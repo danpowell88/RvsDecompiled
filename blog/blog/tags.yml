@@ -1,0 +1,24 @@
+decompilation:
+  label: Decompilation
+  permalink: /decompilation
+  description: Posts about the decompilation process and techniques
+
+ravenshield:
+  label: Ravenshield
+  permalink: /ravenshield
+  description: Posts specific to Rainbow Six Ravenshield
+
+tools:
+  label: Tools
+  permalink: /tools
+  description: Posts about tooling — Ghidra, build systems, comparison scripts
+
+progress:
+  label: Progress
+  permalink: /progress
+  description: Progress updates and milestone reports
+
+deep-dive:
+  label: Deep Dive
+  permalink: /deep-dive
+  description: Technical deep dives into specific systems
