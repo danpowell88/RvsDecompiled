@@ -1,0 +1,59 @@
+# =============================================================================
+# Ravenshield Decompilation Project - .gitignore
+# =============================================================================
+
+# --- Retail game binaries (large, copyrighted, do not redistribute) ---
+retail/
+
+# --- Ghidra project databases (huge, machine-specific) ---
+ghidra/project/
+ghidra/exports/
+*.gpr
+*.rep
+*.lock
+
+# --- Build output ---
+build/
+out/
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.pch
+*.idb
+*.ncb
+*.suo
+*.user
+
+# --- SDK binaries (large, keep source/headers only in git) ---
+sdk/Code Environment/
+sdk/Raven_Shield_C_SDK/lib/
+sdk/Ut99PubSrc/Core/Lib/
+sdk/Ut99PubSrc/Engine/Lib/
+sdk/oldunreal/
+sdk/GameSpySDK/
+
+# --- Tools (large binaries) ---
+tools/toolchain/
+tools/extlibs/
+
+# --- Blog build output ---
+blog/node_modules/
+blog/.docusaurus/
+blog/build/
+
+# --- OS / Editor artifacts ---
+.vs/
+.vscode/settings.json
+*.swp
+*~
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
