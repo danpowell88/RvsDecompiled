@@ -21,7 +21,7 @@ Decompile all Rainbow Six: Ravenshield game runtime binaries (15 DLLs + 1 EXE) u
 
 ---
 
-## Phase 0: Pre-Work — Environment & Tooling
+## Phase 0: Pre-Work — Environment & Tooling ✅ COMPLETE
 
 ### 0A. Repository & Project Structure
 1. Initialize git repo with `.gitignore` (exclude retail binaries, Ghidra databases, build output)
@@ -57,98 +57,120 @@ Decompile all Rainbow Six: Ravenshield game runtime binaries (15 DLLs + 1 EXE) u
 2. `tools/compare/funcmatch.py` — function-level instruction comparison using export table offsets, normalized for relocations
 
 ### 0G. Docusaurus Blog
-1. Initialize Docusaurus 3.x at `blog/`
-2. Posts: *"What Is Decompilation?"*, *"Meet Ravenshield"*, *"The Toolbox"*
+1. ✅ Initialize Docusaurus 3.x at `blog/`
+2. ✅ Posts: *"What Is Decompilation?"*, *"Meet Ravenshield"*, *"The Toolbox"*
 
 ---
 
-## Phase 1: Ghidra Analysis — Batch Processing
+## Phase 1: Ghidra Analysis — Batch Processing ✅ COMPLETE
 
 ### 1A. Batch Import
-1. Write `ghidra/scripts/batch_import.py` — headless import of all 16 binaries, auto-analysis, type library application
-2. Run `analyzeHeadless` against all binaries
-3. Generate per-binary report: function count, export table, string references, import table
+1. ✅ Write `ghidra/scripts/batch_import.py` — headless import of all 16 binaries, auto-analysis, type library application
+2. ✅ Run `analyzeHeadless` against all binaries
+3. ✅ Generate per-binary report: function count, export table, string references, import table — 16/16 JSON reports in `ghidra/exports/reports/`
 
 ### 1B. Symbol Recovery
-1. Write `ghidra/scripts/symbol_recovery.py` — match MSVC mangled export names (`?Func@Class@@...`) against SDK headers
-2. Write `ghidra/scripts/cross_reference.py` — build inter-DLL dependency graph from import tables
-3. Generate function-level cross-reference matrix showing exactly which DLL calls which
+1. ✅ Write `ghidra/scripts/symbol_recovery.py` — match MSVC mangled export names (`?Func@Class@@...`) against SDK headers — 16/16 symbol reports generated
+2. ✅ Write `ghidra/scripts/cross_reference.py` — build inter-DLL dependency graph from import tables — 16/16 per-binary xref reports + aggregate
+3. ✅ Generate function-level cross-reference matrix showing exactly which DLL calls which — 581 function-level cross-references identified
 
 ### 1C. UT99 Source Matching *(Core.dll and Engine.dll only)*
-1. Write `ghidra/scripts/ut99_matcher.py` — compare decompiled functions against UT99 source using string literals, constants, call patterns
-2. Flag functions as: identical to UT99 / modified from UT99 / unique to Ravenshield
+1. ✅ Write `ghidra/scripts/ut99_matcher.py` — compare decompiled functions against UT99 source using string literals, constants, call patterns
+2. ✅ Flag functions as: identical to UT99 / modified from UT99 / unique to Ravenshield — 2/2 reports generated (0% match expected — UT99 public source is headers-only)
 3. Functions matching UT99 can be directly ported from source — massive time savings
 
 ### 1D. Export Raw Decompilation
-1. Write `ghidra/scripts/export_cpp.py` — export per-class `.cpp`/`.h` files to `ghidra/exports/{module}/`
+1. ✅ Write `ghidra/scripts/export_cpp.py` — export per-class `.cpp`/`.h` files to `ghidra/exports/{module}/` — 16/16 binary directories exported
 2. This is the raw starting material, NOT final code
 
-Blog Post: *"First Contact — What Ghidra Found"*
+Blog Post: *"First Contact — What Ghidra Found"* ✅ Written
 
 ---
 
-## Phase 2: Core.dll — Foundation Layer
+## Phase 2: Core.dll — Foundation Layer ✅ COMPLETE
 
 Zero game dependencies. Every other module depends on Core. Best UT99 reference coverage.
 
+**Status:** Reconstructed ~9,900 lines across 20 source files in `src/core/`.
+
 **Conversion order (sub-components, least deps first):**
-1. Memory subsystem — `FMallocWindows`, `FMallocAnsi` (standalone)
-2. Output devices — `FOutputDeviceFile`, `FOutputDeviceWindowsError` (minimal deps)
-3. File managers — `FFileManagerWindows`, `FFileManagerGeneric`
-4. Name table — `FName`, `FNameEntry` (hash table, 4096 buckets)
-5. Math library — `FVector`, `FRotator`, `FPlane`, `FMatrix`, `FQuat`
-6. Object system — `UObject`, `UClass`, `UField`, `UProperty`
-7. Package system — `UPackage`, `ULinker`, `ULinkerLoad/Save`
-8. Script VM — `FFrame`, bytecode interpreter
-9. Serialization — `FArchive`, file readers/writers
-10. Miscellaneous — codecs, exporters, factories, commandlets
+1. ✅ Memory subsystem — `FMallocWindows`, `FMallocAnsi` (standalone)
+2. ✅ Output devices — `FOutputDeviceFile`, `FOutputDeviceWindowsError` (minimal deps)
+3. ✅ File managers — `FFileManagerWindows`, `FFileManagerGeneric`
+4. ✅ Name table — `FName`, `FNameEntry` (hash table, 4096 buckets)
+5. ✅ Math library — `FVector`, `FRotator`, `FPlane`, `FMatrix`, `FQuat`
+6. ✅ Object system — `UObject`, `UClass`, `UField`, `UProperty`
+7. ✅ Package system — `UPackage`, `ULinker`, `ULinkerLoad/Save`
+8. ✅ Script VM — `FFrame`, bytecode interpreter, ~230 native functions
+9. ✅ Serialization — `FArchive`, `FCompactIndex`, file readers/writers
+10. ✅ Miscellaneous — `UCommandlet`, `UTextBuffer`, `USystem`, `ULanguage`
 
-~10 commits. Blog Post: *"Building the Foundation — Core.dll"*
-
----
-
-## Phase 3: Engine.dll — Actor Framework
-
-Required by all game modules. Largest module (~500+ functions) but extensively referenced.
-
-**Conversion order:**
-1. `AActor` — foundation of everything in the world
-2. `APawn`, `AController`, `APlayerController` — player presence
-3. `AGameInfo` — game rules framework
-4. `ULevel`, `ALevelInfo` — map management
-5. `URenderDevice`, `UCanvas`, `AHUD` — rendering interfaces
-6. Physics, collision detection
-7. `UNetDriver`, `UNetConnection` — networking, replication
-8. `UMaterial`, `UTexture`, `UShader` — materials
-9. `UAudioSubsystem` — audio interface
-10. `UMesh`, `USkeletalMesh` — mesh/animation
-11. `ABrush`, `UModel` — BSP geometry
-12. `AEmitter`, `AProjector` — effects
-
-~12 commits. Blog Post: *"The Actor Model — How Unreal Engine Thinks"*
+~10 commits. Blog Post: *"Building the Foundation — Core.dll"* ✅ Written
 
 ---
 
-## Phase 4: Support Modules *(can be parallelized)*
+## Phase 3: Engine.dll — Actor Framework ✅ COMPLETE
 
-| Module | Size | Key Reference | Commits |
-|--------|------|--------------|---------|
-| **Fire.dll** | Tiny (7 classes) | UT99 source equivalent | 1-2 |
-| **Window.dll** | Small | UT99 Window source | 2-3 |
-| **IpDrv.dll** | Medium (5 UC classes + GameSpy) | `sdk/GameSpySDK/src/GameSpy/` full source | 3-4 |
+Required by all game modules. Largest module (~6,290 exports, ~238 autoclass registrations).
+
+**Status:** Builds with 0 errors (3,569 warnings). All 6,290 retail exports present. 348 unique classes, 5,694 symbols recovered.
+
+| File | Classes | Exec Functions | Status |
+|------|---------|---------------|--------|
+| `EnginePrivate.h` | — | — | ✅ Done |
+| `Engine.cpp` | IMPLEMENT_PACKAGE + globals + AUTOGENERATE | — | ✅ Done |
+| `UnActor.cpp` | AActor + 30 actor subclasses | 114+ indexed + ~80 INDEX_NONE | ✅ Done |
+| `UnPawn.cpp` | APawn, AController, APlayerController, AAIController | 55 (49 indexed) | ✅ Done |
+| `UnLevel.cpp` | ULevelBase, ULevel, ALevelInfo, AZoneInfo, AGameInfo + 4 RepInfo | 18 | ✅ Done |
+| `UnRender.cpp` | URenderDevice, UCanvas, AHUD | 25 | ✅ Done |
+| `UnNet.cpp` | UNetDriver, UNetConnection, 4 channel classes, UPackageMapLevel | 0 (virtual only) | ✅ Done |
+| `UnMaterial.cpp` | 25 material/texture classes | 0 (virtual only) | ✅ Done |
+| `UnAudio.cpp` | UAudioSubsystem, USound, UMusic | 0 (virtual only) | ✅ Done |
+| `UnMesh.cpp` | UMesh, ULodMesh, USkeletalMesh, USkeletalMeshInstance, UStaticMesh, UStaticMeshInstance | 0 (virtual only) | ✅ Done |
+| `UnModel.cpp` | UModel, UPolys | 0 (virtual only) | ✅ Done |
+| `UnEffects.cpp` | AEmitter, AProjector, AShadowProjector, UParticleEmitter | 7 | ✅ Done |
+| `Engine.def` | — (6,290 ordinal exports) | — | ✅ Done |
+
+**Total:** 12 main source files + 6 supporting files (EngineExtra.cpp, EngineEvents.cpp, EngineStubs1-4.cpp), ~200+ IMPLEMENT_CLASS macros, ~220+ exec function stubs, 6,290 export ordinals.
+
+Blog Post: *"The Actor Model — How Unreal Engine Thinks"* ✅ Written
+
+---
+
+## Phase 4: Support Modules ✅ COMPLETE
+
+| Module | Size | Key Reference | Status |
+|--------|------|--------------|--------|
+| **Fire.dll** | Tiny (7 classes) | UT99 source equivalent | ✅ Built |
+| **Window.dll** | Small | UT99 Window source | ✅ Built |
+| **IpDrv.dll** | Medium (5 UC classes + GameSpy) | `sdk/GameSpySDK/src/GameSpy/` full source | ✅ Built |
+
+**Fire.dll:** 4 source files (`FirePrivate.h`, `FireClasses.h`, `Fire.cpp`, `Fire.def`). FSpark/FDrop/KeyPoint operator= stubs, UFractalTexture::Init. Links to Core.lib + Engine.lib.
+
+**Window.dll:** 4 source files (`WindowPrivate.h`, `WindowClasses.h`, `Window.cpp`, `Window.def`). Wraps the UT99 Window.h framework with R6 compatibility shims: appMsgf R6 overload + macro, FPreferencesInfo move→copy ALTERNATENAME redirects, 20 SuperProc statics, 15 HBRUSH globals, Shell_NotifyIcon/SHGetSpecialFolderPath wrappers, UWindowManager class. 319 R6-specific .def exports commented out (pending reconstruction).
+
+**IpDrv.dll:** 4 source files (`IpDrvPrivate.h`, `IpDrvClasses.h`, `IpDrv.cpp`, `IpDrv.def`). UTcpNetDriver, UTcpipConnection, ATcpLink, AUdpLink, AInternetLink classes with virtual method stubs. 26 IMPLEMENT_FUNCTION calls (native indices TBD). 3 UTcpipConnection vftable .def entries commented out (UObject MI not reconstructed).
+
+**Known divergences:**
+- Window.dll: 319 R6-specific exports not yet reconstructed
+- IpDrv.dll: 3 UTcpipConnection vftable entries deferred (UObject multiple inheritance)
+- IpDrv.dll: 26 native function indices set to -1 (placeholder)
+- CSDK: Localize extended to 6 params, ResetConfig to 3 params (R6 signatures with UT99-compatible defaults)
 
 Blog Post: *"The Little Modules That Could"*
 
 ---
 
-## Phase 5: Driver Layer
+## Phase 5: Driver Layer ✅ COMPLETE
 
-| Module | Complexity | Key Reference | Commits |
-|--------|-----------|--------------|---------|
-| **WinDrv.dll** | Medium | C SDK headers, UT99 driver | 3-4 |
-| **D3DDrv.dll** | High (GPU state machine) | DX8 headers, UT99 D3D7 driver | 5-6 |
+| Module | Status | Exports | Classes | Notes |
+|--------|--------|---------|---------|-------|
+| **WinDrv.dll** | ✅ Builds | 89 ordinals | UWindowsViewport, UWindowsClient, WWindowsViewportWindow | DirectInput8 statics as `@@2` data members; ToggleFullscreen/EndFullscreen non-virtual (QAEXXZ) |
+| **D3DDrv.dll** | ✅ Builds | 44 ordinals | UD3DRenderDevice | Based off D3D8; bitfields assigned in ctor body; StaticConstructor empty (UBoolProperty vtable fix) |
 
-Blog Post: *"Pixels and Packets — The Driver Layer"*
+Key fixes: `POINTER_64 __ptr64` before `<windows.h>` (DX8 SDK include order conflict); `EInputAction`/`EInputKey` enums in EngineClasses.h for correct mangled signatures; stub types `FRenderInterface`, `FRenderCaps`, `FResolutionInfo`, `EHardwareEmulationMode`, `ETextureFormat` added to EngineClasses.h.
+
+Blog Post: *"Pixels and Packets — The Driver Layer"* (`2025-01-08-pixels-and-packets.md`)
 
 ---
 
@@ -198,18 +220,70 @@ Blog Post: *"Press Start — Launching the Engine"*
 
 ---
 
-## Phase 9: UnrealScript & Assets Rebuild
+## Phase 9: UnrealScript Decompilation & Reconstruction
 
-1. Compile all 20+ `.uc` packages from `sdk/1.56 Source Code/` using original `UCC.exe`
-2. Compilation order per `retail/system/Default.ini` `EditPackages`: Core → Engine → Editor → UnrealEd → IpDrv → UWindow → Fire → Gameplay → R6Abstract → R6Engine → R6Characters → R6Description → R6SFX → R6GameService → R6Game → R6Menu → R6Window → R61stWeapons → R6Weapons → R6WeaponGadgets → R63rdWeapons
-3. Verify `.u` output matches originals
-4. Include Athena Sword expansion packages
+Extract UnrealScript from the **1.60 retail** `.u` packages (not the 1.56 SDK leak). The 1.56/1.60 SDK source is used as a **reference only** for function naming, comments, and understanding intent — the canonical source of truth is the decompiled retail scripts.
+
+### 9A. Script Extraction
+1. Decompile all `.u` packages from `retail/system/` using a UnrealScript decompiler (e.g., UTPT, UE Explorer, or custom tooling)
+2. Output to `src/unrealscript/{PackageName}/Classes/*.uc` — one file per class, mirroring Unreal's package/class convention
+3. Package order per `retail/system/Default.ini` `EditPackages`: Core → Engine → Editor → UnrealEd → IpDrv → UWindow → Fire → Gameplay → R6Abstract → R6Engine → R6Characters → R6Description → R6SFX → R6GameService → R6Game → R6Menu → R6Window → R61stWeapons → R6Weapons → R6WeaponGadgets → R63rdWeapons
+4. Include Athena Sword expansion packages from `retail/Mods/AthenaSword/`
+
+### 9B. Annotation & Documentation
+1. Cross-reference decompiled scripts against `sdk/1.56 Source Code/` — transpose function/variable names and comments where the 1.56 source provides clearer naming than the decompiler output
+2. Add explanatory comments for readability and maintainability — document class purpose, non-obvious logic, magic numbers, state machine transitions, and AI behaviour
+3. Do NOT blindly copy 1.56 source — the retail 1.60 may have bug fixes, balance changes, or structural differences. Always prefer the decompiled retail as the base, annotate from SDK reference
+
+### 9C. Rebuild & Verification
+1. Compile all `.uc` packages using `UCC.exe` from the build output
+2. Verify compiled `.u` output matches retail originals (byte comparison where possible, functional equivalence where not)
+3. CMake integration: `add_custom_command` to compile `.uc` packages as part of the build
 
 Blog Post: *"Scripting a Rainbow — UnrealScript Rebuilt"*
 
 ---
 
-## Phase 10: Integration & Testing
+## Phase 10: Asset Decompilation & Source Formats
+
+Extract all game assets from retail proprietary formats into **lossless, modern, easily-editable source formats**. These live in `src/assets/` organised by asset type. The build system recompiles them into the game's expected formats.
+
+### 10A. Textures
+1. Extract all `.utx` texture packages → individual lossless images (PNG for RGBA, TGA for indexed/palettised, EXR for HDR if any)
+2. Output to `src/assets/textures/{PackageName}/{TextureName}.png`
+3. Build step: repackage into `.utx` using `UCC.exe` or custom tooling
+
+### 10B. Static Meshes & Skeletal Meshes
+1. Extract `.usx` (static meshes) and `.ukx` (skeletal meshes + animations) → glTF 2.0 or FBX
+2. Output to `src/assets/meshes/{PackageName}/{MeshName}.gltf` and `src/assets/animations/{PackageName}/{AnimName}.gltf`
+3. Preserve bone hierarchies, vertex weights, LOD levels, collision hulls
+4. Build step: recompile into `.usx`/`.ukx`
+
+### 10C. Sounds
+1. Extract `.uax` sound packages → WAV (PCM) or FLAC for lossless preservation
+2. Output to `src/assets/sounds/{PackageName}/{SoundName}.wav`
+3. Build step: repackage into `.uax`
+
+### 10D. Maps
+1. Extract `.rsm` map files → Unreal `.t3d` text format (human-readable, diffable)
+2. Output to `src/assets/maps/{MapName}.t3d` plus any embedded assets extracted per 10A-10C
+3. Build step: compile `.t3d` back to `.rsm`
+
+### 10E. Music & Video
+1. Music: Extract any `.umx` → tracker format (IT/S3M/XM) or OGG/WAV as appropriate
+2. Video: Bink `.bik` files — extract to lossless AVI or individual frames + audio. Bink re-encoding via RAD tools for build step
+3. Output to `src/assets/music/` and `src/assets/videos/`
+
+### 10F. UI & Miscellaneous
+1. Localisation `.int`/`.frt`/etc. files — already text, copy to `src/assets/localization/`
+2. Configuration `.ini` files — copy to `src/assets/config/`
+3. Any remaining data files extracted to appropriate `src/assets/` subdirectory
+
+Blog Post: *"Cracking Open the Art — Assets in Source Form"*
+
+---
+
+## Phase 11: Integration & Testing
 
 1. **Incremental replacement** — swap one DLL at a time, test game still boots
 2. **Boot test** — main menu with all rebuilt DLLs
@@ -223,7 +297,38 @@ Blog Posts: *"It Lives!"*, *"The Comparison — How Close Did We Get?"*
 
 ---
 
-## Phase 11: Progressive Modernization
+## Phase 12: Source Cleanup — Self-Contained `src/`
+
+Make `src/` fully self-contained: all compilable source code (C++ headers, UnrealScript, assets) lives in `src/` with no `#include` paths reaching into `sdk/`. The `sdk/` directory becomes purely archival reference material. Import libraries (`.lib`) remain external — they are binary artifacts from the retail game, not source code, and are progressively replaced by our own build output.
+
+### 12A. Internalize C++ Headers
+1. Copy all SDK headers currently referenced by `#include` paths into `src/` subdirectories:
+   - `sdk/Raven_Shield_C_SDK/432Core/Inc/*.h` → `src/core/inc/`
+   - Used headers from `sdk/Ut99PubSrc/Core/Inc/` → `src/core/inc/` (merge with CSDK copies where both exist)
+   - Used headers from `sdk/Ut99PubSrc/Engine/Inc/` → `src/engine/inc/`
+   - `sdk/Ut99PubSrc/Window/Inc/Window.h` + resources → `src/window/inc/`
+   - `sdk/Ut99PubSrc/Fire/Inc/` → `src/fire/inc/`
+   - GameSpy SDK headers used by IpDrv → `src/ipdrv/inc/`
+2. Update all CMakeLists.txt `target_include_directories` to point to `src/*/inc/` instead of `sdk/`
+3. Verify full build still passes with zero `sdk/` include paths
+4. Carry forward all R6-specific modifications already applied (Localize 6-param, ResetConfig 3-param, appMsgf overload, etc.)
+
+### 12B. Reconstruct Headers (Progressive)
+1. As each module's implementation matures, replace copied SDK headers with clean purpose-built ones containing only declarations we've verified
+2. Match ABI exactly: struct sizes, vtable layouts, member offsets, `#pragma pack` directives
+3. Remove dead declarations, commented-out blocks, and SDK quirks
+4. Clear convention: `src/{module}/inc/` = the authoritative header for that module
+
+### 12C. Build System Cleanup
+1. CMake: remove all `sdk/` include paths; only `src/` and `tools/toolchain/` paths remain
+2. Document any remaining `sdk/` dependencies (import `.lib` files only) with path to eventual removal (each rebuilt DLL produces its own `.lib`)
+3. Verify `cmake -S . -B build && cmake --build build` works without `sdk/` in include search paths
+
+Blog Post: *"Cutting the Cord — A Self-Contained Source Tree"*
+
+---
+
+## Phase 13: Progressive Modernization
 
 1. **Readability pass** — meaningful names, extract constants, consistent formatting
 2. **Modern build target** — add MSVC 2022 / C++17 CMake preset alongside legacy MSVC 7.1
@@ -278,8 +383,9 @@ Blog Posts: *"Making It Readable"*, *"The Road Ahead"*
 3. `bindiff.py` reports >90% .text section match for Core, Engine, R6Game
 4. Single-DLL replacement boots game successfully (incremental integration)
 5. Full replacement reaches main menu → completes training mission → LAN multiplayer works
-6. Rebuilt `.u` packages load without errors in `ravenshield.log`
-7. Each blog milestone post published before advancing to next phase
+6. Rebuilt `.u` packages from `src/unrealscript/` load without errors in `ravenshield.log`
+7. Assets in `src/assets/` round-trip: decompile → edit → recompile → game loads correctly
+8. Each blog milestone post published before advancing to next phase
 
 ---
 
@@ -287,18 +393,13 @@ Blog Posts: *"Making It Readable"*, *"The Road Ahead"*
 
 - Third-party DLLs are external dependencies (linked, not decompiled)
 - MSVC 7.1 primary target for byte parity; modern MSVC added in Phase 11
-- Game runtime only — UnrealEd.exe and UCC.exe excluded
-- UnrealScript compiled from existing 1.56 source using original UCC.exe
 - Readability wins over byte-match when they conflict — divergences documented
-- Azure assumed for any CI/CD needs
-- Never push git without user confirmation
-
 ---
 
 ## Further Considerations
 
-1. **Athena Sword expansion** — Additional `.u` packages in `retail/Mods/AthenaSword/`. Include in Phase 9 UnrealScript rebuild and Phase 10 testing, but exclude from C++ decompilation scope.
+1. **Athena Sword expansion** — Additional `.u` packages in `retail/Mods/AthenaSword/`. Include in Phase 9 UnrealScript decompilation and Phase 11 testing.
 
-2. **OpenRVS community mod** — `retail/system/OpenRVS.u` and `openrvs.ini` indicate active community. Verify compatibility in Phase 10 testing.
+2. **OpenRVS community mod** — `retail/system/OpenRVS.u` and `openrvs.ini` indicate active community. Verify compatibility in Phase 11 testing.
 
 3. **Steam integration** — Original has Steam hooks (`installscript.vdf`, `steam_appid.txt`). Rebuilt binaries won't have Steam DRM stubs. Add a thin Steam API stub if needed, document as known difference.

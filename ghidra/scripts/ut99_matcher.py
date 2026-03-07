@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # =============================================================================
 # ut99_matcher.py - Match decompiled functions against UT99 public source
 # =============================================================================
@@ -72,10 +73,26 @@ def index_ut99_source(source_dir):
                             if full_name not in index["functions"]:
                                 index["functions"][full_name] = []
                             index["functions"][full_name].append((rel_path, line_num))
+                        
+                        # Index hex and large decimal constants
+                        for match in re.finditer(r'\b(0x[0-9a-fA-F]{4,}|\d{5,})\b', line):
+                            val = match.group(1)
+                            if val not in index["constants"]:
+                                index["constants"][val] = []
+                            index["constants"][val].append((rel_path, line_num))
             except Exception:
                 pass
     
     return index
+
+def classify_match(confidence):
+    """Classify a function match into one of three categories per the plan."""
+    if confidence >= 85:
+        return "identical"    # High confidence -- directly portable from UT99
+    elif confidence >= 40:
+        return "modified"     # Partial match -- UT99-derived but changed for Ravenshield
+    else:
+        return "unique"       # No match -- unique to Ravenshield
 
 def match_functions(program, ut99_index):
     """Match decompiled functions against UT99 source index."""
@@ -83,11 +100,10 @@ def match_functions(program, ut99_index):
     decomp.openProgram(program)
     
     fm = program.getFunctionManager()
-    matches = []
+    all_functions = []
     
     func_iter = fm.getFunctions(True)
     total = 0
-    matched = 0
     
     while func_iter.hasNext():
         func = func_iter.next()
@@ -97,8 +113,10 @@ def match_functions(program, ut99_index):
         match_info = {
             "address": str(func.getEntryPoint()),
             "name": func_name,
+            "size": func.getBody().getNumAddresses(),
             "match_type": None,
             "confidence": 0,
+            "classification": "unique",
             "ut99_source": None,
         }
         
@@ -111,36 +129,69 @@ def match_functions(program, ut99_index):
                 break
         
         # Strategy 2: String literal match (higher confidence)
+        decomp_text = None
         if match_info["confidence"] < 80:
             try:
                 result = decomp.decompileFunction(func, 30, monitor)
                 if result and result.decompileCompleted():
-                    decomp_text = result.getDecompiledFunction().getC()
+                    decomp_func = result.getDecompiledFunction()
+                    if decomp_func:
+                        decomp_text = decomp_func.getC()
                     
-                    # Find string literals in decompiled output
-                    for s_match in re.finditer(r'"([^"]{4,})"', decomp_text):
-                        s = s_match.group(1)
-                        if s in ut99_index["strings"]:
-                            locs = ut99_index["strings"][s]
+                    if decomp_text:
+                        string_hits = 0
+                        first_source = None
+                        for s_match in re.finditer(r'"([^"]{4,})"', decomp_text):
+                            s = s_match.group(1)
+                            if s in ut99_index["strings"]:
+                                string_hits += 1
+                                if first_source is None:
+                                    first_source = ut99_index["strings"][s][0][0]
+                        
+                        if string_hits >= 3:
                             match_info["match_type"] = "string_match"
-                            match_info["confidence"] = 85
-                            match_info["ut99_source"] = locs[0][0]
-                            match_info["matched_string"] = s[:100]
-                            break
+                            match_info["confidence"] = 90
+                            match_info["ut99_source"] = first_source
+                        elif string_hits >= 1:
+                            match_info["match_type"] = "string_match"
+                            match_info["confidence"] = max(match_info["confidence"], 85)
+                            if first_source:
+                                match_info["ut99_source"] = first_source
             except Exception:
                 pass
         
-        if match_info["confidence"] > 0:
-            matches.append(match_info)
-            matched += 1
+        # Strategy 3: Constant/magic number matching
+        if match_info["confidence"] < 80 and decomp_text:
+            # Look for Unreal-specific constants in decompiled output
+            constant_hits = 0
+            for const_match in re.finditer(r'\b(0x[0-9a-fA-F]{4,}|\d{5,})\b', decomp_text):
+                val = const_match.group(1)
+                if val in ut99_index["constants"]:
+                    constant_hits += 1
+            
+            if constant_hits >= 2:
+                match_info["match_type"] = "constant_match"
+                match_info["confidence"] = max(match_info["confidence"], 60)
+        
+        # Apply three-way classification
+        match_info["classification"] = classify_match(match_info["confidence"])
+        all_functions.append(match_info)
     
     decomp.dispose()
     
+    # Compute classification counts
+    identical = sum(1 for f in all_functions if f["classification"] == "identical")
+    modified = sum(1 for f in all_functions if f["classification"] == "modified")
+    unique = sum(1 for f in all_functions if f["classification"] == "unique")
+    
     return {
         "total_functions": total,
-        "matched_functions": matched,
-        "match_rate": round(100.0 * matched / max(total, 1), 1),
-        "matches": matches,
+        "identical_count": identical,
+        "modified_count": modified,
+        "unique_count": unique,
+        "match_rate": round(100.0 * (identical + modified) / max(total, 1), 1),
+        "identical_rate": round(100.0 * identical / max(total, 1), 1),
+        "functions": all_functions,
     }
 
 def run():
@@ -187,13 +238,17 @@ def run():
     results = match_functions(program, combined_index)
     
     println("\n=== Results ===")
-    println("  Total functions:   " + str(results["total_functions"]))
-    println("  Matched functions: " + str(results["matched_functions"]))
-    println("  Match rate:        " + str(results["match_rate"]) + "%")
+    println("  Total functions:      " + str(results["total_functions"]))
+    println("  Identical to UT99:    " + str(results["identical_count"]) +
+            " (" + str(results["identical_rate"]) + "%)")
+    println("  Modified from UT99:   " + str(results["modified_count"]))
+    println("  Unique to Ravenshield:" + str(results["unique_count"]))
+    println("  Overall match rate:   " + str(results["match_rate"]) + "%")
     
     # Save report
     output_dir = os.path.join(root, "ghidra", "exports", "reports")
-    os.makedirs(output_dir, exist_ok=True)
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
     filepath = os.path.join(output_dir, prog_name + "_ut99_matches.json")
     with open(filepath, "w") as f:
         json.dump(results, f, indent=2)

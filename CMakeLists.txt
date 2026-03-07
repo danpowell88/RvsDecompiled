@@ -58,6 +58,9 @@ if(MSVC)
     add_compile_options(/Zc:wchar_t-)   # Match MSVC 7.1 behavior
     add_compile_options(/W3)            # Warning level 3
     add_compile_options(/GR)            # RTTI enabled (Unreal uses it)
+    # Use async exception handling so guard()/unguard catch(...) blocks
+    # are never optimized away — ensures __FUNC_NAME__ statics are emitted.
+    string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 add_definitions(-D_UNICODE -DUNICODE)
@@ -88,7 +91,10 @@ endif()
 
 # --- Engine (INTERFACE until rebuilt) ---
 add_library(Engine_Dep INTERFACE)
-target_include_directories(Engine_Dep INTERFACE ${UT99_ENGINE_INC})
+target_include_directories(Engine_Dep INTERFACE
+    ${PROJECT_SOURCE_DIR}/src/engine
+    ${UT99_ENGINE_INC}
+)
 if(EXISTS ${CSDK_LIB}/Engine.lib)
     target_link_libraries(Engine_Dep INTERFACE ${CSDK_LIB}/Engine.lib)
 endif()
@@ -134,19 +140,19 @@ endmacro()
 # =============================================================================
 
 # --- Phase 2: Core engine ---
-# add_subdirectory(src/core)
+add_subdirectory(src/core)
 
 # --- Phase 3: Engine ---
-# add_subdirectory(src/engine)
+add_subdirectory(src/engine)
 
 # --- Phase 4: Support modules ---
-# add_subdirectory(src/fire)
-# add_subdirectory(src/window)
-# add_subdirectory(src/ipdrv)
+add_subdirectory(src/fire)
+add_subdirectory(src/window)
+add_subdirectory(src/ipdrv)
 
 # --- Phase 5: Drivers ---
-# add_subdirectory(src/windrv)
-# add_subdirectory(src/d3ddrv)
+add_subdirectory(src/windrv)
+add_subdirectory(src/d3ddrv)
 
 # --- Phase 6: R6 game modules ---
 # add_subdirectory(src/r6abstract)

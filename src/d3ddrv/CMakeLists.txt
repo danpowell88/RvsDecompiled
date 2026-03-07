@@ -1,5 +1,7 @@
 # D3DDrv.dll — Direct3D 8 rendering driver
-# Phase 5 target. Depends on Core, Engine, DirectX SDK.
+# Phase 5 target. Depends on Core, Engine, DirectX 8 SDK.
+# 1 UObject class: UD3DRenderDevice
+# 44 ordinal exports.
 
 set(D3DDRV_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -10,10 +12,11 @@ file(GLOB_RECURSE D3DDRV_SOURCES
 
 list(LENGTH D3DDRV_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(D3DDrv MODULE ${D3DDRV_SOURCES})
+    add_library(D3DDrv MODULE ${D3DDRV_SOURCES} ${D3DDRV_SRC_DIR}/D3DDrv.def)
     target_compile_definitions(D3DDrv PRIVATE D3DDRV_EXPORTS ThisPackage=D3DDrv)
-    target_include_directories(D3DDrv PRIVATE
+    target_include_directories(D3DDrv BEFORE PRIVATE
         ${D3DDRV_SRC_DIR}
+        ${PROJECT_SOURCE_DIR}/src/engine
         ${DXSDK_INCLUDE}
     )
     target_link_libraries(D3DDrv

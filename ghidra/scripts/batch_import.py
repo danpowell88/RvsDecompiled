@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # =============================================================================
 # batch_import.py - Ghidra headless script for mass binary analysis
 # =============================================================================
@@ -45,10 +46,6 @@ TARGET_BINARIES = [
     "DareAudio.dll",
     "DareAudioRelease.dll",
     "DareAudioScript.dll",
-    "SNDDSound3DDLL_ret.dll",
-    "SNDDSound3DDLL_VSR.dll",
-    "SNDext_ret.dll",
-    "SNDext_VSR.dll",
     # Main executable
     "RavenShield.exe",
 ]
@@ -164,7 +161,8 @@ def save_report(report, output_dir):
     if report is None:
         return
     
-    os.makedirs(output_dir, exist_ok=True)
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
     filename = report["binary"].replace(".", "_") + "_report.json"
     filepath = os.path.join(output_dir, filename)
     
@@ -173,14 +171,58 @@ def save_report(report, output_dir):
     
     println("  Report saved: " + filepath)
 
+def apply_type_libraries(program):
+    """Apply SDK type libraries to improve decompilation quality."""
+    root = get_project_root()
+    apply_types_script = os.path.join(root, "ghidra", "scripts", "apply_types.py")
+    if os.path.isfile(apply_types_script):
+        println("  Applying SDK type libraries...")
+        try:
+            # Import and run apply_types inline
+            import importlib
+            import sys
+            sys.path.insert(0, os.path.dirname(apply_types_script))
+            # The apply_types module uses getCurrentProgram() which is already set
+            exec(open(apply_types_script).read())
+            println("  Type libraries applied successfully.")
+        except Exception as e:
+            printerr("  Type library application failed (non-fatal): " + str(e))
+    else:
+        println("  Skipping type libraries -- apply_types.py not found.")
+
+def validate_binaries():
+    """Check which target binaries actually exist in retail/system/."""
+    root = get_project_root()
+    system_dir = os.path.join(root, "retail", "system")
+    found = []
+    missing = []
+    for binary in TARGET_BINARIES:
+        path = os.path.join(system_dir, binary)
+        if os.path.isfile(path):
+            found.append(binary)
+        else:
+            missing.append(binary)
+    return found, missing
+
 def run():
     root = get_project_root()
     output_dir = os.path.join(root, "ghidra", "exports", "reports")
-    
-    # Analyze whatever program is currently loaded
+
+    # Report which binaries are available
+    found, missing = validate_binaries()
+    println("Target binaries found:   " + str(len(found)) + "/" + str(len(TARGET_BINARIES)))
+    if missing:
+        println("Missing binaries: " + ", ".join(missing))
+
+    # Apply type libraries for improved decompilation
+    program = getCurrentProgram()
+    if program:
+        apply_type_libraries(program)
+
+    # Analyze the currently loaded program and generate report
     report = analyze_current_program()
     save_report(report, output_dir)
-    
+
     println("\nAnalysis complete.")
 
 run()

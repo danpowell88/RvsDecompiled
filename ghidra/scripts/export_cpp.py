@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # =============================================================================
 # export_cpp.py - Export Ghidra decompilation as structured C++ source files
 # =============================================================================
@@ -8,7 +9,7 @@
 #
 # Output: ghidra/exports/{module_name}/
 #
-# This is RAW decompiler output — a starting point, not final code.
+# This is RAW decompiler output -- a starting point, not final code.
 # The src/ directory is where cleaned-up, compilable code lives.
 # =============================================================================
 
@@ -53,7 +54,8 @@ def export_program():
     root = get_project_root()
     prog_name = program.getName().replace(".dll", "").replace(".exe", "")
     output_dir = os.path.join(root, "ghidra", "exports", prog_name)
-    os.makedirs(output_dir, exist_ok=True)
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
     
     println("=" * 60)
     println("Exporting C++: " + program.getName())
@@ -89,7 +91,7 @@ def export_program():
         
         with open(cpp_path, "w") as cpp_file:
             cpp_file.write("// " + "=" * 70 + "\n")
-            cpp_file.write("// " + cls_name + " — Raw Ghidra decompilation\n")
+            cpp_file.write("// " + cls_name + " -- Raw Ghidra decompilation\n")
             cpp_file.write("// Source: " + program.getName() + "\n")
             cpp_file.write("// WARNING: This is auto-generated output, NOT compilable code.\n")
             cpp_file.write("// " + "=" * 70 + "\n\n")

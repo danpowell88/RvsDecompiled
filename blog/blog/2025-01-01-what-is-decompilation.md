@@ -11,16 +11,22 @@ If you've ever wondered how people take a finished video game — a blob of ones
 
 ## From Source Code to Machine Code (and Back Again)
 
-When a developer writes a game in C++, their human-readable code goes through a **compiler** (in our case, Microsoft Visual C++ 7.1 from 2003) which translates it into machine code — the raw instructions your CPU actually executes. That compiled output ships as `.exe` and `.dll` files.
+If you're used to languages like C#, Java, or Python, you probably know that your source code gets transformed before it runs. In C# and Java, the compiler produces an intermediate format (IL or bytecode) that still retains a lot of structure — class names, method signatures, even variable names. That's why tools like dotPeek or JD-GUI can decompile a .NET or Java binary almost perfectly.
 
-**Decompilation** is the reverse journey. We take those compiled binaries and attempt to reconstruct something that *looks like* the original source code. It won't be identical — variable names, comments, and formatting are lost during compilation — but the *logic* is all still there, encoded in the instruction patterns.
+C++ is a different beast. When a developer writes a game in C++, the compiler translates it directly into **machine code** — the raw CPU instructions your processor executes. There's no intermediate layer. The resulting `.exe` and `.dll` files are pure binary. Class names? Gone. Variable names? Gone. Comments? Gone. What's left is register shuffles, memory addresses, and jump instructions.
+
+**Decompilation** is the reverse journey. We take those compiled binaries and attempt to reconstruct something that *looks like* the original source code. It won't be identical — all those names and comments were discarded during compilation — but the *logic* is all still there, encoded in the instruction patterns.
+
+:::tip Coming from managed languages?
+Think of it this way: decompiling a .NET assembly is like translating a book from Spanish back to English — the structure is preserved and the result is quite readable. Decompiling a native C++ binary is like reconstructing a novel from its audiobook recording — the content is there, but all the formatting, paragraph breaks, and chapter titles are missing. You have to figure those out yourself.
+:::
 
 ## Why Would Anyone Do This?
 
 Great question. A few reasons:
 
 - **Preservation.** Old games stop working on new hardware. If you can read and rebuild the code, you can keep the game alive.
-- **Modding.** Ravenshield has had an active modding community for over 20 years. Proper source access lets modders do things that were never possible with UnrealScript alone.
+- **Modding.** Ravenshield has had an active modding community for over 20 years. Proper source access lets modders do things that were never possible with UnrealScript alone. (UnrealScript is the engine's own scripting language — think of it like Lua or GDScript: a higher-level language the engine interprets at runtime. It can control game logic, but it can't touch the engine internals.)
 - **Education.** A 2003-era Unreal Engine game is a fantastic case study. It's complex enough to be interesting, but small enough to be approachable.
 
 ## How Does It Work in Practice?
@@ -40,9 +46,9 @@ Rinse and repeat, a few thousand times.
 
 Games compiled with Unreal Engine 2 have some fun quirks:
 
-- **DLL plugins.** The game isn't one giant EXE — it's a launcher plus about 15 DLLs, each responsible for something different (rendering, audio, networking, weapons, AI...).
-- **MSVC name mangling.** C++ symbol names in the export table look like `?ProcessEvent@UObject@@UAEXPAVUFunction@@PAX@Z`. We can decode these back into `UObject::ProcessEvent(UFunction*, void*)`.
-- **UnrealScript glue.** Many C++ functions exist purely to be called *from* UnrealScript. The naming conventions are predictable, which helps us identify them.
+- **DLL plugins.** If you're used to NuGet packages or npm modules, a DLL (Dynamic Link Library) is the native equivalent — a self-contained library of compiled code that gets loaded at runtime. The game isn't one giant EXE. It's a small launcher plus about 15 DLLs, each responsible for something different (rendering, audio, networking, weapons, AI...). This modular design is actually great for us: we can tackle one DLL at a time.
+- **MSVC name mangling.** In managed languages, reflection gives you clean class and method names at runtime. C++ doesn't have that luxury — but it does have something called *name mangling*. The compiler encodes a function's full signature (class, method name, parameter types) into a single decorated string. So `?ProcessEvent@UObject@@UAEXPAVUFunction@@PAX@Z` is the compiler's way of storing `UObject::ProcessEvent(UFunction*, void*)`. We can decode these, and they become our roadmap.
+- **UnrealScript glue.** Many C++ functions exist purely to be called *from* UnrealScript. If you've ever written native plugins for Unity or Godot that expose methods to a scripting layer, it's the same idea. The naming conventions are predictable, which helps us identify them.
 
 ## What Comes Next?
 

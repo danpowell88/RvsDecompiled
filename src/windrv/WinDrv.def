@@ -1,0 +1,98 @@
+; WinDrv.def — Module definition file for WinDrv.dll
+; 89 exports, ordinal base 1.
+; Ordinals verified against retail WinDrv.dll (timestamp 41657B01, Oct 8 2004).
+;
+; Note: ordinals @86/_DllMain@12 and @87/GPackage are swapped in the retail
+;       hint table but the ordinals themselves are correct below.
+
+LIBRARY WinDrv
+EXPORTS
+    ??0UWindowsClient@@QAE@ABV0@@Z                                                  @1
+    ??0UWindowsClient@@QAE@XZ                                                       @2
+    ??0UWindowsViewport@@QAE@ABV0@@Z                                                @3
+    ??0UWindowsViewport@@QAE@XZ                                                     @4
+    ??0WWindowsViewportWindow@@QAE@ABV0@@Z                                          @5
+    ??0WWindowsViewportWindow@@QAE@PAVUWindowsViewport@@@Z                          @6
+    ??0WWindowsViewportWindow@@QAE@XZ                                               @7
+    ??1UWindowsClient@@UAE@XZ                                                       @8
+    ??1UWindowsViewport@@UAE@XZ                                                     @9
+    ??1WWindowsViewportWindow@@UAE@XZ                                               @10
+    ??2UWindowsClient@@SAPAXIPAVUObject@@VFName@@K@Z                                @11
+    ??2UWindowsClient@@SAPAXIPAW4EInternal@@@Z                                      @12
+    ??2UWindowsViewport@@SAPAXIPAVUObject@@VFName@@K@Z                              @13
+    ??2UWindowsViewport@@SAPAXIPAW4EInternal@@@Z                                    @14
+    ??4UWindowsClient@@QAEAAV0@ABV0@@Z                                              @15
+    ??4UWindowsViewport@@QAEAAV0@ABV0@@Z                                            @16
+    ??4WWindowsViewportWindow@@QAEAAV0@ABV0@@Z                                      @17
+    ; @18  ??_7UWindowsClient@@6BFNotifyHook@@@  — vtable (linker-generated, not in .def)
+    ; @19  ??_7UWindowsClient@@6BUClient@@@       — vtable (linker-generated)
+    ; @20  ??_7UWindowsViewport@@6BFExec@@@        — vtable (linker-generated)
+    ; @21  ??_7UWindowsViewport@@6BFOutputDevice@@@ — vtable (linker-generated)
+    ; @22  ??_7UWindowsViewport@@6BUObject@@@      — vtable (linker-generated)
+    ; @23  ??_7WWindowsViewportWindow@@6B@          — vtable (linker-generated)
+    ?AcquireKeyboard@UWindowsViewport@@UAEXXZ                                       @24
+    ?CauseInputEvent@UWindowsViewport@@QAEHHW4EInputAction@@M@Z                    @25
+    ?CheckCD@UWindowsViewport@@UAEXXZ                                               @26
+    ?CloseWindow@UWindowsViewport@@UAEXXZ                                           @27
+    ?Destroy@UWindowsClient@@UAEXXZ                                                 @28
+    ?Destroy@UWindowsViewport@@UAEXXZ                                               @29
+    ?DirectInput8@UWindowsViewport@@2PAUIDirectInput8W@@A                           @30
+    ?DirectInputError@@YAXVFString@@JH@Z                                            @31
+    ?EnableViewportWindows@UWindowsClient@@UAEXKH@Z                                 @32
+    ?EndFullscreen@UWindowsViewport@@QAEXXZ                                         @33
+    ?EnumAxesCallback@UWindowsViewport@@SGHPBUDIDEVICEOBJECTINSTANCEW@@PAX@Z        @34
+    ?EnumJoysticksCallback@UWindowsViewport@@SGHPBUDIDEVICEINSTANCEW@@PAX@Z         @35
+    ?Exec@UWindowsClient@@UAEHPBGAAVFOutputDevice@@@Z                               @36
+    ?Exec@UWindowsViewport@@UAEHPBGAAVFOutputDevice@@@Z                             @37
+    ?GetLastCurrent@UWindowsClient@@UAEPAVUViewport@@XZ                             @38
+    ?GetOuterUWindowsClient@UWindowsViewport@@QBEPAVUWindowsClient@@XZ              @39
+    ?GetPackageName@WWindowsViewportWindow@@UAEPBGXZ                                @40
+    ?GetViewportButtonFlags@UWindowsViewport@@QAEKK@Z                               @41
+    ?GetWindow@UWindowsViewport@@UAEPAXXZ                                           @42
+    ?GetWindowClassName@WWindowsViewportWindow@@UAEXPAG@Z                           @43
+    ?Hold@UWindowsViewport@@UAEXH@Z                                                 @44
+    ?Init@UWindowsClient@@UAEXPAVUEngine@@@Z                                        @45
+    ?InternalConstructor@UWindowsClient@@SAXPAX@Z                                   @46
+    ?InternalConstructor@UWindowsViewport@@SAXPAX@Z                                 @47
+    ?IsFullscreen@UWindowsViewport@@UAEHXZ                                          @48
+    ?Joystick@UWindowsViewport@@2PAUIDirectInputDevice8W@@A                         @49
+    ?JoystickCaps@UWindowsViewport@@2UDIDEVCAPS@@A                                  @50
+    ?JoystickInputEvent@UWindowsViewport@@QAEHMW4EInputKey@@MH@Z                    @51
+    ?KeyPressed@UWindowsViewport@@UAEHH@Z                                           @52
+    ?Keyboard@UWindowsViewport@@2PAUIDirectInputDevice8W@@A                         @53
+    ?Lock@UWindowsViewport@@UAEHPAEPAH@Z                                            @54
+    ?MakeCurrent@UWindowsClient@@UAEXPAVUViewport@@@Z                               @55
+    ?Maximize@UWindowsViewport@@UAEXXZ                                              @56
+    ?Minimize@UWindowsViewport@@UAEXXZ                                              @57
+    ?Mouse@UWindowsViewport@@2PAUIDirectInputDevice8W@@A                            @58
+    ?NewViewport@UWindowsClient@@UAEPAVUViewport@@VFName@@@Z                        @59
+    ?NotifyDestroy@UWindowsClient@@UAEXPAX@Z                                        @60
+    ?OpenWindow@UWindowsViewport@@UAEXKHHHHH@Z                                      @61
+    ?PostEditChange@UWindowsClient@@UAEXXZ                                          @62
+    ?PrivateStaticClass@UWindowsClient@@0VUClass@@A                                 @63
+    ?PrivateStaticClass@UWindowsViewport@@0VUClass@@A                               @64
+    ?ReleaseKeyboard@UWindowsViewport@@UAEXXZ                                       @65
+    ?Repaint@UWindowsViewport@@UAEXH@Z                                              @66
+    ?ResizeViewport@UWindowsViewport@@UAEHKHH@Z                                     @67
+    ?Restore@UWindowsViewport@@UAEXXZ                                               @68
+    ?SetModeCursor@UWindowsViewport@@UAEXXZ                                         @69
+    ?SetMouseCapture@UWindowsViewport@@UAEXHHH@Z                                    @70
+    ?SetTopness@UWindowsViewport@@QAEXXZ                                            @71
+    ?ShowViewportWindows@UWindowsClient@@UAEXKH@Z                                   @72
+    ?ShutdownAfterError@UWindowsClient@@UAEXXZ                                      @73
+    ?ShutdownAfterError@UWindowsViewport@@UAEXXZ                                    @74
+    ?StaticClass@UWindowsClient@@SAPAVUClass@@XZ                                    @75
+    ?StaticClass@UWindowsViewport@@SAPAVUClass@@XZ                                  @76
+    ?StaticConstructor@UWindowsClient@@QAEXXZ                                       @77
+    ?Tick@UWindowsClient@@UAEXXZ                                                    @78
+    ?ToggleFullscreen@UWindowsViewport@@QAEXXZ                                      @79
+    ?TryRenderDevice@UWindowsViewport@@UAEXPBGHHH@Z                                 @80
+    ?Unlock@UWindowsViewport@@UAEXXZ                                                @81
+    ?UpdateInput@UWindowsViewport@@UAEXHM@Z                                         @82
+    ?UpdateWindowFrame@UWindowsViewport@@UAEXXZ                                     @83
+    ?ViewportWndProc@UWindowsViewport@@QAEJIIJ@Z                                    @84
+    ?WndProc@WWindowsViewportWindow@@UAEJIIJ@Z                                      @85
+    GPackage                                                                        @86 NONAME
+    _DllMain@12                                                                     @87
+    autoclassUWindowsClient                                                         @88
+    autoclassUWindowsViewport                                                       @89

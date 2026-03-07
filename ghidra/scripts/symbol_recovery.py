@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # =============================================================================
 # symbol_recovery.py - Recover class/method names from MSVC mangled exports
 # =============================================================================
@@ -8,7 +9,7 @@
 # 4. Applies recovered names to Ghidra's function database
 #
 # MSVC mangling format: ?MethodName@ClassName@@<calling_convention><return_type><params>
-# Example: ?Tick@AActor@@UAEXMHHPAUFVector@@@Z → void AActor::Tick(float, int, int, FVector*)
+# Example: ?Tick@AActor@@UAEXMHHPAUFVector@@@Z -> void AActor::Tick(float, int, int, FVector*)
 #
 # Run via Ghidra GUI or headless after batch_import.py
 # =============================================================================
@@ -128,6 +129,7 @@ def demangle_and_apply(program):
     # Process all symbols
     recovered = 0
     matched_sdk = 0
+    recovered_symbols = []
     
     sym_iter = st.getAllSymbols(True)
     for sym in sym_iter:
@@ -144,12 +146,22 @@ def demangle_and_apply(program):
                              demangler.createDefaultOptions(), monitor)
                 recovered += 1
                 
-                # Check against SDK
                 demangled = str(result)
+                sdk_match = False
+                
+                # Check against SDK
                 for cls_name in sdk_classes:
                     if cls_name in demangled:
                         matched_sdk += 1
+                        sdk_match = True
                         break
+                
+                recovered_symbols.append({
+                    "mangled": name,
+                    "demangled": demangled,
+                    "address": str(sym.getAddress()),
+                    "sdk_match": sdk_match,
+                })
         except Exception as e:
             # Some symbols may not demangle cleanly
             pass
@@ -159,7 +171,7 @@ def demangle_and_apply(program):
     println("  SDK matched:  " + str(matched_sdk))
     println("  SDK classes:  " + str(len(sdk_classes)))
     
-    return recovered, matched_sdk
+    return recovered, matched_sdk, recovered_symbols
 
 def run():
     program = getCurrentProgram()
@@ -173,8 +185,26 @@ def run():
     
     txn = program.startTransaction("Symbol Recovery")
     try:
-        demangle_and_apply(program)
+        recovered, matched_sdk, symbols = demangle_and_apply(program)
         program.endTransaction(txn, True)
+        
+        # Save report
+        root = get_project_root()
+        output_dir = os.path.join(root, "ghidra", "exports", "reports")
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+        
+        prog_name = program.getName().replace(".", "_")
+        report = {
+            "binary": program.getName(),
+            "recovered_count": recovered,
+            "sdk_matched_count": matched_sdk,
+            "symbols": symbols,
+        }
+        filepath = os.path.join(output_dir, prog_name + "_symbols.json")
+        with open(filepath, "w") as f:
+            json.dump(report, f, indent=2)
+        println("Report saved: " + filepath)
     except Exception as e:
         program.endTransaction(txn, False)
         printerr("Error: " + str(e))

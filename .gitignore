@@ -5,12 +5,15 @@
 # --- Retail game binaries (large, copyrighted, do not redistribute) ---
 retail/
 
+# --- SDK (copyrighted third-party code, do not redistribute) ---
+# Contributors must source the Raven Shield SDK independently
+sdk/
+
 # --- Ghidra project databases (huge, machine-specific) ---
 ghidra/project/
 ghidra/exports/
 *.gpr
 *.rep
-*.lock
 
 # --- Build output ---
 build/
@@ -19,19 +22,17 @@ out/
 *.pdb
 *.ilk
 *.exp
+*.lib
 *.pch
 *.idb
 *.ncb
 *.suo
 *.user
+*.log
 
-# --- SDK binaries (large, keep source/headers only in git) ---
-sdk/Code Environment/
-sdk/Raven_Shield_C_SDK/lib/
-sdk/Ut99PubSrc/Core/Lib/
-sdk/Ut99PubSrc/Engine/Lib/
-sdk/oldunreal/
-sdk/GameSpySDK/
+# --- Temporary / working files ---
+build_errors.txt
+*.bak
 
 # --- Tools (large binaries) ---
 tools/toolchain/

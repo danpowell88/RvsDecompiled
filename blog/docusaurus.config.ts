@@ -58,7 +58,8 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'dark',
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'RVS Decomp',
@@ -96,8 +97,9 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} Ravenshield Decompilation Project. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
+      theme: prismThemes.dracula,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ['cpp', 'powershell'],
     },
   } satisfies Preset.ThemeConfig,
 };

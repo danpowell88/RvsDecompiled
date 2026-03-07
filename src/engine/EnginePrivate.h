@@ -1,0 +1,54 @@
+/*=============================================================================
+	EnginePrivate.h: Unreal engine private header file.
+	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
+
+	Reconstructed for Ravenshield decompilation project.
+=============================================================================*/
+
+#ifndef _INC_ENGINE_PRIVATE
+#define _INC_ENGINE_PRIVATE
+
+/*----------------------------------------------------------------------------
+	Engine public includes.
+----------------------------------------------------------------------------*/
+
+#pragma pack(push, 4)
+
+// We are building (exporting) Engine.dll — override the DLL_IMPORT in SDK headers.
+#undef  ENGINE_API
+#define ENGINE_API DLL_EXPORT
+
+// Local Engine.h → Core.h (no UnPrim.h) → UnPrim.h (DECLARE_CLASS) → EngineClasses.h (DECLARE_CLASS).
+#include "Engine.h"
+
+// Fix IMPLEMENT_CLASS for MSVC 2019+ and CSDK private members.
+// 1. C3867: needs & for pointer-to-member (CSDK macro was for MSVC 7.1)
+// 2. UObject::WithinClass and GUID1-4 are private in CSDK — hardcode the
+//    values since all Engine classes use UObject as WithinClass and zero GUIDs.
+#undef IMPLEMENT_CLASS
+#define IMPLEMENT_CLASS(TClass) \
+	UClass TClass::PrivateStaticClass \
+	( \
+		EC_NativeConstructor, \
+		sizeof(TClass), \
+		TClass::StaticClassFlags, \
+		TClass::Super::StaticClass(), \
+		UObject::StaticClass(), \
+		FGuid(0,0,0,0), \
+		TEXT(#TClass)+1, \
+		GPackage, \
+		StaticConfigName(), \
+		RF_Public | RF_Standalone | RF_Transient | RF_Native, \
+		(void(*)(void*))TClass::InternalConstructor, \
+		(void(UObject::*)())&TClass::StaticConstructor \
+	); \
+	extern "C" DLL_EXPORT UClass* autoclass##TClass;\
+	DLL_EXPORT UClass* autoclass##TClass = TClass::StaticClass();
+
+// Forward declarations for Engine types used in virtual function signatures.
+class UViewport;
+class FSceneNode;
+
+#pragma pack(pop)
+
+#endif

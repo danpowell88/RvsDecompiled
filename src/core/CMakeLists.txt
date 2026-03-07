@@ -11,6 +11,10 @@ file(GLOB_RECURSE CORE_SOURCES
 list(LENGTH CORE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_library(Core MODULE ${CORE_SOURCES})
+    # Module definition file for ordinal-accurate exports matching retail Core.dll.
+    if(EXISTS ${CORE_SRC_DIR}/Core.def)
+        target_sources(Core PRIVATE ${CORE_SRC_DIR}/Core.def)
+    endif()
     target_compile_definitions(Core PRIVATE
         CORE_API=__declspec\(dllexport\)
         ThisPackage=Core
