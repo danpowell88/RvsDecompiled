@@ -21,6 +21,27 @@
 #define LoadLibraryX(a)            TCHAR_CALL_OS(LoadLibraryW(a),LoadLibraryA(TCHAR_TO_ANSI(a)))
 
 /*----------------------------------------------------------------------------
+	Window class name helper — matches UT99 Window.h inline.
+	Each window class name is "<Package>Unreal<ClassName>".
+----------------------------------------------------------------------------*/
+
+inline void MakeWindowClassName( TCHAR* Result, const TCHAR* Base )
+{
+	appSprintf( Result, TEXT("%sUnreal%s"), appPackage(), Base );
+}
+
+/*----------------------------------------------------------------------------
+	IMPLEMENT_WINDOWCLASS — register a WWindow-derived class.
+	Must be called before creating any instance of the class.
+----------------------------------------------------------------------------*/
+
+#define IMPLEMENT_WINDOWCLASS(cls,clsf) \
+	{TCHAR Temp[256]; MakeWindowClassName(Temp,TEXT(#cls)); cls::RegisterWindowClass( Temp, clsf );}
+
+#define IMPLEMENT_WINDOWSUBCLASS(cls,wincls) \
+	{TCHAR Temp[256]; MakeWindowClassName(Temp,TEXT(#cls)); cls::SuperProc = cls::RegisterWindowClass( Temp, wincls );}
+
+/*----------------------------------------------------------------------------
 	Forward declarations.
 ----------------------------------------------------------------------------*/
 
@@ -77,6 +98,9 @@ public:
 	static INT              ModalCount;
 	static TArray<WWindow*> _Windows;
 	static TArray<WWindow*> _DeleteWindows;
+
+	// Register a window class with hInstanceWindow. Returns NULL for WWindow classes.
+	static WNDPROC RegisterWindowClass( const TCHAR* Name, DWORD Style );
 };
 
 /*----------------------------------------------------------------------------
@@ -86,6 +110,8 @@ public:
 class WINDOW_API WControl : public WWindow
 {
 public:
+	// Register a control subclass of a standard Windows control.
+	static WNDPROC RegisterWindowClass( const TCHAR* Name, const TCHAR* WinBaseClass );
 };
 
 /*----------------------------------------------------------------------------

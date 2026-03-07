@@ -200,30 +200,70 @@ public:
 	virtual void HeapCheck()=0;
 	virtual void Init()=0;
 	virtual void Exit()=0;
+	// R6 addition: GetMemoryBlockSize at slot 7 (after UT99 methods).
+	// CoreClasses.h DLL extract confirms this virtual method exists.
+	// Export: ?GetMemoryBlockSize@FMalloc@@UAEHPAX@Z (ordinal 1041)
+	virtual INT GetMemoryBlockSize( void* Ptr ) { return 0; }
 };
 
 class FConfigCache
 {
 public:
+	// Vtable slots 0-2: basic type getters
 	virtual UBOOL GetBool( const TCHAR* Section, const TCHAR* Key, UBOOL& Value, const TCHAR* Filename=NULL )=0;
 	virtual UBOOL GetInt( const TCHAR* Section, const TCHAR* Key, INT& Value, const TCHAR* Filename=NULL )=0;
 	virtual UBOOL GetFloat( const TCHAR* Section, const TCHAR* Key, FLOAT& Value, const TCHAR* Filename=NULL )=0;
+	// Vtable slots 3-4: string getters (TCHAR* buffer version, then FString& version)
 	virtual UBOOL GetString( const TCHAR* Section, const TCHAR* Key, TCHAR* Value, INT Size, const TCHAR* Filename=NULL )=0;
 	virtual UBOOL GetString( const TCHAR* Section, const TCHAR* Key, class FString& Str, const TCHAR* Filename=NULL )=0;
+	// Vtable slots 5-8: more getters
 	virtual const TCHAR* GetStr( const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename=NULL )=0;
 	virtual UBOOL GetSection( const TCHAR* Section, TCHAR* Value, INT Size, const TCHAR* Filename=NULL )=0;
 	virtual TMultiMap<FString,FString>* GetSectionPrivate( const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename=NULL )=0;
 	virtual void EmptySection( const TCHAR* Section, const TCHAR* Filename=NULL )=0;
+	// Vtable slots 9-12: setters
 	virtual void SetBool( const TCHAR* Section, const TCHAR* Key, UBOOL Value, const TCHAR* Filename=NULL )=0;
 	virtual void SetInt( const TCHAR* Section, const TCHAR* Key, INT Value, const TCHAR* Filename=NULL )=0;
 	virtual void SetFloat( const TCHAR* Section, const TCHAR* Key, FLOAT Value, const TCHAR* Filename=NULL )=0;
 	virtual void SetString( const TCHAR* Section, const TCHAR* Key, const TCHAR* Value, const TCHAR* Filename=NULL )=0;
+	// Vtable slots 13-15: management
 	virtual void Flush( UBOOL Read, const TCHAR* Filename=NULL )=0;
 	virtual void Detach( const TCHAR* Filename )=0;
 	virtual void Init( const TCHAR* InSystem, const TCHAR* InUser, UBOOL RequireConfig )=0;
+
+	// === R6-specific additions: slots 16-19 ===
+	// These 4 methods are called by Engine.dll during UEngine::Init() for
+	// per-profile and per-server config file management. They sit between
+	// Init() and Exit() in the retail FConfigCache vtable.
+	virtual void InitUser( const TCHAR* InProfilesPath, const TCHAR* InUserIni ) {}
+	virtual void InitServer( const TCHAR* InServerIni ) {}
+	// GetUserIni/GetServerIni MUST return FString& (not void).
+	// The retail caller (appInit in Core.dll at offset 0x3268A) reads the
+	// return value as a pointer and dereferences [retval+4] (FString::Count)
+	// to check whether the ini path is empty. A void return leaves EAX as
+	// garbage (e.g. 1), causing a read of address 0x00000005 → crash.
+	virtual FString& GetUserIni( class FString& OutIni ) { return OutIni; }
+	virtual FString& GetServerIni( class FString& OutIni ) { return OutIni; }
+
+	// Vtable slots 20-22: cleanup (shifted down by 4 from UT99 layout)
 	virtual void Exit()=0;
 	virtual void Dump( FOutputDevice& Ar )=0;
 	virtual ~FConfigCache() {};
+
+	// === More R6-specific additions: slots 23-33 ===
+	// These are called during various boot/exit phases. Slot 23 and 28
+	// return a pointer whose [+4] field is read by the caller.
+	virtual void* R6Reserved1(void* arg) { static BYTE _buf[64] = {}; return _buf; }
+	virtual void R6Reserved2() {}
+	virtual void R6Reserved3() {}
+	virtual void R6Reserved4() {}
+	virtual void R6Reserved5() {}
+	virtual void* R6Reserved6(void* arg) { static BYTE _buf[64] = {}; return _buf; }
+	virtual void R6Reserved7() {}
+	virtual void R6Reserved8() {}
+	virtual void R6Reserved9() {}
+	virtual void R6Reserved10() {}
+	virtual void R6Reserved11() {}
 };
 
 class CORE_API FExec
@@ -273,6 +313,10 @@ enum EFileRead   { FILEREAD_NoFail=0x01 };
 class CORE_API FFileManager
 {
 public:
+	// R6 vtable fix: retail Core.dll has Init at slot 0 (confirmed by
+	// CoreClasses.h DLL extraction and boot diagnostic showing Init(1)
+	// dispatching to CreateFileReader when Init was last).
+	virtual void Init(UBOOL Startup) {}
 	virtual FArchive* CreateFileReader( const TCHAR* Filename, DWORD ReadFlags=0, FOutputDevice* Error=GNull )=0;
 	virtual FArchive* CreateFileWriter( const TCHAR* Filename, DWORD WriteFlags=0, FOutputDevice* Error=GNull )=0;
 	virtual INT FileSize( const TCHAR* Filename )=0;
@@ -286,7 +330,6 @@ public:
 	virtual TArray<FString> FindFiles( const TCHAR* Filename, UBOOL Files, UBOOL Directories )=0;
 	virtual UBOOL SetDefaultDirectory( const TCHAR* Filename )=0;
 	virtual FString GetDefaultDirectory()=0;
-	virtual void Init(UBOOL Startup) {}
 };
 
 /*----------------------------------------------------------------------------

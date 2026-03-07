@@ -58,12 +58,16 @@ if(MSVC)
     add_compile_options(/Zc:wchar_t-)   # Match MSVC 7.1 behavior
     add_compile_options(/W3)            # Warning level 3
     add_compile_options(/GR)            # RTTI enabled (Unreal uses it)
-    # Use async exception handling so guard()/unguard catch(...) blocks
-    # are never optimized away — ensures __FUNC_NAME__ statics are emitted.
+    add_compile_options(/GS-)           # Disable stack cookies (not needed with guard disabled)
+    # Use async exception handling so SEH exceptions are visible to C++ code.
     string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
-add_definitions(-D_UNICODE -DUNICODE)
+# Disable guard/unguard try/catch blocks. Cross-CRT exception handling between
+# MSVC 7.1 (retail DLLs) and MSVC 2019 (our exe) causes terminate() when
+# exceptions propagate through our stack frames. With DO_GUARD=0, guard/unguard
+# become plain braces — no try/catch interference with cross-DLL exceptions.
+add_definitions(-DDO_GUARD=0 -D_UNICODE -DUNICODE)
 
 # --- Global include directories ---
 # Available to all modules: core Unreal headers + R6 SDK headers

@@ -10,13 +10,10 @@
 	on the UT99 launcher reference code, the exe's import table analysis
 	(which reveals exactly which Core/Engine/Window APIs the real code calls),
 	and knowledge of R6-specific engine differences.
-
-	Virtual method calls on UEngine (Init, Tick, GetMaxTickRate) require
-	correct vtable slot ordering. These are stubbed pending Phase 9B when
-	the full UEngine class layout is reconstructed with accurate vtable order.
 =============================================================================*/
 
 #include "LaunchPrivate.h"
+#include <stdlib.h>
 
 /*-----------------------------------------------------------------------------
 	Exported globals — visible to DLLs via the exe's export table.
@@ -49,7 +46,7 @@ extern "C" { TCHAR GPackage[64] = TEXT("Launch"); }
 	WWindow::Show(int): exported from Window.dll but our Window.lib may
 	contain a mangled variant — handled by linking Window.lib.
 -----------------------------------------------------------------------------*/
-#pragma comment(linker, "/ALTERNATENAME:__imp__GTimestampLaunch=_GTimestampLaunch")
+#pragma comment(linker, "/ALTERNATENAME:__imp__GTimestampLaunch=___imp__GTimestampLaunch")
 #pragma comment(linker, "/ALTERNATENAME:__imp_?StaticConstructObject@UObject@@SAPAV1@PAVUClass@@PAV1@VFName@@K1PAVFOutputDevice@@1@Z=__imp_?StaticConstructObject@UObject@@SAPAV1@PAVUClass@@PAV1@VFName@@K1PAVFOutputDevice@@H@Z")
 
 /*-----------------------------------------------------------------------------
@@ -72,8 +69,43 @@ FMallocWindows Malloc;
 FOutputDeviceFile Log;
 
 // Error handler.
+// Subclass the standard error handler to skip the blocking MessageBox
+// when -UNATTENDED is on the command line (for automated testing).
 #include "FOutputDeviceWindowsError.h"
-FOutputDeviceWindowsError Error;
+class FOutputDeviceWindowsErrorUnattended : public FOutputDeviceWindowsError
+{
+public:
+	void HandleError()
+	{
+		if( ParseParam(GetCommandLine(), TEXT("UNATTENDED")) )
+		{
+			// Non-blocking: dump error to a file and exit immediately.
+			try
+			{
+				GIsGuarded       = 0;
+				GIsRunning       = 0;
+				GIsCriticalError = 1;
+				GLogHook         = NULL;
+				UObject::StaticShutdownAfterError();
+				HANDLE h = CreateFileW( L"crash_error.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+				if( h != INVALID_HANDLE_VALUE )
+				{
+					DWORD w;
+					WriteFile( h, GErrorHist, (DWORD)(appStrlen(GErrorHist)*sizeof(TCHAR)), &w, NULL );
+					CloseHandle( h );
+				}
+			}
+			catch( ... )
+			{}
+		}
+		else
+		{
+			// Normal interactive mode: show the dialog.
+			FOutputDeviceWindowsError::HandleError();
+		}
+	}
+};
+FOutputDeviceWindowsErrorUnattended Error;
 
 // Feedback.
 #include "FFeedbackContextWindows.h"
@@ -85,6 +117,59 @@ FFileManagerWindows FileManager;
 
 // Config.
 #include "FConfigCacheIni.h"
+
+// R6-specific FConfigCache subclass: overrides GetUserIni/GetServerIni to
+// handle the hidden return-value pointer convention. Engine.dll callers
+// pass uninitialized stack memory as the OutIni FString — we must zero it
+// before assignment to prevent Realloc from freeing an arbitrary heap object.
+class FConfigCacheIniR6 : public FConfigCacheIni
+{
+public:
+	// R6-specific virtual methods (slots 16-19 in FConfigCache vtable)
+	void InitUser( const TCHAR* InProfilesPath, const TCHAR* InUserIni )
+	{
+		UserIni = InProfilesPath;
+		UserIni += InUserIni;
+		Find( *UserIni, 1 );
+	}
+	void InitServer( const TCHAR* InServerIni )
+	{
+		if( InServerIni && *InServerIni )
+			Find( InServerIni, 1 );
+	}
+	FString& GetUserIni( FString& OutIni )
+	{
+		// OutIni is a hidden return-value pointer from the caller (MSVC struct return convention).
+		// The caller passes UNINITIALIZED stack memory — its Data field may contain a stale heap
+		// pointer (e.g. GModMgr's address). We must zero it before operator= to prevent
+		// Realloc from freeing an arbitrary object.
+		appMemzero(&OutIni, sizeof(FString));
+		OutIni = UserIni;
+		return OutIni;
+	}
+	FString& GetServerIni( FString& OutIni )
+	{
+		appMemzero(&OutIni, sizeof(FString));
+		OutIni = ServerIni;
+		return OutIni;
+	}
+	// R6Reserved slots 23-33: unknown purpose, padding for vtable compatibility.
+	void* R6Reserved1(void* arg) { static BYTE _buf[64] = {}; return _buf; }
+	void R6Reserved2() {}
+	void R6Reserved3() {}
+	void R6Reserved4() {}
+	void R6Reserved5() {}
+	void* R6Reserved6(void* arg) { static BYTE _buf[64] = {}; return _buf; }
+	void R6Reserved7() {}
+	void R6Reserved8() {}
+	void R6Reserved9() {}
+	void R6Reserved10() {}
+	void R6Reserved11() {}
+	static FConfigCache* Factory()
+	{
+		return new FConfigCacheIniR6();
+	}
+};
 
 /*-----------------------------------------------------------------------------
 	R6-specific imports — declared in Core.dll / Engine.dll.
@@ -204,10 +289,51 @@ static void ExitSplash()
 	hWndSplash = NULL;
 }
 
+static LONG WINAPI CrashExceptionFilter(EXCEPTION_POINTERS* ep)
+{
+	FILE* f = fopen("crash_error.txt", "w");
+	if(f) {
+		fprintf(f, "EXCEPTION: code=0x%08X addr=%p\n",
+			ep->ExceptionRecord->ExceptionCode,
+			ep->ExceptionRecord->ExceptionAddress);
+		HMODULE hMod = NULL;
+		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+			(LPCSTR)ep->ExceptionRecord->ExceptionAddress, &hMod);
+		char modName[260] = {0};
+		if(hMod) GetModuleFileNameA(hMod, modName, 260);
+		fprintf(f, "MODULE: %s base=%p offset=0x%X\n", modName, hMod,
+			(DWORD)((BYTE*)ep->ExceptionRecord->ExceptionAddress - (BYTE*)hMod));
+		fprintf(f, "EAX=%08X EBX=%08X ECX=%08X EDX=%08X\n",
+			ep->ContextRecord->Eax, ep->ContextRecord->Ebx,
+			ep->ContextRecord->Ecx, ep->ContextRecord->Edx);
+		fprintf(f, "ESI=%08X EDI=%08X EBP=%08X ESP=%08X\n",
+			ep->ContextRecord->Esi, ep->ContextRecord->Edi,
+			ep->ContextRecord->Ebp, ep->ContextRecord->Esp);
+		fprintf(f, "STACK (16 frames from EBP chain):\n");
+		DWORD* frame = (DWORD*)ep->ContextRecord->Ebp;
+		for(int i = 0; i < 16 && frame; i++) {
+			__try {
+				DWORD retAddr = frame[1];
+				fprintf(f, "  [%d] ret=%08X", i, retAddr);
+				HMODULE hM2 = NULL;
+				GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+					(LPCSTR)retAddr, &hM2);
+				char mn[260] = {0};
+				if(hM2) { GetModuleFileNameA(hM2, mn, 260); fprintf(f, " (%s +0x%X)", mn, retAddr-(DWORD)hM2); }
+				fprintf(f, "\n");
+				frame = (DWORD*)frame[0];
+			} __except(EXCEPTION_EXECUTE_HANDLER) {
+				fprintf(f, "  [%d] <bad frame>\n", i);
+				break;
+			}
+		}
+		fclose(f);
+	}
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
 /*-----------------------------------------------------------------------------
 	Engine initialization — create the game engine object.
-	Virtual method calls (Init, Tick) require correct vtable slot ordering.
-	Pending Phase 9B when the full UEngine class layout is known.
 -----------------------------------------------------------------------------*/
 
 static UEngine* InitEngine()
@@ -317,10 +443,6 @@ static UEngine* InitEngine()
 	);
 	UEngine* Engine = ConstructObject<UEngine>( EngineClass );
 
-	// TODO Phase 9B: Engine->Init() requires correct vtable layout.
-	// UEngine::Init() is virtual (mangled: ?Init@UEngine@@UAEXXZ).
-	// The vtable slot (28, offset 0x70) has been verified against
-	// retail Engine.dll. UEngine is now declared with full vtable order.
 	Engine->Init();
 
 	// R6-specific: set the global engine pointer for subsystem access.
@@ -334,8 +456,6 @@ static UEngine* InitEngine()
 
 /*-----------------------------------------------------------------------------
 	Main loop — engine tick + Windows message pump.
-	Engine->Tick() requires the UGameEngine vtable to be correctly laid out.
-	Pending Phase 9B for full virtual method ordering.
 -----------------------------------------------------------------------------*/
 
 static void MainLoop( UEngine* Engine )
@@ -358,7 +478,6 @@ static void MainLoop( UEngine* Engine )
 	while( GIsRunning && !GIsRequestingExit )
 	{
 		// Update the world.
-		// TODO Phase 9B: Engine->Tick(DeltaTime) requires correct vtable layout.
 		guard(UpdateWorld);
 		FTime NewTime  = appSeconds();
 		FLOAT DeltaTime = NewTime - OldTime;
@@ -415,6 +534,7 @@ static void MainLoop( UEngine* Engine )
 
 INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT nCmdShow )
 {
+	SetUnhandledExceptionFilter(CrashExceptionFilter);
 	// Remember instance info.
 	INT ErrorLevel = 0;
 	GIsStarted     = 1;
@@ -461,19 +581,29 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 #endif
 		// Init core subsystems.
 		GIsClient = GIsGuarded = 1;
-		appInit( GPackage, CmdLine, &Malloc, &Log, &Error, &Warn, &FileManager, FConfigCacheIni::Factory, 1 );
 
-		// Crash recovery: if Running.ini exists, the previous run did not
-		// exit cleanly. The retail binary uses this to trigger safe mode.
+		// R6 FMalloc vtable: GetMemoryBlockSize at slot 0 pushes Init to slot 7.
+		// appInit() calls GMalloc->Init() at the right slot, BUT before that,
+		// FName::StaticInit allocates via GMalloc->Malloc. Pre-init the allocator
+		// so pool tables are ready. Our Init() override handles double-init.
+		Malloc.Init();
+
+		appInit( GPackage, CmdLine, &Malloc, &Log, &Error, &Warn, &FileManager, FConfigCacheIniR6::Factory, 1 );
+
+		// NOTE: CmdLine local variable is clobbered by appInit (register
+		// optimization). Use appCmdLine() for all post-init command line access.
+		CmdLine = appCmdLine();
+
 		UBOOL bSafeMode = ParseParam(CmdLine, TEXT("safe"));
 		UBOOL bChangeVideo = ParseParam(CmdLine, TEXT("changevideo"));
+		UBOOL bUnattended = ParseParam(CmdLine, TEXT("UNATTENDED"));
 		FString RunningIniPath = FString(appBaseDir()) + TEXT("Running.ini");
 		if( GFileManager->FileSize(*RunningIniPath) >= 0 )
 		{
 			// Previous run crashed — offer safe mode.
 			debugf( TEXT("Running.ini detected — previous run may have crashed") );
 			GFileManager->Delete( *RunningIniPath );
-			if( !bSafeMode )
+			if( !bSafeMode && !bUnattended )
 			{
 				if( MessageBox( NULL,
 					TEXT("The game did not exit cleanly last time.\n\nWould you like to start in safe mode?"),
@@ -509,9 +639,6 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		if( bChangeVideo )
 		{
 			debugf( TEXT("ChangeVideo requested — will prompt for render device") );
-			// The retail binary opens a render device selection dialog here.
-			// For now, just log the request — the config wizard is not yet
-			// reconstructed.
 		}
 
 		// Init mode flags.
@@ -534,14 +661,15 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 
 		// Create log window, optionally shown.
 		GLogWindow = new WLog( Log.Filename, Log.LogAr, TEXT("GameLog") );
-		GLogWindow->OpenWindow( ShowLog, 0 );
-		GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Start")) );
-		if( GIsClient )
-			SetPropX( *GLogWindow, TEXT("IsBrowser"), (HANDLE)1 );
+
+		// TODO: WLog::OpenWindow fails with "Cannot find window class" (1407).
+		// GLogWindow->OpenWindow( ShowLog, 0 );
+		// GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Start")) );
+		// if( GIsClient )
+		//	SetPropX( *GLogWindow, TEXT("IsBrowser"), (HANDLE)1 );
 
 		// Init engine.
 		UEngine* Engine = InitEngine();
-		GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Run")) );
 
 		// Hide splash screen.
 		ExitSplash();
@@ -551,7 +679,7 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		if( Parse(CmdLine, TEXT("EXEC="), Temp) )
 		{
 			Temp = FString(TEXT("exec ")) + Temp;
-			// TODO Phase 9B: Engine->Client->Viewports(0)->Exec() requires
+			// TODO: Engine->Client->Viewports(0)->Exec() requires
 			// UEngine::Client member at known offset.
 		}
 
