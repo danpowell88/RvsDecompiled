@@ -2864,7 +2864,7 @@ void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 	guardSlow(UObject::execCompress);
 	P_GET_STR(In);
 	// Passthrough scaffold — returns input unchanged.
-	// Deferred to Phase 8C: retail compresses the string via a proprietary
+	// Deferred to Phase 9B: retail compresses the string via a proprietary
 	// algorithm (~200 bytes at Core.dll+0x??). Needs Ghidra disassembly.
 	*(FString*)Result = In;
 	unguardexecSlow;
@@ -2875,7 +2875,7 @@ void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 	guardSlow(UObject::execExpand);
 	P_GET_STR(In);
 	// Passthrough scaffold — returns input unchanged.
-	// Deferred to Phase 8C: retail decompresses via the inverse of execCompress.
+	// Deferred to Phase 9B: retail decompresses via the inverse of execCompress.
 	*(FString*)Result = In;
 	unguardexecSlow;
 }

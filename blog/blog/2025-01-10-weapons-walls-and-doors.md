@@ -184,6 +184,6 @@ All five R6 game modules now build. The entire dependency chain from `Core.dll` 
 
 - **Phase 7:** The DARE audio system — the hardest phase, since there's no source reference at all
 - **Phase 8:** `RavenShield.exe` — the launcher that kicks everything off
-- **Phase 8B:** The D3D8 render loop — turning stubs into real GPU calls
+- **Phase 9A:** The D3D8 render loop — turning stubs into real GPU calls
 
 We're past the halfway point in terms of modules. Twelve of sixteen binaries build. The next ones are the hardest — but the foundation is solid.

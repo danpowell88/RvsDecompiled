@@ -2335,7 +2335,7 @@ INT R6Charts::BulletGoesThroughCharacter(INT, INT, INT, INT)
 	// Retail (60 bytes at R6Engine+0x3f780): computes a float from
 	// the 4 int parameters via x87 FPU, converts to int via _ftol2
 	// (FUN_10042934), and caps the result at 5000.
-	// Deferred to Phase 8C: the FPU calculation was lost in Ghidra
+	// Deferred to Phase 9B: the FPU calculation was lost in Ghidra
 	// decompilation — needs disassembly analysis of the 60-byte body.
 	return 0;
 }

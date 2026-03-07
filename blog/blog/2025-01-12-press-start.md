@@ -107,7 +107,7 @@ This tells the linker: "when you see a request for the non-virtual `Show`, redir
 
 ## What's Left Stubbed
 
-The launcher compiles and links, but several pieces are intentionally stubbed pending Phase 8C (the audit pass that fills in method bodies across all modules):
+The launcher compiles and links, but several pieces are intentionally stubbed pending Phase 9B (the audit pass that fills in method bodies across all modules):
 
 - **`Engine->Init()`** — This is a virtual method call. Getting it right requires knowing the exact vtable slot ordering for `UEngine`/`UGameEngine`, which depends on the complete virtual method declaration order across the entire inheritance chain. Wrong slot = calling the wrong function = crash.
 
@@ -152,6 +152,6 @@ DareAudio*.dll     ✓ (×3)
 RavenShield.exe    ✓  ← NEW
 ```
 
-That's every module in the game. From Phase 1's empty CMake skeleton to a complete set of binaries — 15 build artifacts, all compiling and linking from reconstructed source. The method bodies are mostly stubs, and the exe can't actually boot the game yet (that's what Phase 8B and 8C are for), but the entire dependency graph is now closed.
+That's every module in the game. From Phase 1's empty CMake skeleton to a complete set of binaries — 15 build artifacts, all compiling and linking from reconstructed source. The method bodies are mostly stubs, and the exe can't actually boot the game yet (that's what Phase 9A and 9B are for), but the entire dependency graph is now closed.
 
-The next step is Phase 8B: reconstructing the D3DDrv render loop so we can actually see pixels on screen. But that's a story for another post.
+The next step is Phase 9A: reconstructing the D3DDrv render loop so we can actually see pixels on screen. But that's a story for another post.

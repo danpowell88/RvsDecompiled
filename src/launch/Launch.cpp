@@ -12,7 +12,7 @@
 	and knowledge of R6-specific engine differences.
 
 	Virtual method calls on UEngine (Init, Tick, GetMaxTickRate) require
-	correct vtable slot ordering. These are stubbed pending Phase 8C when
+	correct vtable slot ordering. These are stubbed pending Phase 9B when
 	the full UEngine class layout is reconstructed with accurate vtable order.
 =============================================================================*/
 
@@ -101,7 +101,7 @@ ENGINE_API extern UEngine* g_pEngine;
 	Handles: ShowLog, HideLog, TakeFocus, EditActor, Preferences.
 	Based on UT99 UnEngineWin.h. Commands that access UEngine/AActor
 	member data (EditActor, Preferences) require full class layout
-	reconstruction — stubbed pending Phase 8C.
+	reconstruction — stubbed pending Phase 9B.
 -----------------------------------------------------------------------------*/
 
 class FExecHook : public FExec, public FNotifyHook
@@ -133,20 +133,20 @@ private:
 		}
 		else if( ParseCommand(&Cmd, TEXT("TakeFocus")) )
 		{
-			// TODO Phase 8C: requires UEngine::Client (member data at known offset)
+			// TODO Phase 9B: requires UEngine::Client (member data at known offset)
 			// to find active viewport and call SetForegroundWindow on it.
 			return 1;
 		}
 		else if( ParseCommand(&Cmd, TEXT("EditActor")) )
 		{
-			// TODO Phase 8C: requires AActor::Location, bDeleteMe, GetLevel()
+			// TODO Phase 9B: requires AActor::Location, bDeleteMe, GetLevel()
 			// to find nearest actor of a given class and open WObjectProperties.
 			Ar.Logf( TEXT("EditActor: pending full class layout reconstruction") );
 			return 1;
 		}
 		else if( ParseCommand(&Cmd, TEXT("Preferences")) )
 		{
-			// TODO Phase 8C: requires WConfigProperties with correct constructor args.
+			// TODO Phase 9B: requires WConfigProperties with correct constructor args.
 			return 1;
 		}
 		else return 0;
@@ -207,7 +207,7 @@ static void ExitSplash()
 /*-----------------------------------------------------------------------------
 	Engine initialization — create the game engine object.
 	Virtual method calls (Init, Tick) require correct vtable slot ordering.
-	Pending Phase 8C when the full UEngine class layout is known.
+	Pending Phase 9B when the full UEngine class layout is known.
 -----------------------------------------------------------------------------*/
 
 static UEngine* InitEngine()
@@ -317,7 +317,7 @@ static UEngine* InitEngine()
 	);
 	UEngine* Engine = ConstructObject<UEngine>( EngineClass );
 
-	// TODO Phase 8C: Engine->Init() requires correct vtable layout.
+	// TODO Phase 9B: Engine->Init() requires correct vtable layout.
 	// UEngine::Init() is virtual (mangled: ?Init@UEngine@@UAEXXZ).
 	// The vtable slot depends on the full inheritance chain's virtual
 	// method declaration order. Deferred until full class layout is known.
@@ -334,7 +334,7 @@ static UEngine* InitEngine()
 /*-----------------------------------------------------------------------------
 	Main loop — engine tick + Windows message pump.
 	Engine->Tick() requires the UGameEngine vtable to be correctly laid out.
-	Pending Phase 8C for full virtual method ordering.
+	Pending Phase 9B for full virtual method ordering.
 -----------------------------------------------------------------------------*/
 
 static void MainLoop( UEngine* Engine )
@@ -357,7 +357,7 @@ static void MainLoop( UEngine* Engine )
 	while( GIsRunning && !GIsRequestingExit )
 	{
 		// Update the world.
-		// TODO Phase 8C: Engine->Tick(DeltaTime) requires correct vtable layout.
+		// TODO Phase 9B: Engine->Tick(DeltaTime) requires correct vtable layout.
 		guard(UpdateWorld);
 		FTime NewTime  = appSeconds();
 		FLOAT DeltaTime = NewTime - OldTime;
@@ -369,7 +369,7 @@ static void MainLoop( UEngine* Engine )
 
 		// Enforce optional maximum tick rate.
 		guard(EnforceTickRate);
-		// TODO Phase 8C: Engine->GetMaxTickRate() requires correct vtable layout.
+		// TODO Phase 9B: Engine->GetMaxTickRate() requires correct vtable layout.
 		FLOAT MaxTickRate = 60.0f; // Placeholder — retail reads from engine config.
 		if( MaxTickRate > 0.0 )
 		{
@@ -500,7 +500,7 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		if( Parse(CmdLine, TEXT("EXEC="), Temp) )
 		{
 			Temp = FString(TEXT("exec ")) + Temp;
-			// TODO Phase 8C: Engine->Client->Viewports(0)->Exec() requires
+			// TODO Phase 9B: Engine->Client->Viewports(0)->Exec() requires
 			// UEngine::Client member at known offset.
 		}
 

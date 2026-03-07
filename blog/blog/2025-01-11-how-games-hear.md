@@ -238,6 +238,6 @@ SNDext_ret.dll    SNDext_VSR.dll
 
 That's everything except `RavenShield.exe` itself (Phase 8). Every DLL the game loads at runtime now has a corresponding source file in our repository.
 
-The audio modules are still stubs — they export the right symbols at the right ordinals, but the function bodies are empty. Filling them in will require careful Ghidra work to reconstruct the DARE engine's internal state machines. That's a Phase 8C problem. For now, the skeleton is in place, the build graph is complete, and the exports match retail.
+The audio modules are still stubs — they export the right symbols at the right ordinals, but the function bodies are empty. Filling them in will require careful Ghidra work to reconstruct the DARE engine's internal state machines. That's a Phase 9B problem. For now, the skeleton is in place, the build graph is complete, and the exports match retail.
 
 Next up: the executable itself.

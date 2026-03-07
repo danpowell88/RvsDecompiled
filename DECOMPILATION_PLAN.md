@@ -107,7 +107,7 @@ Zero game dependencies. Every other module depends on Core. Best UT99 reference 
 
 **Build configuration:** Release only. `sdk/Raven_Shield_C_SDK/432Core/Inc/UnBuild.h` contains a `#error` guard that rejects Debug builds unless `_REALLY_WANT_DEBUG` is defined — this is an intentional SDK constraint, not a code regression. Always build with `--config Release`.
 
-**Deferred to Phase 8C:**
+**Deferred to Phase 9B:**
 - `UObject::ProcessEvent` — 451-byte dispatcher in retail; requires verified UFunction member offsets and FFrame layout
 - `execCompress` / `execExpand` — string compression/decompression via proprietary algorithm; currently passthrough scaffolds
 
@@ -158,9 +158,9 @@ Blog Post: *"The Actor Model — How Unreal Engine Thinks"* ✅ Written
 **IpDrv.dll:** 4 source files (`IpDrvPrivate.h`, `IpDrvClasses.h`, `IpDrv.cpp`, `IpDrv.def`). UTcpNetDriver, UTcpipConnection, ATcpLink, AUdpLink, AInternetLink classes with virtual method stubs. 26 IMPLEMENT_FUNCTION calls (native indices TBD). 3 UTcpipConnection vftable .def entries commented out (UObject MI not reconstructed).
 
 **Known divergences:**
-- Window.dll: ~230 of 1,047 exports commented out — overwhelmingly editor/property-inspector classes (WBitmapButton, WColorButton, FUDNHelpTopic, etc.). No runtime-critical gaps; `WWindow::Show` handled via ALTERNATENAME pragma in launcher. Full reconstruction deferred to Phase 9 (editor)
-- IpDrv.dll: 3 UTcpipConnection vftable entries deferred (UObject multiple inheritance — Phase 8C)
-- IpDrv.dll: 26 native function indices set to -1 (placeholder — extractable from `.u` packages in Phase 9)
+- Window.dll: ~230 of 1,047 exports commented out — overwhelmingly editor/property-inspector classes (WBitmapButton, WColorButton, FUDNHelpTopic, etc.). No runtime-critical gaps; `WWindow::Show` handled via ALTERNATENAME pragma in launcher. Full reconstruction deferred to Phase 10 (editor)
+- IpDrv.dll: 3 UTcpipConnection vftable entries deferred (UObject multiple inheritance — Phase 9B)
+- IpDrv.dll: 26 native function indices set to -1 (placeholder — extractable from `.u` packages in Phase 10)
 - CSDK: Localize extended to 6 params, ResetConfig to 3 params (R6 signatures with UT99-compatible defaults)
 
 Blog Post: *"The Little Modules That Could"*
@@ -239,10 +239,10 @@ Five R6-specific DLLs — the game layer that turns Unreal Engine into Rainbow S
 **Dependency chain:** Core → Engine → R6Abstract → { R6Weapons, R6Engine → { R6Game, R6GameService } }
 
 **Known divergences:**
-- All native function indices set to INDEX_NONE (-1) — dispatched by name at runtime. Correct retail indices can be extracted from `.u` packages in Phase 9.
-- Method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 8C audit pass
+- All native function indices set to INDEX_NONE (-1) — dispatched by name at runtime. Correct retail indices can be extracted from `.u` packages in Phase 10.
+- Method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 9B audit pass
 - R6Engine ordinal 796: `__FUNC_NAME__` static in `AR6FalseHeartBeat::IsBlockedBy` — scope-numbering divergence between retail MSVC 7.1 (`?2?`) and our compiler. Functionally equivalent; cosmetic difference in debug string mangling.
-- `R6Charts::BulletGoesThroughCharacter` — 60-byte function at R6Engine+0x3f780 computes a float from 4 int parameters via x87 FPU, converts via `_ftol2` (FUN_10042934), and caps at 5000. FPU calculation lost in Ghidra decompilation; deferred to Phase 8C disassembly analysis
+- `R6Charts::BulletGoesThroughCharacter` — 60-byte function at R6Engine+0x3f780 computes a float from 4 int parameters via x87 FPU, converts via `_ftol2` (FUN_10042934), and caps at 5000. FPU calculation lost in Ghidra decompilation; deferred to Phase 9B disassembly analysis
 
 Blog Posts: ✅ *"The Game Layer — Rebuilding Rainbow Six's R6 Modules"* (`2025-01-09-the-game-layer.md`), ✅ *"Weapons, Walls, and Doors — What Makes R6 Tick"* (`2025-01-10-weapons-walls-and-doors.md`)
 
@@ -304,7 +304,7 @@ Three DareAudio variants exist (DareAudio, DareAudioScript, DareAudioRelease), e
 - ~~`ESoundSlot`, `ESoundVolume`, `ELoadBankSound`, `ER6SoundState`~~ — Resolved (see known divergences)
 
 **Known divergences:**
-- All method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 8C audit pass
+- All method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 9B audit pass
 - DARE struct layouts (`_SND_tdst*`) are forward-declared only — full field definitions require Ghidra analysis of SNDDSound3D
 - ~~Enum values placeholder~~ → Resolved: `ESoundSlot` (12 values, SLOT_None through SLOT_StartingSound), `ESoundVolume` (4 values, VOLUME_Music through VOLUME_Grenade), `ELoadBankSound` (4 values, LBS_Fix through LBS_Gun), `ER6SoundState` (2 values, BANK_UnloadGun/BANK_UnloadAll) — sourced from `sdk/Raven_Shield_C_SDK/inc/EngineClasses.h`, confirmed against Ghidra switch tables
 
@@ -339,17 +339,19 @@ Blog Post: *"Press Start — Launching the Engine"*
 - The launcher needs an explicit `.def` file passed to the linker; adding it as a source alone is not enough for EXE export-table parity
 - `WM_COPYDATA` forwarding must use `sizeof(TCHAR)`, not `sizeof(TCHAR*)`, or command-line forwarding overreports the payload size
 
-### Stubbed Pending Phase 8C
-- `Engine->Init()` — virtual call requires correct vtable slot ordering for UEngine/UGameEngine
-- `Engine->Tick(DeltaTime)` — same vtable issue; main loop ticks GWindowManager but not engine
-- `Engine->GetMaxTickRate()` — placeholder 60fps; requires vtable
-- FExecHook: `TakeFocus`, `EditActor`, `Preferences` — require UEngine::Client member data at known offset
+### Items Deferred to Phase 9
+- `Engine->Init()`, `Engine->Tick()`, `Engine->GetMaxTickRate()` — virtual calls require correct vtable slot ordering (→ Phase 9B/9C)
+- FExecHook: `TakeFocus`, `EditActor`, `Preferences` — require UEngine::Client member data (→ Phase 9C)
 
 ---
 
-## Phase 8B: D3DDrv Render Loop Reconstruction
+## Phase 9: Implementation & Byte-Parity Completion
 
-Phase 5 left `D3DDrv.dll` building with correct exports and struct layout but all ~170KB of GPU state machine logic stubbed out. This phase reconstructs the real implementation using Ghidra analysis of the retail binary as the primary source, with the UT99 D3D7 driver (`sdk/Ut99PubSrc/`) as structural reference (D3D7 → D3D8 API delta is well-documented).
+All 16 binaries build with correct export tables, but many method bodies are stubs, native indices use INDEX_NONE, some `.def` entries remain commented out, and documented divergences exist across Phases 2–8. This phase systematically implements the real logic, validates byte parity against retail, and completes launcher behavior.
+
+### 9A. D3DDrv Render Loop Reconstruction
+
+Phase 5 left `D3DDrv.dll` building with correct exports and struct layout but all ~170KB of GPU state machine logic stubbed out. This sub-phase reconstructs the real implementation using Ghidra analysis of the retail binary as the primary source, with the UT99 D3D7 driver (`sdk/Ut99PubSrc/`) as structural reference (D3D7 → D3D8 API delta is well-documented).
 
 **Dependency:** Requires Phase 8 (RavenShield.exe) so the full game can boot and rendering output can be validated against retail.
 
@@ -380,16 +382,16 @@ Blog Post: *"Chasing Pixels — Reconstructing the D3D8 Render Loop"*
 
 ---
 
-## Phase 8C: Stub & Byte-Parity Audit Pass
+### 9B. Stub & Byte-Parity Audit Pass
 
-A systematic sweep across every reconstructed module. By this point all 16 binaries build, but many contain stub method bodies, placeholder native indices, commented-out `.def` entries, and documented divergences accumulated across Phases 2–8B. This phase addresses them methodically.
+A systematic sweep across every reconstructed module. By this point all 16 binaries build, but many contain stub method bodies, placeholder native indices, commented-out `.def` entries, and documented divergences accumulated across Phases 2–9A. This sub-phase addresses them methodically.
 
-### 8C-1. Inventory
+#### 9B-1. Inventory
 1. Grep all `src/` for known stub markers: `return 0;` / `return;` / `appErrorf(TEXT("stub"))` / `// TODO` / `// STUB` / `INDEX_NONE` / commented-out `.def` lines
 2. Cross-reference against per-module "Known divergences" sections in this plan
 3. Produce a single audit spreadsheet or markdown table: **module → function → stub reason → fixable? → priority**
 
-### 8C-2. Fix Categories
+#### 9B-2. Fix Categories
 
 | Category | Action |
 |----------|--------|
@@ -399,14 +401,14 @@ A systematic sweep across every reconstructed module. By this point all 16 binar
 | **Commented-out .def exports** (e.g., Window.dll's 319, IpDrv's 3) | Reconstruct the missing symbols or add linker-level forwarding stubs (`= ?...`) so the export table matches retail |
 | **Compiler artefact divergences** (COM vtable thunks, thiscall wrappers) | Document as intentional; verify the generated code is functionally equivalent even if bytes differ |
 
-### 8C-3. Binary Comparison
+#### 9B-3. Binary Comparison
 1. Build all modules in Release with retail-matching compiler flags
 2. Run `tools/compare/bindiff.py` on every DLL — report per-section match percentage
 3. Run `tools/compare/funcmatch.py` on exported functions — report per-function match status
 4. For each function below 95% match: inspect disassembly diff, determine if divergence is fixable or inherent (compiler version, optimisation artefacts)
 5. Update the "Known divergences" documentation with final status for every flagged item
 
-### 8C-4. Triage & Accept
+#### 9B-4. Triage & Accept
 - Functions confirmed as byte-identical → ✅
 - Functions functionally identical but byte-divergent due to compiler artefacts → document, mark as accepted
 - Functions with logic divergences → file as issues, fix if possible, otherwise document the delta with explanation
@@ -417,28 +419,28 @@ Blog Post: *"The Audit — Hunting Down Every Last Stub"*
 
 ---
 
-## Phase 8D: Launcher Behavior Parity
+### 9C. Launcher Behavior Parity
 
-Phase 8 rebuilt the RavenShield bootstrap and made the EXE build/link with the correct entry point, export table, and resources. What remains is the higher-level launcher behavior that retail implements before the engine is fully running: recovery mode, config UI flows, driver detection, and one-shot command-line utility paths. These are distinct from the cross-module stub audit in 8C and are best tracked separately.
+Phase 8 rebuilt the RavenShield bootstrap and made the EXE build/link with the correct entry point, export table, and resources. What remains is the higher-level launcher behavior that retail implements before the engine is fully running: recovery mode, config UI flows, driver detection, and one-shot command-line utility paths. These are distinct from the cross-module stub audit in 9B and are best tracked separately.
 
-**Dependency:** Requires Phase 8 complete. Can proceed independently of Phase 8B rendering work.
+**Dependency:** Requires Phase 8 complete. Can proceed independently of Phase 9A rendering work.
 
-### 8D-1. Startup Flow Recovery
+#### 9C-1. Startup Flow Recovery
 1. Reconstruct `AlreadyRunning` handling based on the `UnrealIsRunning` mutex state
 2. Reconstruct `Running.ini` creation and stale-crash recovery detection
 3. Reconstruct recovery-mode startup path when the previous run did not exit cleanly
 
-### 8D-2. Config Wizard Paths
+#### 9C-2. Config Wizard Paths
 1. Reconstruct `safe` / `changevideo` command-line handling
 2. Reconstruct first-run renderer selection wizard / safe-mode wizard dispatch
 3. Verify which UT99 config pages still exist in RavenShield versus which are replaced by R6-specific logic
 
-### 8D-3. Driver Detection Utilities
+#### 9C-3. Driver Detection Utilities
 1. Reconstruct `testrendev=` path and `Detected.ini` side effects
 2. Reconstruct any `nodetect` / autodetect bypass behavior present in retail
 3. Verify whether the import-table and string-report evidence maps to direct UT99 code reuse or an R6-specific variant
 
-### 8D-4. Command-Line Utility Paths
+#### 9C-4. Command-Line Utility Paths
 1. Reconstruct `consolecommand=` one-shot execution path if present in retail
 2. Validate argument forwarding to an already-running instance against retail behavior
 3. Confirm whether any additional launcher-only command-line switches are present in the SafeDisc-decrypted executable
@@ -454,22 +456,22 @@ Blog Post: *"Before The First Frame — Reconstructing Launcher Behavior"*
 
 ---
 
-## Phase 9: UnrealScript Decompilation & Reconstruction
+## Phase 10: UnrealScript Decompilation & Reconstruction
 
 Extract UnrealScript from the **1.60 retail** `.u` packages (not the 1.56 SDK leak). The 1.56/1.60 SDK source is used as a **reference only** for function naming, comments, and understanding intent — the canonical source of truth is the decompiled retail scripts.
 
-### 9A. Script Extraction
+### 10A. Script Extraction
 1. Decompile all `.u` packages from `retail/system/` using a UnrealScript decompiler (e.g., UTPT, UE Explorer, or custom tooling)
 2. Output to `src/unrealscript/{PackageName}/Classes/*.uc` — one file per class, mirroring Unreal's package/class convention
 3. Package order per `retail/system/Default.ini` `EditPackages`: Core → Engine → Editor → UnrealEd → IpDrv → UWindow → Fire → Gameplay → R6Abstract → R6Engine → R6Characters → R6Description → R6SFX → R6GameService → R6Game → R6Menu → R6Window → R61stWeapons → R6Weapons → R6WeaponGadgets → R63rdWeapons
 4. Include Athena Sword expansion packages from `retail/Mods/AthenaSword/`
 
-### 9B. Annotation & Documentation
+### 10B. Annotation & Documentation
 1. Cross-reference decompiled scripts against `sdk/1.56 Source Code/` — transpose function/variable names and comments where the 1.56 source provides clearer naming than the decompiler output
 2. Add explanatory comments for readability and maintainability — document class purpose, non-obvious logic, magic numbers, state machine transitions, and AI behaviour
 3. Do NOT blindly copy 1.56 source — the retail 1.60 may have bug fixes, balance changes, or structural differences. Always prefer the decompiled retail as the base, annotate from SDK reference
 
-### 9C. Rebuild & Verification
+### 10C. Rebuild & Verification
 1. Compile all `.uc` packages using `UCC.exe` from the build output
 2. Verify compiled `.u` output matches retail originals (byte comparison where possible, functional equivalence where not)
 3. CMake integration: `add_custom_command` to compile `.uc` packages as part of the build
@@ -478,37 +480,37 @@ Blog Post: *"Scripting a Rainbow — UnrealScript Rebuilt"*
 
 ---
 
-## Phase 10: Asset Decompilation & Source Formats
+## Phase 11: Asset Decompilation & Source Formats
 
 Extract all game assets from retail proprietary formats into **lossless, modern, easily-editable source formats**. These live in `src/assets/` organised by asset type. The build system recompiles them into the game's expected formats.
 
-### 10A. Textures
+### 11A. Textures
 1. Extract all `.utx` texture packages → individual lossless images (PNG for RGBA, TGA for indexed/palettised, EXR for HDR if any)
 2. Output to `src/assets/textures/{PackageName}/{TextureName}.png`
 3. Build step: repackage into `.utx` using `UCC.exe` or custom tooling
 
-### 10B. Static Meshes & Skeletal Meshes
+### 11B. Static Meshes & Skeletal Meshes
 1. Extract `.usx` (static meshes) and `.ukx` (skeletal meshes + animations) → glTF 2.0 or FBX
 2. Output to `src/assets/meshes/{PackageName}/{MeshName}.gltf` and `src/assets/animations/{PackageName}/{AnimName}.gltf`
 3. Preserve bone hierarchies, vertex weights, LOD levels, collision hulls
 4. Build step: recompile into `.usx`/`.ukx`
 
-### 10C. Sounds
+### 11C. Sounds
 1. Extract `.uax` sound packages → WAV (PCM) or FLAC for lossless preservation
 2. Output to `src/assets/sounds/{PackageName}/{SoundName}.wav`
 3. Build step: repackage into `.uax`
 
-### 10D. Maps
+### 11D. Maps
 1. Extract `.rsm` map files → Unreal `.t3d` text format (human-readable, diffable)
 2. Output to `src/assets/maps/{MapName}.t3d` plus any embedded assets extracted per 10A-10C
 3. Build step: compile `.t3d` back to `.rsm`
 
-### 10E. Music & Video
+### 11E. Music & Video
 1. Music: Extract any `.umx` → tracker format (IT/S3M/XM) or OGG/WAV as appropriate
 2. Video: Bink `.bik` files — extract to lossless AVI or individual frames + audio. Bink re-encoding via RAD tools for build step
 3. Output to `src/assets/music/` and `src/assets/videos/`
 
-### 10F. UI & Miscellaneous
+### 11F. UI & Miscellaneous
 1. Localisation `.int`/`.frt`/etc. files — already text, copy to `src/assets/localization/`
 2. Configuration `.ini` files — copy to `src/assets/config/`
 3. Any remaining data files extracted to appropriate `src/assets/` subdirectory
@@ -517,7 +519,7 @@ Blog Post: *"Cracking Open the Art — Assets in Source Form"*
 
 ---
 
-## Phase 11: Integration & Testing
+## Phase 12: Integration & Testing
 
 1. **Incremental replacement** — swap one DLL at a time, test game still boots
 2. **Boot test** — main menu with all rebuilt DLLs
@@ -531,11 +533,11 @@ Blog Posts: *"It Lives!"*, *"The Comparison — How Close Did We Get?"*
 
 ---
 
-## Phase 12: Source Cleanup — Self-Contained `src/`
+## Phase 13: Source Cleanup — Self-Contained `src/`
 
 Make `src/` fully self-contained: all compilable source code (C++ headers, UnrealScript, assets) lives in `src/` with no `#include` paths reaching into `sdk/`. The `sdk/` directory becomes purely archival reference material. Import libraries (`.lib`) remain external — they are binary artifacts from the retail game, not source code, and are progressively replaced by our own build output.
 
-### 12A. Internalize C++ Headers
+### 13A. Internalize C++ Headers
 1. Copy all SDK headers currently referenced by `#include` paths into `src/` subdirectories:
    - `sdk/Raven_Shield_C_SDK/432Core/Inc/*.h` → `src/core/inc/`
    - Used headers from `sdk/Ut99PubSrc/Core/Inc/` → `src/core/inc/` (merge with CSDK copies where both exist)
@@ -547,13 +549,13 @@ Make `src/` fully self-contained: all compilable source code (C++ headers, Unrea
 3. Verify full build still passes with zero `sdk/` include paths
 4. Carry forward all R6-specific modifications already applied (Localize 6-param, ResetConfig 3-param, appMsgf overload, etc.)
 
-### 12B. Reconstruct Headers (Progressive)
+### 13B. Reconstruct Headers (Progressive)
 1. As each module's implementation matures, replace copied SDK headers with clean purpose-built ones containing only declarations we've verified
 2. Match ABI exactly: struct sizes, vtable layouts, member offsets, `#pragma pack` directives
 3. Remove dead declarations, commented-out blocks, and SDK quirks
 4. Clear convention: `src/{module}/inc/` = the authoritative header for that module
 
-### 12C. Build System Cleanup
+### 13C. Build System Cleanup
 1. CMake: remove all `sdk/` include paths; only `src/` and `tools/toolchain/` paths remain
 2. Document any remaining `sdk/` dependencies (import `.lib` files only) with path to eventual removal (each rebuilt DLL produces its own `.lib`)
 3. Verify `cmake -S . -B build && cmake --build build` works without `sdk/` in include search paths
@@ -562,7 +564,7 @@ Blog Post: *"Cutting the Cord — A Self-Contained Source Tree"*
 
 ---
 
-## Phase 13: Progressive Modernization
+## Phase 14: Progressive Modernization
 
 1. **Readability pass** — meaningful names, extract constants, consistent formatting
 2. **Modern build target** — add MSVC 2022 / C++17 CMake preset alongside legacy MSVC 7.1
@@ -626,14 +628,14 @@ Blog Posts: *"Making It Readable"*, *"The Road Ahead"*
 ## Decisions
 
 - Third-party DLLs are external dependencies (linked, not decompiled)
-- MSVC 7.1 primary target for byte parity; modern MSVC added in Phase 11
+- MSVC 7.1 primary target for byte parity; modern MSVC added in Phase 14
 - Readability wins over byte-match when they conflict — divergences documented
 ---
 
 ## Further Considerations
 
-1. **Athena Sword expansion** — Additional `.u` packages in `retail/Mods/AthenaSword/`. Include in Phase 9 UnrealScript decompilation and Phase 11 testing.
+1. **Athena Sword expansion** — Additional `.u` packages in `retail/Mods/AthenaSword/`. Include in Phase 10 UnrealScript decompilation and Phase 12 testing.
 
-2. **OpenRVS community mod** — `retail/system/OpenRVS.u` and `openrvs.ini` indicate active community. Verify compatibility in Phase 11 testing.
+2. **OpenRVS community mod** — `retail/system/OpenRVS.u` and `openrvs.ini` indicate active community. Verify compatibility in Phase 12 testing.
 
 3. **Steam integration** — Original has Steam hooks (`installscript.vdf`, `steam_appid.txt`). Rebuilt binaries won't have Steam DRM stubs. Add a thin Steam API stub if needed, document as known difference.
