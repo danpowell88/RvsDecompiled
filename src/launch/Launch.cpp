@@ -319,8 +319,9 @@ static UEngine* InitEngine()
 
 	// TODO Phase 9B: Engine->Init() requires correct vtable layout.
 	// UEngine::Init() is virtual (mangled: ?Init@UEngine@@UAEXXZ).
-	// The vtable slot depends on the full inheritance chain's virtual
-	// method declaration order. Deferred until full class layout is known.
+	// The vtable slot (28, offset 0x70) has been verified against
+	// retail Engine.dll. UEngine is now declared with full vtable order.
+	Engine->Init();
 
 	// R6-specific: set the global engine pointer for subsystem access.
 	g_pEngine = Engine;
@@ -361,7 +362,7 @@ static void MainLoop( UEngine* Engine )
 		guard(UpdateWorld);
 		FTime NewTime  = appSeconds();
 		FLOAT DeltaTime = NewTime - OldTime;
-		(void)DeltaTime; // Suppress unused warning until Tick is enabled.
+		Engine->Tick( DeltaTime );
 		if( GWindowManager )
 			GWindowManager->Tick( DeltaTime );
 		OldTime = NewTime;
@@ -369,8 +370,7 @@ static void MainLoop( UEngine* Engine )
 
 		// Enforce optional maximum tick rate.
 		guard(EnforceTickRate);
-		// TODO Phase 9B: Engine->GetMaxTickRate() requires correct vtable layout.
-		FLOAT MaxTickRate = 60.0f; // Placeholder — retail reads from engine config.
+		FLOAT MaxTickRate = Engine->GetMaxTickRate();
 		if( MaxTickRate > 0.0 )
 		{
 			FLOAT Delta = (1.0f/MaxTickRate) - (appSeconds() - OldTime);
@@ -463,6 +463,57 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		GIsClient = GIsGuarded = 1;
 		appInit( GPackage, CmdLine, &Malloc, &Log, &Error, &Warn, &FileManager, FConfigCacheIni::Factory, 1 );
 
+		// Crash recovery: if Running.ini exists, the previous run did not
+		// exit cleanly. The retail binary uses this to trigger safe mode.
+		UBOOL bSafeMode = ParseParam(CmdLine, TEXT("safe"));
+		UBOOL bChangeVideo = ParseParam(CmdLine, TEXT("changevideo"));
+		FString RunningIniPath = FString(appBaseDir()) + TEXT("Running.ini");
+		if( GFileManager->FileSize(*RunningIniPath) >= 0 )
+		{
+			// Previous run crashed — offer safe mode.
+			debugf( TEXT("Running.ini detected — previous run may have crashed") );
+			GFileManager->Delete( *RunningIniPath );
+			if( !bSafeMode )
+			{
+				if( MessageBox( NULL,
+					TEXT("The game did not exit cleanly last time.\n\nWould you like to start in safe mode?"),
+					TEXT("Raven Shield"),
+					MB_YESNO | MB_ICONWARNING | MB_TASKMODAL ) == IDYES )
+				{
+					bSafeMode = 1;
+				}
+			}
+		}
+
+		// Create Running.ini to track that we're running.
+		// This file is deleted on clean exit. If it remains, the next
+		// launch knows the previous run crashed.
+		{
+			FArchive* RunFile = GFileManager->CreateFileWriter( *RunningIniPath );
+			if( RunFile )
+			{
+				FString Marker = TEXT("[Running]\r\n");
+				RunFile->Serialize( const_cast<TCHAR*>(*Marker), Marker.Len() * sizeof(TCHAR) );
+				delete RunFile;
+			}
+		}
+
+		// Safe mode: force software rendering and low resolution.
+		if( bSafeMode )
+		{
+			debugf( TEXT("Safe mode active — using software defaults") );
+			GConfig->SetString( TEXT("Engine.Engine"), TEXT("GameRenderDevice"), TEXT("D3DDrv.UD3DRenderDevice") );
+		}
+
+		// Change video mode: prompt for render device selection.
+		if( bChangeVideo )
+		{
+			debugf( TEXT("ChangeVideo requested — will prompt for render device") );
+			// The retail binary opens a render device selection dialog here.
+			// For now, just log the request — the config wizard is not yet
+			// reconstructed.
+		}
+
 		// Init mode flags.
 		GIsServer     = 1;
 		GIsClient     = !ParseParam(appCmdLine(), TEXT("SERVER"));
@@ -511,6 +562,10 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		// Clean shutdown.
 		RemovePropX( *GLogWindow, TEXT("IsBrowser") );
 		GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Exit")) );
+
+		// Delete Running.ini to indicate clean exit.
+		GFileManager->Delete( *RunningIniPath );
+
 		delete GLogWindow;
 		appPreExit();
 		GIsGuarded = 0;

@@ -51,15 +51,6 @@
 #include "Engine.h"
 
 /*----------------------------------------------------------------------------
-	Forward declarations for D3D resource / shader types.
-	These are incomplete internally — only the pointer size matters for ABI.
-----------------------------------------------------------------------------*/
-
-class FD3DResource;
-class FD3DPixelShader;
-class FD3DVertexShader;
-
-/*----------------------------------------------------------------------------
 	Ravenshield-specific enums referenced by UD3DRenderDevice.
 	Defined here because they appear in virtual method signatures.
 ----------------------------------------------------------------------------*/
@@ -67,33 +58,59 @@ class FD3DVertexShader;
 // ER6SwitchSurface — surface target for ChangeDrawingSurface
 enum ER6SwitchSurface
 {
-	R6SS_Default  = 0,
+	R6SS_Default   = 0,
 	R6SS_Offscreen = 1,
 };
 
-// EPixelShader / EVertexShader — shader program identifiers (internal IDs).
-// Actual values are not exposed in the CSDK; use placeholders.
+// EPixelShader — pixel shader program identifiers.
+// Ghidra analysis of GetPixelShader (0x10009720) shows indexed lookup.
 enum EPixelShader
 {
-	PS_None = 0,
+	PS_None            = 0,
+	PS_DetailTexture   = 1,
+	PS_FogMap          = 2,
+	PS_MAX             = 16,
 };
 
+// EVertexShader — vertex shader program identifiers.
+// Ghidra analysis of GetVertexShader (0x1000ab90) shows indexed lookup.
 enum EVertexShader
 {
-	VS_None = 0,
+	VS_None            = 0,
+	VS_FixedFunction   = 1,
+	VS_SkinMesh        = 2,
+	VS_MAX             = 16,
 };
 
-// FShaderDeclaration — vertex declaration wrapper (opaque; only passed by ref).
+// FShaderDeclaration — D3D8 vertex declaration wrapper (opaque; passed by ref).
 struct FShaderDeclaration
 {
 	DWORD Declarations[64];
 };
 
 /*----------------------------------------------------------------------------
+	Forward declarations for D3D resource / shader types.
+----------------------------------------------------------------------------*/
+
+class FD3DResource;
+class FD3DPixelShader;
+class FD3DVertexShader;
+class FD3DRenderInterface;
+
+/*----------------------------------------------------------------------------
 	D3DDrv class declarations.
 ----------------------------------------------------------------------------*/
 
 #include "D3DDrvClasses.h"
+
+/*----------------------------------------------------------------------------
+	D3D8 internal structures — full definitions after class declaration.
+	These require D3D8 types and the class declaration above.
+----------------------------------------------------------------------------*/
+
+#include "FD3DResource.h"
+#include "FD3DShaders.h"
+#include "FD3DRenderInterface.h"
 
 /*----------------------------------------------------------------------------
 	IMPLEMENT_CLASS override — same MSVC 2019+ fix used by all modules.

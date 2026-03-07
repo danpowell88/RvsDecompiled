@@ -24,6 +24,7 @@ if(SOURCE_COUNT GREATER 0)
         ${DXSDK_LIB}/d3d8.lib
         ${DXSDK_LIB}/d3dx8.lib
         ${DXSDK_LIB}/dxguid.lib
+        ddraw.lib
     )
 else()
     message(STATUS "D3DDrv: no source files yet — skipping")

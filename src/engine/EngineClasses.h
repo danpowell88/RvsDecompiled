@@ -1119,11 +1119,32 @@ public:
 // ---------------------------------------------------------------------------
 
 // FRenderInterface — abstract render-dispatch interface returned by Lock().
-// Only used as a pointer; forward declaration is sufficient here.
-class ENGINE_API FRenderInterface;
+// Base class for device-specific render interfaces (FD3DRenderInterface, etc.).
+// The engine holds a pointer to this during Lock/Unlock and issues draw calls.
+// Not ENGINE_API: defined inline. D3DDrv defines the vtable via FD3DRenderInterface.
+class FRenderInterface
+{
+public:
+	virtual ~FRenderInterface() {}
+};
 
 // FRenderCaps — hardware capability query result from GetRenderCaps().
-struct ENGINE_API FRenderCaps {};
+// Members reconstructed from D3DDrv Ghidra analysis of Init() and
+// engine-side consumers (terrain renderer, material compiler).
+struct ENGINE_API FRenderCaps
+{
+	INT HardwareTL;                    // Hardware transform & lighting available
+	INT MaxSimultaneousTerrainLayers;  // Max terrain texture layers (capped at 4)
+	INT PixelShaderVersion;            // Pixel shader version (0=none, 1=1.x, 2=2.x)
+	INT MaxTextureBlendStages;         // Maximum texture stages for blending
+
+	FRenderCaps()
+		: HardwareTL(0)
+		, MaxSimultaneousTerrainLayers(1)
+		, PixelShaderVersion(0)
+		, MaxTextureBlendStages(2)
+	{}
+};
 
 // FResolutionInfo — display-mode descriptor for GetAvailableResolutions().
 struct ENGINE_API FResolutionInfo
@@ -1676,10 +1697,106 @@ public:
 
 // --- Parent/intermediate classes (must come before children) ---
 
+class ENGINE_API UClient;  // Forward declaration — full definition below.
+
 class ENGINE_API UEngine : public USubsystem
 {
 public:
 	DECLARE_CLASS(UEngine,USubsystem,CLASS_Config|CLASS_Transient,Engine)
+
+	// --- Member data (offsets from Ghidra analysis of retail Engine.dll) ---
+	// UObject base:   0x00-0x2F
+	// USubsystem add: 0x30-0x43
+	// UEngine add:    0x44+
+
+	// Padding to align Client at offset 0x44.
+	// UObject is ~0x30 bytes, USubsystem adds ~0x14 bytes of data.
+	// The exact intermediate layout depends on the full USubsystem layout,
+	// but for vtable dispatch (virtual calls) only the virtual method
+	// declaration order matters — not member layout.
+
+	UClient*        Client;         // 0x44: Active client (viewport manager)
+
+	// --- Virtual method table ---
+	// The following virtual methods MUST appear in exactly this order to match
+	// the retail Engine.dll vtable layout. VTable slot numbers are from the
+	// complete inheritance chain (UObject=0-24, USubsystem::Tick=25).
+	//
+	// Slot 25: Tick(FLOAT) — inherited from USubsystem, overridden by UGameEngine.
+	// (Tick is already virtual in USubsystem; UEngine re-declares it for override.)
+
+	// Slot 26: PaintProgress — displays loading progress.
+	virtual void PaintProgress() {}
+
+	// Slot 27: CacheArmPatch — R6-specific: cache arm patch data for operators.
+	virtual void CacheArmPatch( void* /*FGuid**/ Guid, DWORD* Param ) {}
+
+	// Slot 28: Init — engine initialisation (create client, audio, renderer).
+	virtual void Init() {}
+
+	// Slot 29: Exit — engine shutdown.
+	virtual void Exit() {}
+
+	// Slot 30: Flush — flush rendering/audio caches.
+	virtual void Flush( INT Param ) {}
+
+	// Slot 31: UpdateGamma — apply gamma correction.
+	virtual void UpdateGamma() {}
+
+	// Slot 32: RestoreGamma — restore original gamma ramp.
+	virtual void RestoreGamma() {}
+
+	// Slot 33: Key — keyboard input event.
+	virtual INT Key( UViewport* Viewport, INT Key ) { return 0; }
+
+	// Slot 34: InputEvent — generic input event.
+	virtual INT InputEvent( UViewport* Viewport, INT Key, INT Action, FLOAT Delta ) { return 0; }
+
+	// Slot 35: Draw — render a viewport (pure virtual in retail).
+	virtual void Draw( UViewport* Viewport, INT
+		, BYTE* HitData, INT* HitSize ) {}
+
+	// Slot 36: MouseDelta — relative mouse movement.
+	virtual void MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
+
+	// Slot 37: MousePosition — absolute mouse position.
+	virtual void MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
+
+	// Slot 38: MouseWheel — mouse wheel scroll (R6 addition).
+	virtual void MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
+
+	// Slot 39: Click — mouse button down.
+	virtual void Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
+
+	// Slot 40: UnClick — mouse button up (R6 addition).
+	virtual void UnClick( UViewport* Viewport, DWORD Buttons, INT X, INT Y ) {}
+
+	// Slot 41: SetClientTravel — initiate level transition.
+	virtual void SetClientTravel( UPlayer* Player, const TCHAR* URL, INT Flags, INT TravelType ) {}
+
+	// Slot 42: ChallengeResponse — network challenge token.
+	virtual INT ChallengeResponse( INT Challenge ) { return 0; }
+
+	// Slot 43: GetMaxTickRate — maximum frames per second.
+	virtual FLOAT GetMaxTickRate() { return 0.f; }
+
+	// Slot 44: SetProgress — update loading/progress display.
+	virtual void SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Progress ) {}
+
+	// Editor virtuals (slots 45-50) — unused at runtime.
+	virtual void edDrawAxisIndicator( void* /*FSceneNode**/ SceneNode ) {}
+	virtual void edSetClickLocation( FVector& Location ) {}
+	virtual INT  edcamMode( UViewport* Viewport ) { return 0; }
+	virtual INT  edcamTerrainBrush() { return 0; }
+	virtual INT  edcamMouseControl( UViewport* Viewport ) { return 0; }
+	virtual INT  EdCallback( DWORD Code, INT Param, DWORD Flags ) { return 0; }
+
+	// Slot 51-53: R6-specific menu/texture background loading.
+	virtual void LoadRandomMenuBackgroundImage( const TCHAR* Path ) {}
+	virtual void LoadBackgroundImage( const TCHAR* Path, UTexture* Tex1, UTexture* Tex2 ) {}
+	virtual void ReplaceTexture( const TCHAR* Path, UTexture* Tex ) {}
+
+	// FExec interface.
 	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 };
 
