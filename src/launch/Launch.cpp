@@ -21,30 +21,35 @@
 /*-----------------------------------------------------------------------------
 	Exported globals — visible to DLLs via the exe's export table.
 	Retail exports: GPackage, hInstance (Ordinal_1).
-	hInstance is declared extern in UnVcWin32.h — we provide the storage here.
-	GPackage is exported via __declspec(dllexport).
+	hInstance is declared extern in UnVcWin32.h — we provide the storage here
+	and export it via RavenShield.def for ordinal accuracy.
+	GPackage is exported via RavenShield.def.
 -----------------------------------------------------------------------------*/
 
 extern "C" { HINSTANCE hInstance; }
-extern "C" { __declspec(dllexport) TCHAR GPackage[64] = TEXT("Launch"); }
+extern "C" { TCHAR GPackage[64] = TEXT("Launch"); }
 
 /*-----------------------------------------------------------------------------
 	GTimestamp — RDTSC availability flag used by inline appSeconds()/appCycles().
 	Declared extern CORE_API in UnVcWin32.h, but NOT exported by retail Core.dll.
-	The launcher provides the actual storage. Init'd TRUE (all target CPUs
+	The launcher provides local storage under a target-local alias in a separate
+	translation unit so the EXE does not accidentally export the symbol. Init'd TRUE (all target CPUs
 	support RDTSC — Pentium+).
 -----------------------------------------------------------------------------*/
-extern "C" { UBOOL GTimestamp = 1; }
 
 /*-----------------------------------------------------------------------------
 	Linker fixups: redirect import symbols whose signatures differ between
 	the CSDK headers and the retail Core.lib.
+	GTimestampLaunch: inline timing helpers expect an imported data symbol via
+	__imp__, but the launcher provides local storage in LaunchGlobals.cpp.
+	Redirect the import thunk name to that local symbol.
 	StaticConstructObject: CSDK declares (UClass*,UObject*,...,UObject* Z)
 	but Core.lib exports (UClass*,UObject*,...,INT Reserved). On x86
 	both are 4-byte values with identical calling convention, so redirect.
 	WWindow::Show(int): exported from Window.dll but our Window.lib may
 	contain a mangled variant — handled by linking Window.lib.
 -----------------------------------------------------------------------------*/
+#pragma comment(linker, "/ALTERNATENAME:__imp__GTimestampLaunch=_GTimestampLaunch")
 #pragma comment(linker, "/ALTERNATENAME:__imp_?StaticConstructObject@UObject@@SAPAV1@PAVUClass@@PAV1@VFName@@K1PAVFOutputDevice@@1@Z=__imp_?StaticConstructObject@UObject@@SAPAV1@PAVUClass@@PAV1@VFName@@K1PAVFOutputDevice@@H@Z")
 
 /*-----------------------------------------------------------------------------
@@ -439,7 +444,7 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 				COPYDATASTRUCT CD;
 				DWORD Result;
 				CD.dwData = WindowMessageOpen;
-				CD.cbData = (appStrlen(CmdLine) + 1) * sizeof(TCHAR*);
+				CD.cbData = (appStrlen(CmdLine) + 1) * sizeof(TCHAR);
 				CD.lpData = const_cast<TCHAR*>( CmdLine );
 				SendMessageTimeout( hWnd, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&CD,
 					SMTO_ABORTIFHUNG|SMTO_BLOCK, 30000, &Result );

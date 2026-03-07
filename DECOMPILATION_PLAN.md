@@ -320,6 +320,8 @@ Blog Post: *"Press Start — Launching the Engine"*
 | Launch.cpp | `src/launch/Launch.cpp` | ✅ Complete — WinMain, InitEngine, MainLoop, FExecHook, splash screen |
 | FMallocWindows.h | `src/launch/FMallocWindows.h` | ✅ Shim — redirects to UT99 version (CSDK has method bodies commented out) |
 | LaunchRes.h / .rc | `src/launch/Res/` | ✅ Complete — splash dialog resource (IDDIALOG_Splash, IDICON_Mainframe) |
+| RavenShield.def | `src/launch/RavenShield.def` | ✅ Complete — ordinal-accurate EXE exports for `hInstance` and `GPackage` |
+| LaunchGlobals.cpp | `src/launch/LaunchGlobals.cpp` | ✅ Complete — local `GTimestamp` storage/thunk without leaking an unintended EXE export |
 | CMakeLists.txt | `src/launch/CMakeLists.txt` | ✅ Complete — links Core, Engine, Window + system libs |
 
 ### Key Discoveries
@@ -328,6 +330,8 @@ Blog Post: *"Press Start — Launching the Engine"*
 - **WWindow::Show** is virtual in R6's Window.dll (`UAEXH`) but declared non-virtual in UT99's Window.h (`QAEXH`) — fixed via ALTERNATENAME pragma
 - **StaticConstructObject** has mismatched 7th parameter type between CSDK headers (`UObject*`) and Core.lib (`INT`) — fixed via ALTERNATENAME pragma
 - FMallocWindows method bodies commented out in CSDK — local shim redirects to UT99's inline version
+- The launcher needs an explicit `.def` file passed to the linker; adding it as a source alone is not enough for EXE export-table parity
+- `WM_COPYDATA` forwarding must use `sizeof(TCHAR)`, not `sizeof(TCHAR*)`, or command-line forwarding overreports the payload size
 
 ### Stubbed Pending Phase 8C
 - `Engine->Init()` — virtual call requires correct vtable slot ordering for UEngine/UGameEngine
@@ -404,6 +408,43 @@ A systematic sweep across every reconstructed module. By this point all 16 binar
 **Estimated commits:** 5–10 (many small targeted fixes across modules)
 
 Blog Post: *"The Audit — Hunting Down Every Last Stub"*
+
+---
+
+## Phase 8D: Launcher Behavior Parity
+
+Phase 8 rebuilt the RavenShield bootstrap and made the EXE build/link with the correct entry point, export table, and resources. What remains is the higher-level launcher behavior that retail implements before the engine is fully running: recovery mode, config UI flows, driver detection, and one-shot command-line utility paths. These are distinct from the cross-module stub audit in 8C and are best tracked separately.
+
+**Dependency:** Requires Phase 8 complete. Can proceed independently of Phase 8B rendering work.
+
+### 8D-1. Startup Flow Recovery
+1. Reconstruct `AlreadyRunning` handling based on the `UnrealIsRunning` mutex state
+2. Reconstruct `Running.ini` creation and stale-crash recovery detection
+3. Reconstruct recovery-mode startup path when the previous run did not exit cleanly
+
+### 8D-2. Config Wizard Paths
+1. Reconstruct `safe` / `changevideo` command-line handling
+2. Reconstruct first-run renderer selection wizard / safe-mode wizard dispatch
+3. Verify which UT99 config pages still exist in RavenShield versus which are replaced by R6-specific logic
+
+### 8D-3. Driver Detection Utilities
+1. Reconstruct `testrendev=` path and `Detected.ini` side effects
+2. Reconstruct any `nodetect` / autodetect bypass behavior present in retail
+3. Verify whether the import-table and string-report evidence maps to direct UT99 code reuse or an R6-specific variant
+
+### 8D-4. Command-Line Utility Paths
+1. Reconstruct `consolecommand=` one-shot execution path if present in retail
+2. Validate argument forwarding to an already-running instance against retail behavior
+3. Confirm whether any additional launcher-only command-line switches are present in the SafeDisc-decrypted executable
+
+**Validation approach:**
+- Compare reconstructed control flow against the retail string report and any recovered functions from the decrypted executable
+- Test command-line cases manually (`safe`, `changevideo`, `testrendev=`, existing-instance forwarding)
+- Verify file side effects (`Running.ini`, `Detected.ini`) and UI behavior against retail
+
+**Estimated commits:** 3–6
+
+Blog Post: *"Before The First Frame — Reconstructing Launcher Behavior"*
 
 ---
 

@@ -14,10 +14,21 @@ file(GLOB_RECURSE LAUNCH_SOURCES
     ${LAUNCH_SRC_DIR}/*.rc
 )
 
+list(APPEND LAUNCH_SOURCES
+    ${LAUNCH_SRC_DIR}/LaunchGlobals.cpp
+)
+
 list(LENGTH LAUNCH_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_executable(RavenShield WIN32 ${LAUNCH_SOURCES})
-    target_compile_definitions(RavenShield PRIVATE ThisPackage=Launch)
+    if(EXISTS ${LAUNCH_SRC_DIR}/RavenShield.def)
+        target_sources(RavenShield PRIVATE ${LAUNCH_SRC_DIR}/RavenShield.def)
+        target_link_options(RavenShield PRIVATE "/DEF:${LAUNCH_SRC_DIR}/RavenShield.def")
+    endif()
+    target_compile_definitions(RavenShield PRIVATE
+        ThisPackage=Launch
+        GTimestamp=GTimestampLaunch
+    )
 
     # BEFORE so our local headers beat global SDK paths.
     # Include paths needed:

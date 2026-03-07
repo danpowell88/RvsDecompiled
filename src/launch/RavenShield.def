@@ -1,0 +1,4 @@
+NAME RavenShield
+EXPORTS
+    hInstance @1 DATA
+    GPackage DATA
