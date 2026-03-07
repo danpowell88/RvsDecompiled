@@ -306,11 +306,34 @@ Blog Post: *"How Games Hear — The DARE Audio System"*
 
 ---
 
-## Phase 8: RavenShield.exe — Bootstrap/Launcher
+## Phase 8: RavenShield.exe — Bootstrap/Launcher ✅ COMPLETE
 
-WinMain, command-line parsing, engine init, window creation, message pump, DLL loading. 3-4 commits.
+WinMain, command-line parsing, engine init, window creation, message pump, DLL loading.
 
 Blog Post: *"Press Start — Launching the Engine"*
+
+### Status
+
+| Component | File | Status |
+|-----------|------|--------|
+| LaunchPrivate.h | `src/launch/LaunchPrivate.h` | ✅ Complete — API linkage, system headers, R6 compat shims, Window.h include |
+| Launch.cpp | `src/launch/Launch.cpp` | ✅ Complete — WinMain, InitEngine, MainLoop, FExecHook, splash screen |
+| FMallocWindows.h | `src/launch/FMallocWindows.h` | ✅ Shim — redirects to UT99 version (CSDK has method bodies commented out) |
+| LaunchRes.h / .rc | `src/launch/Res/` | ✅ Complete — splash dialog resource (IDDIALOG_Splash, IDICON_Mainframe) |
+| CMakeLists.txt | `src/launch/CMakeLists.txt` | ✅ Complete — links Core, Engine, Window + system libs |
+
+### Key Discoveries
+- Retail exe is **SafeDisc v2** wrapped — Ghidra only sees the encrypted packer stub. Reconstruction based on import table analysis + UT99 reference code
+- **GTimestamp** (`UBOOL`) used by inline `appSeconds()` is NOT exported from retail Core.dll — launcher provides the storage locally
+- **WWindow::Show** is virtual in R6's Window.dll (`UAEXH`) but declared non-virtual in UT99's Window.h (`QAEXH`) — fixed via ALTERNATENAME pragma
+- **StaticConstructObject** has mismatched 7th parameter type between CSDK headers (`UObject*`) and Core.lib (`INT`) — fixed via ALTERNATENAME pragma
+- FMallocWindows method bodies commented out in CSDK — local shim redirects to UT99's inline version
+
+### Stubbed Pending Phase 8C
+- `Engine->Init()` — virtual call requires correct vtable slot ordering for UEngine/UGameEngine
+- `Engine->Tick(DeltaTime)` — same vtable issue; main loop ticks GWindowManager but not engine
+- `Engine->GetMaxTickRate()` — placeholder 60fps; requires vtable
+- FExecHook: `TakeFocus`, `EditActor`, `Preferences` — require UEngine::Client member data at known offset
 
 ---
 

@@ -1,0 +1,15 @@
+// RavenShield launcher resource script — splash dialog.
+// Based on UT99 LaunchRes.rc.
+//
+#include "LaunchRes.h"
+#include "afxres.h"
+
+// Splash screen dialog — borderless popup with a bitmap control.
+// The InitSplash() function loads a .bmp and sizes the window to match.
+IDDIALOG_Splash DIALOGEX 0, 0, 191, 65
+STYLE DS_SETFOREGROUND | DS_CENTER | WS_POPUP
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL "",IDC_Logo,"Static",SS_BITMAP,0,0,15,13
+END

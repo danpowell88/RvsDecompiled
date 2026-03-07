@@ -168,4 +168,4 @@ add_subdirectory(src/sndsound3d)
 add_subdirectory(src/dareaudio)
 
 # --- Phase 8: Main executable ---
-# add_subdirectory(src/launch)
+add_subdirectory(src/launch)
