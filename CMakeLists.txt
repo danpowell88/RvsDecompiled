@@ -162,7 +162,10 @@ add_subdirectory(src/r6game)
 add_subdirectory(src/r6gameservice)
 
 # --- Phase 7: Audio ---
-# add_subdirectory(src/dareaudio)
+# Bottom-up: SNDext → SNDDSound3D → DareAudio
+add_subdirectory(src/sndext)
+add_subdirectory(src/sndsound3d)
+add_subdirectory(src/dareaudio)
 
 # --- Phase 8: Main executable ---
 # add_subdirectory(src/launch)

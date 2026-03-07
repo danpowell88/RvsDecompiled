@@ -1,0 +1,114 @@
+; DareAudio.def — exports for DareAudio.dll / DareAudioRelease.dll / DareAudioScript.dll
+; All three DareAudio DLL variants share identical export tables (87 exports, same ordinals).
+; Export ordinals match the retail binary exactly.
+;
+; Ordinals 1-84: UDareAudioSubsystem class members (C++ name-mangled)
+; Ordinal 85: _DllMain@12
+; Ordinal 86: GPackage
+; Ordinal 87: autoclassUDareAudioSubsystem
+
+EXPORTS
+    ; --- Constructors, destructor, operators ---
+    ??0UDareAudioSubsystem@@QAE@ABV0@@Z                                    @1
+    ??0UDareAudioSubsystem@@QAE@XZ                                         @2
+    ??1UDareAudioSubsystem@@UAE@XZ                                         @3
+    ??2UDareAudioSubsystem@@SAPAXIPAVUObject@@VFName@@K@Z                  @4
+    ??2UDareAudioSubsystem@@SAPAXIPAW4EInternal@@@Z                        @5
+    ??4UDareAudioSubsystem@@QAEAAV0@ABV0@@Z                                @6
+
+    ; --- Vtable pointers (FExec, UObject) ---
+    ??_7UDareAudioSubsystem@@6BFExec@@@                                    @7
+    ??_7UDareAudioSubsystem@@6BUObject@@@                                  @8
+
+    ; --- Virtual and non-virtual methods ---
+    ?AddAndFindBankInSound@UDareAudioSubsystem@@UAEXPAVUSound@@W4ELoadBankSound@@@Z  @9
+    ?AddSoundBank@UDareAudioSubsystem@@UAEXVFString@@W4ELoadBankSound@@@Z  @10
+    ?CleanUp@UDareAudioSubsystem@@UAEXXZ                                  @11
+    ?CreateMicro@UDareAudioSubsystem@@AAEXXZ                              @12
+    ?CreateSoundTypes@UDareAudioSubsystem@@AAEXXZ                         @13
+    ?CreateVolumeLines@UDareAudioSubsystem@@AAEXXZ                        @14
+    ?Destroy@UDareAudioSubsystem@@UAEXXZ                                  @15
+    ?Exec@UDareAudioSubsystem@@UAEHPBGAAVFOutputDevice@@@Z                @16
+
+    ; --- Static callbacks (private static __stdcall) ---
+    ?GetActorInfo@UDareAudioSubsystem@@CGXJPADJ@Z                         @17
+    ?GetActorMicroLink@UDareAudioSubsystem@@CGHJJ@Z                       @18
+    ?GetActorMultiLayer@UDareAudioSubsystem@@CGJJJH@Z                     @19
+    ?GetActorPos@UDareAudioSubsystem@@CGXJPAU_SND_tdstVectorFloat@@@Z     @20
+    ?GetActorRollOff@UDareAudioSubsystem@@CGHJPAU_SND_tdstRollOffParam@@@Z @21
+    ?GetActorSpeed@UDareAudioSubsystem@@CGXJPAU_SND_tdstVectorFloat@@@Z   @22
+    ?GetActorSwitch@UDareAudioSubsystem@@CGJJJ@Z                          @23
+
+    ; --- More methods ---
+    ?GetDuration@UDareAudioSubsystem@@AAEMK@Z                             @24
+    ?GetDuration@UDareAudioSubsystem@@UAEMPAVUSound@@@Z                   @25
+    ?GetMicroNormal@UDareAudioSubsystem@@CGXJPAU_SND_tdstVectorFloat@@@Z  @26
+    ?GetMicroPos@UDareAudioSubsystem@@CGXJPAU_SND_tdstVectorFloat@@@Z     @27
+    ?GetMicroSpeed@UDareAudioSubsystem@@CGXJPAU_SND_tdstVectorFloat@@@Z   @28
+    ?GetMicroTangeant@UDareAudioSubsystem@@CGXJPAU_SND_tdstVectorFloat@@@Z @29
+    ?GetPosition@UDareAudioSubsystem@@UAEMPAVAActor@@PAVUSound@@@Z        @30
+    ?GetSoundExtraCoef@UDareAudioSubsystem@@CGXJPAU_SND_tdstBlockEvent@@PAM11@Z @31
+    ?GetViewport@UDareAudioSubsystem@@UAEPAVUViewport@@XZ                 @32
+    ?Init@UDareAudioSubsystem@@UAEHXZ                                     @33
+    ?InternalConstructor@UDareAudioSubsystem@@SAXPAX@Z                    @34
+    ?IsPlayingAnyActor@UDareAudioSubsystem@@QAEHPAVUSound@@@Z             @35
+    ?LoadBankMap@UDareAudioSubsystem@@UAEXPAVULevel@@VFString@@@Z         @36
+    ?NoteDestroy@UDareAudioSubsystem@@UAEXPAVAActor@@@Z                   @37
+    ?PlayMusic@UDareAudioSubsystem@@UAEHPAVUSound@@H@Z                    @38
+    ?PlayMusic@UDareAudioSubsystem@@UAEHVFString@@M@Z                     @39
+    ?PlaySoundW@UDareAudioSubsystem@@UAEHPAVAActor@@PAVUSound@@HH@Z      @40
+    ?PostEditChange@UDareAudioSubsystem@@UAEXXZ                           @41
+    ?PostLoadMap@UDareAudioSubsystem@@UAEXPAVULevel@@@Z                   @42
+
+    ; --- Static class data ---
+    ?PrivateStaticClass@UDareAudioSubsystem@@0VUClass@@A                  @43
+
+    ; --- More methods ---
+    ?RegisterSound@UDareAudioSubsystem@@UAEXPAVUSound@@@Z                 @44
+    ?SND_ChangeVolumeLinear_TypeSound@UDareAudioSubsystem@@UAEXW4ESoundSlot@@H@Z @45
+    ?SND_ChangeVolume_Actor@UDareAudioSubsystem@@UAEXPAVAActor@@W4ESoundSlot@@M@Z @46
+    ?SND_ChangeVolume_AllButOneTypeSound@UDareAudioSubsystem@@UAEXW4ESoundSlot@@M@Z @47
+    ?SND_ChangeVolume_AllTypeSound@UDareAudioSubsystem@@UAEXM@Z           @48
+    ?SND_ChangeVolume_TypeSound@UDareAudioSubsystem@@UAEXW4ESoundSlot@@M@Z @49
+    ?SND_FadeSound@UDareAudioSubsystem@@UAEXMHW4ESoundSlot@@@Z           @50
+    ?SND_GetVolumeInit_TypeSound@UDareAudioSubsystem@@UAEMW4ESoundSlot@@@Z @51
+    ?SND_GetVolumeLine@UDareAudioSubsystem@@UAEMW4ESoundVolume@@@Z        @52
+    ?SND_GetVolume_TypeSound@UDareAudioSubsystem@@UAEMW4ESoundSlot@@@Z    @53
+    ?SND_IsSoundPlaying@UDareAudioSubsystem@@UAEHPAVAActor@@PAVUSound@@@Z @54
+    ?SND_ResetVolumeSoundObjectType@UDareAudioSubsystem@@UAEXW4ESoundSlot@@@Z @55
+    ?SND_ResetVolume_AllTypeSound@UDareAudioSubsystem@@UAEXXZ             @56
+    ?SND_ResetVolume_ButOneTypeSound@UDareAudioSubsystem@@UAEXW4ESoundSlot@@@Z @57
+    ?SND_ReturnSavedFadeValue@UDareAudioSubsystem@@UAEXM@Z               @58
+    ?SND_SaveCurrentFadeValue@UDareAudioSubsystem@@UAEXXZ                 @59
+    ?SND_SetSoundOptions@UDareAudioSubsystem@@UAEX_NVFString@@@Z          @60
+    ?SND_SetVolumeLine@UDareAudioSubsystem@@UAEXW4ESoundVolume@@M@Z      @61
+    ?SetBankInfo@UDareAudioSubsystem@@UAEXW4ER6SoundState@@@Z             @62
+    ?SetViewport@UDareAudioSubsystem@@UAEHPAVUViewport@@VFString@@@Z      @63
+    ?ShutdownAfterError@UDareAudioSubsystem@@UAEXXZ                       @64
+    ?StaticClass@UDareAudioSubsystem@@SAPAVUClass@@XZ                     @65
+    ?StaticConstructor@UDareAudioSubsystem@@QAEXXZ                        @66
+    ?StopAllMusic@UDareAudioSubsystem@@UAEHM@Z                            @67
+    ?StopAllMusic@UDareAudioSubsystem@@UAEXXZ                             @68
+    ?StopAllSounds@UDareAudioSubsystem@@UAEXXZ                            @69
+    ?StopAllSoundsActor@UDareAudioSubsystem@@UAEXPAVAActor@@W4ESoundSlot@@@Z @70
+    ?StopMusic@UDareAudioSubsystem@@UAEHHM@Z                              @71
+    ?StopMusic@UDareAudioSubsystem@@UAEHPAVUSound@@@Z                     @72
+    ?StopSound@UDareAudioSubsystem@@UAEHPAVAActor@@PAVUSound@@@Z          @73
+    ?StopSoundPlaying@UDareAudioSubsystem@@AAEXVFString@@@Z               @74
+    ?TickUpdate@UDareAudioSubsystem@@UAEXMPAVALevelInfo@@@Z               @75
+    ?UnregisterSound@UDareAudioSubsystem@@UAEXPAVUSound@@@Z               @76
+    ?Update@UDareAudioSubsystem@@UAEXPAVFSceneNode@@@Z                    @77
+    ?UpdateAmbientSounds@UDareAudioSubsystem@@QAEXAAVFCoords@@@Z          @78
+    ?UpdateSoundList@UDareAudioSubsystem@@QAEXXZ                          @79
+
+    ; --- Static data members ---
+    ?m_VolumeInit@UDareAudioSubsystem@@0PAMA                              @80
+    ?m_bInitialized@UDareAudioSubsystem@@0HA                              @81
+    ?m_pLastAmbienceObject@UDareAudioSubsystem@@0PAVAActor@@A             @82
+    ?m_pLastViewPortActor@UDareAudioSubsystem@@0PAVAActor@@A              @83
+    ?m_pViewport@UDareAudioSubsystem@@2PAVUViewport@@A                    @84
+
+    ; --- DLL entry point and package symbols ---
+    _DllMain@12                                                           @85
+    GPackage                                                              @86
+    autoclassUDareAudioSubsystem                                          @87
