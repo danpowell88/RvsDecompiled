@@ -115,7 +115,7 @@ EXPORTS
     ??0AR6AbstractCircumstantialActionQuery@@QAE@ABV0@@Z @113
     ??0AR6AbstractCircumstantialActionQuery@@QAE@XZ @114
     ??0AR6AbstractClimbableObj@@IAE@XZ @115
-    ??0AR6AbstractClimbableObj@@QAE@ABV0@@Z @116
+    ; ??0AR6AbstractClimbableObj@@QAE@ABV0@@Z @116  ; header-only class — no dllexport, ordinal reserved
     ??0AR6ActionPointAbstract@@IAE@XZ @117
     ??0AR6ActionPointAbstract@@QAE@ABV0@@Z @118
     ??0AR6ActionSpot@@QAE@ABV0@@Z @119
@@ -557,7 +557,7 @@ EXPORTS
     ??0UR6AbstractPlanningInfo@@QAE@ABV0@@Z @555
     ??0UR6AbstractPlanningInfo@@QAE@XZ @556
     ??0UR6AbstractTerroristMgr@@IAE@XZ @557
-    ??0UR6AbstractTerroristMgr@@QAE@ABV0@@Z @558
+    ; ??0UR6AbstractTerroristMgr@@QAE@ABV0@@Z @558  ; header-only class — no dllexport, ordinal reserved
     ??0UR6FileManager@@QAE@ABV0@@Z @559
     ??0UR6FileManager@@QAE@XZ @560
     ??0UR6GameColors@@IAE@XZ @561
@@ -1115,8 +1115,8 @@ EXPORTS
     ??2AProjector@@SAPAXIPAW4EInternal@@@Z @1113
     ??2AR6AbstractCircumstantialActionQuery@@SAPAXIPAVUObject@@VFName@@K@Z @1114
     ??2AR6AbstractCircumstantialActionQuery@@SAPAXIPAW4EInternal@@@Z @1115
-    ??2AR6AbstractClimbableObj@@SAPAXIPAVUObject@@VFName@@K@Z @1116
-    ??2AR6AbstractClimbableObj@@SAPAXIPAW4EInternal@@@Z @1117
+    ; ??2AR6AbstractClimbableObj@@SAPAXIPAVUObject@@VFName@@K@Z @1116  ; header-only class — no dllexport, ordinal reserved
+    ; ??2AR6AbstractClimbableObj@@SAPAXIPAW4EInternal@@@Z @1117  ; header-only class — no dllexport, ordinal reserved
     ??2AR6ActionPointAbstract@@SAPAXIPAVUObject@@VFName@@K@Z @1118
     ??2AR6ActionPointAbstract@@SAPAXIPAW4EInternal@@@Z @1119
     ??2AR6ActionSpot@@SAPAXIPAVUObject@@VFName@@K@Z @1120
@@ -1363,8 +1363,8 @@ EXPORTS
     ??2UR6AbstractGameManager@@SAPAXIPAW4EInternal@@@Z @1361
     ??2UR6AbstractPlanningInfo@@SAPAXIPAVUObject@@VFName@@K@Z @1362
     ??2UR6AbstractPlanningInfo@@SAPAXIPAW4EInternal@@@Z @1363
-    ??2UR6AbstractTerroristMgr@@SAPAXIPAVUObject@@VFName@@K@Z @1364
-    ??2UR6AbstractTerroristMgr@@SAPAXIPAW4EInternal@@@Z @1365
+    ; ??2UR6AbstractTerroristMgr@@SAPAXIPAVUObject@@VFName@@K@Z @1364  ; header-only class — no dllexport, ordinal reserved
+    ; ??2UR6AbstractTerroristMgr@@SAPAXIPAW4EInternal@@@Z @1365  ; header-only class — no dllexport, ordinal reserved
     ??2UR6FileManager@@SAPAXIPAVUObject@@VFName@@K@Z @1366
     ??2UR6FileManager@@SAPAXIPAW4EInternal@@@Z @1367
     ??2UR6GameColors@@SAPAXIPAVUObject@@VFName@@K@Z @1368
@@ -1529,7 +1529,7 @@ EXPORTS
     ??4APotentialClimbWatcher@@QAEAAV0@ABV0@@Z @1527
     ??4AProjector@@QAEAAV0@ABV0@@Z @1528
     ??4AR6AbstractCircumstantialActionQuery@@QAEAAV0@ABV0@@Z @1529
-    ??4AR6AbstractClimbableObj@@QAEAAV0@ABV0@@Z @1530
+    ; ??4AR6AbstractClimbableObj@@QAEAAV0@ABV0@@Z @1530  ; header-only class — no dllexport, ordinal reserved
     ??4AR6ActionPointAbstract@@QAEAAV0@ABV0@@Z @1531
     ??4AR6ActionSpot@@QAEAAV0@ABV0@@Z @1532
     ??4AR6ColBox@@QAEAAV0@ABV0@@Z @1533
@@ -1753,7 +1753,7 @@ EXPORTS
     ??4UProxyBitmapMaterial@@QAEAAV0@ABV0@@Z @1751
     ??4UR6AbstractGameManager@@QAEAAV0@ABV0@@Z @1752
     ??4UR6AbstractPlanningInfo@@QAEAAV0@ABV0@@Z @1753
-    ??4UR6AbstractTerroristMgr@@QAEAAV0@ABV0@@Z @1754
+    ; ??4UR6AbstractTerroristMgr@@QAEAAV0@ABV0@@Z @1754  ; header-only class — no dllexport, ordinal reserved
     ??4UR6FileManager@@QAEAAV0@ABV0@@Z @1755
     ??4UR6GameColors@@QAEAAV0@ABV0@@Z @1756
     ??4UR6GameMenuCom@@QAEAAV0@ABV0@@Z @1757
@@ -4639,7 +4639,7 @@ EXPORTS
     ?StaticClass@APotentialClimbWatcher@@SAPAVUClass@@XZ @4637
     ?StaticClass@AProjector@@SAPAVUClass@@XZ @4638
     ?StaticClass@AR6AbstractCircumstantialActionQuery@@SAPAVUClass@@XZ @4639
-    ?StaticClass@AR6AbstractClimbableObj@@SAPAVUClass@@XZ @4640
+    ; ?StaticClass@AR6AbstractClimbableObj@@SAPAVUClass@@XZ @4640  ; inline fn, no dllexport, ordinal reserved
     ?StaticClass@AR6ActionPointAbstract@@SAPAVUClass@@XZ @4641
     ?StaticClass@AR6ActionSpot@@SAPAVUClass@@XZ @4642
     ?StaticClass@AR6ColBox@@SAPAVUClass@@XZ @4643
@@ -4763,7 +4763,7 @@ EXPORTS
     ?StaticClass@UProxyBitmapMaterial@@SAPAVUClass@@XZ @4761
     ?StaticClass@UR6AbstractGameManager@@SAPAVUClass@@XZ @4762
     ?StaticClass@UR6AbstractPlanningInfo@@SAPAVUClass@@XZ @4763
-    ?StaticClass@UR6AbstractTerroristMgr@@SAPAVUClass@@XZ @4764
+    ; ?StaticClass@UR6AbstractTerroristMgr@@SAPAVUClass@@XZ @4764  ; inline fn, no dllexport, ordinal reserved
     ?StaticClass@UR6FileManager@@SAPAVUClass@@XZ @4765
     ?StaticClass@UR6GameColors@@SAPAVUClass@@XZ @4766
     ?StaticClass@UR6GameMenuCom@@SAPAVUClass@@XZ @4767

@@ -220,6 +220,76 @@ Blog Post: *"Press Start — Launching the Engine"*
 
 ---
 
+## Phase 8B: D3DDrv Render Loop Reconstruction
+
+Phase 5 left `D3DDrv.dll` building with correct exports and struct layout but all ~170KB of GPU state machine logic stubbed out. This phase reconstructs the real implementation using Ghidra analysis of the retail binary as the primary source, with the UT99 D3D7 driver (`sdk/Ut99PubSrc/`) as structural reference (D3D7 → D3D8 API delta is well-documented).
+
+**Dependency:** Requires Phase 8 (RavenShield.exe) so the full game can boot and rendering output can be validated against retail.
+
+**Reconstruction order (sub-components, least deps first):**
+1. `FD3DResource` — base resource wrapper (textures, vertex buffers, index buffers)
+2. `FD3DPixelShader` / `FD3DVertexShader` — shader object wrappers around `IDirect3DPixelShader8` / `IDirect3DVertexShader8`
+3. `FD3DRenderInterface` — render dispatch class; thunks in D3DDrv to `UD3DRenderDevice` state; reconstruct draw-call and state-change methods one vtable slot at a time
+4. `UD3DRenderDevice::SetRes()` — device creation, swap chain setup, capability detection
+5. `UD3DRenderDevice::Lock()` / `Unlock()` / `Present()` — frame begin/end, swap chain flip
+6. Texture management — `SetTexture()`, mip generation, format conversion (matching `ETextureFormat` values)
+7. Vertex pipeline — fixed-function vs shader selection, `FD3DVertexStream` setup, `DrawPrimitive` calls
+8. Render state management — blending, Z-buffer, fog, lighting, culling state blocks
+9. Bink video surface — `binkw32` integration for in-engine cinematic playback on a render target
+10. SSE memcpy export (`FUN_10001020`) — confirm reconstructed vs retail byte output
+
+**Validation approach:**
+- Run reconstructed D3DDrv against retail maps; compare pixel output screenshots to retail captures
+- Use `tools/compare/bindiff.py` section-level comparison on `.text` segment
+- Known hard parts: vertex shader constants layout, texture stage combiner setup (D3D8 fixed-function combiner is verbose)
+
+**Known divergences to document:**
+- Any places where D3D8 API usage in retail can only be approximated rather than byte-matched (e.g., compiler-generated COM vtable thunks)
+- Bink integration: `BinkGetSurfaces` / `BinkCopyToBuffer` calls are binary-stable but the surrounding render target lifetime management may diverge
+
+**Estimated commits:** 8–12
+
+Blog Post: *"Chasing Pixels — Reconstructing the D3D8 Render Loop"*
+
+---
+
+## Phase 8C: Stub & Byte-Parity Audit Pass
+
+A systematic sweep across every reconstructed module. By this point all 16 binaries build, but many contain stub method bodies, placeholder native indices, commented-out `.def` entries, and documented divergences accumulated across Phases 2–8B. This phase addresses them methodically.
+
+### 8C-1. Inventory
+1. Grep all `src/` for known stub markers: `return 0;` / `return;` / `appErrorf(TEXT("stub"))` / `// TODO` / `// STUB` / `INDEX_NONE` / commented-out `.def` lines
+2. Cross-reference against per-module "Known divergences" sections in this plan
+3. Produce a single audit spreadsheet or markdown table: **module → function → stub reason → fixable? → priority**
+
+### 8C-2. Fix Categories
+
+| Category | Action |
+|----------|--------|
+| **Trivial stubs** (empty virtuals that genuinely do nothing in retail) | Verify via Ghidra that retail function is truly `retn` / `xor eax,eax; retn` — mark as confirmed-accurate, remove any misleading stub comments |
+| **Deferred implementations** (real logic exists but wasn't reconstructed yet) | Pull from Ghidra decompilation, clean up, implement. Prioritise functions called on the hot path (tick, render, physics) |
+| **Placeholder native indices** (`INDEX_NONE` / `-1`) | Look up correct indices from retail `.u` packages or Ghidra export tables; update `IMPLEMENT_FUNCTION` calls |
+| **Commented-out .def exports** (e.g., Window.dll's 319, IpDrv's 3) | Reconstruct the missing symbols or add linker-level forwarding stubs (`= ?...`) so the export table matches retail |
+| **Compiler artefact divergences** (COM vtable thunks, thiscall wrappers) | Document as intentional; verify the generated code is functionally equivalent even if bytes differ |
+
+### 8C-3. Binary Comparison
+1. Build all modules in Release with retail-matching compiler flags
+2. Run `tools/compare/bindiff.py` on every DLL — report per-section match percentage
+3. Run `tools/compare/funcmatch.py` on exported functions — report per-function match status
+4. For each function below 95% match: inspect disassembly diff, determine if divergence is fixable or inherent (compiler version, optimisation artefacts)
+5. Update the "Known divergences" documentation with final status for every flagged item
+
+### 8C-4. Triage & Accept
+- Functions confirmed as byte-identical → ✅
+- Functions functionally identical but byte-divergent due to compiler artefacts → document, mark as accepted
+- Functions with logic divergences → file as issues, fix if possible, otherwise document the delta with explanation
+
+**Estimated commits:** 5–10 (many small targeted fixes across modules)
+
+Blog Post: *"The Audit — Hunting Down Every Last Stub"*
+
+---
+
 ## Phase 9: UnrealScript Decompilation & Reconstruction
 
 Extract UnrealScript from the **1.60 retail** `.u` packages (not the 1.56 SDK leak). The 1.56/1.60 SDK source is used as a **reference only** for function naming, comments, and understanding intent — the canonical source of truth is the decompiled retail scripts.

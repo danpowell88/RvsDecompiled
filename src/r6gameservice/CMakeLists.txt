@@ -10,13 +10,14 @@ file(GLOB_RECURSE R6GAMESERVICE_SOURCES
 
 list(LENGTH R6GAMESERVICE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(R6GameService MODULE ${R6GAMESERVICE_SOURCES})
+    add_library(R6GameService MODULE ${R6GAMESERVICE_SOURCES} ${R6GAMESERVICE_SRC_DIR}/R6GameService.def)
     target_compile_definitions(R6GameService PRIVATE R6GAMESERVICE_EXPORTS ThisPackage=R6GameService)
-    target_include_directories(R6GameService PRIVATE ${R6GAMESERVICE_SRC_DIR})
-    target_link_libraries(R6GameService
-        Core_Dep Engine_Dep
-        ${CSDK_LIB}/R6Game.lib
+    target_include_directories(R6GameService BEFORE PRIVATE
+        ${R6GAMESERVICE_SRC_DIR}
+        ${PROJECT_SOURCE_DIR}/src/r6abstract
+        ${PROJECT_SOURCE_DIR}/src/engine
     )
+    target_link_libraries(R6GameService Core_Dep Engine_Dep ${CSDK_LIB}/R6Abstract.lib)
 else()
     message(STATUS "R6GameService: no source files yet — skipping")
 endif()

@@ -155,11 +155,11 @@ add_subdirectory(src/windrv)
 add_subdirectory(src/d3ddrv)
 
 # --- Phase 6: R6 game modules ---
-# add_subdirectory(src/r6abstract)
-# add_subdirectory(src/r6weapons)
-# add_subdirectory(src/r6engine)
-# add_subdirectory(src/r6game)
-# add_subdirectory(src/r6gameservice)
+add_subdirectory(src/r6abstract)
+add_subdirectory(src/r6weapons)
+add_subdirectory(src/r6engine)
+add_subdirectory(src/r6game)
+add_subdirectory(src/r6gameservice)
 
 # --- Phase 7: Audio ---
 # add_subdirectory(src/dareaudio)

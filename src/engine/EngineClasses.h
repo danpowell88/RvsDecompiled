@@ -634,12 +634,30 @@ public:
 
 	// AActor virtual interface (from AActor.h).
 	virtual INT Tick(FLOAT DeltaTime, enum ELevelTick TickType) { return 0; }
+	virtual INT* GetOptimizedRepList(BYTE* Recent, struct FPropertyRetirement* Retire, INT* Ptr, class UPackageMap* Map, class UActorChannel* Channel);
+	virtual void PreNetReceive();
+	virtual void PostNetReceive();
+	virtual void CheckForErrors();
+	virtual INT IsBlockedBy(class AActor const* Other) const;
+	virtual INT ShouldTrace(class AActor* Other, DWORD TraceFlags);
+	virtual void TickAuthoritative(FLOAT DeltaTime);
+	virtual void ProcessState(FLOAT DeltaTime);
 };
 
 class ENGINE_API AInfo : public AActor
 {
 public:
 	DECLARE_CLASS(AInfo,AActor,0,Engine)
+protected:
+	AInfo() {}
+};
+
+class ABroadcastHandler : public AInfo
+{
+public:
+	DECLARE_CLASS(ABroadcastHandler,AInfo,0,Engine)
+	ABroadcastHandler() {}
+	ABroadcastHandler(const ABroadcastHandler&) {}
 };
 
 class ENGINE_API ABrush : public AActor
@@ -683,6 +701,7 @@ class ENGINE_API ANavigationPoint : public AActor
 {
 public:
 	DECLARE_CLASS(ANavigationPoint,AActor,0,Engine)
+	virtual void CheckForErrors();
 	// Event thunks
 	DWORD eventAccept(class AActor*, class AActor*);
 	INT eventSpecialCost(class APawn*, class UReachSpec*);
@@ -1674,6 +1693,8 @@ class ENGINE_API UInteractions : public UObject
 {
 public:
 	DECLARE_CLASS(UInteractions,UObject,0,Engine)
+protected:
+	UInteractions() {}
 };
 
 class ENGINE_API UDownload : public UObject
@@ -1853,6 +1874,8 @@ public:
 	void eventR6ProgressMsg(const FString&, const FString&, FLOAT);
 	void eventServerDisconnected();
 	void eventUserDisconnected();
+protected:
+	UInteraction() {}
 };
 
 class ENGINE_API UInteractionMaster : public UInteractions
@@ -1876,6 +1899,18 @@ class ENGINE_API UConsole : public UInteraction
 {
 public:
 	DECLARE_CLASS(UConsole,UInteraction,0,Engine)
+protected:
+	UConsole() {}
+};
+
+// UWindowConsole — from UWindow package. Not exported from any .lib;
+// defined inline so R6Game's UR6Console can inherit from it.
+class UUWindowRootWindow;
+class UWindowConsole : public UConsole
+{
+public:
+	DECLARE_CLASS(UWindowConsole,UConsole,0,UWindow)
+	UWindowConsole() {}
 };
 
 class ENGINE_API UInput : public USubsystem
@@ -1897,6 +1932,8 @@ public:
 	DECLARE_CLASS(UPlayerInput,UObject,0,Engine)
 	// Event thunks
 	void eventPlayerInput(FLOAT);
+protected:
+	UPlayerInput() {}
 };
 
 class ENGINE_API UCheatManager : public UObject
@@ -1905,6 +1942,8 @@ public:
 	DECLARE_CLASS(UCheatManager,UObject,0,Engine)
 	// Event thunks
 	void eventLogThis(DWORD, class AActor*);
+protected:
+	UCheatManager() {}
 };
 
 class ENGINE_API UFont : public UObject
@@ -2333,10 +2372,11 @@ public:
 	DECLARE_CLASS(UR6AbstractPlanningInfo,UObject,0,Engine)
 };
 
-class ENGINE_API UR6AbstractTerroristMgr : public UObject
+class UR6AbstractTerroristMgr : public UObject
 {
 public:
 	DECLARE_CLASS(UR6AbstractTerroristMgr,UObject,0,Engine)
+	UR6AbstractTerroristMgr() {}
 };
 
 // --- Actor subclasses ---
@@ -2525,16 +2565,19 @@ public:
 	DECLARE_CLASS(AR6AbstractCircumstantialActionQuery,AActor,0,Engine)
 };
 
-class ENGINE_API AR6AbstractClimbableObj : public AActor
+class AR6AbstractClimbableObj : public AActor
 {
 public:
 	DECLARE_CLASS(AR6AbstractClimbableObj,AActor,0,Engine)
+	AR6AbstractClimbableObj() {}
 };
 
 class ENGINE_API AR6ActionPointAbstract : public AActor
 {
 public:
 	DECLARE_CLASS(AR6ActionPointAbstract,AActor,0,Engine)
+protected:
+	AR6ActionPointAbstract() {}
 };
 
 class ENGINE_API AR6ActionSpot : public AActor
@@ -2584,6 +2627,8 @@ class ENGINE_API AR6EngineFirstPersonWeapon : public AActor
 {
 public:
 	DECLARE_CLASS(AR6EngineFirstPersonWeapon,AActor,0,Engine)
+protected:
+	AR6EngineFirstPersonWeapon() {}
 };
 
 class ENGINE_API AR6EngineWeapon : public AActor
@@ -2610,6 +2655,8 @@ class ENGINE_API AR6GlowLight : public ALight
 {
 public:
 	DECLARE_CLASS(AR6GlowLight,ALight,0,Engine)
+protected:
+	AR6GlowLight() {}
 };
 
 class ENGINE_API AR6RainbowStartInfo : public AActor
@@ -2636,11 +2683,50 @@ public:
 	DECLARE_CLASS(AR6WallHit,AR6DecalsBase,0,Engine)
 };
 
-#endif // NAMES_ONLY
+class AR6AbstractHostageMgr : public AActor
+{
+public:
+	DECLARE_CLASS(AR6AbstractHostageMgr,AActor,0,Engine)
+	AR6AbstractHostageMgr() {}
+	AR6AbstractHostageMgr(const AR6AbstractHostageMgr&) {}
+};
 
-#undef AUTOGENERATE_NAME
-#undef AUTOGENERATE_FUNCTION
+struct FR6HUDState
+{
+	FLOAT fTimeStamp;
+	BYTE eDisplay;
+	FColor Color;
+};
 
-#if _MSC_VER
+class ENGINE_API FCameraSceneNode;
+class ENGINE_API FCanvasUtil;
+
+class UR6MissionObjectiveBase : public UObject
+{
+public:
+	DECLARE_CLASS(UR6MissionObjectiveBase,UObject,0,Engine)
+	INT m_iCountdown;
+	BITFIELD m_bFailed : 1;
+	BITFIELD m_bCompleted : 1;
+	BITFIELD m_bVisibleInMenu : 1;
+	BITFIELD m_bIfCompletedMissionIsSuccessfull : 1;
+	BITFIELD m_bIfFailedMissionIsAborted : 1;
+	BITFIELD m_bMoralityObjective : 1;
+	BITFIELD m_bEndOfListOfObjectives : 1;
+	BITFIELD m_bShowLog : 1;
+	BITFIELD m_bFeedbackOnCompletionSend : 1;
+	BITFIELD m_bFeedbackOnFailureSend : 1;
+	AActor* m_mgr;
+	USound* m_sndSoundSuccess;
+	USound* m_sndSoundFailure;
+	FString m_szDescription;
+	FString m_szDescriptionInMenu;
+	FString m_szDescriptionFailure;
+	FString m_szMissionObjLocalization;
+	FString m_szFeedbackOnCompletion;
+	FString m_szFeedbackOnFailure;
+	UR6MissionObjectiveBase() {}
+};
+
 #pragma pack (pop)
 #endif
