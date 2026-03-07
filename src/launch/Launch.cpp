@@ -184,9 +184,8 @@ ENGINE_API extern UEngine* g_pEngine;
 /*-----------------------------------------------------------------------------
 	FExecHook — Console command handler for the launcher.
 	Handles: ShowLog, HideLog, TakeFocus, EditActor, Preferences.
-	Based on UT99 UnEngineWin.h. Commands that access UEngine/AActor
-	member data (EditActor, Preferences) require full class layout
-	reconstruction — stubbed pending Phase 9B.
+	Based on UT99 UnEngineWin.h. TakeFocus, EditActor, and Preferences
+	require UEngine/AActor member layout reconstruction — stubbed.
 -----------------------------------------------------------------------------*/
 
 class FExecHook : public FExec, public FNotifyHook
@@ -218,20 +217,17 @@ private:
 		}
 		else if( ParseCommand(&Cmd, TEXT("TakeFocus")) )
 		{
-			// TODO Phase 9B: requires UEngine::Client (member data at known offset)
-			// to find active viewport and call SetForegroundWindow on it.
+			// TODO: requires UEngine::Client member to find active viewport.
 			return 1;
 		}
 		else if( ParseCommand(&Cmd, TEXT("EditActor")) )
 		{
-			// TODO Phase 9B: requires AActor::Location, bDeleteMe, GetLevel()
-			// to find nearest actor of a given class and open WObjectProperties.
-			Ar.Logf( TEXT("EditActor: pending full class layout reconstruction") );
+			// TODO: requires AActor member layout to find nearest actor.
 			return 1;
 		}
 		else if( ParseCommand(&Cmd, TEXT("Preferences")) )
 		{
-			// TODO Phase 9B: requires WConfigProperties with correct constructor args.
+			// TODO: requires WConfigProperties class reconstruction.
 			return 1;
 		}
 		else return 0;
@@ -662,7 +658,7 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		// Create log window, optionally shown.
 		GLogWindow = new WLog( Log.Filename, Log.LogAr, TEXT("GameLog") );
 
-		// TODO: WLog::OpenWindow fails with "Cannot find window class" (1407).
+		// TODO: WLog::OpenWindow needs IMPLEMENT_WINDOWCLASS registration.
 		// GLogWindow->OpenWindow( ShowLog, 0 );
 		// GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Start")) );
 		// if( GIsClient )
@@ -679,8 +675,7 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		if( Parse(CmdLine, TEXT("EXEC="), Temp) )
 		{
 			Temp = FString(TEXT("exec ")) + Temp;
-			// TODO: Engine->Client->Viewports(0)->Exec() requires
-			// UEngine::Client member at known offset.
+			// TODO: requires UEngine::Client member for viewport exec.
 		}
 
 		// Start main engine loop.
