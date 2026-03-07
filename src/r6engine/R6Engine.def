@@ -795,7 +795,7 @@ EXPORTS
     ?WeaponLock@AR6Pawn@@QAEXHMM@Z @793
     ?WeaponShouldFollowHead@AR6Pawn@@QAEHXZ @794
     ?WillOpenOnTouch@AR6IORotatingDoor@@QAEHPAVAR6Pawn@@@Z @795
-    ; __FUNC_NAME__ debug static omitted — scope-numbering divergence (ordinal 796 reserved)
+    ; @796 reserved — __FUNC_NAME__ in AR6FalseHeartBeat::IsBlockedBy has scope-numbering divergence between retail MSVC 7.1 and our compiler. Retail mangling: ?__FUNC_NAME__@?2??IsBlockedBy@AR6FalseHeartBeat@@UBEHPBVAActor@@@Z@4QBGB
     ?actorReachableFromLocation@AR6Pawn@@QAEHPAVAActor@@VFVector@@@Z @797
     ?addReachSpecs@AR6ClimbablePoint@@UAEXPAVAPawn@@H@Z @798
     ?addReachSpecs@AR6Door@@UAEXPAVAPawn@@H@Z @799

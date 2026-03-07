@@ -174,28 +174,71 @@ Blog Post: *"Pixels and Packets — The Driver Layer"* (`2025-01-08-pixels-and-p
 
 ---
 
-## Phase 6: R6 Game Modules — Bottom-Up Through Dependency Graph
+## Phase 6: R6 Game Modules — Bottom-Up Through Dependency Graph ✅ COMPLETE
 
-### 6A. R6Abstract.dll — *Start here for game code* (17 classes, smallest R6 module)
-- Abstract bases: `R6AbstractPawn`, `R6AbstractWeapon`, `R6AbstractGameInfo`
-- 2-3 commits
+Five R6-specific DLLs — the game layer that turns Unreal Engine into Rainbow Six. All build with 0 errors. Export tables match retail binaries (1,986 of 1,987 ordinals — 1 reserved due to scope-numbering divergence).
 
-### 6B. R6Weapons.dll — Bullet physics, damage, recoil, firing modes
-- Reference: C SDK headers + UnrealScript + `sdk/Goodies/Weapons Development Kit/`
-- 4-5 commits
+| Module | Classes | Exports | Native Funcs | Key Systems |
+|--------|---------|---------|-------------|-------------|
+| **R6Abstract.dll** | 13 | 207 | 5 | Abstract bases: pawns, weapons, gadgets, game info, HUD, corpses, zones, noise, game service, patch service |
+| **R6Weapons.dll** | 9 | 132 | 2 | Weapon mechanics (`AR6Weapons`), bullets (`AR6Bullet`), gadgets, grenades, demolitions, HBS, reticule, smoke |
+| **R6Engine.dll** | 50 | 1,125 (1 reserved) | 92 | Pawns, AI controllers (Rainbow/Terrorist/Hostage), doors, deployment zones, ladders, stairs, ragdolls, matinee, heartbeat, sound replication |
+| **R6Game.dll** | 16 | 263 | 24 | Game rules (`AR6GameInfo`), multiplayer modes, HUD, planning, action points, file managers, operatives, campaigns |
+| **R6GameService.dll** | 5 | 259 | 41 | GameSpy server list (`UR6GSServers`), LAN discovery, mod info, EviL patch service |
+| **Total** | **93** | **1,987** | **164** | |
 
-### 6C. R6Engine.dll — 160+ classes, conversion sub-order:
-1. `R6Pawn` base → 2. Interactive objects (doors, ladders) → 3. Characters (Rainbow, Terrorist, Hostage) → 4. AI system → 5. Level managers → 6. Cinematics
-- 8-10 commits
+### 6A. R6Abstract.dll ✅
+- 13 classes, 207 ordinal exports (all match retail)
+- 5 native function stubs (INDEX_NONE — dispatched by name)
+- 22 `UR6AbstractGameService` virtual method stubs (overridden in R6GameService)
+- Event dispatchers: `eventGetSkill`, `eventR6MakeNoise`, `eventSpawnSelectedGadget`
+- Source: `R6Abstract.cpp` (210 lines), `R6AbstractClasses.h` (310 lines)
 
-### 6D. R6Game.dll — 110+ classes, conversion sub-order:
-1. `R6GameInfo` base → 2. Deathmatch (simplest rules) → 3. Team modes → 4. Objective modes → 5. Campaign/CoOp → 6. Operative definitions → 7. Console
-- 8-10 commits
+### 6B. R6Weapons.dll ✅
+- 9 classes, 132 ordinal exports (all match retail)
+- 2 native function stubs
+- Accuracy system: `FstAccuracyType` (5 movement-state accuracy values + reticule time + weapon jump)
+- Bullet physics: `AR6Bullet` with energy, penetration factor, range conversion, explosion radius
+- Source: `R6Weapons.cpp` (174 lines), `R6WeaponsClasses.h` (~300 lines)
 
-### 6E. R6GameService.dll — 6 classes (server list, mod info, patches)
-- 2-3 commits
+### 6C. R6Engine.dll ✅
+- 50 classes, 1,125 ordinal exports + 1 reserved (1,126 retail total)
+- Ordinal 796 reserved: `__FUNC_NAME__` static in `AR6FalseHeartBeat::IsBlockedBy` — MSVC scope-numbering divergence between retail MSVC 7.1 and our compiler
+- 92 native function stubs across AR6AIController (17), AR6Pawn (25), AR6DeploymentZone (9), AR6PlayerController (8), AR6RainbowAI (10), AR6TerroristAI (8), and others
+- AI controllers: Rainbow/Terrorist/Hostage with pathfinding, cover, detection, tactical queries
+- Door system: `AR6IORotatingDoor` with lock HP, breach attachment, rotation physics
+- Deployment zones: rectangle, circle, path, random points — hostage/terrorist spawning
+- R6Charts: body part damage tables (Head/Torso/Limbs × Kill/Stun/Through)
+- Matinee extensions: `UR6SubActionAnimSequence`, `UR6SubActionLookAt`
+- Source: `R6Engine.cpp` (1,923 lines), `R6EngineClasses.h` (4,354 lines)
 
-Blog Posts: *"The Heart of Rainbow Six"*, *"Weapons, Walls, and Doors"*
+### 6D. R6Game.dll ✅
+- 16 classes, 263 ordinal exports (all match retail)
+- 24 native function stubs
+- Game modes: `AR6GameInfo`, `AR6MultiPlayerGameInfo`
+- HUD: `AR6HUD` with radar, character info, map drawing, colour management
+- Planning: `AR6PlanningCtrl` with trace/click/XY queries, `UR6PlanningInfo` with team/point management
+- Campaign: `UR6PlayerCampaign`, `UR6PlayerCustomMission`, `UR6FileManagerCampaign`
+- Game manager: `UR6GameManager` with console commands, server management, GameSpy integration
+- Source: `R6Game.cpp` (278 lines), `R6GameClasses.h` (~500 lines)
+
+### 6E. R6GameService.dll ✅
+- 5 classes, 259 ordinal exports (all match retail)
+- 41 native function stubs (most in `UR6GSServers`)
+- `UR6GSServers`: 60+ virtual method stubs — GameSpy client, server registration, CD key auth, matchmaking, ping management, router/lobby connection
+- 10 event dispatchers bridging to UnrealScript (`eventFillCreateGameInfo`, `eventIsGlobalIDBanned`, etc.)
+- `UeviLPatchService`: 6 native functions for the EviL auto-update system
+- Source: `R6GameService.cpp` (652 lines), `R6GameServiceClasses.h` (~500 lines)
+
+**Dependency chain:** Core → Engine → R6Abstract → { R6Weapons, R6Engine → { R6Game, R6GameService } }
+
+**Known divergences:**
+- All native function indices set to INDEX_NONE (-1) — dispatched by name at runtime. Correct retail indices can be extracted from `.u` packages in Phase 9.
+- Method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 8C audit pass
+- R6Engine ordinal 796: `__FUNC_NAME__` static in `AR6FalseHeartBeat::IsBlockedBy` — scope-numbering divergence between retail MSVC 7.1 (`?2?`) and our compiler. Functionally equivalent; cosmetic difference in debug string mangling.
+- `AR6Bullet::BulletGoesThroughCharacter` body pending identification of Ghidra FUN_10042934
+
+Blog Posts: ✅ *"The Game Layer — Rebuilding Rainbow Six's R6 Modules"* (`2025-01-09-the-game-layer.md`), ✅ *"Weapons, Walls, and Doors — What Makes R6 Tick"* (`2025-01-10-weapons-walls-and-doors.md`)
 
 ---
 
