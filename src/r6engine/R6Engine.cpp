@@ -2205,14 +2205,6 @@ void AR6TerroristAI::execMakeBackupList(FFrame& Stack, RESULT_DECL)
 	P_FINISH;
 }
 
-// --- R6Charts ---
-
-// TODO: R6Charts::BulletGoesThroughCharacter — signature not found in header
-
-// TODO: R6Charts::GetKillTable — signature not found in header
-
-// TODO: R6Charts::GetStunTable — signature not found in header
-
 // --- UR6MatineeAttach ---
 
 void UR6MatineeAttach::execGetBoneInformation(FFrame& Stack, RESULT_DECL)
@@ -2340,17 +2332,45 @@ R6Charts& R6Charts::operator=(R6Charts const &)
 
 INT R6Charts::BulletGoesThroughCharacter(INT, INT, INT, INT)
 {
+	// Retail: calls an internal calculation function, caps result at 5000.
+	// Stub until the internal helper (FUN_10042934) is identified.
 	return 0;
 }
 
-stResultTable* R6Charts::GetKillTable(eBodyPart)
+stResultTable* R6Charts::GetKillTable(eBodyPart ePart)
 {
-	return NULL;
+	// Body parts map to 3 groups: Head, Torso (Chest+Abdomen), Limbs (Legs+Arms).
+	// Recovered from Ghidra: switch on eBodyPart returning into m_stKillChart.
+	switch (ePart)
+	{
+	case BP_Head:
+		return &m_stKillChart.BodyPartGroup[0];
+	case BP_Chest:
+	case BP_Abdomen:
+		return &m_stKillChart.BodyPartGroup[1];
+	case BP_Legs:
+	case BP_Arms:
+		return &m_stKillChart.BodyPartGroup[2];
+	default:
+		return NULL;
+	}
 }
 
-stResultTable* R6Charts::GetStunTable(eBodyPart)
+stResultTable* R6Charts::GetStunTable(eBodyPart ePart)
 {
-	return NULL;
+	switch (ePart)
+	{
+	case BP_Head:
+		return &m_stStunChart.BodyPartGroup[0];
+	case BP_Chest:
+	case BP_Abdomen:
+		return &m_stStunChart.BodyPartGroup[1];
+	case BP_Legs:
+	case BP_Arms:
+		return &m_stStunChart.BodyPartGroup[2];
+	default:
+		return NULL;
+	}
 }
 
 stBodyPart R6Charts::m_stKillChart;

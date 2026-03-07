@@ -770,10 +770,6 @@ void UR6ServerList::execSortServers(FFrame& Stack, RESULT_DECL)
 
 // --- UeviLPatchService ---
 
-// TODO: UeviLPatchService::FinalDestroy
-
-// TODO: UeviLPatchService::GetPatchServiceState
-
 void UeviLPatchService::StartPatch()
 {
 }

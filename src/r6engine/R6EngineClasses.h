@@ -67,16 +67,33 @@ class AR6TerroristAI;
 // Forward declarations — opaque types (pointers/params only)
 class UStaticMesh;
 class FR6CharTemplate;
-struct stResultTable;
 enum eBodyPart;
 
-// stBodyPart — used as static member of R6Charts.
-// Minimal definition; actual layout filled in when data is analyzed.
+// stResultTable — ballistic damage result table with 3 thresholds.
+// Used by R6Charts to determine hit outcomes per body-part group.
+// Layout recovered from Ghidra: 3 INT thresholds accessed at offsets 0, 4, 8.
+#ifndef _STRESULTTABLE_DEFINED
+#define _STRESULTTABLE_DEFINED
+struct stResultTable
+{
+	INT Threshold1;
+	INT Threshold2;
+	INT Threshold3;
+	INT Pad;
+};
+#endif
+
+// stBodyPart — body-part group damage table used as static member of R6Charts.
+// Contains one stResultTable per body-part group:
+//   [0] = Head (BP_Head)
+//   [1] = Torso (BP_Chest, BP_Abdomen)
+//   [2] = Limbs (BP_Legs, BP_Arms)
+// Total size: 48 bytes (3 * 16). Verified from retail symbol table gaps.
 #ifndef _STBODYPART_DEFINED
 #define _STBODYPART_DEFINED
 struct stBodyPart
 {
-	BYTE Pad[64];
+	stResultTable BodyPartGroup[3];
 };
 #endif
 
