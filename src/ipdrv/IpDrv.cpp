@@ -41,9 +41,12 @@ IMPLEMENT_CLASS(UUpdateServerCommandlet)
 /*-----------------------------------------------------------------------------
 	Native function exports.
 	IMPLEMENT_FUNCTION creates the C-linkage global + registers with
-	GRegisterNative.  Native indices are from the original bytecode table;
-	exact values TBD — using INDEX_NONE (-1) to export the symbol without
-	registering a native bytecode slot.
+	GRegisterNative. Native indices verified from retail IpDrv.u via
+	parse_ipdrv_u.py. All functions except GetMaxAvailPorts have iNative=0 in
+	IpDrv.u — meaning they are dispatched by name (EX_VirtualFunction), not by
+	native index. INDEX_NONE (-1) is correct for those: no GNatives[] slot
+	is registered, and the engine finds them by name lookup at runtime.
+	GetMaxAvailPorts has iNative=1221 and is index-dispatched.
 -----------------------------------------------------------------------------*/
 
 IMPLEMENT_FUNCTION(AInternetLink, -1, execGetLastError)
@@ -67,7 +70,7 @@ IMPLEMENT_FUNCTION(ATcpLink, -1, execSendText)
 
 IMPLEMENT_FUNCTION(AUdpLink, -1, execBindPort)
 IMPLEMENT_FUNCTION(AUdpLink, -1, execCheckForPlayerTimeouts)
-IMPLEMENT_FUNCTION(AUdpLink, -1, execGetMaxAvailPorts)
+IMPLEMENT_FUNCTION(AUdpLink, 1221, execGetMaxAvailPorts)
 IMPLEMENT_FUNCTION(AUdpLink, -1, execGetPlayingTime)
 IMPLEMENT_FUNCTION(AUdpLink, -1, execReadBinary)
 IMPLEMENT_FUNCTION(AUdpLink, -1, execReadText)
