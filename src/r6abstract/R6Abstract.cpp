@@ -113,15 +113,22 @@ void UR6AbstractGameService::execNativeSubmitMatchResult(FFrame& Stack, RESULT_D
 	UR6AbstractEviLPatchService
 -----------------------------------------------------------------------------*/
 
+// Global callback pointer stored by SetFunctionPtr, read by execGetState.
+// Ghidra: DAT_10010df0 — static storage, not a class member.
+static DWORD (CDECL* GEviLPatchCallback)(void) = NULL;
+
 void UR6AbstractEviLPatchService::SetFunctionPtr(DWORD (CDECL* Func)(void))
 {
-	// Stores callback function pointer — stub.
+	GEviLPatchCallback = Func;
 }
 
 void UR6AbstractEviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(BYTE*)Result = PS_Unknown;
+	if (GEviLPatchCallback != NULL)
+		*(DWORD*)Result = GEviLPatchCallback();
+	else
+		*(DWORD*)Result = 0;
 }
 
 /*-----------------------------------------------------------------------------

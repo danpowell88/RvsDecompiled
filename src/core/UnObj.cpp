@@ -127,7 +127,11 @@ UObject::~UObject()
 void UObject::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 {
 	guard(UObject::ProcessEvent);
-	// Stub — will dispatch appropriately.
+	// Deferred to Phase 8C: 451-byte function in retail.
+	// Sets up an FFrame on the stack, checks GIsScriptable and probe masks,
+	// copies parameters, invokes UFunction::Func, copies results back,
+	// and destroys local properties. Requires verified UFunction member
+	// offsets and FFrame layout to reconstruct correctly.
 	unguard;
 }
 

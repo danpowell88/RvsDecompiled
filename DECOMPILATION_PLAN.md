@@ -105,6 +105,12 @@ Zero game dependencies. Every other module depends on Core. Best UT99 reference 
 9. ✅ Serialization — `FArchive`, `FCompactIndex`, file readers/writers
 10. ✅ Miscellaneous — `UCommandlet`, `UTextBuffer`, `USystem`, `ULanguage`
 
+**Build configuration:** Release only. `sdk/Raven_Shield_C_SDK/432Core/Inc/UnBuild.h` contains a `#error` guard that rejects Debug builds unless `_REALLY_WANT_DEBUG` is defined — this is an intentional SDK constraint, not a code regression. Always build with `--config Release`.
+
+**Deferred to Phase 8C:**
+- `UObject::ProcessEvent` — 451-byte dispatcher in retail; requires verified UFunction member offsets and FFrame layout
+- `execCompress` / `execExpand` — string compression/decompression via proprietary algorithm; currently passthrough scaffolds
+
 ~10 commits. Blog Post: *"Building the Foundation — Core.dll"* ✅ Written
 
 ---
@@ -152,9 +158,9 @@ Blog Post: *"The Actor Model — How Unreal Engine Thinks"* ✅ Written
 **IpDrv.dll:** 4 source files (`IpDrvPrivate.h`, `IpDrvClasses.h`, `IpDrv.cpp`, `IpDrv.def`). UTcpNetDriver, UTcpipConnection, ATcpLink, AUdpLink, AInternetLink classes with virtual method stubs. 26 IMPLEMENT_FUNCTION calls (native indices TBD). 3 UTcpipConnection vftable .def entries commented out (UObject MI not reconstructed).
 
 **Known divergences:**
-- Window.dll: 319 R6-specific exports not yet reconstructed
-- IpDrv.dll: 3 UTcpipConnection vftable entries deferred (UObject multiple inheritance)
-- IpDrv.dll: 26 native function indices set to -1 (placeholder)
+- Window.dll: ~230 of 1,047 exports commented out — overwhelmingly editor/property-inspector classes (WBitmapButton, WColorButton, FUDNHelpTopic, etc.). No runtime-critical gaps; `WWindow::Show` handled via ALTERNATENAME pragma in launcher. Full reconstruction deferred to Phase 9 (editor)
+- IpDrv.dll: 3 UTcpipConnection vftable entries deferred (UObject multiple inheritance — Phase 8C)
+- IpDrv.dll: 26 native function indices set to -1 (placeholder — extractable from `.u` packages in Phase 9)
 - CSDK: Localize extended to 6 params, ResetConfig to 3 params (R6 signatures with UT99-compatible defaults)
 
 Blog Post: *"The Little Modules That Could"*
@@ -236,7 +242,7 @@ Five R6-specific DLLs — the game layer that turns Unreal Engine into Rainbow S
 - All native function indices set to INDEX_NONE (-1) — dispatched by name at runtime. Correct retail indices can be extracted from `.u` packages in Phase 9.
 - Method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 8C audit pass
 - R6Engine ordinal 796: `__FUNC_NAME__` static in `AR6FalseHeartBeat::IsBlockedBy` — scope-numbering divergence between retail MSVC 7.1 (`?2?`) and our compiler. Functionally equivalent; cosmetic difference in debug string mangling.
-- `AR6Bullet::BulletGoesThroughCharacter` body pending identification of Ghidra FUN_10042934
+- `R6Charts::BulletGoesThroughCharacter` — 60-byte function at R6Engine+0x3f780 computes a float from 4 int parameters via x87 FPU, converts via `_ftol2` (FUN_10042934), and caps at 5000. FPU calculation lost in Ghidra decompilation; deferred to Phase 8C disassembly analysis
 
 Blog Posts: ✅ *"The Game Layer — Rebuilding Rainbow Six's R6 Modules"* (`2025-01-09-the-game-layer.md`), ✅ *"Weapons, Walls, and Doors — What Makes R6 Tick"* (`2025-01-10-weapons-walls-and-doors.md`)
 
@@ -295,12 +301,12 @@ Three DareAudio variants exist (DareAudio, DareAudioScript, DareAudioRelease), e
 - `_SND_tdstVectorFloat` — 3D vector for sound positioning
 - `_SND_tdstRollOffParam` — Distance attenuation curve parameters
 - `_SND_tdstBlockEvent` — Sound event block descriptor
-- `ESoundSlot`, `ESoundVolume`, `ELoadBankSound`, `ER6SoundState` — Audio enums (values TBD from Ghidra)
+- ~~`ESoundSlot`, `ESoundVolume`, `ELoadBankSound`, `ER6SoundState`~~ — Resolved (see known divergences)
 
 **Known divergences:**
 - All method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 8C audit pass
 - DARE struct layouts (`_SND_tdst*`) are forward-declared only — full field definitions require Ghidra analysis of SNDDSound3D
-- Enum values for `ESoundSlot`, `ESoundVolume`, `ELoadBankSound`, `ER6SoundState` are placeholder (0-based sequential) — correct values from Ghidra or UnrealScript decompilation
+- ~~Enum values placeholder~~ → Resolved: `ESoundSlot` (12 values, SLOT_None through SLOT_StartingSound), `ESoundVolume` (4 values, VOLUME_Music through VOLUME_Grenade), `ELoadBankSound` (4 values, LBS_Fix through LBS_Gun), `ER6SoundState` (2 values, BANK_UnloadGun/BANK_UnloadAll) — sourced from `sdk/Raven_Shield_C_SDK/inc/EngineClasses.h`, confirmed against Ghidra switch tables
 
 Blog Post: *"How Games Hear — The DARE Audio System"*
 

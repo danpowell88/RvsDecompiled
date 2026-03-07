@@ -46,31 +46,46 @@ struct _SND_tdstBlockEvent;
 /*----------------------------------------------------------------------------
 	Enums used by DareAudioSubsystem.
 	These are Unreal-side enums that map to DARE sound object types.
-	Actual values would come from UnrealScript enum definitions.
+	Values from sdk/Raven_Shield_C_SDK/inc/EngineClasses.h and confirmed
+	against Ghidra switch tables in DareAudio.dll.
 ----------------------------------------------------------------------------*/
 
 enum ESoundSlot
 {
-	SLOT_None    = 0,
-	SLOT_MAX     = 0xFF
+	SLOT_None           = 0,
+	SLOT_Ambient        = 1,
+	SLOT_Guns           = 2,
+	SLOT_SFX            = 3,
+	SLOT_GrenadeEffect  = 4,
+	SLOT_Music          = 5,
+	SLOT_Talk           = 6,
+	SLOT_Speak          = 7,
+	SLOT_HeadSet        = 8,
+	SLOT_Menu           = 9,
+	SLOT_Instruction    = 10,
+	SLOT_StartingSound  = 11,
 };
 
 enum ESoundVolume
 {
-	SNDVOL_Default = 0,
-	SNDVOL_MAX     = 0xFF
+	VOLUME_Music    = 0,
+	VOLUME_Voices   = 1,
+	VOLUME_FX       = 2,
+	VOLUME_Grenade  = 3,
 };
 
 enum ELoadBankSound
 {
-	LOADBANK_Default = 0,
-	LOADBANK_MAX     = 0xFF
+	LBS_Fix = 0,
+	LBS_UC  = 1,
+	LBS_Map = 2,
+	LBS_Gun = 3,
 };
 
 enum ER6SoundState
 {
-	R6SS_Default = 0,
-	R6SS_MAX     = 0xFF
+	BANK_UnloadGun = 0,
+	BANK_UnloadAll = 1,
 };
 
 /*----------------------------------------------------------------------------

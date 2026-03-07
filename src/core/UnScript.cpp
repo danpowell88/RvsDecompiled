@@ -2863,7 +2863,9 @@ void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCompress);
 	P_GET_STR(In);
-	// String compression -- passthrough scaffold. TODO: reverse compression algorithm via Ghidra.
+	// Passthrough scaffold — returns input unchanged.
+	// Deferred to Phase 8C: retail compresses the string via a proprietary
+	// algorithm (~200 bytes at Core.dll+0x??). Needs Ghidra disassembly.
 	*(FString*)Result = In;
 	unguardexecSlow;
 }
@@ -2872,7 +2874,8 @@ void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execExpand);
 	P_GET_STR(In);
-	// String decompression -- passthrough scaffold. TODO: reverse decompression algorithm via Ghidra.
+	// Passthrough scaffold — returns input unchanged.
+	// Deferred to Phase 8C: retail decompresses via the inverse of execCompress.
 	*(FString*)Result = In;
 	unguardexecSlow;
 }
