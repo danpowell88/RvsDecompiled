@@ -2,6 +2,89 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "CMake: Configure",
+      "type": "shell",
+      "command": "& 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe' -B build -G 'Visual Studio 16 2019' -A Win32",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Build: RavenShield",
+      "type": "shell",
+      "command": "& 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe' --build build --config Release --target RavenShield",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Deploy: Copy EXE to retail",
+      "type": "shell",
+      "command": "Copy-Item '${workspaceFolder}\\build\\bin\\RavenShield.exe' '${workspaceFolder}\\retail\\system\\RavenShield.exe' -Force; Write-Host 'Deployed to retail/system/'",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Build: RavenShield",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run: RavenShield",
+      "type": "shell",
+      "command": "Start-Process '${workspaceFolder}\\retail\\system\\RavenShield.exe' -WorkingDirectory '${workspaceFolder}\\retail\\system'",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Deploy: Copy EXE to retail",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run: RavenShield (Unattended)",
+      "type": "shell",
+      "command": "Start-Process '${workspaceFolder}\\retail\\system\\RavenShield.exe' -ArgumentList '-UNATTENDED' -WorkingDirectory '${workspaceFolder}\\retail\\system'",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Deploy: Copy EXE to retail",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Stop: RavenShield",
+      "type": "shell",
+      "command": "Stop-Process -Name 'RavenShield' -Force -ErrorAction SilentlyContinue; Write-Host 'Stopped'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Docusaurus: Dev Server",
       "type": "shell",
       "command": "npx docusaurus start --host 0.0.0.0",
