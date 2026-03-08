@@ -1,4 +1,4 @@
-/*===========================================================================
+﻿/*===========================================================================
 	EngineClasses.h: Ravenshield Engine class declarations.
 	Reconstructed for decompilation — provides DECLARE_CLASS macros that
 	IMPLEMENT_CLASS requires, plus the AUTOGENERATE_NAME / FUNCTION pattern.
@@ -397,19 +397,927 @@ enum EInputAction
 
 class ENGINE_API FEngineStats  { public: BYTE Pad[256]; FEngineStats() { appMemzero(this, sizeof(*this)); } };
 class ENGINE_API FStats        { public: BYTE Pad[256]; FStats()       { appMemzero(this, sizeof(*this)); } };
-class ENGINE_API FRebuildTools { public: BYTE Pad[64];  FRebuildTools(){ appMemzero(this, sizeof(*this)); } };
-class ENGINE_API FMatineeTools { public: BYTE Pad[64];  FMatineeTools(){ appMemzero(this, sizeof(*this)); } };
-class ENGINE_API FTerrainTools { public: BYTE Pad[64];  FTerrainTools(){ appMemzero(this, sizeof(*this)); } };
+
+// FRebuildTools — BSP rebuild configuration manager.
+class ENGINE_API FRebuildTools
+{
+public:
+	BYTE Pad[64];
+	FRebuildTools() { appMemzero(this, sizeof(*this)); }
+	FRebuildTools(const FRebuildTools&);
+	~FRebuildTools();
+	void Init();
+	void Shutdown();
+	void SetCurrent(FString);
+	void Delete(FString);
+	class FRebuildOptions* GetCurrent();
+	class FRebuildOptions* GetFromName(FString);
+	INT GetIdxFromName(FString);
+	class FRebuildOptions* Save(FString);
+};
+
+// FMatineeTools — cinematic action sequencing tools.
+class ENGINE_API FMatineeTools
+{
+public:
+	BYTE Pad[60]; // 60 + 4(vptr) = 64 bytes total
+	FMatineeTools() { appMemzero(Pad, sizeof(Pad)); }
+	FMatineeTools(const FMatineeTools&);
+	virtual ~FMatineeTools();
+	void Init();
+	ASceneManager* SetCurrent(UEngine*, ULevel*, ASceneManager*);
+	ASceneManager* SetCurrent(UEngine*, ULevel*, FString);
+	UMatAction* SetCurrentAction(UMatAction*);
+	class UMatSubAction* SetCurrentSubAction(class UMatSubAction*);
+	ASceneManager* GetCurrent();
+	UMatAction* GetCurrentAction();
+	class UMatSubAction* GetCurrentSubAction();
+	UMatAction* GetNextAction(ASceneManager*, UMatAction*);
+	UMatAction* GetNextMovementAction(ASceneManager*, UMatAction*);
+	FString GetOrientationDesc(INT);
+	INT GetPathStyle(UMatAction*);
+	UMatAction* GetPrevAction(ASceneManager*, UMatAction*);
+	void GetSamples(ASceneManager*, UMatAction*, TArray<FVector>*);
+	INT GetSubActionIdx(class UMatSubAction*);
+	INT GetActionIdx(ASceneManager*, UMatAction*);
+};
+
+// FTerrainTools — terrain editing tools.
+class ENGINE_API FTerrainTools
+{
+public:
+	BYTE Pad[60]; // 60 + 4(vptr) = 64 bytes total
+	FTerrainTools() { appMemzero(Pad, sizeof(Pad)); }
+	FTerrainTools(const FTerrainTools&);
+	virtual ~FTerrainTools();
+	void Init();
+	void SetAdjust(INT);
+	void SetCurrentBrush(INT);
+	void SetCurrentTerrainInfo(ATerrainInfo*);
+	void SetFloorOffset(INT);
+	void SetInnerRadius(INT);
+	void SetMirrorAxis(INT);
+	void SetOuterRadius(INT);
+	void SetStrength(INT);
+	void AdjustAlignedActors();
+	void FindActorsToAlign();
+	INT GetAdjust();
+	ATerrainInfo* GetCurrentTerrainInfo();
+	FString GetExecFromBrushName(FString&);
+	INT GetFloorOffset();
+	INT GetInnerRadius();
+	INT GetMirrorAxis();
+	INT GetOuterRadius();
+	INT GetStrength();
+};
 
 // Pointer-only types — forward declarations sufficient.
-class FStatGraph;
 class FTempLineBatcher;
 struct STDbgLine;
+struct FVertexComponent;
+class FConvexVolume;
+class FVisibilityInterface;
+struct FRebuildOptions;
+class UCubemap;
+class UAnimNotify;
+class UMeshAnimation;
+class UConsole;
+class UCameraEffect;
+class UMotionBlur;
+class UCameraOverlay;
+class UProxyBitmapMaterial;
+class UShadowBitmapMaterial;
+class UParticleMaterial;
+class UParticleEmitter;
+class UInteraction;
+class AEmitter;
+class AKConstraint;
+class AKHinge;
+class AScout;
+class APhysicsVolume;
+class AR6ColBox;
+class AR6eviLTesting;
+class UDownload;
+class UBinaryFileDownload;
+class UFileChannel;
+class UKMeshProps;
+class UVertexBuffer;
+class UVertexStreamCOLOR;
+class UVertexStreamPosNormTex;
+class UVertexStreamUV;
+class UVertexStreamVECTOR;
+class UPolys;
+class ULevelSummary;
+class UPackageMap;
+class CBoneDescData;
+class UR6AbstractGameManager;
+class UShader;
+class UCameraEffect;
 
 // ---------------------------------------------------------------------------
-// Struct types used as AActor/APawn member fields.
-// Layouts from SDK/EngineClasses.h — must match retail binary ABI.
+// Enums needed by rendering interfaces.
 // ---------------------------------------------------------------------------
+enum ETexClampMode { TC_Wrap=0, TC_Clamp=1 };
+enum ETextureFormat
+{
+	TEXF_P8      = 0,
+	TEXF_BGRA8   = 1,
+	TEXF_RGBA8   = 2,
+	TEXF_RGB8    = 3,
+	TEXF_BGR8    = 4,
+	TEXF_BCRGB8  = 5,
+	TEXF_DXT1    = 6,
+	TEXF_RGB16   = 7,
+	TEXF_DXT3    = 8,
+	TEXF_DXT5    = 9,
+	TEXF_L8      = 10,
+	TEXF_LA8     = 11,
+	TEXF_A1      = 14,
+	TEXF_A8      = 15
+};
+template<class T> class TList;
+class FCylinder;
+enum EPrimitiveType { PT_TriangleList=0, PT_TriangleStrip=1, PT_TriangleFan=2, PT_PointList=3, PT_LineList=4 };
+enum ERenderStyle { STY_None=0, STY_Normal=1, STY_Masked=2, STY_Translucent=3, STY_Modulated=4, STY_Alpha=5, STY_Additive=6, STY_Subtractive=7, STY_Particle=8, STY_AlphaZ=9 };
+enum ETextureArithOp { TAO_Add=0, TAO_Subtract=1, TAO_Multiply=2, TAO_Divide=3 };
+enum ETerrainRenderMethod { TRM_Normal=0, TRM_PerPixelDetail=1, TRM_PerPixelLighting=2 };
+enum ENoiseType { NOISE_None=0, NOISE_Footstep=1, NOISE_Weapon=2, NOISE_Explosion=3 };
+enum EPawnType { PAWN_None=0, PAWN_Player=1, PAWN_Bot=2 };
+enum ESoundType { SOUND_None=0, SOUND_Speech=1, SOUND_Effect=2, SOUND_Music=3, SOUND_Ambient=4 };
+enum EDrawType { DT_None=0, DT_Sprite=1, DT_Mesh=2, DT_Brush=3, DT_RopeSprite=4, DT_VerticalSprite=5, DT_Terraform=6, DT_SpriteAnimOnce=7, DT_StaticMesh=8, DT_DrawType=9, DT_Particle=10, DT_AntiPortal=11, DT_FluidSurface=12 };
+enum ER6SwitchSurface { R6SS_None=0 };
+enum eGameVideoType { GVT_None=0 };
+
+// ---------------------------------------------------------------------------
+// FVertexStream — abstract base for vertex buffer data.
+// ---------------------------------------------------------------------------
+class ENGINE_API FVertexStream
+{
+public:
+	virtual ~FVertexStream() {}
+	virtual QWORD GetCacheId() = 0;
+	virtual INT GetRevision() = 0;
+	virtual INT GetComponents(FVertexComponent*) = 0;
+	virtual void GetStreamData(void*) = 0;
+	virtual void GetRawStreamData(void**, INT) = 0;
+	virtual INT GetSize() = 0;
+	virtual INT GetStride() = 0;
+};
+
+// ---------------------------------------------------------------------------
+// FIndexBuffer — abstract base for index buffer data.
+// ---------------------------------------------------------------------------
+class ENGINE_API FIndexBuffer
+{
+public:
+	virtual ~FIndexBuffer() {}
+	virtual QWORD GetCacheId() = 0;
+	virtual INT GetRevision() = 0;
+	virtual INT GetSize() = 0;
+	virtual INT GetIndexSize() = 0;
+	virtual void GetContents(void*) = 0;
+};
+
+// ---------------------------------------------------------------------------
+// FBaseTexture / FTexture — abstract base for texture interfaces.
+// ---------------------------------------------------------------------------
+class ENGINE_API FTexture
+{
+public:
+	virtual ~FTexture() {}
+	virtual QWORD GetCacheId() { return 0; }
+	virtual INT GetRevision() { return 0; }
+	virtual INT GetWidth() { return 0; }
+	virtual INT GetHeight() { return 0; }
+	virtual INT GetNumMips() { return 0; }
+	virtual INT GetFirstMip() { return 0; }
+	virtual ETextureFormat GetFormat() { return TEXF_P8; }
+	virtual ETexClampMode GetUClamp() { return TC_Wrap; }
+	virtual ETexClampMode GetVClamp() { return TC_Wrap; }
+	virtual void* GetRawTextureData(INT) { return NULL; }
+	virtual void GetTextureData(INT, void*, INT, ETextureFormat, INT) {}
+	virtual UTexture* GetUTexture() { return NULL; }
+};
+
+// ---------------------------------------------------------------------------
+// FStatGraph — performance graph rendering.
+// ---------------------------------------------------------------------------
+class ENGINE_API FStatGraph
+{
+public:
+	BYTE Pad[256];
+	FStatGraph() { appMemzero(Pad, sizeof(Pad)); }
+	FStatGraph(const FStatGraph&);
+	~FStatGraph();
+	FStatGraph& operator=(const FStatGraph&);
+	void Reset();
+	void Render(UViewport*, FRenderInterface*);
+	void AddDataPoint(FString, FLOAT, INT);
+	void AddLine(FString, FColor, FLOAT, FLOAT);
+	void AddLineAutoRange(FString, FColor);
+	INT Exec(const TCHAR*, FOutputDevice&);
+};
+
+// ===========================================================================
+// Concrete Vertex Stream implementations.
+// ===========================================================================
+
+class ENGINE_API FLineBatcher : public FVertexStream
+{
+public:
+	BYTE Pad[128];
+	FLineBatcher(FRenderInterface*, INT, INT);
+	FLineBatcher(const FLineBatcher&);
+	~FLineBatcher();
+	FLineBatcher& operator=(const FLineBatcher&);
+	void DrawBox(FBox, FColor);
+	void DrawCircle(FVector, FVector, FVector, FColor, FLOAT, INT);
+	void DrawConvexVolume(FConvexVolume, FColor);
+	void DrawCylinder(FRenderInterface*, FVector, FVector, FVector, FVector, FColor, FLOAT, FLOAT, INT);
+	void DrawDirectionalArrow(FVector, FRotator, FColor, FLOAT);
+	void DrawLine(FVector, FVector, FColor);
+	void DrawPoint(class FSceneNode*, FVector, FColor);
+	void DrawSphere(FVector, FColor, FLOAT, INT);
+	void Flush(DWORD);
+	// FVertexStream
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FCanvasUtil : public FVertexStream
+{
+public:
+	BYTE Pad[128];
+	FCanvasUtil(UViewport*, FRenderInterface*, INT, INT);
+	FCanvasUtil(const FCanvasUtil&);
+	~FCanvasUtil();
+	FCanvasUtil& operator=(const FCanvasUtil&);
+	void BeginPrimitive(EPrimitiveType, UMaterial*);
+	void DrawLine(FLOAT, FLOAT, FLOAT, FLOAT, FColor);
+	void DrawPoint(FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FColor);
+	void DrawTile(FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, UMaterial*, FColor);
+	void DrawTileRotated(FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, UMaterial*, FColor, FLOAT);
+	void Flush();
+	// FVertexStream
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FBspVertexStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FBspVertexStream();
+	FBspVertexStream(const FBspVertexStream&);
+	~FBspVertexStream();
+	FBspVertexStream& operator=(const FBspVertexStream&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FRawColorStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FRawColorStream();
+	FRawColorStream(const FRawColorStream&);
+	~FRawColorStream();
+	FRawColorStream& operator=(const FRawColorStream&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FSkinVertexStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FSkinVertexStream();
+	FSkinVertexStream(const FSkinVertexStream&);
+	~FSkinVertexStream();
+	FSkinVertexStream& operator=(const FSkinVertexStream&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FStaticMeshUVStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FStaticMeshUVStream();
+	FStaticMeshUVStream(const FStaticMeshUVStream&);
+	~FStaticMeshUVStream();
+	FStaticMeshUVStream& operator=(const FStaticMeshUVStream&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FStaticMeshVertexStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FStaticMeshVertexStream();
+	FStaticMeshVertexStream(const FStaticMeshVertexStream&);
+	~FStaticMeshVertexStream();
+	FStaticMeshVertexStream& operator=(const FStaticMeshVertexStream&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FAnimMeshVertexStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FAnimMeshVertexStream();
+	FAnimMeshVertexStream(const FAnimMeshVertexStream&);
+	~FAnimMeshVertexStream();
+	FAnimMeshVertexStream& operator=(const FAnimMeshVertexStream&);
+	virtual INT SetPartialSize(INT);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetComponents(FVertexComponent*);
+	virtual INT GetPartialSize();
+	virtual void GetStreamData(void*);
+	virtual void GetRawStreamData(void**, INT);
+	virtual INT GetSize();
+	virtual INT GetStride();
+};
+
+class ENGINE_API FStaticMeshColorStream : public FVertexStream
+{
+public:
+	BYTE Pad[64];
+	FStaticMeshColorStream() { appMemzero(Pad, sizeof(Pad)); }
+};
+
+// ===========================================================================
+// Concrete Index Buffer implementations.
+// ===========================================================================
+
+class ENGINE_API FRawIndexBuffer : public FIndexBuffer
+{
+public:
+	BYTE Pad[64];
+	FRawIndexBuffer();
+	FRawIndexBuffer(const FRawIndexBuffer&);
+	~FRawIndexBuffer();
+	FRawIndexBuffer& operator=(const FRawIndexBuffer&);
+	virtual void CacheOptimize();
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetSize();
+	virtual INT GetIndexSize();
+	virtual void GetContents(void*);
+	virtual INT Stripify();
+};
+
+class ENGINE_API FRaw32BitIndexBuffer : public FIndexBuffer
+{
+public:
+	BYTE Pad[64];
+	FRaw32BitIndexBuffer();
+	FRaw32BitIndexBuffer(const FRaw32BitIndexBuffer&);
+	~FRaw32BitIndexBuffer();
+	FRaw32BitIndexBuffer& operator=(const FRaw32BitIndexBuffer&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetSize();
+	virtual INT GetIndexSize();
+	virtual void GetContents(void*);
+};
+
+// ===========================================================================
+// Concrete Texture wrapper implementations.
+// ===========================================================================
+
+class ENGINE_API FLightMap : public FTexture
+{
+public:
+	BYTE Pad[128];
+	FLightMap();
+	FLightMap(ULevel*, INT, INT);
+	FLightMap(const FLightMap&);
+	~FLightMap();
+	FLightMap& operator=(const FLightMap&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetNumMips();
+	virtual INT GetFirstMip();
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp();
+	virtual ETexClampMode GetVClamp();
+	virtual void* GetRawTextureData(INT);
+	virtual void GetTextureData(INT, void*, INT, ETextureFormat, INT);
+	virtual UTexture* GetUTexture();
+};
+
+class ENGINE_API FLightMapTexture : public FTexture
+{
+public:
+	BYTE Pad[128];
+	FLightMapTexture();
+	FLightMapTexture(ULevel*);
+	FLightMapTexture(const FLightMapTexture&);
+	~FLightMapTexture();
+	FLightMapTexture& operator=(const FLightMapTexture&);
+	virtual FTexture* GetChild(INT, INT*, INT*);
+	virtual INT GetNumChildren();
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetNumMips();
+	virtual INT GetFirstMip();
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp();
+	virtual ETexClampMode GetVClamp();
+};
+
+class ENGINE_API FStaticLightMapTexture : public FTexture
+{
+public:
+	BYTE Pad[128];
+	FStaticLightMapTexture();
+	FStaticLightMapTexture(const FStaticLightMapTexture&);
+	~FStaticLightMapTexture();
+	FStaticLightMapTexture& operator=(const FStaticLightMapTexture&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetNumMips();
+	virtual INT GetFirstMip();
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp();
+	virtual ETexClampMode GetVClamp();
+	virtual void* GetRawTextureData(INT);
+	virtual void GetTextureData(INT, void*, INT, ETextureFormat, INT);
+	virtual UTexture* GetUTexture();
+};
+
+class ENGINE_API FStaticTexture : public FTexture
+{
+public:
+	BYTE Pad[64];
+	FStaticTexture(UTexture*);
+	FStaticTexture(const FStaticTexture&);
+	FStaticTexture& operator=(const FStaticTexture&);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetNumMips();
+	virtual INT GetFirstMip();
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp();
+	virtual ETexClampMode GetVClamp();
+	virtual void* GetRawTextureData(INT);
+	virtual void GetTextureData(INT, void*, INT, ETextureFormat, INT);
+	virtual UTexture* GetUTexture();
+};
+
+class ENGINE_API FStaticCubemap
+{
+public:
+	BYTE Pad[64];
+	FStaticCubemap(UCubemap*);
+	FStaticCubemap(const FStaticCubemap&);
+	FStaticCubemap& operator=(const FStaticCubemap&);
+	virtual FTexture* GetFace(INT);
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetNumMips();
+	virtual INT GetFirstMip();
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp();
+	virtual ETexClampMode GetVClamp();
+};
+
+// ===========================================================================
+// Collision system classes.
+// ===========================================================================
+
+class ENGINE_API FCollisionHashBase
+{
+public:
+	virtual ~FCollisionHashBase() {}
+	virtual void AddActor(AActor*) = 0;
+	virtual void RemoveActor(AActor*) = 0;
+	virtual FCheckResult* ActorLineCheck(FMemStack&, FVector, FVector, FVector, DWORD, DWORD, AActor*) = 0;
+	virtual FCheckResult* ActorPointCheck(FMemStack&, FVector, FVector, DWORD, DWORD, INT, AActor*) = 0;
+	virtual FCheckResult* ActorRadiusCheck(FMemStack&, FVector, FLOAT, DWORD) = 0;
+	virtual FCheckResult* ActorEncroachmentCheck(FMemStack&, AActor*, FVector, FRotator, DWORD, DWORD) = 0;
+	virtual FCheckResult* ActorOverlapCheck(FMemStack&, AActor*, FBox*, INT) = 0;
+	virtual void CheckActorLocations(ULevel*) = 0;
+	virtual void CheckActorNotReferenced(AActor*) = 0;
+	virtual void CheckIsEmpty() = 0;
+	virtual void Tick() = 0;
+};
+
+struct ENGINE_API FCollisionHash : public FCollisionHashBase
+{
+public:
+	struct FCollisionLink { BYTE Pad[32]; };
+	BYTE Pad[256];
+	static INT CollisionTag;
+	static INT* HashX;
+	static INT* HashY;
+	static INT* HashZ;
+	static INT Inited;
+	FCollisionHash();
+	FCollisionHash(const FCollisionHash&);
+	virtual ~FCollisionHash();
+	FCollisionHash& operator=(const FCollisionHash&);
+	void GetActorExtent(AActor*, INT&, INT&, INT&, INT&, INT&, INT&);
+	void GetHashIndices(FVector, INT&, INT&, INT&);
+	FCollisionLink*& GetHashLink(INT, INT, INT, INT&);
+	virtual void AddActor(AActor*);
+	virtual void RemoveActor(AActor*);
+	virtual FCheckResult* ActorLineCheck(FMemStack&, FVector, FVector, FVector, DWORD, DWORD, AActor*);
+	virtual FCheckResult* ActorPointCheck(FMemStack&, FVector, FVector, DWORD, DWORD, INT, AActor*);
+	virtual FCheckResult* ActorRadiusCheck(FMemStack&, FVector, FLOAT, DWORD);
+	virtual FCheckResult* ActorEncroachmentCheck(FMemStack&, AActor*, FVector, FRotator, DWORD, DWORD);
+	virtual FCheckResult* ActorOverlapCheck(FMemStack&, AActor*, FBox*, INT);
+	virtual void CheckActorLocations(ULevel*);
+	virtual void CheckActorNotReferenced(AActor*);
+	virtual void CheckIsEmpty();
+	virtual void Tick();
+private:
+	FLOAT DistanceToHashPlane(INT, FLOAT, FLOAT, INT);
+};
+
+struct ENGINE_API FCollisionOctree : public FCollisionHashBase
+{
+public:
+	BYTE Pad[256];
+	FCollisionOctree();
+	FCollisionOctree(const FCollisionOctree&);
+	virtual ~FCollisionOctree();
+	FCollisionOctree& operator=(const FCollisionOctree&);
+	virtual void AddActor(AActor*);
+	virtual void RemoveActor(AActor*);
+	virtual FCheckResult* ActorLineCheck(FMemStack&, FVector, FVector, FVector, DWORD, DWORD, AActor*);
+	virtual FCheckResult* ActorPointCheck(FMemStack&, FVector, FVector, DWORD, DWORD, INT, AActor*);
+	virtual FCheckResult* ActorRadiusCheck(FMemStack&, FVector, FLOAT, DWORD);
+	virtual FCheckResult* ActorEncroachmentCheck(FMemStack&, AActor*, FVector, FRotator, DWORD, DWORD);
+	virtual FCheckResult* ActorOverlapCheck(FMemStack&, AActor*, FBox*, INT);
+	virtual void CheckActorLocations(ULevel*);
+	virtual void CheckActorNotReferenced(AActor*);
+	virtual void CheckIsEmpty();
+	virtual void Tick();
+};
+
+struct ENGINE_API FOctreeNode
+{
+	BYTE Pad[64];
+	FOctreeNode();
+	FOctreeNode(const FOctreeNode&);
+	~FOctreeNode();
+	FOctreeNode& operator=(const FOctreeNode&);
+	void SingleNodeFilter(AActor*, FCollisionOctree*, const FPlane*);
+	void MultiNodeFilter(AActor*, FCollisionOctree*, const FPlane*);
+	void RemoveAllActors(FCollisionOctree*);
+	void ActorEncroachmentCheck(FCollisionOctree*, const FPlane*);
+	void ActorNonZeroExtentLineCheck(FCollisionOctree*, const FPlane*);
+	void ActorOverlapCheck(FCollisionOctree*, const FPlane*);
+	void ActorPointCheck(FCollisionOctree*, const FPlane*, AActor*);
+	void ActorRadiusCheck(FCollisionOctree*, const FPlane*);
+	void ActorZeroExtentLineCheck(FCollisionOctree*, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, const FPlane*);
+	void CheckActorNotReferenced(AActor*);
+	void CheckIsEmpty();
+	void Draw(FColor, INT, const FPlane*);
+	void DrawFlaggedActors(FCollisionOctree*, const FPlane*);
+	void FilterTest(FBox*, INT, TArray<FOctreeNode*>*, const FPlane*);
+private:
+	void StoreActor(AActor*, FCollisionOctree*, const FPlane*);
+};
+
+// ===========================================================================
+// Scene node classes.
+// ===========================================================================
+
+class ENGINE_API FSceneNode
+{
+public:
+	BYTE Pad[512];
+	FSceneNode(UViewport*);
+	FSceneNode(FSceneNode*);
+	FSceneNode(const FSceneNode&);
+	virtual ~FSceneNode();
+	FSceneNode& operator=(const FSceneNode&);
+	FPlane Project(FVector);
+	FVector Deproject(FPlane);
+	virtual class FActorSceneNode* GetActorSceneNode();
+	virtual class FCameraSceneNode* GetCameraSceneNode();
+	virtual FLevelSceneNode* GetLevelSceneNode();
+	virtual class FMirrorSceneNode* GetMirrorSceneNode();
+	virtual class FSkySceneNode* GetSkySceneNode();
+	virtual class FWarpZoneSceneNode* GetWarpZoneSceneNode();
+};
+
+class ENGINE_API FLevelSceneNode : public FSceneNode
+{
+public:
+	FLevelSceneNode(UViewport*);
+	FLevelSceneNode(FLevelSceneNode*, INT, FMatrix);
+	FLevelSceneNode(const FLevelSceneNode&);
+	virtual ~FLevelSceneNode();
+	FLevelSceneNode& operator=(const FLevelSceneNode&);
+	virtual void Render(FRenderInterface*);
+	virtual INT FilterActor(AActor*);
+	virtual FLevelSceneNode* GetLevelSceneNode();
+	virtual FConvexVolume GetViewFrustum();
+};
+
+class ENGINE_API FActorSceneNode : public FSceneNode
+{
+public:
+	FActorSceneNode(UViewport*, AActor*, AActor*, FVector, FRotator, FLOAT);
+};
+
+class ENGINE_API FCameraSceneNode : public FSceneNode
+{
+public:
+	FCameraSceneNode(UViewport*, AActor*, FVector, FRotator, FLOAT);
+};
+
+class ENGINE_API FMirrorSceneNode : public FSceneNode { public: BYTE Pad2[64]; };
+class ENGINE_API FSkySceneNode : public FSceneNode { public: BYTE Pad2[64]; };
+class ENGINE_API FWarpZoneSceneNode : public FSceneNode { public: BYTE Pad2[64]; };
+class ENGINE_API FDirectionalLightMapSceneNode : public FSceneNode
+{
+public:
+	FDirectionalLightMapSceneNode(UViewport*, AActor*, class FBspSurf&, FLightMap*);
+};
+class ENGINE_API FPointLightMapSceneNode : public FSceneNode
+{
+public:
+	FPointLightMapSceneNode(UViewport*, AActor*, class FBspSurf&, FLightMap*, INT, INT, INT, INT);
+};
+class ENGINE_API FLightMapSceneNode : public FSceneNode
+{
+public:
+	FLightMapSceneNode(UViewport*, AActor*, FLightMap*);
+};
+
+// ===========================================================================
+// FPoly — BSP polygon.
+// ===========================================================================
+
+struct ENGINE_API FPoly
+{
+	FVector Base;
+	FVector Normal;
+	FVector TextureU;
+	FVector TextureV;
+	FVector Vertex[16]; // FPoly::MAX_VERTICES
+	INT NumVertices;
+	DWORD PolyFlags;
+	ABrush* Actor;
+	UMaterial* Material;
+	FName ItemName;
+	INT iLink;
+	INT iBrushPoly;
+	FLOAT PanU;
+	FLOAT PanV;
+	INT SavePolyIndex;
+	FLOAT LightMapScale;
+
+	FPoly();
+	void Init();
+	FPoly& operator=(const FPoly&);
+	INT operator==(FPoly);
+	INT operator!=(FPoly);
+	FLOAT Area();
+	INT CalcNormal(INT);
+	INT DoesLineIntersect(FVector, FVector, FVector*);
+	INT Faces(const FPoly&) const;
+	INT Finalize(INT);
+	INT Fix();
+	FVector GetTextureSize();
+	void InsertVertex(INT, FVector);
+	INT IsBackfaced(const FVector&) const;
+	INT IsCoplanar(const FPoly&) const;
+	INT OnPlane(FVector);
+	INT OnPoly(FVector);
+	void RemoveColinears();
+	void Reverse();
+	INT Split(const FVector&, const FVector&, INT);
+	void SplitInHalf(FPoly*);
+	INT SplitPrecise(const FVector&, const FVector&, INT);
+	INT SplitWithNode(const UModel*, INT, FPoly*, FPoly*, INT) const;
+	INT SplitWithPlane(const FVector&, const FVector&, FPoly*, FPoly*, INT) const;
+	INT SplitWithPlaneFast(FPlane, FPoly*, FPoly*) const;
+	INT SplitWithPlaneFastPrecise(FPlane, FPoly*, FPoly*) const;
+	void Transform(const FModelCoords&, const FVector&, const FVector&, FLOAT);
+};
+
+// ===========================================================================
+// FColor methods — declared inline struct, methods in .cpp.
+// ===========================================================================
+// FColor is defined in Core headers. We add non-inline method declarations here.
+// These are implemented in EngineMiscClasses.cpp.
+
+// ===========================================================================
+// FPathBuilder — navigation path construction.
+// ===========================================================================
+
+class ENGINE_API FPathBuilder
+{
+public:
+	BYTE Pad[128];
+	FPathBuilder& operator=(const FPathBuilder&);
+	INT buildPaths(ULevel*);
+	INT removePaths(ULevel*);
+	void undefinePaths(ULevel*);
+	void definePaths(ULevel*);
+	void defineChangedPaths(ULevel*);
+	void ReviewPaths(ULevel*);
+	void BuildActionSpotList(ULevel*);
+private:
+	INT createPaths();
+	void getScout();
+	ANavigationPoint* newPath(FVector);
+	void testPathsFrom(FVector);
+	void testPathwithRadius(FVector, FLOAT);
+	INT TestReach(FVector, FVector);
+	INT TestWalk(FVector, FCheckResult, FLOAT);
+	INT ValidNode(ANavigationPoint*, AActor*);
+	void SetPathCollision(INT);
+	void Pass2From(FVector, FVector, FLOAT);
+	void FindBlockingNormal(FVector&);
+};
+
+// ===========================================================================
+// FSortedPathList — path node sorting.
+// ===========================================================================
+
+class ENGINE_API FSortedPathList
+{
+public:
+	BYTE Pad[64];
+	ANavigationPoint* findEndAnchor(APawn*, AActor*, FVector, INT);
+	ANavigationPoint* findStartAnchor(APawn*);
+};
+
+// ===========================================================================
+// FWaveModInfo — WAV file info/manipulation.
+// ===========================================================================
+
+struct ENGINE_API FWaveModInfo
+{
+	BYTE Pad[128];
+	FWaveModInfo();
+	FWaveModInfo& operator=(const FWaveModInfo&);
+	INT ReadWaveInfo(TArray<BYTE>&);
+	INT UpdateWaveData(TArray<BYTE>&);
+	DWORD Pad16Bit(DWORD);
+	void Reduce16to8();
+	void NoiseGateFilter();
+	void HalveData();
+	void HalveReduce16to8();
+};
+
+// ===========================================================================
+// FRotatorF — floating-point rotator.
+// ===========================================================================
+
+struct ENGINE_API FRotatorF
+{
+	FLOAT Pitch, Yaw, Roll;
+	FRotatorF();
+	FRotatorF(FLOAT, FLOAT, FLOAT);
+	FRotatorF(FRotator);
+	FVector Vector();
+	FRotator Rotator();
+	FRotatorF& operator=(const FRotatorF&);
+	FRotatorF operator*(FLOAT) const;
+	FRotatorF operator-(FRotatorF) const;
+	FRotatorF operator+(FRotatorF) const;
+	FRotatorF operator*=(FLOAT);
+	FRotatorF operator+=(FRotatorF);
+	FRotatorF operator-=(FRotatorF);
+};
+
+// ===========================================================================
+// ECLipSynchData — lip-synch animation data.
+// ===========================================================================
+
+class ENGINE_API ECLipSynchData
+{
+public:
+	BYTE Pad[256];
+	ECLipSynchData();
+	ECLipSynchData(UMeshInstance*, USound*, USound*, AActor*);
+	ECLipSynchData& operator=(const ECLipSynchData&);
+	void m_vStartLipsynch();
+	void m_vStopLipsynch();
+	void m_vUpdateBonesCompressed(INT);
+	void m_vUpdateBonesCompressed_BoneView(INT);
+	void m_vUpdateBonesCompressed_PhonemsSeq(INT);
+	void m_vUpdateLipSynch(FLOAT);
+};
+
+// ===========================================================================
+// FHitCause and HHitProxy variants.
+// ===========================================================================
+
+class ENGINE_API FHitObserver
+{
+public:
+	virtual ~FHitObserver() {}
+};
+
+struct ENGINE_API FHitCause
+{
+	FHitObserver* Observer;
+	UViewport* Viewport;
+	DWORD Buttons;
+	FLOAT MouseX;
+	FLOAT MouseY;
+	FHitCause(FHitObserver*, UViewport*, DWORD, FLOAT, FLOAT);
+};
+
+struct ENGINE_API HHitProxy
+{
+	virtual ~HHitProxy() {}
+};
+
+struct ENGINE_API HActor : public HHitProxy { AActor* Actor; };
+struct ENGINE_API HBspSurf : public HHitProxy { INT iSurf; };
+struct ENGINE_API HCoords : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HMaterialTree : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HMatineeAction : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HMatineeScene : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HMatineeSubAction : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HMatineeTimePath : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HTerrain : public HHitProxy { BYTE Pad[64]; };
+struct ENGINE_API HTerrainToolLayer : public HHitProxy { BYTE Pad[64]; };
+
+// ===========================================================================
+// FInBunch / FOutBunch — network bunch wrappers.
+// ===========================================================================
+
+class ENGINE_API FInBunch : public FBitReader
+{
+public:
+	BYTE Pad[64];
+};
+
+class ENGINE_API FOutBunch
+{
+public:
+	BYTE Pad[256];
+};
+
+// ===========================================================================
+// FSoundData — sound data wrapper.
+// ===========================================================================
+
+class ENGINE_API FSoundData
+{
+public:
+	BYTE Pad[64];
+	virtual ~FSoundData() {}
+};
 
 struct FProjectorRenderInfoPtr { INT Ptr; };
 struct FIndexBufferPtr         { INT Ptr; };
@@ -482,6 +1390,52 @@ class ENGINE_API UMeshInstance : public UPrimitive
 {
 	DECLARE_CLASS(UMeshInstance,UPrimitive,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UMeshInstance)
+public:
+	// Anim query interface (virtual, base implementations)
+	virtual INT AnimForcePose(FName, FLOAT, FLOAT, INT);
+	virtual FLOAT AnimGetFrameCount(void*);
+	virtual FName AnimGetGroup(void*);
+	virtual FName AnimGetName(void*);
+	virtual INT AnimGetNotifyCount(void*);
+	virtual UAnimNotify* AnimGetNotifyObject(void*, INT);
+	virtual const TCHAR* AnimGetNotifyText(void*, INT);
+	virtual FLOAT AnimGetNotifyTime(void*, INT);
+	virtual FLOAT AnimGetRate(void*);
+	virtual INT AnimIsInGroup(void*, FName);
+	virtual INT AnimStopLooping(INT);
+	virtual void ClearChannel(INT);
+	virtual INT FreezeAnimAt(FLOAT, INT);
+	virtual FLOAT GetActiveAnimFrame(INT);
+	virtual FLOAT GetActiveAnimRate(INT);
+	virtual FName GetActiveAnimSequence(INT);
+	virtual AActor* GetActor();
+	virtual INT GetAnimCount();
+	virtual void* GetAnimIndexed(INT);
+	virtual void* GetAnimNamed(FName);
+	virtual FBox GetCollisionBoundingBox(const AActor*);
+	virtual void GetFrame(AActor*, FLevelSceneNode*, FVector*, INT, INT&, DWORD);
+	virtual UMaterial* GetMaterial(INT, AActor*);
+	virtual class UMesh* GetMesh();
+	virtual FBox GetRenderBoundingBox(const AActor*);
+	virtual FSphere GetRenderBoundingSphere(const AActor*);
+	virtual INT GetStatus();
+	virtual INT IsAnimating(INT);
+	virtual INT IsAnimLooping(INT);
+	virtual INT IsAnimPastLastFrame(INT);
+	virtual INT IsAnimTweening(INT);
+	virtual INT LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	virtual void MeshBuildBounds();
+	virtual FMatrix MeshToWorld();
+	virtual INT PlayAnim(INT, FName, FLOAT, FLOAT, INT, INT, INT);
+	virtual INT PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD);
+	virtual void Render(class FDynamicActor*, FLevelSceneNode*, class TList<class FDynamicLight*>*, FRenderInterface*);
+	virtual void SetActor(AActor*);
+	virtual void SetAnimFrame(INT, FLOAT);
+	virtual void SetMesh(class UMesh*);
+	virtual void SetScale(FVector);
+	virtual void SetStatus(INT);
+	virtual INT StopAnimating(INT);
+	virtual INT UpdateAnimation(FLOAT);
 };
 
 // URenderResource — parent of UProceduralTexture.
@@ -1494,6 +2448,23 @@ public:
 	DECLARE_CLASS(AMover,ABrush,0|CLASS_NativeReplication,Engine)
 	// Event thunks
 	void eventKeyFrameReached();
+
+	void physMovingBrush(FLOAT);
+
+	virtual void performPhysics(FLOAT);
+	virtual INT ShouldTrace(AActor*, DWORD);
+	virtual void AddMyMarker(AActor*);
+	virtual INT* GetOptimizedRepList(BYTE*, struct FPropertyRetirement*, INT*, UPackageMap*, class UActorChannel*);
+	virtual void SetWorldRaytraceKey();
+	virtual void Spawned();
+	virtual void SetBrushRaytraceKey();
+	virtual void PostEditChange();
+	virtual void PostEditMove();
+	virtual void PostLoad();
+	virtual void PostNetReceive();
+	virtual void PostRaytrace();
+	virtual void PreNetReceive();
+	virtual void PreRaytrace();
 };
 
 class ENGINE_API AProjector : public AActor
@@ -2277,6 +3248,18 @@ class ENGINE_API AReplicationInfo : public AInfo
 {
 public:
 	DECLARE_CLASS(AReplicationInfo,AInfo,0,Engine)
+
+	void StaticConstructor();
+	virtual void StartVideo(UCanvas*, INT, INT, INT);
+	virtual void StopVideo(UCanvas*);
+	virtual INT OpenVideo(UCanvas*, char*, char*, INT);
+	virtual void ChangeDrawingSurface(ER6SwitchSurface, INT);
+	virtual void CloseVideo(UCanvas*);
+	virtual void DisplayVideo(UCanvas*, void*, INT);
+	virtual void Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT);
+	virtual void GetAvailableResolutions(TArray<struct FResolutionInfo>&);
+	virtual DWORD GetAvailableVideoMemory();
+	virtual void HandleFullScreenEffects(INT, INT);
 	NO_DEFAULT_CONSTRUCTOR(AReplicationInfo)
 };
 
@@ -2362,25 +3345,7 @@ enum EHardwareEmulationMode
 	HEM_Refrast    = 2
 };
 
-// ETextureFormat — pixel format codes for SupportsTextureFormat().
-// Values match D3DFMT_* and Unreal's internal ETextureFormat enum.
-enum ETextureFormat
-{
-	TEXF_P8      = 0,
-	TEXF_BGRA8   = 1,
-	TEXF_RGBA8   = 2,
-	TEXF_RGB8    = 3,
-	TEXF_BGR8    = 4,
-	TEXF_BCRGB8  = 5,
-	TEXF_DXT1    = 6,
-	TEXF_RGB16   = 7,
-	TEXF_DXT3    = 8,
-	TEXF_DXT5    = 9,
-	TEXF_L8      = 10,
-	TEXF_LA8     = 11,
-	TEXF_A1      = 14,
-	TEXF_A8      = 15
-};
+// ETextureFormat -- moved above to line ~521
 
 class ENGINE_API UCanvas : public UObject
 {
@@ -2434,6 +3399,23 @@ public:
 	FLOAT m_fFadeCurrentTime;
 	class UMaterial* m_pWritableMapIconsTexture;
 
+	// Non-virtual methods
+	void SetVirtualSize(FLOAT, FLOAT);
+	void StartFade(FColor, FColor, FLOAT, INT);
+	void UseVirtualSize(INT, FLOAT, FLOAT);
+	void SetStretch(FLOAT, FLOAT);
+	void DrawTileClipped(UMaterial*, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT);
+
+	// Virtual methods
+	virtual void DrawTile(UMaterial*, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FPlane, FPlane, FLOAT);
+	virtual void DrawIcon(UMaterial*, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FPlane, FPlane);
+	virtual void DrawPattern(UMaterial*, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FPlane, FPlane);
+	virtual INT _DrawString(class UFont*, INT, INT, const TCHAR*, FPlane, INT, INT, INT);
+	virtual void WrappedDrawString(ERenderStyle, INT&, INT&, class UFont*, INT, const TCHAR*);
+	virtual void WrappedStrLenf(class UFont*, INT&, INT&, const TCHAR*, ...);
+	virtual void WrappedPrintf(class UFont*, INT, const TCHAR*, ...);
+	virtual void SetClip(INT, INT, INT, INT);
+
 	// Virtual interface stubs defined in UnRender.cpp.
 	virtual void Init( class UViewport* InViewport );
 	virtual void Update();
@@ -2455,16 +3437,22 @@ public:
 	DECLARE_FUNCTION(execStrLen)
 	DECLARE_FUNCTION(execTextSize)
 	DECLARE_FUNCTION(execGetScreenCoordinate)
-	DECLARE_FUNCTION(execSetVirtualSize)
-	DECLARE_FUNCTION(execUseVirtualSize)
-	DECLARE_FUNCTION(execSetMotionBlurIntensity)
-	DECLARE_FUNCTION(execDrawWritableMap)
-	DECLARE_FUNCTION(execVideoOpen)
-	DECLARE_FUNCTION(execVideoPlay)
-	DECLARE_FUNCTION(execVideoStop)
-	DECLARE_FUNCTION(execVideoClose)
-	// Event thunks
-	void eventReset();
+
+DECLARE_FUNCTION(execVideoClose)
+DECLARE_FUNCTION(execSetVirtualSize)
+DECLARE_FUNCTION(execUseVirtualSize)
+DECLARE_FUNCTION(execSetMotionBlurIntensity)
+DECLARE_FUNCTION(execDrawWritableMap)
+DECLARE_FUNCTION(execVideoOpen)
+DECLARE_FUNCTION(execVideoPlay)
+    DECLARE_FUNCTION(execVideoStop)
+
+virtual void Serialize(FArchive&);
+virtual void Destroy();
+virtual INT Exec(const TCHAR*, FOutputDevice&);
+
+// Event thunks
+void eventReset();
 };
 
 class ENGINE_API AHUD : public AActor
@@ -2493,8 +3481,21 @@ public:
 class ENGINE_API UNetDriver : public USubsystem
 {
 public:
-	DECLARE_CLASS(UNetDriver,USubsystem,0,Engine)
-	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+DECLARE_CLASS(UNetDriver,USubsystem,0,Engine)
+
+void StaticConstructor();
+
+virtual void TickFlush();
+virtual void TickDispatch(FLOAT);
+virtual void Serialize(FArchive&);
+virtual void NotifyActorDestroyed(AActor*);
+virtual void AssertValid();
+virtual void Destroy();
+virtual INT InitConnect(FNetworkNotify*, FURL&, FString&);
+virtual INT InitListen(FNetworkNotify*, FURL&, FString&);
+virtual void LowLevelDestroy();
+virtual FString LowLevelGetNetworkNumber();
+virtual INT Exec(const TCHAR*, FOutputDevice&);
 };
 
 class ENGINE_API UNetConnection : public UPlayer
@@ -2537,28 +3538,32 @@ public:
 class ENGINE_API UChannel : public UObject
 {
 public:
-	DECLARE_CLASS(UChannel,UObject,0,Engine)
-	UChannel() {}
+DECLARE_CLASS(UChannel,UObject,0,Engine)
+UChannel() {}
 
-	// Virtual methods
-	virtual void Destroy();
-	virtual void Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally );
-	virtual void SetClosingFlag();
-	virtual void Close();
-	virtual FString Describe();
-	virtual void ReceivedNak( INT NakPacketId );
-	virtual void Tick();
+void StaticConstructor();
+INT SendBunch(FOutBunch*, INT);
 
-	// Non-virtual methods
-	void AssertInSequenced();
-	static UClass** ChannelClasses();
-	static INT CDECL IsKnownChannelType( INT Type );
-	INT IsNetReady( INT Saturate );
-	INT MaxSendBytes();
-	void ReceivedAcks();
-	void ReceivedRawBunch( FInBunch& Bunch );
-	INT ReceivedSequencedBunch( FInBunch& Bunch );
-	INT RouteDestroy();
+virtual void Tick();
+virtual void ReceivedBunch(FInBunch&);
+virtual void Serialize(const TCHAR*, EName);
+virtual FString Describe();
+virtual void Destroy();
+virtual void Init(UNetConnection*, INT, INT);
+virtual void SetClosingFlag();
+virtual void Close();
+virtual void ReceivedNak(INT);
+
+// Non-virtual methods
+void AssertInSequenced();
+static UClass** ChannelClasses();
+static INT CDECL IsKnownChannelType(INT);
+INT IsNetReady(INT);
+INT MaxSendBytes();
+void ReceivedAcks();
+void ReceivedRawBunch(FInBunch&);
+INT ReceivedSequencedBunch(FInBunch&);
+INT RouteDestroy();
 };
 
 class ENGINE_API UActorChannel : public UChannel
@@ -2576,7 +3581,15 @@ public:
 class ENGINE_API UFileChannel : public UChannel
 {
 public:
-	DECLARE_CLASS(UFileChannel,UChannel,0,Engine)
+DECLARE_CLASS(UFileChannel,UChannel,0,Engine)
+
+void StaticConstructor();
+
+virtual void Tick();
+virtual void ReceivedBunch(FInBunch&);
+virtual FString Describe();
+virtual void Destroy();
+virtual void Init(UNetConnection*, INT, INT);
 };
 
 class ENGINE_API UPackageMapLevel : public UPackageMap
@@ -2589,10 +3602,28 @@ public:
 	Class declarations — UnMaterial.cpp classes.
 ==========================================================================*/
 
+
 class ENGINE_API UMaterial : public UObject
 {
 public:
-	DECLARE_CLASS(UMaterial,UObject,0,Engine)
+DECLARE_CLASS(UMaterial,UObject,0,Engine)
+
+UMaterial* ConvertPolyFlagsToMaterial(UMaterial*, DWORD);
+static void ClearFallbacks();
+
+virtual BYTE RequiredUVStreams();
+virtual INT RequiresSorting();
+virtual INT MaterialUSize();
+virtual INT MaterialVSize();
+virtual void Serialize(FArchive&);
+virtual void PostEditChange();
+virtual void SetValidated(INT);
+virtual INT CheckCircularReferences(TArray<UMaterial*>&);
+virtual UMaterial* CheckFallback();
+virtual UMaterial* GetDiffuse();
+virtual INT GetValidated();
+virtual INT HasFallback();
+virtual INT IsTransparent();
 };
 
 class ENGINE_API URenderedMaterial : public UMaterial
@@ -2612,8 +3643,27 @@ class ENGINE_API UTexture : public UBitmapMaterial
 public:
 	DECLARE_CLASS(UTexture,UBitmapMaterial,0,Engine)
 
+	static class UClient* __Client;
+
+	void SetLastUpdateTime(double);
+	INT Compress(ETextureFormat, INT, struct FDXTCompressionOptions*);
+	ETextureFormat ConvertDXT(INT, INT, INT, void**);
+	ETextureFormat ConvertDXT();
+	void CreateColorRange();
+	void CreateMips(INT, INT);
+	INT Decompress(ETextureFormat);
+	INT DefaultLOD();
+	FColor* GetColors();
+	DWORD GetColorsIndex();
+	FString GetFormatDesc();
+	double GetLastUpdateTime();
+	struct FMipmapBase* GetMip(INT);
+	INT GetNumMips();
+	FColor GetTexel(FLOAT, FLOAT, FLOAT, FLOAT);
+
 	// UTexture interface (from UT99 UnTex.h).
 	virtual void Clear( DWORD ClearFlags );
+	virtual void Clear( FColor );
 	virtual void Init( INT InUSize, INT InVSize );
 	virtual void Tick( FLOAT DeltaSeconds );
 	virtual void ConstantTimeTick();
@@ -2621,6 +3671,14 @@ public:
 	virtual void Click( DWORD Buttons, FLOAT X, FLOAT Y ) {}
 	virtual void Update( double Time ) {}
 	virtual void Prime();
+	virtual void Serialize(FArchive&);
+	virtual void ArithOp(UTexture*, ETextureArithOp);
+	virtual void Destroy();
+	virtual UBitmapMaterial* Get(double, UViewport*);
+	virtual class FBaseTexture* GetRenderInterface();
+	virtual INT IsTransparent();
+	virtual INT RequiresSorting();
+	virtual void PostLoad();
 };
 
 class ENGINE_API UShader : public URenderedMaterial
@@ -2680,7 +3738,7 @@ public:
 class ENGINE_API UTexOscillator : public UTexCoordMaterial
 {
 public:
-	DECLARE_CLASS(UTexOscillator,UTexCoordMaterial,0,Engine)
+DECLARE_CLASS(UTexOscillator,UTexCoordMaterial,0,Engine)
 };
 
 class ENGINE_API UTexPanner : public UTexCoordMaterial
@@ -2768,6 +3826,16 @@ class ENGINE_API USound : public UObject
 {
 public:
 	DECLARE_CLASS(USound,UObject,0,Engine)
+    USound() {}
+
+	USound(const TCHAR*, INT);
+	static class UAudioSubsystem* Audio;
+
+	virtual void PostLoad();
+	virtual void PS2Convert();
+	virtual void Serialize(FArchive&);
+	virtual void Destroy();
+	virtual FLOAT GetDuration();
 };
 
 class ENGINE_API UMusic : public UObject
@@ -2796,24 +3864,170 @@ class ENGINE_API USkeletalMesh : public UMesh
 {
 public:
 	DECLARE_CLASS(USkeletalMesh,UMesh,0,Engine)
+
+	void m_bLoadLbpFile(FString);
+	INT SetAttachAlias(FName, FName, FCoords&);
+	INT SetAttachmentLocation(AActor*, AActor*);
+	INT LODFootprint(INT, INT);
+	void NormalizeInfluences(INT);
+	void CalculateNormals(TArray<FVector>&, INT);
+	void ClearAttachAliases();
+	void FlipFaces();
+	void GenerateLodModel(INT, FLOAT, FLOAT, INT, INT);
+	void InsertLodModel(INT, USkeletalMesh*, FLOAT, INT);
+	void ReconstructRawMesh();
+	INT RenderPreProcess();
+
+	virtual UClass* MeshGetInstanceClass();
+	virtual void PostLoad();
+	virtual INT UseCylinderCollision(const AActor*);
+	virtual INT R6LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	virtual void Serialize(FArchive&);
+	virtual INT LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	virtual INT MemFootprint(INT);
+	virtual void Destroy();
+	virtual FBox GetCollisionBoundingBox(const AActor*) const;
+	virtual FBox GetRenderBoundingBox(const AActor*);
+	virtual FSphere GetRenderBoundingSphere(const AActor*);
 };
 
 class ENGINE_API ULodMeshInstance : public UMeshInstance
 {
 public:
 	DECLARE_CLASS(ULodMeshInstance,UMeshInstance,0,Engine)
+
+	struct FMeshAnimSeq* GetAnimSeq(FName);
+	virtual void Serialize(FArchive&);
+	virtual void SetActor(AActor*);
+	virtual void SetMesh(class UMesh*);
+	virtual void SetStatus(INT);
+	virtual AActor* GetActor();
+	virtual void GetFrame(AActor*, FLevelSceneNode*, FVector*, INT, INT&, DWORD);
+	virtual UMaterial* GetMaterial(INT, AActor*);
+	virtual class UMesh* GetMesh();
+	virtual void GetMeshVerts(AActor*, FVector*, INT, INT&);
+	virtual INT GetStatus();
 };
 
 class ENGINE_API USkeletalMeshInstance : public ULodMeshInstance
 {
 public:
 	DECLARE_CLASS(USkeletalMeshInstance,ULodMeshInstance,0,Engine)
+
+	static FLOAT* m_fCylindersRadius;
+
+	// Public non-virtual methods
+	INT TraceHeadHit(FCheckResult&, const FVector&, const FVector&, const FVector&, const FLOAT&);
+	void UpdateBlendAlpha(INT, FLOAT, FLOAT);
+	INT ValidateAnimChannel(INT);
+	void SetAnimRate(INT, FLOAT);
+	void SetAnimSequence(INT, FName);
+	void SetBlendAlpha(INT, FLOAT);
+	INT SetBlendParams(INT, FLOAT, FLOAT, FLOAT, FName, INT);
+	INT SetBoneDirection(FName, FRotator, FVector, FLOAT);
+	INT SetBoneLocation(FName, FVector, FLOAT);
+	INT SetBonePosition(FName, FRotator, FVector, FLOAT);
+	INT SetBoneRotation(FName, FRotator, INT, FLOAT, FLOAT);
+	INT SetBoneScale(INT, FLOAT, FName);
+	INT SetSkelAnim(class UMeshAnimation*, USkeletalMesh*);
+	INT LockRootMotion(INT, INT);
+	INT MatchRefBone(FName);
+	void BlendToAlpha(INT, FLOAT, FLOAT);
+	void BuildPivotsList();
+	void ClearSkelAnims();
+	void CopyAnimation(INT, INT);
+	void DrawCollisionCylinders(FSceneNode*);
+	INT EnableChannelNotify(INT, INT);
+	void ForceAnimRate(INT, FLOAT);
+	INT GetAnimChannelCount();
+	FLOAT GetAnimFrame(INT);
+	FLOAT GetAnimRateOnChannel(INT);
+	FName GetAnimSequence(INT);
+	FLOAT GetBlendAlpha(INT);
+	FCoords GetBoneCoords(DWORD, INT);
+	INT GetBoneCylinder(INT, FCylinder&);
+	FName GetBoneName(FName);
+	FRotator GetBoneRotation(DWORD, INT);
+	FRotator GetBoneRotation(FName, INT);
+	FVector GetRootLocation();
+	FVector GetRootLocationDelta();
+	FRotator GetRootRotation();
+	FRotator GetRootRotationDelta();
+	FCoords GetTagCoords(FName);
+	FCoords GetTagPosition(FName);
+	INT WasSkeletonUpdated();
+
+	// Virtual overrides
+	virtual INT ActiveVertStreamSize();
+	virtual void ActualizeAnimLinkups();
+	virtual INT AnimForcePose(FName, FLOAT, FLOAT, INT);
+	virtual FLOAT AnimGetFrameCount(void*);
+	virtual FName AnimGetGroup(void*);
+	virtual FName AnimGetName(void*);
+	virtual INT AnimGetNotifyCount(void*);
+	virtual UAnimNotify* AnimGetNotifyObject(void*, INT);
+	virtual const TCHAR* AnimGetNotifyText(void*, INT);
+	virtual FLOAT AnimGetNotifyTime(void*, INT);
+	virtual FLOAT AnimGetRate(void*);
+	virtual INT AnimIsInGroup(void*, FName);
+	virtual INT AnimStopLooping(INT);
+	virtual void ClearChannel(INT);
+	virtual class UMeshAnimation* CurrentSkelAnim(INT);
+	virtual void Destroy();
+	virtual class UMeshAnimation* FindAnimObjectForSequence(FName);
+	virtual INT FreezeAnimAt(FLOAT, INT);
+	virtual FLOAT GetActiveAnimFrame(INT);
+	virtual FLOAT GetActiveAnimRate(INT);
+	virtual FName GetActiveAnimSequence(INT);
+	virtual INT GetAnimCount();
+	virtual void* GetAnimIndexed(INT);
+	virtual void* GetAnimNamed(FName);
+	virtual void GetFrame(AActor*, FLevelSceneNode*, FVector*, INT, INT&, DWORD);
+	virtual UMaterial* GetMaterial(INT, AActor*);
+	virtual void GetMeshVerts(AActor*, FVector*, INT, INT&);
+	virtual FBox GetRenderBoundingBox(const AActor*);
+	virtual FSphere GetRenderBoundingSphere(const AActor*);
+	virtual INT IsAnimating(INT);
+	virtual INT IsAnimLooping(INT);
+	virtual INT IsAnimPastLastFrame(INT);
+	virtual INT IsAnimTweening(INT);
+	virtual INT LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	virtual void MeshBuildBounds();
+	virtual void MeshSkinVertsCallback(void*);
+	virtual FMatrix MeshToWorld();
+	virtual INT PlayAnim(INT, FName, FLOAT, FLOAT, INT, INT, INT);
+	virtual void Render(class FDynamicActor*, FLevelSceneNode*, class TList<class FDynamicLight*>*, FRenderInterface*);
+	virtual void Serialize(FArchive&);
+	virtual void SetAnimFrame(INT, FLOAT);
+	virtual void SetMesh(class UMesh*);
+	virtual void SetScale(FVector);
+	virtual INT StopAnimating(INT);
+	virtual INT UpdateAnimation(FLOAT);
 };
 
 class ENGINE_API UStaticMesh : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UStaticMesh,UPrimitive,0,Engine)
+
+	void StaticConstructor();
+	void TriangleSphereQuery(AActor*, FSphere&, TArray<struct FStaticMeshCollisionTriangle*>&);
+	void Build();
+	UMaterial* GetSkin(AActor*, INT);
+	class FTags* GetTag(FString);
+
+	virtual void PostEditChange();
+	virtual void PostLoad();
+	virtual void Serialize(FArchive&);
+	virtual INT LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	virtual INT PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD);
+	virtual void Destroy();
+	virtual FBox GetCollisionBoundingBox(const AActor*) const;
+	virtual FVector GetEncroachCenter(AActor*);
+	virtual FVector GetEncroachExtent(AActor*);
+	virtual FBox GetRenderBoundingBox(const AActor*);
+	virtual FSphere GetRenderBoundingSphere(const AActor*);
+	virtual void Illuminate(AActor*, INT);
 };
 
 class ENGINE_API UStaticMeshInstance : public UObject
@@ -3507,6 +4721,17 @@ class ENGINE_API UBinaryFileDownload : public UChannelDownload
 public:
 	DECLARE_CLASS(UBinaryFileDownload,UChannelDownload,CLASS_Transient,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UBinaryFileDownload)
+
+	void StaticConstructor();
+
+	virtual void Tick();
+	virtual INT TrySkipFile();
+	virtual void ReceiveData(BYTE*, INT);
+	virtual void ReceiveFile(UNetConnection*, INT, const TCHAR*, INT);
+	virtual void Serialize(FArchive&);
+	virtual void Destroy();
+	virtual void DownloadDone();
+	virtual void DownloadError(const TCHAR*);
 };
 
 class ENGINE_API UDemoRecConnection : public UNetConnection
@@ -3596,6 +4821,44 @@ class ENGINE_API UVertMeshInstance : public ULodMeshInstance
 {
 public:
 	DECLARE_CLASS(UVertMeshInstance,ULodMeshInstance,0,Engine)
+
+	struct FMeshAnimSeq* GetAnimSeq(FName);
+
+	virtual void MeshBuildBounds();
+	virtual FMatrix MeshToWorld();
+	virtual INT StopAnimating(INT);
+	virtual INT UpdateAnimation(FLOAT);
+	virtual void Render(class FDynamicActor*, FLevelSceneNode*, TList<class FDynamicLight*>*, FRenderInterface*);
+	virtual void Serialize(FArchive&);
+	virtual void SetAnimFrame(INT, FLOAT);
+	virtual void SetScale(FVector);
+	virtual INT PlayAnim(INT, FName, FLOAT, FLOAT, INT, INT, INT);
+	virtual INT AnimForcePose(FName, FLOAT, FLOAT, INT);
+	virtual FLOAT AnimGetFrameCount(void*);
+	virtual FName AnimGetGroup(void*);
+	virtual FName AnimGetName(void*);
+	virtual INT AnimGetNotifyCount(void*);
+	virtual UAnimNotify* AnimGetNotifyObject(void*, INT);
+	virtual const TCHAR* AnimGetNotifyText(void*, INT);
+	virtual FLOAT AnimGetNotifyTime(void*, INT);
+	virtual FLOAT AnimGetRate(void*);
+	virtual INT AnimIsInGroup(void*, FName);
+	virtual INT AnimStopLooping(INT);
+	virtual FLOAT GetActiveAnimFrame(INT);
+	virtual FLOAT GetActiveAnimRate(INT);
+	virtual FName GetActiveAnimSequence(INT);
+	virtual INT GetAnimCount();
+	virtual void* GetAnimIndexed(INT);
+	virtual void* GetAnimNamed(FName);
+	virtual void GetFrame(AActor*, FLevelSceneNode*, FVector*, INT, INT&, DWORD);
+	virtual UMaterial* GetMaterial(INT, AActor*);
+	virtual void GetMeshVerts(AActor*, FVector*, INT, INT&);
+	virtual FBox GetRenderBoundingBox(const AActor*);
+	virtual FSphere GetRenderBoundingSphere(const AActor*);
+	virtual INT IsAnimating(INT);
+	virtual INT IsAnimLooping(INT);
+	virtual INT IsAnimPastLastFrame(INT);
+	virtual INT IsAnimTweening(INT);
 };
 
 class ENGINE_API USkinVertexBuffer : public URenderResource
@@ -3945,7 +5208,10 @@ public:
 class ENGINE_API ACamera : public APlayerController
 {
 public:
-	DECLARE_CLASS(ACamera,APlayerController,0|CLASS_Config|CLASS_NativeReplication,Engine)
+DECLARE_CLASS(ACamera,APlayerController,0|CLASS_Config|CLASS_NativeReplication,Engine)
+
+virtual void RenderEditorInfo(FLevelSceneNode*, FRenderInterface*, class FDynamicActor*);
+virtual void RenderEditorSelected(FLevelSceneNode*, FRenderInterface*, class FDynamicActor*);
 };
 
 class ENGINE_API AScout : public APawn
@@ -4117,7 +5383,58 @@ public:
 class ENGINE_API ATerrainInfo : public AInfo
 {
 public:
-	DECLARE_CLASS(ATerrainInfo,AInfo,0,Engine)
+DECLARE_CLASS(ATerrainInfo,AInfo,0,Engine)
+
+void SoftSelect(FLOAT, FLOAT);
+void Update(FLOAT, INT, INT, INT, INT, INT);
+void UpdateDecorations(INT);
+void UpdateTriangles(INT, INT, INT, INT, INT);
+void UpdateVertices(FLOAT, INT, INT, INT, INT);
+FVector WorldToHeightmap(FVector);
+void Render(FLevelSceneNode*, FRenderInterface*, class FVisibilityInterface*);
+void RenderDecorations(FLevelSceneNode*, FRenderInterface*, class FVisibilityInterface*);
+INT SelectVertex(FVector);
+INT SelectVertexX(INT, INT);
+void SelectVerticesInBox(FBox&);
+void SetEdgeTurnBitmap(INT, INT, INT);
+void SetHeightmap(INT, INT, _WORD);
+void SetLayerAlpha(FLOAT, FLOAT, INT, BYTE, UTexture*);
+void SetPlanningFloorMap(INT, INT, INT);
+void SetQuadVisibilityBitmap(INT, INT, INT);
+void SetTextureColor(INT, INT, UTexture*, FColor&);
+INT LineCheck(FCheckResult&, FVector, FVector, FVector, INT);
+INT LineCheckWithQuad(INT, INT, FCheckResult&, FVector, FVector, FVector, INT);
+void MoveVertices(FLOAT);
+INT PointCheck(FCheckResult&, FVector, FVector, INT);
+void CalcCoords();
+void CalcLayerTexCoords();
+void CheckComputeDataOnLoad();
+void CombineLayerWeights();
+void ConvertHeightmapFormat();
+INT GetClosestVertex(FVector&, FVector*, INT*, INT*);
+INT GetEdgeTurnBitmap(INT, INT);
+INT GetGlobalVertex(INT, INT);
+_WORD GetHeightmap(INT, INT);
+BYTE GetLayerAlpha(INT, INT, INT, UTexture*);
+INT GetPlanningFloorMap(INT, INT);
+INT GetQuadVisibilityBitmap(INT, INT);
+INT GetRenderCombinationNum(TArray<INT>&, ETerrainRenderMethod);
+FBox GetSelectedVerticesBounds();
+FColor GetTextureColor(INT, INT, UTexture*);
+FVector GetVertexNormal(INT, INT);
+FVector HeightmapToWorld(FVector);
+void SetupSectors();
+void SoftDeselect();
+void UpdateFromSelectedVertices();
+void ResetMove();
+void PrecomputeLayerWeights();
+
+virtual void Serialize(FArchive&);
+virtual void CheckForErrors();
+virtual void Destroy();
+virtual UPrimitive* GetPrimitive();
+virtual void PostEditChange();
+virtual void PostLoad();
 };
 
 class ENGINE_API AWarpZoneMarker : public ASmallNavigationPoint

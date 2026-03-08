@@ -27,6 +27,8 @@ IMPL_OBJS = [
     'UnRender.obj', 'UnAudio.obj', 'UnMaterial.obj', 'UnMesh.obj',
     'UnModel.obj', 'UnNet.obj', 'EngineExtra.obj', 'Engine.obj',
     'EngineEvents.obj',
+    'EngineBatchImpl.obj',
+    'EngineVirtuals.obj',
 ]
 
 
