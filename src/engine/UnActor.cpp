@@ -209,5 +209,1155 @@ EXEC_STUB(AActor,execSubtract_ColorColor)      IMPLEMENT_FUNCTION( AActor, INDEX
 #undef EXEC_STUB
 
 /*-----------------------------------------------------------------------------
+	AActor trivial method implementations.
+	Reconstructed from Ghidra decompilation + UT99 reference.
+-----------------------------------------------------------------------------*/
+
+// Pending-state queries
+INT AActor::IsPendingKill()
+{
+	return bDeleteMe;
+}
+
+INT AActor::IsPendingDelete()
+{
+	return bPendingDelete;
+}
+
+// Brush type queries
+INT AActor::IsBrush() const
+{
+	return Brush!=NULL && IsA(ABrush::StaticClass());
+}
+
+INT AActor::IsStaticBrush() const
+{
+	return Brush!=NULL && IsA(ABrush::StaticClass()) && bStatic;
+}
+
+INT AActor::IsMovingBrush() const
+{
+	return Brush!=NULL && IsA(ABrush::StaticClass()) && !bStatic;
+}
+
+INT AActor::IsVolumeBrush() const
+{
+	return IsA(AVolume::StaticClass());
+}
+
+INT AActor::IsEncroacher() const
+{
+	return bCollideActors && (IsA(AMover::StaticClass()) || IsA(AKActor::StaticClass()));
+}
+
+// Editor / octree queries
+INT AActor::IsHiddenEd()
+{
+	return bHiddenEd || bHiddenEdGroup;
+}
+
+INT AActor::IsInOctree()
+{
+	return OctreeNodes.Num() > 0;
+}
+
+UBOOL AActor::IsPlayer() const
+{
+	guardSlow(AActor::IsPlayer);
+	if( !IsA(APawn::StaticClass()) )
+		return 0;
+	return ((APawn*)this)->m_bIsPlayer;
+	unguardSlow;
+}
+
+// Simple getters
+ULevel* AActor::GetLevel() const
+{
+	return XLevel;
+}
+
+AActor* AActor::GetHitActor()
+{
+	return (AActor*)this;
+}
+
+AActor* AActor::GetTopOwner()
+{
+	AActor* Top;
+	for( Top=(AActor*)this; Top->Owner!=NULL; Top=Top->Owner );
+	return Top;
+}
+
+FVector AActor::GetCylinderExtent() const
+{
+	return FVector(CollisionRadius, CollisionRadius, CollisionHeight);
+}
+
+AActor* AActor::GetAmbientLightingActor()
+{
+	return (AActor*)this;
+}
+
+FRotator AActor::GetViewRotation()
+{
+	return Rotation;
+}
+
+AActor* AActor::GetProjectorBase()
+{
+	return (AActor*)this;
+}
+
+APawn* AActor::GetPawnOrColBoxOwner() const
+{
+	guardSlow(AActor::GetPawnOrColBoxOwner);
+	return NULL;
+	unguardSlow;
+}
+
+APawn* AActor::GetPlayerPawn() const
+{
+	guardSlow(AActor::GetPlayerPawn);
+	if( !IsA(APawn::StaticClass()) )
+		return NULL;
+	return NULL;
+	unguardSlow;
+}
+
+UPrimitive* AActor::GetPrimitive()
+{
+	return NULL;
+}
+
+// Simple setters
+void AActor::SetOwner( AActor* NewOwner )
+{
+	guard(AActor::SetOwner);
+	Owner = NewOwner;
+	unguard;
+}
+
+void AActor::SetDrawScale( FLOAT NewScale )
+{
+	guard(AActor::SetDrawScale);
+	DrawScale = NewScale;
+	unguard;
+}
+
+void AActor::SetDrawScale3D( FVector NewScale3D )
+{
+	guard(AActor::SetDrawScale3D);
+	DrawScale3D = NewScale3D;
+	unguard;
+}
+
+void AActor::SetDrawType( EDrawType NewDrawType )
+{
+	guard(AActor::SetDrawType);
+	DrawType = NewDrawType;
+	unguard;
+}
+
+void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
+{
+	guard(AActor::SetStaticMesh);
+	StaticMesh = NewStaticMesh;
+	unguard;
+}
+
+void AActor::SetGameType( FString GameType )
+{
+	guard(AActor::SetGameType);
+	unguard;
+}
+
+
+/*-----------------------------------------------------------------------------
+	AActor method implementations -- batch from .bak reference.
+	Reconstructed from Ghidra decompilation.
+-----------------------------------------------------------------------------*/
+
+void AActor::Serialize( FArchive& Ar )
+{
+	guard(AActor::Serialize);
+	UObject::Serialize( Ar );
+	// TODO: Serialize actor-specific data (attachments, physics state, etc.)
+	unguard;
+}
+
+void AActor::PostLoad()
+{
+	guard(AActor::PostLoad);
+	UObject::PostLoad();
+	unguard;
+}
+
+void AActor::Destroy()
+{
+	guard(AActor::Destroy);
+	UObject::Destroy();
+	unguard;
+}
+
+void AActor::PostEditChange()
+{
+	guard(AActor::PostEditChange);
+	UObject::PostEditChange();
+	unguard;
+}
+
+void AActor::InitExecution()
+{
+	guard(AActor::InitExecution);
+	UObject::InitExecution();
+	unguard;
+}
+
+void AActor::ProcessEvent( UFunction* Function, void* Parms, void* Result )
+{
+	guard(AActor::ProcessEvent);
+	UObject::ProcessEvent( Function, Parms, Result );
+	unguard;
+}
+
+void AActor::ProcessState( FLOAT DeltaSeconds )
+{
+	guard(AActor::ProcessState);
+	UObject::ProcessState( DeltaSeconds );
+	unguard;
+}
+
+INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
+{
+	guard(AActor::ProcessRemoteFunction);
+	return UObject::ProcessRemoteFunction( Function, Parms, Stack );
+	unguard;
+}
+
+void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
+{
+	guard(AActor::ProcessDemoRecFunction);
+	// Demo recording stub.
+	unguard;
+}
+
+void AActor::NetDirty( UProperty* Property )
+{
+	guard(AActor::NetDirty);
+	bNetDirty = 1;
+	unguard;
+}
+
+INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
+{
+	guard(AActor::GetOptimizedRepList);
+	// TODO: Build optimized replication list from replicated properties.
+	return Ptr;
+	unguard;
+}
+
+FLOAT AActor::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
+{
+	guard(AActor::GetNetPriority);
+	return NetPriority * (Time + 1.0f);
+	unguard;
+}
+
+INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
+{
+	guard(AActor::IsNetRelevantFor);
+	return bAlwaysRelevant || (Owner == Viewer);
+	unguard;
+}
+
+void AActor::PreNetReceive()
+{
+	guard(AActor::PreNetReceive);
+	unguard;
+}
+
+void AActor::PostNetReceive()
+{
+	guard(AActor::PostNetReceive);
+	unguard;
+}
+
+void AActor::PostNetReceiveLocation()
+{
+	guard(AActor::PostNetReceiveLocation);
+	unguard;
+}
+
+INT AActor::PlayerControlled()
+{
+	return 0;
+}
+
+INT AActor::IsBlockedBy( const AActor* Other ) const
+{
+	guardSlow(AActor::IsBlockedBy);
+	checkSlow(this!=NULL);
+	checkSlow(Other!=NULL);
+
+	if( Other == (AActor*)Level )
+		return bCollideWorld;
+	else if( Other->IsBrush() )
+		return bCollideWorld && Other->bBlockActors;
+	else if( IsBrush() )
+		return Other->bCollideWorld && bBlockActors;
+	else
+		return Other->bBlockActors && bBlockActors;
+	unguardSlow;
+}
+
+UBOOL AActor::IsOverlapping( AActor* Other, FCheckResult* Hit )
+{
+	guard(AActor::IsOverlapping);
+	// TODO: Broad-phase + narrow-phase collision check.
+	return 0;
+	unguard;
+}
+
+INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
+{
+	guard(AActor::ShouldTrace);
+	return (bCollideActors || bBlockActors || bBlockPlayers || bWorldGeometry);
+	unguard;
+}
+
+void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
+{
+	guard(AActor::UpdateColBox);
+	// TODO: Update collision box / octree.
+	unguard;
+}
+
+FCoords AActor::ToLocal() const
+{
+	return GMath.UnitCoords / Rotation / Location;
+}
+
+FCoords AActor::ToWorld() const
+{
+	return GMath.UnitCoords * Location * Rotation;
+}
+
+FMatrix AActor::LocalToWorld() const
+{
+	guard(AActor::LocalToWorld);
+	// TODO: Build actorâworld transform matrix.
+	return FMatrix();
+	unguard;
+}
+
+FMatrix AActor::WorldToLocal() const
+{
+	guard(AActor::WorldToLocal);
+	// TODO: Build worldâactor transform matrix.
+	return FMatrix();
+	unguard;
+}
+
+INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
+{
+	guard(AActor::Tick);
+	// TODO: Full tick implementation â physics, timers, state, animation.
+	return 1;
+	unguard;
+}
+
+void AActor::TickAuthoritative( FLOAT DeltaTime )
+{
+	guard(AActor::TickAuthoritative);
+	unguard;
+}
+
+void AActor::TickSimulated( FLOAT DeltaTime )
+{
+	guard(AActor::TickSimulated);
+	unguard;
+}
+
+void AActor::TickSpecial( FLOAT DeltaTime )
+{
+	guard(AActor::TickSpecial);
+	unguard;
+}
+
+INT AActor::TickThisFrame( FLOAT DeltaTime )
+{
+	guard(AActor::TickThisFrame);
+	if( m_bSkipTick )
+		return 0;
+	return 1;
+	unguard;
+}
+
+void AActor::UpdateTimers( FLOAT DeltaSeconds )
+{
+	guard(AActor::UpdateTimers);
+	if( TimerRate > 0.f )
+	{
+		TimerCounter += DeltaSeconds;
+		if( TimerCounter >= TimerRate )
+		{
+			if( bTimerLoop )
+				TimerCounter -= TimerRate;
+			else
+			{
+				TimerCounter = 0.f;
+				TimerRate = 0.f;
+			}
+			eventTimer();
+		}
+	}
+	unguard;
+}
+
+INT AActor::CheckOwnerUpdated()
+{
+	guard(AActor::CheckOwnerUpdated);
+	return 1;
+	unguard;
+}
+
+void AActor::BoundProjectileVelocity()
+{
+	guard(AActor::BoundProjectileVelocity);
+	unguard;
+}
+
+void AActor::PostBeginPlay()
+{
+	guard(AActor::PostBeginPlay);
+	unguard;
+}
+
+void AActor::PostEditLoad()
+{
+	guard(AActor::PostEditLoad);
+	unguard;
+}
+
+void AActor::PostEditMove()
+{
+	guard(AActor::PostEditMove);
+	unguard;
+}
+
+void AActor::PostPath()
+{
+	guard(AActor::PostPath);
+	unguard;
+}
+
+void AActor::PostRaytrace()
+{
+	guard(AActor::PostRaytrace);
+	unguard;
+}
+
+void AActor::PostScriptDestroyed()
+{
+	guard(AActor::PostScriptDestroyed);
+	unguard;
+}
+
+void AActor::PrePath()
+{
+	guard(AActor::PrePath);
+	unguard;
+}
+
+void AActor::PreRaytrace()
+{
+	guard(AActor::PreRaytrace);
+	unguard;
+}
+
+void AActor::Spawned()
+{
+	guard(AActor::Spawned);
+	unguard;
+}
+
+UMaterial* AActor::GetSkin( INT Index )
+{
+	guard(AActor::GetSkin);
+	if( Index < Skins.Num() && Skins(Index) )
+		return Skins(Index);
+	return Texture;
+	unguard;
+}
+
+void AActor::NotifyAnimEnd( INT Channel )
+{
+	guard(AActor::NotifyAnimEnd);
+	eventAnimEnd( Channel );
+	unguard;
+}
+
+void AActor::UpdateAnimation( FLOAT DeltaSeconds )
+{
+	guard(AActor::UpdateAnimation);
+	// TODO: Update mesh animation state.
+	unguard;
+}
+
+void AActor::StartAnimPoll()
+{
+	guard(AActor::StartAnimPoll);
+	unguard;
+}
+
+INT AActor::CheckAnimFinished( INT Channel )
+{
+	guard(AActor::CheckAnimFinished);
+	return 0;
+	unguard;
+}
+
+INT AActor::IsAnimating( INT Channel ) const
+{
+	return 0;
+}
+
+void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bOverride, INT bRestart )
+{
+	guard(AActor::PlayAnim);
+	// TODO: Start animation playback on specified channel.
+	unguard;
+}
+
+void AActor::PlayReplicatedAnim()
+{
+	guard(AActor::PlayReplicatedAnim);
+	// TODO: Apply replicated animation state from SimAnim.
+	unguard;
+}
+
+void AActor::ReplicateAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, FLOAT Frame, FLOAT LastFrame, INT bLooping )
+{
+	guard(AActor::ReplicateAnim);
+	// TODO: Send animation state for network replication.
+	unguard;
+}
+
+void AActor::AnimBlendParams( INT Channel, FLOAT BlendAlpha, FLOAT InTime, FLOAT OutTime, FName BoneName )
+{
+	guard(AActor::AnimBlendParams);
+	// TODO: Configure animation blend parameters.
+	unguard;
+}
+
+void AActor::BeginTouch( AActor* Other )
+{
+	guard(AActor::BeginTouch);
+	if( Other )
+	{
+		// Add to touching array if not already present.
+		INT i;
+		for( i=0; i<Touching.Num(); i++ )
+			if( Touching(i) == Other )
+				return;
+		Touching.AddItem( Other );
+		Other->Touching.AddItem( (AActor*)this );
+
+		// Notify both actors.
+		eventTouch( Other );
+		Other->eventTouch( (AActor*)this );
+	}
+	unguard;
+}
+
+void AActor::EndTouch( AActor* Other, INT bNoNotifySelf )
+{
+	guard(AActor::EndTouch);
+	if( Other )
+	{
+		Touching.RemoveItem( Other );
+		Other->Touching.RemoveItem( (AActor*)this );
+		if( !bNoNotifySelf )
+			eventUnTouch( Other );
+		Other->eventUnTouch( (AActor*)this );
+	}
+	unguard;
+}
+
+void AActor::NotifyBump( AActor* Other )
+{
+	guard(AActor::NotifyBump);
+	eventBump( Other );
+	unguard;
+}
+
+void AActor::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
+{
+	guard(AActor::SetBase);
+	if( Base != NewBase )
+	{
+		// Detach from old base.
+		if( Base )
+			Base->Attached.RemoveItem( (AActor*)this );
+
+		Base = NewBase;
+
+		// Attach to new base.
+		if( Base )
+			Base->Attached.AddItem( (AActor*)this );
+
+		if( bNotifyActor )
+			eventBaseChange();
+	}
+	unguard;
+}
+
+INT AActor::AttachToBone( AActor* Attachment, FName BoneName )
+{
+	guard(AActor::AttachToBone);
+	// TODO: Attach actor to skeletal mesh bone.
+	return 0;
+	unguard;
+}
+
+INT AActor::DetachFromBone( AActor* Attachment )
+{
+	guard(AActor::DetachFromBone);
+	// TODO: Detach actor from skeletal mesh bone.
+	return 0;
+	unguard;
+}
+
+void AActor::AttachProjector( AProjector* Proj )
+{
+	guard(AActor::AttachProjector);
+	unguard;
+}
+
+void AActor::DetachProjector( AProjector* Proj )
+{
+	guard(AActor::DetachProjector);
+	unguard;
+}
+
+void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewBlockPlayers )
+{
+	guard(AActor::SetCollision);
+	bCollideActors = bNewCollideActors;
+	bBlockActors   = bNewBlockActors;
+	bBlockPlayers  = bNewBlockPlayers;
+	unguard;
+}
+
+void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
+{
+	guard(AActor::SetCollisionSize);
+	CollisionRadius = NewRadius;
+	CollisionHeight = NewHeight;
+	unguard;
+}
+
+void AActor::UpdateRenderData()
+{
+	guard(AActor::UpdateRenderData);
+	// TODO: Rebuild render data (batches, static lighting).
+	unguard;
+}
+
+FLOAT AActor::WorldLightRadius() const
+{
+	return 25.f * ((INT)LightRadius + 1);
+}
+
+void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
+{
+	guard(AActor::RenderEditorInfo);
+	unguard;
+}
+
+void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
+{
+	guard(AActor::RenderEditorSelected);
+	unguard;
+}
+
+void AActor::SetZone( INT bTest, INT bForceRefresh )
+{
+	guard(AActor::SetZone);
+	// TODO: Update actor zone/region.
+	unguard;
+}
+
+void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
+{
+	guard(AActor::SetVolumes);
+	// TODO: Update actor volume list.
+	unguard;
+}
+
+void AActor::SetVolumes()
+{
+	guard(AActor::SetVolumes_void);
+	// TODO: Recalculate actor volumes.
+	unguard;
+}
+
+void AActor::setPhysics( BYTE NewPhysics, AActor* NewFloor, FVector NewFloorV )
+{
+	guard(AActor::setPhysics);
+	Physics = NewPhysics;
+	unguard;
+}
+
+void AActor::performPhysics( FLOAT DeltaSeconds )
+{
+	guard(AActor::performPhysics);
+	// TODO: Main physics dispatch (PHYS_Walking, PHYS_Falling, etc).
+	unguard;
+}
+
+void AActor::processHitWall( FVector HitNormal, AActor* HitActor )
+{
+	guard(AActor::processHitWall);
+	eventHitWall( HitNormal, HitActor );
+	unguard;
+}
+
+void AActor::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingTime, INT Iterations )
+{
+	guard(AActor::processLanded);
+	eventLanded( HitNormal );
+	unguard;
+}
+
+void AActor::physFalling( FLOAT DeltaTime, INT Iterations )
+{
+	guard(AActor::physFalling);
+	// TODO: Falling physics with gravity + air control.
+	unguard;
+}
+
+void AActor::physProjectile( FLOAT DeltaTime, INT Iterations )
+{
+	guard(AActor::physProjectile);
+	// TODO: Projectile physics (ballistic arc, bouncing).
+	unguard;
+}
+
+void AActor::physTrailer( FLOAT DeltaTime )
+{
+	guard(AActor::physTrailer);
+	// TODO: Trailer physics (follows owner).
+	unguard;
+}
+
+void AActor::physRootMotion( FLOAT DeltaTime )
+{
+	guard(AActor::physRootMotion);
+	// TODO: Root motion physics from skeletal animation.
+	unguard;
+}
+
+void AActor::physicsRotation( FLOAT DeltaTime )
+{
+	guard(AActor::physicsRotation);
+	if( bRotateToDesired )
+	{
+		// TODO: Smooth rotation toward DesiredRotation at RotationRate.
+	}
+	unguard;
+}
+
+FRotator AActor::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
+{
+	guard(AActor::FindSlopeRotation);
+	return NewRotation;
+	unguard;
+}
+
+void AActor::SmoothHitWall( FVector HitNormal, AActor* HitActor )
+{
+	guard(AActor::SmoothHitWall);
+	processHitWall( HitNormal, HitActor );
+	unguard;
+}
+
+void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
+{
+	guard(AActor::stepUp);
+	// TODO: Step-up ledge logic.
+	unguard;
+}
+
+INT AActor::moveSmooth( FVector Delta )
+{
+	guard(AActor::moveSmooth);
+	// TODO: Smooth movement with wall sliding.
+	return 1;
+	unguard;
+}
+
+INT AActor::fixedTurn( INT Current, INT Desired, INT DeltaRate )
+{
+	guard(AActor::fixedTurn);
+	if( DeltaRate == 0 )
+		return Current & 0xFFFF;
+	if( Current == Desired )
+		return Current & 0xFFFF;
+	INT Diff = (Desired - Current) & 0xFFFF;
+	if( Diff > 0x8000 )
+		Diff -= 0x10000;
+	if( Diff > DeltaRate )
+		Diff = DeltaRate;
+	else if( Diff < -DeltaRate )
+		Diff = -DeltaRate;
+	return (Current + Diff) & 0xFFFF;
+	unguard;
+}
+
+void AActor::TwoWallAdjust( FVector& DesiredDir, FVector& Delta, FVector& HitNormal, FVector& OldHitNormal, FLOAT HitTime )
+{
+	guard(AActor::TwoWallAdjust);
+	if( (OldHitNormal | HitNormal) <= 0 )
+	{
+		FVector NewDir = (HitNormal ^ OldHitNormal);
+		NewDir = NewDir.SafeNormal();
+		Delta = (Delta | NewDir) * (1.f - HitTime) * NewDir;
+		if( (DesiredDir | Delta) < 0 )
+			Delta = -1 * Delta;
+	}
+	else
+	{
+		Delta = (Delta - HitNormal * (Delta | HitNormal)) * (1.f - HitTime);
+		if( (Delta | DesiredDir) <= 0 )
+			Delta = FVector(0,0,0);
+	}
+	unguard;
+}
+
+void AActor::FindBase()
+{
+	guard(AActor::FindBase);
+	// TODO: Trace downward to find base actor to stand on.
+	unguard;
+}
+
+void AActor::PutOnGround()
+{
+	guard(AActor::PutOnGround);
+	// TODO: Drop actor to ground level.
+	unguard;
+}
+
+struct _McdModel* AActor::getKModel() const
+{
+	return NULL;
+}
+
+void AActor::physKarma( FLOAT DeltaTime )
+{
+	guard(AActor::physKarma);
+	unguard;
+}
+
+void AActor::physKarma_internal( FLOAT DeltaTime )
+{
+	guard(AActor::physKarma_internal);
+	unguard;
+}
+
+void AActor::physKarmaRagDoll( FLOAT DeltaTime )
+{
+	guard(AActor::physKarmaRagDoll);
+	unguard;
+}
+
+void AActor::physKarmaRagDoll_internal( FLOAT DeltaTime )
+{
+	guard(AActor::physKarmaRagDoll_internal);
+	unguard;
+}
+
+void AActor::preKarmaStep( FLOAT DeltaTime )
+{
+	guard(AActor::preKarmaStep);
+	unguard;
+}
+
+void AActor::postKarmaStep()
+{
+	guard(AActor::postKarmaStep);
+	unguard;
+}
+
+void AActor::preKarmaStep_skeletal( FLOAT DeltaTime )
+{
+	guard(AActor::preKarmaStep_skeletal);
+	unguard;
+}
+
+void AActor::postKarmaStep_skeletal()
+{
+	guard(AActor::postKarmaStep_skeletal);
+	unguard;
+}
+
+INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
+{
+	guard(AActor::KMP2DynKarmaInterface);
+	return 0;
+	unguard;
+}
+
+AActor* AActor::AssociatedLevelGeometry()
+{
+	guard(AActor::AssociatedLevelGeometry);
+	return NULL;
+	unguard;
+}
+
+INT AActor::HasAssociatedLevelGeometry( AActor* Other )
+{
+	guard(AActor::HasAssociatedLevelGeometry);
+	return 0;
+	unguard;
+}
+
+void AActor::KFreezeRagdoll()
+{
+	guard(AActor::KFreezeRagdoll);
+	// TODO: Freeze ragdoll simulation.
+	unguard;
+}
+
+INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
+{
+	guard(AActor::IsRelevantToPawnHeartBeat);
+	return 0;
+	unguard;
+}
+
+INT AActor::IsRelevantToPawnHeatVision( APawn* P )
+{
+	guard(AActor::IsRelevantToPawnHeatVision);
+	return 0;
+	unguard;
+}
+
+INT AActor::IsRelevantToPawnRadar( APawn* P )
+{
+	guard(AActor::IsRelevantToPawnRadar);
+	return 0;
+	unguard;
+}
+
+void AActor::CheckForErrors()
+{
+	guard(AActor::CheckForErrors);
+	unguard;
+}
+
+void AActor::AddMyMarker( AActor* S )
+{
+	guard(AActor::AddMyMarker);
+	unguard;
+}
+
+UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const
+{
+	guardSlow(AActor::IsOwnedBy);
+	for( const AActor* Arg=this; Arg; Arg=Arg->Owner )
+		if( Arg == TestOwner )
+			return 1;
+	return 0;
+	unguardSlow;
+}
+
+UBOOL AActor::IsBasedOn( const AActor* Other ) const
+{
+	guard(AActor::IsBasedOn);
+	for( const AActor* Test=this; Test!=NULL; Test=Test->Base )
+		if( Test == Other )
+			return 1;
+	return 0;
+	unguard;
+}
+
+UBOOL AActor::IsInZone( const AZoneInfo* TestZone ) const
+{
+	return Region.Zone!=Level ? Region.Zone==TestZone : 1;
+}
+
+FLOAT AActor::LifeFraction()
+{
+	return Clamp( 1.f - LifeSpan / GetClass()->GetDefaultActor()->LifeSpan, 0.f, 1.f );
+}
+
+INT AActor::IsJoinedTo( const AActor* Other ) const
+{
+	return 0;
+}
+
+INT AActor::TestCanSeeMe( APlayerController* Viewer )
+{
+	guard(AActor::TestCanSeeMe);
+	return 0;
+	unguard;
+}
+
+void AActor::UpdateRelativeRotation()
+{
+	guard(AActor::UpdateRelativeRotation);
+	// TODO: Update relative rotation when attached.
+	unguard;
+}
+
+void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType PawnType, ESoundType SoundType )
+{
+	guard(AActor::CheckNoiseHearing);
+	// TODO: Propagate noise to AIs with hearing.
+	unguard;
+}
+
+AActor* AActor::Trace( FVector& HitLocation, FVector& HitNormal, FVector& TraceEnd, FVector& TraceStart, INT bTraceActors, FVector& Extent, UMaterial** HitMaterial )
+{
+	guard(AActor::Trace);
+	// TODO: World trace implementation.
+	return NULL;
+	unguard;
+}
+
+void AActor::GetNetBuoyancy( FLOAT& NetBuoyancy, FLOAT& NetFluidFriction )
+{
+	guard(AActor::GetNetBuoyancy);
+	NetBuoyancy = Buoyancy;
+	NetFluidFriction = 0.f;
+	unguard;
+}
+
+void AActor::SafeDestroyActor( AActor* A )
+{
+	guard(AActor::SafeDestroyActor);
+	if( A && !A->bDeleteMe )
+		A->eventDestroyed();
+	unguard;
+}
+
+void AActor::CopyR6Availability( AActor* Src )
+{
+	guard(AActor::CopyR6Availability);
+	if( Src )
+	{
+		m_eStoryMode           = Src->m_eStoryMode;
+		m_eMissionMode         = Src->m_eMissionMode;
+		m_eTerroristHunt       = Src->m_eTerroristHunt;
+		m_eTerroristHuntCoop   = Src->m_eTerroristHuntCoop;
+		m_eHostageRescue       = Src->m_eHostageRescue;
+		m_eHostageRescueCoop   = Src->m_eHostageRescueCoop;
+		m_eHostageRescueAdv    = Src->m_eHostageRescueAdv;
+		m_eDefend              = Src->m_eDefend;
+		m_eDefendCoop          = Src->m_eDefendCoop;
+		m_eRecon               = Src->m_eRecon;
+		m_eReconCoop           = Src->m_eReconCoop;
+		m_eDeathmatch          = Src->m_eDeathmatch;
+		m_eTeamDeathmatch      = Src->m_eTeamDeathmatch;
+		m_eBomb                = Src->m_eBomb;
+		m_eEscort              = Src->m_eEscort;
+		m_eLoneWolf            = Src->m_eLoneWolf;
+		m_eSquadDeathmatch     = Src->m_eSquadDeathmatch;
+		m_eSquadTeamDeathmatch = Src->m_eSquadTeamDeathmatch;
+		m_eTerroristHuntAdv    = Src->m_eTerroristHuntAdv;
+		m_eScatteredHuntAdv    = Src->m_eScatteredHuntAdv;
+		m_eCaptureTheEnemyAdv  = Src->m_eCaptureTheEnemyAdv;
+		m_eCountDown           = Src->m_eCountDown;
+		m_eKamikaze            = Src->m_eKamikaze;
+		m_eFreeBackupAdv       = Src->m_eFreeBackupAdv;
+		m_eGazAlertAdv         = Src->m_eGazAlertAdv;
+		m_eIntruderAdv         = Src->m_eIntruderAdv;
+		m_eLimitSeatsAdv       = Src->m_eLimitSeatsAdv;
+		m_eVirusUploadAdv      = Src->m_eVirusUploadAdv;
+	}
+	unguard;
+}
+
+FString AActor::GlobalIDToString( BYTE* const Bytes )
+{
+	guard(AActor::GlobalIDToString);
+	// TODO: Convert 16-byte global ID to string representation.
+	return FString();
+	unguard;
+}
+
+void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FString& Result )
+{
+	guard(AActor::SecondsToString);
+	INT Minutes = TotalSeconds / 60;
+	INT Seconds = TotalSeconds % 60;
+	// TODO: Format string output.
+	unguard;
+}
+
+void AActor::SaveServerOptions( FString FileName )
+{
+	guard(AActor::SaveServerOptions);
+	unguard;
+}
+
+BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
+{
+	guard(AActor::GetR6AvailabilityPtr);
+	return NULL;
+	unguard;
+}
+
+INT AActor::IsAvailableInGameType( FString GameType )
+{
+	guard(AActor::IsAvailableInGameType);
+	if( !m_bUseR6Availability )
+		return 1;
+	return 1;
+	unguard;
+}
+
+INT AActor::NativeNonUbiMatchMaking()
+{
+	return 0;
+}
+
+INT AActor::NativeNonUbiMatchMakingHost()
+{
+	return 0;
+}
+
+INT AActor::NativeStartedByGSClient()
+{
+	return 0;
+}
+
+void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
+{
+	guard(AActor::DbgAddLine);
+	unguard;
+}
+
+void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
+{
+	guard(AActor::DbgVectorAdd);
+	unguard;
+}
+
+void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
+{
+	guard(AActor::DbgVectorDraw);
+	unguard;
+}
+
+void AActor::DbgVectorReset( INT VectorIndex )
+{
+	guard(AActor::DbgVectorReset);
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

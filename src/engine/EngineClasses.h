@@ -280,6 +280,35 @@ class AEmitter;
 class AProjector;
 
 // ---------------------------------------------------------------------------
+// EPhysics — physics modes for actors.
+// ---------------------------------------------------------------------------
+enum EPhysics
+{
+	PHYS_None=0,
+	PHYS_Walking=1,
+	PHYS_Falling=2,
+	PHYS_Swimming=3,
+	PHYS_Flying=4,
+	PHYS_Rotating=5,
+	PHYS_Projectile=6,
+	PHYS_Interpolating=7,
+	PHYS_MovingBrush=8,
+	PHYS_Spider=9,
+	PHYS_Trailer=10,
+	PHYS_Ladder=11,
+	PHYS_RootMotion=12,
+	PHYS_Karma=13,
+	PHYS_KarmaRagDoll=14,
+};
+
+enum ETestMoveResult
+{
+	TESTMOVE_Stopped=0,
+	TESTMOVE_Moved=1,
+	TESTMOVE_Fell=2,
+};
+
+// ---------------------------------------------------------------------------
 // EInputKey — keyboard / mouse / joystick virtual key codes.
 // Used by UViewport::CauseInputEvent and related input dispatch functions.
 // Ordinals match the retail Engine.dll/WinDrv.dll ABI (CSDK EngineClasses.h).
@@ -741,7 +770,20 @@ public:
 	struct FAnimRep SimAnim;
 	struct FIndexBufferPtr m_OutlineIndexBuffer;
 
-	// Virtual methods
+	// Virtual methods — UObject overrides
+	virtual void Serialize(FArchive&);
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void PostEditChange();
+	virtual void InitExecution();
+	virtual void ProcessEvent(class UFunction*, void*, void* Result=NULL);
+	virtual void ProcessState(FLOAT);
+	virtual INT ProcessRemoteFunction(class UFunction*, void*, struct FFrame*);
+	virtual void NetDirty(class UProperty*);
+
+	// Virtual methods — AActor
+	virtual INT IsPendingKill();
+	virtual INT IsPendingDelete();
 	virtual INT * GetOptimizedRepList(BYTE *, struct FPropertyRetirement *, INT *, class UPackageMap *, class UActorChannel *);
 	virtual class APawn * GetPawnOrColBoxOwner() const;
 	virtual class APawn * GetPlayerPawn() const;
@@ -1192,18 +1234,21 @@ class ENGINE_API AKeypoint : public AActor
 {
 public:
 	DECLARE_CLASS(AKeypoint,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AKeypoint)
 };
 
 class ENGINE_API ATriggers : public AActor
 {
 public:
 	DECLARE_CLASS(ATriggers,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ATriggers)
 };
 
 class ENGINE_API ATrigger : public ATriggers
 {
 public:
 	DECLARE_CLASS(ATrigger,ATriggers,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ATrigger)
 };
 
 class ENGINE_API ALight : public AActor
@@ -1227,6 +1272,7 @@ class ENGINE_API ASmallNavigationPoint : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(ASmallNavigationPoint,ANavigationPoint,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ASmallNavigationPoint)
 };
 
 class ENGINE_API APhysicsVolume : public AVolume
@@ -1245,18 +1291,21 @@ class ENGINE_API ADefaultPhysicsVolume : public APhysicsVolume
 {
 public:
 	DECLARE_CLASS(ADefaultPhysicsVolume,APhysicsVolume,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ADefaultPhysicsVolume)
 };
 
 class ENGINE_API ABlockingVolume : public AVolume
 {
 public:
 	DECLARE_CLASS(ABlockingVolume,AVolume,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ABlockingVolume)
 };
 
 class ENGINE_API AAntiPortalActor : public AActor
 {
 public:
 	DECLARE_CLASS(AAntiPortalActor,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AAntiPortalActor)
 };
 
 class ENGINE_API ANote : public AActor
@@ -1269,12 +1318,14 @@ class ENGINE_API APolyMarker : public AActor
 {
 public:
 	DECLARE_CLASS(APolyMarker,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(APolyMarker)
 };
 
 class ENGINE_API AClipMarker : public AKeypoint
 {
 public:
 	DECLARE_CLASS(AClipMarker,AKeypoint,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AClipMarker)
 };
 
 class ENGINE_API AStaticMeshActor : public AActor
@@ -1299,12 +1350,14 @@ class ENGINE_API ADecoVolumeObject : public AActor
 {
 public:
 	DECLARE_CLASS(ADecoVolumeObject,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ADecoVolumeObject)
 };
 
 class ENGINE_API ADecorationList : public AActor
 {
 public:
 	DECLARE_CLASS(ADecorationList,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ADecorationList)
 };
 
 class ENGINE_API AKActor : public AActor
@@ -1345,6 +1398,7 @@ class ENGINE_API AR6MorphMeshActor : public AActor
 {
 public:
 	DECLARE_CLASS(AR6MorphMeshActor,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AR6MorphMeshActor)
 };
 
 class ENGINE_API AR6ActorSound : public AActor
@@ -1615,6 +1669,7 @@ public:
 	virtual DWORD R6SeePawn(class APawn *, INT);
 	virtual DWORD R6LineOfSightTo(class AActor *, INT);
 	virtual void calcVelocity(class FVector, FLOAT, FLOAT, FLOAT, INT, INT, INT);
+	virtual void Destroy();
 
 	// Native C++ methods
 	APawn();
@@ -1650,6 +1705,7 @@ public:
 	void clearPath(class ANavigationPoint *);
 	void clearPaths();
 	FLOAT findPathToward(class AActor *, class FVector, FLOAT (CDECL*)(class ANavigationPoint *, class APawn *, FLOAT), INT, FLOAT);
+	INT findNewFloor(class FVector, FLOAT, FLOAT, INT);
 	enum ETestMoveResult flyMove(class FVector, class AActor *, FLOAT);
 	INT flyReachable(class FVector, INT, class AActor *);
 	enum ETestMoveResult jumpLanding(class FVector, INT);
@@ -1669,6 +1725,14 @@ public:
 	enum ETestMoveResult walkMove(class FVector, struct FCheckResult &, class AActor *, FLOAT);
 	INT walkReachable(class FVector, INT, class AActor *);
 
+private:
+	INT Pick3DWallAdjust(class FVector);
+	void SpiderstepUp(class FVector, class FVector, struct FCheckResult &);
+	FLOAT Swim(class FVector, struct FCheckResult &);
+	INT checkFloor(class FVector, struct FCheckResult &);
+	class FVector findWaterLine(class FVector, class FVector);
+
+public:
 	// Non-indexed exec
 	DECLARE_FUNCTION(execReachedDestination)
 	DECLARE_FUNCTION(execIsFriend)
@@ -1703,6 +1767,109 @@ class ENGINE_API AController : public AActor
 {
 public:
 	DECLARE_CLASS(AController,AActor,0|CLASS_NativeReplication,Engine)
+
+	// Member variables (from SDK EngineClasses.h)
+	BYTE AttitudeToPlayer;
+	BYTE bRun;
+	BYTE bFire;
+	BYTE bAltFire;
+	BYTE m_bMoveUp;
+	BYTE m_bMoveDown;
+	BYTE m_bMoveLeft;
+	BYTE m_bMoveRight;
+	BYTE m_bRotateCW;
+	BYTE m_bRotateCCW;
+	BYTE m_bZoomIn;
+	BYTE m_bZoomOut;
+	BYTE m_bAngleUp;
+	BYTE m_bAngleDown;
+	BYTE m_bLevelUp;
+	BYTE m_bLevelDown;
+	BYTE m_bGoLevelUp;
+	BYTE m_bGoLevelDown;
+	BYTE bDuck;
+	BYTE m_eMoveToResult;
+	BITFIELD bIsPlayer : 1;
+	BITFIELD bGodMode : 1;
+	BITFIELD bLOSflag : 1;
+	BITFIELD bAdvancedTactics : 1;
+	BITFIELD bCanOpenDoors : 1;
+	BITFIELD bCanDoSpecial : 1;
+	BITFIELD bAdjusting : 1;
+	BITFIELD bPreparingMove : 1;
+	BITFIELD bControlAnimations : 1;
+	BITFIELD bEnemyInfoValid : 1;
+	BITFIELD m_bCrawl : 1;
+	BITFIELD m_bLockWeaponActions : 1;
+	BITFIELD m_bHideReticule : 1;
+	FLOAT SightCounter;
+	FLOAT FovAngle;
+	FLOAT Handedness;
+	FLOAT Stimulus;
+	FLOAT MoveTimer;
+	FLOAT MinHitWall;
+	FLOAT LastSeenTime;
+	FLOAT OldMessageTime;
+	FLOAT RouteDist;
+	FLOAT GroundPitchTime;
+	FLOAT MonitorMaxDistSq;
+	class APawn* Pawn;
+	class AController* nextController;
+	class AActor* MoveTarget;
+	class AActor* Focus;
+	class AMover* PendingMover;
+	class AActor* GoalList[4];
+	class ANavigationPoint* home;
+	class APawn* Enemy;
+	class AActor* Target;
+	class AActor* RouteCache[16];
+	class UReachSpec* CurrentPath;
+	class AActor* RouteGoal;
+	class APlayerReplicationInfo* PlayerReplicationInfo;
+	class ANavigationPoint* StartSpot;
+	class AR6PawnReplicationInfo* m_PawnRepInfo;
+	class APawn* MonitoredPawn;
+	FName NextState;
+	FName NextLabel;
+	class UClass* PlayerReplicationInfoClass;
+	class UClass* PawnClass;
+	class UClass* PreviousPawnClass;
+	class FVector AdjustLoc;
+	class FVector Destination;
+	class FVector FocalPoint;
+	class FVector LastSeenPos;
+	class FVector LastSeeingPos;
+	class FVector ViewX;
+	class FVector ViewY;
+	class FVector ViewZ;
+	class FVector MonitorStartLoc;
+	class FString VoiceType;
+
+	// Virtual methods
+	virtual INT * GetOptimizedRepList(BYTE *, struct FPropertyRetirement *, INT *, class UPackageMap *, class UActorChannel *);
+	virtual class AActor * GetTeamManager();
+	virtual INT LocalPlayerController();
+	virtual INT Tick(FLOAT, enum ELevelTick);
+	virtual void AdjustFromWall(class FVector, class AActor *);
+	virtual void StartAnimPoll();
+	virtual INT CheckAnimFinished(INT);
+	virtual INT AcceptNearbyPath(class AActor *);
+	virtual INT CanHear(class FVector, FLOAT, class AActor *, enum ENoiseType, enum EPawnType);
+	virtual void CheckHearSound(class AActor *, INT, class USound *, class FVector, FLOAT, INT);
+	virtual class AActor * GetViewTarget();
+	virtual void SetAdjustLocation(class FVector);
+
+	// Non-virtual methods
+	INT CanHearSound(class FVector, class AActor *, FLOAT, class FVector &);
+	void CheckEnemyVisible();
+	class AActor * FindPath(class FVector, class AActor *, INT);
+	class AActor * HandleSpecial(class AActor *);
+	DWORD LineOfSightTo(class AActor *, INT);
+	DWORD SeePawn(class APawn *, INT);
+	class AActor * SetPath(INT);
+	void SetRouteCache(class ANavigationPoint *, FLOAT, FLOAT);
+	void ShowSelf();
+
 	// Indexed exec
 	DECLARE_FUNCTION(execMoveTo)
 	DECLARE_FUNCTION(execMoveToward)
@@ -1896,6 +2063,7 @@ class ENGINE_API AReplicationInfo : public AInfo
 {
 public:
 	DECLARE_CLASS(AReplicationInfo,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AReplicationInfo)
 };
 
 class ENGINE_API APlayerReplicationInfo : public AReplicationInfo
@@ -1917,6 +2085,7 @@ class ENGINE_API AR6PawnReplicationInfo : public APlayerReplicationInfo
 {
 public:
 	DECLARE_CLASS(AR6PawnReplicationInfo,APlayerReplicationInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AR6PawnReplicationInfo)
 };
 
 /*==========================================================================
@@ -2003,6 +2172,7 @@ class ENGINE_API UCanvas : public UObject
 {
 public:
 	DECLARE_CLASS(UCanvas,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UCanvas)
 
 	// Member variables (from CSDK EngineClasses.h).
 	class UFont* Font;
@@ -2275,18 +2445,21 @@ class ENGINE_API UColorModifier : public UModifier
 {
 public:
 	DECLARE_CLASS(UColorModifier,UModifier,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UColorModifier)
 };
 
 class ENGINE_API UOpacityModifier : public UModifier
 {
 public:
 	DECLARE_CLASS(UOpacityModifier,UModifier,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UOpacityModifier)
 };
 
 class ENGINE_API UVertexColor : public UModifier
 {
 public:
 	DECLARE_CLASS(UVertexColor,UModifier,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UVertexColor)
 };
 
 class ENGINE_API UProceduralTexture : public URenderResource
@@ -2321,6 +2494,7 @@ class ENGINE_API UAudioSubsystem : public USubsystem
 {
 public:
 	DECLARE_CLASS(UAudioSubsystem,USubsystem,CLASS_Config,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UAudioSubsystem)
 	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 };
 
@@ -2642,6 +2816,7 @@ class ENGINE_API UMatObject : public UObject
 {
 public:
 	DECLARE_CLASS(UMatObject,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UMatObject)
 };
 
 class ENGINE_API UPendingLevel : public UObject
@@ -2660,6 +2835,7 @@ class ENGINE_API UKarmaParamsCollision : public UObject
 {
 public:
 	DECLARE_CLASS(UKarmaParamsCollision,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsCollision)
 };
 
 class ENGINE_API UVertexStreamBase : public URenderResource
@@ -2701,6 +2877,7 @@ class ENGINE_API AStatLog : public AInfo
 {
 public:
 	DECLARE_CLASS(AStatLog,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AStatLog)
 	DECLARE_FUNCTION(execBatchLocal)
 	DECLARE_FUNCTION(execBrowseRelativeLocalURL)
 	DECLARE_FUNCTION(execExecuteLocalLogBatcher)
@@ -2743,6 +2920,7 @@ class ENGINE_API AMapList : public AInfo
 {
 public:
 	DECLARE_CLASS(AMapList,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AMapList)
 };
 
 class ENGINE_API AWarpZoneInfo : public AZoneInfo
@@ -2767,6 +2945,7 @@ class ENGINE_API AFluidSurfaceInfo : public AInfo
 {
 public:
 	DECLARE_CLASS(AFluidSurfaceInfo,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AFluidSurfaceInfo)
 	DECLARE_FUNCTION(execPling)
 };
 
@@ -2774,6 +2953,7 @@ class ENGINE_API ASkyZoneInfo : public AZoneInfo
 {
 public:
 	DECLARE_CLASS(ASkyZoneInfo,AZoneInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ASkyZoneInfo)
 };
 
 // --- Children of existing classes ---
@@ -2908,18 +3088,21 @@ class ENGINE_API UChannelDownload : public UDownload
 {
 public:
 	DECLARE_CLASS(UChannelDownload,UDownload,CLASS_Transient,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UChannelDownload)
 };
 
 class ENGINE_API UBinaryFileDownload : public UChannelDownload
 {
 public:
 	DECLARE_CLASS(UBinaryFileDownload,UChannelDownload,CLASS_Transient,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UBinaryFileDownload)
 };
 
 class ENGINE_API UDemoRecConnection : public UNetConnection
 {
 public:
 	DECLARE_CLASS(UDemoRecConnection,UNetConnection,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UDemoRecConnection)
 };
 
 class ENGINE_API UDemoRecDriver : public UNetDriver
@@ -2956,6 +3139,7 @@ class ENGINE_API UFluidSurfacePrimitive : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UFluidSurfacePrimitive,UPrimitive,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UFluidSurfacePrimitive)
 };
 
 class ENGINE_API UProjectorPrimitive : public UPrimitive
@@ -2968,6 +3152,7 @@ class ENGINE_API UTerrainPrimitive : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UTerrainPrimitive,UPrimitive,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UTerrainPrimitive)
 };
 
 class ENGINE_API UVertMesh : public ULodMesh
@@ -3046,12 +3231,14 @@ class ENGINE_API UDiffuseAttenuationMaterial : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UDiffuseAttenuationMaterial,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UDiffuseAttenuationMaterial)
 };
 
 class ENGINE_API UParticleMaterial : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UParticleMaterial,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UParticleMaterial)
 };
 
 class ENGINE_API UTerrainMaterial : public URenderedMaterial
@@ -3094,12 +3281,14 @@ class ENGINE_API UKarmaParamsRBFull : public UKarmaParams
 {
 public:
 	DECLARE_CLASS(UKarmaParamsRBFull,UKarmaParams,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsRBFull)
 };
 
 class ENGINE_API UKarmaParamsSkel : public UKarmaParams
 {
 public:
 	DECLARE_CLASS(UKarmaParamsSkel,UKarmaParams,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsSkel)
 };
 
 class ENGINE_API UKMeshProps : public UObject
@@ -3174,18 +3363,21 @@ class ENGINE_API UActionMoveCamera : public UMatAction
 {
 public:
 	DECLARE_CLASS(UActionMoveCamera,UMatAction,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UActionMoveCamera)
 };
 
 class ENGINE_API UActionMoveActor : public UActionMoveCamera
 {
 public:
 	DECLARE_CLASS(UActionMoveActor,UActionMoveCamera,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UActionMoveActor)
 };
 
 class ENGINE_API UActionPause : public UMatAction
 {
 public:
 	DECLARE_CLASS(UActionPause,UMatAction,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UActionPause)
 };
 
 class ENGINE_API USubActionCameraEffect : public UMatSubAction
@@ -3252,6 +3444,7 @@ class ENGINE_API UTerrainSector : public UObject
 {
 public:
 	DECLARE_CLASS(UTerrainSector,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UTerrainSector)
 };
 
 class ENGINE_API UI3DL2Listener : public UObject
@@ -3286,18 +3479,21 @@ class ENGINE_API UR6GameColors : public UObject
 {
 public:
 	DECLARE_CLASS(UR6GameColors,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UR6GameColors)
 };
 
 class ENGINE_API UR6GameMenuCom : public UObject
 {
 public:
 	DECLARE_CLASS(UR6GameMenuCom,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UR6GameMenuCom)
 };
 
 class ENGINE_API UR6Mod : public UObject
 {
 public:
 	DECLARE_CLASS(UR6Mod,UObject,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UR6Mod)
 };
 
 class ENGINE_API UR6AbstractPlanningInfo : public UObject
@@ -3331,6 +3527,7 @@ class ENGINE_API AStatLogFile : public AStatLog
 {
 public:
 	DECLARE_CLASS(AStatLogFile,AStatLog,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AStatLogFile)
 	DECLARE_FUNCTION(execCloseLog)
 	DECLARE_FUNCTION(execFileFlush)
 	DECLARE_FUNCTION(execFileLog)
@@ -3343,6 +3540,7 @@ class ENGINE_API AActorManager : public ASceneManager
 {
 public:
 	DECLARE_CLASS(AActorManager,ASceneManager,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AActorManager)
 };
 
 class ENGINE_API AAIMarker : public ASmallNavigationPoint
@@ -3391,6 +3589,7 @@ class ENGINE_API AKBSJoint : public AKConstraint
 {
 public:
 	DECLARE_CLASS(AKBSJoint,AKConstraint,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AKBSJoint)
 };
 
 class ENGINE_API AKConeLimit : public AKConstraint
@@ -3427,6 +3626,7 @@ class ENGINE_API ALiftExit : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(ALiftExit,ANavigationPoint,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ALiftExit)
 };
 
 class ENGINE_API ALineOfSightTrigger : public ATriggers
@@ -3441,6 +3641,7 @@ class ENGINE_API ALookTarget : public AKeypoint
 {
 public:
 	DECLARE_CLASS(ALookTarget,AKeypoint,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ALookTarget)
 };
 
 class ENGINE_API APathNode : public ANavigationPoint
@@ -3459,18 +3660,21 @@ class ENGINE_API APotentialClimbWatcher : public AInfo
 {
 public:
 	DECLARE_CLASS(APotentialClimbWatcher,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(APotentialClimbWatcher)
 };
 
 class ENGINE_API AR6MapList : public AMapList
 {
 public:
 	DECLARE_CLASS(AR6MapList,AMapList,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AR6MapList)
 };
 
 class ENGINE_API ASavedMove : public AInfo
 {
 public:
 	DECLARE_CLASS(ASavedMove,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ASavedMove)
 };
 
 class ENGINE_API ATeleporter : public ASmallNavigationPoint
@@ -3537,6 +3741,7 @@ class ENGINE_API AR6Decal : public AProjector
 {
 public:
 	DECLARE_CLASS(AR6Decal,AProjector,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AR6Decal)
 };
 
 class ENGINE_API AR6DecalGroup : public AActor
@@ -3583,6 +3788,7 @@ class ENGINE_API AR6FootStep : public AActor
 {
 public:
 	DECLARE_CLASS(AR6FootStep,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AR6FootStep)
 };
 
 class ENGINE_API AR6GlowLight : public ALight
