@@ -35,7 +35,7 @@
     {
       "label": "Stage: Rebuilt Runtime",
       "type": "shell",
-      "command": "$stage = '${workspaceFolder}\\build\\runtime-test\\system'; New-Item -ItemType Directory -Force -Path $stage | Out-Null; Copy-Item '${workspaceFolder}\\retail\\system\\*' $stage -Recurse -Force; Copy-Item '${workspaceFolder}\\build\\bin\\*' $stage -Force; Write-Host 'Staged rebuilt runtime at build/runtime-test/system/'",
+      "command": "$stage = '${workspaceFolder}\\build\\runtime-test\\system'; $retail = '${workspaceFolder}\\retail\\system'; $rebuilt = '${workspaceFolder}\\build\\bin'; $middleware = @('binkw32.dll','eax.dll','MFC71.dll','msvcp71.dll','msvcr71.dll','MSVCRT.dll','ogg.dll','OpenAL32.dll','vorbis.dll','vorbisfile.dll'); $assetPatterns = @('*.u','*.int','*.ini','*.bmp','*.dat','*.list'); $assetDirs = @('EditorRes','Res'); New-Item -ItemType Directory -Force -Path $stage | Out-Null; Get-ChildItem -Path $stage -Force | Remove-Item -Recurse -Force; foreach ($pattern in $assetPatterns) { Get-ChildItem -Path $retail -Filter $pattern -File | Copy-Item -Destination $stage -Force; } foreach ($dir in $assetDirs) { $src = Join-Path $retail $dir; if (Test-Path $src) { Copy-Item $src $stage -Recurse -Force; } } foreach ($file in $middleware) { $src = Join-Path $retail $file; if (Test-Path $src) { Copy-Item $src $stage -Force; } } Copy-Item (Join-Path $rebuilt '*') $stage -Force; Write-Host 'Staged rebuilt runtime at build/runtime-test/system/ without retail game DLLs.'",
       "options": {
         "cwd": "${workspaceFolder}"
       },

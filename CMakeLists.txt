@@ -86,22 +86,20 @@ include_directories(
 # INTERFACE library is replaced with the real MODULE library.
 # =============================================================================
 
-# --- Core (INTERFACE until rebuilt) ---
+# --- Core (rebuilt from source) ---
 add_library(Core_Dep INTERFACE)
 target_include_directories(Core_Dep INTERFACE ${CSDK_CORE_INC} ${UT99_CORE_INC})
-if(EXISTS ${CSDK_LIB}/Core.lib)
-    target_link_libraries(Core_Dep INTERFACE ${CSDK_LIB}/Core.lib)
-endif()
+target_link_libraries(Core_Dep INTERFACE
+    ${CMAKE_BINARY_DIR}/src/core/Release/Core.lib)
 
-# --- Engine (INTERFACE until rebuilt) ---
+# --- Engine (rebuilt from source) ---
 add_library(Engine_Dep INTERFACE)
 target_include_directories(Engine_Dep INTERFACE
-    ${PROJECT_SOURCE_DIR}/src/engine
+    ${PROJECT_SOURCE_DIR}/src/engine/Inc
     ${UT99_ENGINE_INC}
 )
-if(EXISTS ${CSDK_LIB}/Engine.lib)
-    target_link_libraries(Engine_Dep INTERFACE ${CSDK_LIB}/Engine.lib)
-endif()
+target_link_libraries(Engine_Dep INTERFACE
+    ${CMAKE_BINARY_DIR}/src/engine/Release/Engine.lib)
 
 # --- Helper macro for game modules ---
 macro(add_rvs_module MODULE_NAME)

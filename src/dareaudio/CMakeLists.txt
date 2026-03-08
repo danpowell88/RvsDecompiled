@@ -9,8 +9,8 @@
 set(DAREAUDIO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE DAREAUDIO_SOURCES
-    ${DAREAUDIO_SRC_DIR}/*.cpp
-    ${DAREAUDIO_SRC_DIR}/*.h
+    ${DAREAUDIO_SRC_DIR}/Inc/*.h
+    ${DAREAUDIO_SRC_DIR}/Src/*.cpp
 )
 
 list(LENGTH DAREAUDIO_SOURCES SOURCE_COUNT)
@@ -21,12 +21,12 @@ if(SOURCE_COUNT GREATER 0)
     set(ENGINE_BUILT_LIB ${CMAKE_BINARY_DIR}/src/engine/Release/Engine.lib)
 
     function(dareaudio_target TARGET_NAME SND_DEP)
-        add_library(${TARGET_NAME} MODULE ${DAREAUDIO_SOURCES} ${DAREAUDIO_SRC_DIR}/DareAudio.def)
+        add_library(${TARGET_NAME} MODULE ${DAREAUDIO_SOURCES} ${DAREAUDIO_SRC_DIR}/Src/DareAudio.def)
         target_compile_definitions(${TARGET_NAME} PRIVATE DAREAUDIO_EXPORTS ThisPackage=DareAudio)
         # BEFORE ensures our local engine headers beat the UT99 SDK headers.
         target_include_directories(${TARGET_NAME} BEFORE PRIVATE
-            ${DAREAUDIO_SRC_DIR}
-            ${PROJECT_SOURCE_DIR}/src/engine
+            ${DAREAUDIO_SRC_DIR}/Inc
+            ${PROJECT_SOURCE_DIR}/src/engine/Inc
         )
         target_link_libraries(${TARGET_NAME}
             Core_Dep

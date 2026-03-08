@@ -4,23 +4,24 @@
 set(CORE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE CORE_SOURCES
-    ${CORE_SRC_DIR}/*.cpp
-    ${CORE_SRC_DIR}/*.h
+    ${CORE_SRC_DIR}/Inc/*.h
+    ${CORE_SRC_DIR}/Src/*.cpp
 )
 
 list(LENGTH CORE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_library(Core MODULE ${CORE_SOURCES})
     # Module definition file for ordinal-accurate exports matching retail Core.dll.
-    if(EXISTS ${CORE_SRC_DIR}/Core.def)
-        target_sources(Core PRIVATE ${CORE_SRC_DIR}/Core.def)
+    if(EXISTS ${CORE_SRC_DIR}/Src/Core.def)
+        target_sources(Core PRIVATE ${CORE_SRC_DIR}/Src/Core.def)
     endif()
     target_compile_definitions(Core PRIVATE
         CORE_API=__declspec\(dllexport\)
         ThisPackage=Core
     )
-    target_include_directories(Core PRIVATE
-        ${CORE_SRC_DIR}
+    # BEFORE ensures src/core/Inc/ local header overrides take priority over SDK.
+    target_include_directories(Core BEFORE PRIVATE
+        ${CORE_SRC_DIR}/Inc
         ${CSDK_CORE_INC}
         ${UT99_CORE_INC}
     )

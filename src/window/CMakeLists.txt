@@ -5,23 +5,20 @@
 set(WINDOW_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE WINDOW_SOURCES
-    ${WINDOW_SRC_DIR}/*.cpp
-    ${WINDOW_SRC_DIR}/*.h
+    ${WINDOW_SRC_DIR}/Inc/*.h
+    ${WINDOW_SRC_DIR}/Src/*.cpp
 )
 
 list(LENGTH WINDOW_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(Window MODULE ${WINDOW_SOURCES} ${WINDOW_SRC_DIR}/Window.def)
+    add_library(Window MODULE ${WINDOW_SOURCES} ${WINDOW_SRC_DIR}/Src/Window.def)
     target_compile_definitions(Window PRIVATE WINDOW_EXPORTS ThisPackage=Window)
-    # BEFORE so src/window/ shim headers beat UT99 headers if needed.
-    # The UT99 Window/Inc path lets Window.h's relative includes resolve:
-    #   ..\Src\Res\WindowRes.h  and  ..\..\core\inc\unmsg.h
-    # BEFORE ensures src/engine/ and src/window/ shim headers beat global UT99 paths.
+    # BEFORE so src/window/Inc/ and src/engine/Inc/ shim headers beat UT99 headers.
     # The UT99 Window/Inc path lets Window.h's relative includes resolve:
     #   ..\Src\Res\WindowRes.h  and  ..\..\core\inc\unmsg.h
     target_include_directories(Window BEFORE PRIVATE
-        ${WINDOW_SRC_DIR}
-        ${PROJECT_SOURCE_DIR}/src/engine
+        ${WINDOW_SRC_DIR}/Inc
+        ${PROJECT_SOURCE_DIR}/src/engine/Inc
         ${PROJECT_SOURCE_DIR}/sdk/Ut99PubSrc/Window/Inc
     )
     target_link_libraries(Window

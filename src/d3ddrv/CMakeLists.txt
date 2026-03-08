@@ -6,17 +6,17 @@
 set(D3DDRV_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE D3DDRV_SOURCES
-    ${D3DDRV_SRC_DIR}/*.cpp
-    ${D3DDRV_SRC_DIR}/*.h
+    ${D3DDRV_SRC_DIR}/Inc/*.h
+    ${D3DDRV_SRC_DIR}/Src/*.cpp
 )
 
 list(LENGTH D3DDRV_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(D3DDrv MODULE ${D3DDRV_SOURCES} ${D3DDRV_SRC_DIR}/D3DDrv.def)
+    add_library(D3DDrv MODULE ${D3DDRV_SOURCES} ${D3DDRV_SRC_DIR}/Src/D3DDrv.def)
     target_compile_definitions(D3DDrv PRIVATE D3DDRV_EXPORTS ThisPackage=D3DDrv)
     target_include_directories(D3DDrv BEFORE PRIVATE
-        ${D3DDRV_SRC_DIR}
-        ${PROJECT_SOURCE_DIR}/src/engine
+        ${D3DDRV_SRC_DIR}/Inc
+        ${PROJECT_SOURCE_DIR}/src/engine/Inc
         ${DXSDK_INCLUDE}
     )
     target_link_libraries(D3DDrv

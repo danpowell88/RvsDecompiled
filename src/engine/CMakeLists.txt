@@ -4,26 +4,24 @@
 set(ENGINE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE ENGINE_SOURCES
-    ${ENGINE_SRC_DIR}/*.cpp
-    ${ENGINE_SRC_DIR}/*.h
+    ${ENGINE_SRC_DIR}/Inc/*.h
+    ${ENGINE_SRC_DIR}/Src/*.cpp
 )
-# Exclude .bak backup files picked up by GLOB_RECURSE.
-list(FILTER ENGINE_SOURCES EXCLUDE REGEX "\\.bak$")
 
 list(LENGTH ENGINE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_library(Engine MODULE ${ENGINE_SOURCES})
     # Module definition file for ordinal-accurate exports matching retail Engine.dll.
-    if(EXISTS ${ENGINE_SRC_DIR}/Engine.def)
-        target_sources(Engine PRIVATE ${ENGINE_SRC_DIR}/Engine.def)
+    if(EXISTS ${ENGINE_SRC_DIR}/Src/Engine.def)
+        target_sources(Engine PRIVATE ${ENGINE_SRC_DIR}/Src/Engine.def)
     endif()
     target_compile_definitions(Engine PRIVATE
         ENGINE_API=__declspec\(dllexport\)
         ThisPackage=Engine
     )
-    # BEFORE ensures src/engine/ shim headers override conflicting UT99/CSDK headers.
+    # BEFORE ensures src/engine/Inc/ shim headers override conflicting UT99/CSDK headers.
     target_include_directories(Engine BEFORE PRIVATE
-        ${ENGINE_SRC_DIR}
+        ${ENGINE_SRC_DIR}/Inc
     )
     target_link_libraries(Engine Core_Dep)
     # Allow duplicate symbol definitions from compiler-generated virtual destructors

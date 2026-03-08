@@ -5,17 +5,17 @@
 set(R6ABSTRACT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE R6ABSTRACT_SOURCES
-    ${R6ABSTRACT_SRC_DIR}/*.cpp
-    ${R6ABSTRACT_SRC_DIR}/*.h
+    ${R6ABSTRACT_SRC_DIR}/Inc/*.h
+    ${R6ABSTRACT_SRC_DIR}/Src/*.cpp
 )
 
 list(LENGTH R6ABSTRACT_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(R6Abstract MODULE ${R6ABSTRACT_SOURCES} ${R6ABSTRACT_SRC_DIR}/R6Abstract.def)
+    add_library(R6Abstract MODULE ${R6ABSTRACT_SOURCES} ${R6ABSTRACT_SRC_DIR}/Src/R6Abstract.def)
     target_compile_definitions(R6Abstract PRIVATE R6ABSTRACT_EXPORTS ThisPackage=R6Abstract)
     target_include_directories(R6Abstract BEFORE PRIVATE
-        ${R6ABSTRACT_SRC_DIR}
-        ${PROJECT_SOURCE_DIR}/src/engine
+        ${R6ABSTRACT_SRC_DIR}/Inc
+        ${PROJECT_SOURCE_DIR}/src/engine/Inc
     )
     target_link_libraries(R6Abstract Core_Dep Engine_Dep)
 else()

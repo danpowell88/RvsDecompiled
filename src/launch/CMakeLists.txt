@@ -10,21 +10,17 @@ set(LAUNCH_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/window/Release/Window.lib)
 
 file(GLOB_RECURSE LAUNCH_SOURCES
-    ${LAUNCH_SRC_DIR}/*.cpp
-    ${LAUNCH_SRC_DIR}/*.h
-    ${LAUNCH_SRC_DIR}/*.rc
-)
-
-list(APPEND LAUNCH_SOURCES
-    ${LAUNCH_SRC_DIR}/LaunchGlobals.cpp
+    ${LAUNCH_SRC_DIR}/Inc/*.h
+    ${LAUNCH_SRC_DIR}/Src/*.cpp
+    ${LAUNCH_SRC_DIR}/Src/*.rc
 )
 
 list(LENGTH LAUNCH_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_executable(RavenShield WIN32 ${LAUNCH_SOURCES})
-    if(EXISTS ${LAUNCH_SRC_DIR}/RavenShield.def)
-        target_sources(RavenShield PRIVATE ${LAUNCH_SRC_DIR}/RavenShield.def)
-        target_link_options(RavenShield PRIVATE "/DEF:${LAUNCH_SRC_DIR}/RavenShield.def")
+    if(EXISTS ${LAUNCH_SRC_DIR}/Src/RavenShield.def)
+        target_sources(RavenShield PRIVATE ${LAUNCH_SRC_DIR}/Src/RavenShield.def)
+        target_link_options(RavenShield PRIVATE "/DEF:${LAUNCH_SRC_DIR}/Src/RavenShield.def")
     endif()
     target_compile_definitions(RavenShield PRIVATE
         ThisPackage=Launch
@@ -33,12 +29,14 @@ if(SOURCE_COUNT GREATER 0)
 
     # BEFORE so our local headers beat global SDK paths.
     # Include paths needed:
-    #   src/launch           — LaunchPrivate.h
-    #   src/engine           — EngineClasses.h (our reconstructed engine headers)
+    #   src/launch/Inc       — LaunchPrivate.h, FMallocWindows.h
+    #   src/launch/Src       — Res/LaunchRes.h (resource header)
+    #   src/engine/Inc       — EngineClasses.h (our reconstructed engine headers)
     #   sdk/.../Window/Inc   — Window.h framework (relative includes resolve from here)
     target_include_directories(RavenShield BEFORE PRIVATE
-        ${LAUNCH_SRC_DIR}
-        ${PROJECT_SOURCE_DIR}/src/engine
+        ${LAUNCH_SRC_DIR}/Inc
+        ${LAUNCH_SRC_DIR}/Src
+        ${PROJECT_SOURCE_DIR}/src/engine/Inc
         ${PROJECT_SOURCE_DIR}/sdk/Ut99PubSrc/Window/Inc
     )
 
