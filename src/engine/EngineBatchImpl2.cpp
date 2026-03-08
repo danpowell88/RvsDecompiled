@@ -2,6 +2,11 @@
 #include "Engine.h"
 #include "EngineDecls.h"
 
+// Disable optimization so trivial function bodies (empty {}, return 0, etc.)
+// still produce exported symbols in the .obj file. MSVC's optimizer will
+// eliminate dllexport symbols whose bodies are trivial.
+#pragma optimize("", off)
+
 // --- AAIController ---
 void AAIController::SetAdjustLocation(FVector)
 {

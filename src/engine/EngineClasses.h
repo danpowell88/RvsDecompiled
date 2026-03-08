@@ -21,10 +21,10 @@
 
 // Forward declarations for types used by generated method stubs
 struct FProjectorRenderInfo;
-class MdtBaseConstraint;
-struct MotionChunk;
+struct MdtBaseConstraint;
+class MotionChunk;
 class UDemoRecDriver;
-struct FSpriteParticleVertex;
+class FSpriteParticleVertex;
 enum eDecalType : int;
 
 
@@ -319,7 +319,7 @@ class FBitReader;
 class FOutBunch;
 class FInBunch;
 class FHitCause;
-class FOrientation;
+struct FOrientation;
 class UMatAction;
 class UClient;
 class UBitmapMaterial;
@@ -486,7 +486,7 @@ struct STDbgLine;
 struct FVertexComponent;
 class FConvexVolume;
 class FVisibilityInterface;
-struct FRebuildOptions;
+class FRebuildOptions;
 class UCubemap;
 class UAnimNotify;
 class UMeshAnimation;
@@ -961,7 +961,7 @@ public:
 	virtual void Tick() = 0;
 };
 
-struct ENGINE_API FCollisionHash : public FCollisionHashBase
+class ENGINE_API FCollisionHash : public FCollisionHashBase
 {
 public:
 	struct FCollisionLink { BYTE Pad[32]; };
@@ -1112,8 +1112,10 @@ public:
 // FPoly — BSP polygon.
 // ===========================================================================
 
-struct ENGINE_API FPoly
+class ENGINE_API FPoly
 {
+public:
+
 	FVector Base;
 	FVector Normal;
 	FVector TextureU;
@@ -1212,8 +1214,10 @@ public:
 // FWaveModInfo — WAV file info/manipulation.
 // ===========================================================================
 
-struct ENGINE_API FWaveModInfo
+class ENGINE_API FWaveModInfo
 {
+public:
+
 	BYTE Pad[128];
 	FWaveModInfo();
 	FWaveModInfo& operator=(const FWaveModInfo&);

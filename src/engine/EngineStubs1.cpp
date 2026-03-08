@@ -18,7 +18,6 @@ extern "C" void* dummy_stub_data = 0;
 	AActor event thunks & physics functions.
 -----------------------------------------------------------------------------*/
 #pragma comment(linker, "/alternatename:?findNewFloor@APawn@@AAEHVFVector@@MMH@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?getKConstraint@AKConstraint@@UBEPAUMdtBaseConstraint@@XZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z@4QBGB=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???0FPointLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@HHHH@Z@4QBGB=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???1?$TLazyArray@E@@QAE@XZ@4QBGB=_dummy_stub_data")
@@ -52,11 +51,6 @@ extern "C" void* dummy_stub_data = 0;
 #pragma comment(linker, "/alternatename:?SetVolumes@ALevelInfo@@UAEXABV?$TArray@PAVAVolume@@@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?SetVolumes@ALevelInfo@@UAEXXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?SetZone@ALevelInfo@@UAEXHH@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?SplitInHalf@FPoly@@QAEXPAV1@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?SplitWithNode@FPoly@@QBEHPBVUModel@@HPAV1@1H@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?SplitWithPlane@FPoly@@QBEHABVFVector@@0PAV1@1H@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?SplitWithPlaneFast@FPoly@@QBEHVFPlane@@PAV1@1@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?SplitWithPlaneFastPrecise@FPoly@@QBEHVFPlane@@PAV1@1@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?StaticConfigName@UInput@@CAPBGXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?StaticConfigName@UInputPlanning@@CAPBGXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?StaticConstructor@UDemoRecConnection@@QAEXXZ=_dummy_stub_data")
@@ -74,7 +68,6 @@ extern "C" void* dummy_stub_data = 0;
 #pragma comment(linker, "/alternatename:?Render@FCameraSceneNode@@UAEXPAVFRenderInterface@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Render@FLightMapSceneNode@@UAEXPAVFRenderInterface@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Render@FStats@@QAEXPAVUViewport@@PAVUEngine@@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Serialize@URenderResource@@UAEXAAVFArchive@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Serialize@UTerrainPrimitive@@UAEXAAVFArchive@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Serialize@UTerrainSector@@UAEXAAVFArchive@@@Z=_dummy_stub_func")

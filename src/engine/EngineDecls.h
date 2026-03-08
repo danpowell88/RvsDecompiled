@@ -35,8 +35,7 @@ public:
 	FBspSection& operator=(const FBspSection&);
 };
 
-class ENGINE_API FBspVertex {
-public:
+struct ENGINE_API FBspVertex {
 	FBspVertex();
 	FBspVertex& operator=(const FBspVertex&);
 };
@@ -60,8 +59,7 @@ public:
 	FPoly ClipPolygonPrecise(FPoly);
 };
 
-class ENGINE_API FDXTCompressionOptions {
-public:
+struct ENGINE_API FDXTCompressionOptions {
 	FDXTCompressionOptions();
 	FDXTCompressionOptions& operator=(const FDXTCompressionOptions&);
 };
@@ -84,13 +82,11 @@ public:
 	FDynamicLight& operator=(const FDynamicLight&);
 };
 
-class ENGINE_API FFontCharacter {
-public:
+struct ENGINE_API FFontCharacter {
 	FFontCharacter& operator=(const FFontCharacter&);
 };
 
-class ENGINE_API FFontPage {
-public:
+struct ENGINE_API FFontPage {
 	FFontPage(FFontPage const &);
 	FFontPage();
 	~FFontPage();
@@ -154,8 +150,7 @@ public:
 	FLineVertex& operator=(const FLineVertex&);
 };
 
-class ENGINE_API FMipmap {
-public:
+struct ENGINE_API FMipmap {
 	FMipmap(FMipmap const &);
 	FMipmap(BYTE,BYTE);
 	FMipmap(BYTE,BYTE,int);
@@ -165,15 +160,13 @@ public:
 	void Clear();
 };
 
-class ENGINE_API FMipmapBase {
-public:
+struct ENGINE_API FMipmapBase {
 	FMipmapBase(BYTE,BYTE);
 	FMipmapBase();
 	FMipmapBase& operator=(const FMipmapBase&);
 };
 
-class ENGINE_API FOrientation {
-public:
+struct ENGINE_API FOrientation {
 	FOrientation();
 	FOrientation& operator=(const FOrientation&);
 	int operator!=(FOrientation const &) const;
@@ -213,14 +206,12 @@ public:
 	int operator==(FStatGraphLine const &) const;
 };
 
-class ENGINE_API FStaticMeshCollisionNode {
-public:
+struct ENGINE_API FStaticMeshCollisionNode {
 	FStaticMeshCollisionNode();
 	FStaticMeshCollisionNode& operator=(const FStaticMeshCollisionNode&);
 };
 
-class ENGINE_API FStaticMeshCollisionTriangle {
-public:
+struct ENGINE_API FStaticMeshCollisionTriangle {
 	FStaticMeshCollisionTriangle(FStaticMeshCollisionTriangle const &);
 	FStaticMeshCollisionTriangle();
 	FStaticMeshCollisionTriangle& operator=(const FStaticMeshCollisionTriangle&);
@@ -238,19 +229,16 @@ public:
 	FStaticMeshSection& operator=(const FStaticMeshSection&);
 };
 
-class ENGINE_API FStaticMeshTriangle {
-public:
+struct ENGINE_API FStaticMeshTriangle {
 	FStaticMeshTriangle();
 	FStaticMeshTriangle& operator=(const FStaticMeshTriangle&);
 };
 
-class ENGINE_API FStaticMeshUV {
-public:
+struct ENGINE_API FStaticMeshUV {
 	FStaticMeshUV& operator=(const FStaticMeshUV&);
 };
 
-class ENGINE_API FStaticMeshVertex {
-public:
+struct ENGINE_API FStaticMeshVertex {
 	FStaticMeshVertex();
 	FStaticMeshVertex& operator=(const FStaticMeshVertex&);
 };
@@ -275,8 +263,7 @@ public:
 	void AddLine(FVector,FVector,FColor);
 };
 
-class ENGINE_API FTerrainMaterialLayer {
-public:
+struct ENGINE_API FTerrainMaterialLayer {
 	FTerrainMaterialLayer();
 	~FTerrainMaterialLayer();
 	FTerrainMaterialLayer& operator=(const FTerrainMaterialLayer&);

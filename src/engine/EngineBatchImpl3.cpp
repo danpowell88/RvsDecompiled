@@ -5,32 +5,37 @@
 
 #include "EnginePrivate.h"
 
+// Disable optimization so trivial function bodies (empty {}, return 0, etc.)
+// still produce exported symbols in the .obj file. MSVC's optimizer will
+// eliminate dllexport symbols whose bodies are trivial.
+#pragma optimize("", off)
+
 
 // Forward declarations for types used by generated stubs
-struct FBspNode;
-struct FBspSection;
+class FBspNode;
+class FBspSection;
 struct FBspVertex;
 struct FPosNormTexData;
 struct FSkinVertex;
-struct FStaticMeshBatcherVertex;
+class FStaticMeshBatcherVertex;
 struct FStaticMeshCollisionNode;
 struct FStaticMeshCollisionTriangle;
-struct FStaticMeshLightInfo;
-struct FStaticMeshMaterial;
-struct FStaticMeshSection;
+class FStaticMeshLightInfo;
+class FStaticMeshMaterial;
+class FStaticMeshSection;
 struct FStaticMeshTriangle;
 struct FStaticMeshUV;
 struct FStaticMeshVertex;
 struct FStaticMeshVertexStream;
 struct FTerrainVertex;
-struct FTerrainVertexStream;
+class FTerrainVertexStream;
 struct FUV2Data;
 struct FUntransformedVertex;
 struct FProjectorRelativeRenderInfo;
 struct FOrientation { BYTE Pad[16]; FOrientation& operator=(FOrientation) { return *this; } int operator!=(const FOrientation&) const { return 0; } };
 struct FHitCause;
 struct HHitProxy;
-struct FRebuildOptions { BYTE Pad[256]; };
+class FRebuildOptions { public:  BYTE Pad[256]; };
 struct _KarmaGlobals;
 struct _McdGeometry;
 struct McdGeomMan;
