@@ -28,6 +28,7 @@ IMPL_OBJS = [
     'UnModel.obj', 'UnNet.obj', 'EngineExtra.obj', 'Engine.obj',
     'EngineEvents.obj',
     'EngineBatchImpl.obj',
+    'EngineBatchImpl2.obj',
     'EngineVirtuals.obj',
 ]
 
