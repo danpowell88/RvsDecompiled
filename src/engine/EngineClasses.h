@@ -19,6 +19,15 @@
 #define AUTOGENERATE_FUNCTION(cls,idx,name)
 #endif
 
+// Forward declarations for types used by generated method stubs
+struct FProjectorRenderInfo;
+class MdtBaseConstraint;
+struct MotionChunk;
+class UDemoRecDriver;
+struct FSpriteParticleVertex;
+enum eDecalType : int;
+
+
 /*==========================================================================
 	AUTOGENERATE_NAME entries — RVS Engine FName tokens (211 names).
 ==========================================================================*/
@@ -2248,6 +2257,12 @@ class ENGINE_API AVolume : public ABrush
 public:
 	DECLARE_CLASS(AVolume,ABrush,0,Engine)
 	DECLARE_FUNCTION(execEncompasses)
+	// Auto-generated method declarations
+	virtual void SetVolumes(TArray<AVolume *> const &);
+	virtual void SetVolumes();
+	virtual int ShouldTrace(AActor *,DWORD);
+	virtual void PostBeginPlay();
+	int Encompasses(FVector);
 };
 
 class ENGINE_API AKeypoint : public AActor
@@ -2361,6 +2376,9 @@ public:
 	void eventPawnEnteredVolume(class APawn*);
 	void eventPawnLeavingVolume(class APawn*);
 	void eventPhysicsChangedFor(class AActor*);
+	// Auto-generated method declarations
+	virtual void SetZone(int,int);
+	virtual int * GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *);
 };
 
 class ENGINE_API ADefaultPhysicsVolume : public APhysicsVolume
@@ -2388,6 +2406,8 @@ class ENGINE_API ANote : public AActor
 {
 public:
 	DECLARE_CLASS(ANote,AActor,0,Engine)
+	// Auto-generated method declarations
+	virtual void CheckForErrors();
 };
 
 class ENGINE_API APolyMarker : public AActor
@@ -2408,6 +2428,8 @@ class ENGINE_API AStaticMeshActor : public AActor
 {
 public:
 	DECLARE_CLASS(AStaticMeshActor,AActor,0,Engine)
+	// Auto-generated method declarations
+	virtual int ShouldTrace(AActor *,DWORD);
 };
 
 class ENGINE_API AEffects : public AActor
@@ -2440,6 +2462,8 @@ class ENGINE_API AKActor : public AActor
 {
 public:
 	DECLARE_CLASS(AKActor,AActor,0,Engine)
+	// Auto-generated method declarations
+	virtual void Spawned();
 };
 
 class ENGINE_API AMover : public ABrush
@@ -2479,6 +2503,21 @@ public:
 	// Event thunks
 	void eventLightUpdateDirect(FVector, FLOAT, BYTE);
 	void eventUpdateShadow();
+	// Auto-generated method declarations
+	virtual int ShouldTrace(AActor *,DWORD);
+	virtual void TickSpecial(float);
+	virtual void UpdateParticleMaterial(UParticleMaterial *,int);
+	virtual void RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	void RenderWireframe(FRenderInterface *);
+	virtual void PostEditChange();
+	virtual void PostEditLoad();
+	virtual void PostEditMove();
+	virtual void Abandon();
+	virtual void Attach();
+	virtual void CalcMatrix();
+	virtual void Destroy();
+	virtual void Detach(int);
+	virtual UPrimitive * GetPrimitive();
 };
 
 class ENGINE_API AShadowProjector : public AProjector
@@ -3065,6 +3104,19 @@ public:
 	void eventSetProgressTime(FLOAT);
 	void eventTeamMessage(class APlayerReplicationInfo*, const FString&, FName);
 	void eventToggleRadar(DWORD);
+	// Auto-generated method declarations
+	void SpecialDestroy();
+	virtual int Tick(float,ELevelTick);
+	void R6PBKickPlayer(FString);
+	void SetPlayer(UPlayer *);
+	virtual int LocalPlayerController();
+	virtual void PostNetReceive();
+	virtual void PreNetReceive();
+	virtual void CheckHearSound(AActor *,int,USound *,FVector,float,int);
+	virtual int * GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *);
+	FString GetPlayerNetworkAddress();
+	virtual AActor * GetViewTarget();
+	virtual int IsNetRelevantFor(APlayerController *,AActor *,FVector);
 };
 
 class ENGINE_API AAIController : public AController
@@ -3073,6 +3125,10 @@ public:
 	DECLARE_CLASS(AAIController,AController,0|CLASS_NativeReplication,Engine)
 	DECLARE_FUNCTION(execWaitToSeeEnemy)
 	DECLARE_FUNCTION(execPollWaitToSeeEnemy)
+	// Auto-generated method declarations
+	virtual void SetAdjustLocation(FVector);
+	virtual int AcceptNearbyPath(AActor *);
+	virtual void AdjustFromWall(FVector,AActor *);
 };
 
 /*==========================================================================
@@ -3193,6 +3249,8 @@ public:
 	// Event thunks
 	void eventActorEntered(class AActor*);
 	void eventActorLeaving(class AActor*);
+	// Auto-generated method declarations
+	virtual void PostEditChange();
 };
 
 class ENGINE_API ALevelInfo : public AZoneInfo
@@ -3294,6 +3352,18 @@ class ENGINE_API URenderDevice : public USubsystem
 public:
 	DECLARE_CLASS(URenderDevice,USubsystem,CLASS_Config,Engine)
 	virtual UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+	// Auto-generated method declarations
+	virtual void StartVideo(UCanvas *,int,int,int);
+	void StaticConstructor();
+	virtual void StopVideo(UCanvas *);
+	virtual int OpenVideo(UCanvas *,char *,char *,int);
+	virtual void ChangeDrawingSurface(ER6SwitchSurface,int);
+	virtual void CloseVideo(UCanvas *);
+	virtual void DisplayVideo(UCanvas *,void *,int);
+	virtual void Draw3DLine(FVector,FVector,FColor,UTexture *,float,float,float,float);
+	virtual void GetAvailableResolutions(TArray<FResolutionInfo> &);
+	virtual DWORD GetAvailableVideoMemory();
+	virtual void HandleFullScreenEffects(int,int);
 };
 
 // ---------------------------------------------------------------------------
@@ -3453,6 +3523,8 @@ virtual INT Exec(const TCHAR*, FOutputDevice&);
 
 // Event thunks
 void eventReset();
+	// Auto-generated method declarations
+	void WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*);
 };
 
 class ENGINE_API AHUD : public AActor
@@ -3466,6 +3538,10 @@ public:
 	void eventRenderFirstPersonGun(class UCanvas*);
 	void eventShowUpgradeMenu();
 	void eventWorldSpaceOverlays();
+	// Auto-generated method declarations
+	virtual void DrawInGameMap(FCameraSceneNode *,UViewport *);
+	virtual void DrawRadar(FCameraSceneNode *,UViewport *);
+	virtual void DrawSpecificModeInfo(FCameraSceneNode *,UViewport *);
 };
 
 /*==========================================================================
@@ -3476,6 +3552,10 @@ class ENGINE_API UPlayer : public UObject
 {
 public:
 	DECLARE_CLASS(UPlayer,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	virtual void Destroy();
+	virtual int Exec(const TCHAR*,FOutputDevice &);
 };
 
 class ENGINE_API UNetDriver : public USubsystem
@@ -3570,12 +3650,32 @@ class ENGINE_API UActorChannel : public UChannel
 {
 public:
 	DECLARE_CLASS(UActorChannel,UChannel,0,Engine)
+	// Auto-generated method declarations
+	void StaticConstructor();
+	virtual void Tick();
+	virtual void ReceivedBunch(FInBunch &);
+	virtual void ReceivedNak(int);
+	void ReplicateActor();
+	void SetChannelActor(AActor *);
+	virtual void SetClosingFlag();
+	virtual void Close();
+	virtual FString Describe();
+	virtual void Destroy();
+	AActor * GetActor();
+	virtual void Init(UNetConnection *,int,int);
 };
 
 class ENGINE_API UControlChannel : public UChannel
 {
 public:
 	DECLARE_CLASS(UControlChannel,UChannel,0,Engine)
+	// Auto-generated method declarations
+	void StaticConstructor();
+	virtual void ReceivedBunch(FInBunch &);
+	virtual void Serialize(const TCHAR*,EName);
+	virtual FString Describe();
+	virtual void Destroy();
+	virtual void Init(UNetConnection *,int,int);
 };
 
 class ENGINE_API UFileChannel : public UChannel
@@ -3636,6 +3736,10 @@ class ENGINE_API UBitmapMaterial : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UBitmapMaterial,URenderedMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual int MaterialUSize();
+	virtual int MaterialVSize();
+	virtual UBitmapMaterial * Get(double,UViewport *);
 };
 
 class ENGINE_API UTexture : public UBitmapMaterial
@@ -3685,84 +3789,142 @@ class ENGINE_API UShader : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UShader,URenderedMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual BYTE RequiredUVStreams();
+	virtual int RequiresSorting();
+	virtual int MaterialUSize();
+	virtual int MaterialVSize();
+	virtual void PostEditChange();
+	virtual int CheckCircularReferences(TArray<UMaterial *> &);
+	virtual UMaterial * CheckFallback();
+	virtual UMaterial * GetDiffuse();
+	virtual int HasFallback();
+	virtual int IsTransparent();
 };
 
 class ENGINE_API UModifier : public UMaterial
 {
 public:
 	DECLARE_CLASS(UModifier,UMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual BYTE RequiredUVStreams();
+	virtual int RequiresSorting();
+	virtual int MaterialUSize();
+	virtual int MaterialVSize();
+	virtual void PostEditChange();
+	virtual int CheckCircularReferences(TArray<UMaterial *> &);
+	virtual int IsTransparent();
 };
 
 class ENGINE_API UCombiner : public UMaterial
 {
 public:
 	DECLARE_CLASS(UCombiner,UMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual BYTE RequiredUVStreams();
+	virtual int RequiresSorting();
+	virtual int MaterialUSize();
+	virtual int MaterialVSize();
+	virtual void PostEditChange();
+	virtual int CheckCircularReferences(TArray<UMaterial *> &);
+	virtual int IsTransparent();
 };
 
 class ENGINE_API UFinalBlend : public UModifier
 {
 public:
 	DECLARE_CLASS(UFinalBlend,UModifier,0,Engine)
+	// Auto-generated method declarations
+	virtual int RequiresSorting();
+	virtual void SetValidated(int);
+	virtual void PostEditChange();
+	virtual int GetValidated();
+	virtual int IsTransparent();
 };
 
 class ENGINE_API UConstantMaterial : public UMaterial
 {
 public:
 	DECLARE_CLASS(UConstantMaterial,UMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FColor GetColor(float);
 };
 
 class ENGINE_API UConstantColor : public UConstantMaterial
 {
 public:
 	DECLARE_CLASS(UConstantColor,UConstantMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FColor GetColor(float);
 };
 
 class ENGINE_API UPalette : public UObject
 {
 public:
 	DECLARE_CLASS(UPalette,UObject,0,Engine)
+	// Auto-generated method declarations
+	UPalette * ReplaceWithExisting();
+	virtual void Serialize(FArchive &);
+	BYTE BestMatch(FColor,int);
+	void FixPalette();
 };
 
 class ENGINE_API UTexCoordMaterial : public UModifier
 {
 public:
 	DECLARE_CLASS(UTexCoordMaterial,UModifier,0,Engine)
+	// Auto-generated method declarations
+	virtual int MaterialUSize();
+	virtual int MaterialVSize();
 };
 
 class ENGINE_API UTexMatrix : public UTexCoordMaterial
 {
 public:
 	DECLARE_CLASS(UTexMatrix,UTexCoordMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FMatrix * GetMatrix(float);
 };
 
 class ENGINE_API UTexOscillator : public UTexCoordMaterial
 {
 public:
 DECLARE_CLASS(UTexOscillator,UTexCoordMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FMatrix * GetMatrix(float);
 };
 
 class ENGINE_API UTexPanner : public UTexCoordMaterial
 {
 public:
 	DECLARE_CLASS(UTexPanner,UTexCoordMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FMatrix * GetMatrix(float);
 };
 
 class ENGINE_API UTexRotator : public UTexCoordMaterial
 {
 public:
 	DECLARE_CLASS(UTexRotator,UTexCoordMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostLoad();
+	virtual FMatrix * GetMatrix(float);
 };
 
 class ENGINE_API UTexScaler : public UTexCoordMaterial
 {
 public:
 	DECLARE_CLASS(UTexScaler,UTexCoordMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FMatrix * GetMatrix(float);
 };
 
 class ENGINE_API UTexEnvMap : public UTexCoordMaterial
 {
 public:
 	DECLARE_CLASS(UTexEnvMap,UTexCoordMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FMatrix * GetMatrix(float);
 };
 
 class ENGINE_API UColorModifier : public UModifier
@@ -3802,6 +3964,9 @@ class ENGINE_API UCubemap : public UTexture
 {
 public:
 	DECLARE_CLASS(UCubemap,UTexture,0,Engine)
+	// Auto-generated method declarations
+	virtual void Destroy();
+	virtual FBaseTexture * GetRenderInterface();
 };
 
 class ENGINE_API UPlayerLight : public UTexture
@@ -3852,12 +4017,20 @@ class ENGINE_API UMesh : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UMesh,UPrimitive,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	virtual UMeshInstance * MeshGetInstance(AActor const *);
+	virtual UClass * MeshGetInstanceClass();
 };
 
 class ENGINE_API ULodMesh : public UMesh
 {
 public:
 	DECLARE_CLASS(ULodMesh,UMesh,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	virtual int MemFootprint(int);
+	virtual UClass * MeshGetInstanceClass();
 };
 
 class ENGINE_API USkeletalMesh : public UMesh
@@ -4034,6 +4207,10 @@ class ENGINE_API UStaticMeshInstance : public UObject
 {
 public:
 	DECLARE_CLASS(UStaticMeshInstance,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	virtual void AttachProjectorClipped(AActor *,AProjector *);
+	virtual void DetachProjectorClipped(AProjector *);
 };
 
 /*==========================================================================
@@ -4080,12 +4257,17 @@ public:
 	INT R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End );
 	void ShrinkModel();
 	void Transform( ABrush* Brush );
+	// Auto-generated method declarations
+	void Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *);
+	void AttachProjector(int,FProjectorRenderInfo *,FPlane *);
 };
 
 class ENGINE_API UPolys : public UObject
 {
 public:
 	DECLARE_CLASS(UPolys,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
 };
 
 /*==========================================================================
@@ -4097,6 +4279,15 @@ class ENGINE_API AEmitter : public AActor
 public:
 	DECLARE_CLASS(AEmitter,AActor,0,Engine)
 	DECLARE_FUNCTION(execKill)
+	// Auto-generated method declarations
+	virtual void Spawned();
+	virtual int Tick(float,ELevelTick);
+	void Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	virtual void Kill();
+	virtual void PostScriptDestroyed();
+	virtual int CheckForProjectors();
+	virtual void Initialize();
 };
 
 class ENGINE_API UParticleEmitter : public UObject
@@ -4104,6 +4295,20 @@ class ENGINE_API UParticleEmitter : public UObject
 public:
 	DECLARE_CLASS(UParticleEmitter,UObject,0,Engine)
 	DECLARE_FUNCTION(execSpawnParticle)
+	// Auto-generated method declarations
+	virtual void SpawnIndividualParticles(int);
+	virtual void SpawnParticle(int,float,int,int,FVector const &);
+	virtual float SpawnParticles(float,float,float);
+	virtual int UpdateParticles(float);
+	virtual int RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void Reset();
+	virtual void Scale(float);
+	virtual void PostEditChange();
+	virtual void PostLoad();
+	virtual void CleanUp();
+	virtual void Destroy();
+	virtual void HandleActorForce(AActor *,float);
+	virtual void Initialize(int);
 };
 
 /*==========================================================================
@@ -4125,6 +4330,18 @@ public:
 	DECLARE_FUNCTION(execStopGSClientProcedure)
 	// Event thunks
 	void eventGMProcessMsg(const FString&);
+	// Auto-generated method declarations
+	virtual void StartJoinServer(FString,FString,int);
+	virtual int StartLogInProcedure();
+	virtual void StartPreJoinProcedure(int);
+	virtual void UnInitialize();
+	virtual void SetGSCreateUbiServer(int);
+	virtual void LaunchListenSrv(FString,FString);
+	virtual void ClientLeaveServer();
+	virtual void ConnectionInterrupted(int);
+	virtual void GameServiceTick(UConsole *);
+	virtual int GetGSCreateUbiServer();
+	virtual void InitializeGameService(UConsole *);
 };
 
 class ENGINE_API UR6MissionDescription : public UObject
@@ -4194,6 +4411,9 @@ public:
 	DECLARE_FUNCTION(execNativeRunAllTests)
 	// Event thunks
 	void eventRunAll();
+	// Auto-generated method declarations
+	void eviLTestATS();
+	void evilTestUpdateSystem();
 };
 
 /*==========================================================================
@@ -4305,12 +4525,35 @@ public:
 
 	// FExec interface.
 	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+	// Auto-generated method declarations
+	void StaticConstructor();
+	virtual int ReplaceTexture(FString,UTexture *);
+	virtual void Serialize(FArchive &);
+	virtual int Key(UViewport *,EInputKey);
+	virtual int LoadBackgroundImage(FString,UTexture *,UTexture *);
+	virtual void LoadRandomMenuBackgroundImage(FString);
+	virtual int CacheArmPatch(FGuid *,DWORD *);
+	virtual void Destroy();
+	int ExecServerProf(const TCHAR*,int,FOutputDevice &);
+	void InitAudio();
+	virtual int InputEvent(UViewport *,EInputKey,EInputAction,float);
 };
 
 class ENGINE_API UClient : public UObject
 {
 public:
 	DECLARE_CLASS(UClient,UObject,CLASS_Config,Engine)
+	// Auto-generated method declarations
+	void StaticConstructor();
+	virtual void UpdateGamma();
+	virtual void UpdateGraphicOptions();
+	virtual void RestoreGamma();
+	virtual void Serialize(FArchive &);
+	virtual void PostEditChange();
+	virtual void Destroy();
+	virtual int Exec(const TCHAR*,FOutputDevice &);
+	virtual void Flush(int);
+	virtual void Init(UEngine *);
 };
 
 class ENGINE_API UInteractions : public UObject
@@ -4326,6 +4569,16 @@ class ENGINE_API UDownload : public UObject
 public:
 	DECLARE_CLASS(UDownload,UObject,CLASS_Transient,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UDownload)
+	// Auto-generated method declarations
+	void StaticConstructor();
+	virtual void Tick();
+	virtual int TrySkipFile();
+	virtual void ReceiveData(BYTE*,int);
+	virtual void ReceiveFile(UNetConnection *,int,const TCHAR*,int);
+	virtual void Serialize(FArchive &);
+	virtual void Destroy();
+	virtual void DownloadDone();
+	virtual void DownloadError(const TCHAR*);
 };
 
 class ENGINE_API UMatObject : public UObject
@@ -4345,6 +4598,9 @@ class ENGINE_API UCameraEffect : public UObject
 {
 public:
 	DECLARE_CLASS(UCameraEffect,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostRender(UViewport *,FRenderInterface *);
+	virtual void PreRender(UViewport *,FRenderInterface *);
 };
 
 class ENGINE_API UKarmaParamsCollision : public UObject
@@ -4364,12 +4620,22 @@ class ENGINE_API UTexModifier : public UModifier
 {
 public:
 	DECLARE_CLASS(UTexModifier,UModifier,0,Engine)
+	// Auto-generated method declarations
+	virtual void SetValidated(int);
+	virtual BYTE RequiredUVStreams();
+	virtual int MaterialUSize();
+	virtual int MaterialVSize();
+	virtual FMatrix * GetMatrix(float);
+	virtual int GetValidated();
 };
 
 class ENGINE_API UAnimNotify : public UObject
 {
 public:
 	DECLARE_CLASS(UAnimNotify,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
+	virtual void PostEditChange();
 };
 
 class ENGINE_API UMatAction : public UMatObject
@@ -4379,6 +4645,10 @@ public:
 	// Event thunks
 	void eventActionStart(class AActor*);
 	void eventInitialize();
+	// Auto-generated method declarations
+	virtual void PostEditChange();
+	virtual void PostLoad();
+	virtual void Initialize();
 };
 
 class ENGINE_API UMatSubAction : public UMatObject
@@ -4387,6 +4657,15 @@ public:
 	DECLARE_CLASS(UMatSubAction,UMatObject,0,Engine)
 	// Event thunks
 	void eventInitialize();
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual void PostEditChange();
+	virtual void PreBeginPreview();
+	virtual FString GetStatString();
+	FString GetStatusDesc();
+	virtual void Initialize();
+	virtual int IsEnding();
+	virtual int IsRunning();
 };
 
 class ENGINE_API AStatLog : public AInfo
@@ -4418,6 +4697,18 @@ public:
 	DECLARE_FUNCTION(execKUpdateConstraintParams)
 	// Event thunks
 	void eventKForceExceed(FLOAT);
+	// Auto-generated method declarations
+	virtual MdtBaseConstraint * getKConstraint() const;
+	virtual _McdModel * getKModel() const;
+	virtual void physKarma(float);
+	virtual void postKarmaStep();
+	virtual void preKarmaStep(float);
+	virtual void RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	virtual void KUpdateConstraintParams();
+	virtual void PostEditChange();
+	virtual void PostEditMove();
+	virtual void CheckForErrors();
+	virtual int CheckOwnerUpdated();
 };
 
 class ENGINE_API ASceneManager : public AInfo
@@ -4443,6 +4734,20 @@ public:
 	// Event thunks
 	void eventSceneEnded();
 	void eventSceneStarted();
+	// Auto-generated method declarations
+	void UpdateViewerFromPct(float);
+	int VerifyIntPoints();
+	void RefreshSubActions(float);
+	void SceneEnded();
+	void SceneStarted();
+	void PreparePath();
+	void ChangeOrientation(FOrientation);
+	void DeletePathSamples();
+	UMatAction * GetActionFromPct(float);
+	float GetActionPctFromScenePct(float);
+	FVector GetLocation(TArray<FVector> *,float);
+	FRotator GetRotation(TArray<FVector> *,float,FVector,FRotator,UMatAction *,int);
+	void InitializeActions();
 };
 
 class ENGINE_API AMapList : public AInfo
@@ -4461,6 +4766,8 @@ public:
 	// Event thunks
 	void eventForceGenerate();
 	void eventGenerate();
+	// Auto-generated method declarations
+	virtual void AddMyMarker(AActor *);
 };
 
 class ENGINE_API AInternetInfo : public AInfo
@@ -4491,6 +4798,17 @@ public:
 	void Pling( const FVector& Location, FLOAT Strength, FLOAT Radius );
 	void PlingVertex( INT X, INT Y, FLOAT Strength );
 	void UpdateSimulation( FLOAT DeltaTime );
+	// Auto-generated method declarations
+	void UpdateOscillatorList();
+	void RebuildClampedBitmap();
+	void Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	void SetClampedBitmap(int,int,int);
+	void FillIndexBuffer(void *);
+	void FillVertexBuffer(void *);
+	int GetClampedBitmap(int,int);
+	void GetNearestIndex(FVector const &,int &,int &);
+	FVector GetVertexPos(int,int);
 };
 
 class ENGINE_API ASkyZoneInfo : public AZoneInfo
@@ -4536,6 +4854,17 @@ public:
 
 	// Non-virtual methods
 	void FixUpLevel();
+	// Auto-generated method declarations
+	virtual int ReplaceTexture(FString,UTexture *);
+	virtual int LoadBackgroundImage(FString,UTexture *,UTexture *);
+	virtual void LoadRandomMenuBackgroundImage(FString);
+	void PostRenderFullScreenEffects(FLevelSceneNode *,UViewport *);
+	void AddLinkerToMasterMap(UNetDriver *,APawn *);
+	void AddLinkerToMasterMap(UNetDriver *,UMaterial *);
+	void AddLinkerToMasterMap(UNetDriver *,UMesh *);
+	void AddLinkerToMasterMap(UNetDriver *,UStaticMesh *);
+	virtual void DisplayGameVideo(eGameVideoType);
+	virtual void InitializeMissionDescription(FString &);
 };
 
 class ENGINE_API UInteraction : public UInteractions
@@ -4581,6 +4910,15 @@ public:
 	void eventProcess_Tick(TArray<UInteraction*>, FLOAT);
 	void eventRemoveInteraction(UInteraction*);
 	void eventSetFocusTo(UInteraction*, class UPlayer*);
+	// Auto-generated method declarations
+	int MasterProcessKeyEvent(EInputKey,EInputAction,float);
+	int MasterProcessKeyType(EInputKey);
+	void MasterProcessMessage(FString const &,float);
+	void MasterProcessPostRender(UCanvas *);
+	void MasterProcessPreRender(UCanvas *);
+	void MasterProcessTick(float);
+	void DisplayCopyright();
+	int Exec(const TCHAR*,FOutputDevice &);
 };
 
 class ENGINE_API UConsole : public UInteraction
@@ -4638,6 +4976,9 @@ class ENGINE_API UInputPlanning : public UInput
 {
 public:
 	DECLARE_CLASS(UInputPlanning,UInput,CLASS_Transient,Engine)
+	// Auto-generated method declarations
+	static const TCHAR* StaticConfigName();
+	static void StaticInitInput();
 };
 
 class ENGINE_API UPlayerInput : public UObject
@@ -4664,18 +5005,32 @@ class ENGINE_API UFont : public UObject
 {
 public:
 	DECLARE_CLASS(UFont,UObject,0,Engine)
+	// Auto-generated method declarations
+	_WORD RemapChar(_WORD);
+	virtual void Serialize(FArchive &);
 };
 
 class ENGINE_API UAnimation : public UObject
 {
 public:
 	DECLARE_CLASS(UAnimation,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
 };
 
 class ENGINE_API UMeshAnimation : public UObject
 {
 public:
 	DECLARE_CLASS(UMeshAnimation,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual int SequenceMemFootprint(FName);
+	virtual void Serialize(FArchive &);
+	virtual int MemFootprint();
+	virtual void PostLoad();
+	void ClearAnimNotifys();
+	virtual FMeshAnimSeq * GetAnimSeq(FName);
+	virtual MotionChunk * GetMovement(FName);
+	virtual void InitForDigestion();
 };
 
 class ENGINE_API UViewport : public UPlayer
@@ -4707,6 +5062,19 @@ public:
 	INT IsWire();
 	void ScreenShot();
 	BYTE* _Screen( INT X, INT Y );
+	// Auto-generated method declarations
+	void PushHit(HHitProxy const &,int);
+	static void RefreshAll();
+	void LockOnActor(AActor *);
+	int MultiShot();
+	void PopHit(int);
+	void ChangeInputSet(BYTE);
+	void ExecProfile(const TCHAR*,int,FOutputDevice &);
+	void ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor * *);
+	int IsDepthComplexity();
+	int IsEditing();
+	int IsLit();
+	int IsTopView();
 };
 
 class ENGINE_API UChannelDownload : public UDownload
@@ -4714,6 +5082,12 @@ class ENGINE_API UChannelDownload : public UDownload
 public:
 	DECLARE_CLASS(UChannelDownload,UDownload,CLASS_Transient,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UChannelDownload)
+	// Auto-generated method declarations
+	void StaticConstructor();
+	virtual int TrySkipFile();
+	virtual void ReceiveFile(UNetConnection *,int,const TCHAR*,int);
+	virtual void Serialize(FArchive &);
+	virtual void Destroy();
 };
 
 class ENGINE_API UBinaryFileDownload : public UChannelDownload
@@ -4745,6 +5119,17 @@ class ENGINE_API UDemoRecDriver : public UNetDriver
 {
 public:
 	DECLARE_CLASS(UDemoRecDriver,UNetDriver,0,Engine)
+	// Auto-generated method declarations
+	void SpawnDemoRecSpectator(UNetConnection *);
+	void StaticConstructor();
+	virtual void TickDispatch(float);
+	virtual void LowLevelDestroy();
+	virtual FString LowLevelGetNetworkNumber();
+	virtual int Exec(const TCHAR*,FOutputDevice &);
+	ULevel * GetLevel();
+	int InitBase(int,FNetworkNotify *,FURL &,FString &);
+	virtual int InitConnect(FNetworkNotify *,FURL &,FString &);
+	virtual int InitListen(FNetworkNotify *,FURL &,FString &);
 };
 
 class ENGINE_API UNetPendingLevel : public UPendingLevel
@@ -4789,6 +5174,10 @@ class ENGINE_API UConvexVolume : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UConvexVolume,UPrimitive,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	virtual FBox GetRenderBoundingBox(AActor const *);
+	int IsPointInside(FVector,FMatrix);
 };
 
 class ENGINE_API UFluidSurfacePrimitive : public UPrimitive
@@ -4796,12 +5185,26 @@ class ENGINE_API UFluidSurfacePrimitive : public UPrimitive
 public:
 	DECLARE_CLASS(UFluidSurfacePrimitive,UPrimitive,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UFluidSurfacePrimitive)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	virtual int LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD);
+	virtual int PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD);
+	virtual FBox GetCollisionBoundingBox(AActor const *) const;
+	virtual FBox GetRenderBoundingBox(AActor const *);
+	virtual FSphere GetRenderBoundingSphere(AActor const *);
 };
 
 class ENGINE_API UProjectorPrimitive : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UProjectorPrimitive,UPrimitive,0,Engine)
+	// Auto-generated method declarations
+	virtual int LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD);
+	virtual int PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD);
+	virtual void Destroy();
+	virtual FBox GetCollisionBoundingBox(AActor const *) const;
+	virtual FVector GetEncroachCenter(AActor *);
+	virtual FVector GetEncroachExtent(AActor *);
 };
 
 class ENGINE_API UTerrainPrimitive : public UPrimitive
@@ -4815,6 +5218,13 @@ class ENGINE_API UVertMesh : public ULodMesh
 {
 public:
 	DECLARE_CLASS(UVertMesh,ULodMesh,0,Engine)
+	// Auto-generated method declarations
+	int RenderPreProcess();
+	virtual void Serialize(FArchive &);
+	virtual UClass * MeshGetInstanceClass();
+	virtual void PostLoad();
+	virtual FBox GetRenderBoundingBox(AActor const *);
+	virtual FSphere GetRenderBoundingSphere(AActor const *);
 };
 
 class ENGINE_API UVertMeshInstance : public ULodMeshInstance
@@ -4865,12 +5275,16 @@ class ENGINE_API USkinVertexBuffer : public URenderResource
 {
 public:
 	DECLARE_CLASS(USkinVertexBuffer,URenderResource,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
 };
 
 class ENGINE_API UIndexBuffer : public URenderResource
 {
 public:
 	DECLARE_CLASS(UIndexBuffer,URenderResource,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
 };
 
 class ENGINE_API UVertexBuffer : public UVertexStreamBase
@@ -4907,18 +5321,26 @@ class ENGINE_API UCameraOverlay : public UCameraEffect
 {
 public:
 	DECLARE_CLASS(UCameraOverlay,UCameraEffect,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostRender(UViewport *,FRenderInterface *);
 };
 
 class ENGINE_API UMotionBlur : public UCameraEffect
 {
 public:
 	DECLARE_CLASS(UMotionBlur,UCameraEffect,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostRender(UViewport *,FRenderInterface *);
+	virtual void PreRender(UViewport *,FRenderInterface *);
+	virtual void Destroy();
 };
 
 class ENGINE_API UFadeColor : public UConstantMaterial
 {
 public:
 	DECLARE_CLASS(UFadeColor,UConstantMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual FColor GetColor(float);
 };
 
 class ENGINE_API UDiffuseAttenuationMaterial : public URenderedMaterial
@@ -4939,36 +5361,54 @@ class ENGINE_API UTerrainMaterial : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UTerrainMaterial,URenderedMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual UMaterial * CheckFallback();
+	virtual int HasFallback();
 };
 
 class ENGINE_API UTexCoordSource : public UTexModifier
 {
 public:
 	DECLARE_CLASS(UTexCoordSource,UTexModifier,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostEditChange();
 };
 
 class ENGINE_API UProxyBitmapMaterial : public UBitmapMaterial
 {
 public:
 	DECLARE_CLASS(UProxyBitmapMaterial,UBitmapMaterial,0,Engine)
+	// Auto-generated method declarations
+	void SetTextureInterface(FBaseTexture *);
+	virtual UBitmapMaterial * Get(double,UViewport *);
+	virtual FBaseTexture * GetRenderInterface();
 };
 
 class ENGINE_API UShadowBitmapMaterial : public UBitmapMaterial
 {
 public:
 	DECLARE_CLASS(UShadowBitmapMaterial,UBitmapMaterial,0,Engine)
+	// Auto-generated method declarations
+	virtual void Destroy();
+	virtual UBitmapMaterial * Get(double,UViewport *);
+	virtual FBaseTexture * GetRenderInterface();
 };
 
 class ENGINE_API UMaterialSwitch : public UModifier
 {
 public:
 	DECLARE_CLASS(UMaterialSwitch,UModifier,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostEditChange();
+	virtual int CheckCircularReferences(TArray<UMaterial *> &);
 };
 
 class ENGINE_API UKarmaParams : public UKarmaParamsCollision
 {
 public:
 	DECLARE_CLASS(UKarmaParams,UKarmaParamsCollision,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostEditChange();
 };
 
 class ENGINE_API UKarmaParamsRBFull : public UKarmaParams
@@ -4989,54 +5429,93 @@ class ENGINE_API UKMeshProps : public UObject
 {
 public:
 	DECLARE_CLASS(UKMeshProps,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
+	void Draw(FRenderInterface *,int);
 };
 
 class ENGINE_API UBeamEmitter : public UParticleEmitter
 {
 public:
 	DECLARE_CLASS(UBeamEmitter,UParticleEmitter,0,Engine)
+	// Auto-generated method declarations
+	virtual void SpawnParticle(int,float,int,int,FVector const &);
+	virtual void UpdateActorHitList();
+	virtual int UpdateParticles(float);
+	virtual int RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void Scale(float);
+	virtual void PostEditChange();
+	virtual void CleanUp();
+	virtual void Initialize(int);
 };
 
 class ENGINE_API UMeshEmitter : public UParticleEmitter
 {
 public:
 	DECLARE_CLASS(UMeshEmitter,UParticleEmitter,0,Engine)
+	// Auto-generated method declarations
+	virtual int UpdateParticles(float);
+	virtual int RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void PostEditChange();
+	virtual void Initialize(int);
 };
 
 class ENGINE_API USparkEmitter : public UParticleEmitter
 {
 public:
 	DECLARE_CLASS(USparkEmitter,UParticleEmitter,0,Engine)
+	// Auto-generated method declarations
+	virtual void SpawnParticle(int,float,int,int,FVector const &);
+	virtual int UpdateParticles(float);
+	virtual int RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void PostEditChange();
+	virtual void CleanUp();
+	virtual void Initialize(int);
 };
 
 class ENGINE_API USpriteEmitter : public UParticleEmitter
 {
 public:
 	DECLARE_CLASS(USpriteEmitter,UParticleEmitter,0,Engine)
+	// Auto-generated method declarations
+	virtual int UpdateParticles(float);
+	virtual int RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *);
+	virtual void PostEditChange();
+	virtual void CleanUp();
+	virtual int FillVertexBuffer(FSpriteParticleVertex *,FLevelSceneNode *);
+	virtual void Initialize(int);
 };
 
 class ENGINE_API UAnimNotify_DestroyEffect : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_DestroyEffect,UAnimNotify,0,Engine)
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
 };
 
 class ENGINE_API UAnimNotify_Effect : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_Effect,UAnimNotify,0,Engine)
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
 };
 
 class ENGINE_API UAnimNotify_MatSubAction : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_MatSubAction,UAnimNotify,0,Engine)
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
 };
 
 class ENGINE_API UAnimNotify_Script : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_Script,UAnimNotify,0,Engine)
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
 };
 
 class ENGINE_API UAnimNotify_Scripted : public UAnimNotify
@@ -5045,12 +5524,16 @@ public:
 	DECLARE_CLASS(UAnimNotify_Scripted,UAnimNotify,0,Engine)
 	// Event thunks
 	void eventNotify(class AActor*);
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
 };
 
 class ENGINE_API UAnimNotify_Sound : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_Sound,UAnimNotify,0,Engine)
+	// Auto-generated method declarations
+	virtual void Notify(UMeshInstance *,AActor *);
 };
 
 class ENGINE_API UActionMoveCamera : public UMatAction
@@ -5078,60 +5561,99 @@ class ENGINE_API USubActionCameraEffect : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionCameraEffect,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API USubActionCameraShake : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionCameraShake,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API USubActionFade : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionFade,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API USubActionFOV : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionFOV,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API USubActionGameSpeed : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionGameSpeed,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API USubActionOrientation : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionOrientation,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual void PostLoad();
+	virtual FString GetStatString();
+	virtual int IsRunning();
 };
 
 class ENGINE_API USubActionSceneSpeed : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionSceneSpeed,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API USubActionTrigger : public UMatSubAction
 {
 public:
 	DECLARE_CLASS(USubActionTrigger,UMatSubAction,0,Engine)
+	// Auto-generated method declarations
+	virtual int Update(float,ASceneManager *);
+	virtual FString GetStatString();
 };
 
 class ENGINE_API ULevelSummary : public UObject
 {
 public:
 	DECLARE_CLASS(ULevelSummary,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostLoad();
 };
 
 class ENGINE_API UReachSpec : public UObject
 {
 public:
 	DECLARE_CLASS(UReachSpec,UObject,0,Engine)
+	// Auto-generated method declarations
+	int findBestReachable(AScout *);
+	int supports(int,int,int,int);
+	int defineFor(ANavigationPoint *,ANavigationPoint *,APawn *);
+	FPlane PathColor();
+	int PlaceScout(AScout *);
+	int operator==(UReachSpec const &);
+	UReachSpec * operator+(UReachSpec const &) const;
+	int operator<=(UReachSpec const &);
+	int BotOnlyPath();
+	void Init();
 };
 
 class ENGINE_API UTerrainSector : public UObject
@@ -5145,12 +5667,16 @@ class ENGINE_API UI3DL2Listener : public UObject
 {
 public:
 	DECLARE_CLASS(UI3DL2Listener,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostEditChange();
 };
 
 class ENGINE_API USoundGen : public USound
 {
 public:
 	DECLARE_CLASS(USoundGen,USound,0,Engine)
+	// Auto-generated method declarations
+	virtual void Serialize(FArchive &);
 };
 
 class ENGINE_API UServerCommandlet : public UObject
@@ -5167,6 +5693,10 @@ public:
 	DECLARE_FUNCTION(execFindFile)
 	DECLARE_FUNCTION(execGetFileName)
 	DECLARE_FUNCTION(execGetNbFile)
+	// Auto-generated method declarations
+	virtual int FindFile(FString *);
+	virtual void GetFileName(int,FString *);
+	virtual int GetNbFile(FString *,FString *);
 };
 
 class ENGINE_API UR6GameColors : public UObject
@@ -5194,6 +5724,10 @@ class ENGINE_API UR6AbstractPlanningInfo : public UObject
 {
 public:
 	DECLARE_CLASS(UR6AbstractPlanningInfo,UObject,0,Engine)
+	// Auto-generated method declarations
+	virtual void TransferFile(FArchive &);
+	virtual void AddPoint(AActor *);
+	virtual AActor * GetTeamLeader();
 };
 
 class UR6AbstractTerroristMgr : public UObject
@@ -5218,6 +5752,10 @@ class ENGINE_API AScout : public APawn
 {
 public:
 	DECLARE_CLASS(AScout,APawn,0|CLASS_Config|CLASS_NativeReplication,Engine)
+	// Auto-generated method declarations
+	int findStart(FVector);
+	virtual int HurtByVolume(AActor *);
+	void InitForPathing();
 };
 
 class ENGINE_API AStatLogFile : public AStatLog
@@ -5244,42 +5782,68 @@ class ENGINE_API AAIMarker : public ASmallNavigationPoint
 {
 public:
 	DECLARE_CLASS(AAIMarker,ASmallNavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual int IsIdentifiedAs(FName);
 };
 
 class ENGINE_API AAIScript : public AKeypoint
 {
 public:
 	DECLARE_CLASS(AAIScript,AKeypoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void AddMyMarker(AActor *);
 };
 
 class ENGINE_API ADoor : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(ADoor,ANavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void PostaddReachSpecs(APawn *);
+	virtual void PostPath();
+	virtual void PrePath();
+	virtual AActor * AssociatedLevelGeometry();
+	virtual void FindBase();
+	virtual int HasAssociatedLevelGeometry(AActor *);
+	virtual void InitForPathFinding();
+	virtual int IsIdentifiedAs(FName);
 };
 
 class ENGINE_API AFluidSurfaceOscillator : public AActor
 {
 public:
 	DECLARE_CLASS(AFluidSurfaceOscillator,AActor,0,Engine)
+	// Auto-generated method declarations
+	void UpdateOscillation(float);
+	virtual void PostEditChange();
+	virtual void Destroy();
 };
 
 class ENGINE_API AInterpolationPoint : public AKeypoint
 {
 public:
 	DECLARE_CLASS(AInterpolationPoint,AKeypoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	virtual void PostEditChange();
+	virtual void PostEditMove();
 };
 
 class ENGINE_API AJumpDest : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(AJumpDest,ANavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void SetupForcedPath(APawn *,UReachSpec *);
+	virtual void ClearPaths();
 };
 
 class ENGINE_API AJumpPad : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(AJumpPad,ANavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void addReachSpecs(APawn *,int);
 };
 
 class ENGINE_API AKBSJoint : public AKConstraint
@@ -5293,30 +5857,48 @@ class ENGINE_API AKConeLimit : public AKConstraint
 {
 public:
 	DECLARE_CLASS(AKConeLimit,AKConstraint,0,Engine)
+	// Auto-generated method declarations
+	virtual void KUpdateConstraintParams();
 };
 
 class ENGINE_API AKHinge : public AKConstraint
 {
 public:
 	DECLARE_CLASS(AKHinge,AKConstraint,0,Engine)
+	// Auto-generated method declarations
+	virtual void preKarmaStep(float);
+	virtual void KUpdateConstraintParams();
 };
 
 class ENGINE_API ALadder : public ASmallNavigationPoint
 {
 public:
 	DECLARE_CLASS(ALadder,ASmallNavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void addReachSpecs(APawn *,int);
+	virtual int ProscribedPathTo(ANavigationPoint *);
+	virtual void ClearPaths();
+	virtual void InitForPathFinding();
 };
 
 class ENGINE_API ALadderVolume : public APhysicsVolume
 {
 public:
 	DECLARE_CLASS(ALadderVolume,APhysicsVolume,0,Engine)
+	// Auto-generated method declarations
+	virtual void RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	virtual void AddMyMarker(AActor *);
+	FVector FindCenter();
+	FVector FindTop(FVector);
 };
 
 class ENGINE_API ALiftCenter : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(ALiftCenter,ANavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void addReachSpecs(APawn *,int);
+	virtual void FindBase();
 };
 
 class ENGINE_API ALiftExit : public ANavigationPoint
@@ -5332,6 +5914,8 @@ public:
 	DECLARE_CLASS(ALineOfSightTrigger,ATriggers,0,Engine)
 	// Event thunks
 	void eventPlayerSeesMe(class APlayerController*);
+	// Auto-generated method declarations
+	virtual void TickAuthoritative(float);
 };
 
 class ENGINE_API ALookTarget : public AKeypoint
@@ -5345,12 +5929,17 @@ class ENGINE_API APathNode : public ANavigationPoint
 {
 public:
 	DECLARE_CLASS(APathNode,ANavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual int ReviewPath(APawn *);
+	virtual void CheckSymmetry(ANavigationPoint *);
 };
 
 class ENGINE_API APlayerStart : public ASmallNavigationPoint
 {
 public:
 	DECLARE_CLASS(APlayerStart,ASmallNavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void addReachSpecs(APawn *,int);
 };
 
 class ENGINE_API APotentialClimbWatcher : public AInfo
@@ -5378,6 +5967,8 @@ class ENGINE_API ATeleporter : public ASmallNavigationPoint
 {
 public:
 	DECLARE_CLASS(ATeleporter,ASmallNavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void addReachSpecs(APawn *,int);
 };
 
 class ENGINE_API ATerrainInfo : public AInfo
@@ -5441,6 +6032,9 @@ class ENGINE_API AWarpZoneMarker : public ASmallNavigationPoint
 {
 public:
 	DECLARE_CLASS(AWarpZoneMarker,ASmallNavigationPoint,0,Engine)
+	// Auto-generated method declarations
+	virtual void addReachSpecs(APawn *,int);
+	virtual int IsIdentifiedAs(FName);
 };
 
 // --- RVS-specific actor subclasses ---
@@ -5449,6 +6043,8 @@ class ENGINE_API AR6AbstractCircumstantialActionQuery : public AActor
 {
 public:
 	DECLARE_CLASS(AR6AbstractCircumstantialActionQuery,AActor,0,Engine)
+	// Auto-generated method declarations
+	virtual int * GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *);
 };
 
 class AR6AbstractClimbableObj : public AActor
@@ -5470,6 +6066,9 @@ class ENGINE_API AR6ActionSpot : public AActor
 {
 public:
 	DECLARE_CLASS(AR6ActionSpot,AActor,0,Engine)
+	// Auto-generated method declarations
+	virtual void RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
+	virtual void CheckForErrors();
 };
 
 class ENGINE_API AR6ColBox : public AActor
@@ -5477,12 +6076,24 @@ class ENGINE_API AR6ColBox : public AActor
 public:
 	DECLARE_CLASS(AR6ColBox,AActor,0,Engine)
 	DECLARE_FUNCTION(execEnableCollision)
+	// Auto-generated method declarations
+	virtual int ShouldTrace(AActor *,DWORD);
+	virtual void SetBase(AActor *,FVector,int);
+	int CanStepUp(FVector);
+	void EnableCollision(int,int,int);
+	void GetColBoxLocationFromOwner(FVector &,float);
+	void GetDestination(FVector &,FRotator &);
+	float GetMaxStepUp(bool,float);
+	virtual APawn * GetPawnOrColBoxOwner() const;
+	virtual int IsBlockedBy(AActor const *) const;
 };
 
 class ENGINE_API AR6DecalsBase : public AActor
 {
 public:
 	DECLARE_CLASS(AR6DecalsBase,AActor,0,Engine)
+	// Auto-generated method declarations
+	virtual int IsNetRelevantFor(APlayerController *,AActor *,FVector);
 };
 
 class ENGINE_API AR6Decal : public AProjector
@@ -5500,6 +6111,12 @@ public:
 	DECLARE_FUNCTION(execAddDecal)
 	DECLARE_FUNCTION(execDeActivateGroup)
 	DECLARE_FUNCTION(execKillDecal)
+	// Auto-generated method declarations
+	virtual void Spawned();
+	void KillDecal(AR6Decal *);
+	virtual void PostScriptDestroyed();
+	void ActivateGroup();
+	int AddDecal(FVector *,FRotator *,UTexture *,int,float,float,float,float,int);
 };
 
 class ENGINE_API AR6DecalManager : public AActor
@@ -5508,6 +6125,10 @@ public:
 	DECLARE_CLASS(AR6DecalManager,AActor,0,Engine)
 	DECLARE_FUNCTION(execAddDecal)
 	DECLARE_FUNCTION(execKillDecal)
+	// Auto-generated method declarations
+	virtual void Spawned();
+	int AddDecal(FVector *,FRotator *,UTexture *,eDecalType,int,float,float,float,float,int);
+	AR6DecalGroup * FindGroup(eDecalType);
 };
 
 class ENGINE_API AR6EngineFirstPersonWeapon : public AActor
@@ -5530,6 +6151,8 @@ public:
 	void eventSetIdentifyTarget(DWORD bShow, DWORD bFriendly, const FString& Name);
 	void eventShowWeaponParticules(BYTE ParticuleType);
 	void eventUpdateWeaponAttachment();
+	// Auto-generated method declarations
+	virtual int GetHeartBeatStatus();
 };
 
 class ENGINE_API AR6FootStep : public AActor
@@ -5551,6 +6174,8 @@ class ENGINE_API AR6RainbowStartInfo : public AActor
 {
 public:
 	DECLARE_CLASS(AR6RainbowStartInfo,AActor,0,Engine)
+	// Auto-generated method declarations
+	void TransferFile(FArchive &);
 };
 
 class ENGINE_API AR6StartGameInfo : public AActor
@@ -5563,12 +6188,18 @@ class ENGINE_API AR6TeamStartInfo : public AActor
 {
 public:
 	DECLARE_CLASS(AR6TeamStartInfo,AActor,0,Engine)
+	// Auto-generated method declarations
+	void TransferFile(FArchive &,int);
 };
 
 class ENGINE_API AR6WallHit : public AR6DecalsBase
 {
 public:
 	DECLARE_CLASS(AR6WallHit,AR6DecalsBase,0,Engine)
+	// Auto-generated method declarations
+	virtual void SpawnEffects();
+	virtual void SpawnSound();
+	virtual void PostBeginPlay();
 };
 
 class AR6AbstractHostageMgr : public AActor
