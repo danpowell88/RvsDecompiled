@@ -321,7 +321,7 @@ class FBaseTexture;
 class FBitReader;
 class FOutBunch;
 class FInBunch;
-class FHitCause;
+struct FHitCause;
 struct FOrientation;
 class UMatAction;
 class UClient;
@@ -1342,6 +1342,8 @@ public:
 // ===========================================================================
 // FHitCause and HHitProxy variants.
 // ===========================================================================
+
+struct FHitCause;
 
 class ENGINE_API FHitObserver
 {
@@ -3733,10 +3735,10 @@ public:
 	Class declarations — UnNet.cpp classes.
 ==========================================================================*/
 
-class ENGINE_API UPlayer : public UObject
+class ENGINE_API UPlayer : public UObject, public FOutputDevice, public FExec
 {
 public:
-	DECLARE_CLASS(UPlayer,UObject,0,Engine)
+	DECLARE_ABSTRACT_CLASS(UPlayer,UObject,0,Engine)
 	// Auto-generated method declarations
 	virtual void Serialize(FArchive &);
 	virtual void Destroy();
@@ -3768,7 +3770,7 @@ enum EChannelType { CHTYPE_None=0, CHTYPE_Control=1, CHTYPE_Actor=2, CHTYPE_File
 class ENGINE_API UNetConnection : public UPlayer
 {
 public:
-	DECLARE_CLASS(UNetConnection,UPlayer,0,Engine)
+	DECLARE_ABSTRACT_CLASS(UNetConnection,UPlayer,0,Engine)
 	UNetConnection() {}
 	UNetConnection( UNetDriver* InDriver, const FURL& InURL );
 
@@ -3852,7 +3854,7 @@ public:
 	virtual void Init(UNetConnection *,int,int);
 };
 
-class ENGINE_API UControlChannel : public UChannel
+class ENGINE_API UControlChannel : public UChannel, public FOutputDevice
 {
 public:
 	DECLARE_CLASS(UControlChannel,UChannel,0,Engine)
@@ -5242,7 +5244,7 @@ public:
 class ENGINE_API UViewport : public UPlayer
 {
 public:
-	DECLARE_CLASS(UViewport,UPlayer,0,Engine)
+	DECLARE_ABSTRACT_CLASS(UViewport,UPlayer,0,Engine)
 	UViewport() {}
 
 	// Virtual methods

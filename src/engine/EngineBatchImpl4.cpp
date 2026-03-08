@@ -335,3 +335,51 @@ FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appM
 // FSceneNode
 // ============================================================================
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+
+// ============================================================================
+// UPlayer — virtual method impl to trigger vftable emission for MI bases
+// (FOutputDevice, FExec, UObject secondary vftables)
+// ============================================================================
+void UPlayer::Destroy() {}
+void UPlayer::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
+int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
+
+// ============================================================================
+// UNetConnection — virtual method impls for vftable emission
+// ============================================================================
+void UNetConnection::Serialize(const TCHAR* Data, EName Event) {}
+void UNetConnection::Destroy() {}
+INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
+void UNetConnection::Serialize(FArchive& Ar) { UPlayer::Serialize(Ar); }
+
+// ============================================================================
+// UViewport — virtual method impls for vftable emission
+// ============================================================================
+void UViewport::Serialize(const TCHAR* Data, EName Event) {}
+void UViewport::Destroy() {}
+INT UViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
+void UViewport::Serialize(FArchive& Ar) { UPlayer::Serialize(Ar); }
+
+// ============================================================================
+// UControlChannel — virtual method impl for vftable emission
+// ============================================================================
+void UControlChannel::Serialize(const TCHAR* Data, EName Event) {}
+void UControlChannel::Destroy() {}
+
+// ============================================================================
+// TLazyArray<BYTE> — force emission of implicitly-declared special members
+// (copy ctor, operator=, default constructor closure).
+// Explicit template instantiation only emits explicitly-defined members;
+// these three are compiler-generated and need actual usage to be emitted.
+// ============================================================================
+template class TLazyArray<BYTE>;
+
+// new[] forces default constructor closure (??_F); copy ctor and operator= are
+// triggered by direct use. The function itself is unreachable but the symbols
+// it references have external linkage and remain in the object file.
+void _ForceTLazyArrayByteEmit() {
+    TLazyArray<BYTE>* p = new TLazyArray<BYTE>[1];
+    TLazyArray<BYTE> copy(*p);
+    *p = copy;
+    delete[] p;
+}

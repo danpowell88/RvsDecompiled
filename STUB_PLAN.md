@@ -480,6 +480,114 @@ The ~365 EXEC_STUBs break down by functional area:
 
 ---
 
+## Phase 8: Header & Source Reorganisation
+**Goal:** Restructure the codebase from its current decompilation-driven layout into a clean, modular source tree modelled on UT99's public source conventions. The code should look like it was always maintained as a proper Unreal Engine project.
+
+### Why This Matters
+During decompilation, pragmatism dictated the file layout — monolithic headers, batch implementation files, stubs files that grew organically. Now that every stub is gone, the code can be reorganised into the canonical Unreal module structure that Epic used and that any Unreal Engine programmer would recognise. This makes the codebase navigable, maintainable, and a genuine reference for anyone studying Ravenshield's internals.
+
+### 8A. Adopt the UT99 Module Convention: Inc/ and Src/
+UT99's public source uses a consistent layout per module:
+```
+ModuleName/
+  Inc/       ← public headers (API surface other modules #include)
+  Src/       ← implementation files (.cpp)
+  CMakeLists.txt
+```
+Apply this structure to every module in `src/`. Current state has headers and source mixed together in flat directories.
+
+**Transformation for each module:**
+| Current | Target |
+|---------|--------|
+| `src/core/CorePrivate.h` | `src/core/Inc/CorePrivate.h` |
+| `src/core/Core.cpp` | `src/core/Src/Core.cpp` |
+| `src/engine/Engine.h` | `src/engine/Inc/Engine.h` |
+| `src/engine/EngineClasses.h` | `src/engine/Inc/EngineClasses.h` |
+| `src/engine/EnginePrivate.h` | `src/engine/Inc/EnginePrivate.h` |
+| `src/engine/UnActor.cpp` | `src/engine/Src/UnActor.cpp` |
+| `src/r6engine/R6Engine.cpp` | `src/r6engine/Src/R6Engine.cpp` |
+| ... | ... |
+
+Update all `#include` paths and CMakeLists.txt `target_include_directories` accordingly.
+
+### 8B. Split Monolithic Headers Into Per-Class Headers
+UT99 has one header per major class or subsystem (e.g. `AActor.h`, `APawn.h`, `UnLevel.h`, `UnMesh.h`, `UnNet.h`). The current codebase has oversized aggregate headers like `EngineClasses.h` containing dozens of class declarations.
+
+**Engine module split (following UT99 conventions):**
+- `Engine.h` → remains as the umbrella include (includes individual headers)
+- `EngineClasses.h` → split into:
+  - `AActor.h` — AActor class declaration + inline methods
+  - `APawn.h` — APawn, AController, movement-related declarations
+  - `ALevelInfo.h` — ALevelInfo, AGameInfo, level metadata
+  - `APlayerController.h` — player controller hierarchy
+  - `UnLevel.h` — ULevel, FCollisionHash, level management
+  - `UnMesh.h` — UMesh, USkeletalMesh, animation structures
+  - `UnModel.h` — UModel, UPolys, BSP-related declarations
+  - `UnNet.h` — UChannel, UNetConnection, UPackageMap, network declarations
+  - `UnAudio.h` — UAudioSubsystem and sound-related declarations
+  - `UnRender.h` — UCanvas, FRenderInterface, rendering declarations
+  - `UnTex.h` — UTexture, UMaterial hierarchy, material declarations
+  - `UnCamera.h` — viewport/camera declarations
+- `EnginePrivate.h` → module-internal declarations, includes the public headers
+
+**R6 module splits:**
+- `src/r6engine/R6Engine.cpp` is likely one enormous file. Split into per-subsystem source files:
+  - `Src/R6PlayerController.cpp` — player control, stance system, camera
+  - `Src/R6AIController.cpp` — AI base + Rainbow/Terrorist/Hostage AI
+  - `Src/R6Door.cpp` — doors, breaching, interactive objects
+  - `Src/R6DeploymentZone.cpp` — spawning, deployment zones, zone paths
+  - `Src/R6Team.cpp` — team management, formation, rainbow squad
+  - `Src/R6RagDoll.cpp` — ragdoll physics
+  - `Src/R6Matinee.cpp` — matinee/cinematic extensions
+- Similarly split R6 headers into per-class files in `Inc/`
+
+**Core module split (following UT99):**
+- Verify existing Core files already follow the UT99 naming (UnArc.cpp, UnClass.cpp, UnObj.cpp, etc.)
+- Add missing per-class headers to `Inc/` if they're currently inlined in CorePrivate.h
+
+### 8C. Eliminate Decompilation Artefacts
+Remove files and patterns that only existed to support the incremental decompilation process:
+
+- **Delete all `.bak` files** — these were Ghidra reference copies, no longer needed once Phase 7 is complete
+- **Delete EngineStubs1-4.cpp** — should already be empty after Phase 7F, remove the files entirely
+- **Delete EngineBatchImpl*.cpp** — redistribute any remaining content into the correct per-subsystem source files
+- **Remove all `#pragma comment(linker, "/alternatename:...")` hacks** — should already be gone after Phase 7F, verify no stragglers remain
+- **Remove `dummy_stub_func` / `dummy_stub_data`** — all references and definitions
+- **Clean up `.def` files** — verify they match the final export tables, remove any comments about stub status
+- **Remove `.gitkeep` files** — directories now have real content
+
+### 8D. Standardise Include Guards and Forward Declarations
+- Adopt a consistent `#pragma once` or `#ifndef` guard convention across all headers
+- Use the UT99 naming convention for guards: `_INC_MODULENAME_HEADERNAME` (e.g. `_INC_ENGINE_AACTOR`)
+- Add proper forward declaration headers where modules reference each other's types without needing full definitions
+- Ensure no circular include dependencies — use the UT99 pattern where `ModulePrivate.h` is the internal "include everything" header and public `Inc/` headers are independently includable
+
+### 8E. CMake Build System Cleanup
+- Update every module's `CMakeLists.txt` to reflect the new `Inc/` and `Src/` layout
+- Use `target_include_directories(PUBLIC Inc/)` so dependent modules pick up headers automatically
+- Remove any hardcoded include paths that reference the old flat layout
+- Ensure `cmake --build build --config Release` still produces identical binaries
+- Verify ordinal tables are unaffected by the restructure
+
+### 8F. Documentation Pass
+- Update `README.md` with a source tree map reflecting the new layout
+- Add a brief comment at the top of each module's umbrella header describing the module's purpose (following UT99's style)
+- Ensure `AGENTS.md` and other project docs reference correct paths
+
+**Phase 8 Verification:**
+- `cmake --build build --config Release` succeeds — binaries are identical to pre-reorganisation
+- `dumpbin /exports` on each DLL still matches retail ordinal tables
+- `grep -r "dummy_stub_func\|alternatename\|\.bak" src/` returns zero hits
+- Every module follows `Inc/` + `Src/` convention
+- No header file exceeds ~1,000 lines (monoliths are split)
+- No source file exceeds ~3,000 lines (monoliths are split)
+- All `#include` paths resolve correctly
+- No circular include dependencies (build succeeds with individual .cpp compilation)
+
+**Phase 8 Milestone:** The codebase is clean, navigable, and structured like a proper Unreal Engine project. Any programmer familiar with UT99's source can orient themselves immediately. The decompilation scaffolding is gone — what remains is a maintainable source tree.
+
+---
+
 ## Phase Summary
 
 | Phase | Name | Stubs | Approach | Outcome |
@@ -491,6 +599,7 @@ The ~365 EXEC_STUBs break down by functional area:
 | **5** | Multiplayer & Networking | ~117 | UT99 + Ghidra + GameSpy SDK | Full multiplayer |
 | **6** | Audio Pipeline | ~450+ | Clean-room (SNDext) + Ghidra | 3D positional audio |
 | **7** | Polish & Remaining | ~600+ | Ghidra + UT99 | 100% complete, zero stubs |
+| **8** | Header & Source Reorganisation | 0 (structural) | UT99 convention guide | Clean, maintainable source tree |
 
 ## Parallelism
 
@@ -503,12 +612,15 @@ Phase 1 (MUST BE FIRST — everything depends on self-sufficient build)
   │                                       │
   ├─► Phase 6 (audio) ───────────────── independent, can start after Phase 1
   │
-  └─► Phase 7 (polish) ─────────────── mop-up, after 2-6 provide context
+  ├─► Phase 7 (polish) ─────────────── mop-up, after 2-6 provide context
+  │
+  └─► Phase 8 (reorganise) ─────────── after Phase 7, all stubs gone before restructuring
 ```
 
 Phases 5, 6, and most of 7 can run in **parallel** with Phase 4.
 Phase 3 and 4 are **sequential** (each builds on the previous).
 Phase 2 and 6 are **independent** of each other.
+Phase 8 is **strictly after Phase 7** — reorganising requires all code to be final.
 
 ## Decisions
 - Scope: All 15 game DLLs. Third-party middleware (bink, OpenAL, ogg, vorbis, EAX, MSVC7.1 RT) stays.
