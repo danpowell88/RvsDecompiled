@@ -914,6 +914,43 @@ void KUpdateMassProps(UKMeshProps * p0) {}
 void KarmaTriListDataInit(_KarmaTriListData * p0) {}
 
 // =============================================================================
+// UVertexStream class implementations.
+// =============================================================================
+UVertexStreamBase::UVertexStreamBase(INT InType, DWORD InStride, DWORD InFlags) {}
+void UVertexStreamBase::Serialize(FArchive& Ar) { URenderResource::Serialize(Ar); }
+void UVertexStreamBase::SetPolyFlags(DWORD Flags) {}
+
+UVertexBuffer::UVertexBuffer() {}
+UVertexBuffer::UVertexBuffer(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexBuffer::GetData() { return NULL; }
+INT UVertexBuffer::GetDataSize() { return 0; }
+
+UVertexStreamCOLOR::UVertexStreamCOLOR() {}
+UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags) : UVertexStreamBase(0, sizeof(FColor), InFlags) {}
+void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamCOLOR::GetData() { return NULL; }
+INT UVertexStreamCOLOR::GetDataSize() { return 0; }
+
+UVertexStreamPosNormTex::UVertexStreamPosNormTex() {}
+UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamPosNormTex::GetData() { return NULL; }
+INT UVertexStreamPosNormTex::GetDataSize() { return 0; }
+
+UVertexStreamUV::UVertexStreamUV() {}
+UVertexStreamUV::UVertexStreamUV(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamUV::GetData() { return NULL; }
+INT UVertexStreamUV::GetDataSize() { return 0; }
+
+UVertexStreamVECTOR::UVertexStreamVECTOR() {}
+UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamVECTOR::GetData() { return NULL; }
+INT UVertexStreamVECTOR::GetDataSize() { return 0; }
+
+// =============================================================================
 // FColor constructor from FPlane (out-of-line to avoid circular header deps).
 // =============================================================================
 FColor::FColor(const FPlane& P)

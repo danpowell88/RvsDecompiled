@@ -563,7 +563,7 @@ enum eGameVideoType { GVT_None=0 };
 class ENGINE_API FVertexStream
 {
 public:
-	virtual ~FVertexStream() {}
+	~FVertexStream() {}
 	virtual QWORD GetCacheId() = 0;
 	virtual INT GetRevision() = 0;
 	virtual INT GetComponents(FVertexComponent*) = 0;
@@ -4675,6 +4675,12 @@ class ENGINE_API UVertexStreamBase : public URenderResource
 {
 public:
 	DECLARE_CLASS(UVertexStreamBase,URenderResource,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UVertexStreamBase)
+	UVertexStreamBase(INT InType, DWORD InStride, DWORD InFlags);
+	virtual void Serialize(FArchive& Ar);
+	virtual void* GetData() { return NULL; }
+	virtual INT GetDataSize() { return 0; }
+	void SetPolyFlags(DWORD Flags);
 };
 
 class ENGINE_API UTexModifier : public UModifier
@@ -5352,30 +5358,55 @@ class ENGINE_API UVertexBuffer : public UVertexStreamBase
 {
 public:
 	DECLARE_CLASS(UVertexBuffer,UVertexStreamBase,0,Engine)
+	UVertexBuffer();
+	UVertexBuffer(DWORD InFlags);
+	virtual void Serialize(FArchive& Ar);
+	virtual void* GetData();
+	virtual INT GetDataSize();
 };
 
 class ENGINE_API UVertexStreamCOLOR : public UVertexStreamBase
 {
 public:
 	DECLARE_CLASS(UVertexStreamCOLOR,UVertexStreamBase,0,Engine)
+	UVertexStreamCOLOR();
+	UVertexStreamCOLOR(DWORD InFlags);
+	virtual void Serialize(FArchive& Ar);
+	virtual void* GetData();
+	virtual INT GetDataSize();
 };
 
 class ENGINE_API UVertexStreamPosNormTex : public UVertexStreamBase
 {
 public:
 	DECLARE_CLASS(UVertexStreamPosNormTex,UVertexStreamBase,0,Engine)
+	UVertexStreamPosNormTex();
+	UVertexStreamPosNormTex(DWORD InFlags);
+	virtual void Serialize(FArchive& Ar);
+	virtual void* GetData();
+	virtual INT GetDataSize();
 };
 
 class ENGINE_API UVertexStreamUV : public UVertexStreamBase
 {
 public:
 	DECLARE_CLASS(UVertexStreamUV,UVertexStreamBase,0,Engine)
+	UVertexStreamUV();
+	UVertexStreamUV(DWORD InFlags);
+	virtual void Serialize(FArchive& Ar);
+	virtual void* GetData();
+	virtual INT GetDataSize();
 };
 
 class ENGINE_API UVertexStreamVECTOR : public UVertexStreamBase
 {
 public:
 	DECLARE_CLASS(UVertexStreamVECTOR,UVertexStreamBase,0,Engine)
+	UVertexStreamVECTOR();
+	UVertexStreamVECTOR(DWORD InFlags);
+	virtual void Serialize(FArchive& Ar);
+	virtual void* GetData();
+	virtual INT GetDataSize();
 };
 
 class ENGINE_API UCameraOverlay : public UCameraEffect
