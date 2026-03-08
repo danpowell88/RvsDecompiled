@@ -1273,6 +1273,7 @@ class ENGINE_API FHitObserver
 {
 public:
 	virtual ~FHitObserver() {}
+	virtual void Click(const FHitCause& Cause, const struct HHitProxy& Hit) {}
 };
 
 struct ENGINE_API FHitCause
@@ -1287,19 +1288,77 @@ struct ENGINE_API FHitCause
 
 struct ENGINE_API HHitProxy
 {
+	union { mutable INT Size; HHitProxy* Parent; };
 	virtual ~HHitProxy() {}
+	virtual const TCHAR* GetName() const { return TEXT("HHitProxy"); }
+	virtual UBOOL IsA(const TCHAR* Str) const { return appStricmp(TEXT("HHitProxy"), Str) == 0; }
+	virtual void Click(const FHitCause& Cause) { Cause.Observer->Click(Cause, *this); }
+	virtual AActor* GetActor() { return NULL; }
 };
 
-struct ENGINE_API HActor : public HHitProxy { AActor* Actor; };
-struct ENGINE_API HBspSurf : public HHitProxy { INT iSurf; };
-struct ENGINE_API HCoords : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HMaterialTree : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HMatineeAction : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HMatineeScene : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HMatineeSubAction : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HMatineeTimePath : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HTerrain : public HHitProxy { BYTE Pad[64]; };
-struct ENGINE_API HTerrainToolLayer : public HHitProxy { BYTE Pad[64]; };
+#define DECLARE_HIT_PROXY(cls,parent) \
+	const TCHAR* GetName() const { return TEXT(#cls); } \
+	UBOOL IsA(const TCHAR* Str) const { return appStricmp(TEXT(#cls), Str) == 0 || parent::IsA(Str); }
+
+struct ENGINE_API HActor : public HHitProxy {
+	DECLARE_HIT_PROXY(HActor, HHitProxy)
+	AActor* Actor;
+	HActor(AActor* InActor) : Actor(InActor) {}
+	AActor* GetActor() { return Actor; }
+};
+struct ENGINE_API HBspSurf : public HHitProxy {
+	DECLARE_HIT_PROXY(HBspSurf, HHitProxy)
+	INT iSurf;
+	HBspSurf(INT iInSurf) : iSurf(iInSurf) {}
+};
+struct ENGINE_API HCoords : public HHitProxy {
+	DECLARE_HIT_PROXY(HCoords, HHitProxy)
+	FCoords Coords, Uncoords;
+	FVector Direction;
+	HCoords(FSceneNode* InFrame);
+};
+struct ENGINE_API HMaterialTree : public HHitProxy {
+	DECLARE_HIT_PROXY(HMaterialTree, HHitProxy)
+	UMaterial* Material;
+	DWORD Flags;
+	HMaterialTree(UMaterial* InMaterial, DWORD InFlags) : Material(InMaterial), Flags(InFlags) {}
+};
+struct ENGINE_API HMatineeAction : public HHitProxy {
+	DECLARE_HIT_PROXY(HMatineeAction, HHitProxy)
+	ASceneManager* SceneManager;
+	UMatAction* Action;
+	HMatineeAction(ASceneManager* InSM, UMatAction* InAction) : SceneManager(InSM), Action(InAction) {}
+};
+struct ENGINE_API HMatineeScene : public HHitProxy {
+	DECLARE_HIT_PROXY(HMatineeScene, HHitProxy)
+	ASceneManager* SceneManager;
+	HMatineeScene(ASceneManager* InSM) : SceneManager(InSM) {}
+};
+struct ENGINE_API HMatineeSubAction : public HHitProxy {
+	DECLARE_HIT_PROXY(HMatineeSubAction, HHitProxy)
+	UMatSubAction* SubAction;
+	UMatAction* Action;
+	HMatineeSubAction(UMatSubAction* InSub, UMatAction* InAction) : SubAction(InSub), Action(InAction) {}
+};
+struct ENGINE_API HMatineeTimePath : public HHitProxy {
+	DECLARE_HIT_PROXY(HMatineeTimePath, HHitProxy)
+	ASceneManager* SceneManager;
+	HMatineeTimePath(ASceneManager* InSM) : SceneManager(InSM) {}
+};
+struct ENGINE_API HTerrain : public HHitProxy {
+	DECLARE_HIT_PROXY(HTerrain, HHitProxy)
+	ATerrainInfo* TerrainInfo;
+	HTerrain(ATerrainInfo* InTerrain) : TerrainInfo(InTerrain) {}
+	AActor* GetActor() { return (AActor*)TerrainInfo; }
+};
+struct ENGINE_API HTerrainToolLayer : public HHitProxy {
+	DECLARE_HIT_PROXY(HTerrainToolLayer, HHitProxy)
+	ATerrainInfo* TerrainInfo;
+	INT LayerIndex;
+	UTexture* Texture;
+	HTerrainToolLayer(ATerrainInfo* InTerrain, INT InLayer, UTexture* InTexture)
+		: TerrainInfo(InTerrain), LayerIndex(InLayer), Texture(InTexture) {}
+};
 
 // ===========================================================================
 // FInBunch / FOutBunch — network bunch wrappers.
