@@ -30,6 +30,7 @@ IMPL_OBJS = [
     'EngineBatchImpl.obj',
     'EngineBatchImpl2.obj',
     'EngineBatchImpl3.obj',
+    'EngineBatchImpl4.obj',
     'EngineVirtuals.obj',
 ]
 

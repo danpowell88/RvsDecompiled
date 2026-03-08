@@ -47,17 +47,7 @@ public:
 	FCanvasVertex& operator=(const FCanvasVertex&);
 };
 
-class ENGINE_API FConvexVolume {
-public:
-	BYTE SphereCheck(FSphere);
-	FConvexVolume(FConvexVolume const &);
-	FConvexVolume();
-	~FConvexVolume();
-	FConvexVolume& operator=(const FConvexVolume&);
-	BYTE BoxCheck(FVector,FVector);
-	FPoly ClipPolygon(FPoly);
-	FPoly ClipPolygonPrecise(FPoly);
-};
+// FConvexVolume — now defined in EngineClasses.h
 
 struct ENGINE_API FDXTCompressionOptions {
 	FDXTCompressionOptions();

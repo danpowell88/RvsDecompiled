@@ -424,7 +424,6 @@ ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMa
 void UGameEngine::SaveGame( INT Position ) {}
 void UGameEngine::CancelPending() {}
 void UGameEngine::PaintProgress( const FURL& URL ) {}
-UNetDriver* UGameEngine::BuildServerMasterMap( UNetDriver* NetDriver, ULevel* InLevel ) { return NULL; }
 void UGameEngine::NotifyLevelChange() {}
 void UGameEngine::FixUpLevel() {}
 
@@ -506,9 +505,7 @@ void UNetConnection::FlushNet() {}
 void UNetConnection::Tick() {}
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 void UNetConnection::HandleClientPlayer( APlayerController* PC ) {}
-UChannel* UNetConnection::CreateChannel( INT ChType, INT bOpenedLocally, INT ChIndex ) { return NULL; }
 UNetDriver* UNetConnection::GetDriver() { return NULL; }
-void UNetConnection::PostSend( INT PacketId ) {}
 void UNetConnection::PreSend( INT SizeBits ) {}
 void UNetConnection::PurgeAcks() {}
 void UNetConnection::ReceiveFile( INT PackageIndex ) {}
@@ -532,7 +529,6 @@ FString UChannel::Describe() { return FString(); }
 void UChannel::ReceivedNak( INT NakPacketId ) {}
 void UChannel::Tick() {}
 void UChannel::AssertInSequenced() {}
-UClass** UChannel::ChannelClasses() { return NULL; }
 INT CDECL UChannel::IsKnownChannelType( INT Type ) { return 0; }
 INT UChannel::IsNetReady( INT Saturate ) { return 1; }
 INT UChannel::MaxSendBytes() { return 0; }
@@ -576,20 +572,14 @@ void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 void UInput::Init( UViewport* InViewport ) {}
-INT UInput::PreProcess( INT Key, INT Action, FLOAT Delta ) { return 0; }
-INT UInput::Process( FOutputDevice& Ar, INT Key, INT Action, FLOAT Delta ) { return 0; }
-void UInput::DirectAxis( INT Key, FLOAT Value, FLOAT Delta ) {}
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
 void UInput::ResetInput() {}
-const TCHAR* UInput::GetKeyName( INT Key ) const { return TEXT(""); }
-INT UInput::FindKeyName( const TCHAR* KeyName, INT& Key ) const { return 0; }
 BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
 void UInput::SetKey( const TCHAR* KeyName ) {}
 FString UInput::GetActionKey( BYTE Key ) { return FString(); }
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
-void UInput::SetInputAction( INT Action, FLOAT Delta ) {}
 BYTE UInput::KeyDown( INT Key ) { return 0; }
 void UInput::StaticConstructor() {}
 
@@ -603,7 +593,6 @@ INT UNullRenderDevice::SetRes( UViewport* Viewport, INT NewX, INT NewY, INT NewC
 void UNullRenderDevice::Exit( UViewport* Viewport ) {}
 void UNullRenderDevice::Flush( UViewport* Viewport ) {}
 void UNullRenderDevice::Present( UViewport* Viewport ) {}
-void UNullRenderDevice::SetEmulationMode( INT Mode ) {}
 void UNullRenderDevice::Unlock( FRenderInterface* RI ) {}
 void UNullRenderDevice::UpdateGamma( UViewport* Viewport ) {}
 void UNullRenderDevice::FlushResource( QWORD ResourceId ) {}
@@ -611,7 +600,6 @@ void UNullRenderDevice::ReadPixels( UViewport* Viewport, FColor* Pixels ) {}
 void UNullRenderDevice::RestoreGamma() {}
 FRenderInterface* UNullRenderDevice::Lock( UViewport* Viewport, BYTE* HitData, INT* HitSize ) { return NULL; }
 FRenderCaps* UNullRenderDevice::GetRenderCaps() { return NULL; }
-INT UNullRenderDevice::SupportsTextureFormat( INT Format ) { return 0; }
 void UNullRenderDevice::StaticConstructor() {}
 
 /*-----------------------------------------------------------------------------

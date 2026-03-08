@@ -6,9 +6,6 @@
 	This file deliberately omits member variables (sizeof will be minimal).
 	The runtime .u package metadata overrides PropertiesSize at load time.
 ===========================================================================*/
-#if _MSC_VER
-#pragma pack (push,4)
-#endif
 
 #ifndef ENGINE_API
 #define ENGINE_API DLL_IMPORT
@@ -246,6 +243,12 @@ AUTOGENERATE_NAME(WorldSpaceOverlays)
 AUTOGENERATE_NAME(ZoneChange)
 
 #ifndef NAMES_ONLY
+#ifndef _INC_ENGINE_CLASSES_DECLS
+#define _INC_ENGINE_CLASSES_DECLS
+
+#if _MSC_VER
+#pragma pack (push,4)
+#endif
 
 /*==========================================================================
 	Forward declarations.
@@ -404,8 +407,30 @@ enum EInputAction
 	Full member layouts will be added as runtime correctness improves.
 ==========================================================================*/
 
-class ENGINE_API FEngineStats  { public: BYTE Pad[256]; FEngineStats() { appMemzero(this, sizeof(*this)); } };
-class ENGINE_API FStats        { public: BYTE Pad[256]; FStats()       { appMemzero(this, sizeof(*this)); } };
+enum EStatsType { STAT_None=0 };
+enum EStatsDataType { STATSDATA_None=0 };
+enum EStatsUnit { STATSUNIT_None=0 };
+
+class ENGINE_API FEngineStats
+{
+public:
+	BYTE Pad[256];
+	FEngineStats() { appMemzero(this, sizeof(*this)); }
+	void Init();
+};
+class ENGINE_API FStats
+{
+public:
+	BYTE Pad[256];
+	FStats() { appMemzero(this, sizeof(*this)); }
+	FStats(const FStats&);
+	~FStats();
+	void UpdateString(FString&, INT);
+	void Render(UViewport*, UEngine*);
+	INT RegisterStats(EStatsType, EStatsDataType, FString, FString, EStatsUnit);
+	void CalcMovingAverage(INT, DWORD);
+	void Clear();
+};
 
 // FRebuildTools — BSP rebuild configuration manager.
 class ENGINE_API FRebuildTools
@@ -484,7 +509,18 @@ public:
 class FTempLineBatcher;
 struct STDbgLine;
 struct FVertexComponent;
-class FConvexVolume;
+class ENGINE_API FConvexVolume {
+public:
+	BYTE Pad[256];
+	BYTE SphereCheck(FSphere);
+	FConvexVolume(FConvexVolume const &);
+	FConvexVolume();
+	~FConvexVolume();
+	FConvexVolume& operator=(const FConvexVolume&);
+	BYTE BoxCheck(FVector,FVector);
+	FPoly ClipPolygon(FPoly);
+	FPoly ClipPolygonPrecise(FPoly);
+};
 class FVisibilityInterface;
 class FRebuildOptions;
 class UCubemap;
@@ -791,6 +827,7 @@ class ENGINE_API FStaticMeshColorStream : public FVertexStream
 public:
 	BYTE Pad[64];
 	FStaticMeshColorStream() { appMemzero(Pad, sizeof(Pad)); }
+	virtual INT GetComponents(struct FVertexComponent*);
 };
 
 // ===========================================================================
@@ -1081,31 +1118,60 @@ class ENGINE_API FActorSceneNode : public FSceneNode
 {
 public:
 	FActorSceneNode(UViewport*, AActor*, AActor*, FVector, FRotator, FLOAT);
+	virtual void Render(FRenderInterface*);
+	virtual FActorSceneNode* GetActorSceneNode();
 };
 
 class ENGINE_API FCameraSceneNode : public FSceneNode
 {
 public:
 	FCameraSceneNode(UViewport*, AActor*, FVector, FRotator, FLOAT);
+	virtual void Render(FRenderInterface*);
+	virtual FCameraSceneNode* GetCameraSceneNode();
+	virtual void UpdateMatrices();
 };
 
-class ENGINE_API FMirrorSceneNode : public FSceneNode { public: BYTE Pad2[64]; };
-class ENGINE_API FSkySceneNode : public FSceneNode { public: BYTE Pad2[64]; };
-class ENGINE_API FWarpZoneSceneNode : public FSceneNode { public: BYTE Pad2[64]; };
+class ENGINE_API FMirrorSceneNode : public FSceneNode
+{
+public:
+	BYTE Pad2[64];
+	FMirrorSceneNode(FLevelSceneNode*, FPlane, INT, INT);
+	virtual FMirrorSceneNode* GetMirrorSceneNode();
+};
+class ENGINE_API FSkySceneNode : public FSceneNode
+{
+public:
+	BYTE Pad2[64];
+	FSkySceneNode(FLevelSceneNode*, INT);
+	virtual FSkySceneNode* GetSkySceneNode();
+};
+class AWarpZoneInfo;
+
+class ENGINE_API FWarpZoneSceneNode : public FSceneNode
+{
+public:
+	BYTE Pad2[64];
+	FWarpZoneSceneNode(FLevelSceneNode*, AWarpZoneInfo*);
+	virtual FWarpZoneSceneNode* GetWarpZoneSceneNode();
+};
 class ENGINE_API FDirectionalLightMapSceneNode : public FSceneNode
 {
 public:
 	FDirectionalLightMapSceneNode(UViewport*, AActor*, class FBspSurf&, FLightMap*);
+	virtual FConvexVolume GetViewFrustum();
 };
 class ENGINE_API FPointLightMapSceneNode : public FSceneNode
 {
 public:
 	FPointLightMapSceneNode(UViewport*, AActor*, class FBspSurf&, FLightMap*, INT, INT, INT, INT);
+	virtual FConvexVolume GetViewFrustum();
 };
 class ENGINE_API FLightMapSceneNode : public FSceneNode
 {
 public:
 	FLightMapSceneNode(UViewport*, AActor*, FLightMap*);
+	virtual void Render(FRenderInterface*);
+	virtual INT FilterActor(AActor*);
 };
 
 // ===========================================================================
@@ -1150,7 +1216,7 @@ public:
 	INT IsCoplanar(const FPoly&) const;
 	INT OnPlane(FVector);
 	INT OnPoly(FVector);
-	void RemoveColinears();
+	INT RemoveColinears();
 	void Reverse();
 	INT Split(const FVector&, const FVector&, INT);
 	void SplitInHalf(FPoly*);
@@ -1206,6 +1272,8 @@ class ENGINE_API FSortedPathList
 {
 public:
 	BYTE Pad[64];
+	FSortedPathList();
+	void addPath(ANavigationPoint*, INT);
 	ANavigationPoint* findEndAnchor(APawn*, AActor*, FVector, INT);
 	ANavigationPoint* findStartAnchor(APawn*);
 };
@@ -1321,7 +1389,7 @@ struct ENGINE_API HCoords : public HHitProxy {
 	DECLARE_HIT_PROXY(HCoords, HHitProxy)
 	FCoords Coords, Uncoords;
 	FVector Direction;
-	HCoords(FSceneNode* InFrame);
+	HCoords(FCameraSceneNode* InFrame);
 };
 struct ENGINE_API HMaterialTree : public HHitProxy {
 	DECLARE_HIT_PROXY(HMaterialTree, HHitProxy)
@@ -1374,12 +1442,23 @@ class ENGINE_API FInBunch : public FBitReader
 {
 public:
 	BYTE Pad[64];
+	FInBunch(const FInBunch&);
+	FInBunch(UNetConnection*);
+	FInBunch& operator=(const FInBunch&);
+	virtual FArchive& operator<<(UObject*&);
+	virtual FArchive& operator<<(FName&);
 };
 
 class ENGINE_API FOutBunch
 {
 public:
 	BYTE Pad[256];
+	FOutBunch();
+	FOutBunch(const FOutBunch&);
+	FOutBunch(UChannel*, INT);
+	virtual ~FOutBunch();
+	virtual FArchive& operator<<(UObject*&);
+	virtual FArchive& operator<<(FName&);
 };
 
 // ===========================================================================
@@ -1390,7 +1469,10 @@ class ENGINE_API FSoundData
 {
 public:
 	BYTE Pad[64];
-	virtual ~FSoundData() {}
+	FSoundData(USound*);
+	virtual ~FSoundData();
+	virtual void Load();
+	FLOAT GetPeriod();
 };
 
 struct FProjectorRenderInfoPtr { INT Ptr; };
@@ -1446,6 +1528,8 @@ struct FPointRegion
 	BYTE ZoneNumber;
 	FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
 	FPointRegion(class AZoneInfo* InZone) : Zone(InZone), iLeaf(0), ZoneNumber(0) {}
+	FPointRegion(class AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
+	FPointRegion& operator=(const FPointRegion&);
 };
 
 struct FCompressedPosition
@@ -1463,7 +1547,7 @@ struct FCompressedPosition
 class ENGINE_API UMeshInstance : public UPrimitive
 {
 	DECLARE_CLASS(UMeshInstance,UPrimitive,0,Engine)
-	NO_DEFAULT_CONSTRUCTOR(UMeshInstance)
+	UMeshInstance() {}
 public:
 	// Anim query interface (virtual, base implementations)
 	virtual INT AnimForcePose(FName, FLOAT, FLOAT, INT);
@@ -1517,6 +1601,7 @@ class ENGINE_API URenderResource : public UObject
 {
 	DECLARE_CLASS(URenderResource,UObject,0,Engine)
 	URenderResource() {}
+	void Serialize(FArchive& Ar);
 };
 
 /*==========================================================================
@@ -3340,6 +3425,20 @@ public:
 	void eventServerTravel(const FString&, DWORD);
 	DWORD eventGameTypeUseNbOfTerroristToSpawn(const FString&);
 	DWORD eventIsGameTypePlayWithNonRainbowNPCs(const FString&);
+
+	// Native C++ method declarations
+	virtual void SetVolumes(const TArray<class AVolume*>&);
+	virtual void SetVolumes();
+	virtual void SetZone(INT, INT);
+	virtual void PostNetReceive();
+	virtual void PreNetReceive();
+	virtual void CheckForErrors();
+	virtual INT* GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*);
+	void CallLogThisActor(AActor*);
+	class APhysicsVolume* GetDefaultPhysicsVolume();
+	FString GetDisplayAs(FString);
+	class APhysicsVolume* GetPhysicsVolume(FVector, AActor*, INT);
+	INT IsSoundAudibleFromZone(INT, INT);
 };
 
 class ENGINE_API AGameInfo : public AInfo
@@ -3367,6 +3466,12 @@ public:
 	void eventPreLogin(const FString&, const FString&, FString&, FString&);
 	void eventPreLogOut(class APlayerController*);
 	void eventUpdateServer();
+
+	// Native C++ method declarations
+	virtual void AbortScoreSubmission();
+	virtual void MasterServerManager();
+	virtual void InitGameInfoGameService();
+	static void CDECL ProcessR6Availabilty(ULevel*, FString);
 };
 
 class ENGINE_API AReplicationInfo : public AInfo
@@ -3392,6 +3497,8 @@ class ENGINE_API APlayerReplicationInfo : public AReplicationInfo
 {
 public:
 	DECLARE_CLASS(APlayerReplicationInfo,AReplicationInfo,0|CLASS_NativeReplication,Engine)
+	virtual void PostNetReceive();
+	virtual INT* GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*);
 };
 
 class ENGINE_API AGameReplicationInfo : public AReplicationInfo
@@ -3401,6 +3508,9 @@ public:
 	// Event thunks
 	void eventNewServerState();
 	void eventSaveRemoteServerSettings(const FString&);
+	// Native C++ method declarations
+	virtual void PostNetReceive();
+	virtual INT* GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*);
 };
 
 class ENGINE_API AR6PawnReplicationInfo : public APlayerReplicationInfo
@@ -3442,11 +3552,16 @@ public:
 // Base class for device-specific render interfaces (FD3DRenderInterface, etc.).
 // The engine holds a pointer to this during Lock/Unlock and issues draw calls.
 // Not ENGINE_API: defined inline. D3DDrv defines the vtable via FD3DRenderInterface.
-class FRenderInterface
+class ENGINE_API FRenderInterface
 {
 public:
+	BYTE RIPad[256];
+	FRenderInterface();
+	FRenderInterface(const FRenderInterface&);
 	virtual ~FRenderInterface() {}
+	FRenderInterface& operator=(const FRenderInterface&);
 	virtual void GetDistanceFog(INT& bEnabled, FLOAT& FogStart, FLOAT& FogEnd, FColor& FogColor) {}
+	virtual void SetNPatchesInfos(INT bEnabled, FLOAT TessellationLevel) {}
 };
 
 // FRenderCaps — hardware capability query result from GetRenderCaps().
@@ -3648,6 +3763,8 @@ virtual FString LowLevelGetNetworkNumber();
 virtual INT Exec(const TCHAR*, FOutputDevice&);
 };
 
+enum EChannelType { CHTYPE_None=0, CHTYPE_Control=1, CHTYPE_Actor=2, CHTYPE_File=3, CHTYPE_MAX=8 };
+
 class ENGINE_API UNetConnection : public UPlayer
 {
 public:
@@ -3670,9 +3787,9 @@ public:
 	virtual void HandleClientPlayer( APlayerController* PC );
 
 	// Non-virtual methods
-	UChannel* CreateChannel( INT ChType, INT bOpenedLocally, INT ChIndex );
+	UChannel* CreateChannel( EChannelType ChType, INT bOpenedLocally, INT ChIndex );
 	UNetDriver* GetDriver();
-	void PostSend( INT PacketId );
+	void PostSend();
 	void PreSend( INT SizeBits );
 	void PurgeAcks();
 	void ReceiveFile( INT PackageIndex );
@@ -3706,7 +3823,7 @@ virtual void ReceivedNak(INT);
 
 // Non-virtual methods
 void AssertInSequenced();
-static UClass** ChannelClasses();
+static UClass** ChannelClasses;
 static INT CDECL IsKnownChannelType(INT);
 INT IsNetReady(INT);
 INT MaxSendBytes();
@@ -3739,6 +3856,7 @@ class ENGINE_API UControlChannel : public UChannel
 {
 public:
 	DECLARE_CLASS(UControlChannel,UChannel,0,Engine)
+	UControlChannel() {}
 	// Auto-generated method declarations
 	void StaticConstructor();
 	virtual void ReceivedBunch(FInBunch &);
@@ -3766,6 +3884,10 @@ class ENGINE_API UPackageMapLevel : public UPackageMap
 {
 public:
 	DECLARE_CLASS(UPackageMapLevel,UPackageMap,0,Engine)
+	UPackageMapLevel() {}
+	UPackageMapLevel(UNetConnection*);
+	virtual INT SerializeObject(FArchive&, UClass*, UObject*&);
+	virtual INT CanSerializeObject(UObject*);
 };
 
 /*==========================================================================
@@ -4581,12 +4703,12 @@ public:
 	virtual void SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Progress ) {}
 
 	// Editor virtuals (slots 45-50) — unused at runtime.
-	virtual void edDrawAxisIndicator( void* /*FSceneNode**/ SceneNode ) {}
+	virtual void edDrawAxisIndicator( FSceneNode* SceneNode ) {}
 	virtual void edSetClickLocation( FVector& Location ) {}
 	virtual INT  edcamMode( UViewport* Viewport ) { return 0; }
 	virtual INT  edcamTerrainBrush() { return 0; }
 	virtual INT  edcamMouseControl( UViewport* Viewport ) { return 0; }
-	virtual INT  EdCallback( DWORD Code, INT Param, DWORD Flags ) { return 0; }
+	virtual void EdCallback( DWORD Code, INT Param, DWORD Flags ) {}
 
 	// Slot 51-53: R6-specific menu/texture background loading.
 	virtual void LoadRandomMenuBackgroundImage( const TCHAR* Path ) {}
@@ -4925,7 +5047,7 @@ public:
 	virtual void SaveGame( INT Position );
 	virtual void CancelPending();
 	virtual void PaintProgress( const FURL& URL );
-	virtual UNetDriver* BuildServerMasterMap( UNetDriver* NetDriver, ULevel* InLevel );
+	virtual void BuildServerMasterMap( UNetDriver* NetDriver, ULevel* InLevel );
 	virtual void NotifyLevelChange();
 
 	// Non-virtual methods
@@ -5025,13 +5147,13 @@ public:
 	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
 	virtual void Serialize( FArchive& Ar );
 	virtual void Init( UViewport* InViewport );
-	virtual INT PreProcess( INT Key, INT Action, FLOAT Delta );
-	virtual INT Process( FOutputDevice& Ar, INT Key, INT Action, FLOAT Delta );
-	virtual void DirectAxis( INT Key, FLOAT Value, FLOAT Delta );
+	virtual INT PreProcess( EInputKey Key, EInputAction Action, FLOAT Delta );
+	virtual INT Process( FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta );
+	virtual void DirectAxis( EInputKey Key, FLOAT Value, FLOAT Delta );
 	virtual void ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar );
 	virtual void ResetInput();
-	virtual const TCHAR* GetKeyName( INT Key ) const;
-	virtual INT FindKeyName( const TCHAR* KeyName, INT& Key ) const;
+	virtual const TCHAR* GetKeyName( EInputKey Key ) const;
+	virtual INT FindKeyName( const TCHAR* KeyName, EInputKey& Key ) const;
 	virtual BYTE GetKey( const TCHAR* KeyName );
 	virtual void SetKey( const TCHAR* KeyName );
 	virtual FString GetActionKey( BYTE Key );
@@ -5043,9 +5165,15 @@ protected:
 
 public:
 	// Non-virtual methods
-	void SetInputAction( INT Action, FLOAT Delta );
+	void SetInputAction( EInputAction Action, FLOAT Delta );
+	EInputAction GetInputAction();
+	FLOAT GetInputDelta();
 	BYTE KeyDown( INT Key );
 	void StaticConstructor();
+private:
+	static const TCHAR* StaticConfigName();
+public:
+	static void StaticInitInput();
 };
 
 class ENGINE_API UInputPlanning : public UInput
@@ -5191,6 +5319,15 @@ class ENGINE_API UDemoRecConnection : public UNetConnection
 public:
 	DECLARE_CLASS(UDemoRecConnection,UNetConnection,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UDemoRecConnection)
+	UDemoRecConnection(UNetDriver*, const FURL&);
+	void StaticConstructor();
+	virtual FString LowLevelDescribe();
+	virtual FString LowLevelGetRemoteAddress();
+	virtual void LowLevelSend(void*, INT);
+	virtual void FlushNet();
+	virtual INT IsNetReady(INT);
+	virtual void HandleClientPlayer(APlayerController*);
+	class UDemoRecDriver* GetDriver();
 };
 
 class ENGINE_API UDemoRecDriver : public UNetDriver
@@ -5235,7 +5372,7 @@ public:
 	virtual void Exit( UViewport* Viewport );
 	virtual void Flush( UViewport* Viewport );
 	virtual void Present( UViewport* Viewport );
-	virtual void SetEmulationMode( INT Mode );
+	virtual void SetEmulationMode( EHardwareEmulationMode Mode );
 	virtual void Unlock( FRenderInterface* RI );
 	virtual void UpdateGamma( UViewport* Viewport );
 	virtual void FlushResource( QWORD ResourceId );
@@ -5243,7 +5380,7 @@ public:
 	virtual void RestoreGamma();
 	virtual FRenderInterface* Lock( UViewport* Viewport, BYTE* HitData, INT* HitSize );
 	virtual FRenderCaps* GetRenderCaps();
-	virtual INT SupportsTextureFormat( INT Format );
+	virtual INT SupportsTextureFormat( ETextureFormat Format );
 
 	void StaticConstructor();
 };
@@ -5290,6 +5427,12 @@ class ENGINE_API UTerrainPrimitive : public UPrimitive
 public:
 	DECLARE_CLASS(UTerrainPrimitive,UPrimitive,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UTerrainPrimitive)
+	UTerrainPrimitive(ATerrainInfo*);
+	virtual void Serialize(FArchive&);
+	virtual INT LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	virtual INT PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD);
+	virtual void Illuminate(AActor*, INT);
+	FBox GetRenderBoundingBox(const AActor*, INT);
 };
 
 class ENGINE_API UVertMesh : public ULodMesh
@@ -5764,6 +5907,17 @@ class ENGINE_API UTerrainSector : public UObject
 public:
 	DECLARE_CLASS(UTerrainSector,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UTerrainSector)
+	UTerrainSector(ATerrainInfo*, INT, INT, INT, INT);
+	virtual void Serialize(FArchive&);
+	virtual void PostLoad();
+	void StaticLight(INT);
+	void GenerateTriangles();
+	INT GetGlobalVertex(INT, INT);
+	INT GetLocalVertex(INT, INT);
+	INT PassShouldRenderTriangle(INT, INT, INT, INT, INT);
+	INT IsSectorAll(INT, BYTE);
+	INT IsTriangleAll(INT, INT, INT, INT, INT, BYTE);
+	void AttachProjector(class AProjector*, FProjectorRenderInfo*);
 };
 
 class ENGINE_API UI3DL2Listener : public UObject
@@ -5837,7 +5991,9 @@ class UR6AbstractTerroristMgr : public UObject
 {
 public:
 	DECLARE_CLASS(UR6AbstractTerroristMgr,UObject,0,Engine)
+protected:
 	UR6AbstractTerroristMgr() {}
+public:
 };
 
 // --- Actor subclasses ---
@@ -6154,7 +6310,9 @@ class AR6AbstractClimbableObj : public AActor
 {
 public:
 	DECLARE_CLASS(AR6AbstractClimbableObj,AActor,0,Engine)
+protected:
 	AR6AbstractClimbableObj() {}
+public:
 };
 
 class ENGINE_API AR6ActionPointAbstract : public AActor
@@ -6350,5 +6508,8 @@ public:
 	UR6MissionObjectiveBase() {}
 };
 
+#if _MSC_VER
 #pragma pack (pop)
 #endif
+#endif // _INC_ENGINE_CLASSES_DECLS
+#endif // NAMES_ONLY
