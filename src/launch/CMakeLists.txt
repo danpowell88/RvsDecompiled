@@ -7,6 +7,7 @@
 # hInstance so DLLs loaded at runtime can find them.
 
 set(LAUNCH_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/window/Release/Window.lib)
 
 file(GLOB_RECURSE LAUNCH_SOURCES
     ${LAUNCH_SRC_DIR}/*.cpp
@@ -43,10 +44,11 @@ if(SOURCE_COUNT GREATER 0)
 
     target_link_libraries(RavenShield
         Core_Dep Engine_Dep
-        ${CSDK_LIB}/Window.lib
+        ${WINDOW_BUILT_LIB}
         user32 gdi32 kernel32 advapi32
         comctl32 comdlg32 shell32
     )
+    add_dependencies(RavenShield Window)
 else()
     message(STATUS "RavenShield (launch): no source files yet — skipping")
 endif()

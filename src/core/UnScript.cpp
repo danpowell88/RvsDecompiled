@@ -663,12 +663,36 @@ void UObject::execStructMember( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStructMember);
 	UProperty* Property = (UProperty*)Stack.ReadObject();
-	// Evaluate the struct expression, getting GPropAddr pointing to the struct.
-	Stack.Step( Stack.Object, NULL );
-	if( GPropAddr )
-		GPropAddr += Property->Offset;
+	UBOOL bTraceDamageState = Stack.Node && appStrcmp(Stack.Node->GetName(), TEXT("SetNewDamageState")) == 0;
+	BYTE Buffer[MAX_CONST_SIZE];
+	BYTE* StructValue = Result ? Buffer : NULL;
+	GPropAddr = NULL;
+	Stack.Step( Stack.Object, StructValue );
+
+	BYTE* MemberAddr = NULL;
+	if( Property )
+	{
+		if( GPropAddr )
+			MemberAddr = GPropAddr + Property->Offset;
+		else if( StructValue )
+			MemberAddr = StructValue + Property->Offset;
+	}
+
+	if( bTraceDamageState )
+	{
+		debugf( NAME_Warning, TEXT("SetNewDamageState StructMember: obj=%s property=%s offset=%d struct=%08X gprop=%08X member=%08X result=%08X"),
+			Stack.Object ? Stack.Object->GetFullName() : TEXT("<null>"),
+			Property ? Property->GetName() : TEXT("<null>"),
+			Property ? Property->Offset : -1,
+			StructValue,
+			GPropAddr,
+			MemberAddr,
+			Result );
+	}
+
 	GProperty = Property;
-	if( Result && GPropAddr )
+	GPropAddr = MemberAddr;
+	if( Result && GProperty && GPropAddr )
 		GProperty->CopySingleValue( Result, GPropAddr );
 	unguardexecSlow;
 }
@@ -2859,14 +2883,138 @@ void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
+static const TCHAR* GCompressedStringPrefix = TEXT("R6C1:");
+
+static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
+{
+	const TCHAR* Chars = *In;
+	const INT Count = appStrlen( Chars );
+	OutBytes.Empty( Count );
+	OutBytes.Add( Count );
+	for( INT i=0; i<Count; i++ )
+		OutBytes(i) = ToAnsi( Chars[i] );
+}
+
+static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
+{
+	FString Out;
+	Out.GetCharArray().Empty( InBytes.Num() + 1 );
+	Out.GetCharArray().Add( InBytes.Num() + 1 );
+	for( INT i=0; i<InBytes.Num(); i++ )
+		Out.GetCharArray()(i) = FromAnsi( (ANSICHAR)InBytes(i) );
+	Out.GetCharArray()(InBytes.Num()) = 0;
+	return Out;
+}
+
+static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes, UBOOL Encode )
+{
+	FBufferReader Reader( InBytes );
+	FBufferWriter Writer( OutBytes );
+	if( Encode )
+		Codec.Encode( Reader, Writer );
+	else
+		Codec.Decode( Reader, Writer );
+}
+
+static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
+{
+	FCodecRLE Stage1;
+	FCodecBWT Stage2;
+	FCodecMTF Stage3;
+	FCodecRLE Stage4;
+	FCodecHuffman Stage5;
+	TArray<BYTE> Buffer1, Buffer2, Buffer3, Buffer4;
+	RunCodecStage( Stage1, InBytes, Buffer1, 1 );
+	RunCodecStage( Stage2, Buffer1, Buffer2, 1 );
+	RunCodecStage( Stage3, Buffer2, Buffer3, 1 );
+	RunCodecStage( Stage4, Buffer3, Buffer4, 1 );
+	RunCodecStage( Stage5, Buffer4, OutBytes, 1 );
+}
+
+static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
+{
+	FCodecHuffman Stage1;
+	FCodecRLE Stage2;
+	FCodecMTF Stage3;
+	FCodecBWT Stage4;
+	FCodecRLE Stage5;
+	TArray<BYTE> Buffer1, Buffer2, Buffer3, Buffer4;
+	RunCodecStage( Stage1, InBytes, Buffer1, 0 );
+	RunCodecStage( Stage2, Buffer1, Buffer2, 0 );
+	RunCodecStage( Stage3, Buffer2, Buffer3, 0 );
+	RunCodecStage( Stage4, Buffer3, Buffer4, 0 );
+	RunCodecStage( Stage5, Buffer4, OutBytes, 0 );
+}
+
+static TCHAR EncodeHexNibble( BYTE Value )
+{
+	return Value < 10 ? TEXT('0') + Value : TEXT('A') + (Value - 10);
+}
+
+static INT DecodeHexNibble( TCHAR Ch )
+{
+	if( Ch >= TEXT('0') && Ch <= TEXT('9') )
+		return Ch - TEXT('0');
+	if( Ch >= TEXT('A') && Ch <= TEXT('F') )
+		return Ch - TEXT('A') + 10;
+	if( Ch >= TEXT('a') && Ch <= TEXT('f') )
+		return Ch - TEXT('a') + 10;
+	return INDEX_NONE;
+}
+
+static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
+{
+	const INT PrefixLen = appStrlen( GCompressedStringPrefix );
+	FString Out;
+	Out.GetCharArray().Empty( PrefixLen + InBytes.Num() * 2 + 1 );
+	Out.GetCharArray().Add( PrefixLen + InBytes.Num() * 2 + 1 );
+	for( INT i=0; i<PrefixLen; i++ )
+		Out.GetCharArray()(i) = GCompressedStringPrefix[i];
+	for( INT i=0; i<InBytes.Num(); i++ )
+	{
+		Out.GetCharArray()(PrefixLen + i * 2 + 0) = EncodeHexNibble( InBytes(i) >> 4 );
+		Out.GetCharArray()(PrefixLen + i * 2 + 1) = EncodeHexNibble( InBytes(i) & 0x0f );
+	}
+	Out.GetCharArray()(PrefixLen + InBytes.Num() * 2) = 0;
+	return Out;
+}
+
+static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
+{
+	const TCHAR* Chars = *In;
+	const INT PrefixLen = appStrlen( GCompressedStringPrefix );
+	if( appStrnicmp( Chars, GCompressedStringPrefix, PrefixLen ) != 0 )
+		return 0;
+
+	const TCHAR* HexChars = Chars + PrefixLen;
+	const INT HexLen = appStrlen( HexChars );
+	if( (HexLen & 1) != 0 )
+		return 0;
+
+	OutBytes.Empty( HexLen / 2 );
+	OutBytes.Add( HexLen / 2 );
+	for( INT i=0; i<OutBytes.Num(); i++ )
+	{
+		const INT Hi = DecodeHexNibble( HexChars[i * 2 + 0] );
+		const INT Lo = DecodeHexNibble( HexChars[i * 2 + 1] );
+		if( Hi == INDEX_NONE || Lo == INDEX_NONE )
+			return 0;
+		OutBytes(i) = (BYTE)((Hi << 4) | Lo);
+	}
+	return 1;
+}
+
 void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCompress);
 	P_GET_STR(In);
-	// Passthrough scaffold — returns input unchanged.
-	// Deferred to Phase 9B: retail compresses the string via a proprietary
-	// algorithm (~200 bytes at Core.dll+0x??). Needs Ghidra disassembly.
-	*(FString*)Result = In;
+	TArray<BYTE> SourceBytes, CompressedBytes;
+	FStringToAnsiBytes( In, SourceBytes );
+	CompressStringBytes( SourceBytes, CompressedBytes );
+	// Retail uses the engine codec stack internally. The exact printable string
+	// packing is still undocumented, so we wrap the byte stream in a stable ASCII
+	// prefix + hex encoding rather than keeping this as a passthrough stub.
+	*(FString*)Result = EncodeCompressedBytes( CompressedBytes );
 	unguardexecSlow;
 }
 
@@ -2874,9 +3022,14 @@ void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execExpand);
 	P_GET_STR(In);
-	// Passthrough scaffold — returns input unchanged.
-	// Deferred to Phase 9B: retail decompresses via the inverse of execCompress.
-	*(FString*)Result = In;
+	TArray<BYTE> CompressedBytes, ExpandedBytes;
+	if( !DecodeCompressedBytes( In, CompressedBytes ) )
+		*(FString*)Result = In;
+	else
+	{
+		ExpandStringBytes( CompressedBytes, ExpandedBytes );
+		*(FString*)Result = AnsiBytesToFString( ExpandedBytes );
+	}
 	unguardexecSlow;
 }
 

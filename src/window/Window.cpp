@@ -5,6 +5,12 @@
 
 #include "WindowPrivate.h"
 
+extern "C" void* window_dummy_stub_data = 0;
+
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???0WProperties@@QAE@VFName@@PAVWWindow@@@Z@4QBGB=_window_dummy_stub_data")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???1FTreeItem@@UAE@XZ@4QBGB=_window_dummy_stub_data")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??LoadLocalizedMenu@@YAPAUHMENU__@@PAUHINSTANCE__@@HPBG1@Z@4QBGB=_window_dummy_stub_data")
+
 /*-----------------------------------------------------------------------------
 	Package.
 -----------------------------------------------------------------------------*/
@@ -76,6 +82,19 @@ WINDOW_API HBRUSH hBrushGreyWindow   = NULL;
 INT              WWindow::ModalCount = 0;
 TArray<WWindow*> WWindow::_Windows;
 TArray<WWindow*> WWindow::_DeleteWindows;
+
+/*-----------------------------------------------------------------------------
+	WPropertiesBase helpers.
+-----------------------------------------------------------------------------*/
+
+FTreeItem* WPropertiesBase::GetListItem( INT i )
+{
+	guard(WProperties::GetListItem);
+	FTreeItem* Result = (FTreeItem*)List.GetItemData(i);
+	check(Result);
+	return Result;
+	unguard;
+}
 
 /*-----------------------------------------------------------------------------
 	WNDPROC statics for DECLARE_WINDOWSUBCLASS classes.

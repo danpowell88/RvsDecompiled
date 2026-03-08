@@ -33,9 +33,9 @@
       }
     },
     {
-      "label": "Deploy: Copy EXE to retail",
+      "label": "Stage: Rebuilt Runtime",
       "type": "shell",
-      "command": "Copy-Item '${workspaceFolder}\\build\\bin\\RavenShield.exe' '${workspaceFolder}\\retail\\system\\RavenShield.exe' -Force; Write-Host 'Deployed to retail/system/'",
+      "command": "$stage = '${workspaceFolder}\\build\\runtime-test\\system'; New-Item -ItemType Directory -Force -Path $stage | Out-Null; Copy-Item '${workspaceFolder}\\retail\\system\\*' $stage -Recurse -Force; Copy-Item '${workspaceFolder}\\build\\bin\\*' $stage -Force; Write-Host 'Staged rebuilt runtime at build/runtime-test/system/'",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -49,11 +49,11 @@
     {
       "label": "Run: RavenShield",
       "type": "shell",
-      "command": "Start-Process '${workspaceFolder}\\retail\\system\\RavenShield.exe' -WorkingDirectory '${workspaceFolder}\\retail\\system'",
+      "command": "Start-Process '${workspaceFolder}\\build\\runtime-test\\system\\RavenShield.exe' -WorkingDirectory '${workspaceFolder}\\build\\runtime-test\\system'",
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "dependsOn": "Deploy: Copy EXE to retail",
+      "dependsOn": "Stage: Rebuilt Runtime",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
@@ -63,11 +63,11 @@
     {
       "label": "Run: RavenShield (Unattended)",
       "type": "shell",
-      "command": "Start-Process '${workspaceFolder}\\retail\\system\\RavenShield.exe' -ArgumentList '-UNATTENDED' -WorkingDirectory '${workspaceFolder}\\retail\\system'",
+      "command": "Start-Process '${workspaceFolder}\\build\\runtime-test\\system\\RavenShield.exe' -ArgumentList '-UNATTENDED' -WorkingDirectory '${workspaceFolder}\\build\\runtime-test\\system'",
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "dependsOn": "Deploy: Copy EXE to retail",
+      "dependsOn": "Stage: Rebuilt Runtime",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",

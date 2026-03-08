@@ -115,6 +115,108 @@ BYTE GShift[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 // Sentinel checked in UClass::Serialize.
 INT googledummy = 0;
 
+class FCoreBootstrapMalloc : public FMalloc
+{
+public:
+	FCoreBootstrapMalloc()
+	: Heap( NULL )
+	{}
+
+	virtual void* Malloc( DWORD Count, const TCHAR* Tag )
+	{
+		if( !Count )
+			return NULL;
+		Init();
+		void* Result = HeapAlloc( Heap, 0, Count );
+		if( !Result )
+			appErrorf( TEXT("Bootstrap allocator out of memory allocating %u bytes for %s"), Count, Tag ? Tag : TEXT("<null>") );
+		return Result;
+	}
+
+	virtual void* Realloc( void* Original, DWORD Count, const TCHAR* Tag )
+	{
+		Init();
+		if( !Count )
+		{
+			if( Original )
+				HeapFree( Heap, 0, Original );
+			return NULL;
+		}
+		void* Result = Original ? HeapReAlloc( Heap, 0, Original, Count ) : HeapAlloc( Heap, 0, Count );
+		if( !Result )
+			appErrorf( TEXT("Bootstrap allocator out of memory reallocating %u bytes for %s"), Count, Tag ? Tag : TEXT("<null>") );
+		return Result;
+	}
+
+	virtual void Free( void* Original )
+	{
+		if( Original )
+		{
+			Init();
+			HeapFree( Heap, 0, Original );
+		}
+	}
+
+	virtual void DumpAllocs()
+	{}
+
+	virtual void HeapCheck()
+	{}
+
+	virtual void Init()
+	{
+		if( !Heap )
+			Heap = GetProcessHeap();
+	}
+
+	virtual void Exit()
+	{}
+
+	virtual INT GetMemoryBlockSize( void* Ptr )
+	{
+		Init();
+		SIZE_T Size = HeapSize( Heap, 0, Ptr );
+		return Size == (SIZE_T)-1 ? 0 : (INT)Size;
+	}
+
+private:
+	HANDLE Heap;
+};
+
+static void appInitPreloadCRCTable()
+{
+	for( DWORD iCRC=0; iCRC<256; iCRC++ )
+	{
+		DWORD CRC = iCRC;
+		for( INT j=8; j>0; j-- )
+			CRC = (CRC & 1) ? (CRC >> 1) ^ 0xEDB88320 : CRC >> 1;
+		GCRCTable[iCRC] = CRC;
+	}
+}
+
+static FCoreBootstrapMalloc& GetCorePreInitMalloc()
+{
+	static FCoreBootstrapMalloc Malloc;
+	return Malloc;
+}
+
+#pragma init_seg(lib)
+class FCorePreInit
+{
+public:
+	FCorePreInit()
+	{
+		FCoreBootstrapMalloc& Malloc = GetCorePreInitMalloc();
+		Malloc.Init();
+		GMalloc = &Malloc;
+		appInitPreloadCRCTable();
+		if( !FName::GetInitialized() )
+			FName::StaticInit();
+	}
+};
+
+static FCorePreInit GCorePreInit;
+
 /*-----------------------------------------------------------------------------
 	FArray::Remove.
 -----------------------------------------------------------------------------*/

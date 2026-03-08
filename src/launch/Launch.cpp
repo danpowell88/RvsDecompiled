@@ -62,11 +62,19 @@ extern "C" { TCHAR GPackage[64] = TEXT("Launch"); }
 
 // Memory allocator.
 #include "FMallocWindows.h"
-FMallocWindows Malloc;
+static FMallocWindows& GetLaunchMalloc()
+{
+	static FMallocWindows Malloc;
+	return Malloc;
+}
 
 // Log file.
 #include "FOutputDeviceFile.h"
-FOutputDeviceFile Log;
+static FOutputDeviceFile& GetLaunchLog()
+{
+	static FOutputDeviceFile Log;
+	return Log;
+}
 
 // Error handler.
 // Subclass the standard error handler to skip the blocking MessageBox
@@ -105,15 +113,27 @@ public:
 		}
 	}
 };
-FOutputDeviceWindowsErrorUnattended Error;
+static FOutputDeviceWindowsErrorUnattended& GetLaunchError()
+{
+	static FOutputDeviceWindowsErrorUnattended Error;
+	return Error;
+}
 
 // Feedback.
 #include "FFeedbackContextWindows.h"
-FFeedbackContextWindows Warn;
+static FFeedbackContextWindows& GetLaunchWarn()
+{
+	static FFeedbackContextWindows Warn;
+	return Warn;
+}
 
 // File manager.
 #include "FFileManagerWindows.h"
-FFileManagerWindows FileManager;
+static FFileManagerWindows& GetLaunchFileManager()
+{
+	static FFileManagerWindows FileManager;
+	return FileManager;
+}
 
 // Config.
 #include "FConfigCacheIni.h"
@@ -185,14 +205,39 @@ ENGINE_API extern UEngine* g_pEngine;
 	FExecHook — Console command handler for the launcher.
 	Handles: ShowLog, HideLog, TakeFocus, EditActor, Preferences.
 	Based on UT99 UnEngineWin.h. TakeFocus, EditActor, and Preferences
-	require UEngine/AActor member layout reconstruction — stubbed.
+	still diverge slightly from retail because viewport/window state is not
+	fully reconstructed in the local WinDrv module.
 -----------------------------------------------------------------------------*/
+
+static void EnsureLaunchWindowClassesRegistered()
+{
+	static UBOOL Registered = 0;
+	if( !Registered )
+	{
+		IMPLEMENT_WINDOWCLASS(WTerminalBase, 0);
+		IMPLEMENT_WINDOWCLASS(WTerminal, 0);
+		IMPLEMENT_WINDOWSUBCLASS(WEdit, TEXT("EDIT"));
+		{
+			TCHAR Temp[256];
+			MakeWindowClassName( Temp, TEXT("WEditTerminal") );
+			WEditTerminal::RegisterWindowClass( Temp, TEXT("EDIT") );
+		}
+		IMPLEMENT_WINDOWCLASS(WLog, 0);
+		IMPLEMENT_WINDOWCLASS(WObjectProperties, 0);
+		IMPLEMENT_WINDOWCLASS(WConfigProperties, 0);
+		Registered = 1;
+	}
+}
 
 class FExecHook : public FExec, public FNotifyHook
 {
 private:
+	WConfigProperties* Preferences;
+
 	void NotifyDestroy( void* Src )
 	{
+		if( Src == Preferences )
+			Preferences = NULL;
 	}
 
 	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar )
@@ -217,17 +262,73 @@ private:
 		}
 		else if( ParseCommand(&Cmd, TEXT("TakeFocus")) )
 		{
-			// TODO: requires UEngine::Client member to find active viewport.
+			if( GLogWindow && GLogWindow->hWnd )
+			{
+				SetForegroundWindow( *GLogWindow );
+				SetFocus( *GLogWindow );
+			}
+			else
+				Ar.Logf( TEXT("No launcher-owned window is available to focus") );
 			return 1;
 		}
 		else if( ParseCommand(&Cmd, TEXT("EditActor")) )
 		{
-			// TODO: requires AActor member layout to find nearest actor.
+			UClass* Class = NULL;
+			FName ActorName = NAME_None;
+			AActor* Found = NULL;
+
+			if( ParseObject<UClass>( Cmd, TEXT("Class="), Class, ANY_PACKAGE ) )
+			{
+				for( TObjectIterator<AActor> It; It; ++It )
+				{
+					if( !It->IsA(Class) )
+						continue;
+
+					Found = *It;
+					break;
+				}
+			}
+			else if( Parse( Cmd, TEXT("Name="), ActorName ) )
+			{
+				for( TObjectIterator<AActor> It; It; ++It )
+				{
+					if( It->GetFName() == ActorName )
+					{
+						Found = *It;
+						break;
+					}
+				}
+			}
+
+			if( Found )
+			{
+				EnsureLaunchWindowClassesRegistered();
+				WObjectProperties* Properties = new WObjectProperties( TEXT("EditActor"), 0, TEXT(""), NULL, 1 );
+				Properties->OpenWindow( GLogWindow ? GLogWindow->hWnd : NULL );
+				Properties->Root.SetObjects( (UObject**)&Found, 1 );
+				Properties->Show(1);
+			}
+			else
+			{
+				Ar.Logf( TEXT("Bad or missing class or name") );
+			}
 			return 1;
 		}
 		else if( ParseCommand(&Cmd, TEXT("Preferences")) )
 		{
-			// TODO: requires WConfigProperties class reconstruction.
+			if( !GIsClient )
+			{
+				EnsureLaunchWindowClassesRegistered();
+				if( !Preferences )
+				{
+					Preferences = new WConfigProperties( TEXT("Preferences"), LocalizeGeneral(TEXT("AdvancedOptionsTitle"), TEXT("Window")) );
+					Preferences->SetNotifyHook( this );
+					Preferences->OpenWindow( GLogWindow ? GLogWindow->hWnd : NULL );
+					Preferences->ForceRefresh();
+				}
+				Preferences->Show(1);
+				SetFocus( *Preferences );
+			}
 			return 1;
 		}
 		else return 0;
@@ -237,6 +338,7 @@ private:
 
 public:
 	FExecHook()
+	: Preferences( NULL )
 	{}
 };
 
@@ -292,6 +394,12 @@ static LONG WINAPI CrashExceptionFilter(EXCEPTION_POINTERS* ep)
 		fprintf(f, "EXCEPTION: code=0x%08X addr=%p\n",
 			ep->ExceptionRecord->ExceptionCode,
 			ep->ExceptionRecord->ExceptionAddress);
+		if( GErrorHist[0] )
+		{
+			fprintf(f, "ERRORHIST:\n%ls\n", GErrorHist);
+		}
+		fprintf(f, "FLAGS: GIsCriticalError=%d GIsRunning=%d GIsStarted=%d\n",
+			GIsCriticalError, GIsRunning, GIsStarted);
 		HMODULE hMod = NULL;
 		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
 			(LPCSTR)ep->ExceptionRecord->ExceptionAddress, &hMod);
@@ -328,6 +436,29 @@ static LONG WINAPI CrashExceptionFilter(EXCEPTION_POINTERS* ep)
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
+static void WriteLaunchDiag( const char* Text )
+{
+	HANDLE h = CreateFileA( "launch_diag.txt", FILE_APPEND_DATA, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+	if( h != INVALID_HANDLE_VALUE )
+	{
+		DWORD Written;
+		WriteFile( h, Text, (DWORD)strlen(Text), &Written, NULL );
+		WriteFile( h, "\r\n", 2, &Written, NULL );
+		CloseHandle( h );
+	}
+}
+
+static void WriteLaunchDiagT( const TCHAR* Text )
+{
+#if UNICODE
+	char Buffer[1024] = {0};
+	WideCharToMultiByte( CP_UTF8, 0, Text, -1, Buffer, ARRAY_COUNT(Buffer), NULL, NULL );
+	WriteLaunchDiag( Buffer );
+#else
+	WriteLaunchDiag( Text );
+#endif
+}
+
 /*-----------------------------------------------------------------------------
 	Engine initialization — create the game engine object.
 -----------------------------------------------------------------------------*/
@@ -336,13 +467,16 @@ static UEngine* InitEngine()
 {
 	guard(InitEngine);
 	FTime LoadTime = appSeconds();
+	WriteLaunchDiag("InitEngine: enter");
 
 	// Set exec hook for console commands.
 	static FExecHook GLocalHook;
 	GExec = &GLocalHook;
+	WriteLaunchDiag("InitEngine: after exec hook");
 
 	// Create mutex so external tools know we're running.
 	CreateMutexX( NULL, 0, TEXT("UnrealIsRunning") );
+	WriteLaunchDiag("InitEngine: after mutex");
 
 	// First-run configuration check.
 	INT FirstRun = 0;
@@ -352,6 +486,7 @@ static UEngine* InitEngine()
 
 	if( FirstRun < ENGINE_VERSION && !GIsEditor && GIsClient )
 	{
+		WriteLaunchDiag("InitEngine: entering first-run block");
 		// Get system directory for driver autodetection.
 		TCHAR SysDir[256] = TEXT(""), WinDir[256] = TEXT("");
 #if UNICODE
@@ -411,6 +546,7 @@ static UEngine* InitEngine()
 			GConfig->SetInt( TEXT("FirstRun"), TEXT("FirstRun"), FirstRun );
 		}
 	}
+	WriteLaunchDiag("InitEngine: after first-run block");
 
 	// R6-specific: CD check using Core.dll's IsRavenShieldCDInDrive.
 	FString CdPath;
@@ -437,9 +573,21 @@ static UEngine* InitEngine()
 		TEXT("ini:Engine.Engine.GameEngine"), NULL,
 		LOAD_NoFail, NULL
 	);
+	{
+		TCHAR Diag[1024];
+		appSprintf( Diag, TEXT("InitEngine: EngineClass=%s Base=%s ChildOfUEngine=%d ChildOfUGameEngine=%d"),
+			EngineClass ? EngineClass->GetFullName() : TEXT("<null>"),
+			EngineClass && EngineClass->GetSuperClass() ? EngineClass->GetSuperClass()->GetFullName() : TEXT("<null>"),
+			EngineClass ? EngineClass->IsChildOf( UEngine::StaticClass() ) : 0,
+			EngineClass ? EngineClass->IsChildOf( UGameEngine::StaticClass() ) : 0 );
+		WriteLaunchDiagT( Diag );
+	}
+	WriteLaunchDiag("InitEngine: before ConstructObject");
 	UEngine* Engine = ConstructObject<UEngine>( EngineClass );
+	WriteLaunchDiag("InitEngine: after ConstructObject");
 
 	Engine->Init();
+	WriteLaunchDiag("InitEngine: after Engine->Init");
 
 	// R6-specific: set the global engine pointer for subsystem access.
 	g_pEngine = Engine;
@@ -530,12 +678,18 @@ static void MainLoop( UEngine* Engine )
 
 INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT nCmdShow )
 {
+	WriteLaunchDiag("WinMain: enter");
 	SetUnhandledExceptionFilter(CrashExceptionFilter);
 	// Remember instance info.
 	INT ErrorLevel = 0;
 	GIsStarted     = 1;
 	hInstance      = hInInstance;
 	const TCHAR* CmdLine = GetCommandLine();
+	FMalloc* Malloc = GMalloc ? GMalloc : (FMalloc*)&GetLaunchMalloc();
+	FOutputDeviceFile& Log = GetLaunchLog();
+	FOutputDeviceWindowsErrorUnattended& Error = GetLaunchError();
+	FFeedbackContextWindows& Warn = GetLaunchWarn();
+	FFileManagerWindows& FileManager = GetLaunchFileManager();
 	appStrcpy( GPackage, appPackage() );
 
 	// See if this should be passed to an already-running instance.
@@ -577,14 +731,23 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 #endif
 		// Init core subsystems.
 		GIsClient = GIsGuarded = 1;
+		WriteLaunchDiag("WinMain: before malloc init");
 
-		// R6 FMalloc vtable: GetMemoryBlockSize at slot 0 pushes Init to slot 7.
-		// appInit() calls GMalloc->Init() at the right slot, BUT before that,
-		// FName::StaticInit allocates via GMalloc->Malloc. Pre-init the allocator
-		// so pool tables are ready. Our Init() override handles double-init.
-		Malloc.Init();
+		// Core.dll pre-initializes the shared allocator before any native class
+		// constructors run. Only fall back to a local allocator if that path failed.
+		if( !GMalloc )
+		{
+			Malloc->Init();
+			GMalloc = Malloc;
+		}
+		GLog         = &Log;
+		GError       = &Error;
+		GWarn        = &Warn;
+		GFileManager = &FileManager;
+		WriteLaunchDiag("WinMain: before appInit");
 
-		appInit( GPackage, CmdLine, &Malloc, &Log, &Error, &Warn, &FileManager, FConfigCacheIniR6::Factory, 1 );
+		appInit( GPackage, CmdLine, Malloc, &Log, &Error, &Warn, &FileManager, FConfigCacheIniR6::Factory, 1 );
+		WriteLaunchDiag("WinMain: after appInit");
 
 		// NOTE: CmdLine local variable is clobbered by appInit (register
 		// optimization). Use appCmdLine() for all post-init command line access.
@@ -651,21 +814,34 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 			Filename = TEXT("..\\Help\\Logo.bmp");
 		appStrcpy( GPackage, appPackage() );
 		InitSplash( hInstance, !ShowLog && !ParseParam(CmdLine, TEXT("server")), *Filename );
+		WriteLaunchDiag("WinMain: after InitSplash");
 
 		// Init windowing subsystem.
 		InitWindowing();
+		WriteLaunchDiag("WinMain: after InitWindowing");
 
 		// Create log window, optionally shown.
+		EnsureLaunchWindowClassesRegistered();
 		GLogWindow = new WLog( Log.Filename, Log.LogAr, TEXT("GameLog") );
+		WriteLaunchDiag("WinMain: after WLog ctor");
 
-		// TODO: WLog::OpenWindow needs IMPLEMENT_WINDOWCLASS registration.
-		// GLogWindow->OpenWindow( ShowLog, 0 );
-		// GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Start")) );
-		// if( GIsClient )
-		//	SetPropX( *GLogWindow, TEXT("IsBrowser"), (HANDLE)1 );
+		WriteLaunchDiag("WinMain: before OpenWindow");
+		GLogWindow->OpenWindow( ShowLog, 0 );
+		WriteLaunchDiag("WinMain: after OpenWindow");
+		WriteLaunchDiag("WinMain: before Start log");
+		GLogWindow->Log( NAME_Title, LocalizeGeneral(TEXT("Start")) );
+		WriteLaunchDiag("WinMain: after Start log");
+		if( GIsClient )
+		{
+			WriteLaunchDiag("WinMain: before IsBrowser prop");
+			SetPropX( *GLogWindow, TEXT("IsBrowser"), (HANDLE)1 );
+			WriteLaunchDiag("WinMain: after IsBrowser prop");
+		}
 
 		// Init engine.
+		WriteLaunchDiag("WinMain: before InitEngine");
 		UEngine* Engine = InitEngine();
+		WriteLaunchDiag("WinMain: after InitEngine");
 
 		// Hide splash screen.
 		ExitSplash();
@@ -675,7 +851,7 @@ INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT n
 		if( Parse(CmdLine, TEXT("EXEC="), Temp) )
 		{
 			Temp = FString(TEXT("exec ")) + Temp;
-			// TODO: requires UEngine::Client member for viewport exec.
+			Engine->Exec( *Temp, *GLog );
 		}
 
 		// Start main engine loop.

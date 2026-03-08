@@ -123,7 +123,8 @@ CORE_API void appInit( const TCHAR* InPackage, const TCHAR* InCmdLine, FMalloc* 
 	}
 
 	// Init FName subsystem.
-	FName::StaticInit();
+	if( !FName::GetInitialized() )
+		FName::StaticInit();
 
 	// Init file manager.
 	GFileManager->Init( 1 );

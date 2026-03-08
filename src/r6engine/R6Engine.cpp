@@ -2330,14 +2330,12 @@ R6Charts& R6Charts::operator=(R6Charts const &)
 	return *this;
 }
 
-INT R6Charts::BulletGoesThroughCharacter(INT, INT, INT, INT)
+INT R6Charts::BulletGoesThroughCharacter(INT iEnergy, INT iGroup, INT iThreshold, INT iSide)
 {
-	// Retail (60 bytes at R6Engine+0x3f780): computes a float from
-	// the 4 int parameters via x87 FPU, converts to int via _ftol2
-	// (FUN_10042934), and caps the result at 5000.
-	// Deferred to Phase 9B: the FPU calculation was lost in Ghidra
-	// decompilation — needs disassembly analysis of the 60-byte body.
-	return 0;
+	INT iResult = (INT)(iEnergy - (FLOAT)m_iHumanPenetrationTresholds[iGroup][iThreshold] * m_fHumanSidePenetrationFactors[iGroup][iSide]);
+	if( iResult > 5000 )
+		iResult = 5000;
+	return iResult;
 }
 
 stResultTable* R6Charts::GetKillTable(eBodyPart ePart)
@@ -2378,8 +2376,20 @@ stResultTable* R6Charts::GetStunTable(eBodyPart ePart)
 
 stBodyPart R6Charts::m_stKillChart;
 stBodyPart R6Charts::m_stStunChart;
-float (*R6Charts::m_fHumanSidePenetrationFactors)[2] = NULL;
-int (*R6Charts::m_iHumanPenetrationTresholds)[3] = NULL;
+static FLOAT GHumanSidePenetrationFactors[3][2] =
+{
+	{1.00f, 0.80f},
+	{1.00f, 1.25f},
+	{1.00f, 1.15f},
+};
+static INT GHumanPenetrationThresholds[3][3] =
+{
+	{600, 650, 675},
+	{650, 675, 700},
+	{450, 600, 650},
+};
+float (*R6Charts::m_fHumanSidePenetrationFactors)[2] = GHumanSidePenetrationFactors;
+int (*R6Charts::m_iHumanPenetrationTresholds)[3] = GHumanPenetrationThresholds;
 
 /*-----------------------------------------------------------------------------
 	The End.

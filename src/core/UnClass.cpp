@@ -483,7 +483,8 @@ void UFunction::Bind()
 	if( iNative )
 	{
 		// Bind to native function.
-		// Func = GNatives[iNative];
+		if( iNative < EX_Max )
+			Func = GNatives[iNative];
 	}
 	unguard;
 }

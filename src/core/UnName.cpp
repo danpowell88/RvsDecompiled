@@ -163,7 +163,8 @@ void FName::StaticInit()
 
 	Initialized = 1;
 
-	debugf( NAME_Init, TEXT("Name subsystem initialized") );
+	if( GLog )
+		debugf( NAME_Init, TEXT("Name subsystem initialized") );
 
 	unguard;
 }

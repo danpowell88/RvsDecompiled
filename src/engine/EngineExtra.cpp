@@ -6,6 +6,38 @@
 	referenced by the retail Engine.dll export table.
 =============================================================================*/
 #include "EnginePrivate.h"
+#include <string.h>  // memcpy
+
+/*-----------------------------------------------------------------------------
+	Missing constructors.
+	
+	AActor() and APawn() default constructors are declared in the SDK but
+	the bodies are trivial — the UObject property system handles real
+	initialisation via InitProperties().  We provide empty bodies so the
+	linker is satisfied (DECLARE_CLASS's InternalConstructor calls them).
+
+	FMatrix copy constructor — the retail Core.lib does not export the
+	compiler-generated copy ctor (__imp_??0FMatrix@@QAE@ABV0@@Z).
+	Because FMatrix is CORE_API (dllimport in Engine), we cannot simply
+	define a member function.  Instead we wire a local implementation
+	into the __imp_ thunk that the compiler emits for dllimport calls.
+-----------------------------------------------------------------------------*/
+
+AActor::AActor() {}
+APawn::APawn() {}
+
+/* FMatrix copy-ctor shim:
+   1. local_FMatrix_CopyCtor — __fastcall mirrors __thiscall on x86
+      (ECX = this, EDX unused, args on stack).
+   2. imp_FMatrix_CopyCtor   — C-linkage pointer variable the linker
+      resolves __imp_??0FMatrix@@QAE@ABV0@@Z to via /alternatename.     */
+static void __fastcall local_FMatrix_CopyCtor(
+	void* _this, void* /*edx*/, const void* src)
+{
+	memcpy(_this, src, sizeof(FMatrix));  // 4 x FPlane = 64 bytes
+}
+extern "C" { void* imp_FMatrix_CopyCtor = (void*)&local_FMatrix_CopyCtor; }
+#pragma comment(linker, "/alternatename:__imp_??0FMatrix@@QAE@ABV0@@Z=_imp_FMatrix_CopyCtor")
 
 /*-----------------------------------------------------------------------------
 	IMPLEMENT_CLASS registrations for all additional classes.

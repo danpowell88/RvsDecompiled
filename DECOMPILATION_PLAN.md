@@ -108,8 +108,8 @@ Zero game dependencies. Every other module depends on Core. Best UT99 reference 
 **Build configuration:** Release only. `sdk/Raven_Shield_C_SDK/432Core/Inc/UnBuild.h` contains a `#error` guard that rejects Debug builds unless `_REALLY_WANT_DEBUG` is defined — this is an intentional SDK constraint, not a code regression. Always build with `--config Release`.
 
 **Deferred to Phase 9B:**
-- `UObject::ProcessEvent` — 451-byte dispatcher in retail; requires verified UFunction member offsets and FFrame layout
-- `execCompress` / `execExpand` — string compression/decompression via proprietary algorithm; currently passthrough scaffolds
+- `UObject::ProcessEvent` — implemented in `src/core/UnObj.cpp`; parameter marshaling, native/script dispatch, and out-param propagation now restored and Release-build validated
+- `execCompress` / `execExpand` — implemented using the engine codec stack (`RLE -> BWT -> MTF -> RLE -> Huffman`) with an ASCII wrapper; exact retail string packing remains a documented divergence
 
 ~10 commits. Blog Post: *"Building the Foundation — Core.dll"* ✅ Written
 
@@ -242,7 +242,7 @@ Five R6-specific DLLs — the game layer that turns Unreal Engine into Rainbow S
 - All native function indices set to INDEX_NONE (-1) — dispatched by name at runtime. Correct retail indices can be extracted from `.u` packages in Phase 10.
 - Method bodies are stubs — correct signatures and export symbols, but logic deferred to Phase 9B audit pass
 - R6Engine ordinal 796: `__FUNC_NAME__` static in `AR6FalseHeartBeat::IsBlockedBy` — scope-numbering divergence between retail MSVC 7.1 (`?2?`) and our compiler. Functionally equivalent; cosmetic difference in debug string mangling.
-- `R6Charts::BulletGoesThroughCharacter` — 60-byte function at R6Engine+0x3f780 computes a float from 4 int parameters via x87 FPU, converts via `_ftol2` (FUN_10042934), and caps at 5000. FPU calculation lost in Ghidra decompilation; deferred to Phase 9B disassembly analysis
+- `R6Charts::BulletGoesThroughCharacter` — implemented from direct retail disassembly: `energy - threshold[group][body] * factor[group][side]`, truncated to int and capped at 5000. Static threshold/factor tables extracted from retail data exports.
 
 Blog Posts: ✅ *"The Game Layer — Rebuilding Rainbow Six's R6 Modules"* (`2025-01-09-the-game-layer.md`), ✅ *"Weapons, Walls, and Doors — What Makes R6 Tick"* (`2025-01-10-weapons-walls-and-doors.md`)
 
@@ -341,7 +341,7 @@ Blog Post: *"Press Start — Launching the Engine"*
 
 ### Items Deferred to Phase 9
 - `Engine->Init()`, `Engine->Tick()`, `Engine->GetMaxTickRate()` — virtual calls require correct vtable slot ordering (→ Phase 9B/9C)
-- FExecHook: `TakeFocus`, `EditActor`, `Preferences` — require UEngine::Client member data (→ Phase 9C)
+- Higher-level launcher recovery/config flows (`safe`, `changevideo`, `testrendev=`, existing-instance forwarding) — still require additional retail startup-path recovery (→ Phase 9C)
 
 ---
 

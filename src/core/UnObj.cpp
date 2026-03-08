@@ -127,11 +127,43 @@ UObject::~UObject()
 void UObject::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 {
 	guard(UObject::ProcessEvent);
-	// Deferred to Phase 9B: 451-byte function in retail.
-	// Sets up an FFrame on the stack, checks GIsScriptable and probe masks,
-	// copies parameters, invokes UFunction::Func, copies results back,
-	// and destroys local properties. Requires verified UFunction member
-	// offsets and FFrame layout to reconstruct correctly.
+	if( !Function )
+		return;
+
+	const INT ParmsSize = Max<INT>( Function->ParmsSize, 1 );
+	BYTE* FrameData = (BYTE*)appAlloca( ParmsSize );
+	appMemzero( FrameData, ParmsSize );
+
+	for( TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags & CPF_Parm); ++It )
+	{
+		UProperty* Property = *It;
+		BYTE* Dest = FrameData + Property->Offset;
+		if( Parms )
+			Property->CopyCompleteValue( Dest, (BYTE*)Parms + Property->Offset );
+	}
+
+	void* LocalResult = Result;
+	if( !LocalResult && Parms && Function->GetReturnProperty() )
+		LocalResult = (BYTE*)Parms + Function->ReturnValueOffset;
+
+	FFrame Stack( this, Function, 0, FrameData );
+	CallFunction( Stack, LocalResult, Function );
+
+	if( Parms )
+	{
+		for( TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags & CPF_Parm); ++It )
+		{
+			UProperty* Property = *It;
+			if( Property->PropertyFlags & (CPF_OutParm | CPF_ReturnParm) )
+				Property->CopyCompleteValue( (BYTE*)Parms + Property->Offset, FrameData + Property->Offset );
+		}
+	}
+
+	for( TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags & CPF_Parm); ++It )
+	{
+		UProperty* Property = *It;
+		Property->DestroyValue( FrameData + Property->Offset );
+	}
 	unguard;
 }
 
@@ -263,10 +295,23 @@ void UObject::PostEditChange()
 void UObject::CallFunction( FFrame& Stack, void* const Result, UFunction* Function )
 {
 	guard(UObject::CallFunction);
+	if( !Function )
+		return;
+
+	if( (Function->FunctionFlags & FUNC_Net) && ProcessRemoteFunction( Function, Stack.Locals, &Stack ) )
+		return;
+
+	if( !Function->Func && Function->iNative && Function->iNative < EX_Max )
+		Function->Func = GNatives[Function->iNative];
+
+	if( Function->Func )
+		(this->*Function->Func)( Stack, Result );
+	else
+		ProcessInternal( Stack, Result );
 	unguard;
 }
 
-INT UObject::ScriptConsoleExec( const TCHAR* Cmd, FOutputDevice& Ar, UObject* Executor )
+INT UObject::ScriptConsoleExec( const TCHAR* Str, FOutputDevice& Ar, UObject* Executor )
 {
 	guard(UObject::ScriptConsoleExec);
 	return 0;
@@ -702,20 +747,45 @@ UObject* UObject::StaticFindObjectChecked( UClass* ObjectClass, UObject* InObjec
 UObject* UObject::StaticLoadObject( UClass* ObjectClass, UObject* InOuter, const TCHAR* InName, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox )
 {
 	guard(UObject::StaticLoadObject);
+	FString IniResolvedName;
+	UObject* LoadOuter = InOuter;
+	if( InName && appStrnicmp( InName, TEXT("ini:"), 4 ) == 0 )
+	{
+		const TCHAR* IniSpec = InName + 4;
+		const TCHAR* LastDot = NULL;
+		for( const TCHAR* Scan = IniSpec; *Scan; ++Scan )
+			if( *Scan == TEXT('.') )
+				LastDot = Scan;
+		if( LastDot )
+		{
+			TCHAR Section[256];
+			appStrncpy( Section, IniSpec, Min<INT>( (INT)(LastDot - IniSpec) + 1, ARRAY_COUNT(Section) ) );
+			Section[LastDot - IniSpec] = 0;
+			GConfig->GetString( Section, LastDot + 1, IniResolvedName );
+			if( IniResolvedName.Len() )
+				InName = *IniResolvedName;
+			else if( !(LoadFlags & LOAD_NoWarn) )
+				debugf( NAME_Warning, TEXT("Failed to resolve config object '%s'"), InName );
+		}
+	}
+
+	const TCHAR* LoadName = InName;
+	if( LoadName && !LoadOuter )
+		ResolveName( LoadOuter, LoadName, 1, 0 );
 
 	// Try to find the object.
-	UObject* Result = StaticFindObject( ObjectClass, InOuter, InName, 0 );
+	UObject* Result = StaticFindObject( ObjectClass, LoadOuter, LoadName, 0 );
 	if( !Result )
 	{
 		// Load through linker.
 		BeginLoad();
-		ULinkerLoad* Linker = GetPackageLinker( InOuter, Filename, LoadFlags, Sandbox, NULL );
-		if( Linker )
-			Result = Linker->Create( ObjectClass, FName(InName,FNAME_Find), LoadFlags, 0 );
+		ULinkerLoad* Linker = GetPackageLinker( LoadOuter, Filename, LoadFlags, Sandbox, NULL );
+		if( Linker && ObjectClass )
+			Result = Linker->Create( ObjectClass, FName(LoadName,FNAME_Find), LoadFlags, 0 );
 		EndLoad();
 	}
 	if( !Result && !(LoadFlags & LOAD_NoWarn) )
-		debugf( NAME_Warning, TEXT("Failed to load '%s': not found"), InName );
+		debugf( NAME_Warning, TEXT("Failed to load '%s': not found"), LoadName ? LoadName : InName );
 	return Result;
 	unguard;
 }
@@ -915,7 +985,71 @@ TArray<UObject*> UObject::GetLoaderList()
 ULinkerLoad* UObject::GetPackageLinker( UObject* InOuter, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox, FGuid* CompatibleGuid )
 {
 	guard(UObject::GetPackageLinker);
-	return NULL;
+	UObject* TopOuter = InOuter;
+	while( TopOuter && TopOuter->GetOuter() )
+		TopOuter = TopOuter->GetOuter();
+
+	UPackage* Package = NULL;
+	if( TopOuter && TopOuter->IsA(UPackage::StaticClass()) )
+		Package = (UPackage*)TopOuter;
+
+	if( !Package && Filename )
+	{
+		const TCHAR* PackageName = Filename;
+		const TCHAR* Slash = NULL;
+		const TCHAR* AltSlash = NULL;
+		for( const TCHAR* Scan = PackageName; *Scan; ++Scan )
+		{
+			if( *Scan == TEXT('\\') )
+				Slash = Scan;
+			else if( *Scan == TEXT('/') )
+				AltSlash = Scan;
+		}
+		if( AltSlash && (!Slash || AltSlash > Slash) )
+			Slash = AltSlash;
+		if( Slash )
+			PackageName = Slash + 1;
+
+		TCHAR BaseName[NAME_SIZE];
+		appStrncpy( BaseName, PackageName, ARRAY_COUNT(BaseName) );
+		TCHAR* Dot = NULL;
+		for( TCHAR* Scan = BaseName; *Scan; ++Scan )
+			if( *Scan == TEXT('.') )
+				Dot = Scan;
+		if( Dot )
+			*Dot = 0;
+
+		Package = CreatePackage( NULL, BaseName );
+	}
+
+	if( !Package )
+		return NULL;
+
+	if( Package->GetLinker() )
+		return Package->GetLinker();
+
+	TCHAR PackageFile[256];
+	if( Filename && *Filename )
+		appStrcpy( PackageFile, Filename );
+	else if( !appFindPackageFile( Package->GetName(), CompatibleGuid, PackageFile ) )
+		return NULL;
+
+	ULinkerLoad* Linker = NULL;
+	try
+	{
+		Linker = new ULinkerLoad( Package, PackageFile, LoadFlags );
+	}
+	catch( ... )
+	{
+		return NULL;
+	}
+
+	if( !Linker )
+		return NULL;
+
+	Package->SetLinker( Linker, INDEX_NONE );
+	GObjLoaders.AddItem( Linker );
+	return Linker;
 	unguard;
 }
 

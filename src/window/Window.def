@@ -515,7 +515,7 @@ EXPORTS
     ?GetLength@WWindow@@UAEHXZ    @513
     ?GetLineCount@WEdit@@QAEHXZ    @514
     ?GetLineIndex@WEdit@@QAEHH@Z    @515
-;      ?GetListItem@WPropertiesBase@@QAEPAVFTreeItem@@H@Z    @516
+    ?GetListItem@WPropertiesBase@@UAEPAVFTreeItem@@H@Z    @516
     ?GetModify@WEdit@@QAEHXZ    @517
     ?GetNext@WWizardPage@@UAEPAV1@XZ    @518
     ?GetNextText@WWizardPage@@UAEPBGXZ    @519
