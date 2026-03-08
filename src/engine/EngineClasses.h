@@ -1229,8 +1229,9 @@ struct ENGINE_API FWaveModInfo
 // FRotatorF — floating-point rotator.
 // ===========================================================================
 
-struct ENGINE_API FRotatorF
+class ENGINE_API FRotatorF
 {
+public:
 	FLOAT Pitch, Yaw, Roll;
 	FRotatorF();
 	FRotatorF(FLOAT, FLOAT, FLOAT);
@@ -3438,6 +3439,7 @@ class FRenderInterface
 {
 public:
 	virtual ~FRenderInterface() {}
+	virtual void GetDistanceFog(INT& bEnabled, FLOAT& FogStart, FLOAT& FogEnd, FColor& FogColor) {}
 };
 
 // FRenderCaps — hardware capability query result from GetRenderCaps().

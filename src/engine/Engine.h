@@ -55,10 +55,17 @@ public:
 	:	R(InR), G(InG), B(InB), A(255) {}
 	FColor( BYTE InR, BYTE InG, BYTE InB, BYTE InA )
 	:	R(InR), G(InG), B(InB), A(InA) {}
+	FColor( DWORD InColor )
+	{ *(DWORD*)this = InColor; }
+	FColor( const FPlane& P );
+
+	// Serialization
 	friend FArchive& operator<< (FArchive &Ar, FColor &Color )
 	{
 		return Ar << Color.R << Color.G << Color.B << Color.A;
 	}
+
+	// Comparison
 	UBOOL operator==( const FColor &C ) const
 	{
 		return *(DWORD*)this == *(DWORD*)&C;
@@ -67,6 +74,53 @@ public:
 	{
 		return *(DWORD*)this != *(DWORD*)&C;
 	}
+
+	// Arithmetic
+	void operator+=( FColor C )
+	{
+		R = (BYTE)Min((INT)R + (INT)C.R, 255);
+		G = (BYTE)Min((INT)G + (INT)C.G, 255);
+		B = (BYTE)Min((INT)B + (INT)C.B, 255);
+		A = (BYTE)Min((INT)A + (INT)C.A, 255);
+	}
+
+	// Accessors
+	DWORD& DWColor()
+	{ return *(DWORD*)this; }
+	const DWORD& DWColor() const
+	{ return *(const DWORD*)this; }
+	DWORD TrueColor() const
+	{ return *(const DWORD*)this; }
+	DWORD PS2DWColor()
+	{ return *(DWORD*)this; }
+
+	// Brightness
+	INT Brightness() const
+	{ return Max(Max((INT)R, (INT)G), (INT)B); }
+	FLOAT FBrightness() const
+	{ return Max(Max(R/255.f, G/255.f), B/255.f); }
+	FColor Brighten( INT Amount )
+	{
+		return FColor( (BYTE)Clamp((INT)R+Amount,0,255), (BYTE)Clamp((INT)G+Amount,0,255), (BYTE)Clamp((INT)B+Amount,0,255), A );
+	}
+
+	// Conversions
+	FPlane Plane() const
+	{ return FPlane(R/255.f, G/255.f, B/255.f, A/255.f); }
+	FColor RedBlueSwap()
+	{ return FColor(B, G, R, A); }
+	operator DWORD() const
+	{ return *(const DWORD*)this; }
+	operator FPlane() const
+	{ return FPlane(R/255.f, G/255.f, B/255.f, A/255.f); }
+	operator FVector() const
+	{ return FVector(R/255.f, G/255.f, B/255.f); }
+
+	// High color
+	_WORD HiColor555() const
+	{ return ((R>>3)<<10) | ((G>>3)<<5) | (B>>3); }
+	_WORD HiColor565() const
+	{ return ((R>>3)<<11) | ((G>>2)<<5) | (B>>3); }
 };
 #endif
 

@@ -443,25 +443,25 @@ FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 FRotator FRotatorF::Rotator() { return FRotator(); }
 
 // ??4FRotatorF@@QAEAAV0@ABV0@@Z
-FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { static FRotatorF dummy; return dummy; }
+FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }
 
 // ??DFRotatorF@@QBE?AV0@M@Z
-FRotatorF FRotatorF::operator*(float p0) const { return FRotatorF(); }
+FRotatorF FRotatorF::operator*(float p0) const { return FRotatorF(Pitch*p0, Yaw*p0, Roll*p0); }
 
 // ??XFRotatorF@@QAE?AV0@M@Z
-FRotatorF FRotatorF::operator*=(float p0) { return FRotatorF(); }
+FRotatorF FRotatorF::operator*=(float p0) { Pitch*=p0; Yaw*=p0; Roll*=p0; return *this; }
 
 // ??HFRotatorF@@QBE?AV0@V0@@Z
-FRotatorF FRotatorF::operator+(FRotatorF p0) const { return FRotatorF(); }
+FRotatorF FRotatorF::operator+(FRotatorF p0) const { return FRotatorF(Pitch+p0.Pitch, Yaw+p0.Yaw, Roll+p0.Roll); }
 
 // ??YFRotatorF@@QAE?AV0@V0@@Z
-FRotatorF FRotatorF::operator+=(FRotatorF p0) { return FRotatorF(); }
+FRotatorF FRotatorF::operator+=(FRotatorF p0) { Pitch+=p0.Pitch; Yaw+=p0.Yaw; Roll+=p0.Roll; return *this; }
 
 // ??GFRotatorF@@QBE?AV0@V0@@Z
-FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(); }
+FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(Pitch-p0.Pitch, Yaw-p0.Yaw, Roll-p0.Roll); }
 
 // ??ZFRotatorF@@QAE?AV0@V0@@Z
-FRotatorF FRotatorF::operator-=(FRotatorF p0) { return FRotatorF(); }
+FRotatorF FRotatorF::operator-=(FRotatorF p0) { Pitch-=p0.Pitch; Yaw-=p0.Yaw; Roll-=p0.Roll; return *this; }
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) { static FStatGraph dummy; return dummy; }
@@ -912,6 +912,16 @@ void KUpdateMassProps(UKMeshProps * p0) {}
 
 // ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z
 void KarmaTriListDataInit(_KarmaTriListData * p0) {}
+
+// =============================================================================
+// FColor constructor from FPlane (out-of-line to avoid circular header deps).
+// =============================================================================
+FColor::FColor(const FPlane& P)
+:	R((BYTE)Clamp(appFloor(P.X*255.f),0,255))
+,	G((BYTE)Clamp(appFloor(P.Y*255.f),0,255))
+,	B((BYTE)Clamp(appFloor(P.Z*255.f),0,255))
+,	A((BYTE)Clamp(appFloor(P.W*255.f),0,255))
+{}
 
 // =============================================================================
 // Explicit template instantiation for TArray<BYTE> and TLazyArray<BYTE>.

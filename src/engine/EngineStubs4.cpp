@@ -19,8 +19,6 @@
 #pragma comment(linker, "/alternatename:?GetViewFrustum@FPointLightMapSceneNode@@UAE?AVFConvexVolume@@XZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?GetWarpZoneSceneNode@FWarpZoneSceneNode@@UAEPAV1@XZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?HandleClientPlayer@UDemoRecConnection@@UAEXPAVAPlayerController@@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?HiColor555@FColor@@QBEGXZ=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?HiColor565@FColor@@QBEGXZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Illuminate@UTerrainPrimitive@@UAEXPAVAActor@@H@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Init@FEngineStats@@QAEXXZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?InitGameInfoGameService@AGameInfo@@UAEXXZ=_dummy_stub_func")
