@@ -993,7 +993,7 @@ private:
 	FLOAT DistanceToHashPlane(INT, FLOAT, FLOAT, INT);
 };
 
-struct ENGINE_API FCollisionOctree : public FCollisionHashBase
+class ENGINE_API FCollisionOctree : public FCollisionHashBase
 {
 public:
 	BYTE Pad[256];
@@ -1014,8 +1014,9 @@ public:
 	virtual void Tick();
 };
 
-struct ENGINE_API FOctreeNode
+class ENGINE_API FOctreeNode
 {
+public:
 	BYTE Pad[64];
 	FOctreeNode();
 	FOctreeNode(const FOctreeNode&);
