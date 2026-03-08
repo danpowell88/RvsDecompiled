@@ -273,8 +273,31 @@ The ~365 EXEC_STUBs break down by functional area:
 ## Phase 4: Rainbow Six Comes Alive
 **Goal:** R6-specific gameplay works. Player controls a soldier. AI teammates and enemies exist. Missions are playable.
 
+> **Phase 4 — Exec Parameter Extraction: COMPLETE** (2025-07-08)
+>
+> All 90 R6Engine native exec functions now have proper P_GET parameter
+> extraction from the bytecode stack, with delegation to C++ method stubs
+> where available. Breakdown by class:
+>
+> | Class | Exec Functions | Key Capabilities |
+> |---|---|---|
+> | AR6AIController | 17 | Pathfinding, door handling, combat positioning |
+> | AR6DeploymentZone | 9 | Spawn zones, hostage/terrorist management |
+> | AR6IORotatingDoor | 3 | Breach charges, door touch detection |
+> | AR6Pawn | 27 | Look/aim, movement, audio, damage, vision modes |
+> | AR6PlayerController | 8 | Reticule, HUD, localization, voice priority |
+> | AR6RainbowAI | 10 | Tactical positions, sniping, room clearing |
+> | AR6SoundReplicationInfo | 3 | Weapon sound replication |
+> | AR6TerroristAI | 8 | Backup calls, clear shots, patrol nodes |
+> | UR6MatineeAttach | 2 | Bone/location queries for cinematics |
+> | UR6TerroristMgr | 2 | Hostage zone assignment |
+>
+> The C++ delegate methods (e.g., `PawnLook`, `CanWalkTo`, `GetViewRotation`)
+> remain as stubs returning zero/null. Implementing their actual logic is the
+> next step for full gameplay functionality.
+
 ### 4A. R6 Player Control (~35 R6Engine stubs + related)
-- **Files:** src/r6engine/R6Engine.cpp (AR6PlayerController, AR6Pawn sections)
+- **Files:** src/r6engine/Src/R6Engine.cpp (AR6PlayerController, AR6Pawn sections)
 - **What:**
   - **AR6PlayerController** (25 methods): PlayerTick, UpdateRotation, SpawnDefaultHUD, ClientRestart, SetupInputSystem, CheckJumpInput, ServerChangeWeapon, ServerDoFire
   - **AR6Pawn stance system** (10 methods): stand/crouch/prone/crawl transitions, fluid peeking (lean left/right), PawnLook/PawnLookAt/PawnLookAbsolute
