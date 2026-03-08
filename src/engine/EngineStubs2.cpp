@@ -1,11 +1,6 @@
 // EngineStubs2.cpp - Linker stub directives (chunk 2 of 4)
 // Maps unresolved .def exports to dummy implementations
 
-#pragma comment(linker, "/alternatename:?KME2UCoords@@YAXPAVFCoords@@QAY03$$CBM@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?KME2UMatrixCopy@@YAXPAVFMatrix@@QAY03M@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?KME2UTransform@@YAXPAVFVector@@PAVFRotator@@QAY03$$CBM@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?KU2MEMatrixCopy@@YAXQAY03MPAVFMatrix@@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?KU2METransform@@YAXQAY03MVFVector@@VFRotator@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??_7UControlChannel@@6BFOutputDevice@@@=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:??_7UControlChannel@@6BUChannel@@@=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:??_7UDemoRecConnection@@6BFExec@@@=_dummy_stub_data")
@@ -22,9 +17,3 @@
 #pragma comment(linker, "/alternatename:??_7UViewport@@6BUObject@@@=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:??_F?$TLazyArray@E@@QAEXXZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??0?$TLazyArray@E@@QAE@ABV0@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??0AR6AbstractClimbableObj@@IAE@XZ=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??0FPointRegion@@QAE@PAVAZoneInfo@@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??0FPointRegion@@QAE@PAVAZoneInfo@@HE@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??0FPointRegion@@QAE@XZ=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??0UR6AbstractTerroristMgr@@IAE@XZ=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??1FSoundData@@QAE@XZ=_dummy_stub_func")

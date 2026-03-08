@@ -283,12 +283,12 @@ struct _McdGeometry;
 struct McdGeomMan;
 
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
-void KME2UCoords(FCoords*, const FLOAT (*)[4]) {}
-void KME2UMatrixCopy(FMatrix*, FLOAT (*)[4]) {}
-void KME2UTransform(FVector*, FRotator*, const FLOAT (*)[4]) {}
+void KME2UCoords(FCoords*, const FLOAT (* const)[4]) {}
+void KME2UMatrixCopy(FMatrix*, FLOAT (* const)[4]) {}
+void KME2UTransform(FVector*, FRotator*, const FLOAT (* const)[4]) {}
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
-void KU2MEMatrixCopy(FLOAT (*)[4], FMatrix*) {}
-void KU2METransform(FLOAT (*)[4], FVector, FRotator) {}
+void KU2MEMatrixCopy(FLOAT (* const)[4], FMatrix*) {}
+void KU2METransform(FLOAT (* const)[4], FVector, FRotator) {}
 
 // ============================================================================
 // TArray<BYTE> operators
@@ -301,9 +301,24 @@ TArray<BYTE>& TArray<BYTE>::operator+=(const TArray<BYTE>& Other) { return *this
 // cannot provide explicit definitions. Left as linker stubs.
 // ============================================================================
 
+
 // ============================================================================
-// AR6AbstractClimbableObj / UR6AbstractTerroristMgr
-// (constructors now defined inline in header as protected)
+// FPointRegion constructors (moved from inline to out-of-line)
+// ============================================================================
+FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
+FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(0), ZoneNumber(0) {}
+FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
+
+// ============================================================================
+// AR6AbstractClimbableObj / UR6AbstractTerroristMgr (out-of-line ctors)
+// ============================================================================
+AR6AbstractClimbableObj::AR6AbstractClimbableObj() {}
+UR6AbstractTerroristMgr::UR6AbstractTerroristMgr() {}
+
+// ============================================================================
+// FHitObserver::Click (moved from inline to out-of-line)
+// ============================================================================
+void FHitObserver::Click(const FHitCause& Cause, const HHitProxy& Hit) {}
 // ============================================================================
 
 // ============================================================================

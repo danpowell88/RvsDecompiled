@@ -1347,7 +1347,7 @@ class ENGINE_API FHitObserver
 {
 public:
 	virtual ~FHitObserver() {}
-	virtual void Click(const FHitCause& Cause, const struct HHitProxy& Hit) {}
+	virtual void Click(const FHitCause& Cause, const struct HHitProxy& Hit);
 };
 
 struct ENGINE_API FHitCause
@@ -1470,7 +1470,7 @@ class ENGINE_API FSoundData
 public:
 	BYTE Pad[64];
 	FSoundData(USound*);
-	virtual ~FSoundData();
+	~FSoundData();
 	virtual void Load();
 	FLOAT GetPeriod();
 };
@@ -1526,9 +1526,9 @@ struct FPointRegion
 	class AZoneInfo* Zone;
 	INT iLeaf;
 	BYTE ZoneNumber;
-	FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
-	FPointRegion(class AZoneInfo* InZone) : Zone(InZone), iLeaf(0), ZoneNumber(0) {}
-	FPointRegion(class AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
+	FPointRegion();
+	FPointRegion(class AZoneInfo* InZone);
+	FPointRegion(class AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber);
 	FPointRegion& operator=(const FPointRegion&);
 };
 
@@ -5992,7 +5992,7 @@ class UR6AbstractTerroristMgr : public UObject
 public:
 	DECLARE_CLASS(UR6AbstractTerroristMgr,UObject,0,Engine)
 protected:
-	UR6AbstractTerroristMgr() {}
+	UR6AbstractTerroristMgr();
 public:
 };
 
@@ -6311,7 +6311,7 @@ class AR6AbstractClimbableObj : public AActor
 public:
 	DECLARE_CLASS(AR6AbstractClimbableObj,AActor,0,Engine)
 protected:
-	AR6AbstractClimbableObj() {}
+	AR6AbstractClimbableObj();
 public:
 };
 
