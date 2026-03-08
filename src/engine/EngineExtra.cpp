@@ -321,6 +321,49 @@ EXEC_STUB(AR6eviLTesting,execNativeRunAllTests) IMPLEMENT_FUNCTION( AR6eviLTesti
 // UInteraction
 EXEC_STUB(UInteraction,execConsoleCommand) IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execConsoleCommand );
 EXEC_STUB(UInteraction,execInitialize)     IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execInitialize );
+
+// =============================================================================
+// ABrush
+// =============================================================================
+
+void ABrush::PostLoad() { Super::PostLoad(); }
+void ABrush::PostEditChange() { Super::PostEditChange(); }
+FCoords ABrush::ToLocal() const { return FCoords(); }
+FCoords ABrush::ToWorld() const { return FCoords(); }
+UPrimitive* ABrush::GetPrimitive() { return NULL; }
+void ABrush::CheckForErrors() { Super::CheckForErrors(); }
+void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
+void ABrush::InitPosRotScale() {}
+FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
+FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
+FCoords ABrush::OldToLocal() const { return FCoords(); }
+FCoords ABrush::OldToWorld() const { return FCoords(); }
+
+// =============================================================================
+// ANavigationPoint
+// =============================================================================
+
+void ANavigationPoint::Destroy() { Super::Destroy(); }
+void ANavigationPoint::PostEditMove() {}
+void ANavigationPoint::Spawned() {}
+void ANavigationPoint::InitForPathFinding() {}
+void ANavigationPoint::CheckSymmetry(ANavigationPoint* Other) {}
+void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
+void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
+void ANavigationPoint::CheckForErrors() { Super::CheckForErrors(); }
+INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav) { return 0; }
+void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
+void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
+void ANavigationPoint::ClearPaths() {}
+void ANavigationPoint::FindBase() {}
+INT ANavigationPoint::PrunePaths() { return 0; }
+INT ANavigationPoint::IsIdentifiedAs(FName Name) { return 0; }
+INT ANavigationPoint::ReviewPath(APawn* Scout) { return 0; }
+INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
+void ANavigationPoint::CleanUpPruned() {}
+INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
+UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav) { return NULL; }
+INT ANavigationPoint::ShouldBeBased() { return 0; }
 EXEC_STUB(UInteraction,execScreenToWorld)  IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execScreenToWorld );
 EXEC_STUB(UInteraction,execWorldToScreen)  IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execWorldToScreen );
 
@@ -354,6 +397,222 @@ EXEC_STUB(UR6ModMgr,execSetGeneralModSettings)   IMPLEMENT_FUNCTION( UR6ModMgr, 
 EXEC_STUB(UR6ModMgr,execSetSystemMod)            IMPLEMENT_FUNCTION( UR6ModMgr, 2021, execSetSystemMod );
 
 #undef EXEC_STUB
+
+// =============================================================================
+// UGameEngine
+// =============================================================================
+
+INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
+void UGameEngine::Destroy() { Super::Destroy(); }
+void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
+void UGameEngine::UpdateConnectingMessage() {}
+void UGameEngine::Init() {}
+void UGameEngine::Exit() {}
+void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize ) {}
+void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
+void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
+void UGameEngine::MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
+void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
+void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
+void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
+INT UGameEngine::ChallengeResponse( INT Challenge ) { return 0; }
+FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
+void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
+INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error ) { return 0; }
+ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error ) { return NULL; }
+void UGameEngine::SaveGame( INT Position ) {}
+void UGameEngine::CancelPending() {}
+void UGameEngine::PaintProgress( const FURL& URL ) {}
+UNetDriver* UGameEngine::BuildServerMasterMap( UNetDriver* NetDriver, ULevel* InLevel ) { return NULL; }
+void UGameEngine::NotifyLevelChange() {}
+void UGameEngine::FixUpLevel() {}
+
+// =============================================================================
+// UViewport
+// =============================================================================
+
+INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
+void UViewport::Destroy() { Super::Destroy(); }
+void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
+INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
+void UViewport::Unlock() {}
+void UViewport::Present() {}
+INT UViewport::SetDrag( INT NewDrag ) { return 0; }
+void* UViewport::GetServer() { return NULL; }
+void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
+void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
+UClient* UViewport::GetOuterUClient() const { return NULL; }
+void UViewport::InitInput() {}
+INT UViewport::IsOrtho() { return 0; }
+INT UViewport::IsPerspective() { return 1; }
+INT UViewport::IsRealtime() { return 0; }
+INT UViewport::IsWire() { return 0; }
+void UViewport::ScreenShot() {}
+BYTE* UViewport::_Screen( INT X, INT Y ) { return NULL; }
+
+// =============================================================================
+// UModel
+// =============================================================================
+
+UModel::UModel( ABrush* Owner, INT InRootOutside ) {}
+void UModel::PostLoad() { Super::PostLoad(); }
+void UModel::Destroy() { Super::Destroy(); }
+void UModel::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+INT UModel::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags ) { return 0; }
+INT UModel::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags ) { return 0; }
+FBox UModel::GetRenderBoundingBox( const AActor* Owner ) { return FBox(); }
+FBox UModel::GetCollisionBoundingBox( const AActor* Owner ) const { return FBox(); }
+void UModel::Illuminate( AActor* Owner, INT bExtra ) {}
+FVector UModel::GetEncroachExtent( AActor* Owner ) { return FVector(0,0,0); }
+FVector UModel::GetEncroachCenter( AActor* Owner ) { return FVector(0,0,0); }
+INT UModel::UseCylinderCollision( const AActor* Owner ) { return 0; }
+TArray<INT> UModel::BoxLeaves( FBox Box ) { return TArray<INT>(); }
+void UModel::BuildBound() {}
+void UModel::BuildRenderData() {}
+void UModel::ClearRenderData( URenderDevice* RenDev ) {}
+void UModel::CompressLightmaps() {}
+INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FVector Extent, TArray<INT>& Result, FLOAT VisRadius ) { return 0; }
+void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys ) {}
+BYTE UModel::FastLineCheck( FVector Start, FVector End ) { return 0; }
+FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const { return 0.0f; }
+void UModel::Modify( INT DoTransArrays ) {}
+void UModel::ModifyAllSurfs( INT SetBits ) {}
+void UModel::ModifySelectedSurfs( INT SetBits ) {}
+void UModel::ModifySurf( INT iSurf, INT SetBits ) {}
+FPointRegion UModel::PointRegion( AZoneInfo* Zone, FVector Location ) const { return FPointRegion(); }
+INT UModel::PotentiallyVisible( INT iLeaf0, INT iLeaf1 ) { return 0; }
+void UModel::PrecomputeSphereFilter( const FPlane& Sphere ) {}
+INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End ) { return 0; }
+void UModel::ShrinkModel() {}
+void UModel::Transform( ABrush* Brush ) {}
+
+// =============================================================================
+// UNetConnection
+// =============================================================================
+
+UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
+INT UNetConnection::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+void UNetConnection::Serialize( const TCHAR* Data, EName Event ) {}
+void UNetConnection::Destroy() { Super::Destroy(); }
+void UNetConnection::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UNetConnection::ReadInput( FLOAT DeltaSeconds ) {}
+void UNetConnection::InitOut() {}
+void UNetConnection::AssertValid() {}
+void UNetConnection::SendAck( INT PacketId, INT RemotePacketId ) {}
+void UNetConnection::FlushNet() {}
+void UNetConnection::Tick() {}
+INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
+void UNetConnection::HandleClientPlayer( APlayerController* PC ) {}
+UChannel* UNetConnection::CreateChannel( INT ChType, INT bOpenedLocally, INT ChIndex ) { return NULL; }
+UNetDriver* UNetConnection::GetDriver() { return NULL; }
+void UNetConnection::PostSend( INT PacketId ) {}
+void UNetConnection::PreSend( INT SizeBits ) {}
+void UNetConnection::PurgeAcks() {}
+void UNetConnection::ReceiveFile( INT PackageIndex ) {}
+void UNetConnection::ReceivedNak( INT NakPacketId ) {}
+void UNetConnection::ReceivedPacket( FBitReader& Reader ) {}
+void UNetConnection::ReceivedRawPacket( void* Data, INT Count ) {}
+void UNetConnection::SendPackageMap() {}
+INT UNetConnection::SendRawBunch( FOutBunch& Bunch, INT InPacketId ) { return 0; }
+void UNetConnection::SetActorDirty( AActor* Actor ) {}
+void UNetConnection::SlowAssertValid() {}
+
+// =============================================================================
+// UChannel
+// =============================================================================
+
+void UChannel::Destroy() { Super::Destroy(); }
+void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally ) {}
+void UChannel::SetClosingFlag() {}
+void UChannel::Close() {}
+FString UChannel::Describe() { return FString(); }
+void UChannel::ReceivedNak( INT NakPacketId ) {}
+void UChannel::Tick() {}
+void UChannel::AssertInSequenced() {}
+UClass** UChannel::ChannelClasses() { return NULL; }
+INT CDECL UChannel::IsKnownChannelType( INT Type ) { return 0; }
+INT UChannel::IsNetReady( INT Saturate ) { return 1; }
+INT UChannel::MaxSendBytes() { return 0; }
+void UChannel::ReceivedAcks() {}
+void UChannel::ReceivedRawBunch( FInBunch& Bunch ) {}
+INT UChannel::ReceivedSequencedBunch( FInBunch& Bunch ) { return 0; }
+INT UChannel::RouteDestroy() { return 0; }
+
+// =============================================================================
+// ASceneManager
+// =============================================================================
+
+void ASceneManager::PostEditChange() { Super::PostEditChange(); }
+INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
+void ASceneManager::PostBeginPlay() {}
+void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
+FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
+void ASceneManager::SetCurrentTime( FLOAT NewTime ) {}
+void ASceneManager::SetSceneStartTime() {}
+
+// =============================================================================
+// AFluidSurfaceInfo
+// =============================================================================
+
+void AFluidSurfaceInfo::PostLoad() { Super::PostLoad(); }
+void AFluidSurfaceInfo::Destroy() { Super::Destroy(); }
+void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
+INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
+void AFluidSurfaceInfo::PostEditMove() {}
+void AFluidSurfaceInfo::Spawned() {}
+UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
+void AFluidSurfaceInfo::Init() {}
+void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
+void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
+void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
+
+// =============================================================================
+// UInput
+// =============================================================================
+
+INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UInput::Init( UViewport* InViewport ) {}
+INT UInput::PreProcess( INT Key, INT Action, FLOAT Delta ) { return 0; }
+INT UInput::Process( FOutputDevice& Ar, INT Key, INT Action, FLOAT Delta ) { return 0; }
+void UInput::DirectAxis( INT Key, FLOAT Value, FLOAT Delta ) {}
+void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
+void UInput::ResetInput() {}
+const TCHAR* UInput::GetKeyName( INT Key ) const { return TEXT(""); }
+INT UInput::FindKeyName( const TCHAR* KeyName, INT& Key ) const { return 0; }
+BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
+void UInput::SetKey( const TCHAR* KeyName ) {}
+FString UInput::GetActionKey( BYTE Key ) { return FString(); }
+BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
+FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
+void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
+void UInput::SetInputAction( INT Action, FLOAT Delta ) {}
+BYTE UInput::KeyDown( INT Key ) { return 0; }
+void UInput::StaticConstructor() {}
+
+// =============================================================================
+// UNullRenderDevice
+// =============================================================================
+
+INT UNullRenderDevice::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+INT UNullRenderDevice::Init() { return 1; }
+INT UNullRenderDevice::SetRes( UViewport* Viewport, INT NewX, INT NewY, INT NewColorBytes ) { return 0; }
+void UNullRenderDevice::Exit( UViewport* Viewport ) {}
+void UNullRenderDevice::Flush( UViewport* Viewport ) {}
+void UNullRenderDevice::Present( UViewport* Viewport ) {}
+void UNullRenderDevice::SetEmulationMode( INT Mode ) {}
+void UNullRenderDevice::Unlock( FRenderInterface* RI ) {}
+void UNullRenderDevice::UpdateGamma( UViewport* Viewport ) {}
+void UNullRenderDevice::FlushResource( QWORD ResourceId ) {}
+void UNullRenderDevice::ReadPixels( UViewport* Viewport, FColor* Pixels ) {}
+void UNullRenderDevice::RestoreGamma() {}
+FRenderInterface* UNullRenderDevice::Lock( UViewport* Viewport, BYTE* HitData, INT* HitSize ) { return NULL; }
+FRenderCaps* UNullRenderDevice::GetRenderCaps() { return NULL; }
+INT UNullRenderDevice::SupportsTextureFormat( INT Format ) { return 0; }
+void UNullRenderDevice::StaticConstructor() {}
 
 /*-----------------------------------------------------------------------------
 	PunkBuster export.

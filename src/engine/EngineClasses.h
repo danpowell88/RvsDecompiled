@@ -278,6 +278,45 @@ class UChannel;
 class UPlayer;
 class AEmitter;
 class AProjector;
+class ANavigationPoint;
+class AJumpPad;
+class AJumpDest;
+class ALadder;
+class ALiftCenter;
+class APlayerStart;
+class ATeleporter;
+class AWarpZoneMarker;
+class APathNode;
+class ADoor;
+class AMover;
+class ALadderVolume;
+class AFluidSurfaceInfo;
+class ASceneManager;
+class ATerrainInfo;
+class UReachSpec;
+class UViewport;
+class UPendingLevel;
+class UEngine;
+class UGameEngine;
+class FCollisionHash;
+class FPoly;
+class FSortedPathList;
+class FRenderInterface;
+class FRenderCaps;
+class FLevelSceneNode;
+class FDynamicActor;
+class FBaseTexture;
+class FBitReader;
+class FOutBunch;
+class FInBunch;
+class FHitCause;
+class FOrientation;
+class UMatAction;
+class UClient;
+class UBitmapMaterial;
+class UPrimitive;
+struct HHitProxy;
+struct FDXTCompressionOptions;
 
 // ---------------------------------------------------------------------------
 // EPhysics — physics modes for actors.
@@ -1221,6 +1260,33 @@ class ENGINE_API ABrush : public AActor
 {
 public:
 	DECLARE_CLASS(ABrush,AActor,0,Engine)
+	ABrush() {}
+
+	BYTE CsgOper;
+	INT PolyFlags;
+	BITFIELD bColored : 1;
+	class UObject* UnusedLightMesh;
+	FVector PostPivot;
+	FScale MainScale;
+	FScale PostScale;
+	FScale TempScale;
+	FColor BrushColor;
+
+	// Virtual methods
+	virtual void PostLoad();
+	virtual void PostEditChange();
+	virtual FCoords ToLocal() const;
+	virtual FCoords ToWorld() const;
+	virtual class UPrimitive * GetPrimitive();
+	virtual void CheckForErrors();
+	virtual void CopyPosRotScaleFrom(class ABrush *);
+	virtual void InitPosRotScale();
+
+	// Non-virtual methods
+	FLOAT BuildCoords(FModelCoords *, FModelCoords *);
+	FLOAT OldBuildCoords(FModelCoords *, FModelCoords *);
+	FCoords OldToLocal() const;
+	FCoords OldToWorld() const;
 };
 
 class ENGINE_API AVolume : public ABrush
@@ -1261,7 +1327,63 @@ class ENGINE_API ANavigationPoint : public AActor
 {
 public:
 	DECLARE_CLASS(ANavigationPoint,AActor,0,Engine)
+	ANavigationPoint() {}
+
+	INT visitedWeight;
+	INT bestPathWeight;
+	INT cost;
+	INT ExtraCost;
+	BITFIELD taken : 1;
+	BITFIELD bBlocked : 1;
+	BITFIELD bPropagatesSound : 1;
+	BITFIELD bOneWayPath : 1;
+	BITFIELD bNeverUseStrafing : 1;
+	BITFIELD bAlwaysUseStrafing : 1;
+	BITFIELD bForceNoStrafing : 1;
+	BITFIELD bAutoBuilt : 1;
+	BITFIELD bSpecialMove : 1;
+	BITFIELD bNoAutoConnect : 1;
+	BITFIELD bNotBased : 1;
+	BITFIELD bPathsChanged : 1;
+	BITFIELD bDestinationOnly : 1;
+	BITFIELD bSourceOnly : 1;
+	BITFIELD bSpecialForced : 1;
+	BITFIELD bMustBeReachable : 1;
+	BITFIELD m_bExactMove : 1;
+	class ANavigationPoint* nextNavigationPoint;
+	class ANavigationPoint* nextOrdered;
+	class ANavigationPoint* prevOrdered;
+	class ANavigationPoint* previousPath;
+	FName ProscribedPaths[4];
+	FName ForcedPaths[4];
+	TArray<class UReachSpec*> PathList;
+	BITFIELD bEndPoint : 1;
+
+	// Virtual methods
+	virtual void Destroy();
+	virtual void PostEditMove();
+	virtual void Spawned();
+	virtual void InitForPathFinding();
+	virtual void CheckSymmetry(class ANavigationPoint *);
+	virtual void PostaddReachSpecs(class APawn *);
+	virtual void SetVolumes(const TArray<class AVolume *> &);
 	virtual void CheckForErrors();
+	virtual INT ProscribedPathTo(class ANavigationPoint *);
+	virtual void addReachSpecs(class APawn *, INT);
+	virtual void SetupForcedPath(class APawn *, class UReachSpec *);
+	virtual void ClearPaths();
+	virtual void FindBase();
+	virtual INT PrunePaths();
+	virtual INT IsIdentifiedAs(FName);
+	virtual INT ReviewPath(class APawn *);
+
+	// Non-virtual methods
+	INT CanReach(class ANavigationPoint *, FLOAT);
+	void CleanUpPruned();
+	INT FindAlternatePath(class UReachSpec *, INT);
+	class UReachSpec * GetReachSpecTo(class ANavigationPoint *);
+	INT ShouldBeBased();
+
 	// Event thunks
 	DWORD eventAccept(class AActor*, class AActor*);
 	INT eventSpecialCost(class APawn*, class UReachSpec*);
@@ -1986,18 +2108,110 @@ public:
 	Class declarations — UnLevel.cpp classes.
 ==========================================================================*/
 
-class ENGINE_API ULevelBase : public UObject
+class ENGINE_API ULevelBase : public UObject, public FNetworkNotify
 {
 public:
-	DECLARE_CLASS(ULevelBase,UObject,0,Engine)
-	NO_DEFAULT_CONSTRUCTOR(ULevelBase)
+	DECLARE_ABSTRACT_CLASS(ULevelBase,UObject,0,Engine)
+
+	// Database.
+	TTransArray<AActor*> Actors;
+
+	// Variables.
+	class UNetDriver*	NetDriver;
+	class UEngine*		Engine;
+	FURL				URL;
+	class UNetDriver*	DemoRecDriver;
+
+	// Constructors.
+	ULevelBase( UEngine* InOwner, const FURL& InURL=FURL(NULL) );
+
+	// UObject interface.
+	virtual void Serialize( FArchive& Ar );
+	virtual void Destroy();
+
+	// FNetworkNotify interface.
+	virtual void NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds );
+
+protected:
+	ULevelBase()
+	: Actors( this )
+	{}
 };
 
 class ENGINE_API ULevel : public ULevelBase
 {
 public:
 	DECLARE_CLASS(ULevel,ULevelBase,0,Engine)
-	NO_DEFAULT_CONSTRUCTOR(ULevel)
+
+	// Constructor.
+	ULevel( UEngine* InEngine, INT InRootOutside );
+
+	// UObject interface.
+	virtual void Serialize( FArchive& Ar );
+	virtual void PostLoad();
+	virtual void Destroy();
+
+	// ULevel interface.
+	virtual void Modify( INT DoTransArrays=0 );
+	virtual void SetActorCollision( INT bCollision, INT bUnused=0 );
+	virtual void Tick( ELevelTick TickType, FLOAT DeltaSeconds );
+	virtual void TickNetClient( FLOAT DeltaSeconds );
+	virtual void TickNetServer( FLOAT DeltaSeconds );
+	virtual INT ServerTickClient( class UNetConnection* Conn, FLOAT DeltaSeconds );
+	virtual void ReconcileActors();
+	virtual void RememberActors();
+	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
+	virtual void ShrinkLevel();
+	virtual void CompactActors();
+	virtual INT Listen( FString& Error );
+	virtual INT IsServer();
+	virtual INT MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest=0, INT bIgnorePawns=0, INT bIgnoreBases=0, INT bNoFail=0, INT bExtra=0 );
+	virtual INT FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest=0, INT bNoCheck=0, INT bAttachedMove=0, INT bExtra=0 );
+	virtual INT DestroyActor( AActor* Actor, INT bNetForce=0 );
+	virtual void CleanupDestroyed( INT bForce );
+	virtual AActor* SpawnActor( UClass* Class, FName InName=NAME_None, FVector Location=FVector(0,0,0), FRotator Rotation=FRotator(0,0,0), AActor* Template=NULL, INT bNoCollisionFail=0, INT bRemoteOwned=0, AActor* SpawnTag=NULL, APawn* Instigator=NULL );
+	virtual ABrush* SpawnBrush();
+	virtual void SpawnViewActor( class UViewport* Viewport );
+	virtual APlayerController* SpawnPlayActor( class UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error );
+	virtual INT FindSpot( FVector Extent, FVector& Location, INT bCheckActors=0, AActor* Requester=NULL );
+	virtual INT CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor );
+	virtual INT CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify );
+	virtual INT SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors );
+	virtual INT SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors );
+	virtual INT SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVector& End, const FVector& Start, DWORD TraceFlags, FVector Extent );
+	virtual INT EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, AActor* Actor );
+	virtual FCheckResult* MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry=0, INT bSingleResult=0, AActor* Requester=NULL );
+	virtual FCheckResult* MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor );
+	virtual void DetailChange( INT NewDetail );
+	virtual INT TickDemoRecord( FLOAT DeltaSeconds );
+	virtual INT TickDemoPlayback( FLOAT DeltaSeconds );
+	virtual void UpdateTime( ALevelInfo* Info );
+	virtual INT IsPaused();
+	virtual void WelcomePlayer( class UNetConnection* Connection, TCHAR* Optional=TEXT("") );
+	virtual INT IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion );
+	virtual FLOAT CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner );
+
+	// FNetworkNotify interface.
+	virtual EAcceptConnection NotifyAcceptingConnection();
+	virtual void NotifyAcceptedConnection( class UNetConnection* Connection );
+	virtual INT NotifyAcceptingChannel( class UChannel* Channel );
+	virtual ULevel* NotifyGetLevel();
+	virtual void NotifyReceivedText( class UNetConnection* Connection, const TCHAR* Text );
+	virtual INT NotifySendingFile( class UNetConnection* Connection, FGuid GUID );
+	virtual void NotifyReceivedFile( class UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced );
+
+	// Non-virtual methods.
+	ABrush* Brush();
+	INT EditorDestroyActor( AActor* Actor );
+	INT GetActorIndex( AActor* Actor );
+	ALevelInfo* GetLevelInfo();
+	class AZoneInfo* GetZoneActor( INT iZone );
+	INT MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit );
+	INT ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor );
+	void UpdateTerrainArrays();
+
+protected:
+	ULevel() {}
 };
 
 class ENGINE_API AZoneInfo : public AInfo
@@ -2287,12 +2501,64 @@ class ENGINE_API UNetConnection : public UPlayer
 {
 public:
 	DECLARE_CLASS(UNetConnection,UPlayer,0,Engine)
+	UNetConnection() {}
+	UNetConnection( UNetDriver* InDriver, const FURL& InURL );
+
+	// Virtual methods
+	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
+	virtual void Serialize( const TCHAR* Data, EName Event );
+	virtual void Destroy();
+	virtual void Serialize( FArchive& Ar );
+	virtual void ReadInput( FLOAT DeltaSeconds );
+	virtual void InitOut();
+	virtual void AssertValid();
+	virtual void SendAck( INT PacketId, INT RemotePacketId );
+	virtual void FlushNet();
+	virtual void Tick();
+	virtual INT IsNetReady( INT Saturate );
+	virtual void HandleClientPlayer( APlayerController* PC );
+
+	// Non-virtual methods
+	UChannel* CreateChannel( INT ChType, INT bOpenedLocally, INT ChIndex );
+	UNetDriver* GetDriver();
+	void PostSend( INT PacketId );
+	void PreSend( INT SizeBits );
+	void PurgeAcks();
+	void ReceiveFile( INT PackageIndex );
+	void ReceivedNak( INT NakPacketId );
+	void ReceivedPacket( FBitReader& Reader );
+	void ReceivedRawPacket( void* Data, INT Count );
+	void SendPackageMap();
+	INT SendRawBunch( FOutBunch& Bunch, INT InPacketId );
+	void SetActorDirty( AActor* Actor );
+	void SlowAssertValid();
 };
 
 class ENGINE_API UChannel : public UObject
 {
 public:
 	DECLARE_CLASS(UChannel,UObject,0,Engine)
+	UChannel() {}
+
+	// Virtual methods
+	virtual void Destroy();
+	virtual void Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally );
+	virtual void SetClosingFlag();
+	virtual void Close();
+	virtual FString Describe();
+	virtual void ReceivedNak( INT NakPacketId );
+	virtual void Tick();
+
+	// Non-virtual methods
+	void AssertInSequenced();
+	static UClass** ChannelClasses();
+	static INT CDECL IsKnownChannelType( INT Type );
+	INT IsNetReady( INT Saturate );
+	INT MaxSendBytes();
+	void ReceivedAcks();
+	void ReceivedRawBunch( FInBunch& Bunch );
+	INT ReceivedSequencedBunch( FInBunch& Bunch );
+	INT RouteDestroy();
 };
 
 class ENGINE_API UActorChannel : public UChannel
@@ -2564,6 +2830,42 @@ class ENGINE_API UModel : public UPrimitive
 {
 public:
 	DECLARE_CLASS(UModel,UPrimitive,0,Engine)
+	UModel() {}
+	UModel( ABrush* Owner, INT InRootOutside );
+
+	// Virtual methods (UObject/UPrimitive overrides)
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void Serialize( FArchive& Ar );
+	virtual INT PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags );
+	virtual INT LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags );
+	virtual FBox GetRenderBoundingBox( const AActor* Owner );
+	virtual FBox GetCollisionBoundingBox( const AActor* Owner ) const;
+	virtual void Illuminate( AActor* Owner, INT bExtra );
+	virtual FVector GetEncroachExtent( AActor* Owner );
+	virtual FVector GetEncroachCenter( AActor* Owner );
+	virtual INT UseCylinderCollision( const AActor* Owner );
+
+	// Non-virtual methods
+	TArray<INT> BoxLeaves( FBox Box );
+	void BuildBound();
+	void BuildRenderData();
+	void ClearRenderData( URenderDevice* RenDev );
+	void CompressLightmaps();
+	INT ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FVector Extent, TArray<INT>& Result, FLOAT VisRadius );
+	void EmptyModel( INT EmptySurfs, INT EmptyPolys );
+	BYTE FastLineCheck( FVector Start, FVector End );
+	FLOAT FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const;
+	void Modify( INT DoTransArrays );
+	void ModifyAllSurfs( INT SetBits );
+	void ModifySelectedSurfs( INT SetBits );
+	void ModifySurf( INT iSurf, INT SetBits );
+	FPointRegion PointRegion( AZoneInfo* Zone, FVector Location ) const;
+	INT PotentiallyVisible( INT iLeaf0, INT iLeaf1 );
+	void PrecomputeSphereFilter( const FPlane& Sphere );
+	INT R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End );
+	void ShrinkModel();
+	void Transform( ABrush* Brush );
 };
 
 class ENGINE_API UPolys : public UObject
@@ -2908,9 +3210,22 @@ class ENGINE_API ASceneManager : public AInfo
 {
 public:
 	DECLARE_CLASS(ASceneManager,AInfo,0,Engine)
+	ASceneManager() {}
 	DECLARE_FUNCTION(execGetTotalSceneTime)
 	DECLARE_FUNCTION(execSceneDestroyed)
 	DECLARE_FUNCTION(execTerminateAIAction)
+
+	// Virtual methods
+	virtual void PostEditChange();
+	virtual INT Tick( FLOAT DeltaTime, ELevelTick TickType );
+	virtual void PostBeginPlay();
+	virtual void CheckForErrors();
+
+	// Non-virtual methods
+	FLOAT GetTotalSceneTime();
+	void SetCurrentTime( FLOAT NewTime );
+	void SetSceneStartTime();
+
 	// Event thunks
 	void eventSceneEnded();
 	void eventSceneStarted();
@@ -2947,6 +3262,21 @@ public:
 	DECLARE_CLASS(AFluidSurfaceInfo,AInfo,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AFluidSurfaceInfo)
 	DECLARE_FUNCTION(execPling)
+
+	// Virtual methods
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void PostEditChange();
+	virtual INT Tick( FLOAT DeltaTime, ELevelTick TickType );
+	virtual void PostEditMove();
+	virtual void Spawned();
+	virtual UPrimitive* GetPrimitive();
+
+	// Non-virtual methods
+	void Init();
+	void Pling( const FVector& Location, FLOAT Strength, FLOAT Radius );
+	void PlingVertex( INT X, INT Y, FLOAT Strength );
+	void UpdateSimulation( FLOAT DeltaTime );
 };
 
 class ENGINE_API ASkyZoneInfo : public AZoneInfo
@@ -2962,6 +3292,36 @@ class ENGINE_API UGameEngine : public UEngine
 {
 public:
 	DECLARE_CLASS(UGameEngine,UEngine,CLASS_Config|CLASS_Transient,Engine)
+	UGameEngine() {}
+
+	// Virtual methods
+	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
+	virtual void Destroy();
+	virtual void Serialize( FArchive& Ar );
+	virtual void Tick( FLOAT DeltaSeconds );
+	virtual void UpdateConnectingMessage();
+	virtual void Init();
+	virtual void Exit();
+	virtual void Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize );
+	virtual void MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY );
+	virtual void MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y );
+	virtual void MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta );
+	virtual void Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y );
+	virtual void UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY );
+	virtual void SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType );
+	virtual INT ChallengeResponse( INT Challenge );
+	virtual FLOAT GetMaxTickRate();
+	virtual void SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds );
+	virtual INT Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error );
+	virtual ULevel* LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error );
+	virtual void SaveGame( INT Position );
+	virtual void CancelPending();
+	virtual void PaintProgress( const FURL& URL );
+	virtual UNetDriver* BuildServerMasterMap( UNetDriver* NetDriver, ULevel* InLevel );
+	virtual void NotifyLevelChange();
+
+	// Non-virtual methods
+	void FixUpLevel();
 };
 
 class ENGINE_API UInteraction : public UInteractions
@@ -3031,7 +3391,33 @@ class ENGINE_API UInput : public USubsystem
 {
 public:
 	DECLARE_CLASS(UInput,USubsystem,CLASS_Transient,Engine)
-	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+	UInput() {}
+
+	// Virtual methods
+	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
+	virtual void Serialize( FArchive& Ar );
+	virtual void Init( UViewport* InViewport );
+	virtual INT PreProcess( INT Key, INT Action, FLOAT Delta );
+	virtual INT Process( FOutputDevice& Ar, INT Key, INT Action, FLOAT Delta );
+	virtual void DirectAxis( INT Key, FLOAT Value, FLOAT Delta );
+	virtual void ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar );
+	virtual void ResetInput();
+	virtual const TCHAR* GetKeyName( INT Key ) const;
+	virtual INT FindKeyName( const TCHAR* KeyName, INT& Key ) const;
+	virtual BYTE GetKey( const TCHAR* KeyName );
+	virtual void SetKey( const TCHAR* KeyName );
+	virtual FString GetActionKey( BYTE Key );
+
+protected:
+	virtual BYTE* FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const;
+	virtual FLOAT* FindAxisName( AActor* Actor, const TCHAR* AxisName ) const;
+	virtual void ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar );
+
+public:
+	// Non-virtual methods
+	void SetInputAction( INT Action, FLOAT Delta );
+	BYTE KeyDown( INT Key );
+	void StaticConstructor();
 };
 
 class ENGINE_API UInputPlanning : public UInput
@@ -3082,6 +3468,31 @@ class ENGINE_API UViewport : public UPlayer
 {
 public:
 	DECLARE_CLASS(UViewport,UPlayer,0,Engine)
+	UViewport() {}
+
+	// Virtual methods
+	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
+	virtual void Serialize( const TCHAR* Data, EName Event );
+	virtual void Destroy();
+	virtual void Serialize( FArchive& Ar );
+	virtual void ReadInput( FLOAT DeltaSeconds );
+	virtual INT Lock( BYTE* HitData, INT* HitSize );
+	virtual void Unlock();
+	virtual void Present();
+	virtual INT SetDrag( INT NewDrag );
+	virtual void* GetServer();
+	virtual void TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes );
+
+	// Non-virtual methods
+	void ExecMacro( const TCHAR* Filename, FOutputDevice& Ar );
+	UClient* GetOuterUClient() const;
+	void InitInput();
+	INT IsOrtho();
+	INT IsPerspective();
+	INT IsRealtime();
+	INT IsWire();
+	void ScreenShot();
+	BYTE* _Screen( INT X, INT Y );
 };
 
 class ENGINE_API UChannelDownload : public UDownload
@@ -3127,6 +3538,26 @@ class ENGINE_API UNullRenderDevice : public URenderDevice
 {
 public:
 	DECLARE_CLASS(UNullRenderDevice,URenderDevice,0,Engine)
+	UNullRenderDevice() {}
+
+	// Virtual methods
+	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
+	virtual INT Init();
+	virtual INT SetRes( UViewport* Viewport, INT NewX, INT NewY, INT NewColorBytes );
+	virtual void Exit( UViewport* Viewport );
+	virtual void Flush( UViewport* Viewport );
+	virtual void Present( UViewport* Viewport );
+	virtual void SetEmulationMode( INT Mode );
+	virtual void Unlock( FRenderInterface* RI );
+	virtual void UpdateGamma( UViewport* Viewport );
+	virtual void FlushResource( QWORD ResourceId );
+	virtual void ReadPixels( UViewport* Viewport, FColor* Pixels );
+	virtual void RestoreGamma();
+	virtual FRenderInterface* Lock( UViewport* Viewport, BYTE* HitData, INT* HitSize );
+	virtual FRenderCaps* GetRenderCaps();
+	virtual INT SupportsTextureFormat( INT Format );
+
+	void StaticConstructor();
 };
 
 class ENGINE_API UConvexVolume : public UPrimitive

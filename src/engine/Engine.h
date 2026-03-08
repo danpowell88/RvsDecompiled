@@ -70,6 +70,66 @@ public:
 };
 #endif
 
+// ETravelType is needed by FURL (UnURL.h uses it).
+// Defined in UT99 EngineClasses.h but we shadow that, so define here.
+#ifndef _INC_ETRAVELTYPE
+#define _INC_ETRAVELTYPE
+enum ETravelType
+{
+	TRAVEL_Absolute,
+	TRAVEL_Partial,
+	TRAVEL_Relative,
+};
+#endif
+
+#include "UnURL.h"
+
+// Enums needed by ULevel and related classes.
+enum EAcceptConnection
+{
+	ACCEPTC_Reject,
+	ACCEPTC_Accept,
+	ACCEPTC_Ignore,
+};
+
+enum ELevelTick
+{
+	LEVELTICK_TimeOnly		= 0,
+	LEVELTICK_ViewportsOnly	= 1,
+	LEVELTICK_All			= 2,
+};
+
+enum ESoundOcclusion
+{
+	OCCLUSION_Default,
+	OCCLUSION_None,
+	OCCLUSION_BSP,
+	OCCLUSION_StaticMeshes,
+};
+
+enum ENetRole
+{
+	ROLE_None,
+	ROLE_DumbProxy,
+	ROLE_SimulatedProxy,
+	ROLE_AutonomousProxy,
+	ROLE_Authority,
+};
+
+// The net code uses this to send notifications.
+class ENGINE_API FNetworkNotify
+{
+public:
+	virtual EAcceptConnection NotifyAcceptingConnection()=0;
+	virtual void NotifyAcceptedConnection( class UNetConnection* Connection )=0;
+	virtual UBOOL NotifyAcceptingChannel( class UChannel* Channel )=0;
+	virtual class ULevel* NotifyGetLevel()=0;
+	virtual void NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )=0;
+	virtual UBOOL NotifySendingFile( UNetConnection* Connection, FGuid GUID )=0;
+	virtual void NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, UBOOL Skipped )=0;
+	virtual void NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds )=0;
+};
+
 #include "EngineClasses.h"
 
 /*-----------------------------------------------------------------------------
