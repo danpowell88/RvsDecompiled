@@ -168,7 +168,7 @@ struct ENGINE_API FMipmapBase {
 
 struct ENGINE_API FOrientation {
 	FOrientation();
-	FOrientation& operator=(const FOrientation&);
+	FOrientation& operator=(FOrientation);
 	int operator!=(FOrientation const &) const;
 };
 
@@ -192,7 +192,7 @@ public:
 	FRebuildOptions(FRebuildOptions const &);
 	FRebuildOptions();
 	~FRebuildOptions();
-	FRebuildOptions& operator=(const FRebuildOptions&);
+	FRebuildOptions operator=(FRebuildOptions);
 	FString GetName();
 	void Init();
 };

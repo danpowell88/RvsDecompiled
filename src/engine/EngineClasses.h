@@ -579,7 +579,7 @@ public:
 class ENGINE_API FIndexBuffer
 {
 public:
-	virtual ~FIndexBuffer() {}
+	~FIndexBuffer() {}
 	virtual QWORD GetCacheId() = 0;
 	virtual INT GetRevision() = 0;
 	virtual INT GetSize() = 0;
@@ -593,7 +593,7 @@ public:
 class ENGINE_API FTexture
 {
 public:
-	virtual ~FTexture() {}
+	~FTexture() {}
 	virtual QWORD GetCacheId() { return 0; }
 	virtual INT GetRevision() { return 0; }
 	virtual INT GetWidth() { return 0; }
@@ -1516,7 +1516,7 @@ public:
 class ENGINE_API URenderResource : public UObject
 {
 	DECLARE_CLASS(URenderResource,UObject,0,Engine)
-	NO_DEFAULT_CONSTRUCTOR(URenderResource)
+	URenderResource() {}
 };
 
 /*==========================================================================
@@ -2902,7 +2902,9 @@ public:
 	void clearPath(class ANavigationPoint *);
 	void clearPaths();
 	FLOAT findPathToward(class AActor *, class FVector, FLOAT (CDECL*)(class ANavigationPoint *, class APawn *, FLOAT), INT, FLOAT);
+private:
 	INT findNewFloor(class FVector, FLOAT, FLOAT, INT);
+public:
 	enum ETestMoveResult flyMove(class FVector, class AActor *, FLOAT);
 	INT flyReachable(class FVector, INT, class AActor *);
 	enum ETestMoveResult jumpLanding(class FVector, INT);
@@ -3590,7 +3592,9 @@ virtual INT Exec(const TCHAR*, FOutputDevice&);
 // Event thunks
 void eventReset();
 	// Auto-generated method declarations
-	void WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*);
+private:
+	void __cdecl WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*);
+public:
 };
 
 class ENGINE_API AHUD : public AActor
@@ -5049,7 +5053,9 @@ class ENGINE_API UInputPlanning : public UInput
 public:
 	DECLARE_CLASS(UInputPlanning,UInput,CLASS_Transient,Engine)
 	// Auto-generated method declarations
+private:
 	static const TCHAR* StaticConfigName();
+public:
 	static void StaticInitInput();
 };
 

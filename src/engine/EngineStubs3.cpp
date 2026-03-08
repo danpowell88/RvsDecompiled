@@ -1,15 +1,12 @@
 // EngineStubs3.cpp - Linker stub directives (chunk 3 of 4)
 // Maps unresolved .def exports to dummy implementations
 
-#pragma comment(linker, "/alternatename:??1FStaticLightMapTexture@@QAE@XZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??1FStats@@QAE@XZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4?$TLazyArray@E@@QAEAAV0@ABV0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4FDbgVectorInfo@@QAEAAU0@ABU0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4FInBunch@@QAEAAV0@ABV0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4FLevelSceneNode@@QAEAAV0@ABV0@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??4FOrientation@@QAEAAU0@U0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4FPointRegion@@QAEAAU0@ABU0@@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:??4FRebuildOptions@@QAE?AV0@V0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4FRenderInterface@@QAEAAV0@ABV0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??4FSceneNode@@QAEAAV0@ABV0@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:??6FInBunch@@UAEAAVFArchive@@AAPAVUObject@@@Z=_dummy_stub_func")

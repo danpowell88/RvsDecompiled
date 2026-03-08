@@ -17,7 +17,6 @@ extern "C" void* dummy_stub_data = 0;
 /*-----------------------------------------------------------------------------
 	AActor event thunks & physics functions.
 -----------------------------------------------------------------------------*/
-#pragma comment(linker, "/alternatename:?findNewFloor@APawn@@AAEHVFVector@@MMH@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z@4QBGB=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???0FPointLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@HHHH@Z@4QBGB=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???1?$TLazyArray@E@@QAE@XZ@4QBGB=_dummy_stub_data")
@@ -52,14 +51,12 @@ extern "C" void* dummy_stub_data = 0;
 #pragma comment(linker, "/alternatename:?SetVolumes@ALevelInfo@@UAEXXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?SetZone@ALevelInfo@@UAEXHH@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?StaticConfigName@UInput@@CAPBGXZ=_dummy_stub_data")
-#pragma comment(linker, "/alternatename:?StaticConfigName@UInputPlanning@@CAPBGXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?StaticConstructor@UDemoRecConnection@@QAEXXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?StaticInitInput@UInput@@SAXXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?StaticLight@UTerrainSector@@QAEXH@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?SupportsTextureFormat@UNullRenderDevice@@UAEHW4ETextureFormat@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?UpdateMatrices@FCameraSceneNode@@UAEXXZ=_dummy_stub_data")
 #pragma comment(linker, "/alternatename:?UpdateString@FStats@@QAEXAAVFString@@H@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?WrappedPrint@UCanvas@@AAAXW4ERenderStyle@@AAH1PAVUFont@@HPBG@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Process@UInput@@UAEHAAVFOutputDevice@@W4EInputKey@@W4EInputAction@@M@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?ProcessR6Availabilty@AGameInfo@@SAXPAVULevel@@VFString@@@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?RegisterStats@FStats@@QAEHW4EStatsType@@W4EStatsDataType@@VFString@@2W4EStatsUnit@@@Z=_dummy_stub_func")

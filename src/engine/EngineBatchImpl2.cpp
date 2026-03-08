@@ -1322,7 +1322,7 @@ FOrientation::FOrientation()
 {
 }
 
-FOrientation& FOrientation::operator=(const FOrientation&)
+FOrientation& FOrientation::operator=(FOrientation)
 {
 	return *this;
 }
@@ -1436,9 +1436,9 @@ FRebuildOptions::~FRebuildOptions()
 {
 }
 
-FRebuildOptions& FRebuildOptions::operator=(const FRebuildOptions&)
+FRebuildOptions FRebuildOptions::operator=(FRebuildOptions)
 {
-	return *this;
+	return FRebuildOptions();
 }
 
 FString FRebuildOptions::GetName()
@@ -2041,7 +2041,7 @@ void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 }
 
 // --- UCanvas ---
-void UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
+void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
 {
 }
 
