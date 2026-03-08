@@ -35,8 +35,6 @@
 #pragma comment(linker, "/alternatename:?Illuminate@UTerrainPrimitive@@UAEXPAVAActor@@H@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?Init@FEngineStats@@QAEXXZ=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?InitGameInfoGameService@AGameInfo@@UAEXXZ=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?Insert@?$TArray@E@@QAEXHH@Z=_dummy_stub_func")
-#pragma comment(linker, "/alternatename:?InsertZeroed@?$TArray@E@@QAEXHH@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?IsA@HActor@@UBEHPBG@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?IsA@HBspSurf@@UBEHPBG@Z=_dummy_stub_func")
 #pragma comment(linker, "/alternatename:?IsA@HCoords@@UBEHPBG@Z=_dummy_stub_func")

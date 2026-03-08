@@ -912,3 +912,11 @@ void KUpdateMassProps(UKMeshProps * p0) {}
 
 // ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z
 void KarmaTriListDataInit(_KarmaTriListData * p0) {}
+
+// =============================================================================
+// Explicit template instantiation for TArray<BYTE> and TLazyArray<BYTE>.
+// The retail Engine.dll exports these symbols; explicit instantiation forces the
+// compiler to emit out-of-line copies of all inline template members.
+// =============================================================================
+template class TArray<BYTE>;
+template class TLazyArray<BYTE>;
