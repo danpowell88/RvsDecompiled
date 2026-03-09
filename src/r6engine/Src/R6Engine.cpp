@@ -183,6 +183,10 @@ IMPLEMENT_FUNCTION(UR6TerroristMgr, -1, execInit)
 	exec functions, and non-virtual exported methods.
 -----------------------------------------------------------------------------*/
 
+// Statics used by PreNetReceive/PostNetReceive to detect replicated changes.
+static BYTE  GR6Pawn_OldNetActionIndex;
+static AR6SoundReplicationInfo* GR6Pawn_OldSoundRepInfo;
+
 // --- AMP2IOKarma ---
 
 void AMP2IOKarma::CheckForErrors()
@@ -1003,13 +1007,30 @@ INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT, INT)
 	return 0;
 }
 
-FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT, FLOAT)
+FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT InPeeking, FLOAT InLimit)
 {
-	return 0.f;
+	if (m_bPeekingLeft)
+	{
+		if (InPeeking >= InLimit)
+			return InPeeking;
+	}
+	else
+	{
+		if (InPeeking < InLimit)
+			return InPeeking;
+	}
+	return InLimit;
 }
 
-void AR6Pawn::BeginTouch(AActor *)
+void AR6Pawn::BeginTouch(AActor* Other)
 {
+	// If touching a door, only process if genuinely overlapping
+	if (Other->IsA(AR6Door::StaticClass()))
+	{
+		if (!IsOverlapping(Other, NULL))
+			return;
+	}
+	AActor::BeginTouch(Other);
 }
 
 FVector AR6Pawn::CheckForLedges(AActor *, FVector, FVector, FVector, INT &, INT &, FLOAT)
@@ -1072,7 +1093,44 @@ INT AR6Pawn::DirectionHasChanged(FLOAT ForwardDot)
 
 BYTE AR6Pawn::GetAnimState()
 {
-	return 0;
+	// Dead or incapacitated
+	if (m_eHealth > 1)
+		return 14;
+
+	// Posture change (crouching/standing transition)
+	if (m_bSoundChangePosture)
+		return (m_bWantsToProne ? 0 : 1) | 4; // 4 = going prone, 5 = standing
+
+	// Landing
+	if (m_bIsLanding)
+		return 13;
+
+	// Stationary (no velocity)
+	if (Velocity.X == 0.0f && Velocity.Y == 0.0f && Velocity.Z == 0.0f)
+		return 3;
+
+	// Prone movement
+	if (m_bIsProne)
+		return (GetMovementDirection() == MOVEDIR_Strafe) + 6; // 6 or 7
+
+	// Climbing stairs
+	if (m_bIsClimbingStairs)
+		return (Velocity.Y > 0.0f) ? 8 : 9; // ascending / descending
+
+	// Second velocity check (effectively same as above — matches retail binary)
+	if (Velocity.X == 0.0f && Velocity.Y == 0.0f && Velocity.Z == 0.0f)
+		return 0;
+
+	// Not walking → running
+	if (!bIsWalking)
+		return 2;
+
+	// Walking while wounded
+	if (m_eHealth == 1)
+		return (m_bLeftFootDown ? (BYTE)0xFD : (BYTE)0) + (BYTE)0xF; // 12 or 15
+
+	// Normal walking
+	return 1;
 }
 
 BYTE AR6Pawn::GetCurrentMaterial()
@@ -1098,9 +1156,13 @@ FVector AR6Pawn::GetHeadLocation(AActor *)
 	return FVector(0,0,0);
 }
 
-FLOAT AR6Pawn::GetMaxFluidPeeking(FLOAT, INT)
+FLOAT AR6Pawn::GetMaxFluidPeeking(FLOAT SpeedRatio, INT bReverse)
 {
-	return 0.f;
+	FLOAT Ratio = GetPeekingRatioNorm(1600.0f);
+	FLOAT Value = ((1.0f - SpeedRatio) * (1.0f - Ratio) + Ratio) * 1000.0f;
+	if (bReverse)
+		return 1000.0f - Value;
+	return Value + 1000.0f;
 }
 
 FVector AR6Pawn::GetMidSectionLocation(AActor *)
@@ -1267,10 +1329,28 @@ INT AR6Pawn::PickActorAdjust(AActor *)
 
 void AR6Pawn::PostNetReceive()
 {
+	// If SoundRepInfo changed and we're ragdoll, stop weapon sound
+	if (GR6Pawn_OldSoundRepInfo != m_SoundRepInfo
+		&& m_bUseRagdoll
+		&& m_SoundRepInfo != NULL)
+	{
+		m_SoundRepInfo->StopWeaponSound();
+	}
+
+	// If net action index changed from unset to valid, sync local copy
+	if (GR6Pawn_OldNetActionIndex == 0xFF && m_iNetCurrentActionIndex != 0xFF)
+	{
+		m_iLocalCurrentActionIndex = m_iNetCurrentActionIndex;
+	}
+
+	APawn::PostNetReceive();
 }
 
 void AR6Pawn::PreNetReceive()
 {
+	GR6Pawn_OldNetActionIndex = m_iNetCurrentActionIndex;
+	GR6Pawn_OldSoundRepInfo = m_SoundRepInfo;
+	APawn::PreNetReceive();
 }
 
 DWORD AR6Pawn::R6LineOfSightTo(AActor *, INT)
@@ -1356,7 +1436,13 @@ void AR6Pawn::WeaponFollow(INT, FLOAT)
 
 INT AR6Pawn::WeaponIsAGadget()
 {
-	return 0;
+	if (EngineWeapon != NULL)
+	{
+		BYTE WeaponType = *(BYTE*)((BYTE*)EngineWeapon + 0x394);
+		if (WeaponType != 7)
+			return (INT)(WeaponType == 6);
+	}
+	return 1;
 }
 
 void AR6Pawn::WeaponLock(INT, FLOAT, FLOAT)
@@ -1813,9 +1899,16 @@ void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)
 	UpdatePawnTrackActor(bNoBlend);
 }
 
-INT AR6Pawn::getMaxRotationOffset(INT)
+INT AR6Pawn::getMaxRotationOffset(INT InProne)
 {
-	return 0;
+	if (InProne == 0)
+		return 0x1555;
+
+	// Check weapon has bipod (byte at weapon+0x3A0, bit 1)
+	if (EngineWeapon != NULL && (*(BYTE*)((BYTE*)EngineWeapon + 0x3A0) & 2) != 0)
+		return 0x15E0;
+
+	return 3000;
 }
 
 void AR6Pawn::initCrawlMode(bool)
