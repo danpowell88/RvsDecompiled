@@ -187,6 +187,12 @@ IMPLEMENT_FUNCTION(UR6TerroristMgr, -1, execInit)
 static BYTE  GR6Pawn_OldNetActionIndex;
 static AR6SoundReplicationInfo* GR6Pawn_OldSoundRepInfo;
 
+// Statics used by AR6InteractiveObject PreNetReceive/PostNetReceive.
+static FLOAT GInteractiveObject_OldNetDamagePercentage;
+
+// Statics used by AR6IORotatingDoor PreNetReceive/PostNetReceive.
+static FVector GRotatingDoor_OldLocation;
+
 // --- AMP2IOKarma ---
 
 void AMP2IOKarma::CheckForErrors()
@@ -451,11 +457,26 @@ void AR6ClimbableObject::CheckForErrors()
 
 void AR6ClimbableObject::PostScriptDestroyed()
 {
+	guard(AR6ClimbableObject::PostScriptDestroyed);
+	SafeDestroyActor(m_climbablePoint);
+	SafeDestroyActor(m_insideClimbablePoint);
+	unguard;
 }
 
-INT AR6ClimbableObject::ShouldTrace(AActor *, DWORD)
+INT AR6ClimbableObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
-	return 0;
+	guard(AR6ClimbableObject::ShouldTrace);
+
+	// If not tracing for level geometry, delegate to AActor base
+	if (!(TraceFlags & TRACE_LevelGeometry))
+	{
+		if (!AActor::ShouldTrace(Other, TraceFlags))
+			return 0;
+	}
+
+	return 1;
+
+	unguard;
 }
 
 // --- AR6ClimbablePoint ---
@@ -541,6 +562,10 @@ void AR6DZonePathNode::CheckForErrors()
 
 void AR6DZonePathNode::PostScriptDestroyed()
 {
+	guard(AR6DZonePathNode::PostScriptDestroyed);
+	if (m_pPath)
+		m_pPath->DeleteANode(this);
+	unguard;
 }
 
 void AR6DZonePathNode::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -589,6 +614,10 @@ void AR6DZoneRandomPointNode::CheckForErrors()
 
 void AR6DZoneRandomPointNode::PostScriptDestroyed()
 {
+	guard(AR6DZoneRandomPointNode::PostScriptDestroyed);
+	if (m_pZone)
+		m_pZone->DeleteANode(this);
+	unguard;
 }
 
 void AR6DZoneRandomPointNode::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -939,6 +968,18 @@ INT AR6IORotatingDoor::IsMovingBrush() const
 
 void AR6IORotatingDoor::PostNetReceive()
 {
+	guard(AR6IORotatingDoor::PostNetReceive);
+	AR6InteractiveObject::PostNetReceive();
+
+	// Doors don't replicate position — restore if it changed
+	if (GRotatingDoor_OldLocation.X != Location.X ||
+		GRotatingDoor_OldLocation.Y != Location.Y ||
+		GRotatingDoor_OldLocation.Z != Location.Z)
+	{
+		Location = GRotatingDoor_OldLocation;
+	}
+
+	unguard;
 }
 
 void AR6IORotatingDoor::PostScriptDestroyed()
@@ -952,6 +993,10 @@ void AR6IORotatingDoor::PostScriptDestroyed()
 
 void AR6IORotatingDoor::PreNetReceive()
 {
+	guard(AR6IORotatingDoor::PreNetReceive);
+	AR6InteractiveObject::PreNetReceive();
+	GRotatingDoor_OldLocation = Location;
+	unguard;
 }
 
 void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -1013,6 +1058,26 @@ void AR6InteractiveObject::CheckForErrors()
 
 void AR6InteractiveObject::PostNetReceive()
 {
+	guard(AR6InteractiveObject::PostNetReceive);
+	AActor::PostNetReceive();
+
+	// If net damage percentage changed, fire the damage state event
+	if (m_fNetDamagePercentage != GInteractiveObject_OldNetDamagePercentage)
+		eventSetNewDamageState(m_fNetDamagePercentage);
+
+	// Sync replicated skins to actual Skins array
+	for (INT i = 0; i < 4; i++)
+	{
+		if (m_aRepSkins[i] != m_aOldSkins[i])
+		{
+			if (Skins.Num() < 4)
+				Skins.AddZeroed(4);
+			m_aOldSkins[i] = m_aRepSkins[i];
+			Skins(i) = m_aRepSkins[i];
+		}
+	}
+
+	unguard;
 }
 
 void AR6InteractiveObject::PostScriptDestroyed()
@@ -1021,6 +1086,10 @@ void AR6InteractiveObject::PostScriptDestroyed()
 
 void AR6InteractiveObject::PreNetReceive()
 {
+	guard(AR6InteractiveObject::PreNetReceive);
+	AActor::PreNetReceive();
+	GInteractiveObject_OldNetDamagePercentage = m_fNetDamagePercentage;
+	unguard;
 }
 
 void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -1488,8 +1557,9 @@ void AR6Pawn::SetPrePivot(FVector NewPrePivot)
 		PrePivot.Z -= 5.0f;
 }
 
-void AR6Pawn::TickSpecial(FLOAT)
+void AR6Pawn::TickSpecial(FLOAT DeltaTime)
 {
+	APawn::TickSpecial(DeltaTime);
 }
 
 void AR6Pawn::UnCrawl(INT)
@@ -2059,7 +2129,7 @@ FString AR6PlayerController::GetLocKeyNameByActionKey(TCHAR const *)
 
 AActor * AR6PlayerController::GetTeamManager()
 {
-	return NULL;
+	return m_TeamManager;
 }
 
 INT AR6PlayerController::PlayPriority(INT)
@@ -2322,7 +2392,7 @@ FVector AR6RainbowAI::GetTeamLeftOfDoorPosition(INT, AR6Door *)
 
 AActor * AR6RainbowAI::GetTeamManager()
 {
-	return NULL;
+	return m_TeamManager;
 }
 
 FVector AR6RainbowAI::GetTeamRightOfDoorPosition(INT, AR6Door *)
