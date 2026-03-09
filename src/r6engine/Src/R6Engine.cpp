@@ -2930,8 +2930,22 @@ INT AR6RagDoll::Tick(FLOAT, enum ELevelTick)
 	return 0;
 }
 
-void AR6RagDoll::VerletIntegration(FLOAT)
+void AR6RagDoll::VerletIntegration(FLOAT dt)
 {
+	// Standard Verlet integration: newPos = 2*pos - prevPos + accel*dt^2
+	// Gravity is (0, 0, -600) in Unreal units
+	FLOAT gravZ = -600.0f * dt * dt;
+	for (INT i = 0; i < 16; i++)
+	{
+		FSTParticle& p = m_aParticle[i];
+		FVector save = p.cCurrentPos.Origin;
+		p.cCurrentPos.Origin.X += (p.cCurrentPos.Origin.X - p.vPreviousOrigin.X);
+		p.cCurrentPos.Origin.Y += (p.cCurrentPos.Origin.Y - p.vPreviousOrigin.Y);
+		p.cCurrentPos.Origin.Z += (p.cCurrentPos.Origin.Z - p.vPreviousOrigin.Z) + gravZ;
+		p.vPreviousOrigin = save;
+	}
+	// NOTE: Original binary has this loop fully unrolled (8 particles per iteration, 2 iterations).
+	// This clean loop produces identical results but different machine code.
 }
 
 // --- AR6Rainbow ---
