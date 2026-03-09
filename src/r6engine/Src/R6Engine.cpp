@@ -556,7 +556,7 @@ FVector AR6DZonePoint::FindClosestPointTo(FVector const &)
 
 FVector AR6DZonePoint::FindRandomPointInArea()
 {
-	return FVector(0,0,0);
+	return Location;
 }
 
 FVector AR6DZonePoint::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
@@ -575,6 +575,10 @@ void AR6DZonePoint::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDyn
 
 void AR6DZonePoint::Spawned()
 {
+	guard(AR6DZonePoint::Spawned);
+	AR6DeploymentZone::Spawned();
+	m_vReactionZoneCenter = Location;
+	unguard;
 }
 
 // --- AR6DZoneRandomPointNode ---
@@ -816,10 +820,30 @@ void AR6Door::addReachSpecs(APawn *, INT)
 
 // --- AR6FalseHeartBeat ---
 
-INT AR6FalseHeartBeat::IsBlockedBy(AActor const *) const
+INT AR6FalseHeartBeat::IsBlockedBy(AActor const* Other) const
 {
 	guard(AR6FalseHeartBeat::IsBlockedBy);
-	return 0;
+
+	// Don't block actors owned by the heartbeat puck's owner
+	if (Other && Other->Owner == m_HeartBeatPuckOwner)
+		return 0;
+
+	ALevelInfo* LevelInfo = XLevel->GetLevelInfo();
+	if (Other == LevelInfo)
+	{
+		// If level info doesn't block actors, defer to base
+		if (!Other->bBlockActors)
+			return AActor::IsBlockedBy(Other);
+	}
+	else
+	{
+		// Non-level actors: not blocked unless bBlockActors
+		if (!Other->bBlockActors)
+			return 0;
+	}
+
+	return 1;
+
 	unguard;
 }
 
@@ -833,9 +857,17 @@ INT AR6FalseHeartBeat::IsRelevantToPawnHeartBeat(APawn *)
 	return 0;
 }
 
-INT AR6FalseHeartBeat::ShouldTrace(AActor *, DWORD)
+INT AR6FalseHeartBeat::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
-	return 0;
+	guard(AR6FalseHeartBeat::ShouldTrace);
+
+	// Don't trace against actors owned by the heartbeat puck's owner
+	if (Other && Other->Owner == m_HeartBeatPuckOwner)
+		return 0;
+
+	return AR6InteractiveObject::ShouldTrace(Other, TraceFlags);
+
+	unguard;
 }
 
 // --- AR6GameReplicationInfo ---
@@ -902,7 +934,7 @@ INT AR6IORotatingDoor::DoorOpenTowards(FVector)
 
 INT AR6IORotatingDoor::IsMovingBrush() const
 {
-	return 0;
+	return StaticMesh != NULL;
 }
 
 void AR6IORotatingDoor::PostNetReceive()
@@ -911,6 +943,11 @@ void AR6IORotatingDoor::PostNetReceive()
 
 void AR6IORotatingDoor::PostScriptDestroyed()
 {
+	guard(AR6IORotatingDoor::PostScriptDestroyed);
+	SafeDestroyActor(m_DoorActorA);
+	SafeDestroyActor(m_DoorActorB);
+	AR6InteractiveObject::PostScriptDestroyed();
+	unguard;
 }
 
 void AR6IORotatingDoor::PreNetReceive()
@@ -921,9 +958,27 @@ void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, 
 {
 }
 
-INT AR6IORotatingDoor::ShouldTrace(AActor *, DWORD)
+INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
-	return 0;
+	guard(AR6IORotatingDoor::ShouldTrace);
+
+	if (!(TraceFlags & 0x80000))
+	{
+		// See-through or bullet-goes-through → skip this door
+		if ((TraceFlags & 0x20000) && m_bSeeThrough)
+			return 0;
+		if ((TraceFlags & 0x40000) && m_bBulletGoThrough)
+			return 0;
+
+		// If not tracing for movers, defer to parent
+		if (!(TraceFlags & TRACE_Movers) &&
+			!AR6InteractiveObject::ShouldTrace(Other, TraceFlags))
+			return 0;
+	}
+
+	return 1;
+
+	unguard;
 }
 
 INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn *)
@@ -972,9 +1027,45 @@ void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode *, FRenderInterface 
 {
 }
 
-INT AR6InteractiveObject::ShouldTrace(AActor *, DWORD)
+INT AR6InteractiveObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
-	return 0;
+	guard(AR6InteractiveObject::ShouldTrace);
+
+	// R6-specific trace flag: always trace regardless
+	if (TraceFlags & 0x800000)
+		return 1;
+
+	// Shot-through objects are skipped when shot-through trace requested
+	if ((TraceFlags & 0x400000) && m_bShotThrough)
+		return 0;
+
+	// Corona visibility check
+	if (TraceFlags & TRACE_VisibleNonColliding)
+		return m_bBlockCoronas ? 1 : 0;
+
+	// See-through check
+	if ((TraceFlags & 0x20000) && m_bSeeThrough)
+		return 0;
+
+	// Bullet-goes-through check
+	if ((TraceFlags & 0x40000) && m_bBulletGoThrough)
+		return 0;
+
+	// Pawn-goes-through check
+	if ((TraceFlags & 0x200000) && m_bPawnGoThrough)
+		return 0;
+
+	// If tracing for movers, always trace interactive objects
+	if (TraceFlags & TRACE_Movers)
+		return 1;
+
+	// Fall through to AActor base
+	if (!AActor::ShouldTrace(Other, TraceFlags))
+		return 0;
+
+	return 1;
+
+	unguard;
 }
 
 void AR6InteractiveObject::eventSetNewDamageState(FLOAT A)
@@ -990,9 +1081,19 @@ void AR6LadderVolume::AddMyMarker(AActor *)
 {
 }
 
-INT AR6LadderVolume::ShouldTrace(AActor *, DWORD)
+INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
-	return 0;
+	guard(AR6LadderVolume::ShouldTrace);
+
+	if (!(TraceFlags & 0x80000))
+	{
+		if (!AVolume::ShouldTrace(Other, TraceFlags))
+			return 0;
+	}
+
+	return 1;
+
+	unguard;
 }
 
 void AR6LadderVolume::eventSetPotentialClimber()
@@ -2420,6 +2521,9 @@ void AR6SoundReplicationInfo::execStopWeaponSound(FFrame& Stack, RESULT_DECL)
 
 void AR6StairOrientation::PostScriptDestroyed()
 {
+	guard(AR6StairOrientation::PostScriptDestroyed);
+	SafeDestroyActor(m_pStairVolume);
+	unguard;
 }
 
 void AR6StairOrientation::linkWithStair(AR6StairVolume *)
@@ -2438,6 +2542,9 @@ void AR6StairVolume::CheckForErrors()
 
 void AR6StairVolume::PostScriptDestroyed()
 {
+	guard(AR6StairVolume::PostScriptDestroyed);
+	SafeDestroyActor(m_pStairOrientation);
+	unguard;
 }
 
 void AR6StairVolume::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
