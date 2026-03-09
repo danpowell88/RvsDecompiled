@@ -939,7 +939,25 @@ INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 
 INT AR6DeploymentZone::HaveHostage()
 {
-	return 0;
+	INT i = -1;
+	do
+	{
+		if (m_HostageZoneToCheck.Num() <= i)
+			return 0;
+
+		AR6DeploymentZone* Zone = this;
+		if (i != -1)
+			Zone = m_HostageZoneToCheck(i);
+
+		while (Zone->m_aHostage.Num() > 0)
+		{
+			AR6Hostage* Hostage = Zone->m_aHostage(0);
+			if (Hostage == NULL || (Hostage->m_eHealth < 2 && !Hostage->m_bExtracted))
+				return 1;
+			Zone->m_aHostage.Remove(0, 1);
+		}
+		i++;
+	} while (true);
 }
 
 INT AR6DeploymentZone::HavePlaceForPawnAt(FVector &)
@@ -949,6 +967,20 @@ INT AR6DeploymentZone::HavePlaceForPawnAt(FVector &)
 
 INT AR6DeploymentZone::HaveTerrorist()
 {
+	for (INT i = 0; i < m_aTerrorist.Num(); i++)
+	{
+		AR6Terrorist* Terrorist = m_aTerrorist(i);
+		if (Terrorist->m_eHealth < 2)
+		{
+			if (IsPointInZone(Terrorist->Location))
+				return 1;
+		}
+		else
+		{
+			m_aTerrorist.Remove(i, 1);
+			i--;
+		}
+	}
 	return 0;
 }
 
@@ -1259,8 +1291,10 @@ INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn *)
+INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn* Pawn)
 {
+	if (!Pawn->m_bIsPlayer && m_bIsDoorClosed && Rotation.Yaw != m_iYawInit)
+		return 1;
 	return 0;
 }
 
@@ -2339,9 +2373,17 @@ INT AR6Pawn::moveToPosition(FVector const &)
 	return 0;
 }
 
-INT AR6Pawn::moveToward(FVector const &, AActor *)
+INT AR6Pawn::moveToward(FVector const& Dest, AActor* GoalActor)
 {
-	return 0;
+	if (!Controller)
+		return 0;
+	AR6AIController* AICtrl = Cast<AR6AIController>(Controller);
+	if (m_ePawnType != 1 && AICtrl && GoalActor && AICtrl->NeedToOpenDoor(GoalActor))
+	{
+		AICtrl->GotoOpenDoorState(((AR6Door*)GoalActor)->m_CorrespondingDoor);
+		return 1;
+	}
+	return APawn::moveToward(Dest, GoalActor);
 }
 
 void AR6Pawn::performPhysics(FLOAT)
@@ -3167,9 +3209,15 @@ FString UR6SubActionLookAt::GetStatString()
 	return TEXT("");
 }
 
-INT UR6SubActionLookAt::Update(FLOAT, ASceneManager *)
+INT UR6SubActionLookAt::Update(FLOAT DeltaTime, ASceneManager* SceneManager)
 {
-	return 0;
+	if (!UMatSubAction::Update(DeltaTime, SceneManager))
+		return 0;
+	if (IsRunning() && m_AffectedPawn)
+	{
+		m_AffectedPawn->PawnTrackActor(m_TargetActor, m_bAim);
+	}
+	return 1;
 }
 
 // --- UR6TerroristMgr ---
