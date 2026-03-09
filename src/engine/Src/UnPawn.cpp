@@ -1053,7 +1053,11 @@ void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckRe
 INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AActor* Viewer)
 {
 	guard(APawn::CacheNetRelevancy);
-	return 0;
+	bNetRelevant = bIsRelevant;
+	NetRelevancyTime = Level->TimeSeconds;
+	LastRealViewer = RealViewer;
+	LastViewer = Viewer;
+	return bIsRelevant;
 	unguard;
 }
 
@@ -1441,7 +1445,7 @@ void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound
 AActor* AController::GetViewTarget()
 {
 	guard(AController::GetViewTarget);
-	return this;
+	return Pawn ? (AActor*)Pawn : (AActor*)this;
 	unguard;
 }
 

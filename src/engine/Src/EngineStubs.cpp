@@ -2191,8 +2191,10 @@ void AAIController::SetAdjustLocation(FVector NewLoc)
 	AdjustLoc = NewLoc;
 }
 
-int AAIController::AcceptNearbyPath(AActor *)
+int AAIController::AcceptNearbyPath(AActor* Goal)
 {
+	if( Goal && Goal->IsA(ANavigationPoint::StaticClass()) )
+		return 1;
 	return 0;
 }
 
@@ -2582,7 +2584,8 @@ void APlayerController::SetPlayer(UPlayer *)
 
 int APlayerController::LocalPlayerController()
 {
-	return 0;
+	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4
+	return Player && Player->IsA(UViewport::StaticClass());
 }
 
 void APlayerController::PostNetReceive()

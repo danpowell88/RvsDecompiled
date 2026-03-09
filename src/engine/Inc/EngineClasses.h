@@ -3963,6 +3963,22 @@ public:
 DECLARE_CLASS(UChannel,UObject,0,Engine)
 UChannel() {}
 
+// Data members (from UT99 UnChan.h).
+UNetConnection*	Connection;
+UBOOL			OpenAcked;
+UBOOL			Closing;
+INT				ChIndex;
+INT				OpenedLocally;
+INT				OpenPacketId;
+UBOOL			OpenTemporary;
+INT				ChType;
+INT				NumInRec;
+INT				NumOutRec;
+INT				NegotiatedVer;
+FInBunch*		InRec;
+FOutBunch*		OutRec;
+UBOOL			Broken;
+
 void StaticConstructor();
 INT SendBunch(FOutBunch*, INT);
 

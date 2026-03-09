@@ -1314,8 +1314,15 @@ void UNetConnection::SlowAssertValid() {}
 // =============================================================================
 
 void UChannel::Destroy() { Super::Destroy(); }
-void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally ) {}
-void UChannel::SetClosingFlag() {}
+void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
+{
+	ChIndex = InChIndex;
+	Connection = InConnection;
+	OpenedLocally = InOpenedLocally;
+	OpenPacketId = INDEX_NONE;
+	// TODO: NegotiatedVer = Connection->NegotiatedVer; (need UNetConnection data members)
+}
+void UChannel::SetClosingFlag() { Closing = 1; }
 void UChannel::Close() {}
 FString UChannel::Describe() { return FString(); }
 void UChannel::ReceivedNak( INT NakPacketId ) {}
