@@ -1236,6 +1236,22 @@ AActor * AR6Door::AssociatedLevelGeometry()
 
 void AR6Door::CheckForErrors()
 {
+	guard(AR6Door::CheckForErrors);
+
+	AActor::CheckForErrors();
+
+	// Validate non-window doors have path connections
+	if (m_RotatingDoor && !m_RotatingDoor->m_bTreatDoorAsWindow)
+	{
+		if (PathList.Num() == 0)
+		{
+			// NOTE: Exact format string may differ from retail binary
+			GWarn->Logf(TEXT("%s has no path connections"), GetName());
+		}
+		SetGameType(FString(TEXT("RGM_AllMode ")));
+	}
+
+	unguard;
 }
 
 INT AR6Door::PrunePaths()
@@ -1787,18 +1803,39 @@ FRotator AR6Pawn::GetRotationOffset()
 	return m_rPrevRotationOffset;
 }
 
-BYTE AR6Pawn::GetSoundGunType(INT)
+BYTE AR6Pawn::GetSoundGunType(INT InType)
 {
-	return 0;
+	// AZoneInfo bitfield at offset 0x398: bit 4 = m_bInDoor (auto-generated field)
+	BYTE ZoneBits = ((BYTE*)Region.Zone)[0x398];
+	if (InType != 0)
+		return (ZoneBits >> 4) & 1;	// Raw indoor flag: 0=outdoor, 1=indoor
+	return ((ZoneBits & 0x10) | 0x20) >> 4;	// Gun sound type: 2=outdoor, 3=indoor
 }
 
 BYTE AR6Pawn::GetStatusOtherTeam()
 {
+	if (Controller)
+	{
+		AR6RainbowAI* RainbowAI = Cast<AR6RainbowAI>(Controller);
+		if (RainbowAI)
+			return (BYTE)RainbowAI->m_TeamManager->m_iMembersLost;
+	}
 	return 0;
 }
 
 BYTE AR6Pawn::GetTeamColor()
 {
+	if (Controller)
+	{
+		AR6RainbowAI* RainbowAI = Cast<AR6RainbowAI>(Controller);
+		INT TeamName = 0;
+		if (RainbowAI)
+			TeamName = RainbowAI->m_TeamManager->m_iRainbowTeamName;
+		if (TeamName == 0)
+			return 2;
+		if (TeamName != 1 && TeamName == 2)
+			return 1;
+	}
 	return 0;
 }
 
@@ -3182,8 +3219,34 @@ void AR6SoundReplicationInfo::StopWeaponSound()
 {
 }
 
-void AR6SoundReplicationInfo::TickSpecial(FLOAT)
+void AR6SoundReplicationInfo::TickSpecial(FLOAT DeltaTime)
 {
+	guard(AR6SoundReplicationInfo::TickSpecial);
+
+	AActor::TickSpecial(DeltaTime);
+
+	if (m_pawnOwner)
+	{
+		// Sync our location and region from the owning pawn
+		Location = m_pawnOwner->Location;
+		Region = m_pawnOwner->Region;
+
+		// On the server in network games, periodically replicate location changes
+		// ALevelInfo::NetMode at offset 0x425 (auto-generated field, not in our header)
+		BYTE NetMode = ((BYTE*)Level)[0x425];
+		if (Role == ROLE_Authority && NetMode != 0)
+		{
+			m_fClientLastUpdate += DeltaTime;
+			if (m_fClientUpdateFrequency < m_fClientLastUpdate)
+			{
+				m_Location = m_pawnOwner->Location;
+				m_fClientLastUpdate = 0.f;
+				bNetDirty = 1;
+			}
+		}
+	}
+
+	unguard;
 }
 
 void AR6SoundReplicationInfo::execPlayLocalWeaponSound(FFrame& Stack, RESULT_DECL)
