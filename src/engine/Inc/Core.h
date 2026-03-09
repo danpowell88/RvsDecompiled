@@ -387,6 +387,13 @@ CORE_API extern DWORD					GCurrentViewport;
 
 CORE_API extern unsigned short *  GMachineOS;
 CORE_API extern unsigned short *  GMachineVideo;
+CORE_API extern UBOOL					GNightVisionActive;
+CORE_API extern FLOAT					GZoomAdjustment;
+CORE_API extern FLOAT					GZoomAdjustmentSniperMode;
+CORE_API extern FLOAT					GZoomAdjustmentSniperNoZoom;
+CORE_API extern FLOAT					GZoomAdjustmentSniperZoom;
+CORE_API extern BYTE					GCompileMaterialsRevision;
+CORE_API extern UObject*				GPropObject;
 
 extern "C" DLL_EXPORT TCHAR GPackage[];
 

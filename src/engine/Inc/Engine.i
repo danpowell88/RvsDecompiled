@@ -9026,6 +9026,8 @@ public:
 	{
 		return Ar << V.X << V.Y << V.Z;
 	}
+
+	static const FVector FVector0;
 };
 
 
