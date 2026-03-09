@@ -719,8 +719,12 @@ void AR6DZonePathNode::PostScriptDestroyed()
 	unguard;
 }
 
-void AR6DZonePathNode::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6DZonePathNode::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6DZonePathNode::RenderEditorInfo);
+	if (m_pPath)
+		m_pPath->RenderEditorInfo(SceneNode, RI, DA);
+	unguard;
 }
 
 // --- AR6DZonePoint ---
@@ -1939,8 +1943,12 @@ void AR6Pawn::PawnLookAt(FVector TargetLoc, INT bShouldAim, INT BlendTime)
 	SetPawnLookAndAimDirection(RelRot, BlendTime);
 }
 
-void AR6Pawn::PawnSetBoneRotation(FName, INT, INT, INT, FLOAT)
+void AR6Pawn::PawnSetBoneRotation(FName BoneName, INT Pitch, INT Yaw, INT Roll, FLOAT Alpha)
 {
+	guard(AR6Pawn::PawnSetBoneRotation);
+	USkeletalMeshInstance* MeshInst = (USkeletalMeshInstance*)Mesh->MeshGetInstance(this);
+	MeshInst->SetBoneRotation(BoneName, FRotator(Pitch, Yaw, Roll), 0, 1.0f, Alpha);
+	unguard;
 }
 
 void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
@@ -3260,6 +3268,7 @@ void AR6SoundReplicationInfo::execPlayWeaponSound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_BYTE(EWeaponSound);
 	P_FINISH;
+	PlayWeaponSound((enum EWeaponSound)EWeaponSound, m_CurrentWeapon);
 }
 
 void AR6SoundReplicationInfo::execStopWeaponSound(FFrame& Stack, RESULT_DECL)
@@ -3299,8 +3308,14 @@ void AR6StairVolume::PostScriptDestroyed()
 	unguard;
 }
 
-void AR6StairVolume::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6StairVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6StairVolume::RenderEditorInfo);
+	AActor::RenderEditorInfo(SceneNode, RI, DA);
+	// Propagate bDirectional editor flag to associated stair orientation actor
+	if ((*(DWORD*)((BYTE*)this + 0xAC) & 0x4000) && m_pStairOrientation)
+		*(DWORD*)((BYTE*)m_pStairOrientation + 0xAC) |= 0x4000;
+	unguard;
 }
 
 void AR6StairVolume::Spawned()
