@@ -993,6 +993,7 @@ void AR6DeploymentZone::execAddHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6Hostage, hostage);
 	P_FINISH;
+	m_aHostage.AddItem(hostage);
 }
 
 void AR6DeploymentZone::execFindClosestPointTo(FFrame& Stack, RESULT_DECL)
@@ -1267,12 +1268,14 @@ void AR6IORotatingDoor::execAddBreach(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, BreachAttached);
 	P_FINISH;
+	m_BreachAttached.AddItem((AR6AbstractBullet*)BreachAttached);
 }
 
 void AR6IORotatingDoor::execRemoveBreach(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, BreachAttached);
 	P_FINISH;
+	m_BreachAttached.RemoveItem((AR6AbstractBullet*)BreachAttached);
 }
 
 void AR6IORotatingDoor::execWillOpenOnTouch(FFrame& Stack, RESULT_DECL)
@@ -2819,6 +2822,7 @@ void AR6SoundReplicationInfo::execPlayLocalWeaponSound(FFrame& Stack, RESULT_DEC
 {
 	P_GET_BYTE(EWeaponSound);
 	P_FINISH;
+	PlayWeaponSound((enum EWeaponSound)EWeaponSound, m_CurrentWeapon);
 }
 
 void AR6SoundReplicationInfo::execPlayWeaponSound(FFrame& Stack, RESULT_DECL)
@@ -3104,6 +3108,16 @@ FLOAT UR6SubActionAnimSequence::GetTotalLength()
 
 INT UR6SubActionAnimSequence::IncrementSequence()
 {
+	m_CurIndex++;
+	if (m_CurIndex < m_Sequences.Num())
+	{
+		m_CurSequence = m_Sequences(m_CurIndex);
+		if (m_CurSequence)
+		{
+			eventSequenceChanged();
+			return 1;
+		}
+	}
 	return 0;
 }
 
