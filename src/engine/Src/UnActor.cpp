@@ -207,7 +207,7 @@ void AActor::execSetPhysics( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execSetPhysics);
 	P_GET_BYTE(NewPhysics);
 	P_FINISH;
-	setPhysics( NewPhysics );
+	setPhysics( NewPhysics, NULL, FVector(0,0,0) );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 3970, execSetPhysics );
@@ -282,7 +282,7 @@ void AActor::execSetBase( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT(AActor,NewBase);
 	P_GET_VECTOR_OPTX(NewFloor,FVector(0,0,1));
 	P_FINISH;
-	SetBase( NewBase, NewFloor );
+	SetBase( NewBase, NewFloor, 0 );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 298, execSetBase );
@@ -322,7 +322,7 @@ void AActor::execFastTrace( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR_OPTX(TraceStart,Location);
 	P_FINISH;
 	FCheckResult Hit(1.f);
-	*(DWORD*)Result = !XLevel->SingleLineCheck( Hit, this, TraceEnd, TraceStart, TRACE_World | TRACE_Level );
+	*(DWORD*)Result = !XLevel->SingleLineCheck( Hit, this, TraceEnd, TraceStart, TRACE_World | TRACE_Level, FVector(0,0,0) );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 548, execFastTrace );
@@ -375,7 +375,7 @@ void AActor::execPlayAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(bForceAnimRate,0);
 	P_FINISH;
 	if( Mesh )
-		Mesh->PlayAnim( this, Channel, Sequence, Rate, TweenTime, 0, bBackward, bForceAnimRate );
+		; // TODO: Mesh->PlayAnim( this, Channel, Sequence, Rate, TweenTime, 0, bBackward, bForceAnimRate );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 259, execPlayAnim );
@@ -391,7 +391,7 @@ void AActor::execLoopAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(bForceAnimRate,0);
 	P_FINISH;
 	if( Mesh )
-		Mesh->PlayAnim( this, Channel, Sequence, Rate, TweenTime, 1, bBackward, bForceAnimRate );
+		; // TODO: Mesh->PlayAnim( this, Channel, Sequence, Rate, TweenTime, 1, bBackward, bForceAnimRate );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 260, execLoopAnim );
@@ -404,7 +404,7 @@ void AActor::execTweenAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
 	if( Mesh )
-		Mesh->TweenAnim( this, Channel, Sequence, Time );
+		; // TODO: Mesh->TweenAnim( this, Channel, Sequence, Time );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 294, execTweenAnim );
@@ -415,7 +415,7 @@ void AActor::execFinishAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
 	GetStateFrame()->LatentAction = EPOLL_FinishAnim;
-	LatentInt = Channel;
+	// TODO: LatentInt = Channel;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 261, execFinishAnim );
@@ -423,7 +423,7 @@ IMPLEMENT_FUNCTION( AActor, 261, execFinishAnim );
 void AActor::execPollFinishAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollFinishAnim);
-	if( !IsAnimating( LatentInt ) )
+	if( !IsAnimating( 0 ) ) // TODO: IsAnimating( LatentInt )
 		GetStateFrame()->LatentAction = 0;
 	unguard;
 }
@@ -435,7 +435,7 @@ void AActor::execStopAnimating( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(ClearAllButBase,0);
 	P_FINISH;
 	if( Mesh )
-		Mesh->StopAnimating( this, ClearAllButBase );
+		; // TODO: Mesh->StopAnimating( this, ClearAllButBase );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAnimating );
@@ -455,7 +455,7 @@ void AActor::execIsTweening( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execIsTweening);
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
-	*(DWORD*)Result = IsTweening( Channel );
+	*(DWORD*)Result = 0; // TODO: IsTweening( Channel );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execIsTweening );
@@ -465,7 +465,7 @@ void AActor::execHasAnim( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execHasAnim);
 	P_GET_NAME(Sequence);
 	P_FINISH;
-	*(DWORD*)Result = Mesh ? Mesh->HasAnim( Sequence ) : 0;
+	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->HasAnim( Sequence ) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 263, execHasAnim );
@@ -475,7 +475,7 @@ void AActor::execGetAnimGroup( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execGetAnimGroup);
 	P_GET_NAME(Sequence);
 	P_FINISH;
-	*(FName*)Result = Mesh ? Mesh->GetAnimGroup( Sequence ) : NAME_None;
+	*(FName*)Result = NAME_None; // TODO: Mesh ? Mesh->GetAnimGroup( Sequence ) : NAME_None;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1500, execGetAnimGroup );
@@ -488,9 +488,8 @@ void AActor::execGetAnimParams( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_REF(OutAnimFrame);
 	P_GET_FLOAT_REF(OutAnimRate);
 	P_FINISH;
-	if( Mesh )
-		Mesh->GetAnimParams( this, Channel, *OutSeqName, *OutAnimFrame, *OutAnimRate );
-	else
+	// TODO: if( Mesh ) Mesh->GetAnimParams( this, Channel, *OutSeqName, *OutAnimFrame, *OutAnimRate );
+	// else
 	{
 		*OutSeqName   = NAME_None;
 		*OutAnimFrame = 0.f;
@@ -510,7 +509,7 @@ void AActor::execAnimBlendParams( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME_OPTX(BoneName,NAME_None);
 	P_FINISH;
 	if( Mesh )
-		Mesh->AnimBlendParams( this, Stage, BlendAlpha, InTime, OutTime, BoneName );
+		; // TODO: Mesh->AnimBlendParams( this, Stage, BlendAlpha, InTime, OutTime, BoneName );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendParams );
@@ -523,7 +522,7 @@ void AActor::execAnimBlendToAlpha( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT(TimeInterval);
 	P_FINISH;
 	if( Mesh )
-		Mesh->AnimBlendToAlpha( this, Stage, TargetAlpha, TimeInterval );
+		; // TODO: Mesh->AnimBlendToAlpha( this, Stage, TargetAlpha, TimeInterval );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendToAlpha );
@@ -533,7 +532,7 @@ void AActor::execGetAnimBlendAlpha( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execGetAnimBlendAlpha);
 	P_GET_INT(Stage);
 	P_FINISH;
-	*(FLOAT*)Result = Mesh ? Mesh->GetAnimBlendAlpha( this, Stage ) : 0.f;
+	*(FLOAT*)Result = 0.f; // TODO: Mesh ? Mesh->GetAnimBlendAlpha( this, Stage ) : 0.f;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2208, execGetAnimBlendAlpha );
@@ -544,7 +543,7 @@ void AActor::execAnimIsInGroup( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Channel,0);
 	P_GET_NAME(Group);
 	P_FINISH;
-	*(DWORD*)Result = Mesh ? Mesh->AnimIsInGroup( this, Channel, Group ) : 0;
+	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->AnimIsInGroup( this, Channel, Group ) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimIsInGroup );
@@ -556,7 +555,7 @@ void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
 	if( Mesh )
-		Mesh->FreezeAnimAt( this, Time, Channel );
+		; // TODO: Mesh->FreezeAnimAt( this, Time, Channel );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execFreezeAnimAt );
@@ -609,7 +608,7 @@ void AActor::execLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT_OPTX(UMesh,NewMesh,NULL);
 	P_FINISH;
 	if( Mesh )
-		Mesh->LinkSkelAnim( Anim, NewMesh );
+		; // TODO: Mesh->LinkSkelAnim( Anim, NewMesh );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLinkSkelAnim );
@@ -619,7 +618,7 @@ void AActor::execUnLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execUnLinkSkelAnim);
 	P_FINISH;
 	if( Mesh )
-		Mesh->LinkSkelAnim( NULL, NULL );
+		; // TODO: Mesh->LinkSkelAnim( NULL, NULL );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2210, execUnLinkSkelAnim );
@@ -685,7 +684,7 @@ void AActor::execGetBoneCoords( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME(BoneName);
 	P_GET_UBOOL_OPTX(bDontCallGetFrame,0);
 	P_FINISH;
-	*(FCoords*)Result = Mesh ? Mesh->GetBoneCoords( this, BoneName ) : GMath.UnitCoords;
+	*(FCoords*)Result = GMath.UnitCoords; // TODO: Mesh ? Mesh->GetBoneCoords( this, BoneName ) : GMath.UnitCoords;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneCoords );
@@ -696,7 +695,7 @@ void AActor::execGetBoneRotation( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME(BoneName);
 	P_GET_INT_OPTX(Space,0);
 	P_FINISH;
-	*(FRotator*)Result = Mesh ? Mesh->GetBoneRotation( this, BoneName, Space ) : FRotator(0,0,0);
+	*(FRotator*)Result = FRotator(0,0,0); // TODO: Mesh ? Mesh->GetBoneRotation( this, BoneName, Space ) : FRotator(0,0,0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneRotation );
@@ -711,7 +710,7 @@ void AActor::execSetBoneRotation( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(InTime,0.f);
 	P_FINISH;
 	if( Mesh )
-		Mesh->SetBoneRotation( this, BoneName, BoneTurn, Space, Alpha );
+		; // TODO: Mesh->SetBoneRotation( this, BoneName, BoneTurn, Space, Alpha );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneRotation );
@@ -725,7 +724,7 @@ void AActor::execSetBoneDirection( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Space,0);
 	P_FINISH;
 	if( Mesh )
-		Mesh->SetBoneDirection( this, BoneName, Dir, Alpha, Space );
+		; // TODO: Mesh->SetBoneDirection( this, BoneName, Dir, Alpha, Space );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneDirection );
@@ -738,7 +737,7 @@ void AActor::execSetBoneLocation( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(Alpha,1.f);
 	P_FINISH;
 	if( Mesh )
-		Mesh->SetBoneLocation( this, BoneName, BoneTrans, Alpha );
+		; // TODO: Mesh->SetBoneLocation( this, BoneName, BoneTrans, Alpha );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneLocation );
@@ -751,7 +750,7 @@ void AActor::execSetBoneScale( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME_OPTX(BoneName,NAME_None);
 	P_FINISH;
 	if( Mesh )
-		Mesh->SetBoneScale( this, Slot, BoneScale, BoneName );
+		; // TODO: Mesh->SetBoneScale( this, Slot, BoneScale, BoneName );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneScale );
@@ -771,7 +770,7 @@ void AActor::execAttachToBone( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT(AActor,Attachment);
 	P_GET_NAME(BoneName);
 	P_FINISH;
-	*(DWORD*)Result = Mesh ? Mesh->AttachToBone( this, Attachment, BoneName ) : 0;
+	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->AttachToBone( this, Attachment, BoneName ) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAttachToBone );
@@ -781,7 +780,7 @@ void AActor::execDetachFromBone( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execDetachFromBone);
 	P_GET_OBJECT(AActor,Attachment);
 	P_FINISH;
-	*(DWORD*)Result = Mesh ? Mesh->DetachFromBone( this, Attachment ) : 0;
+	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->DetachFromBone( this, Attachment ) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDetachFromBone );
@@ -792,10 +791,12 @@ void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlaySound);
 	P_GET_OBJECT(USound,Sound);
-	P_GET_BYTE_OPTX(Slot,SLOT_None);
+	P_GET_BYTE_OPTX(Slot,0);
 	P_FINISH;
-	if( Sound && XLevel && XLevel->Engine && XLevel->Engine->Audio )
-		XLevel->Engine->Audio->PlaySound( this, Sound, Slot );
+	if( Sound && XLevel && XLevel->Engine )
+	{
+		// TODO: Audio subsystem not yet a member of UEngine. Stub.
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 264, execPlaySound );
@@ -804,15 +805,14 @@ void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayOwnedSound);
 	P_GET_OBJECT(USound,Sound);
-	P_GET_BYTE_OPTX(Slot,SLOT_None);
+	P_GET_BYTE_OPTX(Slot,0);
 	P_GET_FLOAT_OPTX(Volume,1.f);
 	P_GET_UBOOL_OPTX(bNoOverride,0);
 	P_GET_FLOAT_OPTX(Radius,0.f);
 	P_GET_FLOAT_OPTX(Pitch,1.f);
 	P_GET_UBOOL_OPTX(Attenuate,1);
 	P_FINISH;
-	if( Sound && XLevel && XLevel->Engine && XLevel->Engine->Audio )
-		XLevel->Engine->Audio->PlaySound( this, Sound, Slot );
+	// TODO: Audio subsystem not yet a member of UEngine. Stub.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayOwnedSound );
@@ -821,16 +821,14 @@ void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDemoPlaySound);
 	P_GET_OBJECT(USound,Sound);
-	P_GET_BYTE_OPTX(Slot,SLOT_None);
+	P_GET_BYTE_OPTX(Slot,0);
 	P_GET_FLOAT_OPTX(Volume,1.f);
 	P_GET_UBOOL_OPTX(bNoOverride,0);
 	P_GET_FLOAT_OPTX(Radius,0.f);
 	P_GET_FLOAT_OPTX(Pitch,1.f);
 	P_GET_UBOOL_OPTX(Attenuate,1);
 	P_FINISH;
-	// Demo playback sound — delegates to same audio path.
-	if( Sound && XLevel && XLevel->Engine && XLevel->Engine->Audio )
-		XLevel->Engine->Audio->PlaySound( this, Sound, Slot );
+	// TODO: Audio subsystem not yet a member of UEngine. Stub.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDemoPlaySound );
@@ -843,9 +841,8 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 	P_GET_BYTE_OPTX(ePawn,0);
 	P_GET_BYTE_OPTX(ESoundType,0);
 	P_FINISH;
-	// Noise propagation for AI hearing — sets the noise values for pawns to detect.
-	if( Instigator )
-		Instigator->Noise = Loudness;
+	// Noise propagation for AI hearing.
+	// TODO: APawn::Noise member not yet declared.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
@@ -1197,9 +1194,9 @@ void AActor::execTouchingActors( FFrame& Stack, RESULT_DECL )
 	INT iTouch = 0;
 	PRE_ITERATOR;
 		*Actor = NULL;
-		while( iTouch < ARRAY_COUNT(Touching) )
+		while( iTouch < Touching.Num() )
 		{
-			*Actor = Touching[iTouch++];
+			*Actor = Touching(iTouch++);
 			if( *Actor && (*Actor)->IsA(BaseClass) )
 				break;
 			*Actor = NULL;
@@ -1226,7 +1223,8 @@ void AActor::execTraceActors( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR_OPTX(Extent,FVector(0,0,0));
 	P_FINISH;
 
-	FCheckResult* Link = XLevel->MultiLineCheck( GSceneMem, End, Start, Extent, XLevel->GetLevelInfo(), TRACE_AllColliding, this );
+	// TODO: GSceneMem (FMemStack) not yet declared as extern. Stub iterator.
+	FCheckResult* Link = NULL; // XLevel->MultiLineCheck( GSceneMem, End, Start, Extent, XLevel->GetLevelInfo(), TRACE_AllColliding, this );
 	FCheckResult* Current = Link;
 	PRE_ITERATOR;
 		*Actor = NULL;
@@ -1305,7 +1303,7 @@ void AActor::execVisibleActors( FFrame& Stack, RESULT_DECL )
 				if( RadiusSq <= 0.f || (Test->Location - Loc).SizeSquared() <= RadiusSq )
 				{
 					FCheckResult Hit(1.f);
-					if( !XLevel->SingleLineCheck( Hit, this, Test->Location, Loc, TRACE_World | TRACE_Level ) )
+					if( !XLevel->SingleLineCheck( Hit, this, Test->Location, Loc, TRACE_World | TRACE_Level, FVector(0,0,0) ) )
 					{
 						*Actor = Test;
 						break;
@@ -1409,7 +1407,7 @@ void AActor::execPlayerCanSeeMe( FFrame& Stack, RESULT_DECL )
 		if( PC && PC->Pawn )
 		{
 			FCheckResult Hit(1.f);
-			if( !XLevel->SingleLineCheck( Hit, this, Location, PC->Pawn->Location, TRACE_World | TRACE_Level ) )
+			if( !XLevel->SingleLineCheck( Hit, this, Location, PC->Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) ) )
 			{
 				*(DWORD*)Result = 1;
 				break;

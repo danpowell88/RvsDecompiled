@@ -4130,6 +4130,17 @@ enum EPollSlowFuncs
 	EPOLL_FinishInterpolation = 302,
 };
 
+// Latent action IDs for AController/AAIController poll functions.
+// Values from Ghidra: stored at FStateFrame offset 0x28.
+enum
+{
+	AI_PollMoveTo          = 501,
+	AI_PollMoveToward      = 503,
+	AI_PollFinishRotation  = 509,
+	AI_PollWaitToSeeEnemy  = 511,
+	AI_PollWaitForLanding  = 528,
+};
+
 
 
 

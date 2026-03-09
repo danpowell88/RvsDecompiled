@@ -249,8 +249,7 @@ void UCanvas::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
 	P_FINISH;
-	if( Viewport && Viewport->RenDev )
-		Viewport->RenDev->Draw3DLine( Viewport, Start, End, Color );
+	// TODO: Real implementation uses FLineBatcher (Ghidra 0x89b10), not RenDev->Draw3DLine.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDraw3DLine );
@@ -358,10 +357,8 @@ void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoOpen);
 	P_GET_STR(Filename);
 	P_FINISH;
-	INT Handle = 0;
-	if( Viewport && Viewport->RenDev )
-		Handle = Viewport->RenDev->OpenVideo( *Filename );
-	*(INT*)Result = Handle;
+	// TODO: Reconstruct proper video API call (Ghidra signature differs from declaration).
+	*(INT*)Result = 0;
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoOpen );
@@ -371,8 +368,7 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoPlay);
 	P_GET_INT(Handle);
 	P_FINISH;
-	if( Viewport && Viewport->RenDev )
-		Viewport->RenDev->DisplayVideo( Handle );
+	// TODO: Reconstruct proper video API call.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
@@ -382,8 +378,7 @@ void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoStop);
 	P_GET_INT(Handle);
 	P_FINISH;
-	if( Viewport && Viewport->RenDev )
-		Viewport->RenDev->StopVideo( Handle );
+	// TODO: Reconstruct proper video API call.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
@@ -393,8 +388,7 @@ void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoClose);
 	P_GET_INT(Handle);
 	P_FINISH;
-	if( Viewport && Viewport->RenDev )
-		Viewport->RenDev->CloseVideo( Handle );
+	// TODO: Reconstruct proper video API call.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
@@ -410,13 +404,8 @@ void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
 	P_FINISH;
-	// Delegate to the viewport's render device if available.
-	if( XLevel && XLevel->Engine )
-	{
-		UViewport* Viewport = Cast<UViewport>( Player );
-		if( Viewport && Viewport->RenDev )
-			Viewport->RenDev->Draw3DLine( Viewport, Start, End, Color );
-	}
+	// TODO: Real implementation uses FLineBatcher (Ghidra 0x12d710), not RenDev->Draw3DLine.
+	// Accesses player viewport through this+0x3E8 -> +0x5B4 chain.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );

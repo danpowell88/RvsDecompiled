@@ -3049,6 +3049,17 @@ public:
 	void eventStopPlayFiring();
 };
 
+// Latent action IDs for AController/AAIController poll functions.
+// Values verified from Ghidra: stored at FStateFrame offset 0x28.
+enum
+{
+	AI_PollMoveTo          = 501,
+	AI_PollMoveToward      = 503,
+	AI_PollFinishRotation  = 509,
+	AI_PollWaitToSeeEnemy  = 511,
+	AI_PollWaitForLanding  = 528,
+};
+
 class ENGINE_API AController : public AActor
 {
 public:
@@ -3852,6 +3863,12 @@ class ENGINE_API AHUD : public AActor
 {
 public:
 	DECLARE_CLASS(AHUD,AActor,0|CLASS_Config,Engine)
+
+	// Data members (partially reconstructed).
+	// Ghidra shows access at this+0x3E8 -> +0x5B4 for the player viewport.
+	// Simplified to a direct Player pointer for compilation.
+	UPlayer* Player;
+
 	DECLARE_FUNCTION(execDraw3DLine)
 	// Event thunks
 	void eventPostFadeRender(class UCanvas*);
@@ -4190,6 +4207,7 @@ class ENGINE_API UPalette : public UObject
 {
 public:
 	DECLARE_CLASS(UPalette,UObject,0,Engine)
+	TArray<FColor> Colors;
 	// Auto-generated method declarations
 	UPalette * ReplaceWithExisting();
 	virtual void Serialize(FArchive &);
@@ -5380,6 +5398,13 @@ class ENGINE_API UViewport : public UPlayer
 public:
 	DECLARE_ABSTRACT_CLASS(UViewport,UPlayer,0,Engine)
 	UViewport() {}
+
+	// Data members (partially reconstructed — layout not yet verified).
+	// UPlayer base has additional fields before these; offsets approximate.
+	BYTE ViewportPad[0x100];  // Placeholder for UPlayer + early UViewport fields
+	INT SizeX;
+	INT SizeY;
+	URenderDevice* RenDev;
 
 	// Virtual methods
 	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );

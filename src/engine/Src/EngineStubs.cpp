@@ -6143,10 +6143,9 @@ int UViewport::IsTopView()
 struct FUV2Data;
 struct FUntransformedVertex;
 struct FProjectorRelativeRenderInfo;
-struct FOrientation { BYTE Pad[16]; FOrientation& operator=(FOrientation) { return *this; } int operator!=(const FOrientation&) const { return 0; } };
 struct FHitCause;
 struct HHitProxy;
-class FRebuildOptions { public:  BYTE Pad[256]; };
+class FTerrainVertexStream;
 struct _KarmaGlobals;
 struct _McdGeometry;
 struct McdGeomMan;
@@ -6381,17 +6380,8 @@ ECLipSynchData::ECLipSynchData() {}
 // ??0FActorSceneNode@@QAE@PAVUViewport@@PAVAActor@@1VFVector@@VFRotator@@M@Z
 FActorSceneNode::FActorSceneNode(UViewport * p0, AActor * p1, AActor * p2, FVector p3, FRotator p4, float p5) : FSceneNode((UViewport*)NULL) {}
 
-// ??1FAnimMeshVertexStream@@QAE@XZ
-FAnimMeshVertexStream::~FAnimMeshVertexStream() {}
-
-// ??1FBspVertexStream@@QAE@XZ
-FBspVertexStream::~FBspVertexStream() {}
-
 // ??0FCameraSceneNode@@QAE@PAVUViewport@@PAVAActor@@VFVector@@VFRotator@@M@Z
 FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRotator p3, float p4) : FSceneNode((UViewport*)NULL) {}
-
-// ??1FCanvasUtil@@QAE@XZ
-FCanvasUtil::~FCanvasUtil() {}
 
 // ??0FCollisionHash@@QAE@ABV0@@Z
 FCollisionHash::FCollisionHash(FCollisionHash const & p0) {}
@@ -6420,17 +6410,8 @@ FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & p0) : FSceneNode((UView
 // ??0FLevelSceneNode@@QAE@PAVUViewport@@@Z
 FLevelSceneNode::FLevelSceneNode(UViewport * p0) : FSceneNode((UViewport*)NULL) {}
 
-// ??1FLightMap@@QAE@XZ
-FLightMap::~FLightMap() {}
-
 // ??0FLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@PAVFLightMap@@@Z
 FLightMapSceneNode::FLightMapSceneNode(UViewport * p0, AActor * p1, FLightMap * p2) : FSceneNode((UViewport*)NULL) {}
-
-// ??1FLightMapTexture@@QAE@XZ
-FLightMapTexture::~FLightMapTexture() {}
-
-// ??1FLineBatcher@@QAE@XZ
-FLineBatcher::~FLineBatcher() {}
 
 // ??0FMatineeTools@@QAE@ABV0@@Z
 FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
@@ -6449,15 +6430,6 @@ FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FB
 
 // ??0FPoly@@QAE@XZ
 FPoly::FPoly() {}
-
-// ??1FRaw32BitIndexBuffer@@QAE@XZ
-FRaw32BitIndexBuffer::~FRaw32BitIndexBuffer() {}
-
-// ??1FRawColorStream@@QAE@XZ
-FRawColorStream::~FRawColorStream() {}
-
-// ??1FRawIndexBuffer@@QAE@XZ
-FRawIndexBuffer::~FRawIndexBuffer() {}
 
 // ??0FRebuildTools@@QAE@ABV0@@Z
 FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
@@ -6483,23 +6455,11 @@ FSceneNode::FSceneNode(FSceneNode const & p0) {}
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
 FSceneNode::FSceneNode(UViewport * p0) {}
 
-// ??1FSkinVertexStream@@QAE@XZ
-FSkinVertexStream::~FSkinVertexStream() {}
-
 // ??0FStatGraph@@QAE@ABV0@@Z
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
 FStatGraph::~FStatGraph() {}
-
-// ??1FStaticLightMapTexture@@QAE@XZ
-FStaticLightMapTexture::~FStaticLightMapTexture() {}
-
-// ??1FStaticMeshUVStream@@QAE@XZ
-FStaticMeshUVStream::~FStaticMeshUVStream() {}
-
-// ??1FStaticMeshVertexStream@@QAE@XZ
-FStaticMeshVertexStream::~FStaticMeshVertexStream() {}
 
 // ??0FURL@@QAE@PAV0@PBGW4ETravelType@@@Z
 FURL::FURL(FURL * p0, const TCHAR* p1, ETravelType p2) {}
@@ -6762,12 +6722,6 @@ FSkySceneNode * FSceneNode::GetSkySceneNode() { return NULL; }
 // ?GetWarpZoneSceneNode@FSceneNode@@UAEPAVFWarpZoneSceneNode@@XZ
 FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
 
-// ?GetMovement@UMeshAnimation@@UAEPAVMotionChunk@@VFName@@@Z
-MotionChunk * UMeshAnimation::GetMovement(FName p0) { return NULL; }
-
-// ?FillVertexBuffer@USpriteEmitter@@UAEHPAVFSpriteParticleVertex@@PAVFLevelSceneNode@@@Z
-int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex * p0, FLevelSceneNode * p1) { return 0; }
-
 // ?ActorEncroachmentCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@VFVector@@VFRotator@@KK@Z
 FCheckResult * FCollisionHash::ActorEncroachmentCheck(FMemStack & p0, AActor * p1, FVector p2, FRotator p3, DWORD p4, DWORD p5) { return NULL; }
 
@@ -6797,9 +6751,6 @@ FCheckResult * FCollisionOctree::ActorPointCheck(FMemStack & p0, FVector p1, FVe
 
 // ?ActorRadiusCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
 FCheckResult * FCollisionOctree::ActorRadiusCheck(FMemStack & p0, FVector p1, float p2, DWORD p3) { return NULL; }
-
-// ?getKConstraint@AKConstraint@@UBEPAUMdtBaseConstraint@@XZ
-MdtBaseConstraint * AKConstraint::getKConstraint() const { return NULL; }
 
 // ?AddActor@FCollisionHash@@UAEXPAVAActor@@@Z
 void FCollisionHash::AddActor(AActor * p0) {}
@@ -6839,9 +6790,6 @@ void FCollisionOctree::Tick() {}
 
 // ?MeshBuildBounds@UMeshInstance@@UAEXXZ
 void UMeshInstance::MeshBuildBounds() {}
-
-// ?ChangeOrientation@ASceneManager@@QAEXUFOrientation@@@Z
-void ASceneManager::ChangeOrientation(FOrientation p0) {}
 
 // ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
 void ECLipSynchData::m_vStartLipsynch() {}
@@ -7405,14 +7353,6 @@ FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appM
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ============================================================================
-// UPlayer — virtual method impl to trigger vftable emission for MI bases
-// (FOutputDevice, FExec, UObject secondary vftables)
-// ============================================================================
-void UPlayer::Destroy() {}
-void UPlayer::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
-int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
-
-// ============================================================================
 // UNetConnection — virtual method impls for vftable emission
 // ============================================================================
 void UNetConnection::Serialize(const TCHAR* Data, EName Event) {}
@@ -7427,12 +7367,6 @@ void UViewport::Serialize(const TCHAR* Data, EName Event) {}
 void UViewport::Destroy() {}
 INT UViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
 void UViewport::Serialize(FArchive& Ar) { UPlayer::Serialize(Ar); }
-
-// ============================================================================
-// UControlChannel — virtual method impl for vftable emission
-// ============================================================================
-void UControlChannel::Serialize(const TCHAR* Data, EName Event) {}
-void UControlChannel::Destroy() {}
 
 // ============================================================================
 // TLazyArray<BYTE> — force emission of implicitly-declared special members
@@ -7451,3 +7385,20 @@ void _ForceTLazyArrayByteEmit() {
     *p = copy;
     delete[] p;
 }
+
+/*-----------------------------------------------------------------------------
+  AReplicationInfo virtual method stubs.
+  Declared in EngineClasses.h but never defined elsewhere.
+  AReplicationInfo mirrors URenderDevice's virtual interface.
+-----------------------------------------------------------------------------*/
+void AReplicationInfo::StaticConstructor() {}
+void AReplicationInfo::StartVideo(UCanvas*, INT, INT, INT) {}
+void AReplicationInfo::StopVideo(UCanvas*) {}
+INT  AReplicationInfo::OpenVideo(UCanvas*, char*, char*, INT) { return 0; }
+void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface, INT) {}
+void AReplicationInfo::CloseVideo(UCanvas*) {}
+void AReplicationInfo::DisplayVideo(UCanvas*, void*, INT) {}
+void AReplicationInfo::Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT) {}
+void AReplicationInfo::GetAvailableResolutions(TArray<FResolutionInfo>&) {}
+DWORD AReplicationInfo::GetAvailableVideoMemory() { return 0; }
+void AReplicationInfo::HandleFullScreenEffects(INT, INT) {}

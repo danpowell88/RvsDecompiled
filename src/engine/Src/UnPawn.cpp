@@ -195,7 +195,7 @@ void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 	if( Other && Pawn && Pawn->XLevel )
 	{
 		FCheckResult Hit(1.f);
-		*(DWORD*)Result = !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Other->Location, Pawn->Location, TRACE_World | TRACE_Level );
+		*(DWORD*)Result = !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Other->Location, Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) );
 	}
 	unguard;
 }
@@ -210,7 +210,7 @@ void AController::execCanSee( FFrame& Stack, RESULT_DECL )
 	if( Other && Pawn && Pawn->XLevel )
 	{
 		FCheckResult Hit(1.f);
-		*(DWORD*)Result = !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Other->Location, Pawn->Location, TRACE_World | TRACE_Level );
+		*(DWORD*)Result = !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Other->Location, Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) );
 	}
 	unguard;
 }
@@ -309,9 +309,12 @@ void AController::execAddController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execAddController);
 	P_FINISH;
-	// Adds this controller to the level's controller list.
-	if( XLevel )
-		XLevel->GetLevelInfo()->AddController( this );
+	// Insert this controller at the head of the level's controller list.
+	if( XLevel && XLevel->GetLevelInfo() )
+	{
+		nextController = XLevel->GetLevelInfo()->ControllerList;
+		XLevel->GetLevelInfo()->ControllerList = this;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 529, execAddController );
@@ -320,8 +323,27 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execRemoveController);
 	P_FINISH;
-	if( XLevel )
-		XLevel->GetLevelInfo()->RemoveController( this );
+	// Remove this controller from the level's controller list.
+	if( XLevel && XLevel->GetLevelInfo() )
+	{
+		ALevelInfo* Info = XLevel->GetLevelInfo();
+		if( Info->ControllerList == this )
+		{
+			Info->ControllerList = nextController;
+		}
+		else
+		{
+			for( AController* C = Info->ControllerList; C; C = C->nextController )
+			{
+				if( C->nextController == this )
+				{
+					C->nextController = nextController;
+					break;
+				}
+			}
+		}
+		nextController = NULL;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
@@ -368,7 +390,7 @@ void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 	guard(AController::execEndClimbLadder);
 	P_FINISH;
 	if( Pawn )
-		Pawn->setPhysics( PHYS_Falling );
+		Pawn->setPhysics( PHYS_Falling, NULL, FVector(0,0,0) );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
@@ -429,8 +451,7 @@ void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 	P_GET_STR(Command);
 	P_FINISH;
 	*(FString*)Result = TEXT("");
-	if( Player )
-		*(FString*)Result = Player->ConsoleCommand( *Command );
+	// TODO: Access Player via _NativeData[50] (offset 0x5B4) and call Exec.
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
@@ -459,7 +480,8 @@ void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 	guard(APlayerController::execSetViewTarget);
 	P_GET_OBJECT(AActor,NewViewTarget);
 	P_FINISH;
-	ViewTarget = NewViewTarget;
+	// TODO: ViewTarget is at an unresolved offset in _NativeData.
+	// ViewTarget = NewViewTarget;
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );
@@ -636,7 +658,7 @@ void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 	if( Enemy && Pawn )
 	{
 		FCheckResult Hit(1.f);
-		if( !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Enemy->Location, Pawn->Location, TRACE_World | TRACE_Level ) )
+		if( !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Enemy->Location, Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) ) )
 			GetStateFrame()->LatentAction = 0;
 	}
 	unguard;

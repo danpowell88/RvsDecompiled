@@ -759,7 +759,7 @@ IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetMapFileName );
 void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetPlayerChecksum);
-	P_GET_OBJECT(APlayerPawn,P);
+	P_GET_OBJECT(AActor,P);
 	P_FINISH;
 	*(FString*)Result = TEXT("");
 	unguard;

@@ -63,10 +63,10 @@ UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
-UMaterial* UMaterial::GetValidated()
+INT UMaterial::GetValidated()
 {
 	guard(UMaterial::GetValidated);
-	return this;
+	return 1;
 	unguard;
 }
 
@@ -96,14 +96,14 @@ UBOOL UMaterial::RequiresSorting()
 	return IsTransparent();
 }
 
-INT UMaterial::RequiredUVStreams()
+BYTE UMaterial::RequiredUVStreams()
 {
 	return 1;
 }
 
-UBOOL UMaterial::CheckFallback()
+UMaterial* UMaterial::CheckFallback()
 {
-	return 0;
+	return NULL;
 }
 
 UBOOL UMaterial::HasFallback()
@@ -122,12 +122,12 @@ UMaterial* UMaterial::GetDiffuse()
 
 INT UBitmapMaterial::MaterialUSize()
 {
-	return USize;
+	return 0; // TODO: return USize;
 }
 
 INT UBitmapMaterial::MaterialVSize()
 {
-	return VSize;
+	return 0; // TODO: return VSize;
 }
 
 /*=============================================================================
@@ -162,7 +162,7 @@ UBOOL UTexture::RequiresSorting()
 
 UBOOL UTexture::IsTransparent()
 {
-	return bAlphaTexture || bMasked;
+	return 0; // TODO: return bAlphaTexture || bMasked;
 }
 
 /*=============================================================================
@@ -185,12 +185,12 @@ UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 
 INT UShader::MaterialUSize()
 {
-	return Diffuse ? Diffuse->MaterialUSize() : 0;
+	return 0; // TODO: return Diffuse ? Diffuse->MaterialUSize() : 0;
 }
 
 INT UShader::MaterialVSize()
 {
-	return Diffuse ? Diffuse->MaterialVSize() : 0;
+	return 0; // TODO: return Diffuse ? Diffuse->MaterialVSize() : 0;
 }
 
 UBOOL UShader::RequiresSorting()
@@ -200,17 +200,17 @@ UBOOL UShader::RequiresSorting()
 
 UBOOL UShader::IsTransparent()
 {
-	return Opacity != NULL;
+	return 0; // TODO: return Opacity != NULL;
 }
 
-INT UShader::RequiredUVStreams()
+BYTE UShader::RequiredUVStreams()
 {
 	return 1;
 }
 
-UBOOL UShader::CheckFallback()
+UMaterial* UShader::CheckFallback()
 {
-	return 0;
+	return NULL;
 }
 
 UBOOL UShader::HasFallback()
@@ -220,7 +220,7 @@ UBOOL UShader::HasFallback()
 
 UMaterial* UShader::GetDiffuse()
 {
-	return Diffuse;
+	return NULL; // TODO: return Diffuse;
 }
 
 /*=============================================================================
@@ -237,33 +237,33 @@ void UModifier::PostEditChange()
 UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UModifier::CheckCircularReferences);
-	return Material ? Material->CheckCircularReferences( History ) : 0;
+	return 0; // TODO: return Material ? Material->CheckCircularReferences( History ) : 0;
 	unguard;
 }
 
 INT UModifier::MaterialUSize()
 {
-	return Material ? Material->MaterialUSize() : 0;
+	return 0; // TODO: return Material ? Material->MaterialUSize() : 0;
 }
 
 INT UModifier::MaterialVSize()
 {
-	return Material ? Material->MaterialVSize() : 0;
+	return 0; // TODO: return Material ? Material->MaterialVSize() : 0;
 }
 
 UBOOL UModifier::RequiresSorting()
 {
-	return Material ? Material->RequiresSorting() : 0;
+	return 0; // TODO: return Material ? Material->RequiresSorting() : 0;
 }
 
 UBOOL UModifier::IsTransparent()
 {
-	return Material ? Material->IsTransparent() : 0;
+	return 0; // TODO: return Material ? Material->IsTransparent() : 0;
 }
 
-INT UModifier::RequiredUVStreams()
+BYTE UModifier::RequiredUVStreams()
 {
-	return Material ? Material->RequiredUVStreams() : 1;
+	return 1; // TODO: return Material ? Material->RequiredUVStreams() : 1;
 }
 
 /*=============================================================================
@@ -286,12 +286,12 @@ UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 
 INT UCombiner::MaterialUSize()
 {
-	return Material1 ? Material1->MaterialUSize() : 0;
+	return 0; // TODO: return Material1 ? Material1->MaterialUSize() : 0;
 }
 
 INT UCombiner::MaterialVSize()
 {
-	return Material1 ? Material1->MaterialVSize() : 0;
+	return 0; // TODO: return Material1 ? Material1->MaterialVSize() : 0;
 }
 
 UBOOL UCombiner::IsTransparent()
@@ -304,7 +304,7 @@ UBOOL UCombiner::RequiresSorting()
 	return IsTransparent();
 }
 
-INT UCombiner::RequiredUVStreams()
+BYTE UCombiner::RequiredUVStreams()
 {
 	return 2;
 }
@@ -320,9 +320,9 @@ void UFinalBlend::PostEditChange()
 	unguard;
 }
 
-UMaterial* UFinalBlend::GetValidated()
+INT UFinalBlend::GetValidated()
 {
-	return this;
+	return 1;
 }
 
 void UFinalBlend::SetValidated( UBOOL InValidated )
@@ -336,7 +336,7 @@ UBOOL UFinalBlend::RequiresSorting()
 
 UBOOL UFinalBlend::IsTransparent()
 {
-	return FrameBufferBlending != FB_Overwrite;
+	return 0; // TODO: return FrameBufferBlending != FB_Overwrite;
 }
 
 /*=============================================================================
