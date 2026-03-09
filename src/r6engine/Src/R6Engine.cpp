@@ -296,8 +296,59 @@ AR6ActionSpot * AR6AIController::FindNearestActionSpot(FLOAT, FVector, INT (CDEC
 	return NULL;
 }
 
-void AR6AIController::FollowPath(enum eMovementPace, FName, INT)
+void AR6AIController::FollowPath(enum eMovementPace Pace, FName Label, INT bResetIndex)
 {
+	if (Pawn == NULL)
+		return;
+
+	NextLabel = Label;
+
+	if (bResetIndex == 0)
+	{
+		m_iCurrentRouteCache = -1;
+	}
+	else
+	{
+		UBOOL bFound = 0;
+		if (Pawn->Anchor != RouteCache[m_iCurrentRouteCache])
+		{
+			m_iCurrentRouteCache++;
+			while (m_iCurrentRouteCache < 16 && RouteCache[m_iCurrentRouteCache] != NULL && !bFound)
+			{
+				if (Pawn->Anchor == RouteCache[m_iCurrentRouteCache])
+					bFound = 1;
+				m_iCurrentRouteCache++;
+			}
+			if (RouteCache[m_iCurrentRouteCache] == NULL || m_iCurrentRouteCache > 15)
+			{
+				if (bFound)
+					return;
+				AActor* Path = FindPath(FVector(0,0,0), RouteGoal, 1);
+				if (Path == NULL)
+					return;
+				m_iCurrentRouteCache = 0;
+			}
+		}
+	}
+
+	Pawn->bReducedSpeed = 0;
+	Pawn->DesiredSpeed = Pawn->MaxDesiredSpeed;
+	GetStateFrame()->LatentAction = 602;
+	bAdjusting = 0;
+
+	SetDestinationToNextInCache();
+
+	INT MoveType = (INT)Pace;
+	if (Pawn->m_eHealth == 1)
+	{
+		if (Pace == 3)
+			MoveType = 2;
+		else if (Pace == 5)
+			MoveType = 4;
+	}
+
+	eventR6SetMovement((BYTE)MoveType);
+	Pawn->moveToward(Destination, MoveTarget);
 }
 
 void AR6AIController::GotoOpenDoorState(AActor* NavPointToOpenFrom)
@@ -1505,8 +1556,31 @@ void AR6Door::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicAc
 {
 }
 
-void AR6Door::addReachSpecs(APawn *, INT)
+void AR6Door::addReachSpecs(APawn* Scout, INT bOnlyChanged)
 {
+	guard(AR6Door::addReachSpecs);
+
+	// Only create reach specs if this door has a rotating door that isn't treated as a window
+	if (m_RotatingDoor && !m_RotatingDoor->m_bTreatDoorAsWindow)
+	{
+		if (m_CorrespondingDoor)
+		{
+			UReachSpec* Spec = ConstructObject<UReachSpec>(UReachSpec::StaticClass(), XLevel->GetOuter(), NAME_None, RF_Public);
+			Spec->Init();
+			Spec->CollisionRadius = 40;
+			Spec->CollisionHeight = 85;
+			Spec->reachFlags = 17;
+			Spec->Start = this;
+			Spec->End = m_CorrespondingDoor;
+			FVector Diff = Location - m_CorrespondingDoor->Location;
+			Spec->Distance = (INT)Diff.Size();
+			PathList.AddItem(Spec);
+		}
+
+		ANavigationPoint::addReachSpecs(Scout, bOnlyChanged);
+	}
+
+	unguard;
 }
 
 // --- AR6FalseHeartBeat ---
