@@ -280,6 +280,7 @@ class UMeshInstance;
 class URenderResource;
 class UMaterial;
 class UTexture;
+class UPalette;
 class USound;
 class UMusic;
 class UAudioSubsystem;
@@ -587,6 +588,7 @@ enum ERenderStyle { STY_None=0, STY_Normal=1, STY_Masked=2, STY_Translucent=3, S
 enum ETextureArithOp { TAO_Add=0, TAO_Subtract=1, TAO_Multiply=2, TAO_Divide=3 };
 enum ETerrainRenderMethod { TRM_Normal=0, TRM_PerPixelDetail=1, TRM_PerPixelLighting=2 };
 enum ENoiseType { NOISE_None=0, NOISE_Footstep=1, NOISE_Weapon=2, NOISE_Explosion=3 };
+enum EFrameBufferBlending { FB_Overwrite=0, FB_Modulate=1, FB_AlphaBlend=2, FB_AlphaModulate_MightNotFogCorrectly=3, FB_Translucent=4, FB_Darken=5, FB_Brighten=6, FB_Invisible=7, FB_Modulate1X=8, FB_Highlight=9 };
 enum EPawnType { PAWN_None=0, PAWN_Player=1, PAWN_Bot=2 };
 enum ESoundType { SOUND_None=0, SOUND_Speech=1, SOUND_Effect=2, SOUND_Music=3, SOUND_Ambient=4 };
 enum EDrawType { DT_None=0, DT_Sprite=1, DT_Mesh=2, DT_Brush=3, DT_RopeSprite=4, DT_VerticalSprite=5, DT_Terraform=6, DT_SpriteAnimOnce=7, DT_StaticMesh=8, DT_DrawType=9, DT_Particle=10, DT_AntiPortal=11, DT_FluidSurface=12 };
@@ -4081,6 +4083,15 @@ class ENGINE_API UBitmapMaterial : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UBitmapMaterial,URenderedMaterial,0,Engine)
+
+	// Data members (from BitmapMaterial.uc — noexport).
+	BYTE Format;       // ETextureFormat
+	BYTE UClampMode;   // ETexClampMode
+	BYTE VClampMode;   // ETexClampMode
+	BYTE UBits, VBits;
+	INT  USize, VSize;
+	INT  UClamp, VClamp;
+
 	// Auto-generated method declarations
 	virtual int MaterialUSize();
 	virtual int MaterialVSize();
@@ -4091,6 +4102,38 @@ class ENGINE_API UTexture : public UBitmapMaterial
 {
 public:
 	DECLARE_CLASS(UTexture,UBitmapMaterial,0,Engine)
+
+	// Data members (from Texture.uc — noexport).
+	UPalette*  Palette;
+	FColor     MipZero;
+	FColor     MaxColor;
+	INT        InternalTime[2];
+	UTexture*  DetailTexture;   // deprecated
+	UTexture*  EnvironmentMap;  // deprecated
+	BYTE       EnvMapTransformType; // EEnvMapTransformType
+	FLOAT      Specular;        // deprecated
+	BITFIELD   bMasked:1;
+	BITFIELD   bAlphaTexture:1;
+	BITFIELD   bHighColorQuality:1;
+	BITFIELD   bHighTextureQuality:1;
+	BITFIELD   bRealtime:1;
+	BITFIELD   bParametric:1;
+	BITFIELD   bRealtimeChanged:1;
+	BITFIELD   bHasComp:1;
+	INT        m_dwSize;
+	INT        m_dwGetSizeLastFrame;
+	BYTE       LODSet;          // ELODSet
+	UTexture*  AnimNext;
+	UTexture*  AnimCurrent;
+	BYTE       PrimeCount;
+	BYTE       PrimeCurrent;
+	FLOAT      MinFrameRate;
+	FLOAT      MaxFrameRate;
+	FLOAT      Accumulator;
+	TArray<INT> Mips;
+	BYTE       CompFormat;      // ETextureFormat
+	INT        RenderInterface; // transient
+	INT        __LastUpdateTime[2]; // transient
 
 	static class UClient* __Client;
 
@@ -4134,6 +4177,21 @@ class ENGINE_API UShader : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UShader,URenderedMaterial,0,Engine)
+
+	// Data members (from Shader.uc).
+	UMaterial* Diffuse;
+	UMaterial* Opacity;
+	UMaterial* Specular;
+	UMaterial* SpecularityMask;
+	UMaterial* SelfIllumination;
+	UMaterial* SelfIlluminationMask;
+	UMaterial* Detail;
+	BYTE OutputBlending; // EOutputBlending
+	BITFIELD TwoSided:1;
+	BITFIELD Wireframe:1;
+	BITFIELD ModulateStaticLighting2X:1;
+	BITFIELD PerformLightingOnSpecularPass:1;
+
 	// Auto-generated method declarations
 	virtual BYTE RequiredUVStreams();
 	virtual int RequiresSorting();
@@ -4151,6 +4209,10 @@ class ENGINE_API UModifier : public UMaterial
 {
 public:
 	DECLARE_CLASS(UModifier,UMaterial,0,Engine)
+
+	// Data members (from Modifier.uc).
+	UMaterial* Material;
+
 	// Auto-generated method declarations
 	virtual BYTE RequiredUVStreams();
 	virtual int RequiresSorting();
@@ -4165,6 +4227,17 @@ class ENGINE_API UCombiner : public UMaterial
 {
 public:
 	DECLARE_CLASS(UCombiner,UMaterial,0,Engine)
+
+	// Data members (from Combiner.uc).
+	BYTE CombineOperation; // EColorOperation
+	BYTE AlphaOperation;   // EAlphaOperation
+	UMaterial* Material1;
+	UMaterial* Material2;
+	UMaterial* Mask;
+	BITFIELD InvertMask:1;
+	BITFIELD Modulate2X:1;
+	BITFIELD Modulate4X:1;
+
 	// Auto-generated method declarations
 	virtual BYTE RequiredUVStreams();
 	virtual int RequiresSorting();
@@ -4179,6 +4252,16 @@ class ENGINE_API UFinalBlend : public UModifier
 {
 public:
 	DECLARE_CLASS(UFinalBlend,UModifier,0,Engine)
+
+	// Data members (from FinalBlend.uc).
+	BYTE FrameBufferBlending; // EFrameBufferBlending
+	BITFIELD ZWrite:1;
+	BITFIELD ZTest:1;
+	BITFIELD AlphaTest:1;
+	BITFIELD TwoSided:1;
+	BYTE AlphaRef;
+	BITFIELD m_bAddZBias:1;
+
 	// Auto-generated method declarations
 	virtual int RequiresSorting();
 	virtual void SetValidated(int);
