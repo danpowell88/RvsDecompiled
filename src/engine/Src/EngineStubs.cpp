@@ -283,7 +283,7 @@ int FAnimMeshVertexStream::SetPartialSize(int)
 
 unsigned __int64 FAnimMeshVertexStream::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 16);
 }
 
 int FAnimMeshVertexStream::GetComponents(FVertexComponent *)
@@ -302,7 +302,7 @@ void FAnimMeshVertexStream::GetRawStreamData(void * *,int)
 
 int FAnimMeshVertexStream::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 24);
 }
 
 int FAnimMeshVertexStream::GetSize()
@@ -316,13 +316,13 @@ void FAnimMeshVertexStream::GetStreamData(void *)
 
 int FAnimMeshVertexStream::GetStride()
 {
-	return 0;
+	return 0x20;
 }
 
 // --- FBspVertexStream ---
 unsigned __int64 FBspVertexStream::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 12);
 }
 
 int FBspVertexStream::GetComponents(FVertexComponent *)
@@ -336,7 +336,7 @@ void FBspVertexStream::GetRawStreamData(void * *,int)
 
 int FBspVertexStream::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 20);
 }
 
 int FBspVertexStream::GetSize()
@@ -350,7 +350,7 @@ void FBspVertexStream::GetStreamData(void *)
 
 int FBspVertexStream::GetStride()
 {
-	return 0;
+	return 0x28;
 }
 
 // --- FCanvasUtil ---
@@ -394,7 +394,7 @@ void FCanvasUtil::GetRawStreamData(void * *,int)
 
 int FCanvasUtil::GetRevision()
 {
-	return 0;
+	return 1;
 }
 
 int FCanvasUtil::GetSize()
@@ -408,7 +408,7 @@ void FCanvasUtil::GetStreamData(void *)
 
 int FCanvasUtil::GetStride()
 {
-	return 0;
+	return 0x18;
 }
 
 // --- FLevelSceneNode ---
@@ -423,7 +423,7 @@ int FLevelSceneNode::FilterActor(AActor *)
 
 FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 {
-	return NULL;
+	return this;
 }
 
 // --- FLightMap ---
@@ -439,17 +439,17 @@ int FLightMap::GetFirstMip()
 
 ETextureFormat FLightMap::GetFormat()
 {
-	return TEXF_P8;
+	return TEXF_BCRGB8;
 }
 
 int FLightMap::GetHeight()
 {
-	return 0;
+	return *(INT*)(Pad + 28);
 }
 
 int FLightMap::GetNumMips()
 {
-	return 0;
+	return 1;
 }
 
 void * FLightMap::GetRawTextureData(int)
@@ -459,7 +459,7 @@ void * FLightMap::GetRawTextureData(int)
 
 int FLightMap::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 32);
 }
 
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
@@ -468,7 +468,7 @@ void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 
 ETexClampMode FLightMap::GetUClamp()
 {
-	return TC_Wrap;
+	return TC_Clamp;
 }
 
 UTexture * FLightMap::GetUTexture()
@@ -478,18 +478,18 @@ UTexture * FLightMap::GetUTexture()
 
 ETexClampMode FLightMap::GetVClamp()
 {
-	return TC_Wrap;
+	return TC_Clamp;
 }
 
 int FLightMap::GetWidth()
 {
-	return 0;
+	return *(INT*)(Pad + 24);
 }
 
 // --- FLightMapTexture ---
 unsigned __int64 FLightMapTexture::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 92);
 }
 
 FTexture * FLightMapTexture::GetChild(int,int *,int *)
@@ -504,27 +504,28 @@ int FLightMapTexture::GetFirstMip()
 
 ETextureFormat FLightMapTexture::GetFormat()
 {
-	return TEXF_P8;
+	return TEXF_BCRGB8;
 }
 
 int FLightMapTexture::GetHeight()
 {
-	return 0;
+	return 0x200;
 }
 
 int FLightMapTexture::GetNumChildren()
 {
-	return 0;
+	// TArray at this+8; ArrayNum is 4 bytes into TArray
+	return *(INT*)(Pad + 8);
 }
 
 int FLightMapTexture::GetNumMips()
 {
-	return 0;
+	return 1;
 }
 
 int FLightMapTexture::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 100);
 }
 
 ETexClampMode FLightMapTexture::GetUClamp()
@@ -539,7 +540,7 @@ ETexClampMode FLightMapTexture::GetVClamp()
 
 int FLightMapTexture::GetWidth()
 {
-	return 0;
+	return 0x200;
 }
 
 // --- FLineBatcher ---
@@ -577,7 +578,7 @@ void FLineBatcher::Flush(DWORD)
 
 unsigned __int64 FLineBatcher::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 12);
 }
 
 int FLineBatcher::GetComponents(FVertexComponent *)
@@ -591,7 +592,7 @@ void FLineBatcher::GetRawStreamData(void * *,int)
 
 int FLineBatcher::GetRevision()
 {
-	return 0;
+	return 1;
 }
 
 int FLineBatcher::GetSize()
@@ -611,7 +612,7 @@ int FLineBatcher::GetStride()
 // --- FRaw32BitIndexBuffer ---
 unsigned __int64 FRaw32BitIndexBuffer::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 12);
 }
 
 void FRaw32BitIndexBuffer::GetContents(void *)
@@ -620,12 +621,12 @@ void FRaw32BitIndexBuffer::GetContents(void *)
 
 int FRaw32BitIndexBuffer::GetIndexSize()
 {
-	return 0;
+	return 4;
 }
 
 int FRaw32BitIndexBuffer::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 20);
 }
 
 int FRaw32BitIndexBuffer::GetSize()
@@ -636,7 +637,7 @@ int FRaw32BitIndexBuffer::GetSize()
 // --- FRawColorStream ---
 unsigned __int64 FRawColorStream::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 12);
 }
 
 int FRawColorStream::GetComponents(FVertexComponent *)
@@ -650,7 +651,7 @@ void FRawColorStream::GetRawStreamData(void * *,int)
 
 int FRawColorStream::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 20);
 }
 
 int FRawColorStream::GetSize()
@@ -664,7 +665,7 @@ void FRawColorStream::GetStreamData(void *)
 
 int FRawColorStream::GetStride()
 {
-	return 0;
+	return 4;
 }
 
 // --- FRawIndexBuffer ---
@@ -674,7 +675,7 @@ void FRawIndexBuffer::CacheOptimize()
 
 unsigned __int64 FRawIndexBuffer::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 12);
 }
 
 void FRawIndexBuffer::GetContents(void *)
@@ -683,12 +684,12 @@ void FRawIndexBuffer::GetContents(void *)
 
 int FRawIndexBuffer::GetIndexSize()
 {
-	return 0;
+	return 2;
 }
 
 int FRawIndexBuffer::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 20);
 }
 
 int FRawIndexBuffer::GetSize()
@@ -699,7 +700,7 @@ int FRawIndexBuffer::GetSize()
 // --- FSkinVertexStream ---
 unsigned __int64 FSkinVertexStream::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 8);
 }
 
 int FSkinVertexStream::GetComponents(FVertexComponent *)
@@ -713,7 +714,7 @@ void FSkinVertexStream::GetRawStreamData(void * *,int)
 
 int FSkinVertexStream::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 16);
 }
 
 int FSkinVertexStream::GetSize()
@@ -727,13 +728,13 @@ void FSkinVertexStream::GetStreamData(void *)
 
 int FSkinVertexStream::GetStride()
 {
-	return 0;
+	return 0x20;
 }
 
 // --- FStaticLightMapTexture ---
 unsigned __int64 FStaticLightMapTexture::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 60);
 }
 
 int FStaticLightMapTexture::GetFirstMip()
@@ -743,17 +744,17 @@ int FStaticLightMapTexture::GetFirstMip()
 
 ETextureFormat FStaticLightMapTexture::GetFormat()
 {
-	return TEXF_P8;
+	return (ETextureFormat)Pad[48];
 }
 
 int FStaticLightMapTexture::GetHeight()
 {
-	return 0;
+	return *(INT*)(Pad + 56);
 }
 
 int FStaticLightMapTexture::GetNumMips()
 {
-	return 0;
+	return 2;
 }
 
 void * FStaticLightMapTexture::GetRawTextureData(int)
@@ -763,7 +764,7 @@ void * FStaticLightMapTexture::GetRawTextureData(int)
 
 int FStaticLightMapTexture::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 68);
 }
 
 void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
@@ -787,13 +788,11 @@ ETexClampMode FStaticLightMapTexture::GetVClamp()
 
 int FStaticLightMapTexture::GetWidth()
 {
-	return 0;
+	return *(INT*)(Pad + 52);
 }
-
-// --- FStaticMeshUVStream ---
 unsigned __int64 FStaticMeshUVStream::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 16);
 }
 
 int FStaticMeshUVStream::GetComponents(FVertexComponent *)
@@ -807,7 +806,7 @@ void FStaticMeshUVStream::GetRawStreamData(void * *,int)
 
 int FStaticMeshUVStream::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 24);
 }
 
 int FStaticMeshUVStream::GetSize()
@@ -821,13 +820,11 @@ void FStaticMeshUVStream::GetStreamData(void *)
 
 int FStaticMeshUVStream::GetStride()
 {
-	return 0;
+	return 8;
 }
-
-// --- FStaticMeshVertexStream ---
 unsigned __int64 FStaticMeshVertexStream::GetCacheId()
 {
-	return 0;
+	return *(QWORD*)(Pad + 12);
 }
 
 int FStaticMeshVertexStream::GetComponents(FVertexComponent *)
@@ -841,7 +838,7 @@ void FStaticMeshVertexStream::GetRawStreamData(void * *,int)
 
 int FStaticMeshVertexStream::GetRevision()
 {
-	return 0;
+	return *(INT*)(Pad + 20);
 }
 
 int FStaticMeshVertexStream::GetSize()
@@ -855,7 +852,7 @@ void FStaticMeshVertexStream::GetStreamData(void *)
 
 int FStaticMeshVertexStream::GetStride()
 {
-	return 0;
+	return 0x18;
 }
 
 // --- FStaticTexture ---
@@ -2593,9 +2590,11 @@ void APlayerStart::addReachSpecs(APawn *,int)
 }
 
 // --- AProjector ---
-int AProjector::ShouldTrace(AActor *,DWORD)
+int AProjector::ShouldTrace(AActor * Other, DWORD TraceFlags)
 {
-	return 0;
+	if (TraceFlags & 0x4000)
+		return 1;
+	return AActor::ShouldTrace(Other, TraceFlags);
 }
 
 void AProjector::TickSpecial(float)

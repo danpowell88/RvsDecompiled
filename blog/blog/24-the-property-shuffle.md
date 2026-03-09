@@ -164,7 +164,7 @@ INT AR6Door::PrunePaths()
 }
 ```
 
-This is Ravenshield's door-specific path pruning. For each pair of reachspecs in a door's path list, it checks whether one is "contained within" (operator<=) another. If so, and if the weaker spec has an alternate route, the stronger spec gets pruned. The `m_CorrespondingDoor` check ensures the door's own connection never gets pruned — you always need to be able to walk through the door itself.
+This is Ravenshield's door-specific path pruning. For each pair of reachspecs in a door's path list, it checks whether one is "contained within" using `operator<=` against another. If so, and if the weaker spec has an alternate route, the stronger spec gets pruned. The `m_CorrespondingDoor` check ensures the door's own connection never gets pruned — you always need to be able to walk through the door itself.
 
 ## The Remaining Frontier
 
