@@ -3413,6 +3413,39 @@ class ENGINE_API AZoneInfo : public AInfo
 {
 public:
 	DECLARE_CLASS(AZoneInfo,AInfo,0|CLASS_NativeReplication,Engine)
+
+	// Script-defined properties (offsets verified from SDK + Ghidra)
+	BYTE AmbientBrightness;                  // 0x394
+	BYTE AmbientHue;                         // 0x395
+	BYTE AmbientSaturation;                  // 0x396
+	BYTE m_SoundZone;                        // 0x397
+	BITFIELD bFogZone : 1;                   // 0x398
+	BITFIELD bTerrainZone : 1;
+	BITFIELD bDistanceFog : 1;
+	BITFIELD bClearToFogColor : 1;
+	BITFIELD m_bInDoor : 1;
+	BITFIELD m_bAlreadyPlayMusic : 1;
+	BITFIELD m_bAlternateEmittersActive : 1;
+	FLOAT DistanceFogStart;                  // 0x39C
+	FLOAT DistanceFogEnd;                    // 0x3A0
+	FLOAT TexUPanSpeed;                      // 0x3A4
+	FLOAT TexVPanSpeed;                      // 0x3A8
+	class ASkyZoneInfo* SkyZone;             // 0x3AC
+	class UTexture* EnvironmentMap;          // 0x3B0
+	class UI3DL2Listener* ZoneEffect;        // 0x3B4
+	class USound* m_SinglePlayerMusic;       // 0x3B8
+	FName ZoneTag;                           // 0x3BC
+	TArray<class ATerrainInfo*> Terrains;    // 0x3C0
+	TArray<class USound*> m_StartingSounds;  // 0x3CC
+	TArray<class USound*> m_EnterSounds;     // 0x3D8
+	TArray<class USound*> m_ExitSounds;      // 0x3E4
+	TArray<class AEmitter*> m_AlternateWeatherEmitters; // 0x3F0
+	FColor DistanceFogColor;                 // 0x3FC
+	FVector m_vBoundLocation;                // 0x400
+	FVector m_vBoundNormal;                  // 0x40C
+	FVector m_vBoundScale;                   // 0x418
+	// AZoneInfo total size: 0x424
+
 	DECLARE_FUNCTION(execZoneActors)
 	// Event thunks
 	void eventActorEntered(class AActor*);
@@ -3425,6 +3458,93 @@ class ENGINE_API ALevelInfo : public AZoneInfo
 {
 public:
 	DECLARE_CLASS(ALevelInfo,AZoneInfo,0|CLASS_Config|CLASS_NativeReplication,Engine)
+
+	// Script-defined properties (offsets verified from SDK + Ghidra)
+	BYTE PhysicsDetailLevel;                        // 0x424
+	BYTE NetMode;                                   // 0x425
+	BYTE m_eTerroristVoices;                        // 0x426
+	BYTE m_eHostageVoices;                          // 0x427
+	INT m_iCoughTimes;                              // 0x428
+	INT m_iNbOfFreeBackupToSpawn;                   // 0x42C
+	INT m_iNbOfFBToSpawnBasedOnNbPlayers;           // 0x430
+	INT MaxRagdolls;                                // 0x434
+	INT HubStackLevel;                              // 0x438
+	INT R6PlanningMaxLevel;                         // 0x43C
+	INT R6PlanningMinLevel;                         // 0x440
+	INT m_iMotionBlurIntensity;                     // 0x444
+	INT m_iLimitedSFXCount;                         // 0x448
+	INT iPBEnabled;                                 // 0x44C
+	BITFIELD m_bShowFloppy : 1;                     // 0x450
+	BITFIELD m_bIsClassicMission : 1;
+	BITFIELD bKStaticFriction : 1;
+	BITFIELD bKNoInit : 1;
+	BITFIELD bLonePlayer : 1;
+	BITFIELD bBegunPlay : 1;
+	BITFIELD bPlayersOnly : 1;
+	BITFIELD bHighDetailMode : 1;
+	BITFIELD bDropDetail : 1;
+	BITFIELD bAggressiveLOD : 1;
+	BITFIELD bStartup : 1;
+	BITFIELD bPathsRebuilt : 1;
+	BITFIELD m_bInGamePlanningActive : 1;
+	BITFIELD m_bInGamePlanningZoomingIn : 1;
+	BITFIELD m_bInGamePlanningZoomingOut : 1;
+	BITFIELD m_bGameTypesInitialized : 1;
+	BITFIELD bNeverPrecache : 1;
+	BITFIELD m_bLogBandWidth : 1;
+	BITFIELD bNextItems : 1;
+	BITFIELD m_bUseDefaultMoralityRules : 1;
+	BITFIELD m_bShowDebugLine : 1;
+	BITFIELD m_bShowDebugLights : 1;
+	BITFIELD m_bShowDebugLODs : 1;
+	BITFIELD m_bShowOnlyTransparentSM : 1;
+	BITFIELD m_bNightVisionActive : 1;
+	BITFIELD m_bHeatVisionActive : 1;
+	BITFIELD m_bScopeVisionActive : 1;
+	BITFIELD m_bAllow3DRendering : 1;
+	BITFIELD m_bSkipMotionBlur : 1;
+	BITFIELD m_bPlaySound : 1;
+	BITFIELD m_bCanStartStartingSound : 1;
+	BITFIELD m_bSoundFadeFinish : 1;
+	BITFIELD m_bIsResettingLevel : 1;               // 0x454
+	BITFIELD m_bPBSvRunning : 1;
+	BITFIELD m_bHeartBeatOn : 1;
+	FLOAT TimeDilation;                             // 0x458
+	FLOAT TimeSeconds;                              // 0x45C
+	FLOAT PauseDelay;                               // 0x460
+	FLOAT m_fCompteurFrameDetection;                // 0x464
+	FLOAT m_fTempsDetection;                        // 0x468
+	FLOAT m_fClignoteTime;                          // 0x46C
+	FLOAT m_fOxygeneTopLevel;                       // 0x470
+	FLOAT m_iCoughSeuil;                            // 0x474
+	FLOAT m_fOxygeneStepDecrease;                   // 0x478
+	FLOAT KarmaTimeScale;                           // 0x47C
+	FLOAT RagdollTimeScale;                         // 0x480
+	FLOAT KarmaGravScale;                           // 0x484
+	FLOAT m_fInGamePlanningZoomDistance;             // 0x488
+	FLOAT PlayerDoppler;                            // 0x48C
+	FLOAT Brightness;                               // 0x490
+	FLOAT m_fRainbowSkillMultiplier;                // 0x494
+	FLOAT m_fTerroSkillMultiplier;                  // 0x498
+	FLOAT NextSwitchCountdown;                      // 0x49C
+	FLOAT m_fTimeLimit;                             // 0x4A0
+	FLOAT m_fEndGamePauseTime;                      // 0x4A4
+	FLOAT m_fDbgNavPointDistance;                    // 0x4A8
+	FLOAT m_fDistanceHeartBeatVisible;              // 0x4AC
+	class APlayerReplicationInfo* Pauser;            // 0x4B0
+	class ULevelSummary* Summary;                    // 0x4B4
+	class UTexture* Screenshot;                      // 0x4B8
+	class UTexture* DefaultTexture;                  // 0x4BC
+	class UTexture* WireframeTexture;                // 0x4C0
+	class UTexture* WhiteSquareTexture;              // 0x4C4
+	class UTexture* LargeVertex;                     // 0x4C8
+	class AGameInfo* Game;                           // 0x4CC
+	class ANavigationPoint* NavigationPointList;     // 0x4D0
+	class AController* ControllerList;               // 0x4D4
+	class APhysicsVolume* PhysicsVolumeList;         // 0x4D8
+	class AR6ActionSpot* m_ActionSpotList;           // 0x4DC
+	// Remaining fields continue after 0x4E0 (skins, meshes, sounds, etc.)
+
 	DECLARE_FUNCTION(execGetAddressURL)
 	DECLARE_FUNCTION(execGetLocalURL)
 	DECLARE_FUNCTION(execGetMapNameLocalisation)
@@ -6343,6 +6463,18 @@ class ENGINE_API AR6ActionSpot : public AActor
 {
 public:
 	DECLARE_CLASS(AR6ActionSpot,AActor,0,Engine)
+
+	// Script-defined properties (offsets verified from SDK + Ghidra)
+	BYTE m_eCover;                                  // 0x394
+	BYTE m_eFire;                                   // 0x395
+	BYTE _pad396[2];                                // 0x396 alignment padding
+	INT m_iLastInvestigateID;                       // 0x398
+	BITFIELD m_bValidTarget : 1;                    // 0x39C
+	BITFIELD m_bInvestigate : 1;
+	class ANavigationPoint* m_Anchor;               // 0x3A0
+	class APawn* m_pCurrentUser;                    // 0x3A4
+	class AR6ActionSpot* m_NextSpot;                // 0x3A8
+
 	// Auto-generated method declarations
 	virtual void RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *);
 	virtual void CheckForErrors();

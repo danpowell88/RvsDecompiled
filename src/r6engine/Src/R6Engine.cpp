@@ -8,6 +8,9 @@
 
 #include "R6EnginePrivate.h"
 
+// External engine globals
+extern ENGINE_API UEngine* g_pEngine;
+
 /*-----------------------------------------------------------------------------
 	Package.
 -----------------------------------------------------------------------------*/
@@ -279,6 +282,13 @@ INT AR6AIController::CanWalkTo(FVector, INT)
 
 void AR6AIController::ClearActionSpot()
 {
+	guard(AR6AIController::ClearActionSpot);
+	Pawn->clearPaths();
+	for( AR6ActionSpot* Spot = Level->m_ActionSpotList; Spot; Spot = Spot->m_NextSpot )
+	{
+		Spot->m_bValidTarget = 0;
+	}
+	unguard;
 }
 
 AR6ActionSpot * AR6AIController::FindNearestActionSpot(FLOAT, FVector, INT (CDECL*)(AR6Pawn *, AR6ActionSpot *, struct STActionSpotCheck &), struct STActionSpotCheck &)
@@ -1073,13 +1083,61 @@ FVector AR6DeploymentZone::FindSpawningPoint(FRotator *, INT *, enum EStance *, 
 
 void AR6DeploymentZone::FirstInit()
 {
+	guard(AR6DeploymentZone::FirstInit);
+
+	// Get the game type string from Level->Game->m_szGameTypeFlag (offset 0x4B0)
+	FString GameType = *(FString*)((BYTE*)Level->Game + 0x4B0);
+
+	if (IsAvailableInGameType(GameType))
+	{
+		if (!m_bAlreadyInitialized)
+		{
+			CheckForErrors(false);
+
+			if (!m_bAlreadyInitialized)
+			{
+				// Convert individual chances to cumulative sums
+				INT TerrorCumulative = 0;
+				INT HostageCumulative = 0;
+				for (INT i = 0; i < 5; i++)
+				{
+					TerrorCumulative += m_Template[i].m_iChance;
+					m_Template[i].m_iChance = TerrorCumulative;
+
+					HostageCumulative += m_HostageTemplates[i].m_iChance;
+					m_HostageTemplates[i].m_iChance = HostageCumulative;
+				}
+			}
+		}
+
+		// Spawn terrorists
+		INT NumTerrorists = GetNbOfTerroristToSpawn();
+		for (INT i = 0; i < NumTerrorists; i++)
+		{
+			SpawnATerrorist();
+		}
+
+		// Spawn hostages: random count in [m_iMinHostage, m_iMaxHostage]
+		INT NumHostages = m_iMinHostage;
+		if (m_iMinHostage < m_iMaxHostage)
+		{
+			NumHostages = m_iMinHostage + appRand() % ((m_iMaxHostage - m_iMinHostage) + 1);
+		}
+		for (INT i = 0; i < NumHostages; i++)
+		{
+			SpawnAHostage();
+		}
+
+		m_bAlreadyInitialized = 1;
+	}
+
+	unguard;
 }
 
 INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 {
 	// Check if game type overrides terrorist count
-	// Level + 0x4CC is the Game pointer; + 0x4B0 is the game type FString on that object
-	FString& GameType = *(FString*)(*(BYTE**)((BYTE*)Level + 0x4CC) + 0x4B0);
+	FString& GameType = *(FString*)((BYTE*)Level->Game + 0x4B0);
 	if (Level->eventGameTypeUseNbOfTerroristToSpawn(GameType))
 		return 0;
 
@@ -1671,7 +1729,7 @@ DWORD AR6Pawn::CheckSeePawn(AR6Pawn *, FVector &, INT)
 
 FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT TargetHeight, FLOAT OtherHeight)
 {
-	FLOAT Result = appFabs((CollisionHeight - TargetHeight) / (TargetHeight - OtherHeight));
+	FLOAT Result = Abs((CollisionHeight - TargetHeight) / (TargetHeight - OtherHeight));
 	if (Result < 0.0f)
 		return 0.0f;
 	if (Result > 1.0f)
@@ -1761,7 +1819,7 @@ BYTE AR6Pawn::GetCurrentMaterial()
 
 void AR6Pawn::GetDefaultHeightAndRadius(FLOAT& OutHeight, FLOAT& OutCrouchHeight, FLOAT& OutRadius)
 {
-	AActor* Default = GetClass()->GetDefaultObject();
+	AActor* Default = (AActor*)GetClass()->GetDefaultObject();
 	OutHeight = Default->CollisionHeight;
 	OutRadius = Default->CollisionRadius;
 	OutCrouchHeight = ((APawn*)Default)->CrouchHeight;
@@ -1869,7 +1927,7 @@ INT AR6Pawn::IsCrawling()
 {
 	if (CollisionHeight == m_fProneHeight)
 	{
-		AActor* Default = GetClass()->GetDefaultObject();
+		AActor* Default = (AActor*)GetClass()->GetDefaultObject();
 		if (CollisionHeight < Default->CollisionHeight)
 			return 1;
 	}
@@ -2970,7 +3028,7 @@ void AR6Rainbow::UpdateAiming()
 	{
 		m_u8CurrentPitch = m_u8DesiredPitch;
 		m_u8CurrentYaw = desiredYaw;
-		PawnLook((INT)m_u8DesiredPitch << 8, (INT)desiredYaw << 8, 0, 1, 0);
+		PawnLook(FRotator((INT)m_u8DesiredPitch << 8, (INT)desiredYaw << 8, 0), 1, 0);
 	}
 
 	unguard;
@@ -3326,6 +3384,20 @@ void AR6SoundReplicationInfo::PreNetReceive()
 
 void AR6SoundReplicationInfo::StopWeaponSound()
 {
+	guard(AR6SoundReplicationInfo::StopWeaponSound);
+
+	if (m_PawnRepInfo)
+	{
+		// Set bit 0x2 on PawnRepInfo bitfield at offset 0x398
+		*(DWORD*)((BYTE*)m_PawnRepInfo + 0x398) |= 2;
+
+		if (m_LastPlayedWeaponSound == 6)
+		{
+			PlayWeaponSound((enum EWeaponSound)10, m_CurrentWeapon);
+		}
+	}
+
+	unguard;
 }
 
 void AR6SoundReplicationInfo::TickSpecial(FLOAT DeltaTime)
