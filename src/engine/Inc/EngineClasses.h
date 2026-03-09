@@ -1035,7 +1035,7 @@ private:
 class ENGINE_API FCollisionOctree : public FCollisionHashBase
 {
 public:
-	BYTE Pad[256];
+	BYTE Pad[272]; // 0x110 bytes: Ghidra operator= copies offsets 0x04-0x113
 	FCollisionOctree();
 	FCollisionOctree(const FCollisionOctree&);
 	virtual ~FCollisionOctree();

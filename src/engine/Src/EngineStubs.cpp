@@ -6602,13 +6602,19 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * p0, ULevel * p1, ASceneManag
 ASceneManager * FMatineeTools::SetCurrent(UEngine * p0, ULevel * p1, FString p2) { return NULL; }
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
-ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & p0) { static ECLipSynchData dummy; return dummy; }
+ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
+	appMemcpy(this, &Other, 24); // 6 dwords, shared with FCanvasVertex and FStaticMeshVertex
+	return *this;
+}
 
 // ??4FCollisionHash@@QAEAAV0@ABV0@@Z
 FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) { static FCollisionHash dummy; return dummy; }
 
 // ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
-FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & p0) { static FCollisionOctree dummy; return dummy; }
+FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & Other) {
+	appMemcpy(Pad, Other.Pad, sizeof(Pad)); // 272 bytes, skip vtable at offset 0
+	return *this;
+}
 
 // ??4FOctreeNode@@QAEAAV0@ABV0@@Z
 FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) { static FOctreeNode dummy; return dummy; }
