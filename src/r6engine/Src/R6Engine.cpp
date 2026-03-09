@@ -927,6 +927,21 @@ FVector AR6DZoneRandomPoints::FindSpawningPoint(FRotator * pRotation, INT * pGro
 
 void AR6DZoneRandomPoints::FirstInit()
 {
+	guard(AR6DZoneRandomPoints::FirstInit);
+	m_aTempHighPriorityNode.Empty();
+	m_aTempNode.Empty();
+	for (INT i = 0; i < m_aNode.Num(); i++)
+	{
+		AR6DZoneRandomPointNode* Node = m_aNode(i);
+		if (Node->m_bHighPriority)
+			m_aTempHighPriorityNode.AddItem(Node);
+		else
+			m_aTempNode.AddItem(Node);
+	}
+	m_bInInit = 1;
+	AR6DeploymentZone::FirstInit();
+	m_bInInit = 0;
+	unguard;
 }
 
 INT AR6DZoneRandomPoints::GetNbOfTerroristToSpawn()
@@ -1345,9 +1360,20 @@ void AR6IORotatingDoor::AddMyMarker(AActor *)
 {
 }
 
-INT AR6IORotatingDoor::DoorOpenTowards(FVector)
+INT AR6IORotatingDoor::DoorOpenTowards(FVector Point)
 {
-	return 0;
+	FVector Dir = Rotation.Vector();
+	m_vCenterOfDoor = Location - Dir * 64.0f;
+	FVector Up(0, 0, 1);
+	m_vNormal = Rotation.Vector() ^ Up;
+
+	FLOAT Dot = (m_vCenterOfDoor.X - Point.X) * m_vNormal.X +
+	            (m_vCenterOfDoor.Y - Point.Y) * m_vNormal.Y +
+	            (m_vCenterOfDoor.Z - Point.Z) * m_vNormal.Z;
+
+	if (Dot > 0.0f)
+		return !m_bIsOpeningClockWise;
+	return m_bIsOpeningClockWise;
 }
 
 INT AR6IORotatingDoor::IsMovingBrush() const
