@@ -483,19 +483,51 @@ INT AR6ClimbableObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 
 void AR6ClimbablePoint::ClearPaths()
 {
+	guard(AR6ClimbablePoint::ClearPaths);
+	ANavigationPoint::ClearPaths();
+	if (m_climbableObj)
+	{
+		if (this == m_climbableObj->m_insideClimbablePoint)
+			m_climbableObj->m_insideClimbablePoint = NULL;
+		else if (this == m_climbableObj->m_climbablePoint)
+			m_climbableObj->m_climbablePoint = NULL;
+	}
+	m_climbableObj = NULL;
+	unguard;
 }
 
 void AR6ClimbablePoint::InitForPathFinding()
 {
+	guard(AR6ClimbablePoint::InitForPathFinding);
+	if (!m_climbableObj)
+	{
+		GWarn->Logf(TEXT("R6ClimbablePoint doesn't have R6ClimbableObject"));
+		return;
+	}
+	if (this == m_climbableObj->m_insideClimbablePoint)
+		m_connectedClimbablePoint = m_climbableObj->m_climbablePoint;
+	else if (this == m_climbableObj->m_climbablePoint)
+		m_connectedClimbablePoint = m_climbableObj->m_insideClimbablePoint;
+	unguard;
 }
 
-INT AR6ClimbablePoint::ProscribedPathTo(ANavigationPoint *)
+INT AR6ClimbablePoint::ProscribedPathTo(ANavigationPoint* Nav)
 {
-	return 0;
+	guard(AR6ClimbablePoint::ProscribedPathTo);
+	if (Nav && Nav->IsA(AR6ClimbablePoint::StaticClass()))
+	{
+		if (m_climbableObj == ((AR6ClimbablePoint*)Nav)->m_climbableObj)
+			return 1;
+	}
+	return ANavigationPoint::ProscribedPathTo(Nav);
+	unguard;
 }
 
-void AR6ClimbablePoint::addReachSpecs(APawn *, INT)
+void AR6ClimbablePoint::addReachSpecs(APawn* Other, INT bOnlyChanged)
 {
+	guard(AR6ClimbablePoint::addReachSpecs);
+	ANavigationPoint::addReachSpecs(Other, bOnlyChanged);
+	unguard;
 }
 
 // --- AR6CoverSpot ---
@@ -533,6 +565,7 @@ FVector AR6DZonePath::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *
 	return FVector(0,0,0);
 }
 
+// Verified from Ghidra: shares function body at 0x193c0 with HurtByVolume — returns 0.
 INT AR6DZonePath::IsPointInZone(FVector const &)
 {
 	return 0;
@@ -552,6 +585,11 @@ void AR6DZonePath::SpawnANewNode(FVector)
 
 void AR6DZonePath::Spawned()
 {
+	guard(AR6DZonePath::Spawned);
+	AR6DeploymentZone::Spawned();
+	SpawnANewNode(FVector(Location.X, Location.Y + 20.0f, Location.Z));
+	SpawnANewNode(FVector(Location.X, Location.Y + 100.0f, Location.Z));
+	unguard;
 }
 
 // --- AR6DZonePathNode ---
@@ -662,6 +700,7 @@ INT AR6DZoneRandomPoints::GetNbOfTerroristToSpawn()
 	return 0;
 }
 
+// Verified from Ghidra: shares function body at 0x193c0 with HurtByVolume — returns 0.
 INT AR6DZoneRandomPoints::IsPointInZone(FVector const &)
 {
 	return 0;
@@ -681,6 +720,10 @@ void AR6DZoneRandomPoints::SpawnANewNode(FVector)
 
 void AR6DZoneRandomPoints::Spawned()
 {
+	guard(AR6DZoneRandomPoints::Spawned);
+	AR6DeploymentZone::Spawned();
+	SpawnANewNode(FVector(Location.X, Location.Y + 100.0f, Location.Z));
+	unguard;
 }
 
 // --- AR6DeploymentZone ---
@@ -759,6 +802,14 @@ void AR6DeploymentZone::SpawnATerrorist()
 
 void AR6DeploymentZone::Spawned()
 {
+	guard(AR6DeploymentZone::Spawned);
+	m_Template[0].m_szName = TEXT("Normal");
+	m_Template[0].m_iChance = 100;
+	m_HostageTemplates[0].m_szName = TEXT("NormalHostage");
+	m_HostageTemplates[0].m_iChance = 100;
+	m_HostageTemplates[1].m_szName = TEXT("NormalCivilian");
+	m_HostageTemplates[1].m_iChance = 0;
+	unguard;
 }
 
 void AR6DeploymentZone::execAddHostage(FFrame& Stack, RESULT_DECL)
@@ -1387,6 +1438,7 @@ FRotator AR6Pawn::GetViewRotation()
 	return FRotator(0,0,0);
 }
 
+// Verified from Ghidra: function at 0x193c0 just returns 0.
 INT AR6Pawn::HurtByVolume(AActor *)
 {
 	return 0;
@@ -2596,8 +2648,9 @@ void AR6StairOrientation::PostScriptDestroyed()
 	unguard;
 }
 
-void AR6StairOrientation::linkWithStair(AR6StairVolume *)
+void AR6StairOrientation::linkWithStair(AR6StairVolume* StairVolume)
 {
+	m_pStairVolume = StairVolume;
 }
 
 // --- AR6StairVolume ---
