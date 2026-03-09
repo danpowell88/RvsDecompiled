@@ -3554,7 +3554,9 @@ FLOAT UR6SubActionAnimSequence::GetCurAnimPct(FLOAT Time)
 
 FString UR6SubActionAnimSequence::GetStatString()
 {
-	return TEXT("");
+	FString Result = UMatSubAction::GetStatString();
+	Result += TEXT("AnimSequence\n");
+	return Result;
 }
 
 FLOAT UR6SubActionAnimSequence::GetTotalLength()
@@ -3597,6 +3599,26 @@ FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim *, FLOAT)
 
 void UR6SubActionAnimSequence::PreBeginPreview()
 {
+	if (m_Sequences.Num() != 0)
+	{
+		m_CurSequence = m_Sequences(0);
+		FLOAT TotalLen = GetTotalLength();
+		// Duration field at UMatSubAction offset 0x34
+		*(FLOAT*)((BYTE*)this + 0x34) = TotalLen;
+		FLOAT Accumulated = 0.f;
+		FLOAT Pct = 0.f;
+		for (INT i = 0; i < m_Sequences.Num(); i++)
+		{
+			UR6PlayAnim* Seq = m_Sequences(i);
+			if (!Seq)
+				break;
+			Seq->m_fBeginPct = Pct;
+			FLOAT Dur = GetAnimDuration(Seq);
+			Accumulated += Dur;
+			Pct = Accumulated / TotalLen;
+			Seq->m_fEndPct = Pct;
+		}
+	}
 }
 
 INT UR6SubActionAnimSequence::Update(FLOAT, ASceneManager *)
@@ -3623,7 +3645,9 @@ void UR6SubActionAnimSequence::eventSequenceFinished()
 
 FString UR6SubActionLookAt::GetStatString()
 {
-	return TEXT("");
+	FString Result = UMatSubAction::GetStatString();
+	Result += TEXT("LookAt\n");
+	return Result;
 }
 
 INT UR6SubActionLookAt::Update(FLOAT DeltaTime, ASceneManager* SceneManager)
