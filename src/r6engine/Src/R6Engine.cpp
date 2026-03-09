@@ -198,6 +198,12 @@ static BYTE GR6Terrorist_OldSpecialAnimValid;
 static BYTE GR6Terrorist_OldHealth;
 static BYTE GR6Terrorist_OldDefCon;
 
+// Statics used by AR6SoundReplicationInfo PreNetReceive/PostNetReceive.
+static BYTE GSoundRepInfo_OldCurrentWeapon;
+static BYTE GSoundRepInfo_OldNewWeaponSound;
+static BYTE GSoundRepInfo_OldNewPawnState;
+static FVector GSoundRepInfo_OldLocation;
+
 // --- AMP2IOKarma ---
 
 void AMP2IOKarma::CheckForErrors()
@@ -2787,6 +2793,15 @@ void AR6SoundReplicationInfo::PostNetReceive()
 
 void AR6SoundReplicationInfo::PreNetReceive()
 {
+	guard(AR6SoundReplicationInfo::PreNetReceive);
+	AActor::PreNetReceive();
+	GSoundRepInfo_OldNewPawnState = m_NewPawnState;
+	GSoundRepInfo_OldLocation.X = m_Location.X;
+	GSoundRepInfo_OldNewWeaponSound = m_NewWeaponSound;
+	GSoundRepInfo_OldLocation.Y = m_Location.Y;
+	GSoundRepInfo_OldLocation.Z = m_Location.Z;
+	GSoundRepInfo_OldCurrentWeapon = m_CurrentWeapon;
+	unguard;
 }
 
 void AR6SoundReplicationInfo::StopWeaponSound()
@@ -2852,6 +2867,11 @@ void AR6StairVolume::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDy
 
 void AR6StairVolume::Spawned()
 {
+	guard(AR6StairVolume::Spawned);
+	m_pStairOrientation = (AR6StairOrientation*)XLevel->SpawnActor(AR6StairOrientation::StaticClass());
+	m_pStairOrientation->m_pStairVolume = this;
+	m_pStairOrientation->bDirectional = 1;
+	unguard;
 }
 
 // --- AR6TeamMemberReplicationInfo ---
