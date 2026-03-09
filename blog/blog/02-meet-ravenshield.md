@@ -1,6 +1,7 @@
 ---
 slug: meet-ravenshield
-title: "Meet Ravenshield: A 2003 Tactical Shooter Built on Unreal"
+title: "02. Meet Ravenshield: A 2003 Tactical Shooter Built on Unreal"
+date: 2025-01-02
 authors: [rvs-team]
 tags: [ravenshield, decompilation]
 ---

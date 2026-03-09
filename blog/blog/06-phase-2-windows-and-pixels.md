@@ -1,6 +1,7 @@
 ---
 slug: phase-2-windows-and-pixels
-title: "Phase 2 — A Window Into The World (and Tidying Up the Source Tree)"
+title: "06. Phase 2 — A Window Into The World (and Tidying Up the Source Tree)"
+date: 2025-01-06
 authors: [rvs-team]
 tags: [decompilation, ravenshield, progress, windrv, directinput, rendering, organisation]
 ---

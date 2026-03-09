@@ -1,7 +1,8 @@
 ---
 slug: ragdoll-physics
-title: "Ragdoll Physics — Rebuilding a Corpse Simulator"
-authors: [default]
+title: "21. Ragdoll Physics — Rebuilding a Corpse Simulator"
+date: 2025-01-21
+authors: [rvs-team]
 tags: [decompilation, physics, ragdoll, game-engine]
 ---
 
@@ -43,17 +44,17 @@ The heart of any physics simulation is its integrator — the code that advances
 
 The formula is deceptively simple:
 
-$$
-\mathbf{x}_{new} = 2\mathbf{x}_{current} - \mathbf{x}_{previous} + \mathbf{a} \cdot \Delta t^2
-$$
+```text
+x_new = 2*x_current - x_previous + a*dt^2
+```
 
 Or equivalently:
 
-$$
-\mathbf{x}_{new} = \mathbf{x}_{current} + (\mathbf{x}_{current} - \mathbf{x}_{previous}) + \mathbf{a} \cdot \Delta t^2
-$$
+```text
+x_new = x_current + (x_current - x_previous) + a*dt^2
+```
 
-The term $(\mathbf{x}_{current} - \mathbf{x}_{previous})$ is an implicit velocity — the engine never stores a velocity vector, it *derives* it from the difference between the current and previous positions. This has a huge advantage: it's inherently stable. Explicit Euler integration (the naïve `velocity += acceleration * dt; position += velocity * dt`) can explode if the timestep is too large. Verlet just... doesn't.
+The term `x_current - x_previous` is an implicit velocity — the engine never stores a velocity vector, it *derives* it from the difference between the current and previous positions. This has a huge advantage: it's inherently stable. Explicit Euler integration (the naïve `velocity += acceleration * dt; position += velocity * dt`) can explode if the timestep is too large. Verlet just... doesn't.
 
 Here's our rebuilt implementation:
 

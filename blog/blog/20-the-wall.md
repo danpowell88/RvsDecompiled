@@ -1,6 +1,7 @@
 ---
 slug: the-wall
-title: "The Wall — When Decompilation Hits Diminishing Returns"
+title: "20. The Wall — When Decompilation Hits Diminishing Returns"
+date: 2025-01-20
 authors: [rvs-team]
 tags: [decompilation, r6engine, ghidra, reverse-engineering, architecture, class-layout]
 ---

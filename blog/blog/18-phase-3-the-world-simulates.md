@@ -1,6 +1,7 @@
 ---
 slug: phase-3-the-world-simulates
-title: "Phase 3 — The World Simulates (316 Stubs, Zero Remaining)"
+title: "18. Phase 3 — The World Simulates (316 Stubs, Zero Remaining)"
+date: 2025-01-18
 authors: [rvs-team]
 tags: [decompilation, ravenshield, progress, unreal-engine, native-functions, actors, animation, physics]
 ---

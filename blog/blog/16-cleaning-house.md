@@ -1,6 +1,7 @@
 ---
 slug: cleaning-house
-title: "Cleaning House — Removing 830 Lines of Debug Scaffolding"
+title: "16. Cleaning House — Removing 830 Lines of Debug Scaffolding"
+date: 2025-01-16
 authors: [rvs-team]
 tags: [decompilation, ravenshield, progress, deep-dive]
 ---

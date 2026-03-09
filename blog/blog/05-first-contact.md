@@ -1,6 +1,7 @@
 ---
 slug: first-contact
-title: "First Contact — What Ghidra Found"
+title: "05. First Contact — What Ghidra Found"
+date: 2025-01-05
 authors: [rvs-team]
 tags: [decompilation, ravenshield, tools]
 ---

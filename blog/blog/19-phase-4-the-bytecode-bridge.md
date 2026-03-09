@@ -1,6 +1,7 @@
 ---
 slug: phase-4-the-bytecode-bridge
-title: "Phase 4: The Bytecode Bridge — Connecting UnrealScript to C++"
+title: "19. Phase 4: The Bytecode Bridge — Connecting UnrealScript to C++"
+date: 2025-01-19
 authors: [danpo]
 tags: [decompilation, r6engine, unrealscript, native-functions, ghidra]
 ---

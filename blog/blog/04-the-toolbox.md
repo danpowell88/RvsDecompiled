@@ -1,6 +1,7 @@
 ---
 slug: the-toolbox
-title: "The Toolbox: Ghidra, CMake, and a 22-Year-Old Compiler"
+title: "04. The Toolbox: Ghidra, CMake, and a 22-Year-Old Compiler"
+date: 2025-01-04
 authors: [rvs-team]
 tags: [tools, decompilation]
 ---

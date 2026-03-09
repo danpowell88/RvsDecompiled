@@ -1,6 +1,7 @@
 ---
 slug: phase-1-self-sufficient-builds
-title: "Phase 1 Complete — Cutting the Last Retail Build Dependencies"
+title: "03. Phase 1 Complete — Cutting the Last Retail Build Dependencies"
+date: 2025-01-03
 authors: [rvs-team]
 tags: [decompilation, ravenshield, progress, build-system]
 ---

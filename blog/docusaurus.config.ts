@@ -38,6 +38,7 @@ const config: Config = {
         },
         blog: {
           showReadingTime: true,
+          sortPosts: 'ascending',
           feedOptions: {
             type: ['rss', 'atom'],
             xslt: true,
