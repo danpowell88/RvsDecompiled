@@ -2840,6 +2840,17 @@ void AR6RagDoll::VerletIntegration(FLOAT)
 
 void AR6Rainbow::UpdateAiming()
 {
+	guard(AR6Rainbow::UpdateAiming);
+
+	BYTE desiredYaw = m_u8DesiredYaw;
+	if (m_u8CurrentYaw != desiredYaw || m_u8CurrentPitch != m_u8DesiredPitch)
+	{
+		m_u8CurrentPitch = m_u8DesiredPitch;
+		m_u8CurrentYaw = desiredYaw;
+		PawnLook((INT)m_u8DesiredPitch << 8, (INT)desiredYaw << 8, 0, 1, 0);
+	}
+
+	unguard;
 }
 
 // --- AR6RainbowAI ---
@@ -2874,8 +2885,82 @@ FVector AR6RainbowAI::GetTeamRightOfDoorPosition(INT, AR6Door *)
 	return FVector(0,0,0);
 }
 
-void AR6RainbowAI::LookAroundRoom(INT)
+void AR6RainbowAI::LookAroundRoom(INT param_1)
 {
+	guard(AR6RainbowAI::LookAroundRoom);
+
+	BYTE uVar2 = 0;
+	BYTE uVar3 = 0;
+
+	if (Enemy != NULL)
+		goto ApplyYaw;
+
+	if (param_1 == 0)
+	{
+		if (m_eCurrentRoomLayout == 0)
+		{
+			if (m_eCoverDirection == 3)
+				goto ApplyYaw;
+		}
+		else
+		{
+			if (m_eCurrentRoomLayout > 2)
+				goto ApplyYaw;
+			switch (m_eCoverDirection)
+			{
+			case 0:
+				uVar2 = 0x15; uVar3 = 0xF1;
+				goto ApplyYaw;
+			case 1:
+				break; // fall through to common assignment
+			case 2:
+				uVar2 = 0xEA; uVar3 = 0x0E;
+				goto ApplyYaw;
+			default:
+				goto ApplyYaw;
+			}
+		}
+		uVar2 = 0xEA;
+		uVar3 = 0x15;
+		goto ApplyYaw;
+	}
+
+	{
+		AR6Pawn* r6pawn = (AR6Pawn*)Pawn;
+		if (r6pawn->m_iID == m_TeamManager->m_iMemberCount - 1)
+		{
+			switch (m_eCurrentRoomLayout)
+			{
+			case 0: uVar2 = 0x15; uVar3 = 0xEA; break;
+			case 1: uVar2 = 0xE0; uVar3 = 0x0E; break;
+			case 2: uVar2 = 0x20; uVar3 = 0xF1; break;
+			case 3: uVar2 = 0x0E; uVar3 = 0xF1; break;
+			}
+		}
+		else
+		{
+			switch (m_eCurrentRoomLayout)
+			{
+			case 0:
+			case 2: uVar2 = 0x0E; uVar3 = 0xEA; break;
+			case 1: uVar2 = 0xF1; uVar3 = 0x15; break;
+			case 3: uVar2 = 0x0E; uVar3 = 0xF1; break;
+			}
+		}
+	}
+
+ApplyYaw:
+	{
+		AR6Rainbow* rainbow = (AR6Rainbow*)Pawn;
+		if (m_iTurn == 0)
+			rainbow->m_u8DesiredYaw = uVar2;
+		else if (m_iTurn != 1)
+			rainbow->m_u8DesiredYaw = 0;
+		else
+			rainbow->m_u8DesiredYaw = uVar3;
+	}
+
+	unguard;
 }
 
 void AR6RainbowAI::UpdateTimers(FLOAT)
@@ -3001,7 +3086,52 @@ void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation)
 
 enum ePawnOrientation AR6RainbowAI::updatePawnOrientation()
 {
-	return (enum ePawnOrientation)0;
+	guard(AR6RainbowAI::updatePawnOrientation);
+
+	AR6Pawn* r6pawn = (AR6Pawn*)Pawn;
+	INT iID = r6pawn->m_iID;
+
+	// Prone pawns always face forward
+	if (r6pawn->m_bIsProne)
+		return PO_Front;
+
+	// Last team member always faces back
+	if (m_eFormation != 0 && iID != 0 && iID == m_TeamManager->m_iMemberCount - 1)
+		return PO_Back;
+
+	switch (m_eFormation)
+	{
+	case 1:
+		if (iID == 1) return r6pawn->m_bIsClimbingStairs ? PO_Front : PO_PeekLeft;
+		if (iID == 2) return r6pawn->m_bIsClimbingStairs ? PO_Front : PO_PeekRight;
+		break;
+	case 2:
+		if (iID == 1) return PO_FrontLeft;
+		if (iID == 2) return PO_Left;
+		break;
+	case 3:
+		if (iID == 1) return PO_FrontRight;
+		if (iID == 2) return PO_Right;
+		break;
+	case 4:
+		if (iID == 1) return PO_FrontLeft;
+		if (iID == 2) return PO_FrontRight;
+		break;
+	case 5:
+		if (iID == 1) return PO_PeekRight;
+		if (iID == 2) return PO_PeekLeft;
+		return PO_Front;
+	default:
+		return PO_Front;
+	}
+
+	// For cases 1-4, member 3 faces back
+	if (iID == 3)
+		return PO_Back;
+
+	return PO_Front;
+
+	unguard;
 }
 
 // --- AR6RainbowTeam ---
