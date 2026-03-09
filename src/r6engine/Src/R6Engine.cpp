@@ -2132,7 +2132,7 @@ void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 void AR6Pawn::execGetMaxRotationOffset(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(INT*)Result = getMaxRotationOffset(0);
+	*(INT*)Result = getMaxRotationOffset((m_bWantsToProne || m_bIsProne) ? 1 : 0);
 }
 
 void AR6Pawn::execGetMovementDirection(FFrame& Stack, RESULT_DECL)
@@ -2258,6 +2258,7 @@ void AR6Pawn::execSetPawnScale(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_FLOAT(fNewScale);
 	P_FINISH;
+	SetDrawScale(fNewScale);
 }
 
 void AR6Pawn::execStartLipSynch(FFrame& Stack, RESULT_DECL)
@@ -2271,6 +2272,8 @@ void AR6Pawn::execStartLipSynch(FFrame& Stack, RESULT_DECL)
 void AR6Pawn::execStopLipSynch(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
+	if (m_hLipSynchData)
+		((ECLipSynchData*)m_hLipSynchData)->m_vStopLipsynch();
 }
 
 void AR6Pawn::execToggleHeatProperties(FFrame& Stack, RESULT_DECL)
