@@ -3267,24 +3267,33 @@ int FKAggregateGeom::GetElementCount()
 }
 
 // --- FKBoxElem ---
-FKBoxElem::FKBoxElem(float)
+FKBoxElem::FKBoxElem(float InSize)
 {
+	// Ghidra: FMatrix::FMatrix() + set all 3 dims to same value
+	X = InSize;
+	Y = InSize;
+	Z = InSize;
 }
 
-FKBoxElem::FKBoxElem(float,float,float)
+FKBoxElem::FKBoxElem(float InX, float InY, float InZ)
 {
+	X = InX;
+	Y = InY;
+	Z = InZ;
 }
 
 FKBoxElem::FKBoxElem()
 {
+	// Ghidra: just calls FMatrix::FMatrix() (default FMatrix ctor is empty)
 }
 
 FKBoxElem::~FKBoxElem()
 {
 }
 
-FKBoxElem& FKBoxElem::operator=(const FKBoxElem&)
+FKBoxElem& FKBoxElem::operator=(const FKBoxElem& Other)
 {
+	appMemcpy( this, &Other, sizeof(FKBoxElem) );
 	return *this;
 }
 
@@ -3307,8 +3316,10 @@ FKConvexElem& FKConvexElem::operator=(const FKConvexElem&)
 }
 
 // --- FKCylinderElem ---
-FKCylinderElem::FKCylinderElem(float,float)
+FKCylinderElem::FKCylinderElem(float InRadius, float InLength)
 {
+	Radius = InRadius;
+	Length = InLength;
 }
 
 FKCylinderElem::FKCylinderElem()
@@ -3319,14 +3330,16 @@ FKCylinderElem::~FKCylinderElem()
 {
 }
 
-FKCylinderElem& FKCylinderElem::operator=(const FKCylinderElem&)
+FKCylinderElem& FKCylinderElem::operator=(const FKCylinderElem& Other)
 {
+	appMemcpy( this, &Other, sizeof(FKCylinderElem) );
 	return *this;
 }
 
 // --- FKSphereElem ---
-FKSphereElem::FKSphereElem(float)
+FKSphereElem::FKSphereElem(float InRadius)
 {
+	Radius = InRadius;
 }
 
 FKSphereElem::FKSphereElem()
@@ -3337,8 +3350,9 @@ FKSphereElem::~FKSphereElem()
 {
 }
 
-FKSphereElem& FKSphereElem::operator=(const FKSphereElem&)
+FKSphereElem& FKSphereElem::operator=(const FKSphereElem& Other)
 {
+	appMemcpy( this, &Other, sizeof(FKSphereElem) );
 	return *this;
 }
 
@@ -3423,7 +3437,9 @@ void FLineBatcher::DrawConvexVolume(FConvexVolume,FColor)
 }
 
 // --- FLineVertex ---
-FLineVertex::FLineVertex(FVector,FColor)
+FLineVertex::FLineVertex(FVector InPoint, FColor InColor)
+:	Point(InPoint)
+,	Color(InColor)
 {
 }
 
@@ -3431,8 +3447,10 @@ FLineVertex::FLineVertex()
 {
 }
 
-FLineVertex& FLineVertex::operator=(const FLineVertex&)
+FLineVertex& FLineVertex::operator=(const FLineVertex& Other)
 {
+	Point = Other.Point;
+	Color = Other.Color;
 	return *this;
 }
 
@@ -3475,8 +3493,9 @@ FMipmapBase::FMipmapBase()
 {
 }
 
-FMipmapBase& FMipmapBase::operator=(const FMipmapBase&)
+FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)
 {
+	appMemcpy( this, &Other, sizeof(FMipmapBase) );
 	return *this;
 }
 
@@ -3775,8 +3794,9 @@ FStaticMeshSection::FStaticMeshSection()
 {
 }
 
-FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection&)
+FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Other)
 {
+	appMemcpy( this, &Other, sizeof(FStaticMeshSection) );
 	return *this;
 }
 
@@ -3817,10 +3837,14 @@ FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream&)
 // --- FStaticMeshVertex ---
 FStaticMeshVertex::FStaticMeshVertex()
 {
+	// Ghidra: constructs two FVectors at offset 0 and 0xC (same as FBspVertex)
+	*(FVector*)&_Data[0] = FVector(0,0,0);
+	*(FVector*)&_Data[12] = FVector(0,0,0);
 }
 
-FStaticMeshVertex& FStaticMeshVertex::operator=(const FStaticMeshVertex&)
+FStaticMeshVertex& FStaticMeshVertex::operator=(const FStaticMeshVertex& Other)
 {
+	appMemcpy( this, &Other, sizeof(FStaticMeshVertex) );
 	return *this;
 }
 

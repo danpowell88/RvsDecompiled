@@ -103,6 +103,10 @@ public:
 
 class ENGINE_API FKBoxElem {
 public:
+	FMatrix TM;    // 0x00 (64 bytes)
+	FLOAT  X;      // 0x40
+	FLOAT  Y;      // 0x44
+	FLOAT  Z;      // 0x48 -- total 76 bytes = 19 dwords
 	FKBoxElem(float);
 	FKBoxElem(float,float,float);
 	FKBoxElem();
@@ -120,6 +124,9 @@ public:
 
 class ENGINE_API FKCylinderElem {
 public:
+	FMatrix TM;      // 0x00 (64 bytes)
+	FLOAT  Radius;   // 0x40
+	FLOAT  Length;   // 0x44 -- total 72 bytes
 	FKCylinderElem(float,float);
 	FKCylinderElem();
 	~FKCylinderElem();
@@ -128,6 +135,8 @@ public:
 
 class ENGINE_API FKSphereElem {
 public:
+	FMatrix TM;      // 0x00 (64 bytes)
+	FLOAT  Radius;   // 0x40 -- total 68 bytes = 17 dwords
 	FKSphereElem(float);
 	FKSphereElem();
 	~FKSphereElem();
@@ -143,6 +152,8 @@ public:
 
 class ENGINE_API FLineVertex {
 public:
+	FVector Point;  // 0x00
+	FColor  Color;  // 0x0C -- total 16 bytes
 	FLineVertex(FVector,FColor);
 	FLineVertex();
 	FLineVertex& operator=(const FLineVertex&);
@@ -159,6 +170,7 @@ struct ENGINE_API FMipmap {
 };
 
 struct ENGINE_API FMipmapBase {
+	BYTE _Data[16]; // 4 dwords, shares operator= with FFontCharacter
 	FMipmapBase(BYTE,BYTE);
 	FMipmapBase();
 	FMipmapBase& operator=(const FMipmapBase&);
@@ -223,6 +235,7 @@ public:
 
 class ENGINE_API FStaticMeshSection {
 public:
+	BYTE _Data[20]; // 5 dwords, shares operator= with FHitCause
 	FStaticMeshSection();
 	FStaticMeshSection& operator=(const FStaticMeshSection&);
 };
@@ -237,6 +250,7 @@ struct ENGINE_API FStaticMeshUV {
 };
 
 struct ENGINE_API FStaticMeshVertex {
+	BYTE _Data[24]; // 6 dwords, shares operator= with FCanvasVertex; Position(FVector)+Normal(FVector)
 	FStaticMeshVertex();
 	FStaticMeshVertex& operator=(const FStaticMeshVertex&);
 };
