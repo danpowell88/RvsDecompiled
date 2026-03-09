@@ -613,12 +613,37 @@ FVector AR6DZonePath::FindClosestPointTo(FVector const &)
 
 FVector AR6DZonePath::FindRandomPointInArea()
 {
-	return FVector(0,0,0);
+	guard(AR6DZonePath::FindRandomPointInArea);
+	if (m_aNode.Num() == 0)
+	{
+		GLog->Logf(TEXT("%s has no nodes"), GetName());
+		return FVector(0,0,0);
+	}
+	INT Index = appRand() % m_aNode.Num();
+	AR6DZonePathNode* Node = m_aNode(Index);
+	FRotator RandRot(0, (appRand() % 0x7FFF) << 1, 0);
+	FLOAT Dist = appFrand() * Node->m_fRadius;
+	FVector Dir = RandRot.Vector();
+	return Node->Location + Dist * Dir;
+	unguard;
 }
 
-FVector AR6DZonePath::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
+FVector AR6DZonePath::FindSpawningPoint(FRotator * pRotation, INT *, enum EStance *, INT *)
 {
-	return FVector(0,0,0);
+	guard(AR6DZonePath::FindSpawningPoint);
+	if (m_aNode.Num() == 0)
+	{
+		GLog->Logf(TEXT("%s has no nodes"), GetName());
+		return FVector(0,0,0);
+	}
+	INT Index = appRand() % m_aNode.Num();
+	AR6DZonePathNode* Node = m_aNode(Index);
+	*pRotation = Node->Rotation;
+	FRotator RandRot(0, (appRand() % 0x7FFF) << 1, 0);
+	FLOAT Dist = appFrand() * Node->m_fRadius;
+	FVector Dir = RandRot.Vector();
+	return Node->Location + Dist * Dir;
+	unguard;
 }
 
 // Verified from Ghidra: shares function body at 0x193c0 with HurtByVolume — returns 0.
@@ -700,9 +725,18 @@ void AR6DZonePathNode::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, F
 
 // --- AR6DZonePoint ---
 
-FVector AR6DZonePoint::FindClosestPointTo(FVector const &)
+FVector AR6DZonePoint::FindClosestPointTo(FVector const & Point)
 {
-	return FVector(0,0,0);
+	FVector Result = Location;
+	if (m_bUseReactionZone)
+	{
+		FLOAT HalfX = m_fReactionZoneX * 0.5f;
+		FLOAT HalfY = m_fReactionZoneY * 0.5f;
+		Result.X = Clamp(Point.X, m_vReactionZoneCenter.X - HalfX, m_vReactionZoneCenter.X + HalfX);
+		Result.Y = Clamp(Point.Y, m_vReactionZoneCenter.Y - HalfY, m_vReactionZoneCenter.Y + HalfY);
+		Result.Z = Point.Z;
+	}
+	return Result;
 }
 
 FVector AR6DZonePoint::FindRandomPointInArea()
@@ -710,13 +744,47 @@ FVector AR6DZonePoint::FindRandomPointInArea()
 	return Location;
 }
 
-FVector AR6DZonePoint::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
+FVector AR6DZonePoint::FindSpawningPoint(FRotator * pRotation, INT *, enum EStance * pStance, INT *)
 {
-	return FVector(0,0,0);
+	*pRotation = Rotation;
+	*pStance = (enum EStance)m_eStance;
+	return FindRandomPointInArea();
 }
 
-INT AR6DZonePoint::IsPointInZone(FVector const &)
+INT AR6DZonePoint::IsPointInZone(FVector const & Point)
 {
+	FLOAT RefX, DeltaY, DeltaZ;
+	if (!m_bUseReactionZone)
+	{
+		RefX = Location.X;
+		DeltaY = Point.Y - Location.Y;
+		DeltaZ = Point.Z - Location.Z;
+	}
+	else
+	{
+		RefX = m_vReactionZoneCenter.X;
+		DeltaY = Point.Y - m_vReactionZoneCenter.Y;
+		DeltaZ = Point.Z - m_vReactionZoneCenter.Z;
+	}
+	FLOAT DeltaX = Point.X - RefX;
+	if (DeltaZ < 0.0f) DeltaZ = -DeltaZ;
+	if (DeltaZ < 100.0f)
+	{
+		if (!m_bUseReactionZone)
+		{
+			if (DeltaX * DeltaX + DeltaY * DeltaY <= 2500.0f)
+				return 1;
+		}
+		else
+		{
+			if (DeltaX < 0.0f) DeltaX = -DeltaX;
+			if (DeltaX > m_fReactionZoneX * 0.5f)
+				return 0;
+			if (DeltaY < 0.0f) DeltaY = -DeltaY;
+			if (DeltaY <= m_fReactionZoneY * 0.5f)
+				return 1;
+		}
+	}
 	return 0;
 }
 
@@ -812,12 +880,49 @@ FVector AR6DZoneRandomPoints::FindClosestPointTo(FVector const &)
 
 FVector AR6DZoneRandomPoints::FindRandomPointInArea()
 {
-	return FVector(0,0,0);
+	guard(AR6DZoneRandomPoints::FindRandomPointInArea);
+	if (m_aNode.Num() == 0)
+	{
+		GLog->Logf(TEXT("%s has no nodes"), GetName());
+		return FVector(0,0,0);
+	}
+	INT Index = appRand() % m_aNode.Num();
+	return m_aNode(Index)->Location;
+	unguard;
 }
 
-FVector AR6DZoneRandomPoints::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
+FVector AR6DZoneRandomPoints::FindSpawningPoint(FRotator * pRotation, INT * pGroupID, enum EStance * pStance, INT * pAllowLeave)
 {
-	return FVector(0,0,0);
+	guard(AR6DZoneRandomPoints::FindSpawningPoint);
+	TArray<AR6DZoneRandomPointNode*>* TempArray = &m_aTempHighPriorityNode;
+	if (m_aTempHighPriorityNode.Num() == 0)
+		TempArray = &m_aTempNode;
+
+	if (m_aNode.Num() == 0)
+	{
+		GLog->Logf(TEXT("%s has no nodes"), GetName());
+		return FVector(0,0,0);
+	}
+
+	AR6DZoneRandomPointNode* Node;
+	if (!m_bInInit || TempArray->Num() == 0)
+	{
+		INT Index = appRand() % m_aNode.Num();
+		Node = m_aNode(Index);
+	}
+	else
+	{
+		INT Index = appRand() % TempArray->Num();
+		Node = (*TempArray)(Index);
+		TempArray->Remove(Index);
+	}
+
+	*pRotation = Node->Rotation;
+	*pGroupID = Node->m_iGroupID;
+	*pStance = (enum EStance)Node->m_eStance;
+	*pAllowLeave = Node->m_bAllowLeave;
+	return Node->Location;
+	unguard;
 }
 
 void AR6DZoneRandomPoints::FirstInit()
@@ -2858,6 +2963,10 @@ FVector AR6RainbowAI::getTargetPosition()
 
 void AR6RainbowAI::resetBoneRotation()
 {
+	USkeletalMeshInstance* MeshInst = (USkeletalMeshInstance*)Pawn->Mesh->MeshGetInstance(Pawn);
+	MeshInst->SetBoneRotation(FName(TEXT("R6 Spine"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
+	MeshInst->SetBoneRotation(FName(TEXT("R6 Spine1"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
+	MeshInst->SetBoneRotation(FName(TEXT("R6 Neck"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
 }
 
 void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation)
