@@ -556,12 +556,29 @@ void AR6DZonePath::CheckForErrors()
 	unguard;
 }
 
-void AR6DZonePath::DeleteANode(AR6DZonePathNode *)
+void AR6DZonePath::DeleteANode(AR6DZonePathNode *Node)
 {
+	guard(AR6DZonePath::DeleteANode);
+	for (INT i = 0; i < m_aNode.Num(); i++)
+	{
+		if (m_aNode(i) == Node)
+		{
+			DeleteANode(i);
+			return;
+		}
+	}
+	unguard;
 }
 
-void AR6DZonePath::DeleteANode(INT)
+void AR6DZonePath::DeleteANode(INT iIndex)
 {
+	guard(AR6DZonePath::DeleteANode);
+	check(iIndex < m_aNode.Num());
+	AActor* Node = m_aNode(iIndex);
+	m_aNode.Remove(iIndex);
+	if (!Node->bDeleteMe)
+		XLevel->DestroyActor(Node, 0);
+	unguard;
 }
 
 FVector AR6DZonePath::FindClosestPointTo(FVector const &)
@@ -587,6 +604,15 @@ INT AR6DZonePath::IsPointInZone(FVector const &)
 
 void AR6DZonePath::PostScriptDestroyed()
 {
+	guard(AR6DZonePath::PostScriptDestroyed);
+	while (m_aNode.Num() > 0)
+	{
+		AActor* Node = m_aNode(0);
+		m_aNode.Remove(0);
+		SafeDestroyActor(Node);
+	}
+	m_aNode.Empty();
+	unguard;
 }
 
 void AR6DZonePath::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -595,6 +621,11 @@ void AR6DZonePath::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDyna
 
 void AR6DZonePath::SpawnANewNode(FVector)
 {
+	guard(AR6DZonePath::SpawnANewNode);
+	AR6DZonePathNode* Node = (AR6DZonePathNode*)XLevel->SpawnActor(AR6DZonePathNode::StaticClass());
+	m_aNode.AddItem(Node);
+	Node->m_pPath = this;
+	unguard;
 }
 
 void AR6DZonePath::Spawned()
@@ -724,12 +755,29 @@ void AR6DZoneRandomPoints::CheckForErrors()
 	unguard;
 }
 
-void AR6DZoneRandomPoints::DeleteANode(AR6DZoneRandomPointNode *)
+void AR6DZoneRandomPoints::DeleteANode(AR6DZoneRandomPointNode *Node)
 {
+	guard(AR6DZoneRandomPoints::DeleteANode);
+	for (INT i = 0; i < m_aNode.Num(); i++)
+	{
+		if (m_aNode(i) == Node)
+		{
+			DeleteANode(i);
+			return;
+		}
+	}
+	unguard;
 }
 
-void AR6DZoneRandomPoints::DeleteANode(INT)
+void AR6DZoneRandomPoints::DeleteANode(INT iIndex)
 {
+	guard(AR6DZoneRandomPoints::DeleteANode);
+	check(iIndex < m_aNode.Num());
+	AActor* Node = m_aNode(iIndex);
+	m_aNode.Remove(iIndex);
+	if (!Node->bDeleteMe)
+		XLevel->DestroyActor(Node, 0);
+	unguard;
 }
 
 FVector AR6DZoneRandomPoints::FindClosestPointTo(FVector const &)
@@ -764,6 +812,15 @@ INT AR6DZoneRandomPoints::IsPointInZone(FVector const &)
 
 void AR6DZoneRandomPoints::PostScriptDestroyed()
 {
+	guard(AR6DZoneRandomPoints::PostScriptDestroyed);
+	while (m_aNode.Num() > 0)
+	{
+		AActor* Node = m_aNode(0);
+		m_aNode.Remove(0);
+		SafeDestroyActor(Node);
+	}
+	m_aNode.Empty();
+	unguard;
 }
 
 void AR6DZoneRandomPoints::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -772,6 +829,11 @@ void AR6DZoneRandomPoints::RenderEditorInfo(FLevelSceneNode *, FRenderInterface 
 
 void AR6DZoneRandomPoints::SpawnANewNode(FVector)
 {
+	guard(AR6DZoneRandomPoints::SpawnANewNode);
+	AR6DZoneRandomPointNode* Node = (AR6DZoneRandomPointNode*)XLevel->SpawnActor(AR6DZoneRandomPointNode::StaticClass());
+	m_aNode.AddItem(Node);
+	Node->m_pZone = this;
+	unguard;
 }
 
 void AR6DZoneRandomPoints::Spawned()
@@ -978,9 +1040,13 @@ void AR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame& Stack, RESULT_D
 	P_FINISH;
 }
 
-INT AR6DeploymentZone::getChanceFromArrayTemplates(struct FSTTemplate *, INT)
+INT AR6DeploymentZone::getChanceFromArrayTemplates(struct FSTTemplate *Templates, INT sizeOfArray)
 {
-	return 0;
+	check(sizeOfArray <= 5); // UCONST_C_NB_Template
+	INT Total = 0;
+	for (INT i = 0; i < sizeOfArray; i++)
+		Total += Templates[i].m_iChance;
+	return Total;
 }
 
 // --- AR6Door ---
