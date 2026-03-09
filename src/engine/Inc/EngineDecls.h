@@ -29,10 +29,31 @@ public:
 
 class ENGINE_API FBspSection {
 public:
+	BYTE Pad[64];
 	FBspSection(FBspSection const &);
 	FBspSection();
 	~FBspSection();
 	FBspSection& operator=(const FBspSection&);
+};
+
+// Layout decoded from Ghidra operator<< (Engine @ 0xcbf50).
+// Size: 0x5C (92) bytes. Offsets 0x00-0x58 accessed in serialization.
+// Ravenshield extends the base UE2 FBspSurf with LicenseeVer-gated fields (0x48-0x58).
+class ENGINE_API FBspSurf {
+public:
+	UObject*  Texture;       // 0x00  (UTexture*)
+	DWORD     PolyFlags;     // 0x04
+	INT       pBase;         // 0x08  FCompactIndex
+	INT       vNormal;       // 0x0C  FCompactIndex
+	INT       vTextureU;     // 0x10  FCompactIndex
+	INT       vTextureV;     // 0x14  FCompactIndex
+	INT       iLightMap;     // 0x18  FCompactIndex
+	UObject*  Actor;         // 0x1C  (ABrush*)
+	BYTE      _Pad20[0x0C]; // 0x20-0x2B  (iBrushPoly, unknown editing fields)
+	FPlane    Plane;         // 0x2C  (4 floats, only serialized if Ver > 0x56)
+	FLOAT     LightMapScale; // 0x3C  (default 32.0 if Ver <= 0x69)
+	BYTE      _Pad40[0x08]; // 0x40-0x47
+	BYTE      _RvsExtra[0x14]; // 0x48-0x5B  Ravenshield extensions
 };
 
 struct ENGINE_API FBspVertex {
@@ -283,8 +304,31 @@ struct ENGINE_API FStaticMeshVertex {
 	FStaticMeshVertex& operator=(const FStaticMeshVertex&);
 };
 
+// FStaticMeshLightInfo: UObject* + TArray<BYTE> + INT.
+// Decoded from Ghidra Engine @ 0x21750. No base class, no vtable.
+class ENGINE_API FStaticMeshLightInfo {
+public:
+	UObject*     LightObject;   // 0x00
+	TArray<BYTE> LightData;     // 0x04 (12 bytes: Data, ArrayNum, ArrayMax)
+	INT          Field10;       // 0x10
+};
+
+// FTerrainVertexStream: TArray<FTerrainVertex> + revision.
+// (FUN_10323cd0 = TArray<FTerrainVertex>::Serialize, elem_size=0x24)
+class ENGINE_API FTerrainVertexStream {
+public:
+	BYTE _Header[4];                        // 0x00
+	TArray<FTerrainVertex> Vertices;        // 0x04 (12 bytes)
+	BYTE _Gap[8];                           // 0x10
+	INT Revision;                           // 0x18
+};
+
+// Layout decoded from Ghidra FTags serializer (Engine @ 0xcc180).
+// 48 bytes of flat data + FString at offset 0x30.
 class ENGINE_API FTags {
 public:
+	BYTE _Data[0x30];    // 0x00-0x2F: 12 dwords serialized by ByteOrderSerialize
+	FString TagString;   // 0x30: serialized via operator<<(FArchive&, FString&)
 	FTags(FTags const &);
 	FTags();
 	~FTags();

@@ -39,18 +39,11 @@ struct FVertexComponent;
 class AWarpZoneInfo;
 class ATerrainInfo;
 class FBspNode;
-class FBspSection;
-struct FBspVertex;
 class FStaticMeshBatcherVertex;
 struct FStaticMeshCollisionNode;
 struct FStaticMeshCollisionTriangle;
-class FStaticMeshLightInfo;
-class FStaticMeshMaterial;
 class FStaticMeshSection;
 struct FStaticMeshTriangle;
-struct FStaticMeshUV;
-struct FStaticMeshVertex;
-struct FStaticMeshVertexStream;
 
 // --- ACamera ---
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
@@ -6043,7 +6036,6 @@ int UViewport::IsTopView()
 struct FUV2Data;
 struct FProjectorRelativeRenderInfo;
 struct HHitProxy;
-class FTerrainVertexStream;
 struct _KarmaGlobals;
 struct _McdGeometry;
 struct McdGeomMan;
@@ -6101,6 +6093,13 @@ _KarmaGlobals * KGData = NULL;
   Implementations
 -----------------------------------------------------------------------------*/
 
+// Forward declarations for element serializers needed by TArray<T> template
+// instantiation in stream/buffer serializers below.
+FArchive & operator<<(FArchive & Ar, FBspVertex & V);
+FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V);
+FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V);
+FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
+
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
 FArchive & operator<<(FArchive & p0, FAnimMeshVertexStream & p1) { static FArchive dummy; return dummy; }
 
@@ -6108,13 +6107,83 @@ FArchive & operator<<(FArchive & p0, FAnimMeshVertexStream & p1) { static FArchi
 FArchive & operator<<(FArchive & p0, FBspNode & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSection@@@Z
-FArchive & operator<<(FArchive & p0, FBspSection & p1) { static FArchive dummy; return dummy; }
+// Decoded from Ghidra Engine @ 0x27ad0. Uses TArray<FBspVertex> (FUN_10322590),
+// UObject* at +0x20, and version-gated INT override.
+// Layout: [0x00] vtable  [0x04] TArray<FBspVertex>  [0x18] INT  [0x1C] INT
+//         [0x20] UObject*  [0x24] INT  [0x28] INT (ver-gated default -1)
+FArchive & operator<<(FArchive & Ar, FBspSection & V) {
+	Ar << *(TArray<FBspVertex>*)&V.Pad[4];       // TArray<FBspVertex> at obj+0x04
+	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);      // INT at obj+0x18
+	Ar << *(UObject**)&V.Pad[0x20];               // UObject* at obj+0x20
+	Ar.ByteOrderSerialize(&V.Pad[0x1C], 4);      // INT at obj+0x1C
+	Ar.ByteOrderSerialize(&V.Pad[0x24], 4);      // INT at obj+0x24
+	Ar.ByteOrderSerialize(&V.Pad[0x28], 4);      // INT at obj+0x28
+	if (Ar.Ver() < 0x6B) {
+		if (Ar.IsLoading()) {
+			*(INT*)&V.Pad[0x28] = -1;
+		}
+	}
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSurf@@@Z
-FArchive & operator<<(FArchive & p0, FBspSurf & p1) { static FArchive dummy; return dummy; }
+// Decoded from Ghidra Engine @ 0xcbf50. Uses vtable+0x18 (UObject*), FCompactIndex,
+// ByteOrderSerialize, and Serialize. No FUN_xxx dependencies.
+FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
+	Ar << V.Texture;
+	Ar.ByteOrderSerialize((BYTE*)&V.PolyFlags, 4);
+	Ar << *(FCompactIndex*)&V.pBase;
+	Ar << *(FCompactIndex*)&V.vNormal;
+	Ar << *(FCompactIndex*)&V.vTextureU;
+	Ar << *(FCompactIndex*)&V.vTextureV;
+	if (Ar.Ver() < 0x65) {
+		FCompactIndex temp;
+		*(INT*)&temp = -1;
+		Ar << temp;
+	}
+	Ar << *(FCompactIndex*)&V.iLightMap;
+	if (Ar.Ver() < 0x4e) {
+		_WORD temp1 = 0, temp2 = 0;
+		Ar.ByteOrderSerialize((BYTE*)&temp1, 2);
+		Ar.ByteOrderSerialize((BYTE*)&temp2, 2);
+	}
+	Ar << V.Actor;
+	if (Ar.Ver() > 0x56) {
+		Ar.ByteOrderSerialize((BYTE*)&V.Plane.X, 4);
+		Ar.ByteOrderSerialize((BYTE*)&V.Plane.Y, 4);
+		Ar.ByteOrderSerialize((BYTE*)&V.Plane.Z, 4);
+		Ar.ByteOrderSerialize((BYTE*)&V.Plane.W, 4);
+	}
+	if (Ar.LicenseeVer() > 3) {
+		Ar.ByteOrderSerialize(&V._RvsExtra[0x00], 4);       // offset 0x48
+		Ar.Serialize(&V._RvsExtra[0x08], 1);                 // offset 0x50
+		Ar.Serialize(&V._RvsExtra[0x0E], 1);                 // offset 0x56
+		Ar.Serialize(&V._RvsExtra[0x0D], 1);                 // offset 0x55
+		Ar.Serialize(&V._RvsExtra[0x0C], 1);                 // offset 0x54
+		Ar.Serialize(&V._RvsExtra[0x0F], 1);                 // offset 0x57
+	}
+	if (Ar.LicenseeVer() > 4) {
+		Ar.Serialize(&V._RvsExtra[0x10], 1);                 // offset 0x58
+	}
+	if (Ar.LicenseeVer() > 6) {
+		Ar.ByteOrderSerialize(&V._RvsExtra[0x04], 4);       // offset 0x4C
+	}
+	if (Ar.Ver() > 0x69) {
+		Ar.ByteOrderSerialize((BYTE*)&V.LightMapScale, 4);
+	} else if (Ar.IsLoading()) {
+		V.LightMapScale = 32.0f;
+	}
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspVertexStream@@@Z
-FArchive & operator<<(FArchive & p0, FBspVertexStream & p1) { static FArchive dummy; return dummy; }
+// FUN_10322590 = TArray<FBspVertex>::Serialize (elem_size 0x28)
+// Layout (after vtable): Pad[0] TArray<FBspVertex>  Pad[0x14] Revision
+FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
+	Ar << *(TArray<FBspVertex>*)V.Pad;            // TArray at Pad[0] = obj+0x04
+	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMap@@@Z
 FArchive & operator<<(FArchive & p0, FLightMap & p1) { static FArchive dummy; return dummy; }
@@ -6167,13 +6236,25 @@ FArchive & operator<<(FArchive & Ar, FPoly & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRaw32BitIndexBuffer@@@Z
-FArchive & operator<<(FArchive & p0, FRaw32BitIndexBuffer & p1) { static FArchive dummy; return dummy; }
+// FUN_1037fbd0 = TArray<DWORD>::Serialize (elem_size 4, ByteOrderSerialize per element)
+// Layout (after vtable): Pad[0] TArray<DWORD>  Pad[0x14] Revision
+FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
+	Ar << *(TArray<DWORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
+	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRawColorStream@@@Z
 FArchive & operator<<(FArchive & p0, FRawColorStream & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z
-FArchive & operator<<(FArchive & p0, FRawIndexBuffer & p1) { static FArchive dummy; return dummy; }
+// FUN_1031e600 = TArray<_WORD>::Serialize (elem_size 2, ByteOrderSerialize per element)
+// Layout (after vtable): Pad[0] TArray<_WORD>  Pad[0x14] Revision
+FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
+	Ar << *(TArray<_WORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
+	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFSkinVertexStream@@@Z
 FArchive & operator<<(FArchive & p0, FSkinVertexStream & p1) { static FArchive dummy; return dummy; }
@@ -6185,7 +6266,14 @@ FArchive & operator<<(FArchive & p0, FStaticLightMapTexture & p1) { static FArch
 FArchive & operator<<(FArchive & Ar, FStaticMeshBatcherVertex & p1) { return Ar; } // empty in original
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshLightInfo@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshLightInfo & p1) { static FArchive dummy; return dummy; }
+// Decoded from Ghidra Engine @ 0x21750. UObject* at +0, TArray<BYTE> at +4
+// (FUN_1031cce0 = bulk byte array), INT at +0x10.
+FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
+	Ar << V.LightObject;
+	Ar << V.LightData;
+	Ar.ByteOrderSerialize((BYTE*)&V.Field10, 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshMaterial@@@Z
 FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
@@ -6199,16 +6287,41 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 FArchive & operator<<(FArchive & p0, FStaticMeshSection & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshUVStream@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshUVStream & p1) { static FArchive dummy; return dummy; }
+// FUN_10324510 = TArray<FStaticMeshUV>::Serialize (elem_size 8, two floats per elem)
+// Layout (after vtable): Pad[0] TArray<FStaticMeshUV>  Pad[0x0C] INT  Pad[0x18] Revision
+FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
+	Ar << *(TArray<FStaticMeshUV>*)V.Pad;         // TArray at Pad[0] = obj+0x04
+	Ar.ByteOrderSerialize(&V.Pad[0x0C], 4);      // INT at Pad[0x0C] = obj+0x10
+	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);      // Revision at Pad[0x18] = obj+0x1C
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshVertexStream@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshVertexStream & p1) { static FArchive dummy; return dummy; }
+// FUN_103243e0 = TArray<FStaticMeshVertex>::Serialize (elem_size 0x18)
+// Layout (after vtable): Pad[0] TArray<FStaticMeshVertex>  Pad[0x14] Revision
+FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
+	Ar << *(TArray<FStaticMeshVertex>*)V.Pad;     // TArray at Pad[0] = obj+0x04
+	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFTags@@@Z
-FArchive & operator<<(FArchive & p0, FTags & p1) { static FArchive dummy; return dummy; }
+// Decoded from Ghidra Engine @ 0xcc180. Inlines FUN_103cbaa0 (12×4-byte flat serialize)
+// then serializes FString at offset 0x30.
+FArchive & operator<<(FArchive & Ar, FTags & V) {
+	for (INT i = 0; i < 12; i++)
+		Ar.ByteOrderSerialize(V._Data + i * 4, 4);
+	Ar << V.TagString;
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFTerrainVertexStream@@@Z
-FArchive & operator<<(FArchive & p0, FTerrainVertexStream & p1) { static FArchive dummy; return dummy; }
+// FUN_10323cd0 = TArray<FTerrainVertex>::Serialize (elem_size 0x24)
+FArchive & operator<<(FArchive & Ar, FTerrainVertexStream & V) {
+	Ar << V.Vertices;
+	Ar.ByteOrderSerialize((BYTE*)&V.Revision, 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFURL@@@Z
 FArchive & operator<<(FArchive& Ar, FURL& U) {
