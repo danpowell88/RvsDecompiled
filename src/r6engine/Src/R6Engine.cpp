@@ -193,6 +193,11 @@ static FLOAT GInteractiveObject_OldNetDamagePercentage;
 // Statics used by AR6IORotatingDoor PreNetReceive/PostNetReceive.
 static FVector GRotatingDoor_OldLocation;
 
+// Statics used by AR6Terrorist PreNetReceive/PostNetReceive.
+static BYTE GR6Terrorist_OldSpecialAnimValid;
+static BYTE GR6Terrorist_OldHealth;
+static BYTE GR6Terrorist_OldDefCon;
+
 // --- AMP2IOKarma ---
 
 void AMP2IOKarma::CheckForErrors()
@@ -1131,6 +1136,7 @@ void AR6InteractiveObject::PostNetReceive()
 	unguard;
 }
 
+// Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
 void AR6InteractiveObject::PostScriptDestroyed()
 {
 }
@@ -2685,9 +2691,13 @@ INT AR6TeamMemberReplicationInfo::IsNetRelevantFor(APlayerController *, AActor *
 	return 0;
 }
 
-INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn *)
+INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn* Other)
 {
+	guard(AR6TeamMemberReplicationInfo::IsRelevantToTeamMember);
+	if (Other && Other->Controller)
+		return Instigator->IsFriend(Other) ? 1 : 0;
 	return 0;
+	unguard;
 }
 
 void AR6TeamMemberReplicationInfo::TickSpecial(FLOAT)
@@ -2698,10 +2708,35 @@ void AR6TeamMemberReplicationInfo::TickSpecial(FLOAT)
 
 void AR6Terrorist::PostNetReceive()
 {
+	guard(AR6Terrorist::PostNetReceive);
+
+	BYTE CurSpecialAnim = m_eSpecialAnimValid;
+	if (GR6Terrorist_OldSpecialAnimValid != CurSpecialAnim)
+	{
+		if (CurSpecialAnim == 0)
+			eventStopSpecialAnim();
+		else if (CurSpecialAnim == 1)
+			eventPlaySpecialAnim();
+		else if (CurSpecialAnim == 2)
+			eventLoopSpecialAnim();
+	}
+
+	if (GR6Terrorist_OldHealth != m_eHealth || GR6Terrorist_OldDefCon != m_eDefCon)
+		eventChangeAnimation();
+
+	AR6Pawn::PostNetReceive();
+
+	unguard;
 }
 
 void AR6Terrorist::PreNetReceive()
 {
+	guard(AR6Terrorist::PreNetReceive);
+	GR6Terrorist_OldSpecialAnimValid = m_eSpecialAnimValid;
+	GR6Terrorist_OldHealth = m_eHealth;
+	GR6Terrorist_OldDefCon = m_eDefCon;
+	AR6Pawn::PreNetReceive();
+	unguard;
 }
 
 void AR6Terrorist::UpdateAiming(FLOAT)
