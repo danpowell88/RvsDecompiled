@@ -5152,21 +5152,6 @@ void URenderDevice::HandleFullScreenEffects(int,int)
 
 
 
-
-
-
-UMaterial * UShader::CheckFallback()
-{
-	return NULL;
-}
-
-UMaterial * UShader::GetDiffuse()
-{
-	return NULL;
-}
-
-
-
 // --- UShadowBitmapMaterial ---
 void UShadowBitmapMaterial::Destroy()
 {
@@ -6099,7 +6084,11 @@ FArchive & operator<<(FArchive & p0, FTags & p1) { static FArchive dummy; return
 FArchive & operator<<(FArchive & p0, FTerrainVertexStream & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFURL@@@Z
-FArchive & operator<<(FArchive & p0, FURL & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive& Ar, FURL& U) {
+	Ar << U.Protocol << U.Host << U.Map << U.Portal << U.Op;
+	Ar << U.Port << U.Valid;
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFBspVertex@@@Z
 FArchive & operator<<(FArchive & p0, FBspVertex & p1) { static FArchive dummy; return dummy; }
@@ -6138,7 +6127,12 @@ FArchive & operator<<(FArchive & p0, FUV2Data & p1) { static FArchive dummy; ret
 FArchive & operator<<(FArchive & p0, FUntransformedVertex & p1) { static FArchive dummy; return dummy; }
 
 // ?GNewCollisionHash@@YAPAVFCollisionHashBase@@XZ
-FCollisionHashBase * GNewCollisionHash() { return NULL; }
+FCollisionHashBase * GNewCollisionHash() {
+	if( !GIsEditor )
+		return new FCollisionOctree();
+	else
+		return new FCollisionHash();
+}
 
 // ?FGetHSV@@YA?AVFPlane@@EEE@Z
 FPlane FGetHSV(BYTE p0, BYTE p1, BYTE p2) { return FPlane(); }
@@ -6487,16 +6481,40 @@ int FRebuildTools::GetIdxFromName(FString p0) { return 0; }
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
 
 // ?HasOption@FURL@@QBEHPBG@Z
-int FURL::HasOption(const TCHAR* p0) const { return 0; }
+int FURL::HasOption(const TCHAR* Test) const {
+	for( INT i=0; i<Op.Num(); i++ )
+		if( appStricmp(*Op(i),Test)==0 )
+			return 1;
+	return 0;
+}
 
 // ?IsInternal@FURL@@QBEHXZ
-int FURL::IsInternal() const { return 0; }
+int FURL::IsInternal() const {
+	return Protocol == DefaultProtocol;
+}
 
 // ?IsLocalInternal@FURL@@QBEHXZ
-int FURL::IsLocalInternal() const { return 0; }
+int FURL::IsLocalInternal() const {
+	return IsInternal() && Host.Len()==0;
+}
 
 // ??8FURL@@QBEHABV0@@Z
-int FURL::operator==(FURL const & p0) const { return 0; }
+int FURL::operator==(FURL const & Other) const {
+	if( Protocol!=Other.Protocol )
+		return 0;
+	if( Host!=Other.Host )
+		return 0;
+	if( Map!=Other.Map )
+		return 0;
+	if( Port!=Other.Port )
+		return 0;
+	if( Op.Num()!=Other.Op.Num() )
+		return 0;
+	for( INT i=0; i<Op.Num(); i++ )
+		if( Op(i)!=Other.Op(i) )
+			return 0;
+	return 1;
+}
 
 // ?ReadWaveInfo@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
 int FWaveModInfo::ReadWaveInfo(TArray<BYTE> & p0) { return 0; }
@@ -6511,10 +6529,15 @@ void FURL::StaticExit() {}
 void FURL::StaticInit() {}
 
 // ?Pad16Bit@FWaveModInfo@@QAEKK@Z
-DWORD FWaveModInfo::Pad16Bit(DWORD p0) { return 0; }
+DWORD FWaveModInfo::Pad16Bit(DWORD InVal) { return (InVal + 1) & ~1; }
 
 // ?GetOption@FURL@@QBEPBGPBG0@Z
-const TCHAR* FURL::GetOption(const TCHAR* p0, const TCHAR* p1) const { return NULL; }
+const TCHAR* FURL::GetOption(const TCHAR* Match, const TCHAR* Default) const {
+	for( INT i=0; i<Op.Num(); i++ )
+		if( appStrnicmp(*Op(i),Match,appStrlen(Match))==0 )
+			return *Op(i) + appStrlen(Match);
+	return Default;
+}
 
 // ??1FCollisionHash@@UAE@XZ
 FCollisionHash::~FCollisionHash() {}
@@ -6751,7 +6774,18 @@ void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 void FStatGraph::Reset() {}
 
 // ?AddOption@FURL@@QAEXPBG@Z
-void FURL::AddOption(const TCHAR* p0) {}
+void FURL::AddOption(const TCHAR* Str) {
+	const TCHAR* Eq = appStrchr(Str,'=');
+	INT PrefixLen = Eq ? (INT)(Eq - Str) + 1 : appStrlen(Str) + 1;
+	INT i;
+	for( i=0; i<Op.Num(); i++ )
+		if( appStrnicmp(*Op(i),Str,PrefixLen)==0 )
+			break;
+	if( i==Op.Num() )
+		new(Op)FString(Str);
+	else
+		Op(i) = Str;
+}
 
 // ?LoadURLConfig@FURL@@QAEXPBG0@Z
 void FURL::LoadURLConfig(const TCHAR* p0, const TCHAR* p1) {}
