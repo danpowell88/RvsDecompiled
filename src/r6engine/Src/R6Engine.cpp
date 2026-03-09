@@ -303,6 +303,22 @@ INT AR6AIController::NeedToOpenDoor(AActor *)
 
 INT AR6AIController::SetDestinationToNextInCache()
 {
+	m_iCurrentRouteCache++;
+	if (m_iCurrentRouteCache < 16 && RouteCache[m_iCurrentRouteCache] != NULL)
+	{
+		Pawn->DesiredSpeed = 1.0f;
+		MoveTarget = RouteCache[m_iCurrentRouteCache];
+		Destination = MoveTarget->Location;
+
+		FVector Delta = Destination - Pawn->Location;
+		FLOAT Dist = Delta.Size();
+		Pawn->setMoveTimer(Dist);
+
+		if (Focus == NULL)
+			FocalPoint = Destination;
+
+		return 1;
+	}
 	return 0;
 }
 
@@ -2360,8 +2376,13 @@ void AR6Pawn::initCrawlMode(bool)
 {
 }
 
-void AR6Pawn::m_vExecuteLipsSynch(FLOAT)
+void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 {
+	if (Mesh && Mesh->IsA(USkeletalMesh::StaticClass()))
+	{
+		if (m_hLipSynchData)
+			((ECLipSynchData*)m_hLipSynchData)->m_vUpdateLipSynch(DeltaTime);
+	}
 }
 
 void AR6Pawn::m_vInitNewLipSynch(USound *, USound *)
@@ -3128,13 +3149,23 @@ FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim *)
 	return 0.f;
 }
 
-UR6PlayAnim * UR6SubActionAnimSequence::GetAnimation(FLOAT)
+UR6PlayAnim * UR6SubActionAnimSequence::GetAnimation(FLOAT Time)
 {
+	for (INT i = 0; i < m_Sequences.Num(); i++)
+	{
+		UR6PlayAnim* Anim = m_Sequences(i);
+		if (Time >= Anim->m_fBeginPct && Time < Anim->m_fEndPct)
+			return Anim;
+	}
 	return NULL;
 }
 
-FLOAT UR6SubActionAnimSequence::GetCurAnimPct(FLOAT)
+FLOAT UR6SubActionAnimSequence::GetCurAnimPct(FLOAT Time)
 {
+	FLOAT Begin = m_CurSequence->m_fBeginPct;
+	FLOAT End = m_CurSequence->m_fEndPct;
+	if (End != Begin)
+		return (Time - Begin) / (End - Begin);
 	return 0.f;
 }
 
@@ -3145,7 +3176,10 @@ FString UR6SubActionAnimSequence::GetStatString()
 
 FLOAT UR6SubActionAnimSequence::GetTotalLength()
 {
-	return 0.f;
+	FLOAT Total = 0.f;
+	for (INT i = 0; i < m_Sequences.Num(); i++)
+		Total += GetAnimDuration(m_Sequences(i));
+	return Total;
 }
 
 INT UR6SubActionAnimSequence::IncrementSequence()
