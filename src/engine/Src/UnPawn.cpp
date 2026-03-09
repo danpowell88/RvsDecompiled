@@ -693,14 +693,14 @@ INT APawn::IsFriend( APawn* Other )
 	guard(APawn::IsFriend_Pawn);
 	if( !Other || !Controller || !Other->Controller )
 		return 0;
-	return 0;
+	return (1 << (Other->m_iTeam & 0x1F)) & m_iFriendlyTeams;
 	unguard;
 }
 
 INT APawn::IsFriend( INT TeamIndex )
 {
 	guard(APawn::IsFriend_Team);
-	return 0;
+	return m_iFriendlyTeams & (1 << (TeamIndex & 0x1F));
 	unguard;
 }
 
@@ -1052,6 +1052,8 @@ INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation
 void APawn::ClearSerpentine()
 {
 	guard(APawn::ClearSerpentine);
+	SerpentineTime = 1000.0f;
+	SerpentineDist = 0.0f;
 	unguard;
 }
 
@@ -1151,7 +1153,16 @@ ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint
 INT APawn::calcMoveFlags()
 {
 	guard(APawn::calcMoveFlags);
-	return 0;
+	INT Result = 256;
+	if( bCanWalk )          Result |= 1;
+	if( bCanFly )           Result |= 2;
+	if( bCanSwim )          Result |= 4;
+	if( bCanJump )          Result |= 8;
+	if( Controller->bCanOpenDoors )  Result |= 16;
+	if( Controller->bCanDoSpecial )  Result |= 32;
+	if( bCanClimbLadders )  Result |= 64;
+	if( Controller->bIsPlayer )      Result |= 512;
+	return Result;
 	unguard;
 }
 
@@ -1165,6 +1176,12 @@ INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 void APawn::clearPath(ANavigationPoint* Node)
 {
 	guard(APawn::clearPath);
+	Node->nextOrdered = NULL;
+	Node->prevOrdered = NULL;
+	Node->previousPath = NULL;
+	Node->bEndPoint = 0;
+	Node->visitedWeight = 10000000;
+	Node->cost = Node->ExtraCost;
 	unguard;
 }
 

@@ -2185,8 +2185,10 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 
 // --- AAIController ---
-void AAIController::SetAdjustLocation(FVector)
+void AAIController::SetAdjustLocation(FVector NewLoc)
 {
+	bAdjusting = 1;
+	AdjustLoc = NewLoc;
 }
 
 int AAIController::AcceptNearbyPath(AActor *)
