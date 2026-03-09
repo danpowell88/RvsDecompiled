@@ -33,6 +33,11 @@
 #include "R6AbstractClasses.h"
 #include "R6EngineClasses.h"
 
+// R6 overload: appMsgf(INT Type, const TCHAR* Fmt, ...)
+// Original UT signature was void(const TCHAR*,...); R6 changed to int(int,...).
+// Exported from Core.dll; declared here for R6Engine use.
+CORE_API const INT appMsgf(INT Type, const TCHAR* Fmt, ...);
+
 /*----------------------------------------------------------------------------
 	IMPLEMENT_CLASS macro.
 ----------------------------------------------------------------------------*/

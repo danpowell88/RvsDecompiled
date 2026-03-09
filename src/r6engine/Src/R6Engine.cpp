@@ -458,6 +458,10 @@ void AR6ClimbableObject::AddMyMarker(AActor *)
 
 void AR6ClimbableObject::CheckForErrors()
 {
+	guard(AR6ClimbableObject::CheckForErrors);
+	if (!m_eClimbHeight)
+		GWarn->Logf(TEXT("Collision: specify the height of m_eClimbHeight"));
+	unguard;
 }
 
 void AR6ClimbableObject::PostScriptDestroyed()
@@ -545,6 +549,11 @@ void AR6CoverSpot::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDyna
 
 void AR6DZonePath::CheckForErrors()
 {
+	guard(AR6DZonePath::CheckForErrors);
+	if (m_aNode.Num() == 0)
+		GWarn->Logf(TEXT("%s don't have any node!"), GetName());
+	AR6DeploymentZone::CheckForErrors(true);
+	unguard;
 }
 
 void AR6DZonePath::DeleteANode(AR6DZonePathNode *)
@@ -601,6 +610,24 @@ void AR6DZonePath::Spawned()
 
 void AR6DZonePathNode::CheckForErrors()
 {
+	guard(AR6DZonePathNode::CheckForErrors);
+	if (m_pPath)
+	{
+		for (INT i = 0; i < m_pPath->m_aNode.Num(); i++)
+		{
+			if (m_pPath->m_aNode(i) == this)
+			{
+				CopyR6Availability(m_pPath);
+				goto Done;
+			}
+		}
+	}
+	GWarn->Logf(TEXT("%s is not part of a path."), GetName());
+Done:
+	PutOnGround();
+	if (!Base)
+		GWarn->Logf(TEXT("Path node not on valid base."));
+	unguard;
 }
 
 void AR6DZonePathNode::PostScriptDestroyed()
@@ -653,6 +680,12 @@ void AR6DZonePoint::Spawned()
 
 void AR6DZoneRandomPointNode::CheckForErrors()
 {
+	guard(AR6DZoneRandomPointNode::CheckForErrors);
+	CopyR6Availability(m_pZone);
+	PutOnGround();
+	if (!Base)
+		GWarn->Logf(TEXT("Random point not on valid base."));
+	unguard;
 }
 
 void AR6DZoneRandomPointNode::PostScriptDestroyed()
@@ -671,6 +704,24 @@ void AR6DZoneRandomPointNode::RenderEditorInfo(FLevelSceneNode *, FRenderInterfa
 
 void AR6DZoneRandomPoints::CheckForErrors()
 {
+	guard(AR6DZoneRandomPoints::CheckForErrors);
+	if (m_aNode.Num() == 0)
+		GWarn->Logf(TEXT("%s don't have any node!"), GetName());
+	for (INT i = 0; i < m_aNode.Num(); i++)
+	{
+		AR6DZoneRandomPointNode* Node = m_aNode(i);
+		if (Node->m_pZone != this)
+		{
+			GWarn->Logf(TEXT("%s belong %s and have been removed from %s"),
+				Node->GetName(),
+				Node->m_pZone ? Node->m_pZone->GetName() : TEXT("None"),
+				GetName());
+			m_aNode.Remove(i);
+			i--;
+		}
+	}
+	AR6DeploymentZone::CheckForErrors(true);
+	unguard;
 }
 
 void AR6DZoneRandomPoints::DeleteANode(AR6DZoneRandomPointNode *)
@@ -735,10 +786,63 @@ void AR6DZoneRandomPoints::Spawned()
 
 void AR6DeploymentZone::CheckForErrors()
 {
+	guard(AR6DeploymentZone::CheckForErrors);
+	if (!IsA(AR6DZoneRandomPoints::StaticClass()) && !IsA(AR6DZonePath::StaticClass()))
+	{
+		PutOnGround();
+		if (!Base)
+			GWarn->Logf(TEXT("Deployment zone not on valid base."));
+	}
+	CheckForErrors(true);
+	unguard;
 }
 
-void AR6DeploymentZone::CheckForErrors(bool)
+void AR6DeploymentZone::CheckForErrors(bool bSilent)
 {
+	guard(AR6DeploymentZone::CheckForErrors);
+
+	// Validate terrorist template chances sum to 100 (or 0 if unused)
+	INT TerroTotal = m_Template[0].m_iChance + m_Template[1].m_iChance + m_Template[2].m_iChance
+	               + m_Template[3].m_iChance + m_Template[4].m_iChance;
+	if (TerroTotal != 100 && TerroTotal != 0)
+	{
+		if (bSilent)
+			GWarn->Logf(TEXT("Total template chance of TERRORIST is %d%% in %s"), TerroTotal, GetName());
+		else
+			appMsgf(0, TEXT("Total template chance of TERRORIST is %d%% in %s"), TerroTotal, GetName());
+	}
+
+	// Validate hostage template chances sum to 100 (or 0 if unused)
+	INT HostTotal = m_HostageTemplates[0].m_iChance + m_HostageTemplates[1].m_iChance + m_HostageTemplates[2].m_iChance
+	              + m_HostageTemplates[3].m_iChance + m_HostageTemplates[4].m_iChance;
+	if (HostTotal != 100 && HostTotal != 0)
+	{
+		if (bSilent)
+			GWarn->Logf(TEXT("Total template chance of HOSTAGE is %d%% in %s"), HostTotal, GetName());
+		else
+			appMsgf(0, TEXT("Total template chance of HOSTAGE is %d%% in %s"), HostTotal, GetName());
+	}
+
+	// Validate terrorist min/max range
+	// NOTE: Original binary uses "HOSTAGE" string in bSilent path — likely a copy-paste bug in retail code.
+	if (m_iMinTerrorist < 0 || m_iMaxTerrorist < m_iMinTerrorist)
+	{
+		if (bSilent)
+			GWarn->Logf(TEXT("Template min max of HOSTAGE is wrong (min=%d%% max=%d%%) in %s"), m_iMinTerrorist, m_iMaxTerrorist, GetName());
+		else
+			appMsgf(0, TEXT("Template min max of TERRORIST is wrong (min=%d%% max=%d%%) in %s"), m_iMinTerrorist, m_iMaxTerrorist, GetName());
+	}
+
+	// Validate hostage min/max range
+	if (m_iMinHostage < 0 || m_iMaxHostage < m_iMinHostage)
+	{
+		if (bSilent)
+			GWarn->Logf(TEXT("Template min max of HOSTAGE is wrong (min=%d%% max=%d%%) in %s"), m_iMinHostage, m_iMaxHostage, GetName());
+		else
+			appMsgf(0, TEXT("Template min max of HOSTAGE is wrong (min=%d%% max=%d%%) in %s"), m_iMinHostage, m_iMaxHostage, GetName());
+	}
+
+	unguard;
 }
 
 FVector AR6DeploymentZone::FindClosestPointTo(FVector const &)
