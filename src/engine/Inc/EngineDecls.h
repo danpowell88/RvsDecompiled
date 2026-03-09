@@ -36,12 +36,17 @@ public:
 };
 
 struct ENGINE_API FBspVertex {
+	BYTE _Data[40]; // 10 dwords from Ghidra operator= loop; Position(FVector) + Normal(FVector) + unknown
 	FBspVertex();
 	FBspVertex& operator=(const FBspVertex&);
 };
 
 class ENGINE_API FCanvasVertex {
 public:
+	FVector Point;   // 0x00
+	FColor  Color;   // 0x0C
+	FLOAT   U;       // 0x10
+	FLOAT   V;       // 0x14
 	FCanvasVertex(FVector,FColor,float,float);
 	FCanvasVertex();
 	FCanvasVertex& operator=(const FCanvasVertex&);
@@ -65,6 +70,8 @@ public:
 
 class ENGINE_API FDynamicLight {
 public:
+	BYTE _Data[0x3C]; // 60 bytes total, layout partially known from Ghidra:
+	                   // 0x00: AActor*, 0x04: FPlane(color), 0x14: FVector, 0x20: FVector
 	float SampleIntensity(FVector,FVector);
 	FColor SampleLight(FVector,FVector);
 	FDynamicLight(FDynamicLight const &);
@@ -73,6 +80,7 @@ public:
 };
 
 struct ENGINE_API FFontCharacter {
+	BYTE _Data[16]; // 4 dwords from Ghidra operator=
 	FFontCharacter& operator=(const FFontCharacter&);
 };
 

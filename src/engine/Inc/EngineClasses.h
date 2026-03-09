@@ -1366,6 +1366,7 @@ struct ENGINE_API FHitCause
 	FLOAT MouseX;
 	FLOAT MouseY;
 	FHitCause(FHitObserver*, UViewport*, DWORD, FLOAT, FLOAT);
+	FHitCause& operator=(const FHitCause&);
 };
 
 struct ENGINE_API HHitProxy

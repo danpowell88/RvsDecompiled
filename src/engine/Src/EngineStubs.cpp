@@ -3049,10 +3049,14 @@ FBspSection& FBspSection::operator=(const FBspSection&)
 // --- FBspVertex ---
 FBspVertex::FBspVertex()
 {
+	// Ghidra: constructs two FVectors at offset 0 and 0xC (Position + Normal)
+	*(FVector*)&_Data[0] = FVector(0,0,0);
+	*(FVector*)&_Data[12] = FVector(0,0,0);
 }
 
-FBspVertex& FBspVertex::operator=(const FBspVertex&)
+FBspVertex& FBspVertex::operator=(const FBspVertex& Other)
 {
+	appMemcpy( this, &Other, sizeof(FBspVertex) );
 	return *this;
 }
 
@@ -3093,7 +3097,11 @@ FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil&)
 }
 
 // --- FCanvasVertex ---
-FCanvasVertex::FCanvasVertex(FVector,FColor,float,float)
+FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float InV)
+:	Point(InPoint)
+,	Color(InColor)
+,	U(InU)
+,	V(InV)
 {
 }
 
@@ -3101,8 +3109,12 @@ FCanvasVertex::FCanvasVertex()
 {
 }
 
-FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex&)
+FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 {
+	Point = Other.Point;
+	Color = Other.Color;
+	U     = Other.U;
+	V     = Other.V;
 	return *this;
 }
 
@@ -3187,22 +3199,25 @@ FColor FDynamicLight::SampleLight(FVector,FVector)
 	return FColor(0,0,0,0);
 }
 
-FDynamicLight::FDynamicLight(FDynamicLight const &)
+FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 {
+	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
 FDynamicLight::FDynamicLight(AActor *)
 {
 }
 
-FDynamicLight& FDynamicLight::operator=(const FDynamicLight&)
+FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
 {
+	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 	return *this;
 }
 
 // --- FFontCharacter ---
-FFontCharacter& FFontCharacter::operator=(const FFontCharacter&)
+FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 {
+	appMemcpy( this, &Other, sizeof(FFontCharacter) );
 	return *this;
 }
 
@@ -5960,7 +5975,6 @@ int UViewport::IsTopView()
 struct FUV2Data;
 struct FUntransformedVertex;
 struct FProjectorRelativeRenderInfo;
-struct FHitCause;
 struct HHitProxy;
 class FTerrainVertexStream;
 struct _KarmaGlobals;
@@ -6137,20 +6151,89 @@ FCollisionHashBase * GNewCollisionHash() {
 // ?FGetHSV@@YA?AVFPlane@@EEE@Z
 FPlane FGetHSV(BYTE p0, BYTE p1, BYTE p2) { return FPlane(); }
 
+// Forward declaration for overloaded variants below
+int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen);
+
 // ?GetFROTATOR@@YAHPBGAAVFRotator@@H@Z
-int GetFROTATOR(const TCHAR* p0, FRotator & p1, int p2) { return 0; }
+int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
+{
+	FLOAT Temp = 0.f;
+	int Count = 0;
+	if( Parse( Stream, TEXT("PITCH="), Temp ) ) { Rotation.Pitch = (INT)(Temp * ScaleFactor); Count++; }
+	if( Parse( Stream, TEXT("YAW="), Temp ) )   { Rotation.Yaw   = (INT)(Temp * ScaleFactor); Count++; }
+	if( Parse( Stream, TEXT("ROLL="), Temp ) )  { Rotation.Roll  = (INT)(Temp * ScaleFactor); Count++; }
+	if( Count > 0 )
+		return 1;
+	Rotation.Pitch = (INT)(appAtof( Stream ) * ScaleFactor);
+	TCHAR* S = appStrchr( Stream, ',' );
+	if( S )
+	{
+		Rotation.Yaw = (INT)(appAtof( S + 1 ) * ScaleFactor);
+		S = appStrchr( S + 1, ',' );
+		if( S )
+		{
+			Rotation.Roll = (INT)(appAtof( S + 1 ) * ScaleFactor);
+			return 1;
+		}
+	}
+	return 0;
+}
 
 // ?GetFROTATOR@@YAHPBG0AAVFRotator@@H@Z
-int GetFROTATOR(const TCHAR* p0, const TCHAR* p1, FRotator & p2, int p3) { return 0; }
+int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int ScaleFactor)
+{
+	TCHAR Temp[80];
+	if( !GetSUBSTRING( Stream, Match, Temp, 80 ) )
+		return 0;
+	return GetFROTATOR( Temp, Rotation, ScaleFactor );
+}
 
 // ?GetFVECTOR@@YAHPBGAAVFVector@@@Z
-int GetFVECTOR(const TCHAR* p0, FVector & p1) { return 0; }
+int GetFVECTOR(const TCHAR* Stream, FVector& Value)
+{
+	int NumParsed = 0;
+	NumParsed += Parse( Stream, TEXT("X="), Value.X );
+	NumParsed += Parse( Stream, TEXT("Y="), Value.Y );
+	NumParsed += Parse( Stream, TEXT("Z="), Value.Z );
+	if( NumParsed > 0 )
+		return NumParsed == 3;
+	Value.X = appAtof( Stream );
+	TCHAR* S = appStrchr( Stream, ',' );
+	if( S )
+	{
+		Value.Y = appAtof( S + 1 );
+		S = appStrchr( S + 1, ',' );
+		if( S )
+		{
+			Value.Z = appAtof( S + 1 );
+			return 1;
+		}
+	}
+	return 0;
+}
 
 // ?GetFVECTOR@@YAHPBG0AAVFVector@@@Z
-int GetFVECTOR(const TCHAR* p0, const TCHAR* p1, FVector & p2) { return 0; }
+int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
+{
+	TCHAR Temp[80];
+	if( !GetSUBSTRING( Stream, Match, Temp, 80 ) )
+		return 0;
+	return GetFVECTOR( Temp, Value );
+}
 
 // ?GetSUBSTRING@@YAHPBG0PAGH@Z
-int GetSUBSTRING(const TCHAR* p0, const TCHAR* p1, TCHAR* p2, int p3) { return 0; }
+int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen)
+{
+	const TCHAR* Found = appStrfind( Stream, Match );
+	if( !Found )
+		return 0;
+	Found += appStrlen( Match );
+	int i = 0;
+	while( *Found && *Found != ' ' && *Found != '\t' && i < MaxLen - 1 )
+		Value[i++] = *Found++;
+	Value[i] = 0;
+	return 1;
+}
 
 // ?getGameShutDown@@YAHXZ
 int getGameShutDown() { return 0; }
@@ -6223,7 +6306,24 @@ FCollisionOctree::FCollisionOctree() {}
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FHitCause@@QAE@PAVFHitObserver@@PAVUViewport@@KMM@Z
-FHitCause::FHitCause(FHitObserver * p0, UViewport * p1, DWORD p2, float p3, float p4) {}
+FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InButtons, float InMouseX, float InMouseY)
+:	Observer(InObserver)
+,	Viewport(InViewport)
+,	Buttons(InButtons)
+,	MouseX(InMouseX)
+,	MouseY(InMouseY)
+{}
+
+// ??4FHitCause@@QAEAAU0@ABU0@@Z
+FHitCause& FHitCause::operator=(const FHitCause& Other)
+{
+	Observer = Other.Observer;
+	Viewport = Other.Viewport;
+	Buttons  = Other.Buttons;
+	MouseX   = Other.MouseX;
+	MouseY   = Other.MouseY;
+	return *this;
+}
 
 // ??0FLevelSceneNode@@QAE@PAV0@HVFMatrix@@@Z
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSceneNode((UViewport*)NULL) {}
@@ -6378,7 +6478,12 @@ FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
 FString FURL::String(int p0) const { return FString(); }
 
 // ?GetTextureSize@FPoly@@QAE?AVFVector@@XZ
-FVector FPoly::GetTextureSize() { return FVector(); }
+FVector FPoly::GetTextureSize()
+{
+	if( !Material )
+		return FVector( 256.f, 256.f, 0.f );
+	return FVector( (FLOAT)Material->MaterialVSize(), (FLOAT)Material->MaterialUSize(), 0.f );
+}
 
 // ?Vector@FRotatorF@@QAE?AVFVector@@XZ
 FVector FRotatorF::Vector() { return FVector(); }
@@ -6439,7 +6544,16 @@ int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
 int FPathBuilder::removePaths(ULevel * p0) { return 0; }
 
 // ?CalcNormal@FPoly@@QAEHH@Z
-int FPoly::CalcNormal(int p0) { return 0; }
+int FPoly::CalcNormal(int bSilent) {
+	Normal = FVector(0,0,0);
+	for( INT i=2; i<NumVertices; i++ )
+		Normal += (Vertex[i-1] - Vertex[0]) ^ (Vertex[i] - Vertex[0]);
+	if( Normal.SizeSquared() < 0.0001f ) {
+		return 1;
+	}
+	Normal.Normalize();
+	return 0;
+}
 
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z
 int FPoly::DoesLineIntersect(FVector p0, FVector p1, FVector * p2) { return 0; }
@@ -6466,7 +6580,29 @@ int FPoly::Faces(FPoly const & Other) const {
 int FPoly::Finalize(int p0) { return 0; }
 
 // ?Fix@FPoly@@QAEHXZ
-int FPoly::Fix() { return 0; }
+int FPoly::Fix()
+{
+	INT j = 0;
+	INT prev = NumVertices - 1;
+	for( INT i = 0; i < NumVertices; i++ )
+	{
+		if( !FPointsAreSame( Vertex[i], Vertex[prev] ) )
+		{
+			if( j != i )
+				Vertex[j] = Vertex[i];
+			prev = j;
+			j++;
+		}
+		else
+		{
+			debugf( NAME_Warning, TEXT("FPoly::Fix: Deleted a duplicate vertex") );
+		}
+	}
+	if( j < 3 )
+		j = 0;
+	NumVertices = j;
+	return j;
+}
 
 // ?IsBackfaced@FPoly@@QBEHABVFVector@@@Z
 int FPoly::IsBackfaced(FVector const & Point) const {
@@ -6800,7 +6936,15 @@ void FPoly::Init() {
 }
 
 // ?InsertVertex@FPoly@@QAEXHVFVector@@@Z
-void FPoly::InsertVertex(int p0, FVector p1) {}
+// NOTE: Original uses temp TArray copy+insert+copyback. Simplified to in-place shift.
+void FPoly::InsertVertex(int InPos, FVector InVtx)
+{
+	check(InPos <= NumVertices);
+	for( INT i = NumVertices; i > InPos; i-- )
+		Vertex[i] = Vertex[i - 1];
+	Vertex[InPos] = InVtx;
+	NumVertices++;
+}
 
 // ?Reverse@FPoly@@QAEXXZ
 void FPoly::Reverse() {
