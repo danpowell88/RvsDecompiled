@@ -304,9 +304,13 @@ void AR6AIController::GotoOpenDoorState(AActor *)
 {
 }
 
-INT AR6AIController::HearingCheck(FVector, FVector)
+INT AR6AIController::HearingCheck(FVector SourcePos, FVector TargetPos)
 {
-	return 0;
+	guard(AR6AIController::HearingCheck);
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, Pawn, TargetPos, SourcePos, 0x40286, FVector(0,0,0));
+	return Hit.Actor == NULL;
+	unguard;
 }
 
 INT AR6AIController::NeedToOpenDoor(AActor *)
@@ -1066,9 +1070,48 @@ void AR6DeploymentZone::CheckForErrors(bool bSilent)
 	unguard;
 }
 
-FVector AR6DeploymentZone::FindClosestPointTo(FVector const &)
+FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 {
-	return FVector(0,0,0);
+	guard(AR6DeploymentZone::FindClosestPointTo);
+
+	FLOAT ResultX = Point.X;
+	FLOAT ResultY = Point.Y;
+	FLOAT ResultZ = Location.Z;
+
+	if (IsA(AR6DZoneRectangle::StaticClass()))
+	{
+		FLOAT HalfX = ((AR6DZoneRectangle*)this)->m_fX * 0.5f;
+		FLOAT MaxX = Location.X + HalfX;
+		FLOAT MinX = Location.X - HalfX;
+		if (ResultX < MinX)
+			ResultX = MinX;
+		else if (ResultX > MaxX)
+			ResultX = MaxX;
+
+		FLOAT HalfY = ((AR6DZoneRectangle*)this)->m_fY * 0.5f;
+		FLOAT MaxY = Location.Y + HalfY;
+		FLOAT MinY = Location.Y - HalfY;
+		if (ResultY < MinY)
+			ResultY = MinY;
+		else if (ResultY > MaxY)
+			ResultY = MaxY;
+
+		return FVector(ResultX, ResultY, ResultZ);
+	}
+
+	if (IsA(AR6DZoneCircle::StaticClass()))
+	{
+		FVector Delta(ResultX - Location.X, ResultY - Location.Y, ResultZ - Location.Z);
+		FVector Dir = Delta.GetNormalized();
+		FLOAT Radius = ((AR6DZoneCircle*)this)->m_fRadius;
+		ResultX = Dir.X * Radius + Location.X;
+		ResultY = Dir.Y * Radius + Location.Y;
+		ResultZ = Dir.Z * Radius + Location.Z;
+	}
+
+	return FVector(ResultX, ResultY, ResultZ);
+
+	unguard;
 }
 
 FVector AR6DeploymentZone::FindRandomPointInArea()
@@ -1172,9 +1215,13 @@ INT AR6DeploymentZone::HaveHostage()
 	} while (true);
 }
 
-INT AR6DeploymentZone::HavePlaceForPawnAt(FVector &)
+INT AR6DeploymentZone::HavePlaceForPawnAt(FVector& Position)
 {
-	return 0;
+	guard(AR6DeploymentZone::HavePlaceForPawnAt);
+	AActor* Default = AR6Terrorist::StaticClass()->GetDefaultActor();
+	FVector Extent(Default->CollisionRadius, Default->CollisionRadius, Default->CollisionHeight);
+	return XLevel->FindSpot(Extent, Position, 0, NULL);
+	unguard;
 }
 
 INT AR6DeploymentZone::HaveTerrorist()
@@ -1204,9 +1251,42 @@ void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate *, AR6Terrorist *)
 {
 }
 
-INT AR6DeploymentZone::IsPointInZone(FVector const &)
+INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
 {
+	guard(AR6DeploymentZone::IsPointInZone);
+
+	FLOAT DeltaX = Point.X - Location.X;
+	FLOAT DeltaY = Point.Y - Location.Y;
+	FLOAT DeltaZ = Point.Z - Location.Z;
+
+	if (DeltaZ < 0.0f)
+		DeltaZ = -DeltaZ;
+
+	if (DeltaZ < 100.0f)
+	{
+		if (IsA(AR6DZoneRectangle::StaticClass()))
+		{
+			if (DeltaX < 0.0f)
+				DeltaX = -DeltaX;
+			if (DeltaX > ((AR6DZoneRectangle*)this)->m_fX * 0.5f)
+				return 0;
+			if (DeltaY < 0.0f)
+				DeltaY = -DeltaY;
+			if (DeltaY > ((AR6DZoneRectangle*)this)->m_fY * 0.5f)
+				return 0;
+			return 1;
+		}
+		if (IsA(AR6DZoneCircle::StaticClass()))
+		{
+			FLOAT Radius = ((AR6DZoneCircle*)this)->m_fRadius;
+			if (DeltaX * DeltaX + DeltaY * DeltaY <= Radius * Radius)
+				return 1;
+		}
+	}
+
 	return 0;
+
+	unguard;
 }
 
 void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -1395,9 +1475,21 @@ INT AR6FalseHeartBeat::IsBlockedBy(AActor const* Other) const
 	unguard;
 }
 
-INT AR6FalseHeartBeat::IsRelevantToPawn(APawn *)
+INT AR6FalseHeartBeat::IsRelevantToPawn(APawn* Other)
 {
+	guard(AR6FalseHeartBeat::IsRelevantToPawn);
+	if (!m_bBroken && Other->EngineWeapon)
+	{
+		if (Other->EngineWeapon->eventIsGoggles())
+		{
+			FVector Diff = Location - Other->Location;
+			FLOAT DistSq = Diff.X * Diff.X + Diff.Y * Diff.Y + Diff.Z * Diff.Z;
+			if (DistSq < 2250000.0f)
+				return 1;
+		}
+	}
 	return 0;
+	unguard;
 }
 
 INT AR6FalseHeartBeat::IsRelevantToPawnHeartBeat(APawn *)
@@ -3006,6 +3098,17 @@ void AR6RagDoll::ClipParticleToPlane(INT particleIdx, FVector const & Normal, FV
 
 void AR6RagDoll::CollisionDetection()
 {
+	guard(AR6RagDoll::CollisionDetection);
+	for (INT i = 0; i < 16; i++)
+	{
+		FSTParticle& p = m_aParticle[i];
+		FVector CurrentPos = p.cCurrentPos.Origin;
+		FCheckResult Hit(1.0f);
+		XLevel->SingleLineCheck(Hit, this, CurrentPos, p.vPreviousOrigin, 0x86, FVector(0,0,0));
+		if (Hit.Time != 1.0f)
+			p.cCurrentPos.Origin = Hit.Location;
+	}
+	unguard;
 }
 
 void AR6RagDoll::FirstInit(AR6AbstractPawn *)
@@ -3067,9 +3170,15 @@ INT AR6RainbowAI::AClearShotIsAvailable(APawn *, FVector)
 	return 0;
 }
 
-INT AR6RainbowAI::ClearToSnipe(FVector, FRotator)
+INT AR6RainbowAI::ClearToSnipe(FVector Position, FRotator Direction)
 {
-	return 0;
+	guard(AR6RainbowAI::ClearToSnipe);
+	FVector Dir = Direction.Vector() * 300.0f;
+	FVector End = Position + Dir;
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, Pawn, End, Position, 0x4400BF, FVector(0,0,0));
+	return Hit.Actor == NULL;
+	unguard;
 }
 
 AActor * AR6RainbowAI::FindSafeSpot()
@@ -3209,6 +3318,47 @@ CallSuper:
 
 void AR6RainbowAI::checkEnvironment()
 {
+	guard(AR6RainbowAI::checkEnvironment);
+
+	if (m_eFormation != 0)
+	{
+		// Trace right: pawn rotation + 60 degrees
+		FCheckResult Hit1(1.0f);
+		FRotator RightRot = Pawn->Rotation;
+		RightRot.Yaw += 0x2AAB;
+		FVector RightDir = RightRot.Vector() * 300.0f;
+		FVector RightEnd = Pawn->Location + RightDir;
+		XLevel->SingleLineCheck(Hit1, this, RightEnd, Pawn->Location, TRACE_World, FVector(0, 0, 0));
+
+		// Trace left: pawn rotation - 60 degrees
+		FCheckResult Hit2(1.0f);
+		FRotator LeftRot = Pawn->Rotation;
+		LeftRot.Yaw -= 0x2AAB;
+		FVector LeftDir = LeftRot.Vector() * 300.0f;
+		FVector LeftEnd = Pawn->Location + LeftDir;
+		XLevel->SingleLineCheck(Hit2, this, LeftEnd, Pawn->Location, TRACE_World, FVector(0, 0, 0));
+
+		// Classify environment based on trace results
+		if (Hit1.Time < 1.0f)
+		{
+			if (Hit2.Time < 1.0f)
+				m_eFormation = 4; // Both sides blocked
+			else
+				m_eFormation = 3; // Right blocked only
+		}
+		else if (Hit2.Time < 1.0f)
+		{
+			m_eFormation = 2; // Left blocked only
+		}
+		else
+		{
+			m_eFormation = 1; // Both sides open
+		}
+
+		m_TeamManager->eventRequestFormationChange(m_eFormation);
+	}
+
+	unguard;
 }
 
 void AR6RainbowAI::eventAttackTimer()
@@ -3575,8 +3725,9 @@ INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn* Other)
 	unguard;
 }
 
-void AR6TeamMemberReplicationInfo::TickSpecial(FLOAT)
+void AR6TeamMemberReplicationInfo::TickSpecial(FLOAT DeltaTime)
 {
+	AActor::TickSpecial(DeltaTime);
 }
 
 // --- AR6Terrorist ---
