@@ -193,10 +193,26 @@ public:
 	FR6MatineePreviewProxy& operator=(const FR6MatineePreviewProxy&);
 };
 
+struct ENGINE_API FPosNormTexData {
+	BYTE _Data[40]; // 10 dwords: Position(3) + Normal(3) + UV(2) + unknown(2)
+};
+
 class ENGINE_API FReachSpec {
 public:
 	BYTE _Data[44]; // 11 dwords, shares operator= with FStaticMeshCollisionNode
 	FReachSpec& operator=(const FReachSpec&);
+};
+
+struct ENGINE_API FSkinVertex {
+	BYTE _Data[64]; // 16 dwords from Ghidra serialization
+};
+
+struct ENGINE_API FTerrainVertex {
+	BYTE _Data[36]; // 6 floats (24) + 4 bytes (4) + 2 floats (8) = 36
+};
+
+struct ENGINE_API FUntransformedVertex {
+	BYTE _Data[44]; // 11 dwords from Ghidra serialization
 };
 
 class ENGINE_API FRebuildOptions {

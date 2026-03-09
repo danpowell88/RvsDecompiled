@@ -41,8 +41,6 @@ class ATerrainInfo;
 class FBspNode;
 class FBspSection;
 struct FBspVertex;
-struct FPosNormTexData;
-struct FSkinVertex;
 class FStaticMeshBatcherVertex;
 struct FStaticMeshCollisionNode;
 struct FStaticMeshCollisionTriangle;
@@ -53,7 +51,6 @@ struct FStaticMeshTriangle;
 struct FStaticMeshUV;
 struct FStaticMeshVertex;
 struct FStaticMeshVertexStream;
-struct FTerrainVertex;
 
 // --- ACamera ---
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
@@ -6044,7 +6041,6 @@ int UViewport::IsTopView()
 
 
 struct FUV2Data;
-struct FUntransformedVertex;
 struct FProjectorRelativeRenderInfo;
 struct HHitProxy;
 class FTerrainVertexStream;
@@ -6127,7 +6123,48 @@ FArchive & operator<<(FArchive & p0, FLightMap & p1) { static FArchive dummy; re
 FArchive & operator<<(FArchive & p0, FLightMapTexture & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFPoly@@@Z
-FArchive & operator<<(FArchive & p0, FPoly & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FPoly & V) {
+	// NumVertices first (compact index)
+	Ar << *(FCompactIndex*)&V.NumVertices;
+	// Base(3) + Normal(3) + TextureU(3) + TextureV(3) = 12 floats
+	for (INT i = 0; i < 12; i++)
+		Ar.ByteOrderSerialize((BYTE*)&V.Base + i * 4, 4);
+	// Variable-length vertex array
+	for (INT i = 0; i < V.NumVertices; i++) {
+		Ar.ByteOrderSerialize(&V.Vertex[i].X, 4);
+		Ar.ByteOrderSerialize(&V.Vertex[i].Y, 4);
+		Ar.ByteOrderSerialize(&V.Vertex[i].Z, 4);
+	}
+	// PolyFlags
+	Ar.ByteOrderSerialize(&V.PolyFlags, 4);
+	// Object references and name
+	Ar << *(UObject**)&V.Actor;
+	Ar << *(UObject**)&V.Material;
+	Ar << V.ItemName;
+	// Link indices
+	Ar << *(FCompactIndex*)&V.iLink;
+	Ar << *(FCompactIndex*)&V.iBrushPoly;
+	// Legacy Ver < 0x4E path omitted (pre-Ravenshield format)
+	// Ravenshield extensions (LicenseeVer > 5)
+	if (Ar.LicenseeVer() > 5) {
+		Ar.ByteOrderSerialize(&V._RvsExtra[0x38], 4);
+		Ar.Serialize(&V._RvsExtra[0x40], 1);
+		Ar.Serialize(&V._RvsExtra[0x46], 1);
+		Ar.Serialize(&V._RvsExtra[0x45], 1);
+		Ar.Serialize(&V._RvsExtra[0x44], 1);
+		Ar.Serialize(&V._RvsExtra[0x47], 1);
+		Ar.Serialize(&V._RvsExtra[0x48], 1);
+	}
+	if (Ar.LicenseeVer() > 6) {
+		Ar.ByteOrderSerialize(&V._RvsExtra[0x3C], 4);
+	}
+	if (Ar.Ver() > 0x69) {
+		Ar.ByteOrderSerialize(&V._RvsExtra[0x34], 4);
+	} else if (Ar.IsLoading()) {
+		*(FLOAT*)&V._RvsExtra[0x34] = 32.0f; // Default LightMapScale
+	}
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRaw32BitIndexBuffer@@@Z
 FArchive & operator<<(FArchive & p0, FRaw32BitIndexBuffer & p1) { static FArchive dummy; return dummy; }
@@ -6145,13 +6182,18 @@ FArchive & operator<<(FArchive & p0, FSkinVertexStream & p1) { static FArchive d
 FArchive & operator<<(FArchive & p0, FStaticLightMapTexture & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshBatcherVertex@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshBatcherVertex & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FStaticMeshBatcherVertex & p1) { return Ar; } // empty in original
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshLightInfo@@@Z
 FArchive & operator<<(FArchive & p0, FStaticMeshLightInfo & p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshMaterial@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshMaterial & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
+	Ar << *(UObject**)&V.Material;
+	Ar << *(FCompactIndex*)&V.Flags1;
+	Ar << *(FCompactIndex*)&V.Flags2;
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshSection@@@Z
 FArchive & operator<<(FArchive & p0, FStaticMeshSection & p1) { static FArchive dummy; return dummy; }
@@ -6176,10 +6218,31 @@ FArchive & operator<<(FArchive& Ar, FURL& U) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFBspVertex@@@Z
-FArchive & operator<<(FArchive & p0, FBspVertex & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
+	// Always serialize: offsets 0x00-0x08 (3 floats), 0x18-0x24 (4 floats)
+	Ar.ByteOrderSerialize(&V._Data[0x00], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x04], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x08], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x18], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x1C], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x20], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x24], 4);
+	// Version > 108: serialize 3 more floats at 0x0C-0x14
+	if (Ar.Ver() > 0x6C) {
+		Ar.ByteOrderSerialize(&V._Data[0x0C], 4);
+		Ar.ByteOrderSerialize(&V._Data[0x10], 4);
+		Ar.ByteOrderSerialize(&V._Data[0x14], 4);
+	}
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFPosNormTexData@@@Z
-FArchive & operator<<(FArchive & p0, FPosNormTexData & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
+	// 10 floats: offsets 0x00-0x24
+	for (INT i = 0; i < 10; i++)
+		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFProjectorRelativeRenderInfo@@@Z
 FArchive & operator<<(FArchive & p0, FProjectorRelativeRenderInfo & p1) { static FArchive dummy; return dummy; }
@@ -6188,28 +6251,84 @@ FArchive & operator<<(FArchive & p0, FProjectorRelativeRenderInfo & p1) { static
 FArchive & operator<<(FArchive & p0, FProjectorRenderInfo * p1) { static FArchive dummy; return dummy; }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFSkinVertex@@@Z
-FArchive & operator<<(FArchive & p0, FSkinVertex & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
+	// 16 floats: offsets 0x00-0x3C
+	for (INT i = 0; i < 16; i++)
+		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionNode@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshCollisionNode & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
+	// 4 FCompactIndex values at offsets 0x00, 0x04, 0x08, 0x0C
+	Ar << *(FCompactIndex*)&V._Data[0x00];
+	Ar << *(FCompactIndex*)&V._Data[0x04];
+	Ar << *(FCompactIndex*)&V._Data[0x08];
+	Ar << *(FCompactIndex*)&V._Data[0x0C];
+	// FBox at offset 0x10
+	Ar << V.Box;
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionTriangle@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshCollisionTriangle & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
+	// 16 floats (4 FPlanes) via ByteOrderSerialize
+	for (INT i = 0; i < 16; i++)
+		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
+	// 4 FCompactIndex values at offsets 0x40, 0x44, 0x48, 0x4C
+	Ar << *(FCompactIndex*)&V._Data[0x40];
+	Ar << *(FCompactIndex*)&V._Data[0x44];
+	Ar << *(FCompactIndex*)&V._Data[0x48];
+	Ar << *(FCompactIndex*)&V._Data[0x4C];
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshUV@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshUV & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
+	Ar.ByteOrderSerialize(&V._Data[0], 4);
+	Ar.ByteOrderSerialize(&V._Data[4], 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshVertex & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
+	// 6 floats: Position (3) + Normal (3)
+	for (INT i = 0; i < 6; i++)
+		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
+	// Legacy version paths for Ver < 0x70 and Ver == 0x6F omitted
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFTerrainVertex@@@Z
-FArchive & operator<<(FArchive & p0, FTerrainVertex & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
+	// 6 floats at 0x00-0x14
+	for (INT i = 0; i < 6; i++)
+		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
+	// 4 individual bytes at 0x18-0x1B (serialized in reverse order per Ghidra)
+	Ar.Serialize(&V._Data[0x1A], 1);
+	Ar.Serialize(&V._Data[0x19], 1);
+	Ar.Serialize(&V._Data[0x18], 1);
+	Ar.Serialize(&V._Data[0x1B], 1);
+	// 2 floats at 0x1C-0x20
+	Ar.ByteOrderSerialize(&V._Data[0x1C], 4);
+	Ar.ByteOrderSerialize(&V._Data[0x20], 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUV2Data@@@Z
-FArchive & operator<<(FArchive & p0, FUV2Data & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
+	Ar.ByteOrderSerialize(&D, 4);
+	Ar.ByteOrderSerialize((BYTE*)&D + 4, 4);
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUntransformedVertex@@@Z
-FArchive & operator<<(FArchive & p0, FUntransformedVertex & p1) { static FArchive dummy; return dummy; }
+FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
+	// 11 floats: offsets 0x00-0x28
+	for (INT i = 0; i < 11; i++)
+		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
+	return Ar;
+}
 
 // ?GNewCollisionHash@@YAPAVFCollisionHashBase@@XZ
 FCollisionHashBase * GNewCollisionHash() {
