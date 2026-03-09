@@ -198,6 +198,9 @@ static BYTE GR6Terrorist_OldSpecialAnimValid;
 static BYTE GR6Terrorist_OldHealth;
 static BYTE GR6Terrorist_OldDefCon;
 
+// Statics used by AR6PlayerController PreNetReceive/PostNetReceive.
+static BYTE GR6PlayerController_OldTeamByte;
+
 // Statics used by AR6SoundReplicationInfo PreNetReceive/PostNetReceive.
 static BYTE GSoundRepInfo_OldCurrentWeapon;
 static BYTE GSoundRepInfo_OldNewWeaponSound;
@@ -2446,10 +2449,19 @@ void AR6PlayerController::PlayVoicesPriority()
 
 void AR6PlayerController::PostNetReceive()
 {
+	guard(AR6PlayerController::PostNetReceive);
+	if (GR6PlayerController_OldTeamByte != ((BYTE*)_NativeData)[10])
+		eventPlayerTeamSelectionReceived();
+	APlayerController::PostNetReceive();
+	unguard;
 }
 
 void AR6PlayerController::PreNetReceive()
 {
+	guard(AR6PlayerController::PreNetReceive);
+	GR6PlayerController_OldTeamByte = ((BYTE*)_NativeData)[10];
+	APlayerController::PreNetReceive();
+	unguard;
 }
 
 AActor * AR6PlayerController::SelectActorForSound(AR6SoundReplicationInfo *)

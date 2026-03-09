@@ -3211,6 +3211,14 @@ class ENGINE_API APlayerController : public AController
 {
 public:
 	DECLARE_CLASS(APlayerController,AController,0|CLASS_Config|CLASS_NativeReplication,Engine)
+
+	// Hidden native data (772 bytes at 0x4EC-0x7EF).
+	// These exist in the retail binary but are not declared in the SDK headers.
+	// Constructor initialises FVectors from 0x5EC, FRotators, FStrings, FStringNoInits,
+	// and an FArray at 0x7DC. The scalar region 0x4EC-0x5EB contains BYTEs, INTs,
+	// and a bitfield at 0x524. Identified: UPlayer* at 0x5B4 (SetPlayer).
+	INT _NativeData[193];
+
 	// Indexed exec
 	DECLARE_FUNCTION(execFindStairRotation)
 	DECLARE_FUNCTION(execResetKeyboard)
@@ -3277,6 +3285,12 @@ class ENGINE_API AAIController : public AController
 {
 public:
 	DECLARE_CLASS(AAIController,AController,0|CLASS_NativeReplication,Engine)
+
+	// Hidden native data (12 bytes at 0x4EC-0x4F7).
+	// These exist in the retail binary but are not declared in the SDK headers.
+	// The copy constructor copies: a 2-bit bitfield at 0x4EC, INT at 0x4F0, INT at 0x4F4.
+	INT _NativeData[3];
+
 	DECLARE_FUNCTION(execWaitToSeeEnemy)
 	DECLARE_FUNCTION(execPollWaitToSeeEnemy)
 	// Auto-generated method declarations
