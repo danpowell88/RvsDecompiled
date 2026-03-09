@@ -300,8 +300,39 @@ void AR6AIController::FollowPath(enum eMovementPace, FName, INT)
 {
 }
 
-void AR6AIController::GotoOpenDoorState(AActor *)
+void AR6AIController::GotoOpenDoorState(AActor* NavPointToOpenFrom)
 {
+	guard(AR6AIController::GotoOpenDoorState);
+
+	check(NavPointToOpenFrom->IsA(AR6Door::StaticClass()));
+
+	// Tell pawn about the potential door to open
+	m_r6pawn->eventPotentialOpenDoor((AR6Door*)NavPointToOpenFrom);
+
+	// If pawn now has a door reference, verify we can open it
+	if (m_r6pawn->m_Door != NULL)
+	{
+		AR6IORotatingDoor* RotDoor = m_r6pawn->m_Door->m_RotatingDoor;
+		if (!eventCanOpenDoor(RotDoor))
+		{
+			m_r6pawn->eventRemovePotentialOpenDoor((AR6Door*)NavPointToOpenFrom);
+			eventOpenDoorFailed();
+			return;
+		}
+	}
+
+	// Save current state name so we can return after the door is opened
+	FName CurrentState = (StateFrame && StateFrame->StateNode) ? StateFrame->StateNode->GetFName() : NAME_None;
+	if (CurrentState != m_openDoorNextState)
+		m_openDoorNextState = CurrentState;
+
+	m_closeDoor = NULL;
+
+	// Transition to the OpenDoor state
+	GotoState(FName(TEXT("OpenDoor"), FNAME_Find));
+	GotoLabel(NAME_Begin);
+
+	unguard;
 }
 
 INT AR6AIController::HearingCheck(FVector SourcePos, FVector TargetPos)
@@ -313,9 +344,41 @@ INT AR6AIController::HearingCheck(FVector SourcePos, FVector TargetPos)
 	unguard;
 }
 
-INT AR6AIController::NeedToOpenDoor(AActor *)
+INT AR6AIController::NeedToOpenDoor(AActor* TestActor)
 {
+	guard(AR6AIController::NeedToOpenDoor);
+
+	if (m_r6pawn->m_ePawnType == 1)
+	{
+		// Rainbow operative: check the pawn's associated door
+		AR6Door* Door = m_r6pawn->m_Door;
+		if (Door != NULL && Door->m_RotatingDoor->m_bIsDoorClosed)
+		{
+			FCheckResult Hit(1.0f);
+			XLevel->SingleLineCheck(Hit, Pawn, TestActor->Location, Pawn->Location, 0xBF, FVector(0,0,0));
+			if (Hit.Actor != NULL && Hit.Actor->IsA(AR6IORotatingDoor::StaticClass()))
+				return 1;
+		}
+	}
+	else if (TestActor != NULL && TestActor->IsA(AR6Door::StaticClass()))
+	{
+		// Non-rainbow: test if the actor itself is a closed door in our path
+		AR6Door* Door = (AR6Door*)TestActor;
+		if (!Door->m_RotatingDoor->m_bIsDoorClosed)
+			return 0;
+		if (Door->m_RotatingDoor->WillOpenOnTouch(m_r6pawn))
+			return 0;
+
+		FCheckResult Hit(1.0f);
+		XLevel->SingleLineCheck(Hit, Pawn, TestActor->Location, Pawn->Location, 0xBF, FVector(0,0,0));
+		if (Hit.Actor != NULL && Hit.Actor->IsA(AR6IORotatingDoor::StaticClass()))
+			return 1;
+		return 0;
+	}
+
 	return 0;
+
+	unguard;
 }
 
 INT AR6AIController::SetDestinationToNextInCache()
@@ -3711,9 +3774,29 @@ void AR6StairVolume::Spawned()
 
 // --- AR6TeamMemberReplicationInfo ---
 
-INT AR6TeamMemberReplicationInfo::IsNetRelevantFor(APlayerController *, AActor *, FVector)
+INT AR6TeamMemberReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*, FVector)
 {
+	guard(AR6TeamMemberReplicationInfo::IsNetRelevantFor);
+
+	// Check viewer's pawn directly
+	APawn* ViewPawn = Viewer->Pawn;
+	if (ViewPawn != NULL)
+		return IsRelevantToTeamMember(ViewPawn);
+
+	// Fallback: check cached view target in APlayerController hidden native data
+	// APlayerController+0x5B8 holds a ViewTarget actor pointer
+	AActor* ViewTarget = *(AActor**)((BYTE*)Viewer + 0x5B8);
+	if (ViewTarget != NULL)
+	{
+		// Original calls vtable[0x68/4] which returns APawn* (GetPlayerPawn)
+		ViewPawn = ViewTarget->GetPlayerPawn();
+		if (ViewPawn != NULL)
+			return IsRelevantToTeamMember(ViewPawn);
+	}
+
 	return 0;
+
+	unguard;
 }
 
 INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn* Other)
