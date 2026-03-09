@@ -1184,22 +1184,26 @@ class ENGINE_API FPoly
 {
 public:
 
-	FVector Base;
-	FVector Normal;
-	FVector TextureU;
-	FVector TextureV;
-	FVector Vertex[16]; // FPoly::MAX_VERTICES
-	INT NumVertices;
-	DWORD PolyFlags;
-	ABrush* Actor;
-	UMaterial* Material;
-	FName ItemName;
-	INT iLink;
-	INT iBrushPoly;
-	FLOAT PanU;
-	FLOAT PanV;
-	INT SavePolyIndex;
-	FLOAT LightMapScale;
+	// Layout verified from Ghidra decompilation of FPoly::Init, Area, Reverse.
+	// Ravenshield reordered fields vs UT99: PolyFlags/Actor/Material/ItemName
+	// now precede NumVertices (at 0x100, not 0xF0).
+	FVector Base;			// 0x00
+	FVector Normal;			// 0x0C
+	FVector TextureU;		// 0x18
+	FVector TextureV;		// 0x24
+	FVector Vertex[16];		// 0x30 (FPoly::MAX_VERTICES, 192 bytes to 0xEF)
+	DWORD PolyFlags;		// 0xF0
+	ABrush* Actor;			// 0xF4
+	UMaterial* Material;	// 0xF8
+	FName ItemName;			// 0xFC
+	INT NumVertices;		// 0x100
+	INT iLink;				// 0x104
+	INT iBrushPoly;			// 0x108
+	INT SavePolyIndex;		// 0x10C
+	// Ravenshield adds ~76 bytes of additional fields here (0x110-0x15B).
+	// Known: FVector at 0x110, LightMapScale (=32.0f) at 0x144.
+	// Total FPoly size = 0x15C (348 bytes, confirmed from operator= copy count).
+	BYTE _RvsExtra[76];		// 0x110 to 0x15B
 
 	FPoly();
 	void Init();

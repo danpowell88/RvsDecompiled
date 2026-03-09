@@ -6253,7 +6253,9 @@ FOctreeNode::~FOctreeNode() {}
 FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3, int p4, int p5, int p6, int p7) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FPoly@@QAE@XZ
-FPoly::FPoly() {}
+FPoly::FPoly() {
+	Init();
+}
 
 // ??0FRebuildTools@@QAE@ABV0@@Z
 FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
@@ -6328,7 +6330,10 @@ FPathBuilder & FPathBuilder::operator=(FPathBuilder const & p0) { static FPathBu
 FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
 
 // ??4FPoly@@QAEAAV0@ABV0@@Z
-FPoly & FPoly::operator=(FPoly const & p0) { static FPoly dummy; return dummy; }
+FPoly & FPoly::operator=(FPoly const & Other) {
+	appMemcpy(this, &Other, sizeof(FPoly));
+	return *this;
+}
 
 // ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
 FRebuildOptions * FRebuildTools::GetCurrent() { return NULL; }
@@ -6406,7 +6411,17 @@ UMatSubAction * FMatineeTools::GetCurrentSubAction() { return NULL; }
 UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * p0) { return NULL; }
 
 // ?Area@FPoly@@QAEMXZ
-float FPoly::Area() { return 0; }
+float FPoly::Area() {
+	FLOAT TotalArea = 0.f;
+	FVector Side1 = Vertex[1] - Vertex[0];
+	for( INT i=2; i<NumVertices; i++ ) {
+		FVector Side2 = Vertex[i] - Vertex[0];
+		FLOAT TriArea = (Side1 ^ Side2).Size();
+		TotalArea += TriArea;
+		Side1 = Side2;
+	}
+	return TotalArea;
+}
 
 // ?GetActionIdx@FMatineeTools@@QAEHPAVASceneManager@@PAVUMatAction@@@Z
 int FMatineeTools::GetActionIdx(ASceneManager * p0, UMatAction * p1) { return 0; }
@@ -6430,7 +6445,22 @@ int FPoly::CalcNormal(int p0) { return 0; }
 int FPoly::DoesLineIntersect(FVector p0, FVector p1, FVector * p2) { return 0; }
 
 // ?Faces@FPoly@@QBEHABV1@@Z
-int FPoly::Faces(FPoly const & p0) const { return 0; }
+int FPoly::Faces(FPoly const & Other) const {
+	if( IsCoplanar(Other) )
+		return 0;
+	for( INT i=0; i<Other.NumVertices; i++ ) {
+		FLOAT d = (Other.Vertex[i] - Base) | Normal;
+		if( d < 0.f ) {
+			for( INT j=0; j<NumVertices; j++ ) {
+				FLOAT d2 = (Vertex[j] - Other.Base) | Other.Normal;
+				if( d2 > 0.f )
+					return 1;
+			}
+			return 0;
+		}
+	}
+	return 0;
+}
 
 // ?Finalize@FPoly@@QAEHH@Z
 int FPoly::Finalize(int p0) { return 0; }
@@ -6439,13 +6469,28 @@ int FPoly::Finalize(int p0) { return 0; }
 int FPoly::Fix() { return 0; }
 
 // ?IsBackfaced@FPoly@@QBEHABVFVector@@@Z
-int FPoly::IsBackfaced(FVector const & p0) const { return 0; }
+int FPoly::IsBackfaced(FVector const & Point) const {
+	return ((Point - Base) | Normal) < 0.f;
+}
 
 // ?IsCoplanar@FPoly@@QBEHABV1@@Z
-int FPoly::IsCoplanar(FPoly const & p0) const { return 0; }
+int FPoly::IsCoplanar(FPoly const & Other) const {
+	FLOAT d = (Base - Other.Base) | Normal;
+	if( d < 0.f ) d = -d;
+	if( d < 0.01f ) {
+		FLOAT dot = Other.Normal | Normal;
+		if( dot < 0.f ) dot = -dot;
+		if( dot > 0.9999f )
+			return 1;
+	}
+	return 0;
+}
 
 // ?OnPlane@FPoly@@QAEHVFVector@@@Z
-int FPoly::OnPlane(FVector p0) { return 0; }
+int FPoly::OnPlane(FVector Point) {
+	FLOAT d = (Point - Vertex[0]) | Normal;
+	return (d > -0.1f && d < 0.1f) ? 1 : 0;
+}
 
 // ?OnPoly@FPoly@@QAEHVFVector@@@Z
 int FPoly::OnPoly(FVector p0) { return 0; }
@@ -6732,13 +6777,40 @@ void FPathBuilder::definePaths(ULevel * p0) {}
 void FPathBuilder::undefinePaths(ULevel * p0) {}
 
 // ?Init@FPoly@@QAEXXZ
-void FPoly::Init() {}
+void FPoly::Init() {
+	Base     = FVector(0,0,0);
+	Normal   = FVector(0,0,0);
+	TextureU = FVector(0,0,0);
+	TextureV = FVector(0,0,0);
+	PolyFlags   = 0;
+	Actor       = NULL;
+	Material    = NULL;
+	ItemName    = FName(NAME_None);
+	NumVertices = 0;
+	iLink       = INDEX_NONE;
+	iBrushPoly  = INDEX_NONE;
+	SavePolyIndex = INDEX_NONE;
+	appMemzero(_RvsExtra, sizeof(_RvsExtra));
+	// LightMapScale at _RvsExtra offset 52 (0x144 - 0x110) = 32.0f
+	*(FLOAT*)&_RvsExtra[52] = 32.0f;
+	// Sentinel values at known offsets within _RvsExtra
+	*(INT*)&_RvsExtra[56] = INDEX_NONE;  // 0x148
+	*(INT*)&_RvsExtra[60] = INDEX_NONE;  // 0x14C
+	*(DWORD*)&_RvsExtra[68] = 0xFF808080; // 0x154
+}
 
 // ?InsertVertex@FPoly@@QAEXHVFVector@@@Z
 void FPoly::InsertVertex(int p0, FVector p1) {}
 
 // ?Reverse@FPoly@@QAEXXZ
-void FPoly::Reverse() {}
+void FPoly::Reverse() {
+	Normal *= -1.f;
+	for( INT i=0; i<NumVertices/2; i++ ) {
+		FVector Temp = Vertex[i];
+		Vertex[i] = Vertex[NumVertices-1-i];
+		Vertex[NumVertices-1-i] = Temp;
+	}
+}
 
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z
 void FPoly::SplitInHalf(FPoly * p0) {}
