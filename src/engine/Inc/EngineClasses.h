@@ -4071,6 +4071,23 @@ class ENGINE_API UMaterial : public UObject
 public:
 DECLARE_CLASS(UMaterial,UObject,0,Engine)
 
+// Data members (from Material.uc — noexport, layout must match .uc order).
+UMaterial*  FallbackMaterial;           // 0x2C
+UMaterial*  DefaultMaterial;            // 0x30
+BITFIELD    UseFallback:1;              // 0x34
+BITFIELD    Validated:1;
+BITFIELD    m_bForceNoSort:1;
+BITFIELD    m_bDynamicMaterial:1;
+BITFIELD    m_bProneTrail:1;
+INT         m_SpecificRenderData;       // 0x38
+INT         m_iPenetration;             // 0x3C
+INT         m_iResistanceFactor;        // 0x40
+UClass*     m_pHitEffect;              // 0x44
+UClass*     m_pFootStep;               // 0x48
+BYTE        m_eSurfIdForSnd;           // 0x4C (ESurfaceType)
+UMaterial*  m_pUnused;                 // 0x50
+BYTE        m_iNightVisionFactor;      // 0x54
+
 UMaterial* ConvertPolyFlagsToMaterial(UMaterial*, DWORD);
 static void ClearFallbacks();
 
@@ -4298,6 +4315,10 @@ class ENGINE_API UConstantColor : public UConstantMaterial
 {
 public:
 	DECLARE_CLASS(UConstantColor,UConstantMaterial,0,Engine)
+
+	// Data members (from ConstantColor.uc).
+	FColor Color;
+
 	// Auto-generated method declarations
 	virtual FColor GetColor(float);
 };

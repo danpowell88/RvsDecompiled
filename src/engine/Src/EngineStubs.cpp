@@ -73,9 +73,9 @@ void AMover::performPhysics(float)
 {
 }
 
-int AMover::ShouldTrace(AActor *,DWORD)
+int AMover::ShouldTrace(AActor*,DWORD TraceFlags)
 {
-	return 0;
+	return TraceFlags & 2;
 }
 
 void AMover::AddMyMarker(AActor *)
@@ -1071,43 +1071,8 @@ UMaterial * UMaterial::ConvertPolyFlagsToMaterial(UMaterial *,DWORD)
 	return NULL;
 }
 
-void UMaterial::Serialize(FArchive &)
-{
-}
 
-void UMaterial::SetValidated(int)
-{
-}
 
-int UMaterial::CheckCircularReferences(TArray<UMaterial *> &)
-{
-	return 0;
-}
-
-UMaterial * UMaterial::CheckFallback()
-{
-	return NULL;
-}
-
-UMaterial * UMaterial::GetDiffuse()
-{
-	return NULL;
-}
-
-int UMaterial::GetValidated()
-{
-	return 0;
-}
-
-int UMaterial::HasFallback()
-{
-	return 0;
-}
-
-int UMaterial::IsTransparent()
-{
-	return 0;
-}
 
 // --- UMeshInstance ---
 int UMeshInstance::StopAnimating(int)
@@ -1974,9 +1939,6 @@ void UTexture::Tick(float)
 {
 }
 
-void UTexture::Serialize(FArchive &)
-{
-}
 
 void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
@@ -1994,9 +1956,6 @@ void UTexture::ConstantTimeTick()
 {
 }
 
-void UTexture::Destroy()
-{
-}
 
 UBitmapMaterial * UTexture::Get(double,UViewport *)
 {
@@ -2012,10 +1971,6 @@ void UTexture::Init(int,int)
 {
 }
 
-int UTexture::IsTransparent()
-{
-	return 0;
-}
 
 // --- UVertMeshInstance ---
 FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName)
@@ -2612,12 +2567,24 @@ FString APlayerController::GetPlayerNetworkAddress()
 
 AActor * APlayerController::GetViewTarget()
 {
-	return NULL;
+	AActor*& ViewTarget = *(AActor**)(&_NativeData[51]); // offset 0x5B8
+	if( !ViewTarget )
+	{
+		if( Pawn && !Pawn->bDeleteMe && !Pawn->bPendingDelete )
+		{
+			ViewTarget = Pawn;
+			return Pawn;
+		}
+		ViewTarget = this;
+	}
+	return ViewTarget;
 }
 
-int APlayerController::IsNetRelevantFor(APlayerController *,AActor *,FVector)
+int APlayerController::IsNetRelevantFor(APlayerController* RealViewer,AActor* Viewer,FVector SrcLocation)
 {
-	return 0;
+	if( this == RealViewer )
+		return 1;
+	return AActor::IsNetRelevantFor( RealViewer, Viewer, SrcLocation );
 }
 
 // --- APlayerStart ---
@@ -4193,19 +4160,11 @@ int UBinaryFileDownload::TrySkipFile()
 }
 
 // --- UBitmapMaterial ---
-int UBitmapMaterial::MaterialUSize()
-{
-	return 0;
-}
 
-int UBitmapMaterial::MaterialVSize()
-{
-	return 0;
-}
 
 UBitmapMaterial * UBitmapMaterial::Get(double,UViewport *)
 {
-	return NULL;
+	return this;
 }
 
 // --- UCameraEffect ---
@@ -4301,44 +4260,17 @@ void UClient::Init(UEngine *)
 }
 
 // --- UCombiner ---
-BYTE UCombiner::RequiredUVStreams()
-{
-	return 0;
-}
 
-int UCombiner::RequiresSorting()
-{
-	return 0;
-}
 
-int UCombiner::MaterialUSize()
-{
-	return 0;
-}
 
-int UCombiner::MaterialVSize()
-{
-	return 0;
-}
 
-void UCombiner::PostEditChange()
-{
-}
 
-int UCombiner::CheckCircularReferences(TArray<UMaterial *> &)
-{
-	return 0;
-}
 
-int UCombiner::IsTransparent()
-{
-	return 0;
-}
 
 // --- UConstantColor ---
 FColor UConstantColor::GetColor(float)
 {
-	return FColor(0,0,0,0);
+	return Color;
 }
 
 // --- UConstantMaterial ---
@@ -4550,28 +4482,10 @@ void UFileChannel::Tick()
 }
 
 // --- UFinalBlend ---
-int UFinalBlend::RequiresSorting()
-{
-	return 0;
-}
 
-void UFinalBlend::SetValidated(int)
-{
-}
 
-void UFinalBlend::PostEditChange()
-{
-}
 
-int UFinalBlend::GetValidated()
-{
-	return 0;
-}
 
-int UFinalBlend::IsTransparent()
-{
-	return 0;
-}
 
 // --- UFluidSurfacePrimitive ---
 void UFluidSurfacePrimitive::Serialize(FArchive &)
@@ -4798,25 +4712,9 @@ int UMatSubAction::IsRunning()
 }
 
 // --- UMaterial ---
-BYTE UMaterial::RequiredUVStreams()
-{
-	return 0;
-}
 
-int UMaterial::RequiresSorting()
-{
-	return 0;
-}
 
-int UMaterial::MaterialUSize()
-{
-	return 0;
-}
 
-int UMaterial::MaterialVSize()
-{
-	return 0;
-}
 
 void UMaterial::ClearFallbacks()
 {
@@ -4913,39 +4811,12 @@ void UModel::AttachProjector(int,FProjectorRenderInfo *,FPlane *)
 }
 
 // --- UModifier ---
-BYTE UModifier::RequiredUVStreams()
-{
-	return 0;
-}
 
-int UModifier::RequiresSorting()
-{
-	return 0;
-}
 
-int UModifier::MaterialUSize()
-{
-	return 0;
-}
 
-int UModifier::MaterialVSize()
-{
-	return 0;
-}
 
-void UModifier::PostEditChange()
-{
-}
 
-int UModifier::CheckCircularReferences(TArray<UMaterial *> &)
-{
-	return 0;
-}
 
-int UModifier::IsTransparent()
-{
-	return 0;
-}
 
 // --- UMotionBlur ---
 void UMotionBlur::PostRender(UViewport *,FRenderInterface *)
@@ -4975,9 +4846,6 @@ UPalette * UPalette::ReplaceWithExisting()
 	return NULL;
 }
 
-void UPalette::Serialize(FArchive &)
-{
-}
 
 BYTE UPalette::BestMatch(FColor,int)
 {
@@ -5282,34 +5150,11 @@ void URenderDevice::HandleFullScreenEffects(int,int)
 }
 
 // --- UShader ---
-BYTE UShader::RequiredUVStreams()
-{
-	return 0;
-}
 
-int UShader::RequiresSorting()
-{
-	return 0;
-}
 
-int UShader::MaterialUSize()
-{
-	return 0;
-}
 
-int UShader::MaterialVSize()
-{
-	return 0;
-}
 
-void UShader::PostEditChange()
-{
-}
 
-int UShader::CheckCircularReferences(TArray<UMaterial *> &)
-{
-	return 0;
-}
 
 UMaterial * UShader::CheckFallback()
 {
@@ -5321,15 +5166,7 @@ UMaterial * UShader::GetDiffuse()
 	return NULL;
 }
 
-int UShader::HasFallback()
-{
-	return 0;
-}
 
-int UShader::IsTransparent()
-{
-	return 0;
-}
 
 // --- UShadowBitmapMaterial ---
 void UShadowBitmapMaterial::Destroy()
@@ -6036,14 +5873,7 @@ FMatrix * UTexScaler::GetMatrix(float)
 }
 
 // --- UTexture ---
-int UTexture::RequiresSorting()
-{
-	return 0;
-}
 
-void UTexture::PostLoad()
-{
-}
 
 void UTexture::Prime()
 {
@@ -6338,8 +6168,6 @@ ANavigationPoint * FPathBuilder::newPath(FVector p0) { return NULL; }
 // ?DistanceToHashPlane@FCollisionHash@@AAEMHMMH@Z
 float FCollisionHash::DistanceToHashPlane(int p0, float p1, float p2, int p3) { return 0; }
 
-// ?findNewFloor@APawn@@AAEHVFVector@@MMH@Z
-int APawn::findNewFloor(FVector p0, float p1, float p2, int p3) { return 0; }
 
 // ?TestReach@FPathBuilder@@AAEHVFVector@@0@Z
 int FPathBuilder::TestReach(FVector p0, FVector p1) { return 0; }
@@ -7355,21 +7183,7 @@ FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appM
 // ============================================================================
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
-// ============================================================================
-// UNetConnection — virtual method impls for vftable emission
-// ============================================================================
-void UNetConnection::Serialize(const TCHAR* Data, EName Event) {}
-void UNetConnection::Destroy() {}
-INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
-void UNetConnection::Serialize(FArchive& Ar) { UPlayer::Serialize(Ar); }
 
-// ============================================================================
-// UViewport — virtual method impls for vftable emission
-// ============================================================================
-void UViewport::Serialize(const TCHAR* Data, EName Event) {}
-void UViewport::Destroy() {}
-INT UViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar) { return 0; }
-void UViewport::Serialize(FArchive& Ar) { UPlayer::Serialize(Ar); }
 
 // ============================================================================
 // TLazyArray<BYTE> — force emission of implicitly-declared special members
@@ -7391,15 +7205,8 @@ void _ForceTLazyArrayByteEmit() {
 
 /*-----------------------------------------------------------------------------
   AReplicationInfo virtual method stubs.
-  Declared in EngineClasses.h but never defined elsewhere.
-  AReplicationInfo mirrors URenderDevice's virtual interface.
+  Only methods NOT defined in EngineClassImpl.cpp remain here.
 -----------------------------------------------------------------------------*/
-void AReplicationInfo::StaticConstructor() {}
-void AReplicationInfo::StartVideo(UCanvas*, INT, INT, INT) {}
-void AReplicationInfo::StopVideo(UCanvas*) {}
-INT  AReplicationInfo::OpenVideo(UCanvas*, char*, char*, INT) { return 0; }
-void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface, INT) {}
-void AReplicationInfo::CloseVideo(UCanvas*) {}
 void AReplicationInfo::DisplayVideo(UCanvas*, void*, INT) {}
 void AReplicationInfo::Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT) {}
 void AReplicationInfo::GetAvailableResolutions(TArray<FResolutionInfo>&) {}

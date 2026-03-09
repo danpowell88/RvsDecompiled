@@ -215,7 +215,7 @@ UMaterial* UShader::CheckFallback()
 
 UBOOL UShader::HasFallback()
 {
-	return 0;
+	return (FallbackMaterial != NULL) || (Diffuse != NULL);
 }
 
 UMaterial* UShader::GetDiffuse()
