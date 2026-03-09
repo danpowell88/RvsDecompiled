@@ -1293,6 +1293,20 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::startNewPhysics);
+	if( DeltaTime < 0.0003f )
+		return;
+	switch( Physics )
+	{
+	case PHYS_Walking:      physWalking(DeltaTime, Iterations); break;
+	case PHYS_Falling:      physFalling(DeltaTime, Iterations); break;
+	case PHYS_Swimming:     physSwimming(DeltaTime, Iterations); break;
+	case PHYS_Flying:       physFlying(DeltaTime, Iterations); break;
+	case PHYS_Spider:       physSpider(DeltaTime, Iterations); break;
+	case PHYS_Ladder:       physLadder(DeltaTime, Iterations); break;
+	case PHYS_RootMotion:   physRootMotion(DeltaTime); break;
+	case PHYS_Karma:        physKarma(DeltaTime); break;
+	case PHYS_KarmaRagDoll: physKarmaRagDoll(DeltaTime); break;
+	}
 	unguard;
 }
 
@@ -1428,6 +1442,8 @@ void AController::ShowSelf()
 DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 {
 	guard(AController::SeePawn);
+	if( Seen && Pawn )
+		return Pawn->R6SeePawn(Seen, bMaySkipChecks);
 	return 0;
 	unguard;
 }
