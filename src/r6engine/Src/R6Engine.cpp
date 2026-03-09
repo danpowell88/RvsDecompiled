@@ -944,7 +944,7 @@ FVector AR6DeploymentZone::FindRandomPointInArea()
 
 FVector AR6DeploymentZone::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
 {
-	return FVector(0,0,0);
+	return FindRandomPointInArea();
 }
 
 void AR6DeploymentZone::FirstInit()
@@ -2426,6 +2426,22 @@ void AR6Pawn::physicsRotation(FLOAT, FVector)
 
 void AR6PlayerController::Destroy()
 {
+	guard(AR6PlayerController::Destroy);
+	while (m_PlayVoicesPriority.Num() > 0)
+	{
+		INT Ptr = m_PlayVoicesPriority(0).Ptr;
+		for (INT i = 0; i < m_PlayVoicesPriority.Num(); i++)
+		{
+			if (m_PlayVoicesPriority(i).Ptr == Ptr)
+			{
+				m_PlayVoicesPriority.Remove(i, 1);
+				i--;
+			}
+		}
+		GMalloc->Free((void*)Ptr);
+	}
+	AActor::Destroy();
+	unguard;
 }
 
 FString AR6PlayerController::GetLocKeyNameByActionKey(TCHAR const *)
@@ -2464,18 +2480,30 @@ void AR6PlayerController::PreNetReceive()
 	unguard;
 }
 
-AActor * AR6PlayerController::SelectActorForSound(AR6SoundReplicationInfo *)
+AActor * AR6PlayerController::SelectActorForSound(AR6SoundReplicationInfo * SoundRepInfo)
 {
-	return NULL;
+	if (!SoundRepInfo)
+	{
+		SoundRepInfo = (AR6SoundReplicationInfo*)Pawn;
+		if (!SoundRepInfo)
+			return this;
+	}
+	return (AActor*)SoundRepInfo;
 }
 
 void AR6PlayerController::StopAndRemoveVoices(INT &)
 {
 }
 
-INT AR6PlayerController::Tick(FLOAT, enum ELevelTick)
+INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
-	return 0;
+	guard(AR6PlayerController::Tick);
+	if (*(INT*)((BYTE*)g_pEngine + 0x48) != 0)
+	{
+		PlayVoicesPriority();
+	}
+	return APlayerController::Tick(DeltaTime, TickType);
+	unguard;
 }
 
 void AR6PlayerController::UpdateCircumstantialAction()
