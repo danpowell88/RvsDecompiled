@@ -1329,7 +1329,33 @@ void AR6Door::CheckForErrors()
 
 INT AR6Door::PrunePaths()
 {
-	return 0;
+	guard(AR6Door::PrunePaths);
+
+	INT Count = 0;
+
+	for (INT i = 0; i < PathList.Num(); i++)
+	{
+		for (INT j = 0; j < PathList.Num(); j++)
+		{
+			if (PathList(i)->End != m_CorrespondingDoor && i != j && PathList(j)->bPruned == 0)
+			{
+				if (*PathList(j) <= *PathList(i))
+				{
+					if (PathList(j)->End->FindAlternatePath(PathList(i), PathList(j)->Distance))
+					{
+						Count++;
+						PathList(i)->bPruned = 1;
+						j = PathList.Num();
+					}
+				}
+			}
+		}
+	}
+
+	CleanUpPruned();
+	return Count;
+
+	unguard;
 }
 
 void AR6Door::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
@@ -3144,8 +3170,41 @@ ApplyYaw:
 	unguard;
 }
 
-void AR6RainbowAI::UpdateTimers(FLOAT)
+void AR6RainbowAI::UpdateTimers(FLOAT DeltaTime)
 {
+	if (m_fAttackTimerRate > 0.0f)
+	{
+		FLOAT fAccum = m_fAttackTimerCounter + DeltaTime;
+		m_fAttackTimerCounter = fAccum;
+
+		if (fAccum >= m_fAttackTimerRate)
+		{
+			if (m_fAttackTimerRate > 0.0f)
+			{
+				m_fAttackTimerCounter = fAccum - (FLOAT)(INT)(fAccum / m_fAttackTimerRate) * m_fAttackTimerRate;
+			}
+
+			if (Enemy != NULL || bFire != 0)
+			{
+				eventAttackTimer();
+
+				if (bFire != 0)
+				{
+					m_fFiringAttackTimer = (FLOAT)(appRand() % 6 + 1) * 0.05f;
+				}
+			}
+
+			goto CallSuper;
+		}
+	}
+
+	if (bFire != 0 && m_fFiringAttackTimer <= m_fAttackTimerCounter)
+	{
+		eventStopAttack();
+	}
+
+CallSuper:
+	AActor::UpdateTimers(DeltaTime);
 }
 
 void AR6RainbowAI::checkEnvironment()

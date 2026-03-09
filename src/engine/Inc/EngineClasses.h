@@ -6025,6 +6025,19 @@ class ENGINE_API UReachSpec : public UObject
 {
 public:
 	DECLARE_CLASS(UReachSpec,UObject,0,Engine)
+
+	// Native field layout (sorted by UE2 property system: BYTE, INT, BOOL, OBJECT)
+	BYTE bPruned;                    // 0x2C
+	// 3 bytes padding
+	INT Distance;                    // 0x30
+	INT CollisionRadius;             // 0x34
+	INT CollisionHeight;             // 0x38
+	INT reachFlags;                  // 0x3C
+	INT MaxLandingVelocity;          // 0x40
+	UBOOL bForced;                   // 0x44
+	class ANavigationPoint* Start;   // 0x48
+	class ANavigationPoint* End;     // 0x4C
+
 	// Auto-generated method declarations
 	int findBestReachable(AScout *);
 	int supports(int,int,int,int);
