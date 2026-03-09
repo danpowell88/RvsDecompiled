@@ -1277,8 +1277,9 @@ private:
 class ENGINE_API FSortedPathList
 {
 public:
-	BYTE Pad[64];
+	BYTE Pad[260]; // 65 dwords (0x104): count at offset 0x100
 	FSortedPathList();
+	FSortedPathList& operator=(const FSortedPathList&);
 	void addPath(ANavigationPoint*, INT);
 	ANavigationPoint* findEndAnchor(APawn*, AActor*, FVector, INT);
 	ANavigationPoint* findStartAnchor(APawn*);
@@ -1292,7 +1293,7 @@ class ENGINE_API FWaveModInfo
 {
 public:
 
-	BYTE Pad[128];
+	BYTE Pad[64]; // 16 dwords (0x40)
 	FWaveModInfo();
 	FWaveModInfo& operator=(const FWaveModInfo&);
 	INT ReadWaveInfo(TArray<BYTE>&);

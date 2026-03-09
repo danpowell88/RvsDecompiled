@@ -177,6 +177,7 @@ struct ENGINE_API FMipmapBase {
 };
 
 struct ENGINE_API FOrientation {
+	BYTE _Data[0x34]; // 52 bytes = 13 dwords. INT at 0x00, 6 dwords 0x04-0x18, FVector at 0x1C, FRotator at 0x28
 	FOrientation();
 	FOrientation& operator=(FOrientation);
 	int operator!=(FOrientation const &) const;
@@ -194,11 +195,14 @@ public:
 
 class ENGINE_API FReachSpec {
 public:
+	BYTE _Data[44]; // 11 dwords, shares operator= with FStaticMeshCollisionNode
 	FReachSpec& operator=(const FReachSpec&);
 };
 
 class ENGINE_API FRebuildOptions {
 public:
+	FString Name;     // 0x00: rebuild option name
+	INT Options[8];   // 0x0C: 8 option values
 	FRebuildOptions(FRebuildOptions const &);
 	FRebuildOptions();
 	~FRebuildOptions();
@@ -217,11 +221,14 @@ public:
 };
 
 struct ENGINE_API FStaticMeshCollisionNode {
+	BYTE _Data[16]; // 4 dwords before FBox
+	FBox Box;         // FBox at offset 0x10
 	FStaticMeshCollisionNode();
 	FStaticMeshCollisionNode& operator=(const FStaticMeshCollisionNode&);
 };
 
 struct ENGINE_API FStaticMeshCollisionTriangle {
+	BYTE _Data[84]; // 21 dwords: 4 FPlanes (64 bytes) + 5 extra dwords (20 bytes)
 	FStaticMeshCollisionTriangle(FStaticMeshCollisionTriangle const &);
 	FStaticMeshCollisionTriangle();
 	FStaticMeshCollisionTriangle& operator=(const FStaticMeshCollisionTriangle&);
@@ -229,6 +236,9 @@ struct ENGINE_API FStaticMeshCollisionTriangle {
 
 class ENGINE_API FStaticMeshMaterial {
 public:
+	UMaterial* Material; // 0x00
+	INT Flags1;          // 0x04, default 1
+	INT Flags2;          // 0x08, default 1
 	FStaticMeshMaterial(UMaterial *);
 	FStaticMeshMaterial& operator=(const FStaticMeshMaterial&);
 };
@@ -241,11 +251,13 @@ public:
 };
 
 struct ENGINE_API FStaticMeshTriangle {
+	BYTE _Data[260]; // 65 dwords (0x104): 3 FVectors + additional data. Shares operator= with FSortedPathList
 	FStaticMeshTriangle();
 	FStaticMeshTriangle& operator=(const FStaticMeshTriangle&);
 };
 
 struct ENGINE_API FStaticMeshUV {
+	BYTE _Data[8]; // 2 dwords (U, V floats), shares operator= with FPathBuilder
 	FStaticMeshUV& operator=(const FStaticMeshUV&);
 };
 

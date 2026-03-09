@@ -3502,16 +3502,25 @@ FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)
 // --- FOrientation ---
 FOrientation::FOrientation()
 {
+	*(INT*)&_Data[0x00] = 2;
+	*(INT*)&_Data[0x04] = 0;
+	*(INT*)&_Data[0x08] = 0;
+	*(INT*)&_Data[0x0C] = 0;
+	*(INT*)&_Data[0x10] = 0;
+	*(INT*)&_Data[0x14] = 0;
+	*(INT*)&_Data[0x18] = 0;
+	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-FOrientation& FOrientation::operator=(FOrientation)
+FOrientation& FOrientation::operator=(FOrientation Other)
 {
+	appMemcpy(this, &Other, 0x34);
 	return *this;
 }
 
-int FOrientation::operator!=(FOrientation const &) const
+int FOrientation::operator!=(FOrientation const & Other) const
 {
-	return 0;
+	return *(INT*)&_Data[0x18] != *(INT*)&Other._Data[0x18];
 }
 
 // --- FR6MatineePreviewProxy ---
@@ -3600,36 +3609,59 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer&)
 }
 
 // --- FReachSpec ---
-FReachSpec& FReachSpec::operator=(const FReachSpec&)
+FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
 {
+	appMemcpy(this, &Other, 44); // 11 dwords, shared with FStaticMeshCollisionNode
 	return *this;
 }
 
 // --- FRebuildOptions ---
-FRebuildOptions::FRebuildOptions(FRebuildOptions const &)
+FRebuildOptions::FRebuildOptions(FRebuildOptions const & Other)
+	: Name(Other.Name)
 {
+	appMemcpy(Options, Other.Options, sizeof(Options));
 }
 
 FRebuildOptions::FRebuildOptions()
 {
+	Options[0] = 2;    // 0x0C
+	Options[1] = 79;   // 0x10
+	Options[2] = 15;   // 0x14
+	Options[3] = 70;   // 0x18
+	Options[4] = 7;    // 0x1C
+	Options[5] = 0;    // 0x20
+	Options[6] = 0;    // 0x24
+	Options[7] = 1;    // 0x28
+	Name = TEXT("Default");
 }
 
 FRebuildOptions::~FRebuildOptions()
 {
+	// Name's implicit destructor handles FString cleanup
 }
 
-FRebuildOptions FRebuildOptions::operator=(FRebuildOptions)
+FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
-	return FRebuildOptions();
+	Name = Other.Name;
+	appMemcpy(Options, Other.Options, sizeof(Options));
+	return *this;
 }
 
 FString FRebuildOptions::GetName()
 {
-	return FString();
+	return Name;
 }
 
 void FRebuildOptions::Init()
 {
+	Options[0] = 2;
+	Options[1] = 79;
+	Options[2] = 15;
+	Options[3] = 70;
+	Options[4] = 7;
+	Options[5] = 0;
+	Options[6] = 0;
+	Options[7] = 1;
 }
 
 // --- FSkinVertexStream ---
@@ -3758,34 +3790,45 @@ FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapT
 // --- FStaticMeshCollisionNode ---
 FStaticMeshCollisionNode::FStaticMeshCollisionNode()
 {
+	// Ghidra: only constructs FBox at offset 0x10 (empty default ctor)
 }
 
-FStaticMeshCollisionNode& FStaticMeshCollisionNode::operator=(const FStaticMeshCollisionNode&)
+FStaticMeshCollisionNode& FStaticMeshCollisionNode::operator=(const FStaticMeshCollisionNode& Other)
 {
+	appMemcpy(this, &Other, 44); // 11 dwords, shared with FReachSpec
 	return *this;
 }
 
 // --- FStaticMeshCollisionTriangle ---
-FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle(FStaticMeshCollisionTriangle const &)
+FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle(FStaticMeshCollisionTriangle const & Other)
 {
+	appMemcpy(_Data, Other._Data, 84); // 21 dwords: 4 FPlanes + 5 extra dwords
 }
 
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle()
 {
+	// Ghidra: constructs 4 FPlanes (all empty default ctors)
 }
 
-FStaticMeshCollisionTriangle& FStaticMeshCollisionTriangle::operator=(const FStaticMeshCollisionTriangle&)
+FStaticMeshCollisionTriangle& FStaticMeshCollisionTriangle::operator=(const FStaticMeshCollisionTriangle& Other)
 {
+	appMemcpy(_Data, Other._Data, 84); // 21 dwords
 	return *this;
 }
 
 // --- FStaticMeshMaterial ---
-FStaticMeshMaterial::FStaticMeshMaterial(UMaterial *)
+FStaticMeshMaterial::FStaticMeshMaterial(UMaterial * InMaterial)
 {
+	Material = InMaterial;
+	Flags1 = 1;
+	Flags2 = 1;
 }
 
-FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial&)
+FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& Other)
 {
+	Material = Other.Material;
+	Flags1 = Other.Flags1;
+	Flags2 = Other.Flags2;
 	return *this;
 }
 
@@ -3803,16 +3846,20 @@ FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Othe
 // --- FStaticMeshTriangle ---
 FStaticMeshTriangle::FStaticMeshTriangle()
 {
+	// Ghidra: constructs 3 FVectors at offsets 0x00, 0x0C, 0x18 (all empty default ctors)
 }
 
-FStaticMeshTriangle& FStaticMeshTriangle::operator=(const FStaticMeshTriangle&)
+FStaticMeshTriangle& FStaticMeshTriangle::operator=(const FStaticMeshTriangle& Other)
 {
+	appMemcpy(_Data, Other._Data, 260); // 65 dwords, shared with FSortedPathList
 	return *this;
 }
 
 // --- FStaticMeshUV ---
-FStaticMeshUV& FStaticMeshUV::operator=(const FStaticMeshUV&)
+FStaticMeshUV& FStaticMeshUV::operator=(const FStaticMeshUV& Other)
 {
+	*(INT*)&_Data[0] = *(INT*)&Other._Data[0];
+	*(INT*)&_Data[4] = *(INT*)&Other._Data[4];
 	return *this;
 }
 
@@ -6388,10 +6435,10 @@ FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
 FRebuildTools::~FRebuildTools() {}
 
 // ??0FRotatorF@@QAE@VFRotator@@@Z
-FRotatorF::FRotatorF(FRotator p0) {}
+FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
 
 // ??0FRotatorF@@QAE@MMM@Z
-FRotatorF::FRotatorF(float p0, float p1, float p2) {}
+FRotatorF::FRotatorF(float InPitch, float InYaw, float InRoll) : Pitch(InPitch), Yaw(InYaw), Roll(InRoll) {}
 
 // ??0FRotatorF@@QAE@XZ
 FRotatorF::FRotatorF() {}
@@ -6418,7 +6465,7 @@ FURL::FURL(FURL * p0, const TCHAR* p1, ETravelType p2) {}
 FURL::FURL(const TCHAR* p0) {}
 
 // ??0FWaveModInfo@@QAE@XZ
-FWaveModInfo::FWaveModInfo() {}
+FWaveModInfo::FWaveModInfo() { *(INT*)&Pad[0x30] = 0; *(INT*)&Pad[0x3C] = 0; }
 
 // ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
 ANavigationPoint * FSortedPathList::findEndAnchor(APawn * p0, AActor * p1, FVector p2, int p3) { return NULL; }
@@ -6448,7 +6495,7 @@ FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & p0) { st
 FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) { static FOctreeNode dummy; return dummy; }
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
-FPathBuilder & FPathBuilder::operator=(FPathBuilder const & p0) { static FPathBuilder dummy; return dummy; }
+FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; } // 2 dwords, shared with FStaticMeshUV
 
 // ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
 FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
@@ -6469,7 +6516,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0) { return NULL; }
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 
 // ?Rotator@FRotatorF@@QAE?AVFRotator@@XZ
-FRotator FRotatorF::Rotator() { return FRotator(); }
+FRotator FRotatorF::Rotator() { return FRotator((INT)Pitch, (INT)Yaw, (INT)Roll); }
 
 // ??4FRotatorF@@QAEAAV0@ABV0@@Z
 FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }
@@ -6516,7 +6563,7 @@ FVector FRotatorF::Vector() { return FVector(); }
 FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
 
 // ??4FWaveModInfo@@QAEAAV0@ABV0@@Z
-FWaveModInfo & FWaveModInfo::operator=(FWaveModInfo const & p0) { static FWaveModInfo dummy; return dummy; }
+FWaveModInfo & FWaveModInfo::operator=(FWaveModInfo const & Other) { appMemcpy(this, &Other, 64); return *this; } // 16 dwords
 
 // ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
 UMatAction * FMatineeTools::GetCurrentAction() { return NULL; }
@@ -7140,6 +7187,7 @@ template class TLazyArray<BYTE>;
 // FSortedPathList
 // ============================================================================
 FSortedPathList::FSortedPathList() { appMemzero(this, sizeof(*this)); }
+FSortedPathList& FSortedPathList::operator=(const FSortedPathList& Other) { appMemcpy(this, &Other, 260); return *this; } // 65 dwords
 void FSortedPathList::addPath(ANavigationPoint*, INT) {}
 
 // ============================================================================
