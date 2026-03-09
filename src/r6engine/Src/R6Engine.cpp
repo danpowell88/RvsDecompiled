@@ -1027,18 +1027,47 @@ DWORD AR6Pawn::CheckSeePawn(AR6Pawn *, FVector &, INT)
 	return 0;
 }
 
-FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT, FLOAT)
+FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT TargetHeight, FLOAT OtherHeight)
 {
-	return 0.f;
+	FLOAT Result = appFabs((CollisionHeight - TargetHeight) / (TargetHeight - OtherHeight));
+	if (Result < 0.0f)
+		return 0.0f;
+	if (Result > 1.0f)
+		Result = 1.0f;
+	return Result;
 }
 
 void AR6Pawn::Crawl(INT)
 {
 }
 
-INT AR6Pawn::DirectionHasChanged(FLOAT)
+INT AR6Pawn::DirectionHasChanged(FLOAT ForwardDot)
 {
-	return 0;
+	FVector NormVel = Velocity;
+	NormVel.Normalize();
+	FVector Fwd = Rotation.Vector();
+	FVector Cross = NormVel ^ Fwd;
+
+	BYTE NewDir;
+	if (ForwardDot <= 0.0f)
+	{
+		NewDir = 3;
+		if (Cross.Z >= 0.0f)
+			NewDir = 4;
+	}
+	else if (Cross.Z >= 0.0f)
+	{
+		NewDir = 2;
+	}
+	else
+	{
+		NewDir = 1;
+	}
+
+	if (NewDir == m_eStrafeDirection)
+		return 0;
+	m_eStrafeDirection = NewDir;
+	return 1;
 }
 
 BYTE AR6Pawn::GetAnimState()
@@ -1092,7 +1121,10 @@ INT AR6Pawn::GetRotValueCenteredAroundZero(INT)
 
 FRotator AR6Pawn::GetRotationOffset()
 {
-	return FRotator(0,0,0);
+	if (m_bIsPlayer)
+		return m_rRotationOffset;
+	// AI pawns return previous offset (original may add jitter)
+	return m_rPrevRotationOffset;
 }
 
 BYTE AR6Pawn::GetSoundGunType(INT)
@@ -1122,6 +1154,12 @@ INT AR6Pawn::HurtByVolume(AActor *)
 
 INT AR6Pawn::IsCrawling()
 {
+	if (CollisionHeight != m_fProneHeight)
+	{
+		AActor* Default = GetClass()->GetDefaultObject();
+		if (CollisionHeight < Default->CollisionHeight)
+			return 1;
+	}
 	return 0;
 }
 
@@ -1142,15 +1180,48 @@ INT AR6Pawn::IsRelevantToPawnHeatVision(APawn *)
 
 INT AR6Pawn::IsUsingHeartBeatSensor()
 {
+	if (m_bIsPlayer && EngineWeapon)
+	{
+		if (EngineWeapon->eventIsGoggles())
+			return 1;
+	}
 	return 0;
 }
 
-void AR6Pawn::PawnLook(FRotator, INT, INT)
+void AR6Pawn::PawnLook(FRotator LookRot, INT bShouldAim, INT BlendTime)
 {
+	if (m_bIsClimbingLadder)
+		bShouldAim = 0;
+
+	if ((!m_bMovingDiagonally || WeaponShouldFollowHead()) &&
+		(bShouldAim || IsUsingHeartBeatSensor()) &&
+		!m_bWeaponTransition &&
+		(!m_bIsProne || !m_bUsingBipod))
+	{
+		SetPawnLookAndAimDirection(LookRot, BlendTime);
+		return;
+	}
+	SetPawnLookDirection(LookRot, BlendTime);
 }
 
-void AR6Pawn::PawnLookAbsolute(FRotator, INT, INT)
+void AR6Pawn::PawnLookAbsolute(FRotator AbsoluteRot, INT bShouldAim, INT BlendTime)
 {
+	if (m_bIsClimbingLadder)
+		bShouldAim = 0;
+
+	FRotator RelRot(AbsoluteRot.Pitch - Rotation.Pitch,
+					AbsoluteRot.Yaw - Rotation.Yaw,
+					AbsoluteRot.Roll - Rotation.Roll);
+
+	if ((!m_bMovingDiagonally || WeaponShouldFollowHead()) &&
+		(bShouldAim || IsUsingHeartBeatSensor()) &&
+		!m_bWeaponTransition &&
+		(!m_bIsProne || !m_bUsingBipod))
+	{
+		SetPawnLookAndAimDirection(RelRot, BlendTime);
+		return;
+	}
+	SetPawnLookDirection(RelRot, BlendTime);
 }
 
 void AR6Pawn::PawnLookAt(FVector, INT, INT)
@@ -1161,8 +1232,11 @@ void AR6Pawn::PawnSetBoneRotation(FName, INT, INT, INT, FLOAT)
 {
 }
 
-void AR6Pawn::PawnTrackActor(AActor *, INT)
+void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 {
+	m_bAim = bShouldAim;
+	m_TrackActor = InActor;
+	UpdatePawnTrackActor(1);
 }
 
 INT AR6Pawn::PickActorAdjust(AActor *)
@@ -1205,8 +1279,11 @@ void AR6Pawn::SetPawnLookDirection(FRotator, INT)
 {
 }
 
-void AR6Pawn::SetPrePivot(FVector)
+void AR6Pawn::SetPrePivot(FVector NewPrePivot)
 {
+	PrePivot = NewPrePivot;
+	if (PrePivot.Z != m_fPrePivotPawnInitialOffset && m_bIsClimbingStairs)
+		PrePivot.Z -= 5.0f;
 }
 
 void AR6Pawn::TickSpecial(FLOAT)
@@ -1257,7 +1334,12 @@ void AR6Pawn::WeaponLock(INT, FLOAT, FLOAT)
 
 INT AR6Pawn::WeaponShouldFollowHead()
 {
-	return 0;
+	// Physics == 12 is PHYS_KarmaRagDoll
+	if (Physics == 12 || m_bIsClimbingLadder)
+		return 0;
+	if (IsUsingHeartBeatSensor() || m_fFiringTimer > 0.0f)
+		return 1;
+	return m_bWeaponGadgetActivated ? 1 : 0;
 }
 
 INT AR6Pawn::actorReachableFromLocation(AActor *, FVector)
