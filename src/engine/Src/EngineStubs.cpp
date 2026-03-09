@@ -6101,10 +6101,161 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V);
 FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
-FArchive & operator<<(FArchive & p0, FAnimMeshVertexStream & p1) { static FArchive dummy; return dummy; }
+// FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
+// Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
+FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
+	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
+	FArray& Arr = *(FArray*)&V.Pad[4];
+	if (Ar.IsLoading()) {
+		FCompactIndex count;
+		Ar << count;
+		INT n = *(INT*)&count;
+		Arr.Empty(0x20, n);
+		for (INT i = 0; i < n; i++) {
+			INT idx = Arr.Add(1, 0x20);
+			BYTE* elem = (BYTE*)Arr.GetData() + idx * 0x20;
+			for (INT j = 0; j < 8; j++)
+				Ar.ByteOrderSerialize(elem + j * 4, 4);
+		}
+	} else {
+		Ar << *(FCompactIndex*)&V.Pad[8];  // ArrayNum as FCompactIndex
+		for (INT i = 0; i < Arr.Num(); i++) {
+			BYTE* elem = (BYTE*)Arr.GetData() + i * 0x20;
+			for (INT j = 0; j < 8; j++)
+				Ar.ByteOrderSerialize(elem + j * 4, 4);
+		}
+	}
+	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);  // Revision at Pad[0x18] = obj+0x1C
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspNode@@@Z
-FArchive & operator<<(FArchive & p0, FBspNode & p1) { static FArchive dummy; return dummy; }
+// Decoded from Ghidra Engine @ 0xcf6f0. Complex with ZoneMask (FUN_103cc610),
+// sub-struct pairs (FUN_103cba20), version-gated multi-branch INT serialization.
+// All internal functions fully decoded from _unnamed.cpp.
+FArchive & operator<<(FArchive & Ar, FBspNode & V) {
+	BYTE* P = (BYTE*)&V;
+
+	// FPlane at offset 0x00 (X, Y, Z, W)
+	Ar.ByteOrderSerialize(P + 0x00, 4);
+	Ar.ByteOrderSerialize(P + 0x04, 4);
+	Ar.ByteOrderSerialize(P + 0x08, 4);
+	Ar.ByteOrderSerialize(P + 0x0C, 4);
+
+	// ZoneMask at offset 0x10: 256-bit bitmask (8 DWORDs = 32 bytes)
+	// FUN_103cc610: Ravenshield format (LicenseeVer >= 9)
+	if (Ar.LicenseeVer() < 9) {
+		// Legacy: 8-byte QWORD (pre-Ravenshield). Read and discard.
+		BYTE temp[8];
+		Ar.ByteOrderSerialize(temp, 8);
+	} else {
+		if (Ar.IsLoading()) {
+			appMemzero(P + 0x10, 32);
+		}
+		INT NumBytes = 0x20;  // 32
+		Ar.ByteOrderSerialize((BYTE*)&NumBytes, 4);
+		for (INT i = 0; i < NumBytes; i++) {
+			if (!Ar.IsLoading()) {
+				// Saving: pack 8 bits from DWORD array into 1 byte
+				BYTE packed = 0;
+				for (INT bit = 0; bit < 8; bit++) {
+					INT bitIndex = bit + i * 8;
+					INT dwordIndex = bitIndex >> 5;
+					INT bitOffset = bitIndex & 0x1F;
+					if (((DWORD*)(P + 0x10))[dwordIndex] & (1 << bitOffset))
+						packed |= (BYTE)(1 << (bit & 0x1F));
+				}
+				Ar.Serialize(&packed, 1);
+			} else {
+				// Loading: read 1 byte, unpack to DWORD bits
+				BYTE packed;
+				Ar.Serialize(&packed, 1);
+				if ((DWORD)i < 0x20) {
+					for (INT bit = 0; bit < 8; bit++) {
+						if (packed & (1 << (bit & 0x1F))) {
+							INT bitIndex = bit + i * 8;
+							INT dwordIndex = bitIndex >> 5;
+							INT bitOffset = bitIndex & 0x1F;
+							((DWORD*)(P + 0x10))[dwordIndex] |= (1 << bitOffset);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// 1 byte at offset 0x6F (flags byte)
+	Ar.Serialize(P + 0x6F, 1);
+
+	// FCompactIndex fields
+	Ar << *(FCompactIndex*)(P + 0x30);
+	Ar << *(FCompactIndex*)(P + 0x34);
+	Ar << *(FCompactIndex*)(P + 0x38);
+	Ar << *(FCompactIndex*)(P + 0x3C);
+	Ar << *(FCompactIndex*)(P + 0x40);
+	Ar << *(FCompactIndex*)(P + 0x64);
+	Ar << *(FCompactIndex*)(P + 0x68);
+
+	// Sub-structures at +0x44 and +0x54 (FUN_103cba20: version-gated 3 or 4 DWORDs)
+	if (Ar.Ver() > 0x45) {
+		// Sub-struct at 0x44
+		Ar.ByteOrderSerialize(P + 0x44, 4);
+		Ar.ByteOrderSerialize(P + 0x48, 4);
+		Ar.ByteOrderSerialize(P + 0x4C, 4);
+		if (Ar.Ver() >= 0x3E)
+			Ar.ByteOrderSerialize(P + 0x50, 4);
+		// Sub-struct at 0x54
+		Ar.ByteOrderSerialize(P + 0x54, 4);
+		Ar.ByteOrderSerialize(P + 0x58, 4);
+		Ar.ByteOrderSerialize(P + 0x5C, 4);
+		if (Ar.Ver() >= 0x3E)
+			Ar.ByteOrderSerialize(P + 0x60, 4);
+	}
+
+	// 3 single bytes at 0x6C, 0x6D, 0x6E
+	Ar.Serialize(P + 0x6C, 1);
+	Ar.Serialize(P + 0x6D, 1);
+	Ar.Serialize(P + 0x6E, 1);
+
+	// 2 INTs at 0x70 and 0x74
+	Ar.ByteOrderSerialize(P + 0x70, 4);
+	Ar.ByteOrderSerialize(P + 0x74, 4);
+
+	// Version-gated block for offsets 0x78, 0x7C, 0x80 (3 INTs)
+	if (Ar.Ver() < 0x5C) {
+		*(INT*)(P + 0x78) = -1;
+		*(INT*)(P + 0x7C) = -1;
+		*(INT*)(P + 0x80) = -1;
+	} else if (Ar.Ver() > 100) {
+		// Ver > 0x64: real serialization
+		Ar.ByteOrderSerialize(P + 0x78, 4);
+		Ar.ByteOrderSerialize(P + 0x7C, 4);
+		Ar.ByteOrderSerialize(P + 0x80, 4);
+		if (Ar.IsLoading() && Ar.Ver() < 0x6C)
+			*(INT*)(P + 0x80) = -1;
+	} else {
+		// 0x5C <= Ver <= 100: read temp values into locals, discard
+		INT temp1 = -1, temp2 = -1;
+		if (Ar.Ver() < 0x5D) {
+			Ar.ByteOrderSerialize((BYTE*)&temp1, 4);
+		} else {
+			Ar.ByteOrderSerialize((BYTE*)&temp1, 4);
+			Ar.ByteOrderSerialize((BYTE*)&temp2, 4);
+		}
+		*(INT*)(P + 0x78) = -1;
+		*(INT*)(P + 0x7C) = -1;
+		*(INT*)(P + 0x80) = -1;
+	}
+
+	// Loading: mask top bits of flags byte at 0x6F
+	if (Ar.IsLoading())
+		P[0x6F] &= 0x1F;
+
+	// FUN_103cf3d0 at offset 0x84 only in counting mode (neither loading nor saving)
+	// — skipped as it has no effect on actual serialization.
+
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSection@@@Z
 // Decoded from Ghidra Engine @ 0x27ad0. Uses TArray<FBspVertex> (FUN_10322590),
@@ -6245,7 +6396,38 @@ FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRawColorStream@@@Z
-FArchive & operator<<(FArchive & p0, FRawColorStream & p1) { static FArchive dummy; return dummy; }
+// FUN_104170d0 = Custom TArray<FColor>::Serialize with BGRA byte order.
+// Original serializes per-element bytes in order: [2]=B, [1]=G, [0]=R, [3]=A.
+// Layout (after vtable): Pad[0] TArray<FColor>  Pad[0x14] Revision
+FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
+	TArray<FColor>& Colors = *(TArray<FColor>*)V.Pad;
+	Colors.CountBytes(Ar);
+	if (Ar.IsLoading()) {
+		FCompactIndex count;
+		Ar << count;
+		INT n = *(INT*)&count;
+		Colors.Empty(n);
+		for (INT i = 0; i < n; i++) {
+			INT idx = Colors.Add();
+			BYTE* elem = (BYTE*)&Colors(idx);
+			Ar.Serialize(elem + 2, 1);  // B
+			Ar.Serialize(elem + 1, 1);  // G
+			Ar.Serialize(elem + 0, 1);  // R
+			Ar.Serialize(elem + 3, 1);  // A
+		}
+	} else {
+		Ar << *(FCompactIndex*)&V.Pad[4];  // ArrayNum as FCompactIndex
+		for (INT i = 0; i < Colors.Num(); i++) {
+			BYTE* elem = (BYTE*)&Colors(i);
+			Ar.Serialize(elem + 2, 1);  // B
+			Ar.Serialize(elem + 1, 1);  // G
+			Ar.Serialize(elem + 0, 1);  // R
+			Ar.Serialize(elem + 3, 1);  // A
+		}
+	}
+	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);  // Revision at Pad[0x14] = obj+0x18
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z
 // FUN_1031e600 = TArray<_WORD>::Serialize (elem_size 2, ByteOrderSerialize per element)
@@ -6257,7 +6439,42 @@ FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFSkinVertexStream@@@Z
-FArchive & operator<<(FArchive & p0, FSkinVertexStream & p1) { static FArchive dummy; return dummy; }
+// Decoded from Ghidra Engine @ 0x2b750. Conditionally serializes two UObject* refs
+// (only when !IsPersistent), then 3 INTs, then TArray<0x20-elem> via FUN_10323030.
+// Layout (after vtable): Pad[0] UObject*  Pad[4] UObject*  Pad[0x10] INT
+//   Pad[0x14] INT  Pad[0x18] INT  Pad[0x1C] TArray<0x20-elem>
+FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
+	if (!Ar.IsPersistent()) {
+		Ar << *(UObject**)&V.Pad[0x00];   // UObject* at Pad[0] = obj+0x04
+		Ar << *(UObject**)&V.Pad[0x04];   // UObject* at Pad[4] = obj+0x08
+	}
+	Ar.ByteOrderSerialize(&V.Pad[0x10], 4);  // INT at Pad[0x10] = obj+0x14
+	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);  // INT at Pad[0x14] = obj+0x18
+	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);  // INT at Pad[0x18] = obj+0x1C
+	// TArray<0x20-elem> at Pad[0x1C] (obj+0x20), serialized same as FAnimMeshVertexStream
+	FArray& Arr = *(FArray*)&V.Pad[0x1C];
+	Arr.CountBytes(Ar, 0x20);
+	if (Ar.IsLoading()) {
+		FCompactIndex count;
+		Ar << count;
+		INT n = *(INT*)&count;
+		Arr.Empty(0x20, n);
+		for (INT i = 0; i < n; i++) {
+			INT idx = Arr.Add(1, 0x20);
+			BYTE* elem = (BYTE*)Arr.GetData() + idx * 0x20;
+			for (INT j = 0; j < 8; j++)
+				Ar.ByteOrderSerialize(elem + j * 4, 4);
+		}
+	} else {
+		Ar << *(FCompactIndex*)&V.Pad[0x20]; // TArray.ArrayNum at Pad[0x1C]+4
+		for (INT i = 0; i < Arr.Num(); i++) {
+			BYTE* elem = (BYTE*)Arr.GetData() + i * 0x20;
+			for (INT j = 0; j < 8; j++)
+				Ar.ByteOrderSerialize(elem + j * 4, 4);
+		}
+	}
+	return Ar;
+}
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticLightMapTexture@@@Z
 FArchive & operator<<(FArchive & p0, FStaticLightMapTexture & p1) { static FArchive dummy; return dummy; }
