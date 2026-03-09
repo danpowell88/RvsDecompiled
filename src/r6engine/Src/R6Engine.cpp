@@ -1080,8 +1080,12 @@ BYTE AR6Pawn::GetCurrentMaterial()
 	return 0;
 }
 
-void AR6Pawn::GetDefaultHeightAndRadius(FLOAT &, FLOAT &, FLOAT &)
+void AR6Pawn::GetDefaultHeightAndRadius(FLOAT& OutHeight, FLOAT& OutCrouchHeight, FLOAT& OutRadius)
 {
+	AActor* Default = GetClass()->GetDefaultObject();
+	OutHeight = Default->CollisionHeight;
+	OutRadius = Default->CollisionRadius;
+	OutCrouchHeight = ((APawn*)Default)->CrouchHeight;
 }
 
 FVector AR6Pawn::GetFootLocation(AActor *)
@@ -1109,14 +1113,18 @@ enum eMovementDirection AR6Pawn::GetMovementDirection()
 	return (enum eMovementDirection)0;
 }
 
-FLOAT AR6Pawn::GetPeekingRatioNorm(FLOAT)
+FLOAT AR6Pawn::GetPeekingRatioNorm(FLOAT PeekingValue)
 {
-	return 0.f;
+	return (PeekingValue - 1000.0f) * 0.001f;
 }
 
-INT AR6Pawn::GetRotValueCenteredAroundZero(INT)
+INT AR6Pawn::GetRotValueCenteredAroundZero(INT Value)
 {
-	return 0;
+	if (Value > 0x8000)
+		return Value - 0x10000;
+	if (Value < -0x8000)
+		Value = Value + 0x10000;
+	return Value;
 }
 
 FRotator AR6Pawn::GetRotationOffset()
@@ -1154,7 +1162,7 @@ INT AR6Pawn::HurtByVolume(AActor *)
 
 INT AR6Pawn::IsCrawling()
 {
-	if (CollisionHeight != m_fProneHeight)
+	if (CollisionHeight == m_fProneHeight)
 	{
 		AActor* Default = GetClass()->GetDefaultObject();
 		if (CollisionHeight < Default->CollisionHeight)
@@ -1224,8 +1232,21 @@ void AR6Pawn::PawnLookAbsolute(FRotator AbsoluteRot, INT bShouldAim, INT BlendTi
 	SetPawnLookDirection(RelRot, BlendTime);
 }
 
-void AR6Pawn::PawnLookAt(FVector, INT, INT)
+void AR6Pawn::PawnLookAt(FVector TargetLoc, INT bShouldAim, INT BlendTime)
 {
+	FVector Dir = TargetLoc - Location;
+	FRotator LookRot = Dir.Rotation();
+	FRotator RelRot(LookRot.Pitch - Rotation.Pitch,
+					LookRot.Yaw - Rotation.Yaw,
+					LookRot.Roll - Rotation.Roll);
+
+	if ((m_bIsClimbingLadder || (m_bIsProne && m_bUsingBipod) || !bShouldAim)
+		&& !IsUsingHeartBeatSensor())
+	{
+		SetPawnLookDirection(RelRot, BlendTime);
+		return;
+	}
+	SetPawnLookAndAimDirection(RelRot, BlendTime);
 }
 
 void AR6Pawn::PawnSetBoneRotation(FName, INT, INT, INT, FLOAT)
@@ -1282,7 +1303,7 @@ void AR6Pawn::SetPawnLookDirection(FRotator, INT)
 void AR6Pawn::SetPrePivot(FVector NewPrePivot)
 {
 	PrePivot = NewPrePivot;
-	if (PrePivot.Z != m_fPrePivotPawnInitialOffset && m_bIsClimbingStairs)
+	if (PrePivot.Z == m_fPrePivotPawnInitialOffset && m_bIsClimbingStairs)
 		PrePivot.Z -= 5.0f;
 }
 
@@ -1311,8 +1332,18 @@ void AR6Pawn::UpdateMovementAnimation(FLOAT)
 {
 }
 
-void AR6Pawn::UpdatePawnTrackActor(INT)
+void AR6Pawn::UpdatePawnTrackActor(INT BlendTime)
 {
+	FVector Dir = m_TrackActor->Location - Location;
+	FRotator LookRot = Dir.Rotation();
+	FRotator RelRot(LookRot.Pitch - Rotation.Pitch,
+					LookRot.Yaw - Rotation.Yaw,
+					LookRot.Roll - Rotation.Roll);
+
+	if (m_bAim)
+		SetPawnLookAndAimDirection(RelRot, BlendTime);
+	else
+		SetPawnLookDirection(RelRot, BlendTime);
 }
 
 void AR6Pawn::UpdatePeeking(FLOAT)
