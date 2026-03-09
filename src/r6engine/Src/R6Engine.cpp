@@ -1077,7 +1077,18 @@ void AR6DeploymentZone::FirstInit()
 
 INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 {
-	return 0;
+	// Check if game type overrides terrorist count
+	// Level + 0x4CC is the Game pointer; + 0x4B0 is the game type FString on that object
+	FString& GameType = *(FString*)(*(BYTE**)((BYTE*)Level + 0x4CC) + 0x4B0);
+	if (Level->eventGameTypeUseNbOfTerroristToSpawn(GameType))
+		return 0;
+
+	// Random number in [m_iMinTerrorist, m_iMaxTerrorist]
+	INT Result = m_iMinTerrorist;
+	if (m_iMinTerrorist < m_iMaxTerrorist)
+		Result = m_iMinTerrorist + appRand() % ((m_iMaxTerrorist - m_iMinTerrorist) + 1);
+
+	return Result;
 }
 
 INT AR6DeploymentZone::HaveHostage()
@@ -3264,9 +3275,32 @@ void AR6RainbowTeam::eventUpdateTeamFormation(BYTE A)
 
 // --- AR6SoundReplicationInfo ---
 
-INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController *, AActor *, FVector)
+INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*, FVector)
 {
-	return 0;
+	// Get the viewer's relevant actor (pawn if available, otherwise the controller itself)
+	AZoneInfo* ViewZone;
+	if (Viewer->Pawn != NULL)
+		ViewZone = Viewer->Pawn->Region.Zone;
+	else
+		ViewZone = Viewer->Region.Zone;
+
+	// Zone team indices (script-defined byte at AZoneInfo + 0x397)
+	BYTE MyTeam = *((BYTE*)Region.Zone + 0x397);
+	BYTE ViewTeam = *((BYTE*)ViewZone + 0x397);
+
+	if (MyTeam != ViewTeam)
+	{
+		// Check zone visibility table in level info (64-bit bitmask at ALevelInfo + 0x650)
+		DWORD ViewBit = 1u << (ViewTeam & 0x1f);
+		BYTE* LevelBase = (BYTE*)Level;
+		if ((ViewBit & *(DWORD*)(LevelBase + 0x650 + MyTeam * 8)) == 0 &&
+			(((INT)ViewBit >> 0x1f) & *(DWORD*)(LevelBase + 0x654 + MyTeam * 8)) == 0)
+		{
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound, BYTE)
@@ -3475,9 +3509,26 @@ void AR6Terrorist::eventStopSpecialAnim()
 
 // --- AR6TerroristAI ---
 
-INT AR6TerroristAI::CanHear(FVector, FLOAT, AActor *, enum ENoiseType, enum EPawnType)
+INT AR6TerroristAI::CanHear(FVector Location, FLOAT Loudness, AActor* Source, enum ENoiseType NoiseType, enum EPawnType PawnType)
 {
-	return 0;
+	// Filter by noise type against terrorist hearing capabilities
+	switch ((INT)NoiseType)
+	{
+	case 1: // NOISE_Footstep
+	case 4: // R6-specific noise type
+		if (!m_bHearInvestigate)
+			return 0;
+		break;
+	case 2: // NOISE_Weapon
+		if (!m_bHearThreat)
+			return 0;
+		break;
+	case 3: // NOISE_Explosion
+		if (!m_bHearGrenade)
+			return 0;
+		break;
+	}
+	return AR6AIController::CanHear(Location, Loudness, Source, NoiseType, PawnType);
 }
 
 INT AR6TerroristAI::HaveAClearShot(FVector, APawn *)
