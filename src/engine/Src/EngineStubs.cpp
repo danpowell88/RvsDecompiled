@@ -75,9 +75,9 @@ void AMover::AddMyMarker(AActor *)
 {
 }
 
-int * AMover::GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *)
+INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return NULL;
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
 // --- ATerrainInfo ---
@@ -2662,9 +2662,9 @@ void APhysicsVolume::SetZone(int,int)
 {
 }
 
-int * APhysicsVolume::GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *)
+INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return NULL;
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
 // --- APlayerController ---
@@ -2717,9 +2717,9 @@ void APlayerController::CheckHearSound(AActor *,int,USound *,FVector,float,int)
 {
 }
 
-int * APlayerController::GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *)
+INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return NULL;
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
 // TODO: Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player
@@ -2818,9 +2818,9 @@ UPrimitive * AProjector::GetPrimitive()
 }
 
 // --- AR6AbstractCircumstantialActionQuery ---
-int * AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPackageMap *,UActorChannel *)
+INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return NULL;
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
 // --- AR6ActionSpot ---
@@ -9391,7 +9391,10 @@ void ALevelInfo::SetZone(INT, INT) {}
 void ALevelInfo::PostNetReceive() {}
 void ALevelInfo::PreNetReceive() {}
 void ALevelInfo::CheckForErrors() {}
-INT* ALevelInfo::GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*) { return NULL; }
+INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+{
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+}
 void ALevelInfo::CallLogThisActor(AActor*) {}
 // ?GetDefaultPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@XZ  Ghidra at ~279 bytes.
 // Lazily spawns ADefaultPhysicsVolume and caches it at this+0x164.
@@ -9482,9 +9485,15 @@ void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
 // AGameReplicationInfo / APlayerReplicationInfo
 // ============================================================================
 void AGameReplicationInfo::PostNetReceive() {}
-INT* AGameReplicationInfo::GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*) { return NULL; }
+INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+{
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+}
 void APlayerReplicationInfo::PostNetReceive() {}
-INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*) { return NULL; }
+INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+{
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+}
 
 // ============================================================================
 // UNetConnection
