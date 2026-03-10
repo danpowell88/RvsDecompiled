@@ -9239,7 +9239,81 @@ void FOctreeNode::RemoveAllActors(FCollisionOctree * p0) {}
 void FOctreeNode::SingleNodeFilter(AActor * p0, FCollisionOctree * p1, FPlane const * p2) {}
 
 // ?BuildActionSpotList@FPathBuilder@@QAEXPAVULevel@@@Z
-void FPathBuilder::BuildActionSpotList(ULevel * p0) {}
+// Ghidra: For each AR6ActionSpot, set CollisionHeight, call PutOnGround,
+// find a NavigationPoint anchor within 1200 uu via FSortedPathList, then
+// chain into LevelInfo->m_ActionSpotList linked list.
+void FPathBuilder::BuildActionSpotList(ULevel* Level) {
+	*(ULevel**)Pad = Level;
+	// Spawn a scout if one is not already present (local_18 tracks whether we did)
+	UBOOL bSpawnedScout = (*(APawn**)(Pad + 4) == NULL);
+	if (bSpawnedScout)
+		getScout();
+
+	// Mark scout as "is player" for pathing purposes
+	APawn* Scout = *(APawn**)(Pad + 4);
+	*(BYTE*)((BYTE*)Scout + 0x2c) = 1;
+
+	ALevelInfo* LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	LInfo->m_ActionSpotList = NULL;	// LevelInfo+0x4dc
+
+	for (INT i = 0; i < (*(ULevel**)Pad)->Actors.Num(); i++) {
+		AActor* Actor = (*(ULevel**)Pad)->Actors(i);
+		if (!Actor) continue;
+		// IsA(AR6ActionSpot) && !bAutoBuilt (signed char at Actor+0xa0 >= 0)
+		if (!Actor->IsA(AR6ActionSpot::StaticClass())) continue;
+		if ((SBYTE)(*(BYTE*)((BYTE*)Actor + 0xa0)) < 0) continue;
+
+		FSortedPathList SortedList;
+		// Initialise count field to 0 (at Pad+0x100)
+		*(INT*)(SortedList.Pad + 0x100) = 0;
+
+		AR6ActionSpot* Spot = (AR6ActionSpot*)Actor;
+		// Set CollisionHeight (Actor+0xfc): 70.0f if m_eFire==2, else 135.0f
+		if (Spot->m_eFire == 2)
+			*(FLOAT*)((BYTE*)Spot + 0xfc) = 70.0f;
+		else
+			*(FLOAT*)((BYTE*)Spot + 0xfc) = 135.0f;
+
+		Spot->PutOnGround();
+
+		LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+		for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8)) {
+			// Skip if nav point has bit 2 set at offset 0x3a4
+			if ((*(DWORD*)(Nav + 0x3a4) & 2) != 0) continue;
+			// Compute squared distance from Spot->Location (FVector at 0x234) to nav point
+			FLOAT dx = *(FLOAT*)((BYTE*)Spot + 0x234) - *(FLOAT*)(Nav + 0x234);
+			FLOAT dy = *(FLOAT*)((BYTE*)Spot + 0x238) - *(FLOAT*)(Nav + 0x238);
+			FLOAT dz = *(FLOAT*)((BYTE*)Spot + 0x23c) - *(FLOAT*)(Nav + 0x23c);
+			FLOAT DistSq = dx*dx + dy*dy + dz*dz;
+			// 1200 uu radius → 1440000 uu² threshold
+			if (DistSq < 1440000.0f)
+				SortedList.addPath((ANavigationPoint*)Nav, (INT)DistSq);
+		}
+
+		// If list has entries, find the best anchor
+		if (*(INT*)(SortedList.Pad + 0x100) > 0) {
+			FVector SpotLoc(*(FLOAT*)((BYTE*)Spot+0x234),
+			                *(FLOAT*)((BYTE*)Spot+0x238),
+			                *(FLOAT*)((BYTE*)Spot+0x23c));
+			Spot->m_Anchor = SortedList.findEndAnchor(Scout, Spot, SpotLoc, 0);
+		}
+
+		// If an anchor was found, prepend to m_ActionSpotList linked list
+		if (Spot->m_Anchor) {
+			LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+			Spot->m_NextSpot = LInfo->m_ActionSpotList;
+			LInfo->m_ActionSpotList = Spot;
+		}
+	}
+
+	// Clean up scout if we spawned it
+	if (bSpawnedScout) {
+		Scout = *(APawn**)(Pad + 4);
+		AActor* AICtrl = *(AActor**)((BYTE*)Scout + 0x4ec);
+		if (AICtrl) (*(ULevel**)Pad)->DestroyActor(AICtrl);
+		(*(ULevel**)Pad)->DestroyActor(Scout);
+	}
+}
 
 // ?ReviewPaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: for each NavigationPoint in linked list, call ReviewPath(Scout);
@@ -9305,7 +9379,168 @@ void FPathBuilder::ReviewPaths(ULevel* Level) {
 }
 
 // ?defineChangedPaths@FPathBuilder@@QAEXPAVULevel@@@Z
-void FPathBuilder::defineChangedPaths(ULevel * p0) {}
+// Ghidra: Partial redefinition — re-runs path building only for nav points
+// flagged as changed (no 0x800 bit at NavPoint+0x3a4). For unchanged nav
+// points, empties their PathList (TArray at +0x3d8). Same scout+pass sequence
+// as definePaths but operates on the changed subset and spawns its own scout.
+void FPathBuilder::defineChangedPaths(ULevel* Level) {
+	*(ULevel**)Pad = Level;
+
+	// Clear NavigationPointList head and the bPathsRebuilt bit
+	ALevelInfo* LInfo = Level->GetLevelInfo();
+	*(INT*)((BYTE*)LInfo + 0x4d0) = 0;
+	LInfo = Level->GetLevelInfo();
+	*(DWORD*)((BYTE*)LInfo + 0x94c) &= ~1u;
+
+	// Pass 0: build nav point linked list (no InitForPathFinding here)
+	for (INT i = 0; i < Level->Actors.Num(); i++) {
+		AActor* Actor = Level->Actors(i);
+		if (!Actor) continue;
+		if (!Actor->IsA(ANavigationPoint::StaticClass())) continue;
+		if ((SBYTE)(*(BYTE*)((BYTE*)Actor + 0xa0)) < 0) continue; // bAutoBuilt
+		LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+		*(INT*)((BYTE*)Actor + 0x3a8) = *(INT*)((BYTE*)LInfo + 0x4d0);
+		*(INT*)((BYTE*)LInfo + 0x4d0) = (INT)Actor;
+	}
+
+	// Pre-pass: for each nav point, decide how to handle changed vs unchanged
+	LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8)) {
+		ANavigationPoint* NavPt = (ANavigationPoint*)Nav;
+		if ((*(DWORD*)(Nav + 0x3a4) & 0x800) == 0) {
+			// Not marked changed: check reachspecs for changed endpoints, prune
+			TArray<UReachSpec*>& PathList = *(TArray<UReachSpec*>*)(Nav + 0x3d8);
+			for (INT j = 0; j < PathList.Num(); j++) {
+				UReachSpec* Spec = PathList(j);
+				if (Spec && Spec->End && (*(DWORD*)((BYTE*)Spec->End + 0x3a4) & 0x800) != 0)
+					*(BYTE*)((BYTE*)Spec + 0x2c) = 1; // mark pruned
+			}
+			NavPt->CleanUpPruned();
+		} else {
+			// Marked changed: empty the path list entirely
+			// Ghidra: FArray::Empty(&NavPoint[0x3d8], 4, 0)
+			((TArray<UReachSpec*>*)(Nav + 0x3d8))->Empty();
+		}
+	}
+
+	getScout();
+	// Verify Actors(0) is ALevelInfo
+	if (!(*(ULevel**)Pad)->Actors(0))
+		appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AD);
+	if (!(*(ULevel**)Pad)->Actors(0)->IsA(ALevelInfo::StaticClass()))
+		appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AE);
+
+	// Clear nav list and rebuild it for the main passes
+	*(INT*)((BYTE*)(*(ULevel**)Pad)->Actors(0) + 0x4d0) = 0;
+	GWarn->BeginSlowTask(TEXT("Defining Paths"), 1, 0);
+
+	SetPathCollision(1);
+	INT NavCount = 0;
+	// Count NavPoints in first loop
+	for (INT i = 0; i < (*(ULevel**)Pad)->Actors.Num(); i++) {
+		GWarn->StatusUpdatef(i, (*(ULevel**)Pad)->Actors.Num(), TEXT("Defining"));
+		AActor* Actor = (*(ULevel**)Pad)->Actors(i);
+		if (Actor && Actor->IsA(ANavigationPoint::StaticClass())) NavCount++;
+	}
+
+	// Verify + clear LevelInfo nav list head again
+	if (!(*(ULevel**)Pad)->Actors(0))
+		appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AD);
+	if (!(*(ULevel**)Pad)->Actors(0)->IsA(ALevelInfo::StaticClass()))
+		appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AE);
+	*(INT*)((BYTE*)(*(ULevel**)Pad)->Actors(0) + 0x4d0) = 0;
+
+	INT nc = 0;
+	for (INT i = 0; i < (*(ULevel**)Pad)->Actors.Num(); i++) {
+		GWarn->StatusUpdatef(nc, NavCount, TEXT("Navigation Points on Bases"));
+		AActor* Actor = (*(ULevel**)Pad)->Actors(i);
+		if (!Actor) continue;
+		if (!Actor->IsA(ANavigationPoint::StaticClass())) continue;
+		if ((SBYTE)(*(BYTE*)((BYTE*)Actor + 0xa0)) < 0) continue; // bAutoBuilt
+		nc++;
+		// Verify + add to list with Actors(0) check
+		if (!(*(ULevel**)Pad)->Actors(0))
+			appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AD);
+		if (!(*(ULevel**)Pad)->Actors(0)->IsA(ALevelInfo::StaticClass()))
+			appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AE);
+		LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+		*(INT*)((BYTE*)Actor + 0x3a8) = *(INT*)((BYTE*)LInfo + 0x4d0);
+		*(INT*)((BYTE*)LInfo + 0x4d0) = (INT)Actor;
+		// InitForPathFinding at vtable[0x19c]
+		typedef void (__thiscall* tInitPath)(BYTE*);
+		tInitPath fn = *(tInitPath*)((BYTE*)(*(void**)Actor) + 0x19c);
+		fn((BYTE*)Actor);
+	}
+
+	// Verify Actors(0)
+	if (!(*(ULevel**)Pad)->Actors(0))
+		appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AD);
+	if (!(*(ULevel**)Pad)->Actors(0)->IsA(ALevelInfo::StaticClass()))
+		appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AE);
+
+	// Pass 2: FindBase on each nav point (vtable[0x190])
+	LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8)) {
+		typedef void (__thiscall* tFindBase)(BYTE*);
+		tFindBase fn = *(tFindBase*)((BYTE*)(*(void**)Nav) + 0x190);
+		fn(Nav);
+	}
+
+	debugf(NAME_Log, TEXT(""));
+
+	// Pass 3: addReachSpecs at vtable[0x188](Scout, 1) — note: 1, not 0
+	APawn* Scout = *(APawn**)(Pad + 4);
+	INT rs = 0;
+	LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8)) {
+		GWarn->StatusUpdatef(rs, NavCount, TEXT("Adding Reachspecs"));
+		typedef void (__thiscall* tAddReach)(BYTE*, APawn*, INT);
+		tAddReach fn = *(tAddReach*)((BYTE*)(*(void**)Nav) + 0x188);
+		fn(Nav, Scout, 1);	// NOTE: int arg is 1 here (changed paths mode)
+		rs++;
+	}
+
+	// Pass 4: SetupForcedPath at vtable[0x18c](Scout)
+	LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8)) {
+		typedef void (__thiscall* tSetupForced)(BYTE*, APawn*);
+		tSetupForced fn = *(tSetupForced*)((BYTE*)(*(void**)Nav) + 0x18c);
+		fn(Nav, Scout);
+	}
+
+	debugf(NAME_Log, TEXT(""));
+
+	// Pass 5: PrunePaths at vtable[0x1a0] with StatusUpdatef
+	INT pr = 0;
+	LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8)) {
+		GWarn->StatusUpdatef(pr, NavCount, TEXT("Pruning"));
+		typedef INT (__thiscall* tPrune)(BYTE*);
+		tPrune fn = *(tPrune*)((BYTE*)(*(void**)Nav) + 0x1a0);
+		fn(Nav);
+		pr++;
+	}
+
+	debugf(NAME_Log, TEXT(""));
+	SetPathCollision(0);
+
+	// Clear bAutoBuilt flags (0x800 at NavPoint+0x3a4)
+	LInfo = (*(ULevel**)Pad)->GetLevelInfo();
+	for (BYTE* Nav = *(BYTE**)((BYTE*)LInfo + 0x4d0); Nav; Nav = *(BYTE**)(Nav + 0x3a8))
+		*(DWORD*)(Nav + 0x3a4) &= ~0x800u;
+
+	BuildActionSpotList(Level);
+
+	// Destroy Scout and its AIController
+	Scout = *(APawn**)(Pad + 4);
+	AActor* AICtrl = *(AActor**)((BYTE*)Scout + 0x4ec);
+	if (AICtrl) (*(ULevel**)Pad)->DestroyActor(AICtrl);
+	(*(ULevel**)Pad)->DestroyActor(Scout);
+
+	debugf(NAME_Log, TEXT("defineChangedPaths done"));
+	// Deviation: skip GWarn vtable[0x1c] call (undeclared)
+	GWarn->EndSlowTask();
+}
 
 // ?definePaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: undefinePaths, then spawn scout, build nav-point linked list, run
