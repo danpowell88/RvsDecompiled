@@ -745,6 +745,9 @@ unsigned __int64 FStaticLightMapTexture::GetCacheId()
 
 int FStaticLightMapTexture::GetFirstMip()
 {
+	// Ghidra (25B): if UTexture::__Client and __Client+0x70 flag is set, return 1
+	if (UTexture::__Client != NULL && *(INT*)((BYTE*)UTexture::__Client + 0x70) != 0)
+		return 1;
 	return 0;
 }
 
@@ -852,7 +855,9 @@ int FStaticMeshVertexStream::GetRevision()
 
 int FStaticMeshVertexStream::GetSize()
 {
-	return 0;
+	// Ghidra (16B): FArray::Num(this+4) * 0x18; Pad[0] = FArray at offset 4
+	INT Num = *(INT*)(Pad + 4); // ArrayNum field of FArray at this+4
+	return Num * 0x18;
 }
 
 void FStaticMeshVertexStream::GetStreamData(void *)
@@ -4102,36 +4107,75 @@ FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLa
 }
 
 // --- FTerrainTools ---
-void FTerrainTools::SetAdjust(int)
+void FTerrainTools::SetAdjust(int Value)
 {
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x60) = Value;
+	else
+		*(INT*)&Pad[0x88] = Value;
 }
 
 void FTerrainTools::SetCurrentBrush(int)
 {
 }
 
-void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo *)
+void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)
 {
+	// Ghidra (29B): if changed, set ptr and zero related fields
+	ATerrainInfo** Cur = (ATerrainInfo**)&Pad[0x78];
+	if (*Cur != Info)
+	{
+		*Cur = Info;
+		*(INT*)&Pad[0x70] = 0;
+		*(INT*)&Pad[0x74] = 0;
+		*(INT*)&Pad[0x54] = 0;
+		*(INT*)&Pad[0x5C] = 0;
+	}
 }
 
-void FTerrainTools::SetFloorOffset(int)
+void FTerrainTools::SetFloorOffset(int Value)
 {
+	// Ghidra (36B): clamp to [-7, 7]
+	if (Value < -7) Value = -7;
+	if (Value > 7) Value = 7;
+	*(INT*)&Pad[0x40] = Value;
 }
 
-void FTerrainTools::SetInnerRadius(int)
+void FTerrainTools::SetInnerRadius(int Value)
 {
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x54) = Value;
+	else
+		*(INT*)&Pad[0x7C] = Value;
 }
 
-void FTerrainTools::SetMirrorAxis(int)
+void FTerrainTools::SetMirrorAxis(int Value)
 {
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x64) = Value;
+	else
+		*(INT*)&Pad[0x8C] = Value;
 }
 
-void FTerrainTools::SetOuterRadius(int)
+void FTerrainTools::SetOuterRadius(int Value)
 {
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x58) = Value;
+	else
+		*(INT*)&Pad[0x80] = Value;
 }
 
-void FTerrainTools::SetStrength(int)
+void FTerrainTools::SetStrength(int Value)
 {
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x5C) = Value;
+	else
+		*(INT*)&Pad[0x84] = Value;
 }
 
 FTerrainTools::FTerrainTools(FTerrainTools const &)
@@ -4165,7 +4209,8 @@ int FTerrainTools::GetAdjust()
 
 ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
 {
-	return NULL;
+	// Ghidra (4B): return pointer at Pad[0x78]
+	return *(ATerrainInfo**)&Pad[0x78];
 }
 
 FString FTerrainTools::GetExecFromBrushName(FString &)
@@ -4175,7 +4220,8 @@ FString FTerrainTools::GetExecFromBrushName(FString &)
 
 int FTerrainTools::GetFloorOffset()
 {
-	return 0;
+	// Ghidra (4B): direct read from Pad[0x40]
+	return *(INT*)&Pad[0x40];
 }
 
 int FTerrainTools::GetInnerRadius()
@@ -4191,7 +4237,13 @@ int FTerrainTools::GetInnerRadius()
 
 int FTerrainTools::GetMirrorAxis()
 {
-	return 0;
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+	{
+		INT* DataPtr = *(INT**)&Pad[0x50];
+		return *(INT*)((BYTE*)DataPtr + 0x64);
+	}
+	return *(INT*)&Pad[0x8C];
 }
 
 int FTerrainTools::GetOuterRadius()
@@ -4278,7 +4330,8 @@ void UActorChannel::Destroy()
 
 AActor * UActorChannel::GetActor()
 {
-	return NULL;
+	// Ghidra (4B): Actor at offset 0x6C
+	return *(AActor**)((BYTE*)this + 0x6C);
 }
 
 void UActorChannel::Init(UNetConnection *,int,int)
@@ -8562,7 +8615,51 @@ template class TLazyArray<BYTE>;
 // ============================================================================
 FSortedPathList::FSortedPathList() { appMemzero(this, sizeof(*this)); }
 FSortedPathList& FSortedPathList::operator=(const FSortedPathList& Other) { appMemcpy(this, &Other, 260); return *this; } // 65 dwords
-void FSortedPathList::addPath(ANavigationPoint*, INT) {}
+void FSortedPathList::addPath(ANavigationPoint* Path, INT Cost)
+{
+	// Ghidra (172B): Sorted insertion into fixed 32-element array.
+	// Layout: Paths[32] at 0x00, Costs[32] at 0x80, Count at 0x100.
+	ANavigationPoint** Paths = (ANavigationPoint**)&Pad[0];
+	INT* Costs = (INT*)&Pad[0x80];
+	INT& Count = *(INT*)&Pad[0x100];
+
+	INT InsertIdx = 0;
+
+	// Quick check: if last element's cost < new cost, start at end
+	if (Count > 0 && Costs[Count - 1] < Cost)
+		InsertIdx = Count;
+
+	// Linear search for insertion point
+	while (InsertIdx < Count && Costs[InsertIdx] <= Cost)
+		InsertIdx++;
+
+	// Insert if within max capacity (32)
+	if (InsertIdx < 32)
+	{
+		// Save displaced element
+		ANavigationPoint* SavedPath = Paths[InsertIdx];
+		INT SavedCost = Costs[InsertIdx];
+
+		// Write new element
+		Paths[InsertIdx] = Path;
+		Costs[InsertIdx] = Cost;
+
+		// Grow count
+		if (Count < 32)
+			Count++;
+
+		// Shift remaining elements right
+		for (INT i = InsertIdx + 1; i < Count; i++)
+		{
+			ANavigationPoint* TempPath = Paths[i];
+			INT TempCost = Costs[i];
+			Paths[i] = SavedPath;
+			Costs[i] = SavedCost;
+			SavedPath = TempPath;
+			SavedCost = TempCost;
+		}
+	}
+}
 
 // ============================================================================
 // FPointRegion
