@@ -7258,7 +7258,35 @@ FStatGraph & FStatGraph::operator=(FStatGraph const & p0) { static FStatGraph du
 FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
 
 // ?String@FURL@@QBE?AVFString@@H@Z
-FString FURL::String(int p0) const { return FString(); }
+// Ghidra at 0x1710c0. Serializes URL to string form.
+FString FURL::String(int FullyQualified) const {
+	FString Result;
+	if (Protocol != DefaultProtocol || FullyQualified) {
+		Result += Protocol;
+		Result += TEXT(":");
+		if (Host != DefaultHost)
+			Result += TEXT("//");
+	}
+	if (Host != DefaultHost || Port != DefaultPort) {
+		Result += Host;
+		if (Port != DefaultPort) {
+			Result += TEXT(":");
+			Result += FString::Printf(TEXT("%i"), Port);
+		}
+		Result += TEXT("/");
+	}
+	if (Map.Len())
+		Result += Map;
+	for (INT i = 0; i < Op.Num(); i++) {
+		Result += TEXT("?");
+		Result += Op(i);
+	}
+	if (Portal.Len()) {
+		Result += TEXT("#");
+		Result += Portal;
+	}
+	return Result;
+}
 
 // ?GetTextureSize@FPoly@@QAE?AVFVector@@XZ
 FVector FPoly::GetTextureSize()
@@ -8343,10 +8371,24 @@ UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
 }
 void UDemoRecConnection::StaticConstructor() {}
-FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("")); }
+FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
 FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
-void UDemoRecConnection::LowLevelSend(void*, INT) {}
-void UDemoRecConnection::FlushNet() {}
+void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
+	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
+	if (Driver->ServerConnection == NULL) {
+		FArchive* FileAr = *(FArchive**)((BYTE*)Driver + 0xB4);
+		FileAr->ByteOrderSerialize((BYTE*)Driver + 0xCC, 4);    // FrameNum (INT)
+		FileAr->ByteOrderSerialize((BYTE*)Driver + 0x48, 8);    // DemoFrameTime (DOUBLE)
+		FileAr->ByteOrderSerialize(&Count, 4);                  // packet size
+		FileAr->Serialize(Data, Count);                          // packet data
+	}
+}
+
+// Ghidra at 0x187cf0 (16 bytes). Only flushes if not a client connection.
+void UDemoRecConnection::FlushNet() {
+	if (Driver->ServerConnection == NULL)
+		UNetConnection::FlushNet();
+}
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
@@ -8356,7 +8398,8 @@ UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver
 // ============================================================================
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 0; }
-INT UPackageMapLevel::CanSerializeObject(UObject*) { return 0; }
+// Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
+INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }
 
 // ============================================================================
 // UNullRenderDevice
@@ -8387,8 +8430,17 @@ void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
 void UTerrainSector::PostLoad() {}
 void UTerrainSector::StaticLight(INT) {}
 void UTerrainSector::GenerateTriangles() {}
-INT UTerrainSector::GetGlobalVertex(INT, INT) { return 0; }
-INT UTerrainSector::GetLocalVertex(INT, INT) { return 0; }
+// Ghidra at 0x156550. Returns linear index in the global heightmap grid.
+INT UTerrainSector::GetGlobalVertex(INT X, INT Y) {
+	// TerrainInfo->HeightmapX is at offset 0x12E0 in ATerrainInfo
+	INT HeightmapX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
+	return (OffsetY + Y) * HeightmapX + OffsetX + X;
+}
+
+// Ghidra at 0x153a0. Returns linear index within this sector.
+INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
+	return (SectorSizeX + 1) * Y + X;
+}
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
 INT UTerrainSector::IsSectorAll(INT, BYTE) { return 0; }
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }

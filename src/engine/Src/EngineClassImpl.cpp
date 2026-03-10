@@ -1297,7 +1297,7 @@ void UNetConnection::FlushNet() {}
 void UNetConnection::Tick() {}
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 void UNetConnection::HandleClientPlayer( APlayerController* PC ) {}
-UNetDriver* UNetConnection::GetDriver() { return NULL; }
+UNetDriver* UNetConnection::GetDriver() { return Driver; }
 void UNetConnection::PreSend( INT SizeBits ) {}
 void UNetConnection::PurgeAcks() {}
 void UNetConnection::ReceiveFile( INT PackageIndex ) {}

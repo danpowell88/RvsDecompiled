@@ -3944,6 +3944,11 @@ class ENGINE_API UNetDriver : public USubsystem
 public:
 DECLARE_CLASS(UNetDriver,USubsystem,0,Engine)
 
+// Layout from Ghidra (FlushNet, LowLevelSend reference Driver+0x3C):
+// USubsystem = UObject(0x2C) + FExec vtable(0x04) = 0x30
+BYTE _NetDrvPad0[0x0C];              // 0x30..0x3B — undecoded fields
+UNetConnection* ServerConnection;     // 0x3C
+
 void StaticConstructor();
 
 virtual void TickFlush();
@@ -6255,6 +6260,17 @@ public:
 	DECLARE_CLASS(UTerrainSector,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UTerrainSector)
 	UTerrainSector(ATerrainInfo*, INT, INT, INT, INT);
+
+	// Layout from Ghidra (GetGlobalVertex, GetLocalVertex):
+	// UObject ends at 0x2C.
+	BYTE _SectorPad0[0x18];      // 0x2C..0x43 — undecoded fields
+	ATerrainInfo* TerrainInfo;    // 0x44
+	BYTE _SectorPad1[0x1C];      // 0x48..0x63 — undecoded fields
+	INT SectorSizeX;              // 0x64
+	INT SectorSizeY;              // 0x68
+	INT OffsetX;                  // 0x6C
+	INT OffsetY;                  // 0x70
+
 	virtual void Serialize(FArchive&);
 	virtual void PostLoad();
 	void StaticLight(INT);
