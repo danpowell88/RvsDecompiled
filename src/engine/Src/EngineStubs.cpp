@@ -8329,7 +8329,43 @@ INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 }
 
 // ?UpdateWaveData@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
-int FWaveModInfo::UpdateWaveData(TArray<BYTE> & p0) { return 0; }
+// Retail ordinal unknown. Applies a sample-rate change to in-memory WAV data:
+//   - Shrinks the data chunk header, block-align and bytes-per-sec fields,
+//   - Re-scales any "smpl" loop-point positions to the new sample count,
+//   - Compacts the array (shifts post-sample chunks left, trims the tail).
+// Only executes if NewDataSize < SampleDataSize; always returns 1.
+INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
+{
+	if (NewDataSize < SampleDataSize) {
+		// Amount by which the sample data shrinks (RIFF chunks must be WORD-aligned).
+		DWORD delta = Pad16Bit(SampleDataSize) - Pad16Bit(NewDataSize);
+
+		// Update the WAV header fields that reflect sample-data size.
+		*pWaveDataSize     = NewDataSize;
+		*pMasterSize      -= delta;
+		*pBlockAlign       = (_WORD)(*pChannels * (*pBitsPerSample >> 3));
+		*pAvgBytesPerSec   = (DWORD)(*pBlockAlign) * *pSamplesPerSec;
+
+		// Re-scale all "smpl" loop point positions proportionally.
+		if (SampleLoopsNum > 0) {
+			FSampleLoop* pLoop = pSampleLoop;
+			DWORD scaleNum = (DWORD)*pBitsPerSample * SampleDataSize / NewDataSize;
+			for (INT i = 0; i < SampleLoopsNum; i++, pLoop++) {
+				pLoop->dwStart = (DWORD)((DWORD)pLoop->dwStart * OldBitsPerSample) / scaleNum;
+				pLoop->dwEnd   = (DWORD)((DWORD)pLoop->dwEnd   * OldBitsPerSample) / scaleNum;
+			}
+		}
+
+		// Shift data that follows the (now-smaller) sample block left by delta bytes.
+		INT afterSize = (INT)(WaveDataEnd - SampleDataEnd);
+		for (INT i = 0; i < afterSize; i++)
+			*(SampleDataEnd - delta + i) = *(SampleDataEnd + i);
+
+		// Trim the now-redundant tail of the array.
+		WavData.Remove(WavData.Num() - delta, delta);
+	}
+	return 1;
+}
 
 // ?StaticExit@FURL@@SAXXZ
 void FURL::StaticExit() {
@@ -10010,7 +10046,7 @@ UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver
 // UPackageMapLevel
 // ============================================================================
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
-INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 0; }
+INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
 // Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
 INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }
 
