@@ -7316,10 +7316,35 @@ int FWaveModInfo::ReadWaveInfo(TArray<BYTE> & p0) { return 0; }
 int FWaveModInfo::UpdateWaveData(TArray<BYTE> & p0) { return 0; }
 
 // ?StaticExit@FURL@@SAXXZ
-void FURL::StaticExit() {}
+void FURL::StaticExit() {
+	DefaultProtocol          = TEXT("");
+	DefaultProtocolDescription = TEXT("");
+	DefaultName              = TEXT("");
+	DefaultMap               = TEXT("");
+	DefaultLocalMap          = TEXT("");
+	DefaultHost              = TEXT("");
+	DefaultPortal            = TEXT("");
+	DefaultMapExt            = TEXT("");
+	DefaultSaveExt           = TEXT("");
+}
 
 // ?StaticInit@FURL@@SAXXZ
-void FURL::StaticInit() {}
+void FURL::StaticInit() {
+	DefaultProtocol            = GConfig->GetStr( TEXT("URL"), TEXT("Protocol"), NULL );
+	DefaultProtocolDescription = GConfig->GetStr( TEXT("URL"), TEXT("ProtocolDescription"), NULL );
+	DefaultName                = GConfig->GetStr( TEXT("URL"), TEXT("Name"), NULL );
+	if( DefaultName == TEXT("UbiPlayer") )
+		DefaultName = appUserName();
+	DefaultMap = TEXT("Entry.");
+	DefaultMap += GConfig->GetStr( TEXT("URL"), TEXT("MapExt"), NULL );
+	DefaultLocalMap = TEXT("Entry.");
+	DefaultLocalMap += GConfig->GetStr( TEXT("URL"), TEXT("MapExt"), NULL );
+	DefaultHost     = GConfig->GetStr( TEXT("URL"), TEXT("Host"), NULL );
+	DefaultPortal   = GConfig->GetStr( TEXT("URL"), TEXT("Portal"), NULL );
+	DefaultMapExt   = GConfig->GetStr( TEXT("URL"), TEXT("MapExt"), NULL );
+	DefaultSaveExt  = GConfig->GetStr( TEXT("URL"), TEXT("SaveExt"), NULL );
+	DefaultPort     = appAtoi( GConfig->GetStr( TEXT("URL"), TEXT("Port"), NULL ) );
+}
 
 // ?Pad16Bit@FWaveModInfo@@QAEKK@Z
 DWORD FWaveModInfo::Pad16Bit(DWORD InVal) { return (InVal + 1) & ~1; }
@@ -7667,10 +7692,29 @@ void FURL::AddOption(const TCHAR* Str) {
 }
 
 // ?LoadURLConfig@FURL@@QAEXPBG0@Z
-void FURL::LoadURLConfig(const TCHAR* p0, const TCHAR* p1) {}
+void FURL::LoadURLConfig(const TCHAR* Section, const TCHAR* Filename) {
+	TCHAR Buffer[32000];
+	GConfig->GetSection( Section, Buffer, ARRAY_COUNT(Buffer), Filename );
+	const TCHAR* Ptr = Buffer;
+	while( *Ptr ) {
+		AddOption( Ptr );
+		Ptr += appStrlen(Ptr) + 1;
+	}
+}
 
 // ?SaveURLConfig@FURL@@QBEXPBG00@Z
-void FURL::SaveURLConfig(const TCHAR* p0, const TCHAR* p1, const TCHAR* p2) const {}
+void FURL::SaveURLConfig(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename) const {
+	for( INT i=0; i<Op.Num(); i++ ) {
+		TCHAR Temp[1024];
+		appStrcpy( Temp, *Op(i) );
+		TCHAR* Value = appStrchr( Temp, '=' );
+		if( Value ) {
+			*Value++ = 0;
+			if( appStricmp(Temp, Key)==0 )
+				GConfig->SetString( Section, Temp, Value, Filename );
+		}
+	}
+}
 
 // ?HalveData@FWaveModInfo@@QAEXXZ
 void FWaveModInfo::HalveData() {}
