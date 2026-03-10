@@ -6889,7 +6889,11 @@ FHitCause& FHitCause::operator=(const FHitCause& Other)
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLevelSceneNode@@QAE@ABV0@@Z
-FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & p0) : FSceneNode((UViewport*)NULL) {}
+// Ghidra: calls FSceneNode copy ctor, then copies 6 DWORDs at 0x1B8-0x1CC
+FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & Other) : FSceneNode((const FSceneNode&)Other)
+{
+	appMemcpy(((BYTE*)this) + 0x1B8, ((const BYTE*)&Other) + 0x1B8, 24);
+}
 
 // ??0FLevelSceneNode@@QAE@PAVUViewport@@@Z
 FLevelSceneNode::FLevelSceneNode(UViewport * p0) : FSceneNode((UViewport*)NULL) {}
@@ -6933,10 +6937,18 @@ FRotatorF::FRotatorF(float InPitch, float InYaw, float InRoll) : Pitch(InPitch),
 FRotatorF::FRotatorF() {}
 
 // ??0FSceneNode@@QAE@PAV0@@Z
-FSceneNode::FSceneNode(FSceneNode * p0) {}
+// Ghidra: copies viewport/matrices/vectors from parent, recalculates determinant
+FSceneNode::FSceneNode(FSceneNode * p0)
+{
+	appMemcpy(((BYTE*)this) + 4, ((BYTE*)p0) + 4, 0x1B4);
+}
 
 // ??0FSceneNode@@QAE@ABV0@@Z
-FSceneNode::FSceneNode(FSceneNode const & p0) {}
+// Ghidra: bitwise copy of all fields from 0x04 through 0x1B4
+FSceneNode::FSceneNode(FSceneNode const & p0)
+{
+	appMemcpy(((BYTE*)this) + 4, ((const BYTE*)&p0) + 4, 0x1B4);
+}
 
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
 FSceneNode::FSceneNode(UViewport * p0) {}
@@ -7316,7 +7328,10 @@ FVector FPoly::GetTextureSize()
 }
 
 // ?Vector@FRotatorF@@QAE?AVFVector@@XZ
-FVector FRotatorF::Vector() { return FVector(); }
+FVector FRotatorF::Vector()
+{
+	return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)).Vector();
+}
 
 // ?Deproject@FSceneNode@@QAE?AVFVector@@VFPlane@@@Z
 FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
@@ -7405,7 +7420,39 @@ int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
-int FPathBuilder::removePaths(ULevel * p0) { return 0; }
+// Ghidra: iterate actors, destroy auto-built navigation points, clear bPathsTransient on LevelInfo
+int FPathBuilder::removePaths(ULevel* Level)
+{
+	// Store level pointer at this+0 (first field in Pad)
+	*(ULevel**)Pad = Level;
+
+	INT Count = 0;
+	for (INT i = 0; i < Level->Actors.Num(); i++)
+	{
+		AActor* Actor = Level->Actors(i);
+		if (Actor && Actor->IsA(ANavigationPoint::StaticClass()))
+		{
+			// Check bAutoBuilt flag — high bit of byte at AActor+0x3A4
+			if (((BYTE*)Actor)[0x3A4] & 0x80)
+			{
+				Count++;
+				Level->DestroyActor(Actor);
+			}
+		}
+	}
+
+	// Verify Actors(0) is ALevelInfo and clear bPathsTransient
+	if (!Level->Actors(0))
+		appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AD);
+	if (!Level->Actors(0)->IsA(ALevelInfo::StaticClass()))
+		appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AE);
+
+	// Clear bPathsTransient bit (bit 0x800 at offset 0x450 on LevelInfo)
+	DWORD& Flags = *(DWORD*)(((BYTE*)Level->Actors(0)) + 0x450);
+	Flags &= ~0x800;
+
+	return Count;
+}
 
 // ?CalcNormal@FPoly@@QAEHH@Z
 int FPoly::CalcNormal(int bSilent) {
@@ -8339,6 +8386,14 @@ void FStats::Clear() { appMemzero(this, sizeof(*this)); }
 // ============================================================================
 // FEngineStats
 // ============================================================================
+// ??4FEngineStats@@QAEAAV0@ABV0@@Z
+// Ghidra: rep movsd loop copying 99 dwords (396 bytes)
+FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
+{
+	appMemcpy(this, &Other, 99 * 4);
+	return *this;
+}
+
 void FEngineStats::Init() {}
 
 // ============================================================================

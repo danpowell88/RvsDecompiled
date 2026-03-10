@@ -416,8 +416,9 @@ enum ESplitType { SP_Coplanar=0, SP_Front=1, SP_Back=2, SP_Split=3 };
 class ENGINE_API FEngineStats
 {
 public:
-	BYTE Pad[256];
-	FEngineStats() { appMemzero(this, sizeof(*this)); }
+	BYTE Pad[0x188];
+	FEngineStats() { appMemset(this, 0xFF, 0x188); }
+	FEngineStats& operator=(const FEngineStats& Other);
 	void Init();
 };
 class ENGINE_API FStats
@@ -4976,6 +4977,7 @@ public:
 	// declaration order matters — not member layout.
 
 	UClient*        Client;         // 0x44: Active client (viewport manager)
+	UAudioSubsystem* Audio;         // 0x48: Audio subsystem
 
 	// --- Virtual method table ---
 	// The following virtual methods MUST appear in exactly this order to match
