@@ -2566,9 +2566,11 @@ int * APlayerController::GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,U
 	return NULL;
 }
 
+// TODO: Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player
+// (UNetConnection* at this+0x5B4). Requires LowLevelGetRemoteAddress on UNetConnection base class.
 FString APlayerController::GetPlayerNetworkAddress()
 {
-	return FString();
+	return FString(TEXT(""));
 }
 
 AActor * APlayerController::GetViewTarget()
@@ -3289,9 +3291,13 @@ void FKAggregateGeom::EmptyElements()
 {
 }
 
+// Ghidra: sum of 4 TArray Num() at offsets 0x00, 0x0C, 0x18, 0x24
 int FKAggregateGeom::GetElementCount()
 {
-	return 0;
+	INT* Counts = (INT*)this;
+	// TArray layout: Data(4), ArrayNum(4), ArrayMax(4) = 12 bytes each
+	// ArrayNum offsets: 0x04, 0x10, 0x1C, 0x28
+	return Counts[1] + Counts[4] + Counts[7] + Counts[10];
 }
 
 // --- FKBoxElem ---
@@ -6951,7 +6957,14 @@ FSceneNode::FSceneNode(FSceneNode const & p0)
 }
 
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
-FSceneNode::FSceneNode(UViewport * p0) {}
+// Ghidra: init 6 FMatrix + 3 FVector, set Viewport, clear Parent/Level
+FSceneNode::FSceneNode(UViewport * Viewport)
+{
+	// Zero-init the data region (0x04 through 0x1B7)
+	appMemzero(((BYTE*)this) + 4, 0x1B4);
+	// Set viewport at offset 0x04, Parent(0x08)=NULL, Level(0x0C)=0
+	*(UViewport**)(((BYTE*)this) + 0x04) = Viewport;
+}
 
 // ??0FStatGraph@@QAE@ABV0@@Z
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
@@ -8186,13 +8199,111 @@ void FURL::SaveURLConfig(const TCHAR* Section, const TCHAR* Key, const TCHAR* Fi
 }
 
 // ?HalveData@FWaveModInfo@@QAEXXZ
-void FWaveModInfo::HalveData() {}
+// Ghidra: halve sample rate with error-diffusion filter, both 16-bit and 8-bit paths
+void FWaveModInfo::HalveData()
+{
+	if (*pBitsPerSample == 16)
+	{
+		DWORD DataSize = SampleDataSize;
+		short* Data = (short*)SampleDataStart;
+		INT Accum = 0;
+		INT Prev = Data[0];
+		for (DWORD i = 0; i < DataSize >> 2; i++)
+		{
+			INT Cur = Data[i * 2 + 1];
+			Accum = Accum + Prev + 0x20000 + Data[i * 2] * 2 + Cur;
+			DWORD Val = (Accum + 2) & 0x3FFFC;
+			if (Val > 0x3FFFC) Val = 0x3FFFC;
+			Data[i] = (short)((INT)Val >> 2) - 0x8000;
+			Accum = Accum - Val;
+			Prev = Cur;
+		}
+		NewDataSize = (DataSize >> 2) << 1;
+		*pSamplesPerSec >>= 1;
+	}
+	else if (*pBitsPerSample == 8)
+	{
+		DWORD DataSize = SampleDataSize;
+		BYTE* Data = SampleDataStart;
+		INT Accum = 0;
+		DWORD Prev = Data[0];
+		for (DWORD i = 0; i < DataSize >> 1; i++)
+		{
+			BYTE Next = Data[i * 2 + 1];
+			Accum = Accum + Prev + Data[i * 2] * 2 + Next;
+			DWORD Val = (Accum + 2) & 0x3FC;
+			if (Val > 0x3FC) Val = 0x3FC;
+			Data[i] = (BYTE)(Val >> 2);
+			Accum = Accum - Val;
+			Prev = Next;
+		}
+		NewDataSize = DataSize >> 1;
+		*pSamplesPerSec >>= 1;
+	}
+}
 
 // ?HalveReduce16to8@FWaveModInfo@@QAEXXZ
-void FWaveModInfo::HalveReduce16to8() {}
+// Ghidra: halve + reduce 16-bit to 8-bit in one pass with error diffusion
+void FWaveModInfo::HalveReduce16to8()
+{
+	DWORD DataSize = SampleDataSize;
+	short* Data16 = (short*)SampleDataStart;
+	BYTE* Data8 = SampleDataStart;
+	INT Accum = 0;
+	INT Prev = Data16[0];
+	for (DWORD i = 0; i < DataSize >> 2; i++)
+	{
+		INT Cur = Data16[i * 2 + 1];
+		Accum = Accum + Prev + 0x20000 + Data16[i * 2] * 2 + Cur;
+		DWORD Val = (Accum + 0x200) & 0xFFFFFC00;
+		if ((INT)Val > 0x3FC00) Val = 0x3FC00;
+		Data8[i] = (BYTE)(Val >> 10);
+		Accum = Accum - Val;
+		Prev = Cur;
+	}
+	NewDataSize = DataSize >> 2;
+	*pBitsPerSample = 8;
+	*pSamplesPerSec >>= 1;
+	NoiseGate = 1;
+}
 
 // ?NoiseGateFilter@FWaveModInfo@@QAEXXZ
-void FWaveModInfo::NoiseGateFilter() {}
+// Ghidra: gates silent sections in 8-bit audio data
+void FWaveModInfo::NoiseGateFilter()
+{
+	BYTE* Data = SampleDataStart;
+	INT TotalSamples = *pWaveDataSize;
+	DWORD Rate = *pSamplesPerSec;
+	INT SilenceStart = 0;
+
+	for (INT i = 0; i < TotalSamples; i++)
+	{
+		// Compute amplitude (distance from 0x80 midpoint)
+		INT Amp = (INT)Data[i] - 0x80;
+		if (Amp < 0) Amp = -Amp;
+
+		UBOOL IsLoud = (Amp >= 0x12);
+		// Debounce: if loud and close to previous loud section, treat as loud
+		if (IsLoud && SilenceStart > 0 && (i - SilenceStart) < (INT)((Rate / 0x2B11) << 5))
+			IsLoud = 0;
+
+		if (SilenceStart == 0)
+		{
+			if (!IsLoud)
+				SilenceStart = i;
+		}
+		else if (IsLoud || i == TotalSamples - 1)
+		{
+			// If silence duration exceeds threshold, gate it
+			if ((i - SilenceStart) >= (INT)((Rate / 0x2B11) * 0x35C))
+			{
+				for (INT j = SilenceStart; j < i; j++)
+					Data[j] = 0x80;
+			}
+			SilenceStart = 0;
+		}
+	}
+}
 
 // ?Reduce16to8@FWaveModInfo@@QAEXXZ
 void FWaveModInfo::Reduce16to8()
@@ -8749,8 +8860,27 @@ void KU2METransform(FLOAT (* const tm)[4], FVector Pos, FRotator Rot) {
 // ============================================================================
 // TArray<BYTE> operators
 // ============================================================================
-TArray<BYTE>& TArray<BYTE>::operator+(const TArray<BYTE>& Other) { return *this; }
-TArray<BYTE>& TArray<BYTE>::operator+=(const TArray<BYTE>& Other) { return *this; }
+// Ghidra: appends elements from Other to this, element-by-element via FArray::Add
+TArray<BYTE>& TArray<BYTE>::operator+(const TArray<BYTE>& Other)
+{
+	if (this != &Other)
+	{
+		for (INT i = 0; i < Other.Num(); i++)
+		{
+			INT Index = Add(1);
+			(*this)(Index) = Other(i);
+		}
+	}
+	return *this;
+}
+
+// Ghidra: delegates to operator+ then operator= (self)
+TArray<BYTE>& TArray<BYTE>::operator+=(const TArray<BYTE>& Other)
+{
+	if (this != &Other)
+		*this + Other;
+	return *this;
+}
 
 // ============================================================================
 // TLazyArray<BYTE> — copy ctor and operator= are compiler-generated;
