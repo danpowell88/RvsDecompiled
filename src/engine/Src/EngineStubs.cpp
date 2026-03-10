@@ -7154,7 +7154,76 @@ int FPathBuilder::createPaths() { return 0; }
 void FOctreeNode::StoreActor(AActor * p0, FCollisionOctree * p1, FPlane const * p2) {}
 
 // ?FindBlockingNormal@FPathBuilder@@AAEXAAVFVector@@@Z
-void FPathBuilder::FindBlockingNormal(FVector & p0) {}
+// Finds the surface normal at the point that blocks a path check.
+// Runs up to three line checks (via Level->SingleLineCheck at vtable+0xcc):
+//   Pass 1: Trace from (Scout.Loc - Direction*16) toward Scout.Loc.
+//           If nothing blocked -> return unchanged.
+//   Pass 2: If pass 1 blocked, trace downward 33 units at the end point.
+//           If blocked -> give up, return unchanged.
+//   Pass 3: If pass 2 not blocked, trace horizontally at Z-33 from End back toward Scout.
+//           If blocked -> write Hit.Normal to p0.
+//
+// NOTE: The retail SingleLineCheck has a 7th undeclared FLOAT parameter (ExtraParam = 16.0).
+// Passes 1 and 2 supply 16.0f for it via raw vtable call; pass 3 omits it (= 0).
+void FPathBuilder::FindBlockingNormal(FVector& p0)
+{
+	ULevel* Level = *(ULevel**)((BYTE*)this);
+	AActor* Scout = *(AActor**)((BYTE*)this + 4);
+
+	FCheckResult Hit;
+	Hit.Time = 1.0f;
+	Hit.Item = INDEX_NONE;
+
+	FLOAT HalfHeight = *(FLOAT*)((BYTE*)Scout + 0xfc);
+	FLOAT Radius     = *(FLOAT*)((BYTE*)Scout + 0xf8);
+
+	// Raw vtable call for SingleLineCheck with 7 explicit params (the extra 16.0f ExtraParam).
+	typedef INT (__thiscall *tSLC7)(ULevel*,
+	    FCheckResult*, AActor*, const FVector*, const FVector*, DWORD,
+	    FLOAT, FLOAT, FLOAT,  // FVector Extent (3 floats by value)
+	    FLOAT);               // ExtraParam
+	void** VTable = *(void***)Level;
+	tSLC7 SLC = (tSLC7)VTable[0xcc / 4];
+
+	// Pass 1: trace from (Scout.Location - p0*16) toward Scout.Location.
+	FVector Scaled = p0 * 16.0f;
+	FVector End1(
+		Scout->Location.X - Scaled.X,
+		Scout->Location.Y - Scaled.Y,
+		Scout->Location.Z - Scaled.Z);
+
+	SLC(Level, &Hit, Scout, &End1, &Scout->Location, 0x86, Radius, Radius, HalfHeight, 16.0f);
+
+	if (Hit.Time < 1.0f)
+	{
+		// Pass 2: vertical trace 33 units downward at the end point.
+		Scaled = p0 * 16.0f;
+		FLOAT EndZ = Scout->Location.Z - Scaled.Z;
+		FVector End2(
+			Scout->Location.X - Scaled.X,
+			Scout->Location.Y - Scaled.Y,
+			EndZ - 33.0f);
+		FVector Start2(End2.X, End2.Y, EndZ);
+
+		SLC(Level, &Hit, Scout, &End2, &Start2, 0x86, Radius, Radius, HalfHeight, 16.0f);
+
+		if (Hit.Time < 1.0f)
+			return;  // Pass 2 blocked—give up
+
+		// Pass 3: horizontal trace at Z-33 from End back toward Scout.Location.
+		FVector Start3(Scout->Location.X, Scout->Location.Y, Scout->Location.Z - 33.0f);
+		FVector End3(End2.X, End2.Y, EndZ - 33.0f);
+
+		Level->SingleLineCheck(Hit, Scout, Start3, End3, 0x86,
+		                       FVector(Radius, Radius, HalfHeight));
+
+		if (Hit.Time >= 1.0f)
+			return;  // Pass 3 found nothing—give up
+
+		// Pass 3 found a hit: set output to its surface normal.
+		p0 = Hit.Normal;
+	}
+}
 
 // ?Pass2From@FPathBuilder@@AAEXVFVector@@0M@Z
 void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
