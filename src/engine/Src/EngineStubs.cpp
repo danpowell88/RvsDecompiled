@@ -7160,7 +7160,57 @@ void FPathBuilder::FindBlockingNormal(FVector & p0) {}
 void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 
 // ?SetPathCollision@FPathBuilder@@AAEXH@Z
-void FPathBuilder::SetPathCollision(int p0) {}
+// Retail ordinal 4485 (0xe0300).
+// Toggles collision for actors that block path-building.
+// When disabling (param_1 != 0): for each live actor that has bBlockPlayers &&
+//   bCollideActors && !bPathTemp && !(JointDetails & 0x20000), save the old
+//   collision state by setting a temporary flag (bit 3) at actor+0x320, then
+//   call SetCollision(0, ...) to take the actor "out of the way".
+// When re-enabling (param_1 == 0): restore collision for every actor that had
+//   the temp flag set.
+// Field actor+0x320 (800 decimal): custom scratch field used only during path
+//   building; bit 3 (0x8) = "collision was disabled for path test; restore it".
+void FPathBuilder::SetPathCollision(int bDisable) {
+	ULevel* Level = *(ULevel**)((BYTE*)this);
+	INT Count = Level->Actors.Num();
+
+	if (bDisable == 0) {
+		// Re-enable collision for actors we disabled.
+		for (INT i = 0; i < Count; i++) {
+			AActor* A = Level->Actors(i);
+			if (!A) continue;
+			if (*(DWORD*)((BYTE*)A + 0x320) & 0x8) {
+				// Clear the temp flag.
+				*(DWORD*)((BYTE*)A + 0x320) &= ~0x8u;
+				// Restore bBlockActors=1, bBlockPlayers and bBlocksSelf from saved flags.
+				DWORD Flags = *(DWORD*)((BYTE*)A + 0xa8);
+				A->SetCollision(1, (Flags >> 13) & 1, (Flags >> 14) & 1);
+			}
+		}
+	} else {
+		// Disable collision of actors that block path search.
+		for (INT i = 0; i < Count; i++) {
+			AActor* A = Level->Actors(i);
+			if (!A) continue;
+			if (*(SBYTE*)((BYTE*)A + 0xa0) < 0) continue; // bDeleteMe
+			DWORD Flags = *(DWORD*)((BYTE*)A + 0xa8);
+			DWORD bBlockPlayers = (Flags >> 13) & 1;
+			if (!bBlockPlayers) {
+				*(DWORD*)((BYTE*)A + 0x320) &= ~0x8u;
+				continue;
+			}
+			// Skip if not bCollideActors, or bPathTemp set, or joint-no-encroach flag.
+			if (!(Flags & 0x800) || (*(DWORD*)((BYTE*)A + 0xa0) & 1) ||
+			    (*(DWORD*)((BYTE*)A + 0xac) & 0x20000)) {
+				*(DWORD*)((BYTE*)A + 0x320) &= ~0x8u;
+				continue;
+			}
+			// Save and disable.
+			*(DWORD*)((BYTE*)A + 0x320) |= 0x8;
+			A->SetCollision(0, bBlockPlayers, (Flags >> 14) & 1);
+		}
+	}
+}
 
 // ?getScout@FPathBuilder@@AAEXXZ
 void FPathBuilder::getScout() {}
