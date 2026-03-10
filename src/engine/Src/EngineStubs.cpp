@@ -7213,7 +7213,68 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 }
 
 // ?getScout@FPathBuilder@@AAEXXZ
-void FPathBuilder::getScout() {}
+// Finds or spawns the Scout pawn used for path-building reachability tests.
+// FPathBuilder layout: [0..3]=ULevel*, [4..7]=APawn* Scout
+// Post-spawn Scout setup:
+//   SetCollision(1,1,1)
+//   Scout+0xa8 |= 0x1000  (bPathBuilding flag)
+//   vtable[0x10c] and vtable[0x114] on Scout (SetPhysics-related calls)
+//   Scout->PhysicsVolume = Level->GetDefaultPhysicsVolume()
+void FPathBuilder::getScout()
+{
+	ULevel* Level = *(ULevel**)((BYTE*)this);
+	*(AActor**)((BYTE*)this + 4) = NULL;
+
+	// Find Scout UClass for IsA checks.
+	// Deviation from original: StaticFindObjectChecked called before loop
+	// instead of using AScout::PrivateStaticClass directly (AScout is forward-declared only).
+	UClass* ScoutClass = (UClass*)UObject::StaticFindObjectChecked(
+		UClass::StaticClass(), (UObject*)-1, TEXT("Scout"), 0);
+
+	// Search existing actors for a Scout pawn.
+	INT Count = Level->Actors.Num();
+	for (INT i = 0; i < Count; i++)
+	{
+		AActor* A = Level->Actors(i);
+		if (!A || !A->IsA(ScoutClass)) continue;
+		*(AActor**)((BYTE*)this + 4) = A;
+		break;
+	}
+
+	if (*(INT*)((BYTE*)this + 4) == 0)
+	{
+		// Spawn a new Scout pawn.
+		AActor* S = Level->SpawnActor(ScoutClass, NAME_None, FVector(0,0,0));
+		*(AActor**)((BYTE*)this + 4) = (S && S->IsA(ScoutClass)) ? S : NULL;
+
+		// Spawn an AIController for the Scout.
+		UClass* AIClass = (UClass*)UObject::StaticFindObjectChecked(
+			UClass::StaticClass(), (UObject*)-1, TEXT("AIController"), 0);
+		AActor* AICtrl = Level->SpawnActor(AIClass, NAME_None, FVector(0,0,0));
+		AActor* Scout = *(AActor**)((BYTE*)this + 4);
+		if (Scout) *(void**)((BYTE*)Scout + 0x4ec) = AICtrl;
+	}
+
+	AActor* Scout = *(AActor**)((BYTE*)this + 4);
+	if (!Scout) return;
+
+	Scout->SetCollision(1, 1, 1);
+	*(DWORD*)((BYTE*)Scout + 0xa8) |= 0x1000;  // bPathBuilding
+
+	// vtable[0x10c] on Scout — physics/state init call (no visible args)
+	typedef void (__thiscall *tVoidFn)(AActor*);
+	tVoidFn fn1 = *(tVoidFn*)((BYTE*)(*(void**)Scout) + 0x10c);
+	fn1(Scout);
+
+	// Store default physics volume
+	ALevelInfo* LevelInfo = *(ALevelInfo**)((BYTE*)Scout + 0x144);
+	APhysicsVolume* Vol = LevelInfo->GetDefaultPhysicsVolume();
+	*(APhysicsVolume**)((BYTE*)Scout + 0x164) = Vol;
+
+	// vtable[0x114] on Scout — second physics/state init call (no visible args)
+	tVoidFn fn2 = *(tVoidFn*)((BYTE*)(*(void**)Scout) + 0x114);
+	fn2(Scout);
+}
 
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
 void FPathBuilder::testPathsFrom(FVector p0) {}
@@ -8177,7 +8238,37 @@ int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverfl
 }
 
 // ?SplitWithNode@FPoly@@QBEHPBVUModel@@HPAV1@1H@Z
-int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int p4) const { return 0; }
+// Calls SplitWithPlane using the geometric plane defined by BSP node p1 in p0.
+// Plane base  = Points[ Verts[ Nodes[p1].iVertPool ].iVertex ]    (first vertex of the node)
+// Plane normal = Vectors[ Surfs[ Nodes[p1].iSurf ].vNormal ]      (surface normal vector)
+//
+// UModel layout (Ghidra-verified offsets, all are TTransArray<T>.Data pointers):
+//   Model+0x5c = Nodes.Data  (FBspNode array, stride 0x90)
+//   Model+0x6c = Verts.Data  (FVert array,    stride 0x08; first INT = iVertex)
+//   Model+0x7c = Vectors.Data(FVector array,  stride 0x0c)
+//   Model+0x8c = Points.Data (FVector array,  stride 0x0c)
+//   Model+0x9c = Surfs.Data  (FBspSurf array, stride 0x5c; vNormal INT at +0x0c)
+// FBspNode field offsets: iVertPool at +0x30, iSurf at +0x34
+int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int p4) const
+{
+	const BYTE* NodesData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x5c);
+	const BYTE* VertsData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x6c);
+	const BYTE* VectorsData= (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x7c);
+	const BYTE* PointsData = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x8c);
+	const BYTE* SurfsData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x9c);
+
+	const BYTE* Node  = NodesData + p1 * 0x90;
+	INT iVertPool     = *(const INT*)(Node + 0x30);
+	INT iSurf         = *(const INT*)(Node + 0x34);
+
+	INT iVertex       = *(const INT*)(VertsData + iVertPool * 8);  // FVert.iVertex at +0
+	const FVector* PointBase   = (const FVector*)(PointsData  + iVertex * 0xc);
+
+	INT vNormal       = *(const INT*)(SurfsData + iSurf * 0x5c + 0x0c);  // FBspSurf.vNormal at +0x0c
+	const FVector* PlaneNormal = (const FVector*)(VectorsData + vNormal * 0xc);
+
+	return SplitWithPlane(*PointBase, *PlaneNormal, p2, p3, p4);
+}
 
 // ?SplitWithPlane@FPoly@@QBEHABVFVector@@0PAV1@1H@Z
 // Same split logic as SplitWithPlaneFast but takes Base+Normal instead of FPlane.
