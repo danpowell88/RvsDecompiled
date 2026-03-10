@@ -7346,10 +7346,40 @@ void FPathBuilder::getScout()
 }
 
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
-void FPathBuilder::testPathsFrom(FVector p0) {}
+// Ghidra: call findStart on Scout; if Z matches within MaxStepHeight -> testPathwithRadius;
+// else retry findStart with Start.Z+20. If neither works, return.
+void FPathBuilder::testPathsFrom(FVector Start) {
+	AScout* Scout = *(AScout**)(Pad + 4);
+	if (Scout->findStart(Start)) {
+		// Check if scout landed close enough in Z (within MaxStepHeight at Scout+0xfc)
+		FLOAT ScoutZ  = *(FLOAT*)((BYTE*)Scout + 0x23c);	// Z component after placement
+		FLOAT MaxStep = *(FLOAT*)((BYTE*)Scout + 0xfc);	// MaxStepHeight
+		FLOAT DiffZ   = ScoutZ - Start.Z;
+		if (DiffZ < 0.0f) DiffZ = -DiffZ;
+		if (DiffZ <= MaxStep) {
+			testPathwithRadius(Start, 40.0f);
+			return;
+		}
+	}
+	// Retry 20 units higher
+	if (Scout->findStart(FVector(Start.X, Start.Y, Start.Z + 20.0f)))
+		testPathwithRadius(Start, 40.0f);
+}
 
 // ?testPathwithRadius@FPathBuilder@@AAEXVFVector@@M@Z
-void FPathBuilder::testPathwithRadius(FVector p0, float p1) {}
+// Ghidra: resize Scout to Radius x 85, then probe 8 horizontal directions (±X, ±Y) at ±1 walk.
+void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
+	AActor* Scout = *(AActor**)(Pad + 4);
+	Scout->SetCollisionSize(Radius, 85.0f);
+	Pass2From(Start, FVector( 1.0f, 0.0f, 0.0f),  1.0f);
+	Pass2From(Start, FVector( 1.0f, 0.0f, 0.0f), -1.0f);
+	Pass2From(Start, FVector( 0.0f, 1.0f, 0.0f),  1.0f);
+	Pass2From(Start, FVector( 0.0f, 1.0f, 0.0f), -1.0f);
+	Pass2From(Start, FVector(-1.0f, 0.0f, 0.0f),  1.0f);
+	Pass2From(Start, FVector(-1.0f, 0.0f, 0.0f), -1.0f);
+	Pass2From(Start, FVector( 0.0f,-1.0f, 0.0f),  1.0f);
+	Pass2From(Start, FVector( 0.0f,-1.0f, 0.0f), -1.0f);
+}
 
 // ??0ECLipSynchData@@QAE@PAVUMeshInstance@@PAVUSound@@1PAVAActor@@@Z
 ECLipSynchData::ECLipSynchData(UMeshInstance * p0, USound * p1, USound * p2, AActor * p3) {}
@@ -9221,7 +9251,50 @@ void FPathBuilder::defineChangedPaths(ULevel * p0) {}
 void FPathBuilder::definePaths(ULevel * p0) {}
 
 // ?undefinePaths@FPathBuilder@@QAEXPAVULevel@@@Z
-void FPathBuilder::undefinePaths(ULevel * p0) {}
+// Ghidra: destroy all non-transient ANavigationPoints; for transient ones call ClearPaths (vtable[0x66]);
+// clear bPathsDefined on LevelInfo.
+void FPathBuilder::undefinePaths(ULevel* Level) {
+	*(ULevel**)Pad = Level;
+	debugf(NAME_Log, TEXT("Undefining paths"));
+
+	ALevelInfo* LInfo = Level->GetLevelInfo();
+	*(DWORD*)((BYTE*)LInfo + 0x4d0) = 0;	// clear navigation point linked list head
+
+	GWarn->BeginSlowTask(TEXT("Undefining"), 0, 0);
+
+	INT i = 0;
+	for (;;) {
+		INT Num = Level->Actors.Num();
+		if (i >= Num) {
+			// Post-loop: verify Actors(0) and clear bPathsDefined (bit 0x800)
+			if (!Level->Actors(0))
+				appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AD);
+			if (!Level->Actors(0)->IsA(ALevelInfo::StaticClass()))
+				appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1AE);
+			*(DWORD*)(((BYTE*)Level->Actors(0)) + 0x450) &= ~0x800u;
+			GWarn->EndSlowTask();
+			return;
+		}
+		GWarn->StatusUpdatef(i, Num, TEXT("Undefining"));
+		AActor* Actor = Level->Actors(i);
+		if (Actor && Actor->IsA(ANavigationPoint::StaticClass())) {
+			UClass* Cls = Actor->GetClass();
+			if ((*(DWORD*)((BYTE*)Cls + 0x48c) & 0x200) == 0) {
+				// Normal nav point: destroy it then keep incrementing i
+				Level->DestroyActor(Actor);
+				i++;
+				continue;
+			} else {
+				// Transient nav point: call ClearPaths via vtable slot 0x198/4 = 102
+				// Deviation: vtable slot determined from Ghidra offset 0x198; likely ClearPaths()
+				typedef void (__thiscall *tClearPaths)(AActor*);
+				tClearPaths fn = *(tClearPaths*)((BYTE*)(*(void**)Actor) + 0x198);
+				fn(Actor);
+			}
+		}
+		i++;
+	}
+}
 
 // ?Init@FPoly@@QAEXXZ
 void FPoly::Init() {
