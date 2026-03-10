@@ -6963,7 +6963,33 @@ FCollisionHashBase * GNewCollisionHash() {
 }
 
 // ?FGetHSV@@YA?AVFPlane@@EEE@Z
-FPlane FGetHSV(BYTE p0, BYTE p1, BYTE p2) { return FPlane(); }
+// Converts Hue/Saturation/Value (each 0-255) to a normalised FPlane colour.
+// Ghidra: param_2 (S/Hue) selects one of three sectors; param_3 (V) scales
+// brightness; result has W=1.0f.
+FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
+	FLOAT fR, fG, fB;
+	if (S < 0x56) {
+		fR = (FLOAT)(0x55 - (DWORD)S) * 0.011764706f;
+		fG = (FLOAT)(DWORD)S            * 0.011764706f;
+		fB = 0.0f;
+	} else if (S < 0xAB) {
+		fR = 0.0f;
+		fG = (FLOAT)(0xAA - (DWORD)S)   * 0.011764706f;
+		fB = (FLOAT)((DWORD)S - 0x55)   * 0.011764706f;
+	} else {
+		fR = (FLOAT)((DWORD)S - 0xAA)   * 0.011764706f;
+		fG = 0.0f;
+		fB = (FLOAT)(0xFF - (DWORD)S)   * 0.011904762f;
+	}
+	FLOAT fV     = (FLOAT)V * 0.003921569f; // V / 255
+	FLOAT fScale = (1.0f - fR) * fV;        // desaturation weight (Ghidra: afStack_c[0])
+	fR = fScale + fR;
+	fG = (1.0f - fG) * fV + fG;
+	fB = (1.0f - fB) * fV + fB;
+	// Ghidra: FVector{fR,fG,fB} * fScale, then FPlane(x,y,z,1.0f)
+	FVector RGB = FVector(fR, fG, fB) * fScale;
+	return FPlane(RGB.X, RGB.Y, RGB.Z, 1.0f);
+}
 
 // Forward declaration for overloaded variants below
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen);
@@ -7432,10 +7458,21 @@ FCollisionHash::FCollisionHash() {
 }
 
 // ??0FCollisionOctree@@QAE@ABV0@@Z
-FCollisionOctree::FCollisionOctree(FCollisionOctree const & p0) {}
+FCollisionOctree::FCollisionOctree(FCollisionOctree const& p0) {
+	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+}
 
 // ??0FCollisionOctree@@QAE@XZ
-FCollisionOctree::FCollisionOctree() {}
+// Ghidra: allocates a root FOctreeNode, zeroes counters, sets world bitmask.
+FCollisionOctree::FCollisionOctree() {
+	appMemzero(Pad, sizeof(Pad));
+	// Pad[0..3] = root FOctreeNode* (object offset +4, ref from Ghidra)
+	FOctreeNode* root = new FOctreeNode();
+	*(FOctreeNode**)Pad = root;
+	// Pad[4..7] = world size bitmask 0x1fffffff (object offset +8)
+	*(INT*)(Pad + 4) = 0x1fffffff;
+	// FVector/FRotator fields at Pad+0x10..0x4c already zeroed by appMemzero
+}
 
 // ??0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
@@ -7480,10 +7517,16 @@ FLightMapSceneNode::FLightMapSceneNode(UViewport * p0, AActor * p1, FLightMap * 
 FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
 
 // ??0FOctreeNode@@QAE@ABV0@@Z
-FOctreeNode::FOctreeNode(FOctreeNode const & p0) {}
+// Copy constructor — copy TArray (actors list at Pad[0..11]) and flag at Pad[12]
+FOctreeNode::FOctreeNode(FOctreeNode const& p0) {
+	appMemcpy(Pad, p0.Pad, 16);
+}
 
 // ??0FOctreeNode@@QAE@XZ
-FOctreeNode::FOctreeNode() {}
+// Ghidra: FArray::FArray((FArray*)this) zeros first 12 bytes; *(this+0xc) = 0
+FOctreeNode::FOctreeNode() {
+	appMemzero(Pad, 16); // TArray<> at 0..11, flag at 12
+}
 
 // ??1FOctreeNode@@QAE@XZ
 FOctreeNode::~FOctreeNode() {}
