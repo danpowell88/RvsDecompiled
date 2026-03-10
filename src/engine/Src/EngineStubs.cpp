@@ -6370,6 +6370,12 @@ INT FCollisionHash::HashZ[0x4000];
 INT FCollisionHash::CollisionTag = 0;
 INT FCollisionHash::Inited = 0;
 
+// Per-frame performance counters reset by FCollisionHash::Tick.
+// Retail addresses: GHashActorCount @0x1064ff28, GHashLinkCellCount @0x1064ff2c, GHashExtraCount @0x1064ff34
+INT GHashActorCount  = 0;   // DAT_1064ff28 — incremented once per AddActor call
+INT GHashLinkCellCount = 0; // DAT_1064ff2c — incremented per hash-cell link inserted
+INT GHashExtraCount  = 0;   // DAT_1064ff34 — additional insertion counter
+
 int FURL::DefaultPort = 0;
 
 _KarmaGlobals * KGData = NULL;
@@ -7047,7 +7053,37 @@ int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxL
 int getGameShutDown() { return bGameShutDown; }
 
 // ?newPath@FPathBuilder@@AAEPAVANavigationPoint@@VFVector@@@Z
-ANavigationPoint * FPathBuilder::newPath(FVector p0) { return NULL; }
+// Retail ordinal 5641 (0xe07b0).
+// Spawns a PathNode at Location (adjusting Z upward if Scout's half-height < 85)
+// and sets the machine-placed flag bit 0x80 at NavigationPoint+0x3a4.
+// FPathBuilder layout: Pad[0..3]=ULevel*, Pad[4..7]=APawn* Scout.
+ANavigationPoint* FPathBuilder::newPath(FVector Location) {
+	ULevel* Level = *(ULevel**)((BYTE*)this);
+	APawn* Scout  = *(APawn**)((BYTE*)this + 4);
+
+	// Adjust Z so the node clears the Scout's collision cylinder height.
+	FLOAT HalfHeight = *(FLOAT*)((BYTE*)Scout + 0xfc);
+	if (HalfHeight < 85.0f)
+		Location.Z = (Location.Z + 85.0f) - HalfHeight;
+
+	// Find the PathNode class object.
+	UClass* MetaClass  = UClass::StaticClass();
+	UObject* PathNodeClass = UObject::StaticFindObjectChecked(MetaClass, (UObject*)~0, TEXT("PathNode"), 0);
+
+	// Spawn a PathNode at Location with default rotation/name.
+	ANavigationPoint* NavPt = (ANavigationPoint*)Level->SpawnActor(
+		(UClass*)PathNodeClass, NAME_None, Location);
+
+	if (!NavPt) {
+		debugf(NAME_Warning, TEXT("FPathBuilder::newPath — failed to spawn PathNode"));
+		return NULL;
+	}
+
+	// Mark as machine-placed (bit 0x80 of the NavigationPoint flags at +0x3a4).
+	*(DWORD*)((BYTE*)NavPt + 0x3a4) |= 0x80;
+
+	return NavPt;
+}
 
 // ?DistanceToHashPlane@FCollisionHash@@AAEMHMMH@Z
 // Retail ordinal 2514 (0x6d6f0).  Returns the signed distance along axis p1
@@ -7062,7 +7098,35 @@ float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT
 
 
 // ?TestReach@FPathBuilder@@AAEHVFVector@@0@Z
-int FPathBuilder::TestReach(FVector p0, FVector p1) { return 0; }
+// Retail ordinal 4852 (0xe0060).
+// Teleports the Scout pawn to Start, tests whether it can reach End via
+// APawn::pointReachable, then teleports Scout back to its original position.
+// FPathBuilder layout: Pad[0..3] = ULevel*, Pad[4..7] = APawn* Scout.
+int FPathBuilder::TestReach(FVector Start, FVector End) {
+	ULevel* Level = *(ULevel**)((BYTE*)this);
+	APawn* Scout = *(APawn**)((BYTE*)this + 4);
+
+	// Save Scout's current location.
+	FVector OldLoc;
+	OldLoc.X = *(FLOAT*)((BYTE*)Scout + 0x234);
+	OldLoc.Y = *(FLOAT*)((BYTE*)Scout + 0x238);
+	OldLoc.Z = *(FLOAT*)((BYTE*)Scout + 0x23c);
+
+	// Teleport Scout to Start (bNoCheck=0, bIgnorePawns=0).
+	Level->FarMoveActor(Scout, Start, 0, 0, 0, 0);
+
+	// Enable navigation-mode flag (bCanFly or similar path-test flag at +0x2c).
+	*(BYTE*)((BYTE*)Scout + 0x2c) = 1;
+
+	// Test whether End is reachable from Start.
+	INT bReachable = Scout->pointReachable(End, 0);
+
+	// Teleport Scout back to its original location (bIgnorePawns=1 to avoid
+	// blocking the return move against other pawns).
+	Level->FarMoveActor(Scout, OldLoc, 0, 1, 0, 0);
+
+	return bReachable;
+}
 
 // ?TestWalk@FPathBuilder@@AAEHVFVector@@UFCheckResult@@M@Z
 int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
@@ -8764,9 +8828,12 @@ void FCollisionHash::AddActor(AActor* Actor) {
 				FCollisionLink*& Bucket = Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
 				Node->Next = Bucket;
 				Bucket = Node;
+				GHashLinkCellCount++;
+				GHashExtraCount++;
 			}
 		}
 	}
+	GHashActorCount++;
 	// Save current location as ColLocation so we can find the right cells on removal.
 	*(DWORD*)((BYTE*)Actor + 0x308) = *(DWORD*)((BYTE*)Actor + 0x234);
 	*(DWORD*)((BYTE*)Actor + 0x30c) = *(DWORD*)((BYTE*)Actor + 0x238);
@@ -8815,7 +8882,12 @@ void FCollisionHash::RemoveActor(AActor* Actor) {
 }
 
 // ?Tick@FCollisionHash@@UAEXXZ
-void FCollisionHash::Tick() {}
+// Retail ordinal 4860 (0x6d6d0).  Resets per-frame performance counters.
+void FCollisionHash::Tick() {
+	GHashExtraCount    = 0; // DAT_1064ff34
+	GHashLinkCellCount = 0; // DAT_1064ff2c
+	GHashActorCount    = 0; // DAT_1064ff28
+}
 
 // ?AddActor@FCollisionOctree@@UAEXPAVAActor@@@Z
 void FCollisionOctree::AddActor(AActor * p0) {}
