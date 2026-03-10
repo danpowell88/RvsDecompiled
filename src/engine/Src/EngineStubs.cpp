@@ -867,32 +867,61 @@ int FStaticMeshVertexStream::GetStride()
 // --- FStaticTexture ---
 unsigned __int64 FStaticTexture::GetCacheId()
 {
-	return 0;
+	// Ghidra: return *(__uint64*)(this + 4); CacheId at Pad[0..7]
+	return *(QWORD*)&Pad[0];
 }
 
 int FStaticTexture::GetFirstMip()
 {
-	return 0;
+	// Ghidra: UTexture::DefaultLOD(Texture)
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return Texture->DefaultLOD();
 }
 
 ETextureFormat FStaticTexture::GetFormat()
 {
-	return TEXF_P8;
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return (ETextureFormat)Texture->Format;
 }
 
 int FStaticTexture::GetHeight()
 {
-	return 0;
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return Texture->VSize;
 }
 
 int FStaticTexture::GetNumMips()
 {
-	return 0;
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return Texture->Mips.Num();
 }
 
-void * FStaticTexture::GetRawTextureData(int)
+void * FStaticTexture::GetRawTextureData(int MipIndex)
 {
-	return NULL;
+	// Ghidra (149B): Access Mips array directly via raw offsets.
+	// Mips at Texture+0xBC (TArray), element stride 0x28 (40 bytes).
+	// Mip data pointer at element+0x1C. Lazy loader vtable at element+0x10.
+	// Texture+0x94 bit 0x20 = already loaded flag.
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	if (Texture->Mips.Num() == 0)
+		return NULL;
+
+	// Mips.Data pointer — TArray stores opaque 0x28-byte mip entries, not INT
+	BYTE* MipsData = (BYTE*)Texture->Mips.GetData();
+	BYTE* MipEntry = MipsData + MipIndex * 0x28;
+
+	// If not already loaded, trigger lazy load via vtable[0]
+	if ((*(((BYTE*)Texture) + 0x94) & 0x20) == 0)
+	{
+		void** LazyVtable = *(void***)(MipEntry + 0x10);
+		if (LazyVtable)
+		{
+			typedef void (__thiscall *LoadFn)(void*);
+			((LoadFn)LazyVtable[0])((void*)(MipEntry + 0x10));
+		}
+	}
+
+	return *(void**)(MipEntry + 0x1C);
 }
 
 int FStaticTexture::GetRevision()
@@ -906,22 +935,25 @@ void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 
 ETexClampMode FStaticTexture::GetUClamp()
 {
-	return TC_Wrap;
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return (ETexClampMode)Texture->UClampMode;
 }
 
 UTexture * FStaticTexture::GetUTexture()
 {
-	return NULL;
+	return *(UTexture**)&Pad[8];
 }
 
 ETexClampMode FStaticTexture::GetVClamp()
 {
-	return TC_Wrap;
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return (ETexClampMode)Texture->VClampMode;
 }
 
 int FStaticTexture::GetWidth()
 {
-	return 0;
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return Texture->USize;
 }
 
 // --- UBinaryFileDownload ---
@@ -1799,7 +1831,15 @@ void USound::Destroy()
 
 float USound::GetDuration()
 {
-	return 0.0f;
+	// Ghidra: Duration at offset 0x5C, FSoundData at offset 0x2C.
+	// Lazy-init: if Duration < 0, compute via FSoundData::GetPeriod.
+	FLOAT& Duration = *(FLOAT*)((BYTE*)this + 0x5C);
+	if (Duration < 0.0f)
+	{
+		FSoundData* SoundData = (FSoundData*)((BYTE*)this + 0x2C);
+		Duration = SoundData->GetPeriod();
+	}
+	return Duration;
 }
 
 // --- UStaticMesh ---
@@ -2930,9 +2970,18 @@ void AVolume::PostBeginPlay()
 {
 }
 
-int AVolume::Encompasses(FVector)
+int AVolume::Encompasses(FVector Location)
 {
-	return 0;
+	// Ghidra: Check if Brush is NULL (offset 0x178), return 0 if so.
+	// Then call Brush->PointCheck with the location and zero extent.
+	// Return 1 if PointCheck returns 0 (point is inside the volume).
+	UPrimitive* Brush = *(UPrimitive**)((BYTE*)this + 0x178);
+	if (!Brush)
+		return 0;
+
+	FCheckResult Result(1.0f);
+	INT Check = Brush->PointCheck(Result, this, Location, FVector(0, 0, 0), 0);
+	return (Check == 0) ? 1 : 0;
 }
 
 // --- AWarpZoneInfo ---
@@ -8492,7 +8541,59 @@ void FStats::UpdateString(FString&, INT) {}
 void FStats::Render(UViewport*, UEngine*) {}
 INT FStats::RegisterStats(EStatsType, EStatsDataType, FString, FString, EStatsUnit) { return 0; }
 void FStats::CalcMovingAverage(INT, DWORD) {}
-void FStats::Clear() { appMemzero(this, sizeof(*this)); }
+void FStats::Clear()
+{
+	// Ghidra (363B): Save current stats to previous, then zero current.
+	// FStats layout: IntStats(0x1C), PrevIntStats(0x28), FloatStats(0x4C),
+	// PrevFloatStats(0x58), StringStats(0x7C), PrevStringStats(0x88).
+	// TArray = {Data*, Num, Max} = 12 bytes. FString element size = 0xC.
+
+	BYTE* Base = (BYTE*)this;
+
+	// Access TArrays via raw offsets (Data ptr at +0, Num at +4)
+	INT*   IntData     = *(INT**)(Base + 0x1C);
+	INT    IntNum      = *(INT*)(Base + 0x20);
+	INT*   PrevIntData = *(INT**)(Base + 0x28);
+
+	INT*   FloatData     = *(INT**)(Base + 0x4C);
+	INT    FloatNum      = *(INT*)(Base + 0x50);
+	INT*   PrevFloatData = *(INT**)(Base + 0x58);
+
+	BYTE*  StrData      = *(BYTE**)(Base + 0x7C);
+	INT    StrNum       = *(INT*)(Base + 0x80);
+	BYTE*  PrevStrData  = *(BYTE**)(Base + 0x88);
+
+	// Step 1: Copy IntStats → PrevIntStats
+	if (IntNum > 0)
+		appMemcpy(PrevIntData, IntData, IntNum * 4);
+
+	// Step 2: Copy FloatStats → PrevFloatStats
+	if (FloatNum > 0)
+		appMemcpy(PrevFloatData, FloatData, FloatNum * 4);
+
+	// Step 3: Copy StringStats → PrevStringStats (FString assignment)
+	for (INT i = 0; i < StrNum; i++)
+	{
+		FString* Dst = (FString*)(PrevStrData + i * 0xC);
+		FString* Src = (FString*)(StrData + i * 0xC);
+		*Dst = *Src;
+	}
+
+	// Step 4: Zero IntStats
+	if (IntNum > 0)
+		appMemzero(IntData, IntNum * 4);
+
+	// Step 5: Zero FloatStats
+	if (FloatNum > 0)
+		appMemzero(FloatData, FloatNum * 4);
+
+	// Step 6: Clear StringStats to empty
+	for (INT i = 0; i < StrNum; i++)
+	{
+		FString* Str = (FString*)(StrData + i * 0xC);
+		*Str = TEXT("");
+	}
+}
 
 // ============================================================================
 // FEngineStats
