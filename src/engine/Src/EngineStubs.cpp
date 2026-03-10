@@ -1909,8 +1909,10 @@ void UStaticMesh::Illuminate(AActor *,int)
 }
 
 // --- UTexture ---
-void UTexture::SetLastUpdateTime(double)
+void UTexture::SetLastUpdateTime(double Time)
 {
+	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
+	*(double*)((BYTE*)this + 0xD0) = Time;
 }
 
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
@@ -1948,12 +1950,18 @@ int UTexture::DefaultLOD()
 
 FColor * UTexture::GetColors()
 {
+	// Ghidra (14B): if Palette (0x70) non-null, return Colors data at Palette+0x2C
+	void* Pal = *(void**)((BYTE*)this + 0x70);
+	if (Pal)
+		return *(FColor**)((BYTE*)Pal + 0x2C);
 	return NULL;
 }
 
 DWORD UTexture::GetColorsIndex()
 {
-	return 0;
+	// Ghidra (9B): return Palette->GetIndex()
+	UObject* Pal = *(UObject**)((BYTE*)this + 0x70);
+	return Pal->GetIndex();
 }
 
 FString UTexture::GetFormatDesc()
@@ -1963,17 +1971,20 @@ FString UTexture::GetFormatDesc()
 
 double UTexture::GetLastUpdateTime()
 {
-	return 0.0;
+	// Ghidra (7B): return double at offset 0xD0
+	return *(double*)((BYTE*)this + 0xD0);
 }
 
-FMipmapBase * UTexture::GetMip(int)
+FMipmapBase * UTexture::GetMip(int MipIndex)
 {
-	return NULL;
+	// Ghidra (19B): Mips at 0xBC, element stride 0x28
+	BYTE* MipsData = *(BYTE**)((BYTE*)this + 0xBC);
+	return (FMipmapBase*)(MipsData + MipIndex * 0x28);
 }
 
 int UTexture::GetNumMips()
 {
-	return 0;
+	return Mips.Num();
 }
 
 FColor UTexture::GetTexel(float,float,float,float)
@@ -2568,6 +2579,20 @@ int * APhysicsVolume::GetOptimizedRepList(BYTE*,FPropertyRetirement *,int *,UPac
 // --- APlayerController ---
 void APlayerController::SpecialDestroy()
 {
+	// Ghidra (49B): If Player (offset 0x5B4) is a UNetConnection with a Driver,
+	// set bPendingDestroy on the Driver's connection info.
+	UObject* Player = *(UObject**)((BYTE*)this + 0x5B4);
+	if (Player && Player->IsA(UNetConnection::StaticClass()))
+	{
+		UNetConnection* Conn = (UNetConnection*)Player;
+		// Driver at Conn+0x7C
+		INT* DriverPtr = (INT*)((BYTE*)Conn + 0x7C);
+		if (*DriverPtr != 0)
+		{
+			// bPendingDestroy at Conn+0x80
+			*(INT*)((BYTE*)Conn + 0x80) = 1;
+		}
+	}
 }
 
 int APlayerController::Tick(float,ELevelTick)
@@ -4127,7 +4152,15 @@ void FTerrainTools::FindActorsToAlign()
 
 int FTerrainTools::GetAdjust()
 {
-	return 0;
+	// Ghidra (21B): if brush ptr (Pad[0]) non-null, read from indirect struct;
+	// otherwise return fallback at Pad[0x88].
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+	{
+		INT* DataPtr = *(INT**)&Pad[0x50];
+		return *(INT*)((BYTE*)DataPtr + 0x60);
+	}
+	return *(INT*)&Pad[0x88];
 }
 
 ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
@@ -4147,7 +4180,13 @@ int FTerrainTools::GetFloorOffset()
 
 int FTerrainTools::GetInnerRadius()
 {
-	return 0;
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+	{
+		INT* DataPtr = *(INT**)&Pad[0x50];
+		return *(INT*)((BYTE*)DataPtr + 0x54);
+	}
+	return *(INT*)&Pad[0x7C];
 }
 
 int FTerrainTools::GetMirrorAxis()
@@ -4157,12 +4196,24 @@ int FTerrainTools::GetMirrorAxis()
 
 int FTerrainTools::GetOuterRadius()
 {
-	return 0;
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+	{
+		INT* DataPtr = *(INT**)&Pad[0x50];
+		return *(INT*)((BYTE*)DataPtr + 0x58);
+	}
+	return *(INT*)&Pad[0x80];
 }
 
 int FTerrainTools::GetStrength()
 {
-	return 0;
+	INT* BrushPtr = *(INT**)&Pad[0];
+	if (BrushPtr)
+	{
+		INT* DataPtr = *(INT**)&Pad[0x50];
+		return *(INT*)((BYTE*)DataPtr + 0x5C);
+	}
+	return *(INT*)&Pad[0x84];
 }
 
 void FTerrainTools::Init()

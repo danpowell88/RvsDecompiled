@@ -487,7 +487,7 @@ public:
 class ENGINE_API FTerrainTools
 {
 public:
-	BYTE Pad[60]; // 60 + 4(vptr) = 64 bytes total
+	BYTE Pad[140]; // Ghidra: getters access up to offset 0x8C, object ~0x90 total
 	FTerrainTools() { appMemzero(Pad, sizeof(Pad)); }
 	FTerrainTools(const FTerrainTools&);
 	virtual ~FTerrainTools();
