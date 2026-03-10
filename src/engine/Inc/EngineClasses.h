@@ -325,6 +325,7 @@ class FInBunch;
 struct FHitCause;
 struct FOrientation;
 class UMatAction;
+class UMatSubAction;
 class UClient;
 class UBitmapMaterial;
 class UPrimitive;
@@ -457,12 +458,16 @@ public:
 class ENGINE_API FMatineeTools
 {
 public:
-	// Layout from Ghidra (GetSubActionIdx): CurrentAction at offset 0x44.
-	// vptr at 0x00 (4 bytes), then data from 0x04...0x47.
-	// CurrentAction(UMatAction*) at 0x44 = Pad[64] + ptr.
-	BYTE _Pad0[64];               // 0x04..0x43
-	UMatAction* CurrentAction;     // 0x44
-	FMatineeTools() { appMemzero(_Pad0, sizeof(_Pad0)); CurrentAction = NULL; }
+	// Layout from Ghidra (Init / GetCurrent / GetCurrentAction / GetCurrentSubAction):
+	// vptr at 0x00 (4 bytes), then 9 editor texture pointers (Init sets these at 0x04..0x24),
+	// CurrentScene(ASceneManager*) at 0x28, unknown pad 0x2C..0x43,
+	// CurrentAction(UMatAction*) at 0x44, CurrentSubAction(UMatSubAction*) at 0x48.
+	BYTE _Pad0[36];                  // 0x04..0x27: editor texture pointers (Init)
+	ASceneManager* CurrentScene;     // 0x28
+	BYTE _Pad1[24];                  // 0x2C..0x43: unknown
+	UMatAction* CurrentAction;       // 0x44
+	UMatSubAction* CurrentSubAction; // 0x48
+	FMatineeTools() { appMemzero(_Pad0, sizeof(_Pad0)); CurrentScene = NULL; appMemzero(_Pad1, sizeof(_Pad1)); CurrentAction = NULL; CurrentSubAction = NULL; }
 	FMatineeTools(const FMatineeTools&);
 	virtual ~FMatineeTools();
 	void Init();

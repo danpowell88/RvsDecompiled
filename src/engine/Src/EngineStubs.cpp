@@ -31,6 +31,9 @@
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
 
+// Global tool subsystems defined in Engine.cpp (used by stubs in this file).
+extern ENGINE_API FRebuildTools GRebuildTools;
+
 // Forward declarations for types used in parameters but not fully defined
 class AProjector;
 struct FProjectorRenderInfo;
@@ -1251,7 +1254,8 @@ UAnimNotify * UMeshInstance::AnimGetNotifyObject(void *,int)
 
 const TCHAR* UMeshInstance::AnimGetNotifyText(void *,int)
 {
-	return NULL;
+	// Ghidra: returns L""
+	return TEXT("");
 }
 
 float UMeshInstance::AnimGetNotifyTime(void *,int)
@@ -1261,7 +1265,8 @@ float UMeshInstance::AnimGetNotifyTime(void *,int)
 
 float UMeshInstance::AnimGetRate(void *)
 {
-	return 0.0f;
+	// Ghidra: default rate is 15.0
+	return 15.0f;
 }
 
 int UMeshInstance::AnimIsInGroup(void *,FName)
@@ -7462,13 +7467,49 @@ ANavigationPoint * FSortedPathList::findEndAnchor(APawn * p0, AActor * p1, FVect
 ANavigationPoint * FSortedPathList::findStartAnchor(APawn * p0) { return NULL; }
 
 // ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
-ASceneManager * FMatineeTools::GetCurrent() { return NULL; }
+// Ghidra at 0x...: simply returns CurrentScene (offset 0x28).
+ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@PAV2@@Z
-ASceneManager * FMatineeTools::SetCurrent(UEngine * p0, ULevel * p1, ASceneManager * p2) { return NULL; }
+// Ghidra: sets CurrentScene, primes CurrentAction/CurrentSubAction from Actions[0].
+ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
+{
+	CurrentScene = Scene;
+	if (Scene)
+	{
+		TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+		if (Actions.Num() > 0)
+			SetCurrentAction(Actions(0));
+		else
+		{
+			CurrentAction = NULL;
+			CurrentSubAction = NULL;
+		}
+	}
+	else
+	{
+		CurrentAction = NULL;
+		CurrentSubAction = NULL;
+	}
+	return Scene;
+}
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
-ASceneManager * FMatineeTools::SetCurrent(UEngine * p0, ULevel * p1, FString p2) { return NULL; }
+// Ghidra: searches Level->Actors for ASceneManager whose GetName() matches Name, then
+// delegates to the ASceneManager* overload.
+ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
+{
+	for (INT i = 0; i < Level->Actors.Num(); i++)
+	{
+		AActor* Actor = Level->Actors(i);
+		if (Actor && Actor->IsA(ASceneManager::StaticClass()))
+		{
+			if (FString(Actor->GetName()) == Name)
+				return SetCurrent(Engine, Level, (ASceneManager*)Actor);
+		}
+	}
+	return SetCurrent(Engine, Level, (ASceneManager*)NULL);
+}
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
 ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
@@ -7591,25 +7632,80 @@ FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
 FWaveModInfo & FWaveModInfo::operator=(FWaveModInfo const & Other) { appMemcpy(this, &Other, 64); return *this; } // 16 dwords
 
 // ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
-UMatAction * FMatineeTools::GetCurrentAction() { return NULL; }
+// Ghidra: returns CurrentAction (offset 0x44).
+UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
 
 // ?GetNextAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
-UMatAction * FMatineeTools::GetNextAction(ASceneManager * p0, UMatAction * p1) { return NULL; }
+// Ghidra: GetActionIdx, return [idx+1] wrapping to [0].
+UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Current)
+{
+	if (!Scene) return NULL;
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+	INT Count = Actions.Num();
+	if (Count == 0) return NULL;
+	INT Idx = GetActionIdx(Scene, Current);
+	return Actions((Idx + 1) % Count);
+}
 
 // ?GetNextMovementAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
-UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * p0, UMatAction * p1) { return NULL; }
+// Ghidra: calls GetNextAction in a loop until the action IsA(UActionMoveCamera).
+UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAction * Current)
+{
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+	INT Count = Actions.Num();
+	if (Count == 0) return NULL;
+	UMatAction* Candidate = GetNextAction(Scene, Current);
+	INT Guard = Count; // prevent infinite loop if no move action exists
+	while (Guard-- > 0 && Candidate && Candidate != Current)
+	{
+		if (Candidate->IsA(UActionMoveCamera::StaticClass()))
+			return Candidate;
+		Candidate = GetNextAction(Scene, Candidate);
+	}
+	return NULL;
+}
 
 // ?GetPrevAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
-UMatAction * FMatineeTools::GetPrevAction(ASceneManager * p0, UMatAction * p1) { return NULL; }
+// Ghidra: GetActionIdx, return [idx-1] wrapping to [last].
+UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Current)
+{
+	if (!Scene) return NULL;
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+	INT Count = Actions.Num();
+	if (Count == 0) return NULL;
+	INT Idx = GetActionIdx(Scene, Current);
+	INT Prev = (Idx <= 0) ? Count - 1 : Idx - 1;
+	return Actions(Prev);
+}
 
 // ?SetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@PAV2@@Z
-UMatAction * FMatineeTools::SetCurrentAction(UMatAction * p0) { return NULL; }
+// Ghidra: sets CurrentAction, primes CurrentSubAction from SubActions[0] if available.
+UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
+{
+	CurrentAction = Action;
+	if (Action)
+	{
+		TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)((BYTE*)Action + 0x48);
+		CurrentSubAction = SubActions.Num() > 0 ? SubActions(0) : NULL;
+	}
+	else
+	{
+		CurrentSubAction = NULL;
+	}
+	return CurrentAction;
+}
 
 // ?GetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@XZ
-UMatSubAction * FMatineeTools::GetCurrentSubAction() { return NULL; }
+// Ghidra: returns CurrentSubAction (offset 0x48).
+UMatSubAction * FMatineeTools::GetCurrentSubAction() { return CurrentSubAction; }
 
 // ?SetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@PAV2@@Z
-UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * p0) { return NULL; }
+// Ghidra: stores SubAction at this+0x48 and returns it.
+UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
+{
+	CurrentSubAction = SubAction;
+	return SubAction;
+}
 
 // ?Area@FPoly@@QAEMXZ
 float FPoly::Area() {
@@ -8889,7 +8985,15 @@ FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FLightMapSceneNode
 void FLightMapSceneNode::Render(FRenderInterface*) {}
-INT FLightMapSceneNode::FilterActor(AActor*) { return 0; }
+// Ghidra: if GRebuildTools has lightmap mode flag (Pad[0x10] & 0x10) and actor's
+// collision flags (offset 0xAC) indicate a shadow-casting group, skip it (return 0).
+// Otherwise return the actor's bLightChanged bit (offset 0xA4 >> 30).
+INT FLightMapSceneNode::FilterActor(AActor* Actor)
+{
+	if ((GRebuildTools.Pad[0x10] & 0x10) && (*(DWORD*)((BYTE*)Actor + 0xAC) & 0x1800))
+		return 0;
+	return (*(DWORD*)((BYTE*)Actor + 0xA4) >> 30) & 1;
+}
 
 // FDirectionalLightMapSceneNode
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
