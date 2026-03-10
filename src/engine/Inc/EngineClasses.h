@@ -1610,7 +1610,10 @@ public:
 class ENGINE_API URenderResource : public UObject
 {
 	DECLARE_CLASS(URenderResource,UObject,0,Engine)
-	URenderResource() {}
+	URenderResource() : Revision(0) {}
+
+	INT Revision;  // 0x2C — serialized by URenderResource::Serialize
+
 	void Serialize(FArchive& Ar);
 };
 
@@ -3930,8 +3933,13 @@ class ENGINE_API UNetConnection : public UPlayer
 {
 public:
 	DECLARE_ABSTRACT_CLASS(UNetConnection,UPlayer,0,Engine)
-	UNetConnection() {}
+	UNetConnection() : Driver(NULL) {}
 	UNetConnection( UNetDriver* InDriver, const FURL& InURL );
+
+	// Layout from Ghidra: UPlayer (MI with FOutputDevice+FExec vtables at 0x2C,0x30)
+	// Data members 0x34..0x7B not yet decoded.
+	BYTE _ConnPad[0x48];      // 0x34 — undecoded UPlayer/UNetConnection fields
+	UNetDriver* Driver;       // 0x7C — network driver pointer
 
 	// Virtual methods
 	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
@@ -5087,9 +5095,16 @@ class ENGINE_API UVertexStreamBase : public URenderResource
 public:
 	DECLARE_CLASS(UVertexStreamBase,URenderResource,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UVertexStreamBase)
-	UVertexStreamBase(INT InType, DWORD InStride, DWORD InFlags);
+
+	// Layout decoded from Ghidra constructor at 0x2210.
+	INT    ElementSize;  // 0x30 — bytes per vertex element
+	DWORD  StreamFlags;  // 0x34 — vertex stream flags
+	DWORD  StreamType;   // 0x38 — stream type ID (1=VECTOR,2=COLOR,3=UV,4=Buffer,5=PosNormTex)
+	TArray<BYTE> Data;   // 0x3C — raw vertex data array
+
+	UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType);
 	virtual void Serialize(FArchive& Ar);
-	virtual void* GetData() { return NULL; }
+	virtual void* GetData() { return Data.GetData(); }
 	virtual INT GetDataSize() { return 0; }
 	void SetPolyFlags(DWORD Flags);
 };

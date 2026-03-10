@@ -7102,8 +7102,39 @@ int FPoly::Faces(FPoly const & Other) const {
 	return 0;
 }
 
-// ?Finalize@FPoly@@QAEHH@Z
-int FPoly::Finalize(int p0) { return 0; }
+// ?Finalize@FPoly@@QAEHH@Z — Ghidra at 0x9e190.
+// Cleans up polygon: removes duplicate verts, validates, computes normal & texture vectors.
+int FPoly::Finalize(int bSilent) {
+	Fix();
+	if( NumVertices < 3 )
+	{
+		debugf( NAME_Warning, TEXT("FPoly::Finalize: Not enough vertices (%i)"), NumVertices );
+		if( bSilent )
+			return -1;
+		appErrorf( TEXT("FPoly::Finalize: Not enough vertices (%i)"), NumVertices );
+	}
+	if( Normal.IsZero() && NumVertices >= 3 )
+	{
+		if( CalcNormal(0) )
+		{
+			debugf( NAME_Warning, TEXT("FPoly::Finalize: Normalization failed, IsZero=%i, Size=%f"), Normal.IsZero(), Normal.Size() );
+			if( bSilent )
+				return -1;
+			appErrorf( TEXT("FPoly::Finalize: Normalization failed, IsZero=%i, Size=%f"), Normal.IsZero(), Normal.Size() );
+		}
+	}
+	if( TextureU.IsZero() && TextureV.IsZero() )
+	{
+		for( INT i=1; i<NumVertices; i++ )
+		{
+			TextureU = ((Vertex[0] - Vertex[i]) ^ Normal).SafeNormal();
+			TextureV = (Normal ^ TextureU).SafeNormal();
+			if( TextureU.SizeSquared() != 0.f && TextureV.SizeSquared() != 0.f )
+				return 0;
+		}
+	}
+	return 0;
+}
 
 // ?Fix@FPoly@@QAEHXZ
 int FPoly::Fix()
@@ -7175,11 +7206,25 @@ int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const { return 
 // ?SplitWithPlaneFastPrecise@FPoly@@QBEHVFPlane@@PAV1@1@Z
 int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const { return 0; }
 
-// ??9FPoly@@QAEHV0@@Z
-int FPoly::operator!=(FPoly p0) { return 0; }
+// ??9FPoly@@QAEHV0@@Z — Ghidra at 0x8bce0.
+int FPoly::operator!=(FPoly Other) {
+	if( NumVertices != Other.NumVertices )
+		return 1;
+	for( INT i=0; i<NumVertices; i++ )
+		if( Vertex[i] != Other.Vertex[i] )
+			return 1;
+	return 0;
+}
 
-// ??8FPoly@@QAEHV0@@Z
-int FPoly::operator==(FPoly p0) { return 0; }
+// ??8FPoly@@QAEHV0@@Z — Ghidra at 0xb4b10.
+int FPoly::operator==(FPoly Other) {
+	if( NumVertices != Other.NumVertices )
+		return 0;
+	for( INT i=0; i<NumVertices; i++ )
+		if( Vertex[i] != Other.Vertex[i] )
+			return 0;
+	return 1;
+}
 
 // ?GetIdxFromName@FRebuildTools@@QAEHVFString@@@Z
 int FRebuildTools::GetIdxFromName(FString p0) { return 0; }
@@ -7585,40 +7630,58 @@ void KarmaTriListDataInit(_KarmaTriListData * p0) {}
 
 // =============================================================================
 // UVertexStream class implementations.
+// Ghidra: constructors at 0x2210 (base), 0x26280+ (derived).
+// GetData/GetDataSize at 0x18b20/0x18b30+.
 // =============================================================================
-UVertexStreamBase::UVertexStreamBase(INT InType, DWORD InStride, DWORD InFlags) {}
+UVertexStreamBase::UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType)
+: ElementSize(InElementSize), StreamFlags(InFlags), StreamType(InType) {}
 void UVertexStreamBase::Serialize(FArchive& Ar) { URenderResource::Serialize(Ar); }
 void UVertexStreamBase::SetPolyFlags(DWORD Flags) {}
 
-UVertexBuffer::UVertexBuffer() {}
-UVertexBuffer::UVertexBuffer(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+// UVertexBuffer: ElementSize=0x2C (44 = sizeof FBspVertex), StreamType=4.
+UVertexBuffer::UVertexBuffer()
+: UVertexStreamBase(0x2C, 0, 4) {}
+UVertexBuffer::UVertexBuffer(DWORD InFlags)
+: UVertexStreamBase(0x2C, InFlags, 0) {}
 void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-void* UVertexBuffer::GetData() { return NULL; }
-INT UVertexBuffer::GetDataSize() { return 0; }
+void* UVertexBuffer::GetData() { return Data.GetData(); }
+INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
 
-UVertexStreamCOLOR::UVertexStreamCOLOR() {}
-UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags) : UVertexStreamBase(0, sizeof(FColor), InFlags) {}
+// UVertexStreamCOLOR: ElementSize=4 (sizeof FColor), StreamType=2.
+UVertexStreamCOLOR::UVertexStreamCOLOR()
+: UVertexStreamBase(4, 0, 2) {}
+UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
+: UVertexStreamBase(4, InFlags, 2) {}
 void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-void* UVertexStreamCOLOR::GetData() { return NULL; }
-INT UVertexStreamCOLOR::GetDataSize() { return 0; }
+void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
+INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
 
-UVertexStreamPosNormTex::UVertexStreamPosNormTex() {}
-UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+// UVertexStreamPosNormTex: ElementSize=0x28 (40), StreamType=5.
+UVertexStreamPosNormTex::UVertexStreamPosNormTex()
+: UVertexStreamBase(0x28, 0, 5) {}
+UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
+: UVertexStreamBase(0x28, InFlags, 5) {}
 void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-void* UVertexStreamPosNormTex::GetData() { return NULL; }
-INT UVertexStreamPosNormTex::GetDataSize() { return 0; }
+void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
+INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
 
-UVertexStreamUV::UVertexStreamUV() {}
-UVertexStreamUV::UVertexStreamUV(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+// UVertexStreamUV: ElementSize=8 (2 floats), StreamType=3.
+UVertexStreamUV::UVertexStreamUV()
+: UVertexStreamBase(8, 0, 3) {}
+UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
+: UVertexStreamBase(8, InFlags, 3) {}
 void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-void* UVertexStreamUV::GetData() { return NULL; }
-INT UVertexStreamUV::GetDataSize() { return 0; }
+void* UVertexStreamUV::GetData() { return Data.GetData(); }
+INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
 
-UVertexStreamVECTOR::UVertexStreamVECTOR() {}
-UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags) : UVertexStreamBase(0, 0, InFlags) {}
+// UVertexStreamVECTOR: ElementSize=0xC (12 = sizeof FVector), StreamType=1.
+UVertexStreamVECTOR::UVertexStreamVECTOR()
+: UVertexStreamBase(0xC, 0, 1) {}
+UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
+: UVertexStreamBase(0xC, InFlags, 1) {}
 void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-void* UVertexStreamVECTOR::GetData() { return NULL; }
-INT UVertexStreamVECTOR::GetDataSize() { return 0; }
+void* UVertexStreamVECTOR::GetData() { return Data.GetData(); }
+INT UVertexStreamVECTOR::GetDataSize() { return Data.Num() * 0xC; }
 
 // =============================================================================
 // FColor constructor from FPlane (out-of-line to avoid circular header deps).
@@ -7830,7 +7893,7 @@ void UDemoRecConnection::LowLevelSend(void*, INT) {}
 void UDemoRecConnection::FlushNet() {}
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
-UDemoRecDriver* UDemoRecConnection::GetDriver() { return NULL; }
+UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
 
 // ============================================================================
 // UPackageMapLevel
@@ -7890,9 +7953,14 @@ FCollisionHash::FCollisionLink*& FCollisionHash::GetHashLink(INT, INT, INT, INT&
 }
 
 // ============================================================================
-// URenderResource
+// URenderResource — Ghidra at 0x110D00.
+// Serializes UObject + Revision (4 bytes at 0x2C).
 // ============================================================================
-void URenderResource::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
+void URenderResource::Serialize(FArchive& Ar)
+{
+	UObject::Serialize(Ar);
+	Ar << Revision;
+}
 
 // ============================================================================
 // FPoly
