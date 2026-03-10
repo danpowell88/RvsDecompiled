@@ -7542,10 +7542,23 @@ FPoly & FPoly::operator=(FPoly const & Other) {
 }
 
 // ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
-FRebuildOptions * FRebuildTools::GetCurrent() { return NULL; }
+// Ghidra: loads first pointer in layout (Current field at Pad[0x00]).
+FRebuildOptions * FRebuildTools::GetCurrent() { return *(FRebuildOptions**)this; }
 
 // ?GetFromName@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-FRebuildOptions * FRebuildTools::GetFromName(FString p0) { return NULL; }
+// Ghidra: walks TArray of FRebuildOptions (data at Pad[0x04], count at Pad[0x08], stride 0x2C=44).
+FRebuildOptions * FRebuildTools::GetFromName(FString p0)
+{
+	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
+	INT count = *(INT*)((BYTE*)this + 8);
+	for (INT i = 0; i < count; i++)
+	{
+		FRebuildOptions* opt = (FRebuildOptions*)((BYTE*)data + i * 0x2C);
+		if (opt->Name == p0)
+			return opt;
+	}
+	return NULL;
+}
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
@@ -8030,7 +8043,19 @@ int FPoly::operator==(FPoly Other) {
 }
 
 // ?GetIdxFromName@FRebuildTools@@QAEHVFString@@@Z
-int FRebuildTools::GetIdxFromName(FString p0) { return 0; }
+// Ghidra: same array walk as GetFromName; returns index or -1 (NOT 0 — 0 is a valid index).
+int FRebuildTools::GetIdxFromName(FString p0)
+{
+	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
+	INT count = *(INT*)((BYTE*)this + 8);
+	for (INT i = 0; i < count; i++)
+	{
+		FRebuildOptions* opt = (FRebuildOptions*)((BYTE*)data + i * 0x2C);
+		if (opt->Name == p0)
+			return i;
+	}
+	return -1;
+}
 
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
@@ -9101,7 +9126,27 @@ void ALevelInfo::PreNetReceive() {}
 void ALevelInfo::CheckForErrors() {}
 INT* ALevelInfo::GetOptimizedRepList(BYTE*, FPropertyRetirement*, INT*, UPackageMap*, UActorChannel*) { return NULL; }
 void ALevelInfo::CallLogThisActor(AActor*) {}
-APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume() { return NULL; }
+// ?GetDefaultPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@XZ  Ghidra at ~279 bytes.
+// Lazily spawns ADefaultPhysicsVolume and caches it at this+0x164.
+// The original also sets vol+0x40C (Priority field, raw 0xFFF0BDC0) and vol+0xA0 |= 4.
+// Priority raw-write left as TODO until AVolume layout is confirmed byte-accurate.
+// CRITICAL: this must never return NULL as callers dereference the result unchecked.
+APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
+{
+	APhysicsVolume*& CachedVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
+	if (!CachedVol)
+	{
+		CachedVol = (APhysicsVolume*)XLevel->SpawnActor(ADefaultPhysicsVolume::StaticClass());
+		if (CachedVol)
+		{
+			// Priority: raw DWORD at vol+0x40C = 0xFFF0BDC0 (Ghidra; AVolume layout not yet verified)
+			*(DWORD*)((BYTE*)CachedVol + 0x40C) = 0xFFF0BDC0u;
+			// vol+0xA0 |= 4 (a bitmask flag in AActor's bitfield block)
+			*(DWORD*)((BYTE*)CachedVol + 0xA0) |= 4;
+		}
+	}
+	return CachedVol;
+}
 FString ALevelInfo::GetDisplayAs(FString s) { return s; }
 APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector, AActor*, INT) { return NULL; }
 INT ALevelInfo::IsSoundAudibleFromZone(INT, INT) { return 1; }
@@ -9220,7 +9265,37 @@ INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
-INT UTerrainSector::IsSectorAll(INT, BYTE) { return 0; }
+// ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
+// Gets the alpha texture for the layer, computes texel range for this sector,
+// then checks that every texel matches 'value'. Returns 1 (true) on empty range.
+INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
+{
+	// Alpha map pointer: TerrainInfo + 0x3AC + layerIdx * 0x78
+	UTexture* alphaMap = *(UTexture**)((BYTE*)TerrainInfo + 0x3AC + layerIdx * 0x78);
+	INT QuadsX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
+	INT QuadsY = *(INT*)((BYTE*)TerrainInfo + 0x12E4);
+
+	// Scale factors: texels per quad in each axis
+	INT scaleX = alphaMap->USize / QuadsX;
+	INT scaleY = alphaMap->VSize / QuadsY;
+
+	// Inclusive texel range for this sector
+	INT x0 = OffsetX * scaleX;
+	INT x1 = (OffsetX + SectorSizeX) * scaleX - 1;
+	INT y0 = OffsetY * scaleY;
+	INT y1 = (OffsetY + SectorSizeY) * scaleY - 1;
+
+	// Empty sector (SectorSizeX/Y == 0) → trivially all match
+	if (x0 > x1 || y0 > y1)
+		return 1;
+
+	for (INT y = y0; y <= y1; y++)
+		for (INT x = x0; x <= x1; x++)
+			if (TerrainInfo->GetLayerAlpha(x, y, layerIdx, alphaMap) != value)
+				return 0;
+
+	return 1;
+}
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}
 
