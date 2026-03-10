@@ -8017,10 +8017,124 @@ int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int 
 int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FPoly * p3, int p4) const { return 0; }
 
 // ?SplitWithPlaneFast@FPoly@@QBEHVFPlane@@PAV1@1@Z
-int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const { return 0; }
+// Splits this polygon against a plane using THRESH_SPLIT_POLY_WITH_PLANE (0.25).
+// Returns SP_Front, SP_Back, SP_Coplanar, or SP_Split.
+// Out-polys (FrontPoly/BackPoly) may be NULL when the result is one-sided.
+int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
+{
+	const FLOAT Thresh = THRESH_SPLIT_POLY_WITH_PLANE;
+
+	// Classify every vertex against the plane
+	FLOAT Dist[16];
+	INT FrontN = 0, BackN = 0;
+	for (INT i = 0; i < NumVertices; i++)
+	{
+		Dist[i] = p0.PlaneDot(Vertex[i]);
+		if      (Dist[i] >  Thresh) FrontN++;
+		else if (Dist[i] < -Thresh) BackN++;
+	}
+
+	if (!FrontN && !BackN)
+		return SP_Coplanar;
+	if (!BackN)
+	{
+		if (p1) *p1 = *this;
+		return SP_Front;
+	}
+	if (!FrontN)
+	{
+		if (p2) *p2 = *this;
+		return SP_Back;
+	}
+
+	// Build split halves
+	if (p1) { *p1 = *this; p1->NumVertices = 0; }
+	if (p2) { *p2 = *this; p2->NumVertices = 0; }
+
+	INT   j        = NumVertices - 1;
+	FLOAT PrevDist = Dist[j];
+	for (INT i = 0; i < NumVertices; i++)
+	{
+		FLOAT CurDist = Dist[i];
+
+		// If edge crosses the plane, emit an intersection vertex in both halves
+		if ((PrevDist < -Thresh && CurDist > Thresh) ||
+		    (PrevDist >  Thresh && CurDist < -Thresh))
+		{
+			FLOAT t   = PrevDist / (PrevDist - CurDist);
+			FVector I = Vertex[j] + (Vertex[i] - Vertex[j]) * t;
+			if (p1 && p1->NumVertices < 16) p1->Vertex[p1->NumVertices++] = I;
+			if (p2 && p2->NumVertices < 16) p2->Vertex[p2->NumVertices++] = I;
+		}
+
+		// Emit current vertex to front and/or back half
+		if (CurDist >= -Thresh)
+			if (p1 && p1->NumVertices < 16) p1->Vertex[p1->NumVertices++] = Vertex[i];
+		if (CurDist <=  Thresh)
+			if (p2 && p2->NumVertices < 16) p2->Vertex[p2->NumVertices++] = Vertex[i];
+
+		j        = i;
+		PrevDist = CurDist;
+	}
+	return SP_Split;
+}
 
 // ?SplitWithPlaneFastPrecise@FPoly@@QBEHVFPlane@@PAV1@1@Z
-int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const { return 0; }
+// Same as SplitWithPlaneFast but uses THRESH_SPLIT_POLY_PRECISELY (0.01).
+int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
+{
+	const FLOAT Thresh = THRESH_SPLIT_POLY_PRECISELY;
+
+	FLOAT Dist[16];
+	INT FrontN = 0, BackN = 0;
+	for (INT i = 0; i < NumVertices; i++)
+	{
+		Dist[i] = p0.PlaneDot(Vertex[i]);
+		if      (Dist[i] >  Thresh) FrontN++;
+		else if (Dist[i] < -Thresh) BackN++;
+	}
+
+	if (!FrontN && !BackN)
+		return SP_Coplanar;
+	if (!BackN)
+	{
+		if (p1) *p1 = *this;
+		return SP_Front;
+	}
+	if (!FrontN)
+	{
+		if (p2) *p2 = *this;
+		return SP_Back;
+	}
+
+	if (p1) { *p1 = *this; p1->NumVertices = 0; }
+	if (p2) { *p2 = *this; p2->NumVertices = 0; }
+
+	INT   j        = NumVertices - 1;
+	FLOAT PrevDist = Dist[j];
+	for (INT i = 0; i < NumVertices; i++)
+	{
+		FLOAT CurDist = Dist[i];
+
+		if ((PrevDist < -Thresh && CurDist > Thresh) ||
+		    (PrevDist >  Thresh && CurDist < -Thresh))
+		{
+			FLOAT t   = PrevDist / (PrevDist - CurDist);
+			FVector I = Vertex[j] + (Vertex[i] - Vertex[j]) * t;
+			if (p1 && p1->NumVertices < 16) p1->Vertex[p1->NumVertices++] = I;
+			if (p2 && p2->NumVertices < 16) p2->Vertex[p2->NumVertices++] = I;
+		}
+
+		if (CurDist >= -Thresh)
+			if (p1 && p1->NumVertices < 16) p1->Vertex[p1->NumVertices++] = Vertex[i];
+		if (CurDist <=  Thresh)
+			if (p2 && p2->NumVertices < 16) p2->Vertex[p2->NumVertices++] = Vertex[i];
+
+		j        = i;
+		PrevDist = CurDist;
+	}
+	return SP_Split;
+}
 
 // ??9FPoly@@QAEHV0@@Z — Ghidra at 0x8bce0.
 int FPoly::operator!=(FPoly Other) {
@@ -9329,7 +9443,34 @@ void URenderResource::Serialize(FArchive& Ar)
 // ============================================================================
 // FPoly
 // ============================================================================
-INT FPoly::RemoveColinears() { return 0; }
+// ?RemoveColinears@FPoly@@QAEHXZ
+// Removes collinear (in-line) vertices. A vertex is collinear if it lies within
+// THRESH_POINT_ON_SIDE of the line connecting its two neighbours.
+// Returns final vertex count.
+INT FPoly::RemoveColinears()
+{
+	BYTE Colinear[16];
+	for (INT i = 0; i < NumVertices; i++)
+	{
+		INT Prev = (i + NumVertices - 1) % NumVertices;
+		INT Next = (i + 1) % NumVertices;
+		// Direction along the prev→next edge
+		FVector Side  = (Vertex[Next] - Vertex[Prev]);
+		// In-plane perpendicular to that edge
+		FVector Cross = Side ^ Normal;
+		FLOAT   Len   = Cross.Size();
+		// Signed distance from Vertex[i] to the line (prev → next), measured in the polygon plane
+		FLOAT   Dist  = (Len > 0.f) ? Abs((Vertex[i] - Vertex[Prev]) | (Cross / Len)) : 0.f;
+		Colinear[i] = (Dist < THRESH_POINT_ON_SIDE) ? 1 : 0;
+	}
+
+	INT j = 0;
+	for (INT i = 0; i < NumVertices; i++)
+		if (!Colinear[i])
+			Vertex[j++] = Vertex[i];
+	NumVertices = j;
+	return NumVertices;
+}
 
 // ============================================================================
 // Karma free functions
