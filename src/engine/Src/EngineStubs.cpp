@@ -9353,7 +9353,59 @@ APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 	return CachedVol;
 }
 FString ALevelInfo::GetDisplayAs(FString s) { return s; }
-APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector, AActor*, INT) { return NULL; }
+
+// ?GetPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@VFVector@@PAVAActor@@H@Z  (0x0BBА00, 346 bytes)
+// Walks the PhysicsVolume linked list to find the highest-priority volume
+// that contains point V. With Actor+bUseTouchingVolumes=true it uses only
+// the volumes in Actor->Touching (fast path).
+// The list is lazily rebuilt when the dirty flag at this+0x94C bit 0 is clear.
+// Priority field in APhysicsVolume is at raw offset 0x40C; next-pointer at 0x438.
+APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseTouchingVolumes)
+{
+	APhysicsVolume* Best = GetDefaultPhysicsVolume();
+	if (!bUseTouchingVolumes || !Actor)
+	{
+		// Lazy rebuild of the linear PhysicsVolume list from the level's actor array.
+		if (!(*(DWORD*)((BYTE*)this + 0x94C) & 1))
+		{
+			PhysicsVolumeList = NULL;
+			ULevel* L = XLevel;
+			INT N = L->Actors.Num();
+			for (INT i = 0; i < N; i++)
+			{
+				AActor* A = L->Actors(i);
+				if (A && A->IsA(APhysicsVolume::StaticClass()))
+				{
+					// Prepend A to the singly-linked list (NextVolume pointer at +0x438).
+					*(APhysicsVolume**)((BYTE*)A + 0x438) = PhysicsVolumeList;
+					PhysicsVolumeList = (APhysicsVolume*)A;
+				}
+			}
+			*(DWORD*)((BYTE*)this + 0x94C) |= 1;
+		}
+		for (APhysicsVolume* V2 = PhysicsVolumeList; V2;
+			 V2 = *(APhysicsVolume**)((BYTE*)V2 + 0x438))
+		{
+			// 0x40C = Priority (INT) in AVolume; pick highest-priority enclosing volume.
+			if (*(INT*)((BYTE*)Best + 0x40C) < *(INT*)((BYTE*)V2 + 0x40C) &&
+				V2->Encompasses(V))
+				Best = V2;
+		}
+	}
+	else
+	{
+		// Fast path: restrict search to volumes currently Touching the Actor.
+		for (INT i = 0; i < Actor->Touching.Num(); i++)
+		{
+			AActor* A = Actor->Touching(i);
+			if (A && A->IsA(APhysicsVolume::StaticClass()) &&
+				*(INT*)((BYTE*)Best + 0x40C) < *(INT*)((BYTE*)A + 0x40C) &&
+				((AVolume*)A)->Encompasses(V))
+				Best = (APhysicsVolume*)A;
+		}
+	}
+	return Best;
+}
 INT ALevelInfo::IsSoundAudibleFromZone(INT, INT) { return 1; }
 
 // ============================================================================
@@ -9375,7 +9427,80 @@ INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE*, FPropertyRetirement*, IN
 // ============================================================================
 // UNetConnection
 // ============================================================================
-UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex) { return NULL; }
+
+// ?CreateChannel@UNetConnection@@QAEPAVUChannel@@W4EChannelType@@HH@Z (0x1855E0, 228 bytes)
+// Allocates a new UChannel of the appropriate class, initialises it and
+// registers it in the Channels array and OpenChannels list.
+// Special ChIndex values:
+//   -1         : auto-allocate any empty slot in [1,0x3FE] (or [0,0x3FE] for CHTYPE_Control)
+//   0x7FFFFFFF : auto-allocate from patch-channel band [0x400, 0x410)
+//   0x7FFFFFFE : auto-allocate from patch-channel band [0x410, 0x50F)
+// Channels array at  this + ChIndex*4 + 0xEB0.
+// OpenChannels TArray at this + 0x4B7C.
+UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
+{
+	if (!UChannel::IsKnownChannelType((INT)ChType))
+		appFailAssert("UChannel::IsKnownChannelType(ChType)", ".\\UnConn.cpp", 0x31E);
+
+	AssertValid();
+
+	INT iIdx = ChIndex;
+	if (ChIndex >= 0x400)
+	{
+		if (ChIndex == (INT)0x7FFFFFFF)
+		{
+			for (iIdx = 0x400; iIdx < 0x410; iIdx++)
+				if (*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) == NULL) break;
+			if (iIdx == 0x410) return NULL;
+		}
+		else if (ChIndex == (INT)0x7FFFFFFE)
+		{
+			for (iIdx = 0x410; iIdx < 0x50F; iIdx++)
+				if (*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) == NULL) break;
+			if (iIdx == 0x50F) return NULL;
+		}
+		if (iIdx >= 0x50F)
+			appFailAssert("ChIndex<MAX_CHANNELS+NUM_ARMPATCH_CHANNELS", ".\\UnConn.cpp", 0x36A);
+	}
+
+	if (iIdx == -1)
+	{
+		iIdx = (ChType == CHTYPE_Control) ? 0 : 1;
+		while (iIdx < 0x3FF && *(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) != NULL)
+			iIdx++;
+		if (iIdx == 0x3FF) return NULL;
+	}
+
+	if (ChIndex < 0x400)
+	{
+		if (iIdx >= 0x3FF)
+			appFailAssert("ChIndex<MAX_CHANNELS", ".\\UnConn.cpp", 0x36E);
+	}
+	else
+	{
+		if (iIdx >= 0x50F)
+			appFailAssert("ChIndex<MAX_CHANNELS+NUM_ARMPATCH_CHANNELS", ".\\UnConn.cpp", 0x36A);
+	}
+
+	if (*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) != NULL)
+		appFailAssert("Channels[ChIndex]==NULL", ".\\UnConn.cpp", 0x373);
+
+	// Construct the channel object for this channel type.
+	UClass* Class = UChannel::ChannelClasses[ChType];
+	check(Class->IsChildOf(UChannel::StaticClass()));
+	UChannel* Ch = (UChannel*)UObject::StaticConstructObject(
+		Class, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL);
+	Ch->Init(this, iIdx, bOpenedLocally);
+
+	// Register in the fixed-size Channels array.
+	*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) = Ch;
+
+	// Append to OpenChannels dynamic list (TArray<UChannel*> at this+0x4B7C).
+	INT arrIdx = ((FArray*)((BYTE*)this + 0x4B7C))->Add(1, sizeof(UChannel*));
+	*(UChannel**)(*(BYTE**)((BYTE*)this + 0x4B7C) + arrIdx * sizeof(UChannel*)) = Ch;
+
+	return Ch;
+}
 void UNetConnection::PostSend()
 {
 	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
