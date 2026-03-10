@@ -411,6 +411,7 @@ enum EInputAction
 enum EStatsType { STAT_None=0 };
 enum EStatsDataType { STATSDATA_None=0 };
 enum EStatsUnit { STATSUNIT_None=0 };
+enum ESplitType { SP_Coplanar=0, SP_Front=1, SP_Back=2, SP_Split=3 };
 
 class ENGINE_API FEngineStats
 {
@@ -455,8 +456,12 @@ public:
 class ENGINE_API FMatineeTools
 {
 public:
-	BYTE Pad[60]; // 60 + 4(vptr) = 64 bytes total
-	FMatineeTools() { appMemzero(Pad, sizeof(Pad)); }
+	// Layout from Ghidra (GetSubActionIdx): CurrentAction at offset 0x44.
+	// vptr at 0x00 (4 bytes), then data from 0x04...0x47.
+	// CurrentAction(UMatAction*) at 0x44 = Pad[64] + ptr.
+	BYTE _Pad0[64];               // 0x04..0x43
+	UMatAction* CurrentAction;     // 0x44
+	FMatineeTools() { appMemzero(_Pad0, sizeof(_Pad0)); CurrentAction = NULL; }
 	FMatineeTools(const FMatineeTools&);
 	virtual ~FMatineeTools();
 	void Init();
@@ -515,7 +520,11 @@ struct FVertexComponent {
 };
 class ENGINE_API FConvexVolume {
 public:
-	BYTE Pad[256];
+	// Layout from Ghidra (SphereCheck, BoxCheck):
+	// FPlane array at 0x00 (up to 0x200 = 32 planes × 16 bytes each),
+	// NumPlanes at 0x200.
+	FPlane Planes[32];        // 0x00..0x1FF (32 * 16 = 512 bytes)
+	INT NumPlanes;            // 0x200
 	BYTE SphereCheck(FSphere);
 	FConvexVolume(FConvexVolume const &);
 	FConvexVolume();
@@ -1366,7 +1375,14 @@ public:
 class ENGINE_API ECLipSynchData
 {
 public:
-	BYTE Pad[256];
+	// Layout from Ghidra (m_vStartLipsynch, m_vStopLipsynch):
+	BYTE _Pad0[4];        // 0x00
+	INT BoneIndex;         // 0x04
+	AActor* Owner;         // 0x08
+	BYTE _Pad1[4];        // 0x0C
+	INT bPlaying;          // 0x10
+	INT bStopped;          // 0x14
+	BYTE _Pad2[232];      // 0x18..0xFF (256 - 24 = 232)
 	ECLipSynchData();
 	ECLipSynchData(UMeshInstance*, USound*, USound*, AActor*);
 	ECLipSynchData& operator=(const ECLipSynchData&);

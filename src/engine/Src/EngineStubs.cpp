@@ -3128,9 +3128,18 @@ FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 }
 
 // --- FConvexVolume ---
-BYTE FConvexVolume::SphereCheck(FSphere)
+BYTE FConvexVolume::SphereCheck(FSphere Sphere)
 {
-	return 0;
+	BYTE Result = 1;
+	for (INT i = 0; i < NumPlanes; i++)
+	{
+		FLOAT Dist = Planes[i].PlaneDot(*(FVector*)&Sphere);
+		if (Dist > Sphere.W)
+			return 2;
+		if (Dist > -Sphere.W)
+			Result |= 2;
+	}
+	return Result;
 }
 
 FConvexVolume::FConvexVolume(FConvexVolume const &)
@@ -3150,9 +3159,19 @@ FConvexVolume& FConvexVolume::operator=(const FConvexVolume&)
 	return *this;
 }
 
-BYTE FConvexVolume::BoxCheck(FVector,FVector)
+BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 {
-	return 0;
+	BYTE Result = 1;
+	for (INT i = 0; i < NumPlanes; i++)
+	{
+		FLOAT Dist = Planes[i].PlaneDot(Origin);
+		FLOAT PushOut = Abs(Extent.X * Planes[i].X) + Abs(Extent.Y * Planes[i].Y) + Abs(Extent.Z * Planes[i].Z);
+		if (Dist > PushOut)
+			return 2;
+		if (Dist > -PushOut)
+			Result |= 2;
+	}
+	return Result;
 }
 
 FPoly FConvexVolume::ClipPolygon(FPoly)
@@ -7340,13 +7359,47 @@ float FPoly::Area() {
 }
 
 // ?GetActionIdx@FMatineeTools@@QAEHPAVASceneManager@@PAVUMatAction@@@Z
-int FMatineeTools::GetActionIdx(ASceneManager * p0, UMatAction * p1) { return 0; }
+int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
+{
+	if (!SM)
+		return -1;
+	// ASceneManager + 0x3A8 = TArray<UMatAction*> Actions
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)SM + 0x3A8);
+	for (INT i = 0; i < Actions.Num(); i++)
+	{
+		if (Actions(i) == Action)
+			return i;
+	}
+	return -1;
+}
 
 // ?GetPathStyle@FMatineeTools@@QAEHPAVUMatAction@@@Z
-int FMatineeTools::GetPathStyle(UMatAction * p0) { return 0; }
+int FMatineeTools::GetPathStyle(UMatAction* Action)
+{
+	if (Action)
+	{
+		if (Action->IsA(UActionPause::StaticClass()))
+			return 0;
+		if (Action->IsA(UActionMoveCamera::StaticClass()))
+			return *((BYTE*)Action + 0x90);
+	}
+	return *((BYTE*)Action + 0x90);
+}
 
 // ?GetSubActionIdx@FMatineeTools@@QAEHPAVUMatSubAction@@@Z
-int FMatineeTools::GetSubActionIdx(UMatSubAction * p0) { return 0; }
+int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
+{
+	if (!CurrentAction)
+		return -1;
+	// UMatAction + 0x48 = TArray<UMatSubAction*> SubActions
+	TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)((BYTE*)CurrentAction + 0x48);
+	for (INT i = 0; i < SubActions.Num(); i++)
+	{
+		if (SubActions(i) == SubAction)
+			return i;
+	}
+	return -1;
+}
 
 // ?buildPaths@FPathBuilder@@QAEHPAVULevel@@@Z
 int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
@@ -7506,10 +7559,49 @@ int FPoly::OnPoly(FVector Point) {
 }
 
 // ?Split@FPoly@@QAEHABVFVector@@0H@Z
-int FPoly::Split(FVector const & p0, FVector const & p1, int p2) { return 0; }
+int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
+{
+	if (NoOverflow && NumVertices >= 14)
+	{
+		// Too many vertices — just classify without allocating output polys.
+		FPlane Plane(Normal.X, Normal.Y, Normal.Z, Normal | Base);
+		INT Result = SplitWithPlaneFast(Plane, NULL, NULL);
+		if (Result == SP_Back)
+			return 0;
+		return NumVertices;
+	}
+
+	FPoly Front, Back;
+	FPlane Plane(Normal.X, Normal.Y, Normal.Z, Normal | Base);
+	INT Result = SplitWithPlaneFast(Plane, &Front, &Back);
+	if (Result == SP_Back)
+		return 0;
+	if (Result == SP_Split)
+		*this = Front;
+	return NumVertices;
+}
 
 // ?SplitPrecise@FPoly@@QAEHABVFVector@@0H@Z
-int FPoly::SplitPrecise(FVector const & p0, FVector const & p1, int p2) { return 0; }
+int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverflow)
+{
+	if (NoOverflow && NumVertices >= 14)
+	{
+		FPlane Plane(Normal.X, Normal.Y, Normal.Z, Normal | Base);
+		INT Result = SplitWithPlaneFastPrecise(Plane, NULL, NULL);
+		if (Result == SP_Back)
+			return 0;
+		return NumVertices;
+	}
+
+	FPoly Front, Back;
+	FPlane Plane(Normal.X, Normal.Y, Normal.Z, Normal | Base);
+	INT Result = SplitWithPlaneFastPrecise(Plane, &Front, &Back);
+	if (Result == SP_Back)
+		return 0;
+	if (Result == SP_Split)
+		*this = Front;
+	return NumVertices;
+}
 
 // ?SplitWithNode@FPoly@@QBEHPBVUModel@@HPAV1@1H@Z
 int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int p4) const { return 0; }
@@ -7790,7 +7882,10 @@ void FCollisionOctree::Tick() {}
 void UMeshInstance::MeshBuildBounds() {}
 
 // ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
-void ECLipSynchData::m_vStartLipsynch() {}
+void ECLipSynchData::m_vStartLipsynch()
+{
+	bPlaying = 1;
+}
 
 // ?m_vStopLipsynch@ECLipSynchData@@QAEXXZ
 void ECLipSynchData::m_vStopLipsynch() {}
@@ -8310,7 +8405,32 @@ FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
 // ============================================================================
 // UInput / UInputPlanning
 // ============================================================================
-INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta) { return 0; }
+INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
+{
+	// KeyDownMap at offset 0xEB4 from this (Ghidra-verified).
+	BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
+	if (Action == IST_Press)
+	{
+		if (KeyDownMap[Key] == 0)
+		{
+			KeyDownMap[Key] = 1;
+			return 1;
+		}
+	}
+	else if (Action == IST_Release)
+	{
+		if (KeyDownMap[Key] != 0)
+		{
+			KeyDownMap[Key] = 0;
+			return 1;
+		}
+	}
+	else
+	{
+		return 1;
+	}
+	return 0;
+}
 INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta) { return 0; }
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 const TCHAR* UInput::GetKeyName(EInputKey Key) const { return TEXT(""); }
