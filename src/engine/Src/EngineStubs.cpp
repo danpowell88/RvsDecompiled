@@ -6088,6 +6088,8 @@ int FURL::DefaultPort = 0;
 
 _KarmaGlobals * KGData = NULL;
 
+static INT bGameShutDown = 0;
+
 
 /*-----------------------------------------------------------------------------
   Implementations
@@ -6756,7 +6758,7 @@ int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxL
 }
 
 // ?getGameShutDown@@YAHXZ
-int getGameShutDown() { return 0; }
+int getGameShutDown() { return bGameShutDown; }
 
 // ?newPath@FPathBuilder@@AAEPAVANavigationPoint@@VFVector@@@Z
 ANavigationPoint * FPathBuilder::newPath(FVector p0) { return NULL; }
@@ -7744,19 +7746,35 @@ void DrawSprite(AActor * p0, FVector p1, UMaterial * p2, FLevelSceneNode * p3, F
 void DrawSprite(float p0, FVector p1, FVector p2, UMaterial * p3, FPlane p4, BYTE p5, FCameraSceneNode * p6, FRenderInterface * p7, float p8, int p9, int p10) {}
 
 // ?KME2UPosition@@YAXPAVFVector@@QBM@Z
-void KME2UPosition(FVector * p0, float const * const p1) {}
+void KME2UPosition(FVector* Out, float const * const In) {
+	Out->X = In[0] * 50.0f;
+	Out->Y = In[1] * 50.0f;
+	Out->Z = In[2] * 50.0f;
+}
 
 // ?KME2UVecCopy@@YAXPAVFVector@@QBM@Z
-void KME2UVecCopy(FVector * p0, float const * const p1) {}
+void KME2UVecCopy(FVector* Out, float const * const In) {
+	Out->X = In[0];
+	Out->Y = In[1];
+	Out->Z = In[2];
+}
 
 // ?KTermGameKarma@@YAXXZ
 void KTermGameKarma() {}
 
 // ?KU2MEPosition@@YAXQAMVFVector@@@Z
-void KU2MEPosition(float * const p0, FVector p1) {}
+void KU2MEPosition(float * const Out, FVector In) {
+	Out[0] = In.X * 0.02f;
+	Out[1] = In.Y * 0.02f;
+	Out[2] = In.Z * 0.02f;
+}
 
 // ?KU2MEVecCopy@@YAXQAMVFVector@@@Z
-void KU2MEVecCopy(float * const p0, FVector p1) {}
+void KU2MEVecCopy(float * const Out, FVector In) {
+	Out[0] = In.X;
+	Out[1] = In.Y;
+	Out[2] = In.Z;
+}
 
 // ?KUpdateMassProps@@YAXPAVUKMeshProps@@@Z
 void KUpdateMassProps(UKMeshProps * p0) {}
@@ -7772,7 +7790,12 @@ void KarmaTriListDataInit(_KarmaTriListData * p0) {}
 UVertexStreamBase::UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType)
 : ElementSize(InElementSize), StreamFlags(InFlags), StreamType(InType) {}
 void UVertexStreamBase::Serialize(FArchive& Ar) { URenderResource::Serialize(Ar); }
-void UVertexStreamBase::SetPolyFlags(DWORD Flags) {}
+void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
+	DWORD OldFlags = StreamFlags;
+	StreamFlags = Flags;
+	if( OldFlags != Flags )
+		Revision++;
+}
 
 // UVertexBuffer: ElementSize=0x2C (44 = sizeof FBspVertex), StreamType=4.
 UVertexBuffer::UVertexBuffer()
@@ -8110,12 +8133,37 @@ struct _McdGeometry;
 struct McdGeomMan;
 
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
-void KME2UCoords(FCoords*, const FLOAT (* const)[4]) {}
-void KME2UMatrixCopy(FMatrix*, FLOAT (* const)[4]) {}
-void KME2UTransform(FVector*, FRotator*, const FLOAT (* const)[4]) {}
+void KME2UCoords(FCoords* Out, const FLOAT (* const tm)[4]) {
+	*Out = FCoords(
+		FVector(tm[3][0]*50.f, tm[3][1]*50.f, tm[3][2]*50.f),
+		FVector(tm[0][0], tm[0][1], tm[0][2]),
+		FVector(tm[1][0], tm[1][1], tm[1][2]),
+		FVector(tm[2][0], tm[2][1], tm[2][2])
+	);
+}
+void KME2UMatrixCopy(FMatrix* Out, FLOAT (* const In)[4]) {
+	appMemcpy(Out, In, sizeof(FLOAT)*16);
+}
+void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[4]) {
+	OutPos->X = tm[3][0] * 50.0f;
+	OutPos->Y = tm[3][1] * 50.0f;
+	OutPos->Z = tm[3][2] * 50.0f;
+	FCoords Coords;
+	KME2UCoords(&Coords, tm);
+	*OutRot = Coords.OrthoRotation();
+}
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
-void KU2MEMatrixCopy(FLOAT (* const)[4], FMatrix*) {}
-void KU2METransform(FLOAT (* const)[4], FVector, FRotator) {}
+void KU2MEMatrixCopy(FLOAT (* const Out)[4], FMatrix* In) {
+	appMemcpy(Out, In, sizeof(FLOAT)*16);
+}
+void KU2METransform(FLOAT (* const tm)[4], FVector Pos, FRotator Rot) {
+	FCoords Coords(FVector(0.f,0.f,0.f));
+	Coords *= Rot;
+	tm[0][0] = Coords.XAxis.X; tm[0][1] = Coords.XAxis.Y; tm[0][2] = Coords.XAxis.Z; tm[0][3] = 0.f;
+	tm[1][0] = Coords.YAxis.X; tm[1][1] = Coords.YAxis.Y; tm[1][2] = Coords.YAxis.Z; tm[1][3] = 0.f;
+	tm[2][0] = Coords.ZAxis.X; tm[2][1] = Coords.ZAxis.Y; tm[2][2] = Coords.ZAxis.Z; tm[2][3] = 0.f;
+	tm[3][0] = Pos.X * 0.02f; tm[3][1] = Pos.Y * 0.02f; tm[3][2] = Pos.Z * 0.02f; tm[3][3] = 1.0f;
+}
 
 // ============================================================================
 // TArray<BYTE> operators
