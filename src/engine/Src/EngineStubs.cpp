@@ -402,7 +402,8 @@ void FCanvasUtil::Flush()
 
 unsigned __int64 FCanvasUtil::GetCacheId()
 {
-	return 0;
+	// Ghidra: CacheId QWORD at this+0xc9c = Pad+0xc98
+	return *(QWORD*)(Pad + 0xc98);
 }
 
 int FCanvasUtil::GetComponents(FVertexComponent* C)
@@ -424,11 +425,15 @@ int FCanvasUtil::GetRevision()
 
 int FCanvasUtil::GetSize()
 {
-	return 0;
+	// Ghidra: count at this+0x98 = Pad+0x94, times stride 0x18
+	return *(INT*)(Pad + 0x94) * 0x18;
 }
 
-void FCanvasUtil::GetStreamData(void *)
+void FCanvasUtil::GetStreamData(void * Dest)
 {
+	// Ghidra: memcpy from inline vertex buffer at this+0x9c = Pad+0x98
+	INT Size = *(INT*)(Pad + 0x94) * 0x18;
+	appMemcpy(Dest, Pad + 0x98, Size);
 }
 
 int FCanvasUtil::GetStride()
@@ -613,8 +618,10 @@ int FLineBatcher::GetComponents(FVertexComponent* C)
 	return 2;
 }
 
-void FLineBatcher::GetRawStreamData(void * *,int)
+void FLineBatcher::GetRawStreamData(void ** Out, int Offset)
 {
+	// Ghidra: *Out = data + offset * 0x10
+	*Out = *(BYTE**)Pad + Offset * 0x10;
 }
 
 int FLineBatcher::GetRevision()
@@ -624,16 +631,20 @@ int FLineBatcher::GetRevision()
 
 int FLineBatcher::GetSize()
 {
-	return 0;
+	// Ghidra: FArray::Num(this+4) << 4, TArray at Pad[0]
+	return *(INT*)(Pad + 4) << 4;
 }
 
-void FLineBatcher::GetStreamData(void *)
+void FLineBatcher::GetStreamData(void * Dest)
 {
+	// Ghidra: memcpy Num<<4 bytes from TArray data
+	INT Size = *(INT*)(Pad + 4) << 4;
+	appMemcpy(Dest, *(void**)Pad, Size);
 }
 
 int FLineBatcher::GetStride()
 {
-	return 0;
+	return 0x10;
 }
 
 // --- FRaw32BitIndexBuffer ---
@@ -845,8 +856,10 @@ int FStaticMeshUVStream::GetComponents(FVertexComponent* C)
 	return 1;
 }
 
-void FStaticMeshUVStream::GetRawStreamData(void * *,int)
+void FStaticMeshUVStream::GetRawStreamData(void ** Out, int Offset)
 {
+	// Ghidra: *Out = data + offset * 8
+	*Out = *(BYTE**)Pad + Offset * 8;
 }
 
 int FStaticMeshUVStream::GetRevision()
@@ -856,11 +869,15 @@ int FStaticMeshUVStream::GetRevision()
 
 int FStaticMeshUVStream::GetSize()
 {
-	return 0;
+	// Ghidra: Num << 3 (stride = 8)
+	return *(INT*)(Pad + 4) << 3;
 }
 
-void FStaticMeshUVStream::GetStreamData(void *)
+void FStaticMeshUVStream::GetStreamData(void * Dest)
 {
+	// Ghidra: memcpy Num<<3 bytes from TArray data
+	INT Size = *(INT*)(Pad + 4) << 3;
+	appMemcpy(Dest, *(void**)Pad, Size);
 }
 
 int FStaticMeshUVStream::GetStride()

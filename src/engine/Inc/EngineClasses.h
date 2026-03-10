@@ -712,7 +712,7 @@ public:
 class ENGINE_API FCanvasUtil : public FVertexStream
 {
 public:
-	BYTE Pad[128];
+	BYTE Pad[3264]; // Ghidra: CacheId at this+0xc9c, inline vertex buffer at 0x9c, count at 0x98
 	FCanvasUtil(UViewport*, FRenderInterface*, INT, INT);
 	FCanvasUtil(const FCanvasUtil&);
 	~FCanvasUtil();
