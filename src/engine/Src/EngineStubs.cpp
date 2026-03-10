@@ -9019,7 +9019,69 @@ FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 FStats::~FStats() {}
 void FStats::UpdateString(FString&, INT) {}
 void FStats::Render(UViewport*, UEngine*) {}
-INT FStats::RegisterStats(EStatsType, EStatsDataType, FString, FString, EStatsUnit) { return 0; }
+// ?RegisterStats@FStats@@QAEHW4EStatsType@@W4EStatsDataType@@VFString@@2W4EStatsUnit@@@Z  (0x154670)
+// Registers a new stat slot and returns its index in the type-specific value array.
+// FStats layout (from Ghidra / Clear() analysis):
+//   INT values/retirements  at 0x1C/0x28  (stride 4)
+//   FLOAT values/retirements at 0x4C/0x58  (stride 4)
+//   FString values/retirements at 0x7C/0x88 (stride 12)
+//   Name/DisplayName arrays per data type:
+//     INT:    0x34/0x40   FLOAT: 0x64/0x70   STRING: 0x94/0xA0  (stride 12)
+//   Descriptor TArray[3] at 0xAC (indexed by EStatsType, stride 12):
+//     each descriptor = {INT valueIdx, INT dataType, INT unit}
+INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
+	FString StatName, FString DisplayName, EStatsUnit Unit)
+{
+	INT SlotIdx = -1;
+
+	if (DataType == (EStatsDataType)0)       // INT
+	{
+		SlotIdx = ((FArray*)((BYTE*)this + 0x1C))->AddZeroed(4);
+		((FArray*)((BYTE*)this + 0x28))->AddZeroed(4);
+
+		INT ni = ((FArray*)((BYTE*)this + 0x34))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x34) + ni * sizeof(FString)) = StatName;
+
+		INT di = ((FArray*)((BYTE*)this + 0x40))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x40) + di * sizeof(FString)) = DisplayName + StatName;
+	}
+	else if (DataType == (EStatsDataType)1)  // FLOAT
+	{
+		SlotIdx = ((FArray*)((BYTE*)this + 0x4C))->AddZeroed(4);
+		((FArray*)((BYTE*)this + 0x58))->AddZeroed(4);
+
+		INT ni = ((FArray*)((BYTE*)this + 0x64))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x64) + ni * sizeof(FString)) = StatName;
+
+		INT di = ((FArray*)((BYTE*)this + 0x70))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x70) + di * sizeof(FString)) = DisplayName + StatName;
+	}
+	else if (DataType == (EStatsDataType)2)  // STRING
+	{
+		SlotIdx = ((FArray*)((BYTE*)this + 0x7C))->AddZeroed(sizeof(FString));
+		((FArray*)((BYTE*)this + 0x88))->AddZeroed(sizeof(FString));
+
+		INT ni = ((FArray*)((BYTE*)this + 0x94))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x94) + ni * sizeof(FString)) = StatName;
+
+		INT di = ((FArray*)((BYTE*)this + 0xA0))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0xA0) + di * sizeof(FString)) = DisplayName + StatName;
+	}
+	else
+	{
+		return -1;
+	}
+
+	// Append descriptor {valueIdx, dataType, unit} to the per-StatsType table.
+	// Each TArray in the descriptor table is 12 bytes; descriptor element = 12 bytes.
+	INT ri = ((FArray*)((BYTE*)this + (INT)StatType * 12 + 0xAC))->Add(1, 12);
+	INT* pRec = (INT*)(*(BYTE**)((BYTE*)this + (INT)StatType * 12 + 0xAC) + ri * 12);
+	pRec[0] = SlotIdx;
+	pRec[1] = (INT)DataType;
+	pRec[2] = (INT)Unit;
+
+	return SlotIdx;
+}
 void FStats::CalcMovingAverage(INT, DWORD) {}
 void FStats::Clear()
 {
