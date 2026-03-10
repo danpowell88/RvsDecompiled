@@ -6929,7 +6929,234 @@ FStatGraph::FStatGraph(FStatGraph const & p0) {}
 FStatGraph::~FStatGraph() {}
 
 // ??0FURL@@QAE@PAV0@PBGW4ETravelType@@@Z
-FURL::FURL(FURL * p0, const TCHAR* p1, ETravelType p2) {}
+// Ghidra at 0x171a30. Full URL parser: handles travel types, options, protocol/host/port/map/portal.
+FURL::FURL(FURL* Base, const TCHAR* TextURL, ETravelType Type) {
+	// Initialize with defaults
+	Protocol = DefaultProtocol;
+	Host     = DefaultHost;
+	Port     = DefaultPort;
+	Map      = DefaultMap;
+	Portal   = DefaultPortal;
+	Valid    = 1;
+
+	check(TextURL);
+
+	// Copy to mutable local buffer
+	TCHAR Temp[1024];
+	appStrncpy(Temp, TextURL, ARRAY_COUNT(Temp));
+	TCHAR* Str = Temp;
+
+	// TRAVEL_Relative: copy URL fields from Base
+	if (Type == TRAVEL_Relative) {
+		check(Base);
+		Protocol = Base->Protocol;
+		Host     = Base->Host;
+		Map      = Base->Map;
+		Portal   = Base->Portal;
+		Port     = Base->Port;
+	}
+
+	// TRAVEL_Relative and TRAVEL_Partial: copy non-transient options from Base
+	if (Type == TRAVEL_Relative || Type == TRAVEL_Partial) {
+		check(Base);
+		for (INT i = 0; i < Base->Op.Num(); i++) {
+			if (appStricmp(*Base->Op(i), TEXT("PUSH"))  != 0
+			 && appStricmp(*Base->Op(i), TEXT("POP"))   != 0
+			 && appStricmp(*Base->Op(i), TEXT("PEER"))  != 0
+			 && appStricmp(*Base->Op(i), TEXT("LOAD"))  != 0
+			 && appStricmp(*Base->Op(i), TEXT("QUIET")) != 0)
+			{
+				new(Op) FString(Base->Op(i));
+			}
+		}
+	}
+
+	// Skip leading spaces
+	while (*Str == ' ')
+		Str++;
+
+	// Split off options (?) and portal (#)
+	TCHAR* OptionStart = appStrchr(Str, '?');
+	TCHAR* HashStart   = appStrchr(Str, '#');
+	if (OptionStart == NULL || (HashStart != NULL && HashStart <= OptionStart))
+		OptionStart = HashStart;
+
+	if (OptionStart != NULL) {
+		TCHAR Delim = *OptionStart;
+		*OptionStart = 0;
+		TCHAR* Token = OptionStart + 1;
+		TCHAR  NextDelim = 0;
+
+		do {
+			TCHAR* NextQ = appStrchr(Token, '?');
+			TCHAR* NextH = appStrchr(Token, '#');
+			TCHAR* Next  = NextQ;
+			if (Next == NULL || (NextH != NULL && NextH <= Next))
+				Next = NextH;
+
+			NextDelim = 0;
+			if (Next != NULL) {
+				NextDelim = *Next;
+				*Next++ = 0;
+			}
+
+			// Space in option/portal token invalidates the URL
+			if (appStrchr(Token, ' ') != NULL) {
+				*this = FURL(NULL);
+				Valid = 0;
+				return;
+			}
+
+			if (Delim == '?')
+				AddOption(Token);
+			else
+				Portal = Token;
+
+			Delim = NextDelim;
+			Token = Next;
+		} while (Token != NULL);
+	}
+
+	// Parse URL structure
+	UBOOL bMapChange = 0;
+	UBOOL bHasMap    = 0;
+
+	INT StrLen = appStrlen(Str);
+	if (StrLen >= 3 && Str[1] == ':') {
+		// Drive letter path (e.g., "C:\Maps\MyMap.rsm")
+		Protocol = DefaultProtocol;
+		Host     = DefaultHost;
+		Map      = Str;
+		Portal   = DefaultPortal;
+		Str      = NULL;
+		bMapChange = 1;
+		bHasMap    = 1;
+		Host       = TEXT("");
+	} else {
+		// Check for protocol (colon with >1 char before it, no dot before colon)
+		if (appStrchr(Str, ':') != NULL) {
+			TCHAR* Colon = appStrchr(Str, ':');
+			if (Str + 1 < Colon) {
+				TCHAR* Dot = appStrchr(Str, '.');
+				if (Dot == NULL || Dot > Colon) {
+					*Colon = 0;
+					Protocol = Str;
+					Str = Colon + 1;
+				}
+			}
+		}
+
+		// Check for authority (//)
+		if (*Str == '/') {
+			if (Str[1] != '/') {
+				// Single / without // is invalid
+				*this = FURL(NULL);
+				Valid = 0;
+				return;
+			}
+			Str += 2;
+			bMapChange = 1;
+			Host = TEXT("");
+		}
+
+		// Check for host (dot in remaining, not a map/save extension)
+		TCHAR* Dot = appStrchr(Str, '.');
+		if (Dot != NULL && Dot > Str) {
+			UBOOL bIsMapExt = 0;
+			if (appStrnicmp(Dot + 1, *DefaultMapExt, DefaultMapExt.Len()) == 0) {
+				TCHAR After = Dot[DefaultMapExt.Len() + 1];
+				if (!((After >= 'a' && After <= 'z') || (After >= 'A' && After <= 'Z') || (After >= '0' && After <= '9')))
+					bIsMapExt = 1;
+			}
+			if (!bIsMapExt && appStrnicmp(Dot + 1, *DefaultSaveExt, DefaultSaveExt.Len()) == 0) {
+				TCHAR After = Dot[DefaultSaveExt.Len() + 1];
+				if (!((After >= 'a' && After <= 'z') || (After >= 'A' && After <= 'Z') || (After >= '0' && After <= '9')))
+					bIsMapExt = 1;
+			}
+
+			if (!bIsMapExt) {
+				// It's a host — extract host:port/path
+				TCHAR* HostStr = Str;
+				TCHAR* Slash = appStrchr(Str, '/');
+				if (Slash != NULL) {
+					*Slash = 0;
+					Str = Slash + 1;
+				} else {
+					Str = NULL;
+				}
+
+				TCHAR* PortSep = appStrchr(HostStr, ':');
+				if (PortSep != NULL) {
+					*PortSep = 0;
+					Port = appAtoi(PortSep + 1);
+				}
+
+				Host = HostStr;
+				if (appStricmp(*Protocol, *DefaultProtocol) == 0)
+					Map = DefaultMap;
+				else
+					Map = TEXT("");
+				bMapChange = 1;
+			}
+		}
+	}
+
+	// TRAVEL_Absolute: forward persistent options from Base
+	if (Type == TRAVEL_Absolute && Base != NULL && IsInternal()) {
+		for (INT i = 0; i < Base->Op.Num(); i++) {
+			if (appStrnicmp(*Base->Op(i), TEXT("Name="), 5) == 0
+			 || appStrnicmp(*Base->Op(i), TEXT("Team="), 5) == 0
+			 || appStrnicmp(*Base->Op(i), TEXT("Class="), 6) == 0
+			 || appStrnicmp(*Base->Op(i), TEXT("Skin="), 5) == 0
+			 || appStrnicmp(*Base->Op(i), TEXT("Face="), 5) == 0
+			 || appStrnicmp(*Base->Op(i), TEXT("Voice="), 6) == 0
+			 || appStrnicmp(*Base->Op(i), TEXT("OverrideClass="), 14) == 0)
+			{
+				TCHAR Match[256];
+				const TCHAR* Eq = appStrchr(*Base->Op(i), '=');
+				if (Eq == NULL)
+					appStrcpy(Match, *Base->Op(i));
+				else
+					appStrncpy(Match, *Base->Op(i), (INT)(Eq - *Base->Op(i)) + 1);
+
+				if (appStrcmp(GetOption(Match, TEXT("")), TEXT("")) == 0) {
+					debugf(TEXT("URL: Carrying over <%s>"), *Base->Op(i));
+					new(Op) FString(Base->Op(i));
+				}
+			}
+		}
+	}
+
+	// Parse map from remaining string
+	if (Str != NULL && *Str != 0) {
+		if (IsInternal()) {
+			bHasMap = 1;
+			TCHAR* Slash = appStrchr(Str, '/');
+			if (Slash != NULL) {
+				*Slash = 0;
+				TCHAR* Slash2 = appStrchr(Slash + 1, '/');
+				if (Slash2 != NULL) {
+					*Slash2 = 0;
+					if (Slash2[1] != 0) {
+						*this = FURL(NULL);
+						Valid = 0;
+						return;
+					}
+				}
+				Portal = Slash + 1;
+			}
+		}
+		Map = Str;
+	}
+
+	// Validate: no spaces in Protocol/Host/Portal, and something meaningful was parsed
+	if (appStrchr(*Protocol, ' ') || appStrchr(*Host, ' ') || appStrchr(*Portal, ' ')
+	 || (!bMapChange && !bHasMap && Op.Num() == 0))
+	{
+		*this = FURL(NULL);
+		Valid = 0;
+	}
+}
 
 // ??0FURL@@QAE@PBG@Z
 // ??0FURL@@QAE@PBG@Z — Ghidra at 0x171950.
