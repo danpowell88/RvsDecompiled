@@ -266,9 +266,15 @@ UPrimitive * ATerrainInfo::GetPrimitive()
 }
 
 // --- FAnimMeshVertexStream ---
-int FAnimMeshVertexStream::SetPartialSize(int)
+int FAnimMeshVertexStream::SetPartialSize(int Size)
 {
-	return 0;
+	// Ghidra: clamp Size to [0, Num], store at Pad[32], mark dirty (increment Pad[24])
+	INT Num = *(INT*)(Pad + 8);
+	if (Size < 0) Size = 0;
+	if (Size > Num) Size = Num;
+	*(INT*)(Pad + 32) = Size;
+	*(INT*)(Pad + 24) += 1;
+	return Size;
 }
 
 unsigned __int64 FAnimMeshVertexStream::GetCacheId()
@@ -286,11 +292,20 @@ int FAnimMeshVertexStream::GetComponents(FVertexComponent* C)
 
 int FAnimMeshVertexStream::GetPartialSize()
 {
-	return 0;
+	// Ghidra: if partial pointer (Pad[28]) non-zero, return min(Pad[32], Num); else Num
+	INT Num = *(INT*)(Pad + 8);
+	if (*(INT*)(Pad + 28))
+	{
+		INT PartialCount = *(INT*)(Pad + 32);
+		return (PartialCount < Num) ? PartialCount : Num;
+	}
+	return Num;
 }
 
-void FAnimMeshVertexStream::GetRawStreamData(void * *,int)
+void FAnimMeshVertexStream::GetRawStreamData(void ** Out, int Offset)
 {
+	// Ghidra: *Out = data + offset * 0x20
+	*Out = *(BYTE**)(Pad + 4) + Offset * 0x20;
 }
 
 int FAnimMeshVertexStream::GetRevision()
@@ -300,11 +315,15 @@ int FAnimMeshVertexStream::GetRevision()
 
 int FAnimMeshVertexStream::GetSize()
 {
-	return 0;
+	// Ghidra: GetPartialSize() << 5 (multiply by stride 0x20)
+	return GetPartialSize() << 5;
 }
 
-void FAnimMeshVertexStream::GetStreamData(void *)
+void FAnimMeshVertexStream::GetStreamData(void * Dest)
 {
+	// Ghidra: memcpy GetPartialSize()<<5 bytes from data
+	INT Size = GetPartialSize() << 5;
+	appMemcpy(Dest, *(void**)(Pad + 4), Size);
 }
 
 int FAnimMeshVertexStream::GetStride()
@@ -327,8 +346,10 @@ int FBspVertexStream::GetComponents(FVertexComponent* C)
 	return 4;
 }
 
-void FBspVertexStream::GetRawStreamData(void * *,int)
+void FBspVertexStream::GetRawStreamData(void ** Out, int Offset)
 {
+	// Ghidra: *Out = data + offset * 0x28
+	*Out = *(BYTE**)Pad + Offset * 0x28;
 }
 
 int FBspVertexStream::GetRevision()
@@ -338,11 +359,15 @@ int FBspVertexStream::GetRevision()
 
 int FBspVertexStream::GetSize()
 {
-	return 0;
+	// Ghidra: Num * 0x28
+	return *(INT*)(Pad + 4) * 0x28;
 }
 
-void FBspVertexStream::GetStreamData(void *)
+void FBspVertexStream::GetStreamData(void * Dest)
 {
+	// Ghidra: memcpy Num()*0x28 bytes
+	INT Size = *(INT*)(Pad + 4) * 0x28;
+	appMemcpy(Dest, *(void**)Pad, Size);
 }
 
 int FBspVertexStream::GetStride()
@@ -617,8 +642,11 @@ unsigned __int64 FRaw32BitIndexBuffer::GetCacheId()
 	return *(QWORD*)(Pad + 12);
 }
 
-void FRaw32BitIndexBuffer::GetContents(void *)
+void FRaw32BitIndexBuffer::GetContents(void * Dest)
 {
+	// Ghidra: memcpy Num()<<2 bytes
+	INT Size = *(INT*)(Pad + 4) << 2;
+	appMemcpy(Dest, *(void**)Pad, Size);
 }
 
 int FRaw32BitIndexBuffer::GetIndexSize()
@@ -633,7 +661,8 @@ int FRaw32BitIndexBuffer::GetRevision()
 
 int FRaw32BitIndexBuffer::GetSize()
 {
-	return 0;
+	// Ghidra: Num << 2
+	return *(INT*)(Pad + 4) << 2;
 }
 
 // --- FRawColorStream ---
@@ -648,8 +677,10 @@ int FRawColorStream::GetComponents(FVertexComponent* C)
 	return 1;
 }
 
-void FRawColorStream::GetRawStreamData(void * *,int)
+void FRawColorStream::GetRawStreamData(void ** Out, int Offset)
 {
+	// Ghidra: *Out = data + offset * 4
+	*Out = *(BYTE**)Pad + Offset * 4;
 }
 
 int FRawColorStream::GetRevision()
@@ -659,11 +690,15 @@ int FRawColorStream::GetRevision()
 
 int FRawColorStream::GetSize()
 {
-	return 0;
+	// Ghidra: Num << 2
+	return *(INT*)(Pad + 4) << 2;
 }
 
-void FRawColorStream::GetStreamData(void *)
+void FRawColorStream::GetStreamData(void * Dest)
 {
+	// Ghidra: memcpy Num()<<2 bytes
+	INT Size = *(INT*)(Pad + 4) << 2;
+	appMemcpy(Dest, *(void**)Pad, Size);
 }
 
 int FRawColorStream::GetStride()
@@ -2245,15 +2280,25 @@ void ADoor::PrePath()
 
 AActor * ADoor::AssociatedLevelGeometry()
 {
-	return NULL;
+	// Ghidra 0xd5af0, 7B: return pointer at offset 0x3ec
+	return *(AActor**)((BYTE*)this + 0x3ec);
 }
 
 void ADoor::FindBase()
 {
 }
 
-int ADoor::HasAssociatedLevelGeometry(AActor *)
+int ADoor::HasAssociatedLevelGeometry(AActor * Other)
 {
+	// Ghidra 0xd5b20, 45B: walk linked list at 0x3ec, next ptr at 0x3e0
+	if (Other)
+	{
+		for (AActor* Node = *(AActor**)((BYTE*)this + 0x3ec); Node; Node = *(AActor**)((BYTE*)Node + 0x3e0))
+		{
+			if (Node == Other)
+				return 1;
+		}
+	}
 	return 0;
 }
 
@@ -2269,6 +2314,9 @@ int ADoor::IsIdentifiedAs(FName)
 // --- AEmitter ---
 void AEmitter::Spawned()
 {
+	// Ghidra 0xdf2e0, 18B: set flag 4 at offset 0x3c8 when not in editor
+	if (!GIsEditor)
+		*(DWORD*)((BYTE*)this + 0x3c8) |= 4;
 }
 
 int AEmitter::Tick(float,ELevelTick)
@@ -2469,13 +2517,29 @@ void ALadder::addReachSpecs(APawn *,int)
 {
 }
 
-int ALadder::ProscribedPathTo(ANavigationPoint *)
+int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 {
-	return 0;
+	// Ghidra 0xd7130, 131B: if Nav is ALadder with same MyLadder ptr, proscribed
+	if (Nav)
+	{
+		if (Nav->IsA(ALadder::StaticClass()))
+		{
+			if (*(INT*)((BYTE*)this + 0x3E8) == *(INT*)((BYTE*)Nav + 0x3E8))
+				return 1;
+		}
+	}
+	return ANavigationPoint::ProscribedPathTo(Nav);
 }
 
 void ALadder::ClearPaths()
 {
+	// Ghidra 0xd6a60, 90B: call base, clear ladder reference, zero pointers
+	ANavigationPoint::ClearPaths();
+	INT* MyLadder = (INT*)((BYTE*)this + 0x3E8);
+	if (*MyLadder != 0)
+		*(INT*)(*MyLadder + 0x47c) = 0;
+	*(INT*)((BYTE*)this + 0x3ec) = 0;
+	*MyLadder = 0;
 }
 
 void ALadder::InitForPathFinding()
@@ -2943,9 +3007,12 @@ void AScout::InitForPathing()
 }
 
 // --- AStaticMeshActor ---
-int AStaticMeshActor::ShouldTrace(AActor *,DWORD)
+int AStaticMeshActor::ShouldTrace(AActor * Other, DWORD TraceFlags)
 {
-	return 0;
+	// Ghidra 0x718b0, 32B: check bCollideActors (bit 1 of flags at 0x398)
+	if (TraceFlags & 0x2000)
+		return (*(DWORD*)((BYTE*)this + 0x398) >> 1) & 1;
+	return AActor::ShouldTrace(Other, TraceFlags);
 }
 
 // --- ATeleporter ---
@@ -3834,7 +3901,8 @@ FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap&)
 
 unsigned __int64 FStaticCubemap::GetCacheId()
 {
-	return 0;
+	// Ghidra: return QWORD at this+8 = Pad+4
+	return *(QWORD*)(Pad + 4);
 }
 
 FTexture * FStaticCubemap::GetFace(int)
