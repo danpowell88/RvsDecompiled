@@ -8148,7 +8148,26 @@ void FWaveModInfo::HalveReduce16to8() {}
 void FWaveModInfo::NoiseGateFilter() {}
 
 // ?Reduce16to8@FWaveModInfo@@QAEXXZ
-void FWaveModInfo::Reduce16to8() {}
+void FWaveModInfo::Reduce16to8()
+{
+	// Convert 16-bit signed PCM to 8-bit unsigned with error diffusion dithering.
+	DWORD DataSize = SampleDataSize;
+	short* Data16 = (short*)SampleDataStart;
+	BYTE* Data8 = SampleDataStart;
+	INT Error = 0;
+	for (DWORD i = 0; i < DataSize >> 1; i++)
+	{
+		Error = Error + 0x8000 + (INT)Data16[i];
+		INT Quantized = (Error + 0x7F) & 0xFFFFFF00;
+		if (Quantized > 0xFF00)
+			Quantized = 0xFF00;
+		Data8[i] = (BYTE)(Quantized >> 8);
+		Error = Error - Quantized;
+	}
+	NewDataSize = DataSize >> 1;
+	*pBitsPerSample = 8;
+	NoiseGate = 1;
+}
 
 // ?AVIStart@@YAXPBGPAVUEngine@@H@Z
 void AVIStart(const TCHAR* p0, UEngine * p1, int p2) {}
@@ -8431,13 +8450,39 @@ INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
 	}
 	return 0;
 }
-INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta) { return 0; }
+INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta)
+{
+	if ((INT)Key < 0 || (INT)Key >= 0xFF)
+		appFailAssert("iKey>=0&&iKey<IK_MAX", ".\\UnIn.cpp", 0x1E8);
+	// Bindings array at offset 0x2B0 (FString[IK_MAX], 0xC each)
+	FString& Binding = *(FString*)((BYTE*)this + (INT)Key * 0xC + 0x2B0);
+	if (Binding.Len())
+	{
+		*(EInputAction*)((BYTE*)this + 0xEAC) = Action;
+		*(FLOAT*)((BYTE*)this + 0xEB0) = Delta;
+		Exec(*Binding, Ar);
+		*(INT*)((BYTE*)this + 0xEAC) = 0;
+		*(INT*)((BYTE*)this + 0xEB0) = 0;
+		return 1;
+	}
+	return 0;
+}
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 const TCHAR* UInput::GetKeyName(EInputKey Key) const { return TEXT(""); }
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const { return 0; }
-void UInput::SetInputAction(EInputAction Action, FLOAT Delta) {}
-EInputAction UInput::GetInputAction() { return IST_None; }
-FLOAT UInput::GetInputDelta() { return 0.0f; }
+void UInput::SetInputAction(EInputAction Action, FLOAT Delta)
+{
+	*(EInputAction*)((BYTE*)this + 0xEAC) = Action;
+	*(FLOAT*)((BYTE*)this + 0xEB0) = Delta;
+}
+EInputAction UInput::GetInputAction()
+{
+	return *(EInputAction*)((BYTE*)this + 0xEAC);
+}
+FLOAT UInput::GetInputDelta()
+{
+	return *(FLOAT*)((BYTE*)this + 0xEB0);
+}
 const TCHAR* UInput::StaticConfigName() { return TEXT("Input"); }
 void UInput::StaticInitInput() {}
 
@@ -8477,7 +8522,16 @@ INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE*, FPropertyRetirement*, IN
 // UNetConnection
 // ============================================================================
 UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex) { return NULL; }
-void UNetConnection::PostSend() {}
+void UNetConnection::PostSend()
+{
+	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
+	FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
+	INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
+	if (Out.GetNumBits() > MaxPacket * 8)
+		appFailAssert("Out.GetNumBits()<=MaxPacket*8", ".\\UnConn.cpp", 0x2B6);
+	if (Out.GetNumBits() == MaxPacket * 8)
+		FlushNet();
+}
 
 // ============================================================================
 // UChannel

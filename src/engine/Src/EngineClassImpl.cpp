@@ -1298,7 +1298,25 @@ void UNetConnection::Tick() {}
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 void UNetConnection::HandleClientPlayer( APlayerController* PC ) {}
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
-void UNetConnection::PreSend( INT SizeBits ) {}
+void UNetConnection::PreSend( INT SizeBits )
+{
+	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
+	FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
+	INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
+	// If adding SizeBits + 1 bit would overflow, flush first.
+	if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
+		FlushNet();
+	// If Out is empty, write packet header (OutPacketId at 0xEA8).
+	if (Out.GetNumBits() == 0)
+	{
+		Out.WriteInt(*(DWORD*)((BYTE*)this + 0xEA8), 0x4000);
+		if (Out.GetNumBits() > 16)
+			appFailAssert("Out.GetNumBits()<=MAX_PACKET_HEADER_BITS", ".\\UnConn.cpp", 0x2A4);
+	}
+	// Final overflow check.
+	if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
+		appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
+}
 void UNetConnection::PurgeAcks() {}
 void UNetConnection::ReceiveFile( INT PackageIndex ) {}
 void UNetConnection::ReceivedNak( INT NakPacketId ) {}
@@ -1470,7 +1488,15 @@ FString UInput::GetActionKey( BYTE Key ) { return FString(); }
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
-BYTE UInput::KeyDown( INT Key ) { return 0; }
+BYTE UInput::KeyDown( INT Key )
+{
+	BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
+	if (Key < 0)
+		return KeyDownMap[0];
+	if (Key > 0xFD)
+		Key = 0xFE;
+	return KeyDownMap[Key];
+}
 void UInput::StaticConstructor() {}
 
 // =============================================================================
