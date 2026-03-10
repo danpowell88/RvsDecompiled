@@ -509,7 +509,10 @@ public:
 // Pointer-only types — forward declarations sufficient.
 class FTempLineBatcher;
 struct STDbgLine;
-struct FVertexComponent;
+struct FVertexComponent {
+	INT Type;      // 1=Float3, 2=Float2, 3=Float1, 4=Color
+	INT Function;  // 0=Position, 1=Normal, 2=Specular, 3=Diffuse, 4=TexCoord0, 5=TexCoord1
+};
 class ENGINE_API FConvexVolume {
 public:
 	BYTE Pad[256];
@@ -1286,14 +1289,43 @@ public:
 };
 
 // ===========================================================================
+// FSampleLoop — sample loop point from WAV "smpl" chunk.
+// ===========================================================================
+
+struct FSampleLoop
+{
+	DWORD dwIdentifier;
+	DWORD dwType;
+	DWORD dwStart;
+	DWORD dwEnd;
+	DWORD dwFraction;
+	DWORD dwPlayCount;
+};
+
+// ===========================================================================
 // FWaveModInfo — WAV file info/manipulation.
 // ===========================================================================
 
 class ENGINE_API FWaveModInfo
 {
 public:
-
-	BYTE Pad[64]; // 16 dwords (0x40)
+	// Pointers into in-memory WAV data
+	DWORD* pSamplesPerSec;    // 0x00
+	DWORD* pAvgBytesPerSec;   // 0x04
+	_WORD* pBlockAlign;        // 0x08
+	_WORD* pBitsPerSample;     // 0x0C
+	_WORD* pChannels;          // 0x10
+	DWORD  OldBitsPerSample;   // 0x14
+	DWORD* pWaveDataSize;      // 0x18
+	DWORD* pMasterSize;        // 0x1C
+	BYTE*  SampleDataStart;    // 0x20
+	BYTE*  SampleDataEnd;      // 0x24
+	DWORD  SampleDataSize;     // 0x28
+	BYTE*  WaveDataEnd;        // 0x2C
+	INT    SampleLoopsNum;     // 0x30
+	FSampleLoop* pSampleLoop;  // 0x34
+	DWORD  NewDataSize;        // 0x38
+	UBOOL  NoiseGate;          // 0x3C
 	FWaveModInfo();
 	FWaveModInfo& operator=(const FWaveModInfo&);
 	INT ReadWaveInfo(TArray<BYTE>&);

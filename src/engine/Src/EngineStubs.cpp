@@ -35,7 +35,7 @@
 class AProjector;
 struct FProjectorRenderInfo;
 struct FPropertyRetirement;
-struct FVertexComponent;
+// FVertexComponent is now defined in EngineClasses.h
 class AWarpZoneInfo;
 class ATerrainInfo;
 class FBspNode;
@@ -276,9 +276,12 @@ unsigned __int64 FAnimMeshVertexStream::GetCacheId()
 	return *(QWORD*)(Pad + 16);
 }
 
-int FAnimMeshVertexStream::GetComponents(FVertexComponent *)
+int FAnimMeshVertexStream::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 1; C[0].Function = 0;
+	C[1].Type = 1; C[1].Function = 1;
+	C[2].Type = 2; C[2].Function = 4;
+	return 3;
 }
 
 int FAnimMeshVertexStream::GetPartialSize()
@@ -315,9 +318,13 @@ unsigned __int64 FBspVertexStream::GetCacheId()
 	return *(QWORD*)(Pad + 12);
 }
 
-int FBspVertexStream::GetComponents(FVertexComponent *)
+int FBspVertexStream::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 1; C[0].Function = 0;
+	C[1].Type = 1; C[1].Function = 1;
+	C[2].Type = 2; C[2].Function = 4;
+	C[3].Type = 2; C[3].Function = 5;
+	return 4;
 }
 
 void FBspVertexStream::GetRawStreamData(void * *,int)
@@ -373,9 +380,12 @@ unsigned __int64 FCanvasUtil::GetCacheId()
 	return 0;
 }
 
-int FCanvasUtil::GetComponents(FVertexComponent *)
+int FCanvasUtil::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 1; C[0].Function = 0;
+	C[1].Type = 4; C[1].Function = 2;
+	C[2].Type = 2; C[2].Function = 4;
+	return 3;
 }
 
 void FCanvasUtil::GetRawStreamData(void * *,int)
@@ -571,9 +581,11 @@ unsigned __int64 FLineBatcher::GetCacheId()
 	return *(QWORD*)(Pad + 12);
 }
 
-int FLineBatcher::GetComponents(FVertexComponent *)
+int FLineBatcher::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 1; C[0].Function = 0;
+	C[1].Type = 4; C[1].Function = 2;
+	return 2;
 }
 
 void FLineBatcher::GetRawStreamData(void * *,int)
@@ -630,9 +642,10 @@ unsigned __int64 FRawColorStream::GetCacheId()
 	return *(QWORD*)(Pad + 12);
 }
 
-int FRawColorStream::GetComponents(FVertexComponent *)
+int FRawColorStream::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 4; C[0].Function = 2;
+	return 1;
 }
 
 void FRawColorStream::GetRawStreamData(void * *,int)
@@ -693,9 +706,12 @@ unsigned __int64 FSkinVertexStream::GetCacheId()
 	return *(QWORD*)(Pad + 8);
 }
 
-int FSkinVertexStream::GetComponents(FVertexComponent *)
+int FSkinVertexStream::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 1; C[0].Function = 0;
+	C[1].Type = 1; C[1].Function = 1;
+	C[2].Type = 2; C[2].Function = 4;
+	return 3;
 }
 
 void FSkinVertexStream::GetRawStreamData(void * *,int)
@@ -785,9 +801,10 @@ unsigned __int64 FStaticMeshUVStream::GetCacheId()
 	return *(QWORD*)(Pad + 16);
 }
 
-int FStaticMeshUVStream::GetComponents(FVertexComponent *)
+int FStaticMeshUVStream::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 2; C[0].Function = *(INT*)(Pad + 0x0C) + 4;
+	return 1;
 }
 
 void FStaticMeshUVStream::GetRawStreamData(void * *,int)
@@ -817,9 +834,11 @@ unsigned __int64 FStaticMeshVertexStream::GetCacheId()
 	return *(QWORD*)(Pad + 12);
 }
 
-int FStaticMeshVertexStream::GetComponents(FVertexComponent *)
+int FStaticMeshVertexStream::GetComponents(FVertexComponent* C)
 {
-	return 0;
+	C[0].Type = 1; C[0].Function = 0;
+	C[1].Type = 1; C[1].Function = 1;
+	return 2;
 }
 
 void FStaticMeshVertexStream::GetRawStreamData(void * *,int)
@@ -6925,7 +6944,7 @@ FURL::FURL(const TCHAR* Filename) {
 }
 
 // ??0FWaveModInfo@@QAE@XZ
-FWaveModInfo::FWaveModInfo() { *(INT*)&Pad[0x30] = 0; *(INT*)&Pad[0x3C] = 0; }
+FWaveModInfo::FWaveModInfo() : SampleLoopsNum(0), NoiseGate(0) {}
 
 // ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
 ANavigationPoint * FSortedPathList::findEndAnchor(APawn * p0, AActor * p1, FVector p2, int p3) { return NULL; }
@@ -7312,7 +7331,58 @@ int FURL::operator==(FURL const & Other) const {
 }
 
 // ?ReadWaveInfo@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
-int FWaveModInfo::ReadWaveInfo(TArray<BYTE> & p0) { return 0; }
+INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
+	guard(FWaveModInfo::ReadWaveInfo);
+
+	BYTE* Start = &WavData(0);
+	INT Len = WavData.Num();
+	WaveDataEnd = Start + Len;
+
+	// Check RIFF/WAVE header
+	if( *(DWORD*)(Start + 8) != 0x45564157 ) // 'WAVE'
+		return 0;
+	pMasterSize = (DWORD*)(Start + 4);
+
+	BYTE* Ptr;
+	DWORD ChunkSize;
+
+	// Scan for "fmt " chunk
+	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x20746d66; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
+	if( *(DWORD*)Ptr != 0x20746d66 ) // 'fmt '
+		return 0;
+
+	BYTE* FmtData = Ptr + 8; // actual format data past chunk header
+	pBitsPerSample  = (_WORD*)(Ptr + 0x16);
+	pSamplesPerSec  = (DWORD*)(Ptr + 12);
+	pAvgBytesPerSec = (DWORD*)(Ptr + 16);
+	pBlockAlign     = (_WORD*)(Ptr + 20);
+	pChannels       = (_WORD*)(Ptr + 10);
+
+	// Scan for "data" chunk
+	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x61746164; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
+	if( *(DWORD*)Ptr != 0x61746164 ) // 'data'
+		return 0;
+
+	SampleDataStart = Ptr + 8;
+	pWaveDataSize   = (DWORD*)(Ptr + 4);
+	SampleDataSize  = *(DWORD*)(Ptr + 4);
+	OldBitsPerSample = (DWORD)*(_WORD*)(FmtData + 0x0E);
+	SampleDataEnd   = SampleDataStart + SampleDataSize;
+	NewDataSize     = SampleDataSize;
+
+	// Scan for optional "smpl" chunk
+	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x6C706D73; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
+	if( Ptr + 4 < WaveDataEnd && *(DWORD*)Ptr == 0x6C706D73 ) // 'smpl'
+	{
+		BYTE SmplHeader[36];
+		appMemcpy(SmplHeader, Ptr + 8, 36);
+		SampleLoopsNum = *(INT*)(SmplHeader + 28);
+		pSampleLoop    = (FSampleLoop*)(Ptr + 8 + 36);
+	}
+
+	return 1;
+	unguard;
+}
 
 // ?UpdateWaveData@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
 int FWaveModInfo::UpdateWaveData(TArray<BYTE> & p0) { return 0; }
@@ -8065,7 +8135,7 @@ INT UPackageMapLevel::CanSerializeObject(UObject*) { return 0; }
 // UNullRenderDevice
 // ============================================================================
 void UNullRenderDevice::SetEmulationMode(EHardwareEmulationMode) {}
-INT UNullRenderDevice::SupportsTextureFormat(ETextureFormat) { return 0; }
+INT UNullRenderDevice::SupportsTextureFormat(ETextureFormat) { return 1; }
 
 // ============================================================================
 // UEngine / UGameEngine
@@ -8100,7 +8170,10 @@ void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}
 // ============================================================================
 // FStaticMeshColorStream
 // ============================================================================
-INT FStaticMeshColorStream::GetComponents(FVertexComponent*) { return 0; }
+INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
+	C[0].Type = 4; C[0].Function = 3;
+	return 1;
+}
 
 // ============================================================================
 // FCollisionHash
