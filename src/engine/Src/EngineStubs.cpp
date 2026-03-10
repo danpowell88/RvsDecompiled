@@ -6361,15 +6361,14 @@ UClient * UTexture::__Client = NULL;
 
 float * USkeletalMeshInstance::m_fCylindersRadius = NULL;
 
-int * FCollisionHash::HashX = NULL;
-
-int * FCollisionHash::HashY = NULL;
-
-int * FCollisionHash::HashZ = NULL;
-
-int FCollisionHash::CollisionTag = 0;
-
-int FCollisionHash::Inited = 0;
+// Hash-mixing permutation tables — 0x4000 entries each.
+// Must be declared as arrays (not pointers) to match the retail layout
+// where &HashX[i] is meaningful without heap allocation.
+INT FCollisionHash::HashX[0x4000];
+INT FCollisionHash::HashY[0x4000];
+INT FCollisionHash::HashZ[0x4000];
+INT FCollisionHash::CollisionTag = 0;
+INT FCollisionHash::Inited = 0;
 
 int FURL::DefaultPort = 0;
 
@@ -7051,7 +7050,15 @@ int getGameShutDown() { return bGameShutDown; }
 ANavigationPoint * FPathBuilder::newPath(FVector p0) { return NULL; }
 
 // ?DistanceToHashPlane@FCollisionHash@@AAEMHMMH@Z
-float FCollisionHash::DistanceToHashPlane(int p0, float p1, float p2, int p3) { return 0; }
+// Retail ordinal 2514 (0x6d6f0).  Returns the signed distance along axis p1
+// to the far or near face of hash cell p0 (cell size = p3 unreal units,
+// world offset = 262144).  Returns 256000 when p1 is zero (no movement along axis).
+float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT CellSize) {
+	if (Dir == 0.0f) return 256000.0f;
+	if (Dir > 0.0f)
+		return ((((float)CellIdx + 0.5f) * (float)CellSize - 262144.0f) - Pos) / Dir;
+	return ((((float)CellIdx - 0.5f) * (float)CellSize - 262144.0f) - Pos) / Dir;
+}
 
 
 // ?TestReach@FPathBuilder@@AAEHVFVector@@0@Z
@@ -7061,7 +7068,20 @@ int FPathBuilder::TestReach(FVector p0, FVector p1) { return 0; }
 int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 
 // ?ValidNode@FPathBuilder@@AAEHPAVANavigationPoint@@PAVAActor@@@Z
-int FPathBuilder::ValidNode(ANavigationPoint * p0, AActor * p1) { return 0; }
+// Retail ordinal 4962 (0xe0c90).
+// Returns 1 when p1 is a valid adjacent navigation point for p0:
+//   - p1 is non-null and different from p0
+//   - p1 is not flagged as deleted (sign byte at 0xa0 >= 0)
+//   - p1 is a NavigationPoint but NOT a LiftCenter
+int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
+	if (Candidate && Candidate != (AActor*)NavPoint && *(SBYTE*)((BYTE*)Candidate + 0xa0) >= 0) {
+		if (((UObject*)Candidate)->IsA(ANavigationPoint::StaticClass())) {
+			if (!((UObject*)Candidate)->IsA(ALiftCenter::StaticClass()))
+				return 1;
+		}
+	}
+	return 0;
+}
 
 // ?createPaths@FPathBuilder@@AAEHXZ
 int FPathBuilder::createPaths() { return 0; }
@@ -7100,10 +7120,42 @@ FActorSceneNode::FActorSceneNode(UViewport * p0, AActor * p1, AActor * p2, FVect
 FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRotator p3, float p4) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCollisionHash@@QAE@ABV0@@Z
-FCollisionHash::FCollisionHash(FCollisionHash const & p0) {}
+// Copy constructor — rarely called; just default-init and leave buckets empty.
+// A proper implementation would clone the hash table from p0, but that involves
+// re-inserting all actors which requires level context we don't have here.
+FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
+	FreeList = NULL;
+	// AllocatedPools default-constructed to empty
+	if (!Inited) {
+		Inited = 1;
+		for (INT i = 0; i < 0x4000; i++) HashX[i] = HashY[i] = HashZ[i] = i;
+		for (INT i = 0; i < 0x4000; i++) {
+			INT jx = (DWORD)appRand() & 0x3FFF; Exchange(HashX[i], HashX[jx]);
+			INT jy = (DWORD)appRand() & 0x3FFF; Exchange(HashY[i], HashY[jy]);
+			INT jz = (DWORD)appRand() & 0x3FFF; Exchange(HashZ[i], HashZ[jz]);
+		}
+	}
+	for (INT i = 0; i < 0x4000; i++) Buckets[i] = NULL;
+}
 
 // ??0FCollisionHash@@QAE@XZ
-FCollisionHash::FCollisionHash() {}
+// Retail: ordinal 211 (0x6f440).  Size: ~700 bytes.
+// Sets up vftable, zeros pool/FArray, initialises permutation tables once via
+// Fisher-Yates shuffle (seeded by appRand), then NULLs all 0x4000 bucket heads.
+FCollisionHash::FCollisionHash() {
+	FreeList = NULL;
+	// AllocatedPools is default-constructed (TArray ctor zeroes it)
+	if (!Inited) {
+		Inited = 1;
+		for (INT i = 0; i < 0x4000; i++) HashX[i] = HashY[i] = HashZ[i] = i;
+		for (INT i = 0; i < 0x4000; i++) {
+			INT jx = (DWORD)appRand() & 0x3FFF; Exchange(HashX[i], HashX[jx]);
+			INT jy = (DWORD)appRand() & 0x3FFF; Exchange(HashY[i], HashY[jy]);
+			INT jz = (DWORD)appRand() & 0x3FFF; Exchange(HashZ[i], HashZ[jz]);
+		}
+	}
+	for (INT i = 0; i < 0x4000; i++) Buckets[i] = NULL;
+}
 
 // ??0FCollisionOctree@@QAE@ABV0@@Z
 FCollisionOctree::FCollisionOctree(FCollisionOctree const & p0) {}
@@ -8388,7 +8440,47 @@ FCheckResult * FCollisionOctree::ActorPointCheck(FMemStack & p0, FVector p1, FVe
 FCheckResult * FCollisionOctree::ActorRadiusCheck(FMemStack & p0, FVector p1, float p2, DWORD p3) { return NULL; }
 
 // ?AddActor@FCollisionHash@@UAEXPAVAActor@@@Z
-void FCollisionHash::AddActor(AActor * p0) {}
+// Retail ordinal 2232 (0x6ee70).  Inserts an actor into every hash cell that
+// its bounding box overlaps.  Pool-allocates 12-byte FCollisionLink slabs of
+// 1024 nodes (0x3000 bytes) on demand.  Saves actor Location into ColLocation
+// (offsets 0x308-0x310) so RemoveActor can look it up by the original position.
+void FCollisionHash::AddActor(AActor* Actor) {
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800); // bCollideActors must be set
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;  // bDeleteMe — skip
+	if ((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x100) return; // bIgnoreEncroachers — skip
+
+	CheckActorNotReferenced(Actor); // debug: verify not already tracked
+
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetActorExtent(Actor, MinX, MaxX, MinY, MaxY, MinZ, MaxZ);
+
+	for (INT x = MinX; x <= MaxX; x++) {
+		for (INT y = MinY; y <= MaxY; y++) {
+			for (INT z = MinZ; z <= MaxZ; z++) {
+				// Grow pool if free-list exhausted.
+				if (!FreeList) {
+					BYTE* Slab = (BYTE*)GMalloc->Malloc(0x3000, TEXT("FCollisionLink"));
+					for (INT k = 0; k < 0x3FF; k++)
+						((FCollisionLink*)(Slab + k*12))->Next = (FCollisionLink*)(Slab + (k+1)*12);
+					((FCollisionLink*)(Slab + 0x3FF*12))->Next = NULL;
+					FreeList = (FCollisionLink*)Slab;
+					AllocatedPools.AddItem((void*)Slab);
+				}
+				FCollisionLink* Node = FreeList;
+				FreeList = Node->Next;
+				Node->Actor   = Actor;
+				Node->HashPos = (z * 0x400 + y) * 0x400 + x;
+				FCollisionLink*& Bucket = Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
+				Node->Next = Bucket;
+				Bucket = Node;
+			}
+		}
+	}
+	// Save current location as ColLocation so we can find the right cells on removal.
+	*(DWORD*)((BYTE*)Actor + 0x308) = *(DWORD*)((BYTE*)Actor + 0x234);
+	*(DWORD*)((BYTE*)Actor + 0x30c) = *(DWORD*)((BYTE*)Actor + 0x238);
+	*(DWORD*)((BYTE*)Actor + 0x310) = *(DWORD*)((BYTE*)Actor + 0x23c);
+}
 
 // ?CheckActorLocations@FCollisionHash@@UAEXPAVULevel@@@Z
 void FCollisionHash::CheckActorLocations(ULevel * p0) {}
@@ -8400,7 +8492,36 @@ void FCollisionHash::CheckActorNotReferenced(AActor * p0) {}
 void FCollisionHash::CheckIsEmpty() {}
 
 // ?RemoveActor@FCollisionHash@@UAEXPAVAActor@@@Z
-void FCollisionHash::RemoveActor(AActor * p0) {}
+// Retail ordinal 4274 (0x6f0c0).  Removes an actor from every hash cell it
+// occupies by walking the ColLocation extent (not current Location, so it
+// works even if the actor has moved since it was added).  Returns links to pool.
+void FCollisionHash::RemoveActor(AActor* Actor) {
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800); // bCollideActors must be set
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;  // bDeleteMe
+	// NOTE: retail also checks ColLocation == Location consistency here;
+	// omitted as it only matters for editor-time diagnostics.
+
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetActorExtent(Actor, MinX, MaxX, MinY, MaxY, MinZ, MaxZ);
+
+	for (INT x = MinX; x <= MaxX; x++) {
+		for (INT y = MinY; y <= MaxY; y++) {
+			for (INT z = MinZ; z <= MaxZ; z++) {
+				FCollisionLink** pp = &Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
+				while (*pp) {
+					if ((*pp)->Actor == Actor) {
+						FCollisionLink* Removed = *pp;
+						*pp = Removed->Next;
+						Removed->Next = FreeList;
+						FreeList = Removed;
+					} else {
+						pp = &(*pp)->Next;
+					}
+				}
+			}
+		}
+	}
+}
 
 // ?Tick@FCollisionHash@@UAEXXZ
 void FCollisionHash::Tick() {}
@@ -8447,11 +8568,24 @@ void ECLipSynchData::m_vUpdateBonesCompressed_PhonemsSeq(int p0) {}
 // ?m_vUpdateLipSynch@ECLipSynchData@@QAEXM@Z
 void ECLipSynchData::m_vUpdateLipSynch(float p0) {}
 
-// ?GetActorExtent@FCollisionHash@@QAEXPAVAActor@@AAH11111@Z
-void FCollisionHash::GetActorExtent(AActor * p0, int & p1, int & p2, int & p3, int & p4, int & p5, int & p6) {}
-
 // ?GetHashIndices@FCollisionHash@@QAEXVFVector@@AAH11@Z
-void FCollisionHash::GetHashIndices(FVector p0, int & p1, int & p2, int & p3) {}
+// Retail ordinal 3033 (0x6dd20).
+// Converts a world-space coordinate to a hash-table grid index in each axis.
+// Grid resolution: each cell = 256 unreal units; world spans [-262144, +262144].
+void FCollisionHash::GetHashIndices(FVector V, INT& XI, INT& YI, INT& ZI) {
+	XI = Clamp(appRound((V.X + 262144.0f) * 0.00390625f), 0, 0x3FFF);
+	YI = Clamp(appRound((V.Y + 262144.0f) * 0.00390625f), 0, 0x3FFF);
+	ZI = Clamp(appRound((V.Z + 262144.0f) * 0.00390625f), 0, 0x3FFF);
+}
+
+// ?GetActorExtent@FCollisionHash@@QAEXPAVAActor@@AAH11111@Z
+// Retail ordinal 2897 (0x6dde0).
+// Converts the actor's collision bounding box into a 3D range of hash indices.
+void FCollisionHash::GetActorExtent(AActor* Actor, INT& MinX, INT& MaxX, INT& MinY, INT& MaxY, INT& MinZ, INT& MaxZ) {
+	FBox Box = Actor->GetPrimitive()->GetCollisionBoundingBox(Actor);
+	GetHashIndices(Box.Min, MinX, MinY, MinZ);
+	GetHashIndices(Box.Max, MaxX, MaxY, MaxZ);
+}
 
 // ?GetSamples@FMatineeTools@@QAEXPAVASceneManager@@PAVUMatAction@@PAV?$TArray@VFVector@@@@@Z
 void FMatineeTools::GetSamples(ASceneManager * p0, UMatAction * p1, TArray<FVector> * p2) {}
@@ -9711,10 +9845,14 @@ INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
 // ============================================================================
 // FCollisionHash
 // ============================================================================
-FCollisionHash::FCollisionLink*& FCollisionHash::GetHashLink(INT, INT, INT, INT&)
+// ?GetHashLink@FCollisionHash@@QAEAAPAUFCollisionLink@1@HHHAAH@Z
+// Retail ordinal 3034 (0x6d680).
+// Returns a reference to the bucket-head pointer for hash cell (x, y, z) and
+// writes the encoded position z*0x100000 + y*0x400 + x into OutPos.
+FCollisionHash::FCollisionLink*& FCollisionHash::GetHashLink(INT x, INT y, INT z, INT& OutPos)
 {
-	static FCollisionHash::FCollisionLink* dummy = NULL;
-	return dummy;
+	OutPos = (z * 0x400 + y) * 0x400 + x;
+	return Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
 }
 
 // ============================================================================

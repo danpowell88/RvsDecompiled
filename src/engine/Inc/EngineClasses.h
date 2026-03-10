@@ -1021,13 +1021,26 @@ public:
 class ENGINE_API FCollisionHash : public FCollisionHashBase
 {
 public:
-	struct FCollisionLink { BYTE Pad[32]; };
-	BYTE Pad[256];
+	// 12-byte pool node.  Actor/Next/HashPos match Ghidra offsets [0/4/8].
+	struct FCollisionLink {
+		AActor*         Actor;   // actor stored in this cell
+		FCollisionLink* Next;    // next in bucket / free-list chain
+		INT             HashPos; // encoded position: z*0x100000 + y*0x400 + x
+	};
+
+	// Hash table: 0x4000 bucket heads at object offsets 4 .. 0x10003 (65536 bytes).
+	FCollisionLink* Buckets[0x4000];
+
+	FCollisionLink* FreeList;       // pool free-list head  @ 0x10004
+	TArray<void*>   AllocatedPools; // tracks malloc'd slabs @ 0x10008
+
+	// Static hash-mixing permutation tables, each 0x4000 entries (arrays).
+	static INT HashX[0x4000];
+	static INT HashY[0x4000];
+	static INT HashZ[0x4000];
 	static INT CollisionTag;
-	static INT* HashX;
-	static INT* HashY;
-	static INT* HashZ;
 	static INT Inited;
+
 	FCollisionHash();
 	FCollisionHash(const FCollisionHash&);
 	virtual ~FCollisionHash();
