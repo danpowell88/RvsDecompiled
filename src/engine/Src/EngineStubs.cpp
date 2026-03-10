@@ -6911,7 +6911,16 @@ FStatGraph::~FStatGraph() {}
 FURL::FURL(FURL * p0, const TCHAR* p1, ETravelType p2) {}
 
 // ??0FURL@@QAE@PBG@Z
-FURL::FURL(const TCHAR* p0) {}
+// ??0FURL@@QAE@PBG@Z — Ghidra at 0x171950.
+// Constructs a URL with defaults, optionally using the provided string as Map.
+FURL::FURL(const TCHAR* Filename) {
+	Protocol = DefaultProtocol;
+	Host     = DefaultHost;
+	Port     = DefaultPort;
+	Map      = Filename ? FString(Filename) : DefaultMap;
+	Portal   = DefaultPortal;
+	Valid    = 1;
+}
 
 // ??0FWaveModInfo@@QAE@XZ
 FWaveModInfo::FWaveModInfo() { *(INT*)&Pad[0x30] = 0; *(INT*)&Pad[0x3C] = 0; }
@@ -7082,7 +7091,25 @@ int FPoly::CalcNormal(int bSilent) {
 }
 
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z
-int FPoly::DoesLineIntersect(FVector p0, FVector p1, FVector * p2) { return 0; }
+// ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z — Ghidra at 0x9E760.
+// Tests if a line segment intersects this polygon. Optionally returns the hit point.
+int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection) {
+	FLOAT d1 = (Start - Vertex[0]) | Normal;
+	FLOAT d2 = (End   - Vertex[0]) | Normal;
+
+	// Check that the line straddles the polygon's plane.
+	if( (d1 >= 0.f || d2 >= 0.f) && (d1 <= 0.f || d2 <= 0.f) )
+	{
+		FVector Hit = FLinePlaneIntersection( Start, End, Vertex[0], Normal );
+		if( Intersection )
+			*Intersection = Hit;
+
+		// Only count as intersection if hit point is not at an endpoint.
+		if( !(Hit == Start) && !(Hit == End) )
+			return OnPoly( Hit );
+	}
+	return 0;
+}
 
 // ?Faces@FPoly@@QBEHABV1@@Z
 int FPoly::Faces(FPoly const & Other) const {
@@ -7186,7 +7213,21 @@ int FPoly::OnPlane(FVector Point) {
 }
 
 // ?OnPoly@FPoly@@QAEHVFVector@@@Z
-int FPoly::OnPoly(FVector p0) { return 0; }
+// ?OnPoly@FPoly@@QAEHVFVector@@@Z — Ghidra at 0x9DD10.
+// Returns 1 if Point lies inside the polygon, 0 otherwise.
+int FPoly::OnPoly(FVector Point) {
+	for( INT i=0; i<NumVertices; i++ )
+	{
+		INT j = i - 1;
+		if( j < 0 ) j = NumVertices - 1;
+		FVector Side = Vertex[i] - Vertex[j];
+		FVector SideNormal = Side ^ Normal;
+		SideNormal.Normalize();
+		if( ((Point - Vertex[i]) | SideNormal) > 0.1f )
+			return 0;
+	}
+	return 1;
+}
 
 // ?Split@FPoly@@QAEHABVFVector@@0H@Z
 int FPoly::Split(FVector const & p0, FVector const & p1, int p2) { return 0; }
@@ -7528,10 +7569,61 @@ void FPoly::Reverse() {
 }
 
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z
-void FPoly::SplitInHalf(FPoly * p0) {}
+// ?SplitInHalf@FPoly@@QAEXPAV1@@Z — Ghidra at 0x9C640.
+// Splits a polygon in two halves along the vertex midpoint.
+void FPoly::SplitInHalf(FPoly * OtherHalf) {
+	INT Half = NumVertices / 2;
+	if( NumVertices < 4 || NumVertices > 16 )
+		appErrorf( TEXT("FPoly::SplitInHalf: Vertex count = %i"), NumVertices );
+
+	// Copy full polygon structure to the other half.
+	*OtherHalf = *this;
+
+	// Adjust vertex counts: first half gets [0..Half], second half gets [Half..N-1, 0].
+	OtherHalf->NumVertices = NumVertices - Half + 1;
+	NumVertices = Half + 1;
+
+	// Copy the right-side vertices into OtherHalf.
+	for( INT i=0; i<OtherHalf->NumVertices-1; i++ )
+		OtherHalf->Vertex[i] = Vertex[i + Half];
+
+	// Close the second polygon by copying back the first vertex of the original.
+	OtherHalf->Vertex[OtherHalf->NumVertices - 1] = Vertex[0];
+
+	// Mark both halves as cut (PF_EdCut = 0x80000000).
+	PolyFlags |= 0x80000000;
+	OtherHalf->PolyFlags |= 0x80000000;
+}
 
 // ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z
-void FPoly::Transform(FModelCoords const & p0, FVector const & p1, FVector const & p2, float p3) {}
+// ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z — Ghidra at 0x9C8F0.
+// Transforms all polygon data by the given coordinate system.
+void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, FVector const & PostAdd, float Orientation) {
+	// Transform texture mapping vectors by the contravariant (vector) transform.
+	TextureU = TextureU.TransformVectorBy( Coords.VectorXform );
+	TextureV = TextureV.TransformVectorBy( Coords.VectorXform );
+
+	// Transform base: subtract pivot, apply covariant transform, add destination.
+	Base = (Base - PreSubtract).TransformVectorBy( Coords.PointXform ) + PostAdd;
+
+	// Transform each vertex the same way.
+	for( INT i=0; i<NumVertices; i++ )
+		Vertex[i] = (Vertex[i] - PreSubtract).TransformVectorBy( Coords.PointXform ) + PostAdd;
+
+	// If orientation is negative (mirroring), reverse the winding order.
+	if( Orientation < 0.f )
+	{
+		for( INT i=0; i<NumVertices/2; i++ )
+		{
+			FVector Temp = Vertex[i];
+			Vertex[i] = Vertex[(NumVertices-1) - i];
+			Vertex[(NumVertices-1) - i] = Temp;
+		}
+	}
+
+	// Re-compute the normal after transformation.
+	Normal = Normal.TransformVectorBy( Coords.VectorXform ).SafeNormal();
+}
 
 // ?Delete@FRebuildTools@@QAEXVFString@@@Z
 void FRebuildTools::Delete(FString p0) {}
