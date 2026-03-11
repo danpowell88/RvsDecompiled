@@ -2631,6 +2631,11 @@ void AActor::StartAnimPoll()
 INT AActor::CheckAnimFinished( INT Channel )
 {
 	guard(AActor::CheckAnimFinished);
+	// Retail 0x10420AB0: if MeshInstance is NULL, return 1 (no mesh = animation trivially done).
+	// Full mesh instance animation poll for non-null case deferred.
+	if( !MeshInstance )
+		return 1;
+	// TODO: poll MeshInstance for animation finish on Channel
 	return 0;
 	unguard;
 }
@@ -3373,7 +3378,9 @@ AActor* AActor::AssociatedLevelGeometry()
 INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 {
 	guard(AActor::HasAssociatedLevelGeometry);
-	return 0;
+	// Retail 0x103D5B00: returns 1 only if this actor has bWorldGeometry set
+	// AND the Other actor IS this actor.
+	return (bWorldGeometry && Other == this) ? 1 : 0;
 	unguard;
 }
 
