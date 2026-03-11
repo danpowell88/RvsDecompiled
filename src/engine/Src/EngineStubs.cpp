@@ -7177,7 +7177,19 @@ int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 int FPathBuilder::createPaths() { return 0; }
 
 // ?StoreActor@FOctreeNode@@AAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
-void FOctreeNode::StoreActor(AActor * p0, FCollisionOctree * p1, FPlane const * p2) {}
+// Ghidra (0xdb4e0): Leaf storage — adds the actor to this node's TArray and records
+// this node in the actor's OctreeNodes list (actor+0x338) for fast removal.
+// If the node already has >2 actors and is large enough to subdivide it does so;
+// for simplicity we always use leaf storage (no subdivision).
+void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
+{
+	// Add actor to this node's actor list (TArray<AActor*> at FOctreeNode offset 0)
+	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
+	ActorList.AddItem(Actor);
+	// Record this node in the actor's OctreeNodes list (TArray<FOctreeNode*> at actor+0x338)
+	TArray<FOctreeNode*>& NodeList = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
+	NodeList.AddItem(this);
+}
 
 // ?FindBlockingNormal@FPathBuilder@@AAEXAAVFVector@@@Z
 // Finds the surface normal at the point that blocks a path check.
@@ -7830,10 +7842,43 @@ FURL::FURL(const TCHAR* Filename) {
 FWaveModInfo::FWaveModInfo() : SampleLoopsNum(0), NoiseGate(0) {}
 
 // ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
-ANavigationPoint * FSortedPathList::findEndAnchor(APawn * p0, AActor * p1, FVector p2, int p3) { return NULL; }
+// Ghidra (0x11c590): Finds the best nav point in the sorted list that the Scout can
+// walk to AND from which the End actor/point is reachable.  Returns the first
+// qualifying candidate, or a fallback (first reachable nav point) if bAllowFallback.
+ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVector EndVec, INT bAllowFallback)
+{
+	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
+	INT Count = *(INT*)(Pad + 0x100);
+	ANavigationPoint* Best = NULL;
+	for (INT i = 0; i < Count; i++)
+	{
+		ANavigationPoint* Nav = Paths[i];
+		if (!Nav) continue;
+		if ((*(DWORD*)((BYTE*)Nav + 0x3a4)) & 0x200) continue;  // NavPoint flagged as blocked
+		if (!Scout->actorReachable(Nav, 1, 1)) continue;
+		INT EndReachable = End ? Scout->actorReachable(End, 1, 1) : Scout->pointReachable(EndVec, 1);
+		if (EndReachable) return Nav;
+		if (bAllowFallback && !Best) Best = Nav;
+	}
+	return Best;
+}
 
 // ?findStartAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@@Z
-ANavigationPoint * FSortedPathList::findStartAnchor(APawn * p0) { return NULL; }
+// Ghidra (0x11c3b0): Finds the first nav point in the sorted list that the Scout
+// can reach (not flagged as blocked, passes actorReachable test).
+ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
+{
+	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
+	INT Count = *(INT*)(Pad + 0x100);
+	for (INT i = 0; i < Count; i++)
+	{
+		ANavigationPoint* Nav = Paths[i];
+		if (!Nav) continue;
+		if ((*(DWORD*)((BYTE*)Nav + 0x3a4)) & 0x200) continue;  // NavPoint flagged as blocked
+		if (Scout->actorReachable(Nav, 1, 1)) return Nav;
+	}
+	return NULL;
+}
 
 // ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
 // Ghidra at 0x...: simply returns CurrentScene (offset 0x28).
@@ -9062,20 +9107,138 @@ FCheckResult * FCollisionHash::ActorRadiusCheck(FMemStack & Mem, FVector Center,
 	return List;
 }
 
+// Octree collision helpers — shared iteration of the root node's flat actor list.
+// The octree stores all actors in the root node (no subdivision for now), making
+// queries equivalent to linear scans.  The frame counter (Pad[4]) deduplicates
+// actors that appear in multiple query cells via the visited tag at actor+0x60.
+
 // ?ActorEncroachmentCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@VFVector@@VFRotator@@KK@Z
-FCheckResult * FCollisionOctree::ActorEncroachmentCheck(FMemStack & p0, AActor * p1, FVector p2, FRotator p3, DWORD p4, DWORD p5) { return NULL; }
+FCheckResult* FCollisionOctree::ActorEncroachmentCheck(FMemStack& Mem, AActor* Actor, FVector Location, FRotator Rotation, DWORD ExtraNodeFlags, DWORD TypeFlags)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A || A == Actor) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A->ShouldTrace(Actor, ExtraNodeFlags))
+		{
+			FCheckResult TestHit(1.f);
+			if (A->GetPrimitive()->PointCheck(TestHit, A, Location, FVector(0,0,0), 0) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+	return List;
+}
 
 // ?ActorLineCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@11KKPAVAActor@@@Z
-FCheckResult * FCollisionOctree::ActorLineCheck(FMemStack & p0, FVector p1, FVector p2, FVector p3, DWORD p4, DWORD p5, AActor * p6) { return NULL; }
+// Sweeps a line (or capsule if Extent nonzero) through all tracked actors.
+// Mirrors FCollisionHash::ActorLineCheck but draws from the octree's root actor list.
+FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD TypeFlags, AActor* SourceActor)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A == SourceActor) continue;
+		// Walk the owner chain to skip owned actors
+		bool bIgnored = false;
+		for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI + 0x140))
+			if ((AActor*)pI == A) { bIgnored = true; break; }
+		if (bIgnored) continue;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(0.f);
+			if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, Extent, TypeFlags, TraceFlags) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+				if (TraceFlags & 0x200) return List;
+			}
+		}
+	}
+	return List;
+}
 
 // ?ActorOverlapCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
 FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
 
 // ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
-FCheckResult * FCollisionOctree::ActorPointCheck(FMemStack & p0, FVector p1, FVector p2, DWORD p3, DWORD p4, int p5, AActor * p6) { return NULL; }
+// Tests a point+AABB against all tracked actors; uses GMem for allocation (matching retail).
+FCheckResult* FCollisionOctree::ActorPointCheck(FMemStack& /*Mem*/, FVector Location, FVector Extent, DWORD ExtraNodeFlags, DWORD /*unused*/, INT bSingleResult, AActor* SourceActor)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		if (!A->ShouldTrace(SourceActor, ExtraNodeFlags)) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		FCheckResult TestHit(1.f);
+		if (A->GetPrimitive()->PointCheck(TestHit, A, Location, Extent, 0) == 0)
+		{
+			FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+			if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			if (bSingleResult) return List;
+		}
+	}
+	return List;
+}
 
 // ?ActorRadiusCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
-FCheckResult * FCollisionOctree::ActorRadiusCheck(FMemStack & p0, FVector p1, float p2, DWORD p3) { return NULL; }
+// Returns all actors whose location is within Radius of Center.
+FCheckResult* FCollisionOctree::ActorRadiusCheck(FMemStack& Mem, FVector Center, FLOAT Radius, DWORD ExtraNodeFlags)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (!A->ShouldTrace(NULL, ExtraNodeFlags)) continue;
+		if (FDist(A->Location, Center) <= Radius)
+		{
+			FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+			if (CR)
+			{
+				appMemzero(CR, sizeof(FCheckResult));
+				CR->Actor = A;
+				CR->GetNext() = List;
+				List = CR;
+			}
+		}
+	}
+	return List;
+}
 
 // ?AddActor@FCollisionHash@@UAEXPAVAActor@@@Z
 // Retail ordinal 2232 (0x6ee70).  Inserts an actor into every hash cell that
@@ -9173,7 +9336,25 @@ void FCollisionHash::Tick() {
 }
 
 // ?AddActor@FCollisionOctree@@UAEXPAVAActor@@@Z
-void FCollisionOctree::AddActor(AActor * p0) {}
+// Ghidra (0xdc1a0): Computes actor bbox, inserts into octree via SingleNodeFilter
+// or MultiNodeFilter depending on whether actor is flagged bStatic.
+// Simplified: insert into root node's flat actor list directly.
+void FCollisionOctree::AddActor(AActor* Actor)
+{
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800);          // bCollideActors
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;           // bDeleteMe
+	if ((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x100) return;     // bNoCollision
+	// Skip if already registered (actor's OctreeNodes list non-empty)
+	TArray<FOctreeNode*>& NodeList = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
+	if (NodeList.Num() > 0) return;
+	// Insert into root node (simplified flat storage — no octant subdivision)
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (Root) Root->SingleNodeFilter(Actor, this, NULL);
+	// Save ColLocation for consistent removal even after the actor moves
+	*(DWORD*)((BYTE*)Actor + 0x308) = *(DWORD*)((BYTE*)Actor + 0x234);
+	*(DWORD*)((BYTE*)Actor + 0x30c) = *(DWORD*)((BYTE*)Actor + 0x238);
+	*(DWORD*)((BYTE*)Actor + 0x310) = *(DWORD*)((BYTE*)Actor + 0x23c);
+}
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
@@ -9185,7 +9366,23 @@ void FCollisionOctree::CheckActorNotReferenced(AActor * p0) {}
 void FCollisionOctree::CheckIsEmpty() {}
 
 // ?RemoveActor@FCollisionOctree@@UAEXPAVAActor@@@Z
-void FCollisionOctree::RemoveActor(AActor * p0) {}
+// Ghidra (0xdbd00): Removes actor from every octree node it appears in,
+// then clears actor's OctreeNodes list.
+void FCollisionOctree::RemoveActor(AActor* Actor)
+{
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800);  // bCollideActors
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;   // bDeleteMe
+	// Remove actor from each node in its OctreeNodes list
+	TArray<FOctreeNode*>& NodeList = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
+	for (INT i = 0; i < NodeList.Num(); i++)
+	{
+		FOctreeNode* Node = NodeList(i);
+		if (!Node) continue;
+		TArray<AActor*>& ActorList = *(TArray<AActor*>*)Node;
+		ActorList.RemoveItem(Actor);
+	}
+	NodeList.Empty();
+}
 
 // ?Tick@FCollisionOctree@@UAEXXZ
 void FCollisionOctree::Tick() {}
@@ -9273,13 +9470,29 @@ void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
 
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
-void FOctreeNode::MultiNodeFilter(AActor * p0, FCollisionOctree * p1, FPlane const * p2) {}
+// Ghidra (0xd8ec0): In the full octree, routes actor to all overlapping child nodes.
+// Simplified: store at this node directly (no subdivision).
+void FOctreeNode::MultiNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
+{
+	StoreActor(Actor, OctHash, Plane);
+}
 
 // ?RemoveAllActors@FOctreeNode@@QAEXPAVFCollisionOctree@@@Z
-void FOctreeNode::RemoveAllActors(FCollisionOctree * p0) {}
+// Ghidra (0xdb3e0): Recursively clears all actors from this node and its children.
+// Simplified: just clear this node's actor list.
+void FOctreeNode::RemoveAllActors(FCollisionOctree* OctHash)
+{
+	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
+	ActorList.Empty();
+}
 
 // ?SingleNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
-void FOctreeNode::SingleNodeFilter(AActor * p0, FCollisionOctree * p1, FPlane const * p2) {}
+// Ghidra (0xdc010): In the full octree, routes actor to the single containing child.
+// Simplified: store at this node directly (no subdivision).
+void FOctreeNode::SingleNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
+{
+	StoreActor(Actor, OctHash, Plane);
+}
 
 // ?BuildActionSpotList@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: For each AR6ActionSpot, set CollisionHeight, call PutOnGround,
