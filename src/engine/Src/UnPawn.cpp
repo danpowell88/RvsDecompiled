@@ -450,8 +450,11 @@ void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 	guard(APlayerController::execConsoleCommand);
 	P_GET_STR(Command);
 	P_FINISH;
+	// UPlayer* is stored in _NativeData[50] (offset 0x5B4, set by SetPlayer).
+	UPlayer* P = *(UPlayer**)(&_NativeData[50]);
+	if( P )
+		P->Exec( *Command, *GLog );
 	*(FString*)Result = TEXT("");
-	// TODO: Access Player via _NativeData[50] (offset 0x5B4) and call Exec.
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
@@ -480,8 +483,8 @@ void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 	guard(APlayerController::execSetViewTarget);
 	P_GET_OBJECT(AActor,NewViewTarget);
 	P_FINISH;
-	// TODO: ViewTarget is at an unresolved offset in _NativeData.
-	// ViewTarget = NewViewTarget;
+	// ViewTarget stored at _NativeData[51] (offset 0x5B8), matching GetViewTarget() in EngineStubs.cpp.
+	*(AActor**)(&_NativeData[51]) = NewViewTarget;
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );

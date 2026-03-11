@@ -4026,6 +4026,7 @@ public:
 	virtual void Tick();
 	virtual INT IsNetReady( INT Saturate );
 	virtual void HandleClientPlayer( APlayerController* PC );
+	virtual FString LowLevelGetRemoteAddress() = 0;
 
 	// Non-virtual methods
 	UChannel* CreateChannel( EChannelType ChType, INT bOpenedLocally, INT ChIndex );

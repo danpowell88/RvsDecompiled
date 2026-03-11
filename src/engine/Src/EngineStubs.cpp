@@ -2722,10 +2722,12 @@ INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Reti
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
-// TODO: Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player
-// (UNetConnection* at this+0x5B4). Requires LowLevelGetRemoteAddress on UNetConnection base class.
 FString APlayerController::GetPlayerNetworkAddress()
 {
+	// Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player connection.
+	UNetConnection* Conn = Cast<UNetConnection>( *(UPlayer**)(&_NativeData[50]) ); // offset 0x5B4
+	if( Conn )
+		return Conn->LowLevelGetRemoteAddress();
 	return FString(TEXT(""));
 }
 

@@ -1338,7 +1338,10 @@ void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLo
 	Connection = InConnection;
 	OpenedLocally = InOpenedLocally;
 	OpenPacketId = INDEX_NONE;
-	// TODO: NegotiatedVer = Connection->NegotiatedVer; (need UNetConnection data members)
+	// NegotiatedVer copies from the connection's negotiated protocol version.
+	// UNetConnection::NegotiatedVer is within _ConnPad (not yet decoded from Ghidra).
+	// Default to 0 (minimum version) until the field offset is confirmed.
+	NegotiatedVer = 0;
 }
 void UChannel::SetClosingFlag() { Closing = 1; }
 void UChannel::Close() {}
