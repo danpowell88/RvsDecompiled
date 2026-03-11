@@ -2492,8 +2492,9 @@ void AActor::TickAuthoritative( FLOAT DeltaTime )
 
 void AActor::TickSimulated( FLOAT DeltaTime )
 {
-	guard(AActor::TickSimulated);
-	unguard;
+	// Retail Engine.dll vtable[61]: mov eax,[ecx]; jmp [eax+0xF0]
+	// Pure tail-call to TickAuthoritative (vtable slot 60). No guard/unguard in original.
+	TickAuthoritative( DeltaTime );
 }
 
 void AActor::TickSpecial( FLOAT DeltaTime )
@@ -3370,9 +3371,9 @@ INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation
 
 AActor* AActor::AssociatedLevelGeometry()
 {
-	guard(AActor::AssociatedLevelGeometry);
-	return NULL;
-	unguard;
+	// Retail Engine.dll vtable[86]: returns this if bWorldGeometry is set, else NULL.
+	// mov eax,[ecx+0xA0]; and eax,0x100000; neg; sbb eax,eax; and eax,ecx; ret
+	return bWorldGeometry ? this : NULL;
 }
 
 INT AActor::HasAssociatedLevelGeometry( AActor* Other )
