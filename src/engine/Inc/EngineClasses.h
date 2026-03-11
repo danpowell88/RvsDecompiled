@@ -4351,11 +4351,12 @@ public:
 	DECLARE_CLASS(UCombiner,UMaterial,0,Engine)
 
 	// Data members (from Combiner.uc).
-	BYTE CombineOperation; // EColorOperation
-	BYTE AlphaOperation;   // EAlphaOperation
-	UMaterial* Material1;
-	UMaterial* Material2;
-	UMaterial* Mask;
+	// NOTE: enums are INT-sized in MSVC; retail confirms Material1=0x60, Material2=0x64
+	INT  CombineOperation; // 0x58  (EColorOperation)
+	INT  AlphaOperation;   // 0x5C  (EAlphaOperation)
+	UMaterial* Material1;  // 0x60
+	UMaterial* Material2;  // 0x64
+	UMaterial* Mask;       // 0x68
 	BITFIELD InvertMask:1;
 	BITFIELD Modulate2X:1;
 	BITFIELD Modulate4X:1;

@@ -111,7 +111,8 @@ UMaterial* UMaterial::CheckFallback()
 
 UBOOL UMaterial::HasFallback()
 {
-	return 0;
+	// Retail: 8B 51 2C 33 C0 85 D2 0F 95 C0 C3 = return FallbackMaterial != NULL
+	return FallbackMaterial != NULL;
 }
 
 UMaterial* UMaterial::GetDiffuse()
@@ -289,12 +290,18 @@ UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 
 INT UCombiner::MaterialUSize()
 {
-	return Material1 ? Material1->MaterialUSize() : 0;
+	// Retail: max(Material2->MaterialUSize(), Material1->MaterialUSize())
+	INT usize2 = Material2 ? Material2->MaterialUSize() : 0;
+	INT usize1 = Material1 ? Material1->MaterialUSize() : 0;
+	return usize2 > usize1 ? usize2 : usize1;
 }
 
 INT UCombiner::MaterialVSize()
 {
-	return Material1 ? Material1->MaterialVSize() : 0;
+	// Retail: max(Material2->MaterialVSize(), Material1->MaterialVSize())
+	INT vsize2 = Material2 ? Material2->MaterialVSize() : 0;
+	INT vsize1 = Material1 ? Material1->MaterialVSize() : 0;
+	return vsize2 > vsize1 ? vsize2 : vsize1;
 }
 
 UBOOL UCombiner::IsTransparent()
@@ -325,21 +332,32 @@ void UFinalBlend::PostEditChange()
 
 INT UFinalBlend::GetValidated()
 {
-	return 1;
+	// Retail: delegate to Material->GetValidated() if present, else return 1.
+	// Pattern matches UTexModifier::GetValidated.
+	return Material ? Material->GetValidated() : 1;
 }
 
 void UFinalBlend::SetValidated( UBOOL InValidated )
 {
+	// Retail: delegate to Material->SetValidated() if present.
+	// Pattern matches UTexModifier::SetValidated.
+	if (Material)
+		Material->SetValidated(InValidated);
 }
 
 UBOOL UFinalBlend::RequiresSorting()
 {
-	return IsTransparent();
+	// Retail: if m_bForceNoSort → return 0;
+	// else: return FrameBufferBlending in range [FB_Modulate, FB_Brighten]
+	if (m_bForceNoSort) return 0;
+	BYTE fb = FrameBufferBlending;
+	return (fb >= FB_Modulate && fb <= FB_Brighten) ? 1 : 0;
 }
 
 UBOOL UFinalBlend::IsTransparent()
 {
-	return FrameBufferBlending != FB_Overwrite;
+	// Retail: JMP vtable[30] = tail-call to RequiresSorting()
+	return RequiresSorting();
 }
 
 /*=============================================================================
