@@ -611,12 +611,14 @@ int FLightMapTexture::GetRevision()
 
 ETexClampMode FLightMapTexture::GetUClamp()
 {
-	return TC_Clamp;
+	// Retail: 33 C0 C3 = return 0 = TC_Wrap
+	return TC_Wrap;
 }
 
 ETexClampMode FLightMapTexture::GetVClamp()
 {
-	return TC_Clamp;
+	// Retail: 33 C0 C3 = return 0 = TC_Wrap
+	return TC_Wrap;
 }
 
 int FLightMapTexture::GetWidth()
@@ -5063,7 +5065,8 @@ void UCubemap::Destroy()
 
 FBaseTexture * UCubemap::GetRenderInterface()
 {
-	return NULL;
+	// Retail: 8B 81 F0 00 00 00 C3 = return *(this+0xF0) — UCubemap's own render interface
+	return *(FBaseTexture**)((BYTE*)this + 0xF0);
 }
 
 // --- UDemoRecDriver ---
@@ -5926,7 +5929,8 @@ UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 
 FBaseTexture * UShadowBitmapMaterial::GetRenderInterface()
 {
-	return NULL;
+	// Retail: 8B 81 9C 00 00 00 C3 = return *(this+0x9C) — render interface pointer in shadow bitmap
+	return *(FBaseTexture**)((BYTE*)this + 0x9C);
 }
 
 // --- USkeletalMesh ---
