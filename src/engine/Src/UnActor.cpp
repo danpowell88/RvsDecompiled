@@ -2352,7 +2352,7 @@ INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
 {
 	guard(AActor::UpdateColBox);
-	// TODO: Update collision box / octree.
+	// Base class does nothing; subclasses (APawn, AMover, etc.) override as needed.
 	unguard;
 }
 
@@ -2736,7 +2736,28 @@ void AActor::setPhysics( BYTE NewPhysics, AActor* NewFloor, FVector NewFloorV )
 void AActor::performPhysics( FLOAT DeltaSeconds )
 {
 	guard(AActor::performPhysics);
-	// TODO: Main physics dispatch (PHYS_Walking, PHYS_Falling, etc).
+	switch( Physics )
+	{
+	case PHYS_Falling:      physFalling( DeltaSeconds, 0 );      break;
+	case PHYS_Projectile:   physProjectile( DeltaSeconds, 0 );   break;
+	case PHYS_Trailer:      physTrailer( DeltaSeconds );         break;
+	case PHYS_RootMotion:   physRootMotion( DeltaSeconds );      break;
+	case PHYS_Karma:        physKarma( DeltaSeconds );           break;
+	case PHYS_KarmaRagDoll: physKarmaRagDoll( DeltaSeconds );    break;
+	// PHYS_None, PHYS_Walking (APawn-only), PHYS_Rotating, PHYS_Swimming,
+	// PHYS_Flying, PHYS_MovingBrush, PHYS_Spider, PHYS_Ladder: no-op for base AActor
+	}
+	// Apply rotation toward desired rotation if RotationRate is set and actor is not interpolating
+	if ( !RotationRate.IsZero() && !bInterpolating )
+		physicsRotation( DeltaSeconds );
+	// Process one pending touch event (linked list, one per tick)
+	if ( PendingTouch )
+	{
+		AActor* OldTouch    = PendingTouch;
+		OldTouch->eventPostTouch( this );
+		PendingTouch            = OldTouch->PendingTouch;
+		OldTouch->PendingTouch  = NULL;
+	}
 	unguard;
 }
 
@@ -2757,38 +2778,212 @@ void AActor::processLanded( FVector HitNormal, AActor* HitActor, FLOAT Remaining
 void AActor::physFalling( FLOAT DeltaTime, INT Iterations )
 {
 	guard(AActor::physFalling);
-	// TODO: Falling physics with gravity + air control.
+	// Destroy if outside the world and not ignoring out-of-world events
+	if ( Region.ZoneNumber == 0 && !bIgnoreOutOfWorld )
+	{
+		XLevel->DestroyActor( this );
+		return;
+	}
+	// Save current velocity for midpoint integration
+	FVector OldVelocity = Velocity;
+	FCheckResult Hit( 1.f );
+	while ( DeltaTime > 0.f && Iterations < 8 )
+	{
+		// Clamp step size to max 0.05s for stable integration
+		FLOAT dt = Min( DeltaTime, 0.05f );
+		DeltaTime -= dt;
+		Iterations++;
+		FVector OldLoc = Location;
+		bJustTeleported = 0;
+		// Apply zone gravity to velocity (approximation: use raw zone fields)
+		// Zone gravity offsets from Ghidra: Zone+0x450 = GravAcceleration FVector
+		// Zone+0x444 = ZoneVelocity FVector (additive wind/flow)
+		if ( Region.Zone )
+		{
+			FVector* ZoneGrav = (FVector*)((BYTE*)Region.Zone + 0x450);
+			FVector* ZoneVel  = (FVector*)((BYTE*)Region.Zone + 0x444);
+			Velocity += *ZoneVel;
+			FVector GravDelta = *ZoneGrav * dt;
+			FVector AvgVel    = (Velocity + OldVelocity) * 0.5f;
+			Velocity += GravDelta;
+			FVector Delta = AvgVel * dt;
+			XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+		}
+		else
+		{
+			// No zone: apply default gravity (1800 UU/s²)
+			FVector AvgVel = (Velocity + OldVelocity) * 0.5f;
+			Velocity.Z -= 1800.f * dt;
+			FVector Delta = AvgVel * dt;
+			XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+		}
+		if ( bDeleteMe )
+			return;
+		if ( Hit.Time < 1.f )
+		{
+			if ( bBlockPlayers )
+				eventHitWall( Hit.Normal, Hit.Actor );
+			if ( Physics == PHYS_Falling )
+			{
+				if ( Hit.Normal.Z >= 0.7f )
+				{
+					// Landed on a floor – update velocity from actual displacement
+					if ( !bJustTeleported && Hit.Time > 0.1f && dt * Hit.Time > 0.003f )
+						Velocity = (Location - OldLoc) / (dt * Hit.Time);
+					processLanded( Hit.Normal, Hit.Actor, DeltaTime + dt * (1.f - Hit.Time), Iterations );
+					return;
+				}
+				else
+				{
+					// Slide along a wall; preserve remaining time
+					FVector Adj = Hit.Normal;
+					FLOAT RemainTime = DeltaTime + dt * (1.f - Hit.Time);
+					if ( Iterations < 2 )
+						DeltaTime = RemainTime;
+					Iterations++;
+				}
+			}
+		}
+		OldVelocity = Velocity;
+	}
 	unguard;
 }
 
 void AActor::physProjectile( FLOAT DeltaTime, INT Iterations )
 {
 	guard(AActor::physProjectile);
-	// TODO: Projectile physics (ballistic arc, bouncing).
+	// Destroy if outside the world and not ignoring out-of-world events
+	if ( Region.ZoneNumber == 0 && !bIgnoreOutOfWorld )
+	{
+		XLevel->DestroyActor( this );
+		return;
+	}
+	FVector StartLoc = Location;
+	bJustTeleported  = 0;
+	FCheckResult Hit( 1.f );
+	INT BounceCount  = 0;
+	while ( DeltaTime > 0.f )
+	{
+		BounceCount++;
+		// Apply fluid drag from zone (if in a water/fluid zone)
+		// Zone+0x410 flag byte, Zone+0x420 = FluidFriction FLOAT (from Ghidra physProjectile)
+		FLOAT Drag = 0.f;
+		if ( Region.Zone )
+		{
+			if ( (*(BYTE*)((BYTE*)Region.Zone + 0x410)) & 0x40 )
+				Drag = *(FLOAT*)((BYTE*)Region.Zone + 0x420);
+		}
+		FLOAT DragFactor = 1.f - Drag * DeltaTime * 0.2f;
+		Velocity *= DragFactor;
+		// Apply acceleration (e.g. homing)
+		Velocity += Acceleration * DeltaTime;
+		// Move by Velocity * DeltaTime
+		FVector Delta = Velocity * DeltaTime;
+		FLOAT  RemainingTime = DeltaTime;
+		DeltaTime = 0.f;
+		XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+		if ( Hit.Time < 1.f && !bDeleteMe && !bBounce )
+		{
+			FVector SafeNorm = Hit.Normal.SafeNormal();
+			eventHitWall( SafeNorm, Hit.Actor );
+			if ( bBlockPlayers && BounceCount < 2 )
+				DeltaTime = (1.f - Hit.Time) * RemainingTime;
+			if ( Physics == PHYS_Falling )
+				physFalling( DeltaTime, Iterations );
+		}
+	}
 	unguard;
 }
 
 void AActor::physTrailer( FLOAT DeltaTime )
 {
 	guard(AActor::physTrailer);
-	// TODO: Trailer physics (follows owner).
+	// Only follow owner when not attached to something else
+	if ( !Owner || Base )
+		return;
+	FCheckResult Hit( 1.f );
+	if ( DrawType != DT_Sprite )
+	{
+		// Non-sprite trailer: snap to owner's position, orient from owner velocity
+		XLevel->FarMoveActor( this, Owner->Location, 0, 1, 0, 0 );
+		FRotator NewRot( 0, 0, 0 );
+		if ( !Owner->Velocity.IsNearlyZero() )
+			NewRot = ( -Owner->Velocity ).SafeNormal().Rotation();
+		else
+			NewRot = Owner->Rotation;
+		XLevel->MoveActor( this, FVector(0,0,0), NewRot, Hit, 0, 0, 0, 0 );
+	}
+	else
+	{
+		// Sprite trailer: follow owner with relative location offset
+		XLevel->FarMoveActor( this, RelativeLocation + Owner->Location, 0, 1, 0, 0 );
+	}
 	unguard;
 }
 
 void AActor::physRootMotion( FLOAT DeltaTime )
 {
 	guard(AActor::physRootMotion);
-	// TODO: Root motion physics from skeletal animation.
+	// Root motion requires a SkeletalMesh and a SkeletalMeshInstance
+	if ( !Mesh || !Mesh->IsA( USkeletalMesh::StaticClass() ) )
+	{
+		Velocity     = FVector(0,0,0);
+		Acceleration = FVector(0,0,0);
+		return;
+	}
+	USkeletalMeshInstance* SMI = Cast<USkeletalMeshInstance>( MeshInstance );
+	if ( !SMI || !SMI->IsA( USkeletalMeshInstance::StaticClass() ) )
+	{
+		Velocity     = FVector(0,0,0);
+		Acceleration = FVector(0,0,0);
+		return;
+	}
+	FVector OldLoc = Location;
+	FCheckResult Hit( 1.f );
+	// Root motion flag at SMI+0x100 indicates active root motion channel
+	if ( *(INT*)((BYTE*)SMI + 0x100) != 0 )
+	{
+		FRotator RotDelta = SMI->GetRootRotationDelta();
+		FVector  LocDelta  = SMI->GetRootLocationDelta();
+		XLevel->MoveActor( this, LocDelta, Rotation + RotDelta, Hit, 0, 0, 0, 0 );
+	}
+	// Keep DesiredRotation in sync with actual rotation after root motion
+	DesiredRotation = Rotation;
+	// Recompute velocity from actual displacement (unless teleported)
+	if ( !bJustTeleported )
+	{
+		Velocity     = (Location - OldLoc) / Max( DeltaTime, DELTA );
+		Acceleration = FVector(0,0,0);
+	}
 	unguard;
 }
 
 void AActor::physicsRotation( FLOAT DeltaTime )
 {
 	guard(AActor::physicsRotation);
-	if( bRotateToDesired )
+	// Only rotate if either bRotateToDesired or bFixedRotationDir is set
+	if ( !bRotateToDesired && !bFixedRotationDir )
+		return;
+	// If already at the desired rotation there is nothing to do
+	if ( bRotateToDesired && Rotation == DesiredRotation )
+		return;
+	FRotator NewRot = Rotation;
+	FRotator Delta  = RotationRate * DeltaTime;
+	// For each axis: advance toward desired rotation at the scaled rate
+	if ( Delta.Yaw   != 0 && (!bFixedRotationDir || DesiredRotation.Yaw   != NewRot.Yaw) )
+		NewRot.Yaw   = fixedTurn( NewRot.Yaw,   DesiredRotation.Yaw,   Delta.Yaw );
+	if ( Delta.Pitch != 0 && (!bFixedRotationDir || DesiredRotation.Pitch != NewRot.Pitch) )
+		NewRot.Pitch = fixedTurn( NewRot.Pitch, DesiredRotation.Pitch, Delta.Pitch );
+	if ( Delta.Roll  != 0 && (!bFixedRotationDir || DesiredRotation.Roll  != NewRot.Roll) )
+		NewRot.Roll  = fixedTurn( NewRot.Roll,  DesiredRotation.Roll,  Delta.Roll );
+	if ( NewRot != Rotation )
 	{
-		// TODO: Smooth rotation toward DesiredRotation at RotationRate.
+		FCheckResult Hit( 1.f );
+		XLevel->MoveActor( this, FVector(0,0,0), NewRot, Hit, 0, 0, 0, 0 );
 	}
+	// Fire event once the desired rotation is reached
+	if ( bRotateToDesired && Rotation == DesiredRotation )
+		eventEndedRotation();
 	unguard;
 }
 
@@ -2816,8 +3011,25 @@ void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckR
 INT AActor::moveSmooth( FVector Delta )
 {
 	guard(AActor::moveSmooth);
-	// TODO: Smooth movement with wall sliding.
-	return 1;
+	FCheckResult Hit( 1.f );
+	INT bResult = XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+	if ( Hit.Time < 1.0f )
+	{
+		FVector OldHitNormal = Hit.Normal;
+		FVector DesiredDir   = Delta.SafeNormal();
+		FLOAT   RemainTime   = 1.0f - Hit.Time;
+		// Project remaining delta onto the wall plane and scale by remaining fraction
+		Delta = (Delta - Hit.Normal * (Delta | Hit.Normal)) * RemainTime;
+		SmoothHitWall( Hit.Normal, Hit.Actor );
+		bResult = XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+		if ( Hit.Time < 1.0f )
+		{
+			// Two-wall corner: adjust for both normals and try a third move
+			TwoWallAdjust( DesiredDir, Delta, Hit.Normal, OldHitNormal, Hit.Time );
+			XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+		}
+	}
+	return bResult;
 	unguard;
 }
 
