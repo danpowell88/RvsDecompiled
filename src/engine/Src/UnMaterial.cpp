@@ -189,12 +189,22 @@ UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 
 INT UShader::MaterialUSize()
 {
-	return Diffuse ? Diffuse->MaterialUSize() : 0;
+	// Retail: try Diffuse first, then SelfIllumination (at 0x70), else 0
+	if (Diffuse)
+		return Diffuse->MaterialUSize();
+	if (SelfIllumination)
+		return SelfIllumination->MaterialUSize();
+	return 0;
 }
 
 INT UShader::MaterialVSize()
 {
-	return Diffuse ? Diffuse->MaterialVSize() : 0;
+	// Retail: try Diffuse first, then SelfIllumination (at 0x70), else 0
+	if (Diffuse)
+		return Diffuse->MaterialVSize();
+	if (SelfIllumination)
+		return SelfIllumination->MaterialVSize();
+	return 0;
 }
 
 UBOOL UShader::RequiresSorting()
@@ -316,7 +326,11 @@ UBOOL UCombiner::RequiresSorting()
 
 BYTE UCombiner::RequiredUVStreams()
 {
-	return 2;
+	// Retail: OR together Material1 and Material2 stream requirements.
+	// Each defaults to 1 if null.
+	BYTE m1 = Material1 ? Material1->RequiredUVStreams() : 1;
+	BYTE m2 = Material2 ? Material2->RequiredUVStreams() : 1;
+	return m1 | m2;
 }
 
 /*=============================================================================
