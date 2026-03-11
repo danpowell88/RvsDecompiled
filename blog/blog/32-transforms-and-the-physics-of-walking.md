@@ -42,9 +42,9 @@ The `PrePivot` field lets artists shift the model's centroid without moving the 
 
 For an arbitrary matrix the inverse is expensive. For a scale-rotation-translation matrix, though, there's a closed-form shortcut. Because the rotation block is orthogonal (rows are perpendicular unit vectors), its inverse is just the **transpose** divided by the scale squared:
 
-$$W_{ij} = \frac{L_{ji}}{S_j^2} = \frac{L_{ji}}{S_j \cdot S_j}$$
+`W[i][j] = L[j][i] / (S[j] * S[j])`
 
-Since $L_{ji} = S_i \cdot R_{ji}$, dividing by $S_j^2$ gives us $R_{ji}/S_j$ — the transposed rotation with inverted scale. The translation becomes:
+Since `L[j][i] = S[i] * R[j][i]`, dividing by `S[j] * S[j]` gives us `R[j][i] / S[j]` — the transposed rotation with inverted scale. The translation becomes:
 
 ```cpp
 FLOAT wtx = PrePivot.X - (Location.X*w00 + Location.Y*w10 + Location.Z*w20);
@@ -60,8 +60,8 @@ With transforms working, the next piece is **collision detection**. `AActor::IsO
 
 Unreal uses an axis-aligned cylinder as the default collision shape — it's fast, it doesn't need normals, and it works well for upright humanoids. Two cylinders overlap when:
 
-1. Their Z extents overlap: $|Z_1 - Z_2| < H_1 + H_2$
-2. Their XY circles overlap: $\sqrt{(X_1-X_2)^2 + (Y_1-Y_2)^2} < R_1 + R_2$
+1. Their Z extents overlap: `abs(Z1 - Z2) < H1 + H2`
+2. Their XY circles overlap: `sqrt((X1 - X2)^2 + (Y1 - Y2)^2) < R1 + R2`
 
 In code we skip the sqrt and compare squares to avoid the expensive operation. We also skip actors joined to each other (attached objects) and actors that are the same as their owner. The Ghidra confirms this logic, plus an additional mesh-based narrow phase for projectors and fluid surfaces — those are deferred until mesh APIs are available.
 

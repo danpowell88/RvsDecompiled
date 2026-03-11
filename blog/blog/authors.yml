@@ -5,3 +5,11 @@ rvs-team:
 danpo:
   name: Dan Po
   title: Project Maintainer
+
+default:
+  name: RVS Decomp Team
+  title: Reverse Engineers & Game Archaeologists
+
+dan:
+  name: Dan Po
+  title: Project Maintainer
