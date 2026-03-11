@@ -715,8 +715,11 @@ INT APawn::IsLocallyControlled()
 
 INT APawn::IsFriend( APawn* Other )
 {
+	// Retail RVA=0xE5350: checks (1 << Other->m_iTeam) & m_iFriendlyTeams
+	// No null checks in retail; we add safety check for null Other only.
+	// NOTE: retail divergence - retail doesn't check Controller/Other->Controller
 	guard(APawn::IsFriend_Pawn);
-	if( !Other || !Controller || !Other->Controller )
+	if( !Other )
 		return 0;
 	return (1 << (Other->m_iTeam & 0x1F)) & m_iFriendlyTeams;
 	unguard;
@@ -724,6 +727,7 @@ INT APawn::IsFriend( APawn* Other )
 
 INT APawn::IsFriend( INT TeamIndex )
 {
+	// Retail RVA=0xE5370: return m_iFriendlyTeams & (1 << TeamIndex)
 	guard(APawn::IsFriend_Team);
 	return m_iFriendlyTeams & (1 << (TeamIndex & 0x1F));
 	unguard;
@@ -731,17 +735,27 @@ INT APawn::IsFriend( INT TeamIndex )
 
 INT APawn::IsEnemy( APawn* Other )
 {
+	// Retail RVA=0xE5420: checks (1 << Other->m_iTeam) & m_iEnemyTeams
+	// BUG FIX: previous code used !IsFriend() which checked the wrong mask.
+	// IsEnemy uses m_iEnemyTeams, NOT !m_iFriendlyTeams.
 	guard(APawn::IsEnemy);
-	if( !Other || !Controller || !Other->Controller )
+	if( !Other )
 		return 0;
-	return !IsFriend( Other );
+	return (1 << (Other->m_iTeam & 0x1F)) & m_iEnemyTeams;
 	unguard;
 }
 
 INT APawn::IsNeutral( APawn* Other )
 {
+	// Retail RVA=0xE54D0: not in FriendlyTeams AND not in EnemyTeams for Other's team bit.
+	// BUG FIX: previous code was !IsFriend && !IsEnemy which = !F && F = always false.
 	guard(APawn::IsNeutral);
-	return !IsFriend( Other ) && !IsEnemy( Other );
+	if( !Other )
+		return 0;
+	INT bit = 1 << (Other->m_iTeam & 0x1F);
+	if( m_iFriendlyTeams & bit ) return 0;
+	if( m_iEnemyTeams & bit ) return 0;
+	return 1;
 	unguard;
 }
 

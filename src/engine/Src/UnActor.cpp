@@ -2297,7 +2297,18 @@ INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, 
 FLOAT AActor::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(AActor::GetNetPriority);
-	return NetPriority * (Time + 1.0f);
+	// Retail Engine.dll RVA=0x77DE0 (56 bytes):
+	// bAlwaysRelevant actors get a priority boost:
+	//   max(NetUpdateFrequency * 0.1f, 1.0f) * NetPriority * Time
+	// All others: Time * NetPriority
+	if( bAlwaysRelevant )
+	{
+		FLOAT boost = NetUpdateFrequency * 0.1f;
+		if( boost < 1.0f )
+			boost = 1.0f;
+		return boost * NetPriority * Time;
+	}
+	return Time * NetPriority;
 	unguard;
 }
 
