@@ -141,8 +141,17 @@ void ATerrainInfo::SelectVerticesInBox(FBox &)
 {
 }
 
-void ATerrainInfo::SetEdgeTurnBitmap(int,int,int)
+void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 {
+	// Retail: packed-bit write into EdgeTurnBitmap.Data (Data* at this+0x137C).
+	// idx = HeightmapX (this+0x12E0) * Y + X.
+	INT HeightmapX_val = *(INT*)((BYTE*)this + 0x12E0);
+	INT idx = HeightmapX_val * Y + X;
+	INT bit_mask = 1 << (idx & 31);
+	INT* data = *(INT**)((BYTE*)this + 0x137C);
+	if (!data) return;
+	if (Value) data[idx >> 5] |=  bit_mask;
+	else       data[idx >> 5] &= ~bit_mask;
 }
 
 void ATerrainInfo::SetHeightmap(int,int,_WORD)
@@ -157,8 +166,16 @@ void ATerrainInfo::SetPlanningFloorMap(int,int,int)
 {
 }
 
-void ATerrainInfo::SetQuadVisibilityBitmap(int,int,int)
+void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 {
+	// Same as SetEdgeTurnBitmap but for QuadVisibilityBitmap.Data (Data* at this+0x1370).
+	INT HeightmapX_val = *(INT*)((BYTE*)this + 0x12E0);
+	INT idx = HeightmapX_val * Y + X;
+	INT bit_mask = 1 << (idx & 31);
+	INT* data = *(INT**)((BYTE*)this + 0x1370);
+	if (!data) return;
+	if (Value) data[idx >> 5] |=  bit_mask;
+	else       data[idx >> 5] &= ~bit_mask;
 }
 
 void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
@@ -209,14 +226,25 @@ int ATerrainInfo::GetClosestVertex(FVector &,FVector *,int *,int *)
 	return 0;
 }
 
-int ATerrainInfo::GetEdgeTurnBitmap(int,int)
+int ATerrainInfo::GetEdgeTurnBitmap(int X, int Y)
 {
-	return 0;
+	// Retail: return single bit from EdgeTurnBitmap (Data* at this+0x137C).
+	// idx = HeightmapX * Y + X; return bit (idx&31) of Data[idx>>5].
+	INT HeightmapX_val = *(INT*)((BYTE*)this + 0x12E0);
+	INT idx = HeightmapX_val * Y + X;
+	INT* data = *(INT**)((BYTE*)this + 0x137C);
+	if (!data) return 0;
+	INT word = data[idx >> 5];
+	INT bit_mask = 1 << (idx & 31);
+	return (word & bit_mask) ? 1 : 0;
 }
 
-int ATerrainInfo::GetGlobalVertex(int,int)
+int ATerrainInfo::GetGlobalVertex(int X, int Y)
 {
-	return 0;
+	// Retail: 8B 81 E0 12 00 00 0F AF 44 24 08 03 44 24 04 C2 08 00
+	// return HeightmapX (at this+0x12E0) * Y + X.
+	INT HeightmapX_val = *(INT*)((BYTE*)this + 0x12E0);
+	return HeightmapX_val * Y + X;
 }
 
 _WORD ATerrainInfo::GetHeightmap(int,int)
@@ -234,9 +262,16 @@ int ATerrainInfo::GetPlanningFloorMap(int,int)
 	return 0;
 }
 
-int ATerrainInfo::GetQuadVisibilityBitmap(int,int)
+int ATerrainInfo::GetQuadVisibilityBitmap(int X, int Y)
 {
-	return 0;
+	// Same pattern as GetEdgeTurnBitmap but reads QuadVisibilityBitmap (Data* at this+0x1370).
+	INT HeightmapX_val = *(INT*)((BYTE*)this + 0x12E0);
+	INT idx = HeightmapX_val * Y + X;
+	INT* data = *(INT**)((BYTE*)this + 0x1370);
+	if (!data) return 0;
+	INT word = data[idx >> 5];
+	INT bit_mask = 1 << (idx & 31);
+	return (word & bit_mask) ? 1 : 0;
 }
 
 int ATerrainInfo::GetRenderCombinationNum(TArray<int> &,ETerrainRenderMethod)
@@ -1008,7 +1043,16 @@ void * FStaticTexture::GetRawTextureData(int MipIndex)
 
 int FStaticTexture::GetRevision()
 {
-	return 0;
+	// Retail: 8B 41 0C F6 80 94 00 00 00 40 74 0A FF 41 10 83 A0 94 00 00 00 BF 8B 41 10 C3
+	// If bRealtimeChanged flag (bit 6 = 0x40 in bitfield at UTexture+0x94) is set:
+	// increment Revision counter at this+0x10, clear the flag, then return Revision.
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	if (Texture->bRealtimeChanged)
+	{
+		++(*(INT*)&Pad[12]);
+		Texture->bRealtimeChanged = 0;
+	}
+	return *(INT*)&Pad[12];
 }
 
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
