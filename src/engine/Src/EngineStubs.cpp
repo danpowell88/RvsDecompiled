@@ -154,16 +154,37 @@ void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 	else       data[idx >> 5] &= ~bit_mask;
 }
 
-void ATerrainInfo::SetHeightmap(int,int,_WORD)
+void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 {
+	// Retail: 45b. Writes 16-bit height value at USize*Y+X in the G16 heightmap.
+	// Checks format at terrain texture+0x58 must be 10 (G16). First mip data
+	// pointer is at Mips.Data[0x1C]. Stored as WORD array.
+	UTexture* HeightTex = *(UTexture**)((BYTE*)this + 0x398);
+	if (*(BYTE*)((BYTE*)HeightTex + 0x58) != 10) return; // must be G16/format-10
+	INT idx = *(INT*)((BYTE*)HeightTex + 0x60) * Y + X;  // USize * Y + X
+	BYTE* mipsData = *(BYTE**)((BYTE*)HeightTex + 0xBC); // Mips.Data ptr (first field of TArray)
+	WORD* heightData = (WORD*)*(BYTE**)(mipsData + 0x1C); // FMipmapBase[0].DataPtr
+	heightData[idx] = Value;
 }
 
 void ATerrainInfo::SetLayerAlpha(float,float,int,BYTE,UTexture *)
 {
 }
 
-void ATerrainInfo::SetPlanningFloorMap(int,int,int)
+void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 {
+	// Retail: writes biased 4-bit nibble (Value+8) into packed INT array at
+	// this+0x13C8. 8 nibbles per INT, nibble_pos = (X&7)*4 bits.
+	// Inverse of GetPlanningFloorMap (adds bias 8 back, stores in 4-bit nibble).
+	UTexture* HeightTex = *(UTexture**)((BYTE*)this + 0x398);
+	INT USize = *(INT*)((BYTE*)HeightTex + 0x60);
+	INT idx = USize * Y + X;
+	INT* planData = *(INT**)((BYTE*)this + 0x13C8);
+	INT bit_pos = (X & 7) << 2;
+	INT mask = 0x0F << bit_pos;
+	INT* word_ptr = &planData[idx >> 3];
+	*word_ptr = (*word_ptr & ~mask) | (((Value + 8) & 0x0F) << bit_pos);
+	// TODO: flag at this+0x12B4 also ORed in retail (terrain-dirty marking).
 }
 
 void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
@@ -247,9 +268,17 @@ int ATerrainInfo::GetGlobalVertex(int X, int Y)
 	return HeightmapX_val * Y + X;
 }
 
-_WORD ATerrainInfo::GetHeightmap(int,int)
+_WORD ATerrainInfo::GetHeightmap(int X, int Y)
 {
-	return 0;
+	// Retail: 23b format-check wrapper + tail-call to 34b impl.
+	// If format is not 10 (G16), returns 0. Otherwise reads WORD at USize*Y+X
+	// from the first mip data of the terrain heightmap texture at this+0x398.
+	UTexture* HeightTex = *(UTexture**)((BYTE*)this + 0x398);
+	if (*(BYTE*)((BYTE*)HeightTex + 0x58) != 10) return 0; // not G16: return 0
+	INT idx = *(INT*)((BYTE*)HeightTex + 0x60) * Y + X;    // USize * Y + X
+	BYTE* mipsData = *(BYTE**)((BYTE*)HeightTex + 0xBC);
+	WORD* heightData = (WORD*)*(BYTE**)(mipsData + 0x1C);
+	return heightData[idx];
 }
 
 BYTE ATerrainInfo::GetLayerAlpha(int,int,int,UTexture *)
@@ -257,9 +286,18 @@ BYTE ATerrainInfo::GetLayerAlpha(int,int,int,UTexture *)
 	return 0;
 }
 
-int ATerrainInfo::GetPlanningFloorMap(int,int)
+int ATerrainInfo::GetPlanningFloorMap(int X, int Y)
 {
-	return 0;
+	// Retail: 57b. Planning floor map stored as packed 4-bit nibbles in INT array
+	// at this+0x13C8. 8 nibbles per INT (DWORD), bias of -8 on read (stored + 8).
+	// Index = USize*Y+X; DWORD_idx = idx>>3; nibble_pos = (X&7)*4.
+	UTexture* HeightTex = *(UTexture**)((BYTE*)this + 0x398);
+	INT USize = *(INT*)((BYTE*)HeightTex + 0x60);
+	INT idx = USize * Y + X;
+	INT* planData = *(INT**)((BYTE*)this + 0x13C8);
+	INT bit_pos = (X & 7) << 2;  // nibble position within DWORD
+	INT nibble = (planData[idx >> 3] >> bit_pos) & 0x0F;
+	return nibble - 8;            // unbias: stored range 0..15, returned -8..7
 }
 
 int ATerrainInfo::GetQuadVisibilityBitmap(int X, int Y)
@@ -2154,6 +2192,14 @@ void UTexture::Clear(FColor)
 
 void UTexture::ConstantTimeTick()
 {
+	// Retail: 45b. Advances the circular linked-list for realtime texture ticking.
+	// this+0xA8 = "current" pointer; object+0xA4 = "next" pointer in each node.
+	// If current is null, initializes to self. Then advances current to next.
+	void* cur = *(void**)((BYTE*)this + 0xA8);
+	if (!cur)
+		cur = this;
+	void* nxt = *(void**)((BYTE*)cur + 0xA4);
+	*(void**)((BYTE*)this + 0xA8) = nxt ? nxt : this; // advance or wrap to self
 }
 
 
@@ -2847,8 +2893,15 @@ int AProjector::ShouldTrace(AActor * Other, DWORD TraceFlags)
 	return AActor::ShouldTrace(Other, TraceFlags);
 }
 
-void AProjector::TickSpecial(float)
+void AProjector::TickSpecial(float DeltaTime)
 {
+	// Retail: 17b. If lifecycle state byte at this+0x2C == 5, call vtable[100] (offset 0x190).
+	if (*(BYTE*)((BYTE*)this + 0x2C) == 5)
+	{
+		void** vtbl = *(void***)this;
+		typedef void (__thiscall *FnType)(AProjector*);
+		((FnType)vtbl[100])(this);
+	}
 }
 
 void AProjector::UpdateParticleMaterial(UParticleMaterial *,int)
@@ -3070,6 +3123,10 @@ void ASceneManager::ChangeOrientation(FOrientation)
 
 void ASceneManager::DeletePathSamples()
 {
+	// Retail: 17b. Empties the PathSamples TArray at this+0x3E4 (12-byte elements).
+	// Calls an indirect TArray resize function with count=0, elementSize=12.
+	INT* arr = (INT*)((BYTE*)this + 0x3E4);  // TArray: [0]=Data*, [4]=ArrayNum, [8]=ArrayMax
+	arr[1] = 0;  // ArrayNum = 0 (retail may also free/realloc the buffer)
 }
 
 UMatAction * ASceneManager::GetActionFromPct(float)
