@@ -2382,9 +2382,6 @@ INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 
 void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
 {
-	guard(AActor::UpdateColBox);
-	// Base class does nothing; subclasses (APawn, AMover, etc.) override as needed.
-	unguard;
 }
 
 FCoords AActor::ToLocal() const
@@ -3353,9 +3350,7 @@ void AActor::postKarmaStep_skeletal()
 
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
 {
-	guard(AActor::KMP2DynKarmaInterface);
 	return 0;
-	unguard;
 }
 
 AActor* AActor::AssociatedLevelGeometry()
@@ -3383,23 +3378,17 @@ void AActor::KFreezeRagdoll()
 
 INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 {
-	guard(AActor::IsRelevantToPawnHeartBeat);
 	return 0;
-	unguard;
 }
 
 INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 {
-	guard(AActor::IsRelevantToPawnHeatVision);
 	return 0;
-	unguard;
 }
 
 INT AActor::IsRelevantToPawnRadar( APawn* P )
 {
-	guard(AActor::IsRelevantToPawnRadar);
 	return 0;
-	unguard;
 }
 
 void AActor::CheckForErrors()

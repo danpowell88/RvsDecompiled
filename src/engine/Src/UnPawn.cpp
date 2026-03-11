@@ -1645,16 +1645,12 @@ INT* AController::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Ret
 
 AActor* AController::GetTeamManager()
 {
-	guard(AController::GetTeamManager);
 	return NULL;
-	unguard;
 }
 
 INT AController::LocalPlayerController()
 {
-	guard(AController::LocalPlayerController);
 	return 0;
-	unguard;
 }
 
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
@@ -1666,8 +1662,6 @@ INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 
 void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 {
-	guard(AController::AdjustFromWall);
-	unguard;
 }
 
 void AController::StartAnimPoll()
@@ -1685,9 +1679,7 @@ INT AController::CheckAnimFinished( INT Channel )
 
 INT AController::AcceptNearbyPath( AActor* Goal )
 {
-	guard(AController::AcceptNearbyPath);
 	return 0;
-	unguard;
 }
 
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
@@ -1712,8 +1704,6 @@ AActor* AController::GetViewTarget()
 
 void AController::SetAdjustLocation( FVector NewLoc )
 {
-	guard(AController::SetAdjustLocation);
-	unguard;
 }
 
 /*-----------------------------------------------------------------------------
