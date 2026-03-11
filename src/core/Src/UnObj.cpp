@@ -195,6 +195,8 @@ void UObject::Modify()
 void UObject::PostLoad()
 {
 	guard(UObject::PostLoad);
+	// Retail Core.dll 0x3AA30: sets RF_DebugPostLoad in ObjectFlags.
+	ObjectFlags |= RF_DebugPostLoad;
 	unguard;
 }
 

@@ -66,13 +66,16 @@ UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 INT UMaterial::GetValidated()
 {
 	guard(UMaterial::GetValidated);
-	return 1;
+	// Retail Engine.dll 0x3970: returns bit 1 (Validated) of the bitfield DWORD at this+0x34.
+	return Validated;
 	unguard;
 }
 
 void UMaterial::SetValidated( UBOOL InValidated )
 {
 	guard(UMaterial::SetValidated);
+	// Retail Engine.dll 0x3980: sets or clears the Validated bit at this+0x34.
+	Validated = InValidated ? 1 : 0;
 	unguard;
 }
 
