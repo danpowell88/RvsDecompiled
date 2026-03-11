@@ -839,10 +839,18 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT(Loudness);
 	P_GET_BYTE_OPTX(eNoise,0);
 	P_GET_BYTE_OPTX(ePawn,0);
-	P_GET_BYTE_OPTX(ESoundType,0);
+	P_GET_BYTE_OPTX(eSoundType,0);
 	P_FINISH;
 	// Noise propagation for AI hearing.
-	// TODO: APawn::Noise member not yet declared.
+	// Update noise fields on the making pawn (if applicable).
+	APawn* NoisePawn = Instigator ? Instigator : Cast<APawn>(this);
+	if( NoisePawn )
+	{
+		NoisePawn->noiseTime     = Level->TimeSeconds;
+		NoisePawn->noiseLoudness = Loudness;
+		NoisePawn->noiseType     = eNoise;
+	}
+	CheckNoiseHearing( Loudness, (ENoiseType)eNoise, (EPawnType)ePawn, (ESoundType)eSoundType );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
@@ -1223,8 +1231,9 @@ void AActor::execTraceActors( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR_OPTX(Extent,FVector(0,0,0));
 	P_FINISH;
 
-	// TODO: GSceneMem (FMemStack) not yet declared as extern. Stub iterator.
-	FCheckResult* Link = NULL; // XLevel->MultiLineCheck( GSceneMem, End, Start, Extent, XLevel->GetLevelInfo(), TRACE_AllColliding, this );
+	// GSceneMem is a rendering-phase allocation stack not yet declared as global;
+	// GMem (Core global) is an acceptable substitute for per-call iterator results.
+	FCheckResult* Link = XLevel->MultiLineCheck( GMem, End, Start, Extent, XLevel->GetLevelInfo(), TRACE_AllColliding, this );
 	FCheckResult* Current = Link;
 	PRE_ITERATOR;
 		*Actor = NULL;
@@ -3457,7 +3466,21 @@ void AActor::UpdateRelativeRotation()
 void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType PawnType, ESoundType SoundType )
 {
 	guard(AActor::CheckNoiseHearing);
-	// TODO: Propagate noise to AIs with hearing.
+	// Propagate noise to AI controllers with hearing ability.
+	// Iterate the controller list; each AI that returns true from CanHear
+	// fires eventHearNoise on its controlling pawn.
+	if( !Level ) return;
+
+	for( AController* C = Level->ControllerList; C; C = C->nextController )
+	{
+		if( C == NULL || C->bDeleteMe )
+			continue;
+		// CanHear: virtual method — default AController returns 0 for silence.
+		if( C->CanHear( Location, Loudness, this, NoiseType, PawnType ) )
+		{
+			C->eventHearNoise( Loudness, this, (BYTE)NoiseType, (BYTE)PawnType );
+		}
+	}
 	unguard;
 }
 
