@@ -2541,8 +2541,7 @@ INT AActor::CheckOwnerUpdated()
 
 void AActor::BoundProjectileVelocity()
 {
-	guard(AActor::BoundProjectileVelocity);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PostBeginPlay()
@@ -2552,50 +2551,42 @@ void AActor::PostBeginPlay()
 
 void AActor::PostEditLoad()
 {
-	guard(AActor::PostEditLoad);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PostEditMove()
 {
-	guard(AActor::PostEditMove);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PostPath()
 {
-	guard(AActor::PostPath);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PostRaytrace()
 {
-	guard(AActor::PostRaytrace);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PostScriptDestroyed()
 {
-	guard(AActor::PostScriptDestroyed);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PrePath()
 {
-	guard(AActor::PrePath);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::PreRaytrace()
 {
-	guard(AActor::PreRaytrace);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 void AActor::Spawned()
 {
-	guard(AActor::Spawned);
-	unguard;
+	// Retail Engine.dll: ret (truly empty)
 }
 
 UMaterial* AActor::GetSkin( INT Index )
