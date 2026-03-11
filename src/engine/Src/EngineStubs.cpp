@@ -3197,16 +3197,24 @@ CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDe
 }
 
 // --- FAnimMeshVertexStream ---
-FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &)
+FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 {
+	// Ghidra 0x2b170: vtable set by compiler; DWORD at +4; TArray<FStreamVert32> at +8 (stride 0x20); 6 DWORDs at +14..+28
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	new ((BYTE*)this + 0x08) TArray<FStreamVert32>(*(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x08));
+	appMemcpy((BYTE*)this + 0x14, (const BYTE*)&Other + 0x14, 0x18); // 6 DWORDs
 }
 
 FAnimMeshVertexStream::FAnimMeshVertexStream()
 {
+	// Initialize TArray<FStreamVert32> at +8 to empty (equivalent to TArray default ctor)
+	new ((BYTE*)this + 0x08) TArray<FStreamVert32>();
 }
 
 FAnimMeshVertexStream::~FAnimMeshVertexStream()
 {
+	// Ghidra 0x2b160: destroy TArray<FStreamVert32> at +8 (stride 0x20, POD elements)
+	((TArray<FStreamVert32>*)((BYTE*)this + 0x08))->~TArray();
 }
 
 FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStream& Other)
@@ -3243,16 +3251,23 @@ float FBezier::Evaluate(FVector *,int,TArray<FVector> *)
 }
 
 // --- FBspSection ---
-FBspSection::FBspSection(FBspSection const &)
+FBspSection::FBspSection(FBspSection const &Other)
 {
+	// Ghidra 0x27b60: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 7 DWORDs at +10..+28
+	new ((BYTE*)this + 0x04) TArray<FBspVertex>(*(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
 
 FBspSection::FBspSection()
 {
+	// Initialize TArray<FBspVertex> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<FBspVertex>();
 }
 
 FBspSection::~FBspSection()
 {
+	// Ghidra 0x103278e0: shared with ~FBspVertexStream; destroy TArray<FBspVertex> at +4
+	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FBspSection& FBspSection::operator=(const FBspSection& Other)
@@ -3279,16 +3294,23 @@ FBspVertex& FBspVertex::operator=(const FBspVertex& Other)
 }
 
 // --- FBspVertexStream ---
-FBspVertexStream::FBspVertexStream(FBspVertexStream const &)
+FBspVertexStream::FBspVertexStream(FBspVertexStream const &Other)
 {
+	// Ghidra 0x103278f0: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 3 DWORDs at +10..+18
+	new ((BYTE*)this + 0x04) TArray<FBspVertex>(*(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
 FBspVertexStream::FBspVertexStream()
 {
+	// Initialize TArray<FBspVertex> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<FBspVertex>();
 }
 
 FBspVertexStream::~FBspVertexStream()
 {
+	// Ghidra 0x103278e0: shared with ~FBspSection; destroy TArray<FBspVertex> at +4
+	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
@@ -3477,16 +3499,23 @@ FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 }
 
 // --- FFontPage ---
-FFontPage::FFontPage(FFontPage const &)
+FFontPage::FFontPage(FFontPage const &Other)
 {
+	// Ghidra 0x27800: no vtable; 2 DWORDs at +0,+4; TArray<FLineVertex> at +8 (stride 0x10)
+	appMemcpy(this, &Other, 8);
+	new ((BYTE*)this + 0x08) TArray<FLineVertex>(*(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x08));
 }
 
 FFontPage::FFontPage()
 {
+	// Initialize TArray<FLineVertex> at +8 to empty
+	new ((BYTE*)this + 0x08) TArray<FLineVertex>();
 }
 
 FFontPage::~FFontPage()
 {
+	// Ghidra 0x103277f0: destroy TArray<FLineVertex> at +8 (stride 0x10, POD elements)
+	((TArray<FLineVertex>*)((BYTE*)this + 0x08))->~TArray();
 }
 
 FFontPage& FFontPage::operator=(const FFontPage& Other)
@@ -3699,16 +3728,25 @@ FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 }
 
 // --- FLineBatcher ---
-FLineBatcher::FLineBatcher(FLineBatcher const &)
+FLineBatcher::FLineBatcher(FLineBatcher const &Other)
 {
+	// Ghidra 0x27320: vtable set by compiler; TArray<FLineVertex> at +4 (stride 0x10); 5 DWORDs at +10..+20
+	new ((BYTE*)this + 0x04) TArray<FLineVertex>(*(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x14); // 5 DWORDs
 }
 
 FLineBatcher::FLineBatcher(FRenderInterface *,int,int)
 {
+	// Initialize TArray<FLineVertex> at +4 to empty so dtor is safe
+	new ((BYTE*)this + 0x04) TArray<FLineVertex>();
+	appMemzero((BYTE*)this + 0x10, 0x14); // zero state DWORDs
 }
 
 FLineBatcher::~FLineBatcher()
 {
+	// Ghidra 0x418050: reset vtable, call Flush(false), destroy TArray<FLineVertex> at +4
+	// Flush() is a stub; we just destroy the TArray
+	((TArray<FLineVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
@@ -3844,16 +3882,23 @@ FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePrevie
 }
 
 // --- FRaw32BitIndexBuffer ---
-FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &)
+FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 {
+	// Ghidra 0x209a0: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
+	new ((BYTE*)this + 0x04) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer()
 {
+	// Initialize TArray<FLOAT> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<FLOAT>();
 }
 
 FRaw32BitIndexBuffer::~FRaw32BitIndexBuffer()
 {
+	// Ghidra 0x1032c020: shared with ~FRawColorStream; destroy TArray<FLOAT>(4-byte elements) at +4
+	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer& Other)
@@ -3866,16 +3911,23 @@ FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer
 }
 
 // --- FRawColorStream ---
-FRawColorStream::FRawColorStream(FRawColorStream const &)
+FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 {
+	// Ghidra 0x27570: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
+	new ((BYTE*)this + 0x04) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
 FRawColorStream::FRawColorStream()
 {
+	// Initialize TArray<FLOAT> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<FLOAT>();
 }
 
 FRawColorStream::~FRawColorStream()
 {
+	// Ghidra 0x1032c020: shared with ~FRaw32BitIndexBuffer; destroy TArray<FLOAT>(4-byte elements) at +4
+	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
@@ -3969,16 +4021,23 @@ void FRebuildOptions::Init()
 }
 
 // --- FSkinVertexStream ---
-FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &)
+FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &Other)
 {
+	// Ghidra 0x2b7d0: vtable set by compiler; 7 DWORDs at +4..+1c; TArray<FStreamVert32> at +20 (stride 0x20)
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x1C); // 7 DWORDs
+	new ((BYTE*)this + 0x20) TArray<FStreamVert32>(*(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x20));
 }
 
 FSkinVertexStream::FSkinVertexStream()
 {
+	// Initialize TArray<FStreamVert32> at +0x20 to empty
+	new ((BYTE*)this + 0x20) TArray<FStreamVert32>();
 }
 
 FSkinVertexStream::~FSkinVertexStream()
 {
+	// destroy TArray<FStreamVert32> at +0x20 (stride 0x20, POD elements)
+	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
 }
 
 FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
@@ -4021,8 +4080,10 @@ int FStatGraphLine::operator==(FStatGraphLine const &) const
 }
 
 // --- FStaticCubemap ---
-FStaticCubemap::FStaticCubemap(FStaticCubemap const &)
+FStaticCubemap::FStaticCubemap(FStaticCubemap const &Other)
 {
+	// Ghidra 0x18eb0: vtable set by compiler; scalar copy of 4 DWORDs at +4..+10
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
 FStaticCubemap::FStaticCubemap(UCubemap *)
@@ -4190,16 +4251,23 @@ FStaticMeshUV& FStaticMeshUV::operator=(const FStaticMeshUV& Other)
 }
 
 // --- FStaticMeshUVStream ---
-FStaticMeshUVStream::FStaticMeshUVStream(FStaticMeshUVStream const &)
+FStaticMeshUVStream::FStaticMeshUVStream(FStaticMeshUVStream const &Other)
 {
+	// Ghidra 0x2c110: vtable set by compiler; TArray<FStaticMeshUV> at +4 (stride 8); 4 DWORDs at +10..+1c
+	new ((BYTE*)this + 0x04) TArray<FStaticMeshUV>(*(const TArray<FStaticMeshUV>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x10); // 4 DWORDs
 }
 
 FStaticMeshUVStream::FStaticMeshUVStream()
 {
+	// Initialize TArray<FStaticMeshUV> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<FStaticMeshUV>();
 }
 
 FStaticMeshUVStream::~FStaticMeshUVStream()
 {
+	// destroy TArray<FStaticMeshUV> at +4 (stride 8, POD elements)
+	((TArray<FStaticMeshUV>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream& Other)
@@ -4226,16 +4294,23 @@ FStaticMeshVertex& FStaticMeshVertex::operator=(const FStaticMeshVertex& Other)
 }
 
 // --- FStaticMeshVertexStream ---
-FStaticMeshVertexStream::FStaticMeshVertexStream(FStaticMeshVertexStream const &)
+FStaticMeshVertexStream::FStaticMeshVertexStream(FStaticMeshVertexStream const &Other)
 {
+	// Ghidra 0x2bf90: vtable set by compiler; TArray<FStaticMeshVertex> at +4 (stride 0x18); 3 DWORDs at +10..+18
+	new ((BYTE*)this + 0x04) TArray<FStaticMeshVertex>(*(const TArray<FStaticMeshVertex>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
 FStaticMeshVertexStream::FStaticMeshVertexStream()
 {
+	// Initialize TArray<FStaticMeshVertex> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<FStaticMeshVertex>();
 }
 
 FStaticMeshVertexStream::~FStaticMeshVertexStream()
 {
+	// destroy TArray<FStaticMeshVertex> at +4 (stride 0x18, POD elements)
+	((TArray<FStaticMeshVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FStaticMeshVertexStream& FStaticMeshVertexStream::operator=(const FStaticMeshVertexStream& Other)
@@ -4248,8 +4323,10 @@ FStaticMeshVertexStream& FStaticMeshVertexStream::operator=(const FStaticMeshVer
 }
 
 // --- FStaticTexture ---
-FStaticTexture::FStaticTexture(FStaticTexture const &)
+FStaticTexture::FStaticTexture(FStaticTexture const &Other)
 {
+	// Ghidra 0x20b50: vtable set by compiler; scalar copy of 4 DWORDs at +4..+10. Shares address with FStaticCubemap.
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
 FStaticTexture::FStaticTexture(UTexture *)
@@ -4265,16 +4342,24 @@ FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
 }
 
 // --- FTags ---
-FTags::FTags(FTags const &)
+FTags::FTags(FTags const &Other)
 {
+	// Ghidra 0x2ed0: bitwise copy of first 0x30 bytes (TArrays here are shallow/borrowed), then FString copy at +0x30
+	appMemcpy(this, &Other, 0x30);
+	new ((BYTE*)this + 0x30) FString(*(const FString*)((const BYTE*)&Other + 0x30));
 }
 
 FTags::FTags()
 {
+	// Zero first 0x30 bytes; initialize owned FString at +0x30 to empty
+	appMemzero(this, 0x30);
+	new ((BYTE*)this + 0x30) FString();
 }
 
 FTags::~FTags()
 {
+	// Ghidra 0x10302ec0: only ~FString at +0x30; TArrays in first 0x30 bytes are not destructed (shallow/borrowed)
+	((FString*)((BYTE*)this + 0x30))->~FString();
 }
 
 FTags& FTags::operator=(const FTags& Other)
