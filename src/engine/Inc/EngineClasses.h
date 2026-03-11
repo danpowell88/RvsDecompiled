@@ -4624,6 +4624,11 @@ class ENGINE_API ULodMeshInstance : public UMeshInstance
 public:
 	DECLARE_CLASS(ULodMeshInstance,UMeshInstance,0,Engine)
 
+	// Data fields — offsets 0x58..0x60 (immediately after UPrimitive base = 0x58)
+	UMesh*  Mesh;    // 0x58
+	AActor* Actor;   // 0x5C
+	INT     Status;  // 0x60
+
 	struct FMeshAnimSeq* GetAnimSeq(FName);
 	virtual void Serialize(FArchive&);
 	virtual void SetActor(AActor*);
@@ -6025,6 +6030,10 @@ class ENGINE_API UProxyBitmapMaterial : public UBitmapMaterial
 {
 public:
 	DECLARE_CLASS(UProxyBitmapMaterial,UBitmapMaterial,0,Engine)
+
+	// Data field — offset 0x70 (immediately after UBitmapMaterial base = 0x70)
+	FBaseTexture* TextureInterface; // 0x70
+
 	// Auto-generated method declarations
 	void SetTextureInterface(FBaseTexture *);
 	virtual UBitmapMaterial * Get(double,UViewport *);

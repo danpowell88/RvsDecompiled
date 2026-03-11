@@ -576,12 +576,12 @@ int FLightMapTexture::GetRevision()
 
 ETexClampMode FLightMapTexture::GetUClamp()
 {
-	return TC_Wrap;
+	return TC_Clamp;
 }
 
 ETexClampMode FLightMapTexture::GetVClamp()
 {
-	return TC_Wrap;
+	return TC_Clamp;
 }
 
 int FLightMapTexture::GetWidth()
@@ -1136,16 +1136,19 @@ void ULodMeshInstance::Serialize(FArchive &)
 {
 }
 
-void ULodMeshInstance::SetActor(AActor *)
+void ULodMeshInstance::SetActor(AActor * a)
 {
+	Actor = a;
 }
 
-void ULodMeshInstance::SetMesh(UMesh *)
+void ULodMeshInstance::SetMesh(UMesh * m)
 {
+	Mesh = m;
 }
 
-void ULodMeshInstance::SetStatus(int)
+void ULodMeshInstance::SetStatus(int s)
 {
+	Status = s;
 }
 
 AActor * ULodMeshInstance::GetActor()
@@ -2103,7 +2106,7 @@ UBitmapMaterial * UTexture::Get(double,UViewport *)
 
 FBaseTexture * UTexture::GetRenderInterface()
 {
-	return NULL;
+	return reinterpret_cast<FBaseTexture*>(RenderInterface);
 }
 
 void UTexture::Init(int,int)
@@ -5342,7 +5345,7 @@ int ULodMesh::MemFootprint(int)
 
 UClass * ULodMesh::MeshGetInstanceClass()
 {
-	return NULL;
+	return ULodMeshInstance::StaticClass();
 }
 
 // --- UMatAction ---
@@ -5651,18 +5654,19 @@ FVector UProjectorPrimitive::GetEncroachExtent(AActor *)
 }
 
 // --- UProxyBitmapMaterial ---
-void UProxyBitmapMaterial::SetTextureInterface(FBaseTexture *)
+void UProxyBitmapMaterial::SetTextureInterface(FBaseTexture * Interface)
 {
+	TextureInterface = Interface;
 }
 
 UBitmapMaterial * UProxyBitmapMaterial::Get(double,UViewport *)
 {
-	return NULL;
+	return this;
 }
 
 FBaseTexture * UProxyBitmapMaterial::GetRenderInterface()
 {
-	return NULL;
+	return TextureInterface;
 }
 
 // --- UR6AbstractGameManager ---
@@ -5869,7 +5873,7 @@ int USkeletalMesh::RenderPreProcess()
 
 UClass * USkeletalMesh::MeshGetInstanceClass()
 {
-	return NULL;
+	return USkeletalMeshInstance::StaticClass();
 }
 
 void USkeletalMesh::PostLoad()
@@ -6596,7 +6600,7 @@ FBox UTerrainBrushVisibility::GetRect()
 // --- UTerrainMaterial ---
 UMaterial * UTerrainMaterial::CheckFallback()
 {
-	return NULL;
+	return this;
 }
 
 int UTerrainMaterial::HasFallback()
@@ -6709,7 +6713,7 @@ void UVertMesh::Serialize(FArchive &)
 
 UClass * UVertMesh::MeshGetInstanceClass()
 {
-	return NULL;
+	return UVertMeshInstance::StaticClass();
 }
 
 void UVertMesh::PostLoad()

@@ -680,7 +680,9 @@ APawn* APawn::GetPawnOrColBoxOwner() const
 
 APawn* APawn::GetPlayerPawn() const
 {
-	return Controller && Controller->bIsPlayer ? (APawn*)this : NULL;
+	// Retail: 8B C1 C3 = mov eax,ecx; ret — APawn always returns itself.
+	// The base AActor::GetPlayerPawn returns NULL; APawn overrides to return this.
+	return (APawn*)this;
 }
 
 INT APawn::PlayerControlled()
