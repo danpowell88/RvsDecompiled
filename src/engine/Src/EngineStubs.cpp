@@ -776,8 +776,15 @@ int FSkinVertexStream::GetComponents(FVertexComponent* C)
 	return 3;
 }
 
-void FSkinVertexStream::GetRawStreamData(void * *,int)
+void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
+	// Retail: field at Pad[0x18] (this+0x1C) is a lock flag; data at Pad[0x1C] (this+0x20)
+	if (*(DWORD*)(Pad + 0x18))
+	{
+		*ppData = NULL;
+		return;
+	}
+	*ppData = *(BYTE**)(Pad + 0x1C) + (FirstVertex << 5);
 }
 
 int FSkinVertexStream::GetRevision()
@@ -912,8 +919,10 @@ int FStaticMeshVertexStream::GetComponents(FVertexComponent* C)
 	return 2;
 }
 
-void FStaticMeshVertexStream::GetRawStreamData(void * *,int)
+void FStaticMeshVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
+	// Retail: data = [this+4] (TArray.Data); stride = 24 (3*8); Pad[0] = this+4
+	*ppData = *(BYTE**)(Pad + 0) + FirstVertex * 0x18;
 }
 
 int FStaticMeshVertexStream::GetRevision()
@@ -1067,8 +1076,11 @@ void UCanvas::UseVirtualSize(int,float,float)
 {
 }
 
-void UCanvas::SetStretch(float,float)
+void UCanvas::SetStretch(float stretchX, float stretchY)
 {
+	// Retail (23b): stores both params directly into m_fStretchX (0x94) and m_fStretchY (0x98)
+	m_fStretchX = stretchX;
+	m_fStretchY = stretchY;
 }
 
 void UCanvas::DrawTileClipped(UMaterial *,float,float,float,float,float,float)
@@ -5793,6 +5805,16 @@ int UReachSpec::BotOnlyPath()
 
 void UReachSpec::Init()
 {
+	// Retail (36b): zeros all nav fields and clears bit 0 of bForced
+	bPruned = 0;
+	Distance = 0;
+	CollisionRadius = 0;
+	CollisionHeight = 0;
+	reachFlags = 0;
+	MaxLandingVelocity = 0;
+	bForced = FALSE;
+	Start = NULL;
+	End = NULL;
 }
 
 // --- URenderDevice ---
