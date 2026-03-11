@@ -2762,21 +2762,74 @@ void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface*
 void AActor::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(AActor::SetZone);
-	// TODO: Update actor zone/region.
+	// Ghidra 0xbd2a0: query the BSP model for the zone and leaf this actor
+	// occupies, then fire zone/volume events if anything changed.
+	// ULevel::Model is at raw offset +0x90 in ULevel (not yet formally declared
+	// in EngineClasses.h).  UModel::PointRegion is a stub returning FPointRegion()
+	// until the BSP traversal is fully reconstructed.
+	if( bDeleteMe )
+		return;
+
+	FPointRegion NewRegion;
+	if( XLevel )
+	{
+		UModel* pModel = *(UModel**)( (BYTE*)XLevel + 0x90 );
+		NewRegion = pModel ? pModel->PointRegion( Level, Location )
+		                   : FPointRegion( Level );
+	}
+	else
+	{
+		NewRegion = FPointRegion( Level );
+	}
+
+	AZoneInfo* OldZone = Region.Zone;
+	AZoneInfo* NewZone = NewRegion.Zone;
+
+	// Store updated region data regardless of bTest.
+	Region = NewRegion;
+
+	// Fire zone-transition events (only if not a test query).
+	if( !bTest && OldZone != NewZone )
+	{
+		if( OldZone )
+			OldZone->eventActorLeaving( this );
+		eventZoneChange( NewZone );
+		if( NewZone )
+			NewZone->eventActorEntered( this );
+	}
+
+	// Update PhysicsVolume (water check only for non-test, non-force-refresh).
+	INT bCheckWater  = (!bTest && !bForceRefresh && bProjTarget);
+	APhysicsVolume* NewVol = Level->GetPhysicsVolume( Location, this, bCheckWater );
+	APhysicsVolume* OldVol = PhysicsVolume;
+
+	if( !bTest && NewVol != OldVol )
+	{
+		if( OldVol )
+			OldVol->eventActorLeavingVolume( this );
+		eventPhysicsVolumeChange( NewVol );
+		if( NewVol )
+			NewVol->eventActorEnteredVolume( this );
+	}
+	PhysicsVolume = NewVol;
 	unguard;
 }
 
 void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 {
 	guard(AActor::SetVolumes);
-	// TODO: Update actor volume list.
+	// Called from ANavigationPoint and volume-intersection sweeps; for base AActor
+	// we don't store the volume list separately — PhysicsVolume is updated by SetZone.
+	// Derived classes (ANavigationPoint) have their own override.
 	unguard;
 }
 
 void AActor::SetVolumes()
 {
 	guard(AActor::SetVolumes_void);
-	// TODO: Recalculate actor volumes.
+	// Recalculate volumes: iterate the level's PhysicsVolume list and call the
+	// array form. Requires ULevel::PhysicsVolumeList (ALevelInfo line 3633) which
+	// is populated at map-load time.  Deferred until volume system is finalised.
 	unguard;
 }
 

@@ -1029,8 +1029,55 @@ void APawn::calcVelocity( FVector AccelDir, FLOAT DeltaTime, FLOAT MaxSpeed, FLO
 INT APawn::moveToward( const FVector& Dest, AActor* GoalActor )
 {
 	guard(APawn::moveToward);
-	// TODO: Move pawn toward destination / goal actor.
-	return 1;
+	// Ghidra 0xe7650: move pawn toward Dest; returns 1 when destination reached.
+	// Physics-specific handling:
+	//   Walking  — zero-out Z diff and check cylinder radius to declare 'reached'
+	//   Swimming — check whether buoyancy has lifted the pawn clear of water
+	//   Ladder   — delegate to ladder speed & direction (LadderSpeed field)
+	if( !Controller )
+		return 0;
+
+	FVector Diff = Dest - Location;
+
+	switch( Physics )
+	{
+	case PHYS_Walking:
+		Diff.Z = 0.f;   // only XY matters for walking approach
+		break;
+	case PHYS_Swimming:
+		Diff.Z = 0.f;
+		Velocity = Diff.SafeNormal() * WaterSpeed;
+		if( Velocity.Z < 0.f || Location.Z + 33.f >= Dest.Z )
+		{
+			Controller->MoveTimer = 2;
+			return 0;
+		}
+		Controller->MoveTimer = 2;
+		return 1;
+	case PHYS_Ladder:
+		// On ladder: use LadderSpeed; velocity direction matches ladder axis
+		Velocity = Diff.SafeNormal() * LadderSpeed;
+		Controller->MoveTimer = 2;
+		return 0;
+	default:
+		break;
+	}
+
+	// Arrived?
+	if( ReachedDestination( Dest, GoalActor ) )
+	{
+		if( Physics != PHYS_Flying && Physics != PHYS_Swimming )
+			Velocity = FVector(0.f, 0.f, 0.f);
+		if( GoalActor && GoalActor->IsA(ANavigationPoint::StaticClass()) )
+			Anchor = (ANavigationPoint*)GoalActor;
+		Controller->MoveTimer = 1;
+		return 1;
+	}
+
+	// Steer toward destination
+	Velocity = Diff.SafeNormal() * GroundSpeed;
+	Controller->MoveTimer = 2;
+	return 0;
 	unguard;
 }
 
@@ -1088,14 +1135,98 @@ void APawn::performPhysics( FLOAT DeltaSeconds )
 void APawn::physFalling( FLOAT DeltaTime, INT Iterations )
 {
 	guard(APawn::physFalling);
-	// TODO: Pawn falling physics with air control.
+	// Ghidra 0xf6410: pawn falling with air-control and midpoint gravity.
+	// Sub-steps of at most 0.05 s; NewFallVelocity handles buoyancy-adjusted
+	// gravity integration so we just drive air-control on top.
+	while( DeltaTime > KINDA_SMALL_NUMBER && Iterations < 8 )
+	{
+		Iterations++;
+		FLOAT subDT = Min( DeltaTime * 0.5f, 0.05f );
+		DeltaTime -= subDT;
+
+		FVector OldLoc = Location;
+		bJustTeleported = 0;
+
+		// Midpoint Verlet gravity (buoyancy-aware)
+		Velocity = NewFallVelocity( Velocity, Acceleration, subDT );
+
+		// Air control: lateral nudge proportional to AirControl * AccelRate
+		if( AirControl > 0.05f && !Acceleration.IsZero() )
+			Velocity += Acceleration.SafeNormal() * (AirControl * AccelRate * subDT);
+
+		// Zone velocity (wind / fluid current at Zone+0x444)
+		FVector ZoneVel( 0.f, 0.f, 0.f );
+		if( Region.Zone )
+			ZoneVel = *(FVector*)( (BYTE*)Region.Zone + 0x444 );
+
+		FVector Delta = (Velocity + ZoneVel) * subDT;
+		FCheckResult Hit( 1.f );
+		XLevel->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0 );
+
+		if( bDeleteMe )
+			return;
+
+		// Entered water mid-fall
+		if( Physics == PHYS_Swimming )
+			return;
+
+		if( Hit.Time < 1.f )
+		{
+			if( Hit.Normal.Z >= 0.7f )
+			{
+				// Landed on a walkable surface
+				if( !bJustTeleported && Hit.Time > 0.1f && subDT * Hit.Time > 0.003f )
+					Velocity = (Location - OldLoc) / (subDT * Hit.Time);
+				processLanded( Hit.Normal, Hit.Actor,
+					DeltaTime + subDT * (1.f - Hit.Time), Iterations );
+				return;
+			}
+			else
+			{
+				// Wall hit — notify and remove the into-wall velocity component
+				processHitWall( Hit.Normal, Hit.Actor );
+				if( Physics == PHYS_Falling )
+				{
+					FLOAT VDotN = Velocity | Hit.Normal;
+					if( VDotN < 0.f )
+						Velocity -= Hit.Normal * VDotN;
+				}
+				else
+					return;
+			}
+		}
+	}
 	unguard;
 }
 
 void APawn::physLadder( FLOAT DeltaTime, INT Iterations )
 {
 	guard(APawn::physLadder);
-	// TODO: Ladder climbing physics.
+	// Ghidra 0xf4810: ladder climbing physics.
+	// Fall off if no longer in a ladder volume.
+	if( !OnLadder )
+	{
+		setPhysics( PHYS_Falling, NULL, FVector(0.f,0.f,0.f) );
+		return;
+	}
+
+	// Move along the velocity direction (set by moveToward / input) for this frame.
+	// The full Ghidra implementation uses the LadderNode nav-point direction vectors
+	// (Up at +0x498, Tangent at +0x4a4) which require ALadder field declarations.
+	// For now: move by Velocity*DeltaTime and handle top/bottom exit.
+	FCheckResult Hit( 1.f );
+	XLevel->MoveActor( this, Velocity * DeltaTime, Rotation, Hit, 0, 0, 0, 0 );
+
+	if( bDeleteMe )
+		return;
+
+	if( Hit.Time < 1.f )
+	{
+		// Reached the top or bottom of the ladder; transition out.
+		Velocity = FVector( 0.f, 0.f, 0.f );
+		// Default exit to walking; derived classes handle water exit via physicsVolume checks.
+		setPhysics( PHYS_Walking, NULL, FVector(0.f,0.f,0.f) );
+	}
 	unguard;
 }
 
