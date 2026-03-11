@@ -2439,7 +2439,28 @@ FMatrix AActor::WorldToLocal() const
 INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AActor::Tick);
-	// TODO: Full tick implementation â physics, timers, state, animation.
+	// Ghidra 0xc4870: main per-frame actor update.
+	//
+	// 1. Advance any active latent UnrealScript action (Sleep, FinishAnim etc.).
+	//    StateFrame->LatentAction is non-zero while a latent function is pending.
+	if( StateFrame && StateFrame->LatentAction )
+		ProcessState( DeltaTime );
+
+	// 2. Per-tick culling gate: derived classes can suppress ticking (bSkipTick, etc.).
+	if( !TickThisFrame( DeltaTime ) )
+		return 0;
+
+	// 3. Authority tick: timers and physics.  Skipped when world is paused
+	//    but the viewport still refreshes (ViewportsOnly mode).
+	if( TickType != LEVELTICK_ViewportsOnly )
+		TickAuthoritative( DeltaTime );
+
+	// 4. Net-simulation and visual update.
+	TickSimulated( DeltaTime );
+
+	// 5. Per-actor overlay / effects update.
+	TickSpecial( DeltaTime );
+
 	return 1;
 	unguard;
 }
@@ -2447,6 +2468,9 @@ INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
 void AActor::TickAuthoritative( FLOAT DeltaTime )
 {
 	guard(AActor::TickAuthoritative);
+	// Advance timer counters, then run physics simulation.
+	UpdateTimers( DeltaTime );
+	performPhysics( DeltaTime );
 	unguard;
 }
 

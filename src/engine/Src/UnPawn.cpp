@@ -983,8 +983,33 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
-	// TODO: Navigation reachability test.
-	return 0;
+	// Navigation reachability test.
+	// Full implementation requires the path-graph / ReachSpec network.
+	// This approximation uses a straight-line sight trace + distance bound which
+	// is correct for open geometry and serves as a fallback for nav-less maps.
+	if( !Goal )
+		return 0;
+
+	FVector Diff = Goal->Location - Location;
+	// Ignore height for walking proximity check.
+	FLOAT HorizDistSq = Diff.X*Diff.X + Diff.Y*Diff.Y;
+	// Reject if beyond MaxReachable (arbitrary: 8x GroundSpeed seconds of travel)
+	FLOAT MaxReach = 8.f * GroundSpeed;
+	if( HorizDistSq > MaxReach * MaxReach )
+		return 0;
+
+	// Visibility: SingleLineCheck between centres.
+	if( !bKnowVisible )
+	{
+		FCheckResult Hit( 1.f );
+		if( !XLevel->SingleLineCheck( Hit, this, Goal->Location, Location,
+		    TRACE_World | TRACE_Level, FVector(0.f,0.f,0.f) ) )
+		{
+			// Something in the way — not directly reachable.
+			return 0;
+		}
+	}
+	return 1;
 	unguard;
 }
 
@@ -1100,7 +1125,16 @@ void APawn::performPhysics( FLOAT DeltaSeconds )
 	{
 		if( bWantsToCrouch && !bIsCrouched )
 			Crouch(0);
-		// TODO: bTryToUncrouch countdown timer at this+0x424 not yet mapped to a named field.
+		else if( bTryToUncrouch )
+		{
+			// Countdown to forced un-crouch (Ghidra 0xf5350: this+0x424 = UncrouchTime).
+			UncrouchTime -= DeltaSeconds;
+			if( UncrouchTime <= 0.f )
+			{
+				bTryToUncrouch = 0;
+				UnCrouch(0);
+			}
+		}
 	}
 	else if( bIsCrouched )
 		UnCrouch(0);
