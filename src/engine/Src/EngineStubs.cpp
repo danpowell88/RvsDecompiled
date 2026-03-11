@@ -3528,16 +3528,31 @@ FFontPage& FFontPage::operator=(const FFontPage& Other)
 }
 
 // --- FKAggregateGeom ---
-FKAggregateGeom::FKAggregateGeom(FKAggregateGeom const &)
+FKAggregateGeom::FKAggregateGeom(FKAggregateGeom const &Other)
 {
+	// Ghidra 0x3cc00: no vtable; 4 TArrays at +0, +0xC, +0x18, +0x24
+	new ((BYTE*)this + 0x00) TArray<FKSphereElem>(*(const TArray<FKSphereElem>*)((const BYTE*)&Other + 0x00));
+	new ((BYTE*)this + 0x0C) TArray<FKBoxElem>(*(const TArray<FKBoxElem>*)((const BYTE*)&Other + 0x0C));
+	new ((BYTE*)this + 0x18) TArray<FKCylinderElem>(*(const TArray<FKCylinderElem>*)((const BYTE*)&Other + 0x18));
+	new ((BYTE*)this + 0x24) TArray<FKConvexElem>(*(const TArray<FKConvexElem>*)((const BYTE*)&Other + 0x24));
 }
 
 FKAggregateGeom::FKAggregateGeom()
 {
+	// Initialize all 4 TArrays to empty
+	new ((BYTE*)this + 0x00) TArray<FKSphereElem>();
+	new ((BYTE*)this + 0x0C) TArray<FKBoxElem>();
+	new ((BYTE*)this + 0x18) TArray<FKCylinderElem>();
+	new ((BYTE*)this + 0x24) TArray<FKConvexElem>();
 }
 
 FKAggregateGeom::~FKAggregateGeom()
 {
+	// Destroy 4 TArrays in reverse order
+	((TArray<FKConvexElem>*)((BYTE*)this + 0x24))->~TArray();
+	((TArray<FKCylinderElem>*)((BYTE*)this + 0x18))->~TArray();
+	((TArray<FKBoxElem>*)((BYTE*)this + 0x0C))->~TArray();
+	((TArray<FKSphereElem>*)((BYTE*)this + 0x00))->~TArray();
 }
 
 FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
@@ -3595,16 +3610,26 @@ FKBoxElem& FKBoxElem::operator=(const FKBoxElem& Other)
 }
 
 // --- FKConvexElem ---
-FKConvexElem::FKConvexElem(FKConvexElem const &)
+FKConvexElem::FKConvexElem(FKConvexElem const &Other)
 {
+	// Ghidra 0x27ce0: no vtable; 16 DWORDs at +0..+3F; TArray<FVector> at +40 (stride 12); TArray<INT> at +4C (stride 4)
+	appMemcpy(this, &Other, 0x40); // 16 DWORDs
+	new ((BYTE*)this + 0x40) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)&Other + 0x40));
+	new ((BYTE*)this + 0x4C) TArray<INT>(*(const TArray<INT>*)((const BYTE*)&Other + 0x4C));
 }
 
 FKConvexElem::FKConvexElem()
 {
+	// Initialize TArray<FVector> at +0x40 and TArray<INT> at +0x4C to empty
+	new ((BYTE*)this + 0x40) TArray<FVector>();
+	new ((BYTE*)this + 0x4C) TArray<INT>();
 }
 
 FKConvexElem::~FKConvexElem()
 {
+	// Destroy TArray<INT> at +0x4C then TArray<FVector> at +0x40 (reverse order)
+	((TArray<INT>*)((BYTE*)this + 0x4C))->~TArray();
+	((TArray<FVector>*)((BYTE*)this + 0x40))->~TArray();
 }
 
 FKConvexElem& FKConvexElem::operator=(const FKConvexElem& Other)
@@ -3659,20 +3684,32 @@ FKSphereElem& FKSphereElem::operator=(const FKSphereElem& Other)
 }
 
 // --- FLightMap ---
-FLightMap::FLightMap(FLightMap const &)
+FLightMap::FLightMap(FLightMap const &Other)
 {
+	// Ghidra 0x3c910: vtable set by compiler; 34 DWORDs at +4..+8B; TArray<FLightMapSample52> at +0x8C; TArray<FLOAT> at +0x98
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x88);
+	new ((BYTE*)this + 0x8C) TArray<FLightMapSample52>(*(const TArray<FLightMapSample52>*)((const BYTE*)&Other + 0x8C));
+	new ((BYTE*)this + 0x98) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98));
 }
 
 FLightMap::FLightMap(ULevel *,int,int)
 {
+	// Initialize TArray members so dtor is safe regardless of which ctor was called
+	new ((BYTE*)this + 0x8C) TArray<FLightMapSample52>();
+	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
 FLightMap::FLightMap()
 {
+	new ((BYTE*)this + 0x8C) TArray<FLightMapSample52>();
+	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
 FLightMap::~FLightMap()
 {
+	// Ghidra 0x3c6a0 area: destroy TArrays in reverse order
+	((TArray<FLOAT>*)((BYTE*)this + 0x98))->~TArray();
+	((TArray<FLightMapSample52>*)((BYTE*)this + 0x8C))->~TArray();
 }
 
 FLightMap& FLightMap::operator=(const FLightMap& Other)
@@ -3944,16 +3981,23 @@ int FRawIndexBuffer::Stripify()
 	return 0;
 }
 
-FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &)
+FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 {
+	// Ghidra 0x18d80: vtable set by compiler; TArray<WORD> at +4 (stride 2); 3 DWORDs at +10..+18
+	new ((BYTE*)this + 0x04) TArray<WORD>(*(const TArray<WORD>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
 FRawIndexBuffer::FRawIndexBuffer()
 {
+	// Initialize TArray<WORD> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<WORD>();
 }
 
 FRawIndexBuffer::~FRawIndexBuffer()
 {
+	// destroy TArray<WORD> at +4
+	((TArray<WORD>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
@@ -4050,16 +4094,28 @@ FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 }
 
 // --- FStatGraphLine ---
-FStatGraphLine::FStatGraphLine(FStatGraphLine const &)
+FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 {
+	// Ghidra 0x2c410: no vtable; DWORD at +0; TArray<FLOAT> at +4; 2 DWORDs at +10; FString at +18; 4 DWORDs at +24..+30
+	*(DWORD*)this = *(const DWORD*)&Other;
+	new ((BYTE*)this + 0x04) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04));
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 8); // 2 DWORDs
+	new ((BYTE*)this + 0x18) FString(*(const FString*)((const BYTE*)&Other + 0x18));
+	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
 }
 
 FStatGraphLine::FStatGraphLine()
 {
+	// Initialize TArray<FLOAT> at +4 and FString at +18 to empty
+	new ((BYTE*)this + 0x04) TArray<FLOAT>();
+	new ((BYTE*)this + 0x18) FString();
 }
 
 FStatGraphLine::~FStatGraphLine()
 {
+	// Destroy FString at +18 then TArray<FLOAT> at +4 (reverse order)
+	((FString*)((BYTE*)this + 0x18))->~FString();
+	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
@@ -4379,16 +4435,34 @@ void FTempLineBatcher::Render(FRenderInterface *,int)
 {
 }
 
-FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &)
+FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &Other)
 {
+	// Ghidra 0x27490: no vtable; TArray<FVector>@+0, TArray<FVector>@+0xC, TArray<FLOAT>@+0x18, TArray<FBox>@+0x24, TArray<FLOAT>@+0x30
+	new ((BYTE*)this + 0x00) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)&Other + 0x00));
+	new ((BYTE*)this + 0x0C) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)&Other + 0x0C));
+	new ((BYTE*)this + 0x18) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x18));
+	new ((BYTE*)this + 0x24) TArray<FBox>(*(const TArray<FBox>*)((const BYTE*)&Other + 0x24));
+	new ((BYTE*)this + 0x30) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x30));
 }
 
 FTempLineBatcher::FTempLineBatcher()
 {
+	// Initialize all 5 TArrays to empty
+	new ((BYTE*)this + 0x00) TArray<FVector>();
+	new ((BYTE*)this + 0x0C) TArray<FVector>();
+	new ((BYTE*)this + 0x18) TArray<FLOAT>();
+	new ((BYTE*)this + 0x24) TArray<FBox>();
+	new ((BYTE*)this + 0x30) TArray<FLOAT>();
 }
 
 FTempLineBatcher::~FTempLineBatcher()
 {
+	// Destroy 5 TArrays in reverse order
+	((TArray<FLOAT>*)((BYTE*)this + 0x30))->~TArray();
+	((TArray<FBox>*)((BYTE*)this + 0x24))->~TArray();
+	((TArray<FLOAT>*)((BYTE*)this + 0x18))->~TArray();
+	((TArray<FVector>*)((BYTE*)this + 0x0C))->~TArray();
+	((TArray<FVector>*)((BYTE*)this + 0x00))->~TArray();
 }
 
 FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
