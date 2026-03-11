@@ -6654,10 +6654,15 @@ FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMap@@@Z
-FArchive & operator<<(FArchive & p0, FLightMap & p1) { static FArchive dummy; return dummy; }
+// Ghidra @ 0x3c730: 7x FCompactIndex at Pad[8..0x20]; 9x DWORD at Pad[0x68..0x88];
+// FUN_10301470 (FName?), FUN_1033a9a0, version checks 0x6a/0x6b/0x6d/0x6e.
+// Needs FTexture base size to correctly interpret Pad offsets.
+FArchive & operator<<(FArchive & Ar, FLightMap & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMapTexture@@@Z
-FArchive & operator<<(FArchive & p0, FLightMapTexture & p1) { static FArchive dummy; return dummy; }
+// Ghidra @ 0x27a00: vtable[6] on Pad[4..8], FUN_103218c0, BOS at Pad[0x60]+8, Pad[0x68]+4;
+// if Ver()>0x73: recurse into FStaticLightMapTexture at Pad[0x14].
+FArchive & operator<<(FArchive & Ar, FLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFPoly@@@Z
 FArchive & operator<<(FArchive & Ar, FPoly & V) {
@@ -6794,7 +6799,9 @@ FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticLightMapTexture@@@Z
-FArchive & operator<<(FArchive & p0, FStaticLightMapTexture & p1) { static FArchive dummy; return dummy; }
+// Ghidra @ 0x20c60: FUN_1031d450 on Pad[4..0x1c]; vtable[0] at Pad[0x34]+1;
+// BOS at Pad[0x38]+4, Pad[0x3c]+4, Pad[0x48]+4. Needs FTexture base size.
+FArchive & operator<<(FArchive & Ar, FStaticLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshBatcherVertex@@@Z
 FArchive & operator<<(FArchive & Ar, FStaticMeshBatcherVertex & p1) { return Ar; } // empty in original
@@ -6818,7 +6825,9 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshSection@@@Z
-FArchive & operator<<(FArchive & p0, FStaticMeshSection & p1) { static FArchive dummy; return dummy; }
+// Ghidra @ 0x50f10: complex version-branched (pre-0x5c / 0x5c-0x70 / 0x70+) with SEH;
+// creates temp FStaticMeshVertexStream + FRawIndexBuffer locals. Needs deep decode.
+FArchive & operator<<(FArchive & Ar, FStaticMeshSection & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshUVStream@@@Z
 // FUN_10324510 = TArray<FStaticMeshUV>::Serialize (elem_size 8, two floats per elem)
@@ -6892,10 +6901,14 @@ FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFProjectorRelativeRenderInfo@@@Z
-FArchive & operator<<(FArchive & p0, FProjectorRelativeRenderInfo & p1) { static FArchive dummy; return dummy; }
+// Ghidra @ 0x48c0: reads p1.m_RenderInfoPtr.Ptr as FProjectorRenderInfo*;
+// calls FUN_10304820 version check, then vtable[6] for two fields at +0x18 and +0x1c.
+FArchive & operator<<(FArchive & Ar, FProjectorRelativeRenderInfo & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@PAUFProjectorRenderInfo@@@Z
-FArchive & operator<<(FArchive & p0, FProjectorRenderInfo * p1) { static FArchive dummy; return dummy; }
+// Ghidra @ 0x4890: calls FUN_10304820 version check; if 0 returns Ar;
+// otherwise vtable[6] on p1+0x18 and p1+0x1c. FProjectorRenderInfo is forward-decl only.
+FArchive & operator<<(FArchive & Ar, FProjectorRenderInfo * p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFSkinVertex@@@Z
 FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
@@ -7955,7 +7968,14 @@ ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 }
 
 // ??4FCollisionHash@@QAEAAV0@ABV0@@Z
-FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) { static FCollisionHash dummy; return dummy; }
+// Ghidra @ 0x6f3f0: copies Buckets[0x4000] (offsets 4..0x10003), then FreeList at
+// 0x10004, then TArray<void*> AllocatedPools at 0x10008.
+FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) {
+	appMemcpy(Buckets, p0.Buckets, sizeof(Buckets));
+	FreeList = p0.FreeList;
+	AllocatedPools = p0.AllocatedPools;
+	return *this;
+}
 
 // ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
 FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & Other) {
@@ -7964,7 +7984,12 @@ FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & Other) {
 }
 
 // ??4FOctreeNode@@QAEAAV0@ABV0@@Z
-FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) { static FOctreeNode dummy; return dummy; }
+// Ghidra @ 0x6f350: TArray<AActor*> copy at Pad[0] (FUN_1031f660 = TArray::operator=),
+// then DWORD copy at Pad[0xc]. Pad copy is shallow but TArray<AActor*> stores raw ptrs.
+FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) {
+	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+	return *this;
+}
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
 FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; } // 2 dwords, shared with FStaticMeshUV
@@ -8025,7 +8050,12 @@ FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(Pitch-p0.P
 FRotatorF FRotatorF::operator-=(FRotatorF p0) { Pitch-=p0.Pitch; Yaw-=p0.Yaw; Roll-=p0.Roll; return *this; }
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-FStatGraph & FStatGraph::operator=(FStatGraph const & p0) { static FStatGraph dummy; return dummy; }
+// Ghidra @ 0x519b0: copies individual DWORDs/TArrays across Pad[0..0x64] plus
+// FString at Pad[0x54]. Uses appMemcpy equivalent - divergence: no deep TArray copy.
+FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
+	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+	return *this;
+}
 
 // ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
 FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
