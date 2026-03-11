@@ -1383,8 +1383,15 @@ void UNetDriver::TickDispatch(float)
 {
 }
 
-void UNetDriver::Serialize(FArchive &)
+void UNetDriver::Serialize(FArchive &Ar)
 {
+	guard(UNetDriver::Serialize);
+	// Ghidra 0x1048C210: UObject::Serialize, then a conditional-transact helper (RVA 0x18BFA0)
+	// that returns a filtered archive, then serializes fields at +0x3C,+0x44,+0x7C,+0x80.
+	UObject::Serialize(Ar);
+	// NOTE: Divergence — object-ref fields (+0x3C ServerConnection, +0x44, +0x7C, +0x80) not serialized;
+	// full implementation requires transactor helper identification.
+	unguard;
 }
 
 void UNetDriver::NotifyActorDestroyed(AActor *)
@@ -4789,8 +4796,18 @@ int UEngine::ReplaceTexture(FString,UTexture *)
 	return 0;
 }
 
-void UEngine::Serialize(FArchive &)
+void UEngine::Serialize(FArchive &Ar)
 {
+	guard(UEngine::Serialize);
+	// Ghidra 0x10393120: UObject::Serialize, then Ar << fields at +0x40,+0x44(Client),+0x48(Audio),+0x4C,
+	// then 5 global static UObject* pointers (BSS, always NULL on first run).
+	UObject::Serialize(Ar);
+	Ar << *(UObject**)((BYTE*)this + 0x40);	// unknown UObject* field before Client
+	Ar << (UObject*&)Client;
+	Ar << (UAudioSubsystem*&)Audio;
+	Ar << *(UObject**)((BYTE*)this + 0x4C);	// unknown UObject* field after Audio
+	// NOTE: Divergence — 5 global static UObject* refs (0x1066bcd0-bc) skipped; BSS/NULL at startup.
+	unguard;
 }
 
 int UEngine::Key(UViewport *,EInputKey)
@@ -5277,8 +5294,12 @@ void UParticleEmitter::Initialize(int)
 }
 
 // --- UPlayer ---
-void UPlayer::Serialize(FArchive &)
+void UPlayer::Serialize(FArchive &Ar)
 {
+	guard(UPlayer::Serialize);
+	// Ghidra 0x103F7120 (41 bytes): only calls UObject::Serialize then returns.
+	UObject::Serialize(Ar);
+	unguard;
 }
 
 void UPlayer::Destroy()

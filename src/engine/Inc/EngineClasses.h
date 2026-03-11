@@ -3754,6 +3754,8 @@ class ENGINE_API URenderDevice : public USubsystem
 public:
 	DECLARE_CLASS(URenderDevice,USubsystem,CLASS_Config,Engine)
 	virtual UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+	virtual INT Init() { return 1; }                                            // Initialise device; returns non-zero on success
+	virtual INT SetRes( INT NewX, INT NewY, INT NewColorBytes, INT Fullscreen ) { return 1; }  // Change resolution/fullscreen mode
 	// Auto-generated method declarations
 	virtual void StartVideo(UCanvas *,int,int,int);
 	void StaticConstructor();
@@ -5097,6 +5099,7 @@ class ENGINE_API UClient : public UObject
 {
 public:
 	DECLARE_CLASS(UClient,UObject,CLASS_Config,Engine)
+	TArray<UViewport*> Viewports;   // All active viewports managed by this client
 	// Auto-generated method declarations
 	void StaticConstructor();
 	virtual void UpdateGamma();
@@ -5608,6 +5611,22 @@ public:
 	virtual void InitForDigestion();
 };
 
+// Viewport blit-mode flags — used by ResizeViewport() and BlitFlags member.
+enum EBlitType
+{
+	BLIT_Fullscreen = 0x1,   // Window covers entire display
+	BLIT_Direct     = 0x2,   // Direct-to-framebuffer blit
+	BLIT_Temporary  = 0x4,   // Temporary (off-screen) blit
+};
+
+// Viewport mouse-button flags — returned by GetViewportButtonFlags().
+enum EViewportButtonFlags
+{
+	MOUSE_Left   = 0x1,
+	MOUSE_Right  = 0x2,
+	MOUSE_Middle = 0x4,
+};
+
 class ENGINE_API UViewport : public UPlayer
 {
 public:
@@ -5620,6 +5639,9 @@ public:
 	INT SizeX;
 	INT SizeY;
 	URenderDevice* RenDev;
+	INT ColorBytes;           // Bytes per pixel (e.g. 4 = 32bpp)
+	DWORD BlitFlags;          // Active blit-mode flags (EBlitType bitmask)
+	UInput* Input;            // Active input subsystem (set by WinDrv on init)
 
 	// Virtual methods
 	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );
@@ -5633,6 +5655,9 @@ public:
 	virtual INT SetDrag( INT NewDrag );
 	virtual void* GetServer();
 	virtual void TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes );
+	virtual void* GetWindow() { return NULL; }             // Returns Win32 HWND (or NULL for non-Windows)
+	virtual INT IsFullscreen() { return 0; }               // Returns non-zero when in fullscreen mode
+	virtual INT ResizeViewport( DWORD NewBlitFlags, INT NewX, INT NewY ) { return 0; }  // Resize/mode-switch
 
 	// Non-virtual methods
 	void ExecMacro( const TCHAR* Filename, FOutputDevice& Ar );

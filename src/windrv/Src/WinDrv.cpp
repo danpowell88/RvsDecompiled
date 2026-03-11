@@ -192,7 +192,7 @@ void UWindowsViewport::UpdateWindowFrame()
 	guard(UWindowsViewport::UpdateWindowFrame);
 	if( GViewportHWnd )
 	{
-		SetWindowTextW( GViewportHWnd, *GetName() );
+		SetWindowTextW( GViewportHWnd, GetName() );
 	}
 	unguard;
 }
@@ -201,7 +201,7 @@ void UWindowsViewport::OpenWindow(DWORD ParentWindow, INT IsTemporary, INT NewX,
 {
 	guard(UWindowsViewport::OpenWindow);
 
-	check(googGetOuterUWindowsClient());
+	check(GetOuterUWindowsClient());
 
 	// Set initial size.
 	SizeX = NewX ? NewX : 640;
@@ -225,7 +225,7 @@ void UWindowsViewport::OpenWindow(DWORD ParentWindow, INT IsTemporary, INT NewX,
 
 	GViewportHWnd = CreateWindowW(
 		TEXT("RavenShieldViewport"),
-		*GetName(),
+		GetName(),
 		Style,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		rc.right - rc.left, rc.bottom - rc.top,

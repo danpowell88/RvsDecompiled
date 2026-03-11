@@ -2214,7 +2214,14 @@ void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
 	UObject::Serialize( Ar );
-	// TODO: Serialize actor-specific data (attachments, physics state, etc.)
+	if( Ar.Ver() >= 12 )
+	{
+		// Ghidra 0x1037C130: version-gated serialization of a TArray at this+0x210
+		// (helper FUN_103218c0 serializes TArray count then GC-marks each element).
+		// NOTE: Divergence — TArray field at 0x210 identity-pending; skipped for now.
+	}
+	// Ghidra: every 16th actor during loading triggers a GC-tick/UI-update;
+	// editor-only behaviour, omitted here.
 	unguard;
 }
 
