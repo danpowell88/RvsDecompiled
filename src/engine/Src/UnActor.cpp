@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnActor.cpp: AActor and subclass implementation.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -2337,8 +2337,23 @@ INT AActor::IsBlockedBy( const AActor* Other ) const
 UBOOL AActor::IsOverlapping( AActor* Other, FCheckResult* Hit )
 {
 	guard(AActor::IsOverlapping);
-	// TODO: Broad-phase + narrow-phase collision check.
-	return 0;
+	// Quick-exit guards matching Ghidra 0x78b40:
+	// Both actors need collision geometry; exclude self, owner, and joined pairs.
+	if( this == Other || Other == Owner )
+		return 0;
+	if( IsJoinedTo(Other) || Other->IsJoinedTo(this) )
+		return 0;
+	// Cylinder broad-phase: check Z overlap first (cheap), then XY radius overlap.
+	FLOAT dZ  = Location.Z - Other->Location.Z;
+	FLOAT hSum = CollisionHeight + Other->CollisionHeight;
+	if( dZ*dZ >= hSum*hSum )
+		return 0;
+	FLOAT dX   = Location.X - Other->Location.X;
+	FLOAT dY   = Location.Y - Other->Location.Y;
+	FLOAT rSum = CollisionRadius + Other->CollisionRadius;
+	if( dX*dX + dY*dY >= rSum*rSum )
+		return 0;
+	return 1;
 	unguard;
 }
 
@@ -2369,16 +2384,55 @@ FCoords AActor::ToWorld() const
 FMatrix AActor::LocalToWorld() const
 {
 	guard(AActor::LocalToWorld);
-	// TODO: Build actorâworld transform matrix.
-	return FMatrix();
+	// Build a scale-rotation-translation matrix matching the retail binary (Ghidra-verified).
+	// Uses GMath sin/cos lookup tables for accuracy.
+	FLOAT SP = GMath.SinTab(Rotation.Pitch), CP = GMath.CosTab(Rotation.Pitch);
+	FLOAT SY = GMath.SinTab(Rotation.Yaw),   CY = GMath.CosTab(Rotation.Yaw);
+	FLOAT SR = GMath.SinTab(Rotation.Roll),  CR = GMath.CosTab(Rotation.Roll);
+	FLOAT Sx = DrawScale3D.X * DrawScale;
+	FLOAT Sy = DrawScale3D.Y * DrawScale;
+	FLOAT Sz = DrawScale3D.Z * DrawScale;
+	// Rotation-scale rows (row-vector convention; translation lives in WPlane)
+	FLOAT r00 = CY*CP*Sx,                  r01 = SY*CP*Sx,                  r02 = SP*Sx;
+	FLOAT r10 = (CY*SP*SR - SY*CR)*Sy,    r11 = (SY*SP*SR + CY*CR)*Sy,    r12 = -CP*SR*Sy;
+	FLOAT r20 = -(CY*SP*CR + SY*SR)*Sz,   r21 = (CY*SR - SY*SP*CR)*Sz,    r22 = CP*CR*Sz;
+	// Translation = Location - (rotation-columns dotted with PrePivot)
+	FLOAT tx = Location.X - r00*PrePivot.X - r10*PrePivot.Y - r20*PrePivot.Z;
+	FLOAT ty = Location.Y - r01*PrePivot.X - r11*PrePivot.Y - r21*PrePivot.Z;
+	FLOAT tz = Location.Z - r02*PrePivot.X - r12*PrePivot.Y - r22*PrePivot.Z;
+	return FMatrix(
+		FPlane(r00, r01, r02, 0.f),
+		FPlane(r10, r11, r12, 0.f),
+		FPlane(r20, r21, r22, 0.f),
+		FPlane(tx,  ty,  tz,  1.f)
+	);
 	unguard;
 }
 
 FMatrix AActor::WorldToLocal() const
 {
 	guard(AActor::WorldToLocal);
-	// TODO: Build worldâactor transform matrix.
-	return FMatrix();
+	// Inverse of LocalToWorld: S^-1 * R^T with inverted translation.
+	FLOAT SP = GMath.SinTab(Rotation.Pitch), CP = GMath.CosTab(Rotation.Pitch);
+	FLOAT SY = GMath.SinTab(Rotation.Yaw),   CY = GMath.CosTab(Rotation.Yaw);
+	FLOAT SR = GMath.SinTab(Rotation.Roll),  CR = GMath.CosTab(Rotation.Roll);
+	FLOAT invSx = 1.f / (DrawScale3D.X * DrawScale);
+	FLOAT invSy = 1.f / (DrawScale3D.Y * DrawScale);
+	FLOAT invSz = 1.f / (DrawScale3D.Z * DrawScale);
+	// Transposed + inv-scaled rotation rows
+	FLOAT w00 = CY*CP*invSx,              w01 = (CY*SP*SR - SY*CR)*invSy,  w02 = -(CY*SP*CR + SY*SR)*invSz;
+	FLOAT w10 = SY*CP*invSx,              w11 = (SY*SP*SR + CY*CR)*invSy,  w12 = (CY*SR - SY*SP*CR)*invSz;
+	FLOAT w20 = SP*invSx,                 w21 = -CP*SR*invSy,              w22 = CP*CR*invSz;
+	// Translation: inverse maps world Location to local PrePivot
+	FLOAT wtx = PrePivot.X - (Location.X*w00 + Location.Y*w10 + Location.Z*w20);
+	FLOAT wty = PrePivot.Y - (Location.X*w01 + Location.Y*w11 + Location.Z*w21);
+	FLOAT wtz = PrePivot.Z - (Location.X*w02 + Location.Y*w12 + Location.Z*w22);
+	return FMatrix(
+		FPlane(w00, w01, w02, 0.f),
+		FPlane(w10, w11, w12, 0.f),
+		FPlane(w20, w21, w22, 0.f),
+		FPlane(wtx, wty, wtz, 1.f)
+	);
 	unguard;
 }
 
@@ -3004,7 +3058,57 @@ void AActor::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(AActor::stepUp);
-	// TODO: Step-up ledge logic.
+	// MaxStepHeight = 33.f (0x42040000) from Ghidra 0xef2f0.
+	// Try stepping up by one step height, move forward, then drop back down.
+	FVector Down = GravDir * 33.f;
+	if( !XLevel->MoveActor(this, -Down, Rotation, Hit) )
+		return;
+	if( !XLevel->MoveActor(this, Delta, Rotation, Hit) )
+	{
+		XLevel->MoveActor(this, Down, Rotation, Hit);
+		return;
+	}
+	if( Hit.Time < 1.f )
+	{
+		// If we hit a wall (not a floor), recurse with a wall-projected delta.
+		if( Abs(Hit.Normal.Z) < 0.08f && Delta.SizeSquared() * Hit.Time > 144.f )
+		{
+			XLevel->MoveActor(this, Down, Rotation, Hit);
+			FVector NewDelta = Delta - Hit.Normal * (Delta | Hit.Normal);
+			NewDelta = NewDelta - GravDir * (NewDelta | GravDir);
+			stepUp(GravDir, DesiredDir, NewDelta * (1.f - Hit.Time), Hit);
+			return;
+		}
+		processHitWall(Hit.Normal, Hit.Actor);
+		if( Physics == PHYS_Falling )
+		{
+			XLevel->MoveActor(this, Down, Rotation, Hit);
+			return;
+		}
+		// Slide along the wall normal projected to horizontal plane.
+		FVector OldHitNormal = Hit.Normal;
+		Hit.Normal.Z = 0.f;
+		Hit.Normal = Hit.Normal.SafeNormal();
+		FVector NewDelta = Delta - Hit.Normal * (Delta | Hit.Normal);
+		NewDelta = NewDelta - GravDir * (NewDelta | GravDir);
+		if( (NewDelta | DesiredDir) > 0.f )
+		{
+			XLevel->MoveActor(this, NewDelta * (1.f - Hit.Time), Rotation, Hit);
+			if( Hit.Time < 1.f )
+			{
+				processHitWall(Hit.Normal, Hit.Actor);
+				if( Physics == PHYS_Falling )
+				{
+					XLevel->MoveActor(this, Down, Rotation, Hit);
+					return;
+				}
+				TwoWallAdjust(DesiredDir, NewDelta, Hit.Normal, OldHitNormal, Hit.Time);
+				XLevel->MoveActor(this, NewDelta, Rotation, Hit);
+			}
+		}
+	}
+	// Return to original Z after the step-and-move attempt.
+	XLevel->MoveActor(this, Down, Rotation, Hit);
 	unguard;
 }
 
@@ -3074,14 +3178,35 @@ void AActor::TwoWallAdjust( FVector& DesiredDir, FVector& Delta, FVector& HitNor
 void AActor::FindBase()
 {
 	guard(AActor::FindBase);
-	// TODO: Trace downward to find base actor to stand on.
+	// Ghidra 0xecf00: trace 8 units straight down; SetBase on hit actor.
+	FCheckResult Hit(1.f);
+	FVector TraceEnd(Location.X, Location.Y, Location.Z - 8.f);
+	XLevel->SingleLineCheck(Hit, this, TraceEnd, Location, 0xdf,
+		FVector(CollisionRadius, CollisionRadius, CollisionHeight));
+	if( Base != Hit.Actor )
+		SetBase(Hit.Actor, Hit.Normal, 1);
 	unguard;
 }
 
 void AActor::PutOnGround()
 {
 	guard(AActor::PutOnGround);
-	// TODO: Drop actor to ground level.
+	// Ghidra 0x79e30: trace down 3*CollisionHeight, snap to surface, set base.
+	FCheckResult Hit(1.f);
+	FVector TraceEnd(Location.X, Location.Y, Location.Z - CollisionHeight * 3.f);
+	XLevel->SingleLineCheck(Hit, this, TraceEnd, Location, 0xdf,
+		FVector(CollisionRadius, CollisionRadius, 1.f));
+	if( Hit.Actor )
+	{
+		if( Hit.Normal.Z <= 0.7f )
+			Hit.Actor = NULL;
+		else
+		{
+			FVector NewLoc(Hit.Location.X, Hit.Location.Y, Hit.Location.Z + (CollisionHeight - 1.f));
+			XLevel->FarMoveActor(this, NewLoc, 0, 1, 0, 0);
+		}
+	}
+	SetBase(Hit.Actor, Hit.Normal, 1);
 	unguard;
 }
 
@@ -3244,7 +3369,11 @@ INT AActor::TestCanSeeMe( APlayerController* Viewer )
 void AActor::UpdateRelativeRotation()
 {
 	guard(AActor::UpdateRelativeRotation);
-	// TODO: Update relative rotation when attached.
+	if( !Base )
+		return;
+	// Compute this actor's rotation expressed in Base's local coordinate system.
+	// Matches Ghidra 0x70c30: FCoords path when no bone attachment (BoneName == NAME_None).
+	RelativeRotation = (GMath.UnitCoords * Rotation / Base->Rotation).OrthoRotation();
 	unguard;
 }
 
@@ -3258,8 +3387,16 @@ void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType 
 AActor* AActor::Trace( FVector& HitLocation, FVector& HitNormal, FVector& TraceEnd, FVector& TraceStart, INT bTraceActors, FVector& Extent, UMaterial** HitMaterial )
 {
 	guard(AActor::Trace);
-	// TODO: World trace implementation.
-	return NULL;
+	FCheckResult Hit(1.f);
+	DWORD TraceFlags = TRACE_World | TRACE_Level;
+	if( bTraceActors )
+		TraceFlags |= TRACE_Pawns | TRACE_Others;
+	AActor* HitActor = XLevel->SingleLineCheck(Hit, this, TraceEnd, TraceStart, TraceFlags, Extent) ? NULL : Hit.Actor;
+	HitLocation = Hit.Location;
+	HitNormal   = Hit.Normal;
+	if( HitMaterial )
+		*HitMaterial = (Hit.Material && Hit.Material->IsA(UMaterial::StaticClass())) ? (UMaterial*)Hit.Material : NULL;
+	return HitActor;
 	unguard;
 }
 
@@ -3319,8 +3456,15 @@ void AActor::CopyR6Availability( AActor* Src )
 FString AActor::GlobalIDToString( BYTE* const Bytes )
 {
 	guard(AActor::GlobalIDToString);
-	// TODO: Convert 16-byte global ID to string representation.
-	return FString();
+	// Format a 16-byte binary GUID into the standard UUID text representation.
+	return FString::Printf(
+		TEXT("%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X"),
+		Bytes[0],  Bytes[1],  Bytes[2],  Bytes[3],
+		Bytes[4],  Bytes[5],
+		Bytes[6],  Bytes[7],
+		Bytes[8],  Bytes[9],
+		Bytes[10], Bytes[11], Bytes[12], Bytes[13], Bytes[14], Bytes[15]
+	);
 	unguard;
 }
 
@@ -3329,7 +3473,10 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 	guard(AActor::SecondsToString);
 	INT Minutes = TotalSeconds / 60;
 	INT Seconds = TotalSeconds % 60;
-	// TODO: Format string output.
+	if( bAlignMinOnTwoDigits )
+		Result = FString::Printf( TEXT("%02d:%02d"), Minutes, Seconds );
+	else
+		Result = FString::Printf( TEXT("%d:%02d"), Minutes, Seconds );
 	unguard;
 }
 
