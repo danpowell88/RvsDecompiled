@@ -209,17 +209,42 @@ INT UShader::MaterialVSize()
 
 UBOOL UShader::RequiresSorting()
 {
-	return IsTransparent();
+	// Retail: F6 41 34 04 75 1E 8A 41 58 84 C0 75 07 8B 51 64 85 D2 75 13
+	//         3C 02 74 0F 3C 05 74 0B 3C 06 74 07 3C 03 74 03 33 C0 C3 B8 01...
+	// ForceNoSort flag → return 0 immediately.
+	if (m_bForceNoSort) return 0;
+	// OB_Normal: sort only if there is an Opacity channel.
+	if (OutputBlending == OB_Normal)
+		return (Opacity != NULL);
+	// OB_Modulate, OB_Translucent, OB_Brighten, OB_Darken require sorting.
+	return (OutputBlending == OB_Modulate || OutputBlending == OB_Translucent ||
+	        OutputBlending == OB_Brighten  || OutputBlending == OB_Darken);
 }
 
 UBOOL UShader::IsTransparent()
 {
-	return Opacity != NULL;
+	// Retail: 8B 01 FF 60 78 — tail-call JMP vtable[30] = RequiresSorting.
+	return RequiresSorting();
 }
 
 BYTE UShader::RequiredUVStreams()
 {
-	return 1;
+	// Retail: aggregates all 7 material slots with OR.
+	// Diffuse is special: its result replaces the default, but UV0 is always forced.
+	// All other slots OR their streams into the accumulator.
+	BYTE result = 1;
+	if (Diffuse)
+	{
+		result = Diffuse->RequiredUVStreams();
+		result |= 1; // Shader always needs at least UV stream 0
+	}
+	if (Opacity)           result |= Opacity->RequiredUVStreams();
+	if (Specular)          result |= Specular->RequiredUVStreams();
+	if (SpecularityMask)   result |= SpecularityMask->RequiredUVStreams();
+	if (SelfIllumination)  result |= SelfIllumination->RequiredUVStreams();
+	if (SelfIlluminationMask) result |= SelfIlluminationMask->RequiredUVStreams();
+	if (Detail)            result |= Detail->RequiredUVStreams();
+	return result;
 }
 
 UMaterial* UShader::CheckFallback()

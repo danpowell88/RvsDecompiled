@@ -4295,24 +4295,40 @@ public:
 	virtual void PostLoad();
 };
 
+// EOutputBlending: enum used by UShader (stored as BYTE at 0x58, before material ptrs).
+// Divergence note: .uc declares OutputBlending after material ptrs but retail places it
+// at 0x58 (first UShader field) with bitfields at 0x5C, then pointers from 0x60.
+enum EOutputBlending
+{
+	OB_Normal       = 0,  // sort only if Opacity != NULL
+	OB_Masked       = 1,  // no sorting
+	OB_Modulate     = 2,  // requires sorting
+	OB_Translucent  = 3,  // requires sorting
+	OB_Invisible    = 4,  // no sorting
+	OB_Brighten     = 5,  // requires sorting
+	OB_Darken       = 6,  // requires sorting
+};
+
 class ENGINE_API UShader : public URenderedMaterial
 {
 public:
 	DECLARE_CLASS(UShader,URenderedMaterial,0,Engine)
 
-	// Data members (from Shader.uc).
-	UMaterial* Diffuse;
-	UMaterial* Opacity;
-	UMaterial* Specular;
-	UMaterial* SpecularityMask;
-	UMaterial* SelfIllumination;
-	UMaterial* SelfIlluminationMask;
-	UMaterial* Detail;
-	BYTE OutputBlending; // EOutputBlending
-	BITFIELD TwoSided:1;
+	// Data members — field order matches retail binary layout, NOT .uc declaration order.
+	// OutputBlending (0x58) and bitfields (0x5C) come before material pointers (0x60+).
+	BYTE     OutputBlending;            // 0x58 — EOutputBlending
+	// (3 bytes implicit MSVC padding to align next BITFIELD DWORD)
+	BITFIELD TwoSided:1;                // 0x5C
 	BITFIELD Wireframe:1;
 	BITFIELD ModulateStaticLighting2X:1;
 	BITFIELD PerformLightingOnSpecularPass:1;
+	UMaterial* Diffuse;                 // 0x60
+	UMaterial* Opacity;                 // 0x64
+	UMaterial* Specular;                // 0x68
+	UMaterial* SpecularityMask;         // 0x6C
+	UMaterial* SelfIllumination;        // 0x70
+	UMaterial* SelfIlluminationMask;    // 0x74
+	UMaterial* Detail;                  // 0x78
 
 	// Auto-generated method declarations
 	virtual BYTE RequiredUVStreams();
