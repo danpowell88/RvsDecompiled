@@ -111,8 +111,7 @@ UBOOL UField::MergeBools()
 
 void UField::Bind()
 {
-	guard(UField::Bind);
-	unguard;
+	// Retail Core.dll: ret (truly empty)
 }
 
 UClass* UField::GetOwnerClass()

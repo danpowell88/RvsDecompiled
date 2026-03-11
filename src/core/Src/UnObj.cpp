@@ -339,8 +339,7 @@ INT UObject::GetPropertiesSize()
 
 void UObject::NetDirty( UProperty* Property )
 {
-	guard(UObject::NetDirty);
-	unguard;
+	// Retail Core.dll: ret 4 (truly empty)
 }
 
 /*-----------------------------------------------------------------------------
