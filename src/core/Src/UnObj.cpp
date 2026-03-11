@@ -175,8 +175,7 @@ void UObject::ProcessDelegate( FName DelegateName, FScriptDelegate* Delegate, vo
 
 void UObject::ProcessState( FLOAT DeltaSeconds )
 {
-	guard(UObject::ProcessState);
-	unguard;
+	// Retail Core.dll: ret 4 (truly empty, no SEH frame)
 }
 
 INT UObject::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
@@ -284,8 +283,7 @@ void UObject::InitExecution()
 
 void UObject::ShutdownAfterError()
 {
-	guard(UObject::ShutdownAfterError);
-	unguard;
+	// Retail Core.dll: ret (truly empty, no SEH frame)
 }
 
 void UObject::PostEditChange()

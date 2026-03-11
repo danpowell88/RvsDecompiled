@@ -2499,8 +2499,7 @@ void AActor::TickSimulated( FLOAT DeltaTime )
 
 void AActor::TickSpecial( FLOAT DeltaTime )
 {
-	guard(AActor::TickSpecial);
-	unguard;
+	// Retail Engine.dll: ret 4 (truly empty, no SEH frame)
 }
 
 INT AActor::TickThisFrame( FLOAT DeltaTime )
@@ -2548,8 +2547,7 @@ void AActor::BoundProjectileVelocity()
 
 void AActor::PostBeginPlay()
 {
-	guard(AActor::PostBeginPlay);
-	unguard;
+	// Retail Engine.dll: ret (truly empty, no SEH frame)
 }
 
 void AActor::PostEditLoad()
