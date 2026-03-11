@@ -96,7 +96,8 @@ INT UMaterial::MaterialVSize()
 
 UBOOL UMaterial::RequiresSorting()
 {
-	return IsTransparent();
+	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
+	return 0;
 }
 
 BYTE UMaterial::RequiredUVStreams()
@@ -161,7 +162,10 @@ void UTexture::Serialize( FArchive& Ar )
 
 UBOOL UTexture::RequiresSorting()
 {
-	return UBitmapMaterial::RequiresSorting();
+	// Retail: F6 41 34 04 74 03 33 C0 C3 8B 81 94 00 00 00 D1 E8 83 E0 01 C3
+	// Check ForceNoSort flag; if clear, return bAlphaTexture (bit 1 of bitfield at 0x94).
+	if (m_bForceNoSort) return 0;
+	return bAlphaTexture ? 1 : 0;
 }
 
 UBOOL UTexture::IsTransparent()
@@ -346,7 +350,8 @@ UBOOL UCombiner::IsTransparent()
 
 UBOOL UCombiner::RequiresSorting()
 {
-	return IsTransparent();
+	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
+	return 0;
 }
 
 BYTE UCombiner::RequiredUVStreams()
