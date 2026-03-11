@@ -1153,7 +1153,7 @@ void ULodMeshInstance::SetStatus(int s)
 
 AActor * ULodMeshInstance::GetActor()
 {
-	return NULL;
+	return Actor;
 }
 
 void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
@@ -1167,16 +1167,16 @@ UMaterial * ULodMeshInstance::GetMaterial(int,AActor *)
 
 UMesh * ULodMeshInstance::GetMesh()
 {
-	return NULL;
+	return Mesh;
 }
 
 void ULodMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 }
 
-int ULodMeshInstance::GetStatus()
+INT ULodMeshInstance::GetStatus()
 {
-	return 0;
+	return Status;
 }
 
 // --- UMaterial ---
@@ -6609,14 +6609,14 @@ int UTerrainMaterial::HasFallback()
 }
 
 // --- UTexCoordMaterial ---
-int UTexCoordMaterial::MaterialUSize()
+INT UTexCoordMaterial::MaterialUSize()
 {
-	return 0;
+	return Material ? Material->MaterialUSize() : 0;
 }
 
-int UTexCoordMaterial::MaterialVSize()
+INT UTexCoordMaterial::MaterialVSize()
 {
-	return 0;
+	return Material ? Material->MaterialVSize() : 0;
 }
 
 // --- UTexCoordSource ---
@@ -6633,7 +6633,7 @@ FMatrix * UTexEnvMap::GetMatrix(float)
 // --- UTexMatrix ---
 FMatrix * UTexMatrix::GetMatrix(float)
 {
-	return NULL;
+	return &Matrix;
 }
 
 // --- UTexModifier ---
