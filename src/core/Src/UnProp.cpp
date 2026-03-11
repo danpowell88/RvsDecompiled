@@ -145,8 +145,6 @@ void UProperty::CopyCompleteValue( void* Dest, void* Src ) const
 
 void UProperty::DestroyValue( void* Dest ) const
 {
-	guard(UProperty::DestroyValue);
-	unguard;
 }
 
 UBOOL UProperty::Port() const
