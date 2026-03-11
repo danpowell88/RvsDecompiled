@@ -9225,7 +9225,10 @@ FCheckResult* FCollisionOctree::ActorRadiusCheck(FMemStack& Mem, FVector Center,
 		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
 		*(INT*)((BYTE*)A + 0x60) = Frame;
 		if (!A->ShouldTrace(NULL, ExtraNodeFlags)) continue;
-		if (FDist(A->Location, Center) <= Radius)
+		const FLOAT dx = A->Location.X - Center.X;
+		const FLOAT dy = A->Location.Y - Center.Y;
+		const FLOAT dz = A->Location.Z - Center.Z;
+		if (dx*dx + dy*dy + dz*dz <= Radius*Radius)
 		{
 			FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
 			if (CR)
@@ -9437,22 +9440,179 @@ void FMatineeTools::GetSamples(ASceneManager * p0, UMatAction * p1, TArray<FVect
 void FMatineeTools::Init() {}
 
 // ?ActorEncroachmentCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree * p0, FPlane const * p1) {}
+// Node-level encroachment check.  Reads query state from OctHash->Pad:
+//   Pad[96..99]   = SourceActor (the encroaching actor)
+//   Pad[16..27]   = query Location (FVector)
+//   Pad[80..87]   = Extent (FVector, zero for point test)
+//   Pad[88..91]   = TraceFlags (DWORD)
+void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+	FVector Location    = *(FVector*)(OctHash->Pad + 16);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A || A == SourceActor) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(1.f);
+			if (A->GetPrimitive()->PointCheck(TestHit, A, Location, FVector(0,0,0), 0) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+}
 
 // ?ActorNonZeroExtentLineCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree * p0, FPlane const * p1) {}
+// Capsule line check — like the zero-extent version but passes Extent to LineCheck.
+void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	FVector   Start     = *(FVector*)(OctHash->Pad + 16);
+	FVector   End       = *(FVector*)(OctHash->Pad + 28);
+	FVector   Extent    = *(FVector*)(OctHash->Pad + 80);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+	DWORD TypeFlags     = *(DWORD*)(OctHash->Pad + 92);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A == SourceActor) continue;
+		bool bIgnored = false;
+		for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI + 0x140))
+			if ((AActor*)pI == A) { bIgnored = true; break; }
+		if (bIgnored) continue;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(0.f);
+			if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, Extent, TypeFlags, TraceFlags) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+}
 
 // ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
-void FOctreeNode::ActorPointCheck(FCollisionOctree * p0, FPlane const * p1, AActor * p2) {}
+void FOctreeNode::ActorPointCheck(FCollisionOctree* OctHash, FPlane const* NodePlane, AActor* SourceActor)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FVector Location    = *(FVector*)(OctHash->Pad + 16);
+	FVector Extent      = *(FVector*)(OctHash->Pad + 80);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		if (!A->ShouldTrace(SourceActor, TraceFlags)) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		FCheckResult TestHit(1.f);
+		if (A->GetPrimitive()->PointCheck(TestHit, A, Location, Extent, 0) == 0)
+		{
+			FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+			if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+		}
+	}
+}
 
 // ?ActorRadiusCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-void FOctreeNode::ActorRadiusCheck(FCollisionOctree * p0, FPlane const * p1) {}
+void FOctreeNode::ActorRadiusCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	FVector   Center    = *(FVector*)(OctHash->Pad + 16);
+	FLOAT     Radius    = *(FLOAT*)(OctHash->Pad + 80);  // radius in Extent.X
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (!A->ShouldTrace(NULL, TraceFlags)) continue;
+		const FLOAT dx = A->Location.X - Center.X;
+		const FLOAT dy = A->Location.Y - Center.Y;
+		const FLOAT dz = A->Location.Z - Center.Z;
+		if (dx*dx + dy*dy + dz*dz <= Radius*Radius)
+		{
+			FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+			if (CR)
+			{
+				appMemzero(CR, sizeof(FCheckResult));
+				CR->Actor = A;
+				CR->GetNext() = List;
+				List = CR;
+			}
+		}
+	}
+}
 
 // ?ActorZeroExtentLineCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@MMMMMMPBVFPlane@@@Z
-void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree * p0, float p1, float p2, float p3, float p4, float p5, float p6, FPlane const * p7) {}
+// Entry point for a ray test against actors in this node.  The caller passes
+// Start and End as individual floats; Ghidra confirmed the packing order is
+// Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z.
+void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, float Sy, float Sz, float Ex, float Ey, float Ez, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+	DWORD TypeFlags     = *(DWORD*)(OctHash->Pad + 92);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+	FVector Start(Sx, Sy, Sz);
+	FVector End(Ex, Ey, Ez);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A == SourceActor) continue;
+		bool bIgnored = false;
+		for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI + 0x140))
+			if ((AActor*)pI == A) { bIgnored = true; break; }
+		if (bIgnored) continue;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(0.f);
+			if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, FVector(0,0,0), TypeFlags, TraceFlags) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+}
 
 // ?CheckActorNotReferenced@FOctreeNode@@QAEXPAVAActor@@@Z
 void FOctreeNode::CheckActorNotReferenced(AActor * p0) {}
