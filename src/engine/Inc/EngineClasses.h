@@ -4435,15 +4435,19 @@ enum ETexCoordSrc
 };
 enum ETexCoordCount { TCN_2DCoords=0, TCN_3DCoords=1, TCN_4DCoords=2 };
 
+// UTexCoordMaterial corresponds to the UC class TexModifier (extends Modifier).
+// It holds TexCoordSource, TexCoordCount, TexCoordProjected at 0x5C–0x64.
+// UTexModifier (defined later) is the abstract C++ interface; it shares the same
+// field layout when its virtual methods are called on UTexCoordMaterial instances.
 class ENGINE_API UTexCoordMaterial : public UModifier
 {
 public:
 	DECLARE_CLASS(UTexCoordMaterial,UModifier,0,Engine)
 
-	// Data fields from TexModifier.uc — offsets 0x5C..0x60 (after UModifier=0x5C)
-	BYTE  TexCoordSource;   // 0x5C (ETexCoordSrc)
-	BYTE  TexCoordCount;    // 0x5D (ETexCoordCount)
-	// 2 padding bytes → 0x60
+	// Data fields from TexModifier.uc — offsets 0x5C..0x64 (after UModifier=0x5C)
+	BYTE  TexCoordSource;    // 0x5C (ETexCoordSrc)
+	BYTE  TexCoordCount;     // 0x5D (ETexCoordCount)
+	// 2 implicit padding bytes at 0x5E–0x5F
 	UBOOL TexCoordProjected; // 0x60
 
 	// Auto-generated method declarations
@@ -5216,6 +5220,13 @@ class ENGINE_API UTexModifier : public UModifier
 {
 public:
 	DECLARE_CLASS(UTexModifier,UModifier,0,Engine)
+
+	// Data fields from TexModifier.uc (offset 0x5C = first field after UModifier=0x5C)
+	BYTE  TexCoordSource;    // 0x5C  (ETexCoordSrc)
+	BYTE  TexCoordCount;     // 0x5D  (ETexCoordCount)
+	// 2 implicit padding bytes at 0x5E–0x5F
+	UBOOL TexCoordProjected; // 0x60
+
 	// Auto-generated method declarations
 	virtual void SetValidated(int);
 	virtual BYTE RequiredUVStreams();
@@ -5229,6 +5240,10 @@ class ENGINE_API UAnimNotify : public UObject
 {
 public:
 	DECLARE_CLASS(UAnimNotify,UObject,0,Engine)
+
+	// From AnimNotify.uc: var transient int Revision;
+	INT Revision; // 0x2C — incremented on PostEditChange
+
 	// Auto-generated method declarations
 	virtual void Notify(UMeshInstance *,AActor *);
 	virtual void PostEditChange();

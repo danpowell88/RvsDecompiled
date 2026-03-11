@@ -4763,6 +4763,8 @@ void UAnimNotify::Notify(UMeshInstance *,AActor *)
 
 void UAnimNotify::PostEditChange()
 {
+	// Retail: FF 41 2C C3 = INC [ECX+0x2C]; RET — increments Revision counter
+	Revision++;
 }
 
 // --- UAnimNotify_DestroyEffect ---
@@ -6659,13 +6661,31 @@ FMatrix * UTexMatrix::GetMatrix(float)
 }
 
 // --- UTexModifier ---
-void UTexModifier::SetValidated(int)
+void UTexModifier::SetValidated(int x)
 {
+	// Delegate to Material via virtual call if present.
+	// Retail: 8B 41 58 85 C0 74 07 8B C8 8B 01 FF 60 6C C2 04 00
+	if (Material)
+		Material->SetValidated(x);
 }
 
 BYTE UTexModifier::RequiredUVStreams()
 {
-	return 0;
+	// Retail: when TexCoordSource <= 7 and Material present: (1<<src)|Material->RequiredUVStreams()
+	// When TexCoordSource <= 7 and no Material: (1<<src)|1
+	if (TexCoordSource <= 7)
+	{
+		if (Material)
+		{
+			BYTE matResult = Material->RequiredUVStreams();
+			return (BYTE)((1 << TexCoordSource) | matResult);
+		}
+		return (BYTE)((1 << TexCoordSource) | 1);
+	}
+	// TexCoordSource > 7 (world/camera coords etc.): delegate to material if present
+	if (Material)
+		return Material->RequiredUVStreams();
+	return 1;
 }
 
 int UTexModifier::MaterialUSize()
@@ -6685,7 +6705,11 @@ FMatrix * UTexModifier::GetMatrix(float)
 
 int UTexModifier::GetValidated()
 {
-	return 0;
+	// Retail: if Material -> tail-call Material->GetValidated(); else return 1
+	// 8B 41 58 85 C0 74 07 8B C8 8B 01 FF 60 68 B8 01 00 00 00 C3
+	if (Material)
+		return Material->GetValidated();
+	return 1;
 }
 
 // --- UTexOscillator ---
