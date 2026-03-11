@@ -3323,8 +3323,12 @@ FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
 }
 
 // --- FCanvasUtil ---
-FCanvasUtil::FCanvasUtil(FCanvasUtil const &)
+FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 {
+	// Ghidra 0x18c10: vtable set by compiler; same copy regions as operator= (0x18cb0):
+	// scalar state +4..+53, skip transient +54..+93, big vertex batch +94..+CA7
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x50);
+	appMemcpy((BYTE*)this + 0x94, (const BYTE*)&Other + 0x94, 0xC14);
 }
 
 FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
