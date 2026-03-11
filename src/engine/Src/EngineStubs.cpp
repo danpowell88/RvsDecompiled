@@ -3359,8 +3359,10 @@ BYTE FConvexVolume::SphereCheck(FSphere Sphere)
 	return Result;
 }
 
-FConvexVolume::FConvexVolume(FConvexVolume const &)
+FConvexVolume::FConvexVolume(const FConvexVolume& Other)
 {
+	// Ghidra 0x3750: 32 FPlane copy ctors (FPlane is POD) + 24 DWORDs = 0x260 bytes total
+	appMemcpy(this, &Other, 0x260);
 }
 
 FConvexVolume::FConvexVolume()
@@ -3420,8 +3422,10 @@ void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInt
 {
 }
 
-FDynamicActor::FDynamicActor(FDynamicActor const &)
+FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 {
+	// Ghidra 0x135d0: no vtable; flat copy of 0x80 bytes (same as operator= at 0x13660)
+	appMemcpy(this, &Other, 0x80);
 }
 
 FDynamicActor::FDynamicActor(AActor *)
@@ -4505,8 +4509,10 @@ void FTerrainTools::Init()
 }
 
 // --- FZoneProperties ---
-FZoneProperties::FZoneProperties(FZoneProperties const &)
+FZoneProperties::FZoneProperties(const FZoneProperties& Other)
 {
+	// Ghidra 0x2ac0: shares address with operator=; 18 DWORDs flat copy (no vtable)
+	appMemcpy(this, &Other, 0x48);
 }
 
 FZoneProperties::FZoneProperties()
