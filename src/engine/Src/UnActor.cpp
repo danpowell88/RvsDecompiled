@@ -2200,8 +2200,6 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 
 void AActor::SetGameType( FString GameType )
 {
-	guard(AActor::SetGameType);
-	unguard;
 }
 
 
@@ -2312,20 +2310,14 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 
 void AActor::PreNetReceive()
 {
-	guard(AActor::PreNetReceive);
-	unguard;
 }
 
 void AActor::PostNetReceive()
 {
-	guard(AActor::PostNetReceive);
-	unguard;
 }
 
 void AActor::PostNetReceiveLocation()
 {
-	guard(AActor::PostNetReceiveLocation);
-	unguard;
 }
 
 INT AActor::PlayerControlled()
@@ -2611,8 +2603,6 @@ void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 
 void AActor::StartAnimPoll()
 {
-	guard(AActor::StartAnimPoll);
-	unguard;
 }
 
 INT AActor::CheckAnimFinished( INT Channel )
@@ -2740,14 +2730,10 @@ INT AActor::DetachFromBone( AActor* Attachment )
 
 void AActor::AttachProjector( AProjector* Proj )
 {
-	guard(AActor::AttachProjector);
-	unguard;
 }
 
 void AActor::DetachProjector( AProjector* Proj )
 {
-	guard(AActor::DetachProjector);
-	unguard;
 }
 
 void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewBlockPlayers )
@@ -2781,14 +2767,10 @@ FLOAT AActor::WorldLightRadius() const
 
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
-	guard(AActor::RenderEditorInfo);
-	unguard;
 }
 
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
-	guard(AActor::RenderEditorSelected);
-	unguard;
 }
 
 void AActor::SetZone( INT bTest, INT bForceRefresh )
@@ -3302,50 +3284,34 @@ struct _McdModel* AActor::getKModel() const
 
 void AActor::physKarma( FLOAT DeltaTime )
 {
-	guard(AActor::physKarma);
-	unguard;
 }
 
 void AActor::physKarma_internal( FLOAT DeltaTime )
 {
-	guard(AActor::physKarma_internal);
-	unguard;
 }
 
 void AActor::physKarmaRagDoll( FLOAT DeltaTime )
 {
-	guard(AActor::physKarmaRagDoll);
-	unguard;
 }
 
 void AActor::physKarmaRagDoll_internal( FLOAT DeltaTime )
 {
-	guard(AActor::physKarmaRagDoll_internal);
-	unguard;
 }
 
 void AActor::preKarmaStep( FLOAT DeltaTime )
 {
-	guard(AActor::preKarmaStep);
-	unguard;
 }
 
 void AActor::postKarmaStep()
 {
-	guard(AActor::postKarmaStep);
-	unguard;
 }
 
 void AActor::preKarmaStep_skeletal( FLOAT DeltaTime )
 {
-	guard(AActor::preKarmaStep_skeletal);
-	unguard;
 }
 
 void AActor::postKarmaStep_skeletal()
 {
-	guard(AActor::postKarmaStep_skeletal);
-	unguard;
 }
 
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
@@ -3391,8 +3357,6 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 
 void AActor::CheckForErrors()
 {
-	guard(AActor::CheckForErrors);
-	unguard;
 }
 
 void AActor::AddMyMarker( AActor* S )
@@ -3571,8 +3535,6 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 
 void AActor::SaveServerOptions( FString FileName )
 {
-	guard(AActor::SaveServerOptions);
-	unguard;
 }
 
 BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
@@ -3608,26 +3570,18 @@ INT AActor::NativeStartedByGSClient()
 
 void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
 {
-	guard(AActor::DbgAddLine);
-	unguard;
 }
 
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
-	guard(AActor::DbgVectorAdd);
-	unguard;
 }
 
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
-	guard(AActor::DbgVectorDraw);
-	unguard;
 }
 
 void AActor::DbgVectorReset( INT VectorIndex )
 {
-	guard(AActor::DbgVectorReset);
-	unguard;
 }
 
 /*-----------------------------------------------------------------------------

@@ -1336,8 +1336,6 @@ void APawn::ClearSerpentine()
 
 void APawn::Crouch(INT bClientSimulation)
 {
-	guard(APawn::Crouch);
-	unguard;
 }
 
 ETestMoveResult APawn::FindBestJump(FVector Dest)
@@ -1387,14 +1385,10 @@ INT APawn::PickWallAdjust(FVector WallHitNormal)
 
 void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 {
-	guard(APawn::SpiderstepUp);
-	unguard;
 }
 
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 {
-	guard(APawn::StartNewSerpentine);
-	unguard;
 }
 
 FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJumpZ)
@@ -1413,8 +1407,6 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 
 void APawn::UnCrouch(INT bClientSimulation)
 {
-	guard(APawn::UnCrouch);
-	unguard;
 }
 
 INT APawn::ValidAnchor()
@@ -1426,8 +1418,6 @@ INT APawn::ValidAnchor()
 
 void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 {
-	guard(APawn::ZeroMovementAlpha);
-	unguard;
 }
 
 ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), ANavigationPoint* Start, INT MaxPathLength, FLOAT* Weight)
@@ -1474,8 +1464,6 @@ void APawn::clearPath(ANavigationPoint* Node)
 
 void APawn::clearPaths()
 {
-	guard(APawn::clearPaths);
-	unguard;
 }
 
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
@@ -1536,26 +1524,18 @@ INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 
 void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 {
-	guard(APawn::physFlying);
-	unguard;
 }
 
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
-	guard(APawn::physSpider);
-	unguard;
 }
 
 void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 {
-	guard(APawn::physSwimming);
-	unguard;
 }
 
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
-	guard(APawn::physWalking);
-	unguard;
 }
 
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
@@ -1567,14 +1547,10 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
-	guard(APawn::rotateToward);
-	unguard;
 }
 
 void APawn::setMoveTimer(FLOAT DeltaTime)
 {
-	guard(APawn::setMoveTimer);
-	unguard;
 }
 
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
@@ -1599,8 +1575,6 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
-	guard(APawn::startSwimming);
-	unguard;
 }
 
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
@@ -1666,8 +1640,6 @@ void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 
 void AController::StartAnimPoll()
 {
-	guard(AController::StartAnimPoll);
-	unguard;
 }
 
 INT AController::CheckAnimFinished( INT Channel )
@@ -1691,8 +1663,6 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
-	guard(AController::CheckHearSound);
-	unguard;
 }
 
 AActor* AController::GetViewTarget()
@@ -1712,8 +1682,6 @@ void AController::SetAdjustLocation( FVector NewLoc )
 
 void AController::ShowSelf()
 {
-	guard(AController::ShowSelf);
-	unguard;
 }
 
 DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
@@ -1734,8 +1702,6 @@ AActor* AController::SetPath( INT bInitialPath )
 
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
-	guard(AController::SetRouteCache);
-	unguard;
 }
 
 DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
@@ -1754,8 +1720,6 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 
 void AController::CheckEnemyVisible()
 {
-	guard(AController::CheckEnemyVisible);
-	unguard;
 }
 
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
