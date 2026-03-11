@@ -913,8 +913,12 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
-	// TODO: Check if pawn reached destination within threshold.
-	return 0;
+	// Destination reached within pawn+goal collision radius if XY distance is small enough.
+	FVector GoalLoc      = GoalActor ? GoalActor->Location : Dest;
+	FLOAT   Threshold    = CollisionRadius + (GoalActor ? GoalActor->CollisionRadius : 0.f);
+	FVector Diff         = Location - GoalLoc;
+	Diff.Z               = 0.f;   // XY plane only
+	return Diff.SizeSquared() <= Threshold * Threshold;
 	unguard;
 }
 
@@ -963,7 +967,9 @@ void APawn::TickSimulated( FLOAT DeltaTime )
 void APawn::TickSpecial( FLOAT DeltaTime )
 {
 	guard(APawn::TickSpecial);
-	// TODO: Pawn-specific ticking (posture, status effects, breathing).
+	// Pawn-specific per-frame housekeeping.
+	// Animation, posture and status-effect updates live in derived classes (AR6Pawn etc.).
+	AActor::TickSimulated( DeltaTime );
 	unguard;
 }
 
@@ -985,7 +991,38 @@ INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 void APawn::calcVelocity( FVector AccelDir, FLOAT DeltaTime, FLOAT MaxSpeed, FLOAT Friction, INT bFluid, INT bBraking, INT bBuoyant )
 {
 	guard(APawn::calcVelocity);
-	// TODO: Calculate velocity from acceleration, friction, max speed.
+	// Ghidra 0xee4b0: braking sub-step loop when Acceleration is zero,
+	// otherwise friction-then-acceleration formula.
+	if( Acceleration.IsZero() )
+	{
+		// Braking path: sub-step deceleration (max 0.03 s per chunk).
+		FVector OriginalVelocity = Velocity;
+		FLOAT   RemainingTime   = DeltaTime;
+		while( RemainingTime > KINDA_SMALL_NUMBER )
+		{
+			FLOAT Step = Min( RemainingTime, 0.03f );
+			RemainingTime -= Step;
+			Velocity -= Velocity * (Friction * Step);
+			// Stop if velocity reversed sign or fell below 10 UU/s.
+			if( Velocity.SizeSquared() < 100.f || (OriginalVelocity | Velocity) < 0.f )
+			{
+				Velocity = FVector(0.f, 0.f, 0.f);
+				return;
+			}
+		}
+		return;
+	}
+
+	// Normal path: apply friction, then add acceleration, then cap to MaxSpeed.
+	FLOAT VelScale = 1.f - Friction * DeltaTime;
+	if( VelScale < 0.f ) VelScale = 0.f;
+	Velocity *= VelScale;
+	Velocity += Acceleration.SafeNormal() * (MaxSpeed * DeltaTime);
+
+	// Clamp to MaxSpeed.
+	FLOAT SpeedSq = Velocity.SizeSquared();
+	if( SpeedSq > MaxSpeed * MaxSpeed )
+		Velocity = Velocity.SafeNormal() * MaxSpeed;
 	unguard;
 }
 
@@ -1000,7 +1037,51 @@ INT APawn::moveToward( const FVector& Dest, AActor* GoalActor )
 void APawn::performPhysics( FLOAT DeltaSeconds )
 {
 	guard(APawn::performPhysics);
-	// TODO: Pawn physics dispatch (walking, falling, swimming, flying, ladder).
+	// Fell-out-of-world: zone 0 means outside all zones (Ghidra 0xf5350).
+	if( bCollideWorld && Region.ZoneNumber == 0 && !bIgnoreOutOfWorld )
+	{
+		// Only fire the event for AI; players are handled by the controller.
+		if( !Controller || !Controller->IsA(APlayerController::StaticClass()) )
+			eventFellOutOfWorld();
+		return;
+	}
+
+	FVector OldVelocity = Velocity;
+
+	// Crouch state machine for walking mode.
+	if( Physics == PHYS_Walking )
+	{
+		if( bWantsToCrouch && !bIsCrouched )
+			Crouch(0);
+		// TODO: bTryToUncrouch countdown timer at this+0x424 not yet mapped to a named field.
+	}
+	else if( bIsCrouched )
+		UnCrouch(0);
+
+	startNewPhysics( DeltaSeconds, 0 );
+
+	// Keep bIsWalking in sync with the current physics mode.
+	bIsWalking = (Physics == PHYS_Walking || Physics == PHYS_Falling);
+
+	// Uncrouch if we're no longer in a state that allows crouching.
+	if( bIsCrouched && !(Physics == PHYS_Walking && bWantsToCrouch) )
+		UnCrouch(0);
+
+	// Drive rotation from the controller when active and not frozen by Karma.
+	if( Controller && !bInterpolating &&
+		Physics != PHYS_Karma && Physics != PHYS_KarmaRagDoll && Physics != PHYS_None )
+	{
+		physicsRotation( DeltaSeconds, OldVelocity );
+	}
+
+	// Process deferred touch events (same pattern as AActor::performPhysics).
+	if( PendingTouch )
+	{
+		AActor* OldTouch  = PendingTouch;
+		OldTouch->eventPostTouch( this );
+		PendingTouch       = OldTouch->PendingTouch;
+		OldTouch->PendingTouch = NULL;
+	}
 	unguard;
 }
 
@@ -1021,7 +1102,9 @@ void APawn::physLadder( FLOAT DeltaTime, INT Iterations )
 void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 {
 	guard(APawn::physicsRotation);
-	// TODO: Pawn rotation with controller desired rotation.
+	// Retail Ghidra 0xf1920: asserts "false" in debug builds — this override
+	// should never be reached.  Each concrete pawn (AR6Pawn, APlayerPawn) has its
+	// own controller-driven physicsRotation.  Fall through as no-op here.
 	unguard;
 }
 
@@ -1103,10 +1186,20 @@ ETestMoveResult APawn::FindJumpUp(FVector Dest)
 	unguard;
 }
 
-FVector APawn::NewFallVelocity(FVector OldVelocity, FVector OldAcceleration, FLOAT DeltaTime)
+FVector APawn::NewFallVelocity( FVector OldVelocity, FVector OldAcceleration, FLOAT DeltaTime )
 {
 	guard(APawn::NewFallVelocity);
-	return FVector(0,0,0);
+	// Ghidra 0xf2090: midpoint gravity integration with buoyancy reduction.
+	FLOAT NetBuoyancy = 0.f, NetFluidFriction = 0.f;
+	GetNetBuoyancy( NetBuoyancy, NetFluidFriction );
+	// Zone gravity from raw offset (same convention as AActor::physFalling).
+	FVector Gravity( 0.f, 0.f, -1800.f );
+	if( Region.Zone )
+		Gravity = *(FVector*)( (BYTE*)Region.Zone + 0x450 );
+	Gravity *= (1.f - NetBuoyancy);
+	// Midpoint Verlet: half gravity + acceleration + half gravity.
+	FVector HalfGrav = Gravity * (DeltaTime * 0.5f);
+	return OldVelocity + HalfGrav + OldAcceleration * DeltaTime + HalfGrav;
 	unguard;
 }
 
