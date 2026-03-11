@@ -53,6 +53,14 @@ struct FStaticMeshTriangle;
 // (confirmed by GetStreamData: FArray::Num * 32 bytes).
 struct FStreamVert32 { BYTE d[32]; };
 
+// 52-byte element type for TArray in FLightMap (Ghidra FUN_1033aac0).
+// Confirmed by FUN_1031eda0 copy constructor: DWORD + TArray<BYTE> + 9 DWORDs.
+struct FLightMapSample52 {
+	DWORD        d0;
+	TArray<BYTE> bytes;
+	DWORD        d4, d5, d6, d7, d8, d9, d10, d11, d12;
+};
+
 // --- ACamera ---
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
@@ -3159,8 +3167,14 @@ CBoneDescData::~CBoneDescData()
 {
 }
 
-CBoneDescData& CBoneDescData::operator=(const CBoneDescData&)
+CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 {
+	// Ghidra 0x2b0a0: +0,+4=DWORD; +8=TArray<FString> (FUN_10321830); +0x14=FString; +0x20=DWORD
+	*(DWORD*)((BYTE*)this + 0x00) = *(const DWORD*)((const BYTE*)&Other + 0x00);
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	*(TArray<FString>*)((BYTE*)this + 0x08) = *(const TArray<FString>*)((const BYTE*)&Other + 0x08);
+	*(FString*)((BYTE*)this + 0x14) = *(const FString*)((const BYTE*)&Other + 0x14);
+	*(DWORD*)((BYTE*)this + 0x20) = *(const DWORD*)((const BYTE*)&Other + 0x20);
 	return *this;
 }
 
@@ -3628,8 +3642,12 @@ FLightMap::~FLightMap()
 {
 }
 
-FLightMap& FLightMap::operator=(const FLightMap&)
+FLightMap& FLightMap::operator=(const FLightMap& Other)
 {
+	// Ghidra 0x3ca10: skip vtable +0; +4..+8B = 34 DWORDs (contiguous); +0x8C=TArray<FLightMapSample52>; +0x98=TArray<FLOAT>
+	appMemcpy((BYTE*)this + 4, (const BYTE*)&Other + 4, 0x88);
+	*(TArray<FLightMapSample52>*)((BYTE*)this + 0x8C) = *(const TArray<FLightMapSample52>*)((const BYTE*)&Other + 0x8C);
+	*(TArray<FLOAT>*)((BYTE*)this + 0x98) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98);
 	return *this;
 }
 
@@ -3666,8 +3684,13 @@ FLightMapTexture::~FLightMapTexture()
 {
 }
 
-FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture&)
+FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 {
+	// Ghidra 0x20ed0: skip vtable +0; +4=DWORD; +8=TArray<FLOAT>; +0x14=FStaticLightMapTexture subobj; +0x60,+0x64,+0x68=3 DWORDs
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	*(TArray<FLOAT>*)((BYTE*)this + 0x08) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x08);
+	*(FStaticLightMapTexture*)((BYTE*)this + 0x14) = *(const FStaticLightMapTexture*)((const BYTE*)&Other + 0x14);
+	appMemcpy((BYTE*)this + 0x60, (const BYTE*)&Other + 0x60, 0x0C);
 	return *this;
 }
 
@@ -3829,8 +3852,12 @@ FRaw32BitIndexBuffer::~FRaw32BitIndexBuffer()
 {
 }
 
-FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer&)
+FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer& Other)
 {
+	// Ghidra 0x275b0: skip vtable +0; +4=TArray<FLOAT> (FUN_1031f660); +0x10,+0x14,+0x18=3 DWORDs
+	// Shares address with FRawColorStream and FStaticMeshColorStream.
+	*(TArray<FLOAT>*)((BYTE*)this + 0x04) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C);
 	return *this;
 }
 
@@ -3847,8 +3874,11 @@ FRawColorStream::~FRawColorStream()
 {
 }
 
-FRawColorStream& FRawColorStream::operator=(const FRawColorStream&)
+FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 {
+	// Ghidra 0x275b0: same body as FRaw32BitIndexBuffer::operator=
+	*(TArray<FLOAT>*)((BYTE*)this + 0x04) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C);
 	return *this;
 }
 
@@ -3870,8 +3900,11 @@ FRawIndexBuffer::~FRawIndexBuffer()
 {
 }
 
-FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer&)
+FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 {
+	// Ghidra 0x18dc0: skip vtable +0; +4=TArray<WORD>; +0x10,+0x14,+0x18=3 DWORDs
+	*(TArray<WORD>*)((BYTE*)this + 0x04) = *(const TArray<WORD>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C);
 	return *this;
 }
 
@@ -4064,8 +4097,15 @@ FStaticLightMapTexture::~FStaticLightMapTexture()
 {
 }
 
-FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapTexture&)
+FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapTexture& Other)
 {
+	// Ghidra 0x20d50: 2-iteration loop (stride 0x18); each: 2 DWORDs before TArray<BYTE>, then TArray<BYTE>.
+	// Layout: +0x08,+0x0C=2 DWORDs; +0x10=TArray<BYTE>; +0x20,+0x24=2 DWORDs; +0x28=TArray<BYTE>; +0x34..+0x48=6 DWORDs.
+	appMemcpy((BYTE*)this + 0x08, (const BYTE*)&Other + 0x08, 0x08);
+	*(TArray<BYTE>*)((BYTE*)this + 0x10) = *(const TArray<BYTE>*)((const BYTE*)&Other + 0x10);
+	appMemcpy((BYTE*)this + 0x20, (const BYTE*)&Other + 0x20, 0x08);
+	*(TArray<BYTE>*)((BYTE*)this + 0x28) = *(const TArray<BYTE>*)((const BYTE*)&Other + 0x28);
+	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 0x18);
 	return *this;
 }
 
@@ -4291,8 +4331,10 @@ FTerrainMaterialLayer::~FTerrainMaterialLayer()
 {
 }
 
-FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLayer&)
+FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLayer& Other)
 {
+	// Ghidra 0x9810: shares address with FKCylinderElem::operator= (same-size flat copy, no vtable)
+	appMemcpy(this, &Other, sizeof(FTerrainMaterialLayer));
 	return *this;
 }
 
@@ -4471,8 +4513,10 @@ FZoneProperties::FZoneProperties()
 {
 }
 
-FZoneProperties& FZoneProperties::operator=(const FZoneProperties&)
+FZoneProperties& FZoneProperties::operator=(const FZoneProperties& Other)
 {
+	// Ghidra 0x2ac0: 18 DWORDs from +0x00 (no vtable; also used as copy ctor body)
+	appMemcpy(this, &Other, 0x48);
 	return *this;
 }
 
@@ -5904,8 +5948,12 @@ UTerrainBrush::~UTerrainBrush()
 {
 }
 
-UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush&)
+UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 {
+	// Ghidra 0x15770: skip vtable +0; FString@+4, FString@+0x10, 19 DWORDs@+0x1C..+0x64
+	*(FString*)((BYTE*)this + 0x04) = *(const FString*)((const BYTE*)&Other + 0x04);
+	*(FString*)((BYTE*)this + 0x10) = *(const FString*)((const BYTE*)&Other + 0x10);
+	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C);
 	return *this;
 }
 
@@ -5940,8 +5988,10 @@ UTerrainBrushColor::~UTerrainBrushColor()
 {
 }
 
-UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor&)
+UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator= (shared by all 13 subclasses)
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -5962,8 +6012,10 @@ UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn()
 {
 }
 
-UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeTurn&)
+UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeTurn& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -5989,8 +6041,10 @@ UTerrainBrushFlatten::~UTerrainBrushFlatten()
 {
 }
 
-UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten&)
+UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6011,8 +6065,10 @@ UTerrainBrushNoise::~UTerrainBrushNoise()
 {
 }
 
-UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise&)
+UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6033,8 +6089,10 @@ UTerrainBrushPaint::~UTerrainBrushPaint()
 {
 }
 
-UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint&)
+UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6059,8 +6117,10 @@ UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint()
 {
 }
 
-UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrainBrushPlanningPaint&)
+UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrainBrushPlanningPaint& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6089,8 +6149,10 @@ UTerrainBrushSelect::~UTerrainBrushSelect()
 {
 }
 
-UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect&)
+UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6116,8 +6178,10 @@ UTerrainBrushSmooth::~UTerrainBrushSmooth()
 {
 }
 
-UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth&)
+UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6142,8 +6206,10 @@ UTerrainBrushTexPan::~UTerrainBrushTexPan()
 {
 }
 
-UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan&)
+UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6164,8 +6230,10 @@ UTerrainBrushTexRotate::~UTerrainBrushTexRotate()
 {
 }
 
-UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTexRotate&)
+UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTexRotate& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6186,8 +6254,10 @@ UTerrainBrushTexScale::~UTerrainBrushTexScale()
 {
 }
 
-UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexScale&)
+UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexScale& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6204,8 +6274,10 @@ UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit()
 {
 }
 
-UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushVertexEdit&)
+UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushVertexEdit& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
@@ -6222,8 +6294,10 @@ UTerrainBrushVisibility::~UTerrainBrushVisibility()
 {
 }
 
-UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushVisibility&)
+UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushVisibility& Other)
 {
+	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
+	*reinterpret_cast<UTerrainBrush*>(this) = *reinterpret_cast<const UTerrainBrush*>(&Other);
 	return *this;
 }
 
