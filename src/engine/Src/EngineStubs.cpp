@@ -48,6 +48,11 @@ struct FStaticMeshCollisionTriangle;
 class FStaticMeshSection;
 struct FStaticMeshTriangle;
 
+// Raw 32-byte vertex element for FSkinVertexStream / FAnimMeshVertexStream.
+// Both streams use TArray<FStreamVert32> where element size = 32 bytes
+// (confirmed by GetStreamData: FArray::Num * 32 bytes).
+struct FStreamVert32 { BYTE d[32]; };
+
 // --- ACamera ---
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
@@ -3170,8 +3175,10 @@ int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE*)
 	return 0;
 }
 
-CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDescData&)
+CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDescData& Other)
 {
+	// Ghidra 0x14390: 9 DWORDs, no vtable. Shares address with FDXTCompressionOptions.
+	appMemcpy(this, &Other, 36);
 	return *this;
 }
 
@@ -3188,8 +3195,13 @@ FAnimMeshVertexStream::~FAnimMeshVertexStream()
 {
 }
 
-FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStream&)
+FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStream& Other)
 {
+	// Ghidra 0x2b1c0: skip vtable at +0, DWORD at +4, TArray<FStreamVert32> at +8
+	// (FUN_1031f7d0 = 32-byte elems), then 6 DWORDs at +0x14..+0x28
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	*(TArray<FStreamVert32>*)((BYTE*)this + 0x08) = *(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x08);
+	appMemcpy((BYTE*)this + 0x14, (const BYTE*)&Other + 0x14, 0x18); // 6 DWORDs
 	return *this;
 }
 
@@ -3229,8 +3241,12 @@ FBspSection::~FBspSection()
 {
 }
 
-FBspSection& FBspSection::operator=(const FBspSection&)
+FBspSection& FBspSection::operator=(const FBspSection& Other)
 {
+	// Ghidra 0x27bb0: skip vtable at +0, TArray<FBspVertex> at +4 (FUN_10324ae0=40-byte elems),
+	// then 7 DWORDs at +0x10..+0x28
+	*(TArray<FBspVertex>*)((BYTE*)this + 0x04) = *(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 	return *this;
 }
 
@@ -3261,8 +3277,12 @@ FBspVertexStream::~FBspVertexStream()
 {
 }
 
-FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream&)
+FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
 {
+	// Ghidra 0x27930: skip vtable at +0, TArray<FBspVertex> at +4 (FUN_10324ae0=40-byte elems),
+	// then 3 DWORDs at +0x10..+0x18
+	*(TArray<FBspVertex>*)((BYTE*)this + 0x04) = *(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 	return *this;
 }
 
@@ -3279,8 +3299,12 @@ FCanvasUtil::~FCanvasUtil()
 {
 }
 
-FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil&)
+FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 {
+	// Ghidra 0x18cb0: vtable at +0 skipped. Copy +4..+53, skip +54..+93 (transient state),
+	// then copy +94..+CA7 (includes big vertex batch + 3 trailing DWORDs)
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x50);
+	appMemcpy((BYTE*)this + 0x94, (const BYTE*)&Other + 0x94, 0xC14);
 	return *this;
 }
 
@@ -3333,8 +3357,10 @@ FConvexVolume::~FConvexVolume()
 {
 }
 
-FConvexVolume& FConvexVolume::operator=(const FConvexVolume&)
+FConvexVolume& FConvexVolume::operator=(const FConvexVolume& Other)
 {
+	// Ghidra 0x37f0: 0x98 DWORDs from offset 0 (no vtable)
+	appMemcpy(this, &Other, 0x260);
 	return *this;
 }
 
@@ -3368,8 +3394,10 @@ FDXTCompressionOptions::FDXTCompressionOptions()
 {
 }
 
-FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionOptions&)
+FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionOptions& Other)
 {
+	// Ghidra 0x14390: 9 DWORDs, no vtable. Shares address with CCompressedLipDescData.
+	appMemcpy(this, &Other, 36);
 	return *this;
 }
 
@@ -3390,8 +3418,10 @@ FDynamicActor::~FDynamicActor()
 {
 }
 
-FDynamicActor& FDynamicActor::operator=(const FDynamicActor&)
+FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 {
+	// Ghidra 0x13660: 0x20 DWORDs from offset 0 (FDynamicActor has no vtable)
+	appMemcpy(this, &Other, 0x80);
 	return *this;
 }
 
@@ -3441,8 +3471,12 @@ FFontPage::~FFontPage()
 {
 }
 
-FFontPage& FFontPage::operator=(const FFontPage&)
+FFontPage& FFontPage::operator=(const FFontPage& Other)
 {
+	// Ghidra 0x27830: 2 DWORDs at +0,+4, then TArray<FLineVertex> at +8
+	// (FUN_1031e1c0 = 16-byte elems, same function as FLineBatcher::op=)
+	appMemcpy(this, &Other, 8);
+	*(TArray<FLineVertex>*)((BYTE*)this + 0x08) = *(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x08);
 	return *this;
 }
 
@@ -3459,8 +3493,13 @@ FKAggregateGeom::~FKAggregateGeom()
 {
 }
 
-FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom&)
+FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 {
+	// Ghidra 0x3cc80: 4 TArrays at +0,+0xC,+0x18,+0x24
+	*(TArray<FKSphereElem>*)((BYTE*)this + 0x00) = *(const TArray<FKSphereElem>*)((const BYTE*)&Other + 0x00);
+	*(TArray<FKBoxElem>*)((BYTE*)this + 0x0C) = *(const TArray<FKBoxElem>*)((const BYTE*)&Other + 0x0C);
+	*(TArray<FKCylinderElem>*)((BYTE*)this + 0x18) = *(const TArray<FKCylinderElem>*)((const BYTE*)&Other + 0x18);
+	*(TArray<FKConvexElem>*)((BYTE*)this + 0x24) = *(const TArray<FKConvexElem>*)((const BYTE*)&Other + 0x24);
 	return *this;
 }
 
@@ -3521,8 +3560,13 @@ FKConvexElem::~FKConvexElem()
 {
 }
 
-FKConvexElem& FKConvexElem::operator=(const FKConvexElem&)
+FKConvexElem& FKConvexElem::operator=(const FKConvexElem& Other)
 {
+	// Ghidra 0x27d50: 16 DWORDs (64 bytes) at +0..+3F (no vtable),
+	// TArray<FVector> at +40 (FUN_10323160=12-byte), TArray<INT> at +4C (FUN_10322870=4-byte)
+	appMemcpy(this, &Other, 0x40);
+	*(TArray<FVector>*)((BYTE*)this + 0x40) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x40);
+	*(TArray<INT>*)((BYTE*)this + 0x4C) = *(const TArray<INT>*)((const BYTE*)&Other + 0x4C);
 	return *this;
 }
 
@@ -3598,8 +3642,10 @@ FLightMapIndex::~FLightMapIndex()
 {
 }
 
-FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex&)
+FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex& Other)
 {
+	// Ghidra 0x2c10: 0x30 DWORDs from offset 0 (no vtable)
+	appMemcpy(this, &Other, 0xC0);
 	return *this;
 }
 
@@ -3638,8 +3684,12 @@ FLineBatcher::~FLineBatcher()
 {
 }
 
-FLineBatcher& FLineBatcher::operator=(const FLineBatcher&)
+FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 {
+	// Ghidra 0x27360: skip vtable at +0, TArray<FLineVertex> at +4 (FUN_1031e1c0=16-byte),
+	// then 5 DWORDs at +0x10..+0x20
+	*(TArray<FLineVertex>*)((BYTE*)this + 0x04) = *(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x14); // 5 DWORDs
 	return *this;
 }
 
@@ -3686,8 +3736,14 @@ FMipmap::~FMipmap()
 {
 }
 
-FMipmap& FMipmap::operator=(const FMipmap&)
+FMipmap& FMipmap::operator=(const FMipmap& Other)
 {
+	// Ghidra 0x27790: FMipmapBase 4 DWORDs at +0..+0C, skip FLazyLoader vtable at +10,
+	// deep-copy TArray<BYTE> at +1C, then SavedAr at +14 and SavedPos at +18
+	appMemcpy(this, &Other, 0x10); // FMipmapBase data
+	*(TArray<BYTE>*)((BYTE*)this + 0x1C) = *(const TArray<BYTE>*)((const BYTE*)&Other + 0x1C);
+	*(DWORD*)((BYTE*)this + 0x14) = *(const DWORD*)((const BYTE*)&Other + 0x14);
+	*(DWORD*)((BYTE*)this + 0x18) = *(const DWORD*)((const BYTE*)&Other + 0x18);
 	return *this;
 }
 
@@ -3888,8 +3944,12 @@ FSkinVertexStream::~FSkinVertexStream()
 {
 }
 
-FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream&)
+FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 {
+	// Ghidra 0x2b820: skip vtable at +0, 7 DWORDs at +4..+1C,
+	// TArray<FStreamVert32> at +20 (FUN_1031f7d0 = 32-byte GPU verts)
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x1C); // 7 DWORDs
+	*(TArray<FStreamVert32>*)((BYTE*)this + 0x20) = *(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x20);
 	return *this;
 }
 
@@ -3906,8 +3966,15 @@ FStatGraphLine::~FStatGraphLine()
 {
 }
 
-FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine&)
+FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 {
+	// Ghidra 0x21790: DWORD at +0, TArray<FLOAT> at +4 (FUN_1031f660=4-byte data points),
+	// 2 DWORDs at +10,+14, FString at +18, 4 DWORDs at +24..+30
+	*(DWORD*)((BYTE*)this + 0x00) = *(const DWORD*)((const BYTE*)&Other + 0x00);
+	*(TArray<FLOAT>*)((BYTE*)this + 0x04) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 8); // 2 DWORDs
+	*(FString*)((BYTE*)this + 0x18) = *(const FString*)((const BYTE*)&Other + 0x18);
+	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
 	return *this;
 }
 
@@ -3925,8 +3992,11 @@ FStaticCubemap::FStaticCubemap(UCubemap *)
 {
 }
 
-FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap&)
+FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap& Other)
 {
+	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
+	// Shares address with FStaticTexture.
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 	return *this;
 }
 
@@ -4088,8 +4158,12 @@ FStaticMeshUVStream::~FStaticMeshUVStream()
 {
 }
 
-FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream&)
+FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream& Other)
 {
+	// Ghidra 0x2c150: skip vtable at +0, TArray<FStaticMeshUV> at +4 (FUN_103220d0=8-byte),
+	// then 4 DWORDs at +10..+1C
+	*(TArray<FStaticMeshUV>*)((BYTE*)this + 0x04) = *(const TArray<FStaticMeshUV>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x10); // 4 DWORDs
 	return *this;
 }
 
@@ -4120,8 +4194,12 @@ FStaticMeshVertexStream::~FStaticMeshVertexStream()
 {
 }
 
-FStaticMeshVertexStream& FStaticMeshVertexStream::operator=(const FStaticMeshVertexStream&)
+FStaticMeshVertexStream& FStaticMeshVertexStream::operator=(const FStaticMeshVertexStream& Other)
 {
+	// Ghidra 0x2bfd0: skip vtable at +0, TArray<FStaticMeshVertex> at +4 (FUN_10324030=24-byte),
+	// then 3 DWORDs at +10..+18
+	*(TArray<FStaticMeshVertex>*)((BYTE*)this + 0x04) = *(const TArray<FStaticMeshVertex>*)((const BYTE*)&Other + 0x04);
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 	return *this;
 }
 
@@ -4134,8 +4212,11 @@ FStaticTexture::FStaticTexture(UTexture *)
 {
 }
 
-FStaticTexture& FStaticTexture::operator=(const FStaticTexture&)
+FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
 {
+	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
+	// Shares address with FStaticCubemap.
+	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 	return *this;
 }
 
@@ -4152,8 +4233,11 @@ FTags::~FTags()
 {
 }
 
-FTags& FTags::operator=(const FTags&)
+FTags& FTags::operator=(const FTags& Other)
 {
+	// Ghidra 0x2f00: 12 DWORDs at +0..+2F (no vtable), then FString at +0x30
+	appMemcpy(this, &Other, 0x30);
+	*(FString*)((BYTE*)this + 0x30) = *(const FString*)((const BYTE*)&Other + 0x30);
 	return *this;
 }
 
@@ -4178,8 +4262,15 @@ FTempLineBatcher::~FTempLineBatcher()
 {
 }
 
-FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher&)
+FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
 {
+	// Ghidra 0x27520: no vtable; line start/end FVectors at +0/+0C, line colors at +18,
+	// box data (FBox) at +24, box colors at +30
+	*(TArray<FVector>*)((BYTE*)this + 0x00) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x00);
+	*(TArray<FVector>*)((BYTE*)this + 0x0C) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x0C);
+	*(TArray<FLOAT>*)((BYTE*)this + 0x18) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x18);
+	*(TArray<FBox>*)((BYTE*)this + 0x24) = *(const TArray<FBox>*)((const BYTE*)&Other + 0x24);
+	*(TArray<FLOAT>*)((BYTE*)this + 0x30) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x30);
 	return *this;
 }
 
