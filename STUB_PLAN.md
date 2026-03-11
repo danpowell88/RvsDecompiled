@@ -5,30 +5,51 @@ Replace ~3,930 stubs across 15 game DLLs so RavenShield plays entirely from rebu
 
 Phases grouped by **functional outcome** — each phase produces a testable, meaningful result rather than completing a module in isolation. Cross-module work that serves the same purpose ships together.
 
-## Current State
+## Current State (2026-03-11)
 - 16 binaries build and link (15 DLLs + 1 EXE) — zero retail .lib references
 - Source organized into UT99-style Inc/Src layout across all 16 modules
-- Phase 1 (build self-sufficiency) COMPLETE — Core_Dep and Engine_Dep resolve to rebuilt libs
-- Phase 2 (window/rendering) ~90% COMPLETE — WinDrv, Canvas, D3DDrv, Materials all implemented
-- ~3,930 original stubs: ~2,612 EngineStubs linker redirects, ~365 EXEC_STUBs, ~960 method stubs
-- Remaining EngineStubs1.cpp: 28 `__FUNC_NAME__` compatibility shims (compiler-version artifacts, not real stubs)
-- Remaining CoreStubs.cpp: 6 `__FUNC_NAME__` compatibility shims
+- Phase 1 (build self-sufficiency) **COMPLETE** — Core_Dep and Engine_Dep resolve to rebuilt libs
+- Phase 2 (window/rendering) **~90% COMPLETE** — WinDrv, Canvas, D3DDrv, Materials all implemented
+- Phase 3 (EXEC_STUBs) **COMPLETE** — zero EXEC_STUB macros remain in engine source; all 365+ replaced with P_GET parameter extraction
+- Phase 4 (R6 exec param extraction) **COMPLETE** — all 90 R6Engine native exec functions have proper P_GET extraction
+- No `.bak` files remain anywhere in `src/`
 
-## Stub Composition Analysis
-The ~2,612 EngineStubs linker redirects break down as:
-- **~1,200 (22%) trivially auto-generatable**: constructors, destructors, assignment operators, vtable pointers, simple getters, TArray template operations
-- **~1,800 (33%) semi-auto with class defs**: serialization, animation accessors, material properties, format handlers
-- **~2,400 (45%) require Ghidra**: physics, pathfinding, rendering pipeline, collision algorithms, event routing, terrain
+### Remaining Stubs by Module (measured 2026-03-11)
 
-The ~365 EXEC_STUBs break down by functional area:
-- Gameplay (spawning, timers, iterators, config): 144
-- Movement/Physics: 62
-- Rendering (canvas, HUD, effects): 60
-- Animation: 36
-- Audio: 23
-- AI/Navigation: 15
-- Networking: 10
-- Core Boot: 13
+| Module | File | Lines | Stub Bodies | Primary Type |
+|--------|------|-------|-------------|--------------|
+| **Engine** | `EngineStubs.cpp` | 9,637 | ~1,695 | Empty method bodies (~1,346 empty + ~255 return 0 + ~94 return NULL) |
+| **Engine** | `EngineLinkerShims.cpp` | 133 | 0 real | 28 `__FUNC_NAME__` compiler-version artifacts only |
+| **R6Engine** | `R6Engine.cpp` | 3,680 | ~493 | Virtual override stubs (delegate methods return zero/null) |
+| **R6GameService** | `R6GameService.cpp` | 652 | ~177 | GameSpy client/server stubs |
+| **R6Game** | `R6Game.cpp` | 278 | ~65 | Game rule/manager stubs |
+| **R6Weapons** | `R6Weapons.cpp` | 174 | ~29 | Ballistics/gadget stubs |
+| **R6Abstract** | `R6Abstract.cpp` | 194 | ~28 | Abstract service layer stubs |
+| **IpDrv** | `IpDrv.cpp` | 361 | ~37 | TCP/UDP exec + method stubs |
+| **SNDDSound3D** | `SNDDSound3D.cpp` | 381 | ~377 | DirectSound3D backend stubs |
+| **SNDext** | `SNDext.cpp` | 145 | ~32 | Win32 platform layer stubs |
+| **Window** | `Window.cpp` | 228 | ~17 | Control class stubs (DECLARE_WINDOW_STUB) |
+| **Launch** | `Launch.cpp` | 800 | 7 | TODO items (vtable/config paths) |
+| **D3DDrv** | `D3DDrv.cpp` | 1,122 | ~5 | Mostly implemented (~95%) |
+| **DareAudio** | `DareAudio.cpp` | 316 | ~5 | UObject interface stubs |
+| **Core** | `CoreStubs.cpp` | 1,293 | 0 real | 6 `__FUNC_NAME__` compiler artifacts only |
+| | | | **~2,967 total** | |
+
+### Linker Compatibility Shims (not real stubs)
+- `EngineLinkerShims.cpp`: 28 `__FUNC_NAME__` wide-string redirects + `dummy_stub_func`/`dummy_stub_data` catch-all targets
+- `CoreStubs.cpp`: 6 `__FUNC_NAME__` wide-string redirects
+- `Window.cpp`: 3 `__FUNC_NAME__` wide-string redirects
+- `Launch.cpp`: ~13 `ALTERNATENAME` pragmas (WWindow::Show Q→U redirect, StaticConstructObject param mismatch, GTimestamp)
+- **Total**: ~50 `/alternatename` pragmas across all `src/*.cpp` + ~4 in headers
+
+### Stub Composition Analysis
+The ~1,695 EngineStubs.cpp method body stubs break down as:
+- **~400 (24%) trivial/mechanical**: constructors, destructors, assignment operators, simple getters, TArray template operations, `Serialize` methods
+- **~280 (17%) physics/movement**: `physWalking`, `physFalling`, `moveSmooth`, collision octree, coordinate transforms
+- **~200 (12%) animation/skeletal**: animation playback, bone control, mesh instance methods
+- **~280 (17%) rendering/scene**: FRenderInterface, scene nodes, projectors, terrain rendering
+- **~435 (25%) networking/events/misc**: channel management, event system, Karma bridge, level management, interactions
+- **~5 remaining functional stubs in original files** (D3DDrv, DareAudio)
 
 ---
 
@@ -443,14 +464,22 @@ The ~365 EXEC_STUBs break down by functional area:
 ## Phase 6: Audio Pipeline
 **Goal:** Full 3D positional audio. Currently the engine can dispatch sound events (Phase 3E), but nothing plays — this phase gives them a voice.
 
-### 6A. SNDext — Platform Abstraction (32 stubs × 2 variants)
-- **Files:** src/sndext/SNDext.cpp
-- **What:** Thin Win32 API wrappers:
-  - File I/O: SND_fn_vOpenFile/CloseFile/ReadFile/SeekFile → CreateFile/ReadFile/SetFilePointer
-  - Memory: SND_fn_pvAlloc/vFreeAlloc/pvRealloc → HeapAlloc/HeapFree/HeapReAlloc
-  - Threading: SND_fn_vCreateThread/vDestroyThread/vLockMutex/vUnlockMutex → CreateThread/WaitForSingleObject/CreateMutex
-  - Error: SND_fn_vDisplayError/vInitErrorSnd
-- **Approach:** Clean-room — these are straightforward Win32 wrappers. No Ghidra needed.
+### 6A. SNDext — Platform Abstraction (32 stubs × 2 variants) ✅ COMPLETE
+- **Files:** src/sndext/Src/SNDext.cpp
+- **Status:** Fully implemented (2026-03-11). Both SNDext_ret.dll and SNDext_VSR.dll
+  build with 32 matching exports. All stubs replaced with real implementations.
+- **Implemented:**
+  - File I/O: CreateFileA/ReadFile/SetFilePointer/CloseHandle/GetFileAttributesA
+  - Memory: HeapAlloc/HeapFree/HeapReAlloc (clean-room: process heap instead of GMalloc)
+  - Aligned memory: _aligned_malloc/_aligned_free (clean-room: header scheme differs from retail CRT-based approach)
+  - Memory ops: memcpy/memmove/memset (retail used MMX optimised versions; semantically identical)
+  - Error functions: confirmed no-ops in retail release binary (ret 8/12/16)
+  - Async streaming: synchronous ReadFile fallback with 300-byte SndStream descriptor matching retail state machine (state 0=idle, 2=done)
+- **Divergences documented:**
+  - pvMallocSnd/vFreeSnd use process heap instead of GMalloc from Core.dll
+  - pvMallocSndAligned uses _aligned_malloc instead of retail custom 4-byte-header scheme
+  - Async streaming is synchronous (ReadFile) instead of overlapped I/O; state machine and descriptor layout match retail
+- **Approach:** Clean-room — Win32 wrappers. Retail binary disassembled to confirm function behaviour.
 
 ### 6B. SNDDSound3D — DirectSound3D Backend (377 stubs × 2 variants)
 - **Files:** src/sndsound3d/SNDDSound3D.cpp
@@ -647,51 +676,336 @@ Remove files and patterns that only existed to support the incremental decompila
 
 ---
 
+## Agent Implementation Batching Plan
+
+The phases above describe **what** to build and **why**, grouped by functional outcome. This section describes **how** to execute the remaining ~2,967 stubs as iterative batches that an agent can pick up and work on one at a time. The strategy is: **complete the Engine internals first** (everything downstream depends on them), then move outward to consumer modules, completing each section as a whole before moving on.
+
+Each batch is designed to be:
+1. **Self-contained** — can be worked on independently with a clear start/end
+2. **Verifiable** — build must compile after each batch; EngineStubs.cpp line count should decrease measurably
+3. **Ordered** — each batch unlocks the next; dependencies flow downward
+
+### Batch 1: Engine — Serialization, Lifecycle & Trivial Methods (~400 stubs)
+**Goal:** Eliminate the mechanical stubs — constructors, destructors, `Serialize`, `PostLoad`, `operator=`, simple getters/setters. This is the highest-ROI batch: lots of stubs removed with relatively predictable patterns.
+
+| Sub-batch | ~Stubs | Classes | Approach |
+|-----------|--------|---------|----------|
+| **1a.** Constructors & destructors | ~120 | All Engine classes | Pattern: zero-init members or call Super. Class layouts from SDK headers |
+| **1b.** `Serialize` methods | ~80 | UVertexBuffer, UVertexStream*, UPolys, UKMeshProps, UMesh, ULodMesh, USkeletalMesh, UStaticMesh, UModel, UTexture, UBitmapMaterial, FMipmap | `FArchive <<` on each member. SDK headers define field layout |
+| **1c.** `PostLoad` / `PostEditChange` | ~30 | ULevelSummary, UTexture, materials, meshes | Typically calls Super then rebuilds cached data |
+| **1d.** `operator=` and copy ctors | ~60 | TArray template ops, UObject-derived classes | Memberwise copy, return `*this` |
+| **1e.** Simple getters/accessors | ~110 | `GetWidth`, `GetHeight`, `GetFormat`, `IsAnimating`, `ShouldTrace`, `GetActor`, material property queries | Return member variable or trivial computation |
+
+**Source:** SDK headers for class layouts, UT99 reference for standard Unreal serialization patterns. Minimal Ghidra needed.
+**Files touched:** `EngineStubs.cpp` → move implementations to `UnMesh.cpp`, `UnModel.cpp`, `UnMaterial.cpp`, `UnNet.cpp`, `UnAudio.cpp`
+**Verification:** Build compiles. EngineStubs.cpp shrinks by ~2,500 lines.
+
+---
+
+### Batch 2: Engine — Physics & Movement (~280 stubs)
+**Goal:** The core physics loop works — walking, falling, flying, swimming, projectile, ladder.
+
+| Sub-batch | ~Stubs | Key Functions | Approach |
+|-----------|--------|---------------|----------|
+| **2a.** Physics dispatch | ~20 | `performPhysics`, `processLanded`, `setPhysics` | Main physics tick switch statement. Ghidra |
+| **2b.** Walking physics | ~40 | `physWalking`, `walkStep`, `adjustFloor`, `stepUp` | Ground movement, slope handling. Ghidra |
+| **2c.** Falling/flying/swimming | ~30 | `physFalling`, `physFlying`, `physSwimming` | Air/water physics. Ghidra + UT99 ref |
+| **2d.** Projectile & ladder | ~20 | `physProjectile`, `physLadder`, `physRolling` | Simpler physics modes. Ghidra |
+| **2e.** Collision & traces | ~80 | `ActorLineCheck`, `ActorPointCheck`, `ActorOverlapCheck`, collision octree | Geometry intersection. Ghidra-heavy |
+| **2f.** Movement helpers | ~90 | `moveSmooth`, `fixedTurn`, `TwoWallAdjust`, `FindSpot`, coordinate transforms | Supporting math. Ghidra + existing partial implementations |
+
+**Source:** Ghidra primary. UT99 reference for standard Unreal physics patterns.
+**Files touched:** `EngineStubs.cpp` → new `UnPhysics.cpp` or expand `UnActor.cpp`
+**Verification:** Build compiles. Physics functions have real bodies.
+**Maps to:** Phase 3C (movement/physics) linker stubs
+
+---
+
+### Batch 3: Engine — Animation & Skeletal Mesh (~200 stubs)
+**Goal:** Animation playback, bone manipulation, skeletal mesh instances all functional.
+
+| Sub-batch | ~Stubs | Key Functions | Approach |
+|-----------|--------|---------------|----------|
+| **3a.** Animation playback | ~40 | `PlayAnim`, `LoopAnim`, `TweenAnim`, `StopAnimating`, `AnimForcePose` | Channel-based animation system. Ghidra |
+| **3b.** Bone control | ~50 | `SetBonePosition`, `SetBoneRotation`, `GetBoneCoords`, `LockRootMotion` | Bone transform manipulation. Ghidra |
+| **3c.** Skeletal mesh instance | ~60 | `USkeletalMeshInstance` methods — `GetFrame`, `SetBlendParams`, `AnimGetChannel` | Mesh-animation bridge. Ghidra |
+| **3d.** LOD mesh & static mesh | ~50 | `ULodMesh`, `UStaticMesh`, `UStaticMeshInstance` method bodies | Mesh rendering support. Ghidra |
+
+**Source:** Ghidra primary. SDK headers define the skeletal mesh/animation structures.
+**Files touched:** `EngineStubs.cpp` → expand `UnMesh.cpp`
+**Verification:** Build compiles. Mesh/animation path has real implementations.
+**Maps to:** Phase 3D (animation) + Phase 7B (mesh systems) linker stubs
+
+---
+
+### Batch 4: Engine — Rendering Pipeline & Scene (~280 stubs)
+**Goal:** FRenderInterface, scene nodes, projectors, terrain rendering internals all implemented.
+
+| Sub-batch | ~Stubs | Key Functions | Approach |
+|-----------|--------|---------------|----------|
+| **4a.** FRenderInterface | ~60 | Virtual draw-call dispatch, state management | Engine→D3DDrv bridge. Ghidra |
+| **4b.** Scene nodes | ~80 | `FLevelSceneNode`, `FDirectionalLightMapSceneNode`, `FPointLightMapSceneNode`, `FProjectorSceneNode` | Scene graph traversal. Ghidra |
+| **4c.** Actor rendering | ~50 | `RenderEditorInfo`, `RenderEditorSelected`, `GetRenderBoundingSphere/Box` | Per-actor render dispatch. Ghidra |
+| **4d.** Terrain rendering | ~50 | `UTerrainSector` methods, `ATerrainInfo::Update*` | Terrain LOD & rendering. Ghidra |
+| **4e.** Projectors & decals | ~40 | `AProjector` methods, `FProjectorRenderInfo` | Dynamic shadow/decal system. Ghidra |
+
+**Source:** Ghidra primary. UT99 has structural reference for scene node patterns.
+**Files touched:** `EngineStubs.cpp` → new `UnScene.cpp`, expand `UnModel.cpp`
+**Verification:** Build compiles. EngineStubs.cpp should be nearly empty (~435 stubs remaining).
+**Maps to:** Phase 7C (rendering pipeline internals)
+
+---
+
+### Batch 5: Engine — Networking, Events & Remaining (~435 stubs)
+**Goal:** Complete Engine.dll — zero stubs remaining. Delete EngineStubs.cpp.
+
+| Sub-batch | ~Stubs | Key Functions | Approach |
+|-----------|--------|---------------|----------|
+| **5a.** Network channels | ~80 | `UChannel::ReceivedBunch`, `SendBunch`, `UActorChannel`, `UControlChannel`, `UFileChannel`, `UPackageMap` | Replication pipeline. UT99 ref + Ghidra |
+| **5b.** Karma physics bridge | ~40 | 34 `K*` exec function bodies + related method stubs | MathEngine SDK bridge. Ghidra |
+| **5c.** Actor event system | ~60 | Event thunk bodies, timer dispatch, touch system internals | Event routing. Ghidra |
+| **5d.** Level management | ~40 | `ULevel::SpawnActor`, `DestroyActor`, `Tick`, `LoadMap` stubs | Level lifecycle. Ghidra + UT99 |
+| **5e.** Interaction & input | ~30 | `UInteraction`, `UInteractionMaster`, input processing chain | Input pipeline. Ghidra |
+| **5f.** Mop-up | ~185 | Any remaining stubs: StatLog, editor-only methods, Mover, misc | Mixed. Verify each is truly empty in retail or implement |
+
+**Source:** Ghidra + UT99 for networking fundamentals.
+**Files touched:** Expand `UnNet.cpp`, `UnLevel.cpp`, `UnActor.cpp`. **Delete `EngineStubs.cpp`** when empty. Remove `dummy_stub_func`/`dummy_stub_data` from `EngineLinkerShims.cpp`.
+**Verification:** Build compiles. **EngineStubs.cpp is deleted.** `grep dummy_stub_func src/engine/` returns zero hits.
+**Maps to:** Phase 5A (engine network), Phase 7A (Karma), Phase 7E (misc)
+
+---
+
+### Batch 6: D3DDrv & WinDrv — Driver Completion (~10 stubs)
+**Goal:** Rendering and input drivers fully implemented. Mostly done already.
+
+| Sub-batch | ~Stubs | Key Functions | Approach |
+|-----------|--------|---------------|----------|
+| **6a.** D3DDrv remaining | ~5 | `SetEmulationMode`, `StartVideo`, `StopVideo`, `HandleFullScreenEffects` | Ghidra |
+| **6b.** WinDrv polish | ~5 | Any remaining stub polish, joystick callbacks | Ghidra + testing |
+
+**Source:** Ghidra. D3DDrv is already ~95% done.
+**Verification:** Build compiles. Full rendering pipeline functional.
+**Maps to:** Phase 2B (D3DDrv finish)
+
+---
+
+### Batch 7: IpDrv — Network Transport (~37 stubs)
+**Goal:** TCP/UDP transport layer fully implemented.
+
+| Sub-batch | ~Stubs | Key Functions | Approach |
+|-----------|--------|---------------|----------|
+| **7a.** AInternetLink | 8 | `GetLocalIP`, `Resolve`, `ParseURL`, `IpAddrToString` | UT99 WinSock2 reference |
+| **7b.** ATcpLink | 14 | `Open`, `Listen`, `Close`, `SendText/Binary`, `ReadText/Binary`, buffer management | UT99 reference |
+| **7c.** AUdpLink | 15 | `BindPort`, `Send/Recv`, broadcast, `RecvFrom`, `SendTo` | UT99 reference |
+
+**Source:** UT99 public source has complete IpDrv implementations.
+**Verification:** Build compiles. Network transport functional.
+**Maps to:** Phase 5B (IpDrv TCP/UDP)
+
+---
+
+### Batch 8: R6Abstract — Service Layer (~28 stubs)
+**Goal:** Complete the abstract base layer that all R6 modules depend on. Must be done before R6Engine/R6Weapons/R6Game consumers.
+
+- All ~32 `UR6AbstractGameService` virtual stubs (Created, Destroy, Tick, GetGSStatus, BuildGSQueryString, CDKey auth, server management)
+- `AR6AbstractPawn`, `AR6AbstractWeapon` etc. base class methods
+- Verify against Ghidra which are truly empty in retail vs which have real logic
+- Many may be genuinely empty (abstract base that subclasses override)
+
+**Source:** Ghidra. Many may be confirmed as intentionally empty in retail.
+**Verification:** Build compiles. R6Abstract.dll fully implemented.
+**Maps to:** Phase 4G (team management & abstract)
+
+---
+
+### Batch 9: R6Weapons — Ballistics & Gadgets (~29 stubs)
+**Goal:** Weapon mechanics fully implemented.
+
+- `ComputeEffectiveAccuracy()` — R6's accuracy model (movement state × weapon × stance)
+- `GetMovingModifier()` — movement accuracy penalty
+- `ShowWeaponParticles()` — muzzle flash FX
+- `GetHeartBeatStatus()`, `WeaponIsNotFiring()` — state queries
+- `ProcessState()`, `IsBlockedBy()`, `PreNetReceive()`/`PostNetReceive()`, `TickAuthoritative()` — partial Super-delegations to complete
+- Bullet/grenade/smoke/HBS gadget mechanics
+
+**Source:** Ghidra. R6-proprietary ballistics.
+**Verification:** Build compiles. R6Weapons.dll fully implemented.
+**Maps to:** Phase 4E (weapons)
+
+---
+
+### Batch 10: R6Engine — Game Actor Logic (~493 stubs)
+**Goal:** The largest R6 module fully implemented — player control, AI, doors, deployment, ragdolls. This is the heart of what makes Ravenshield a Rainbow Six game.
+
+| Sub-batch | ~Stubs | Classes | Approach |
+|-----------|--------|---------|----------|
+| **10a.** Player controller | ~40 | `AR6PlayerController` — PlayerTick, UpdateRotation, SpawnDefaultHUD, ClientRestart, SetupInputSystem, ServerChangeWeapon, ServerDoFire | Ghidra |
+| **10b.** Pawn mechanics | ~30 | `AR6Pawn` — stance transitions (stand/crouch/prone/crawl), fluid peeking (lean L/R), PawnLook/LookAt/LookAbsolute, vision modes, damage | Ghidra |
+| **10c.** AI base + Rainbow AI | ~60 | `AR6AIController` (MoveToPosition, FollowPath, CanWalkTo, FindPlaceToFire, FindPlaceToTakeCover), `AR6RainbowAI` (GetEntryPosition, GetGuardPosition, AClearShotIsAvailable, ClearToSnipe, LookAroundRoom) | Ghidra |
+| **10d.** Terrorist + Hostage AI | ~40 | `AR6TerroristAI` (CallBackupForAttack, HaveAClearShot, FindBetterShotLocation, GetNextRandomNode), `AR6HostageAI` (GotoStand/Crouch/Prone/Kneel) | Ghidra |
+| **10e.** Doors & interactive objects | ~50 | `AR6IORotatingDoor` (WillOpenOnTouch, DoorOpenTowards, AddBreach, RemoveBreach), `AR6InteractiveObject`, `AR6Ladder`, `AR6Stairs`, `AR6ClimbableObject` | Ghidra |
+| **10f.** Deployment zones | ~60 | `AR6DeploymentZone*` (FirstInit, FindRandomPointInArea, FindSpawningPoint, GetNbOfTerroristToSpawn, SpawnATerrorist, SpawnAHostage) | Ghidra |
+| **10g.** Ragdoll & matinee | ~40 | `AR6RagDoll` (physics, collision, impulse), matinee attachments, `UR6SubActionAnimSequence` | Ghidra |
+| **10h.** Remaining R6Engine | ~173 | AR6Bomb, AR6Camera, AR6Electronics, AR6FalseHeartBeat, R6Charts, HUD subclasses, Mover subclasses, game type overrides | Ghidra |
+
+**Source:** Ghidra only — all R6-proprietary. No UT99 equivalent.
+**Verification:** Build compiles. R6Engine.dll fully implemented. All ~493 virtual override stubs replaced with real logic.
+**Maps to:** Phase 4A-4D + 4G-4H (R6 gameplay)
+
+---
+
+### Batch 11: R6Game — Game Rules & Manager (~65 stubs)
+**Goal:** Game flow, scoring, planning, campaigns all implemented.
+
+- `AR6GameInfo` (~10): BeginPlay, RestartGame, InitGameInfoGameService, NotifyKilled, ReduceDamage, GetMapListName, DetourToMainMenu
+- `AR6MultiPlayerGameInfo` — multiplayer-specific game rules, scoring, round management
+- `UR6GameManager` (~15): Init, Created, AddPlayer, RemovePlayer, GetState, console commands, server management
+- `UR6PlanningInfo` (~5): AddPoint, GetTeamLeader, NoStairsBetweenPoints, TransferFile
+- `AR6HUD` — HUD rendering overrides (radar, character info, map drawing, colour management)
+- `AR6PlanningCtrl` — planning phase controller
+- `AR6ActionPoint` — SetRotationToward, TransferFile
+- `UR6FileManagerCampaign`, `UR6PlayerCampaign`, `UR6PlayerCustomMission` — campaign persistence
+
+**Source:** Ghidra.
+**Verification:** Build compiles. R6Game.dll fully implemented.
+**Maps to:** Phase 4F (game flow) + Phase 5D (multiplayer modes)
+
+---
+
+### Batch 12: R6GameService — GameSpy Integration (~177 stubs)
+**Goal:** Full GameSpy client/server implementation for byte-accuracy. GameSpy master servers are dead (shut down 2014), but the code should faithfully reproduce the retail binary. Community uses OpenRVS at the UnrealScript layer.
+
+| Sub-batch | ~Stubs | Functions | Approach |
+|-----------|--------|-----------|----------|
+| **12a.** Server lifecycle | ~30 | `UR6GSServers::Created`, `Init`, `Tick`, `Destroy`, `InitializeGSClient`, `PostServerUpdate` | Ghidra + GameSpy SDK |
+| **12b.** CD key auth | ~20 | `AuthenticateGSCDKeyID`, `RequestGSCDKeyAuthID`, `ResetAuthId`, `GetAuthStatus`, `DisconnectAllCDKeyPlayers` | Ghidra + GameSpy SDK |
+| **12c.** Server browser | ~40 | `AllocateServerID`, `DeallocateServerID`, `BuildGSQueryString`, `GetServerProperty` | Ghidra + GameSpy SDK |
+| **12d.** Lobby & match | ~30 | Lobby connection, router setup, score submission, match result reporting | Ghidra + GameSpy SDK |
+| **12e.** EviL patch service | ~10 | `UeviLPatchService` methods (6 native functions) | Ghidra |
+| **12f.** Remaining | ~47 | Ping management, player tracking, DNS resolution, misc | Ghidra |
+
+**Source:** Ghidra + GameSpy SDK source in `sdk/GameSpySDK/`.
+**Verification:** Build compiles. R6GameService.dll fully implemented.
+**Maps to:** Phase 5C (GameSpy integration)
+
+---
+
+### Batch 13: Audio — SNDext, SNDDSound3D, DareAudio (~450 stubs)
+**Goal:** Full audio pipeline from Unreal dispatch to DirectSound output. The lowest-reference-quality module — no source reference exists for the DARE audio system. Pure Ghidra except for SNDext.
+
+| Sub-batch | ~Stubs | Module | Approach |
+|-----------|--------|--------|----------|
+| **13a.** SNDext platform layer | ~32 | SNDext.dll × 2 variants | Clean-room Win32 wrappers: `CreateFile`/`ReadFile`/`HeapAlloc`/`CreateThread` etc. No Ghidra needed |
+| **13b.** SNDDSound3D core | ~150 | SNDDSound3D.dll | Buffer creation (`IDirectSoundBuffer`), playback, stop, volume control. Ghidra |
+| **13c.** SNDDSound3D 3D audio | ~100 | SNDDSound3D.dll | 3D positioning (`IDirectSound3DBuffer`), Doppler, distance attenuation, listener tracking. Ghidra |
+| **13d.** SNDDSound3D EAX/advanced | ~127 | SNDDSound3D.dll | Environmental reverb (EAX), Dolby positioning, streaming buffers. Ghidra |
+| **13e.** DareAudio bridge | ~5 | DareAudio.dll × 3 variants | `UDareAudioSubsystem` StaticConstructor, Destroy, ShutdownAfterError, Exec. Ghidra |
+
+**Source:** Ghidra (no reference source for DARE/SND). SNDext is clean-room from Win32 API docs.
+**Verification:** Build compiles. All 7 audio DLLs fully implemented.
+**Maps to:** Phase 6 (audio pipeline)
+
+---
+
+### Batch 14: Launch & Window — Final (~24 stubs)
+**Goal:** Launcher behavior parity and Window control classes. The mop-up batch.
+
+| Sub-batch | ~Stubs | Module | Approach |
+|-----------|--------|--------|----------|
+| **14a.** Launch TODOs | 7 | RavenShield.exe | `FExecHook::Exec` branches (TakeFocus, EditActor, Preferences), `Engine->Init/Tick/GetMaxTickRate` vtable calls, `Client->Viewports` access. Ghidra + UT99 reference |
+| **14b.** Window control classes | 17 | Window.dll | Replace DECLARE_WINDOW_STUB for WButton, WEdit, WRichEdit, WListBox, WCheckListBox, WComboBox, WScrollBar, WTreeView, WTabControl, WTrackBar, WProgressBar, WListView, WUrlButton, WLabel, WToolTip, WHeaderCtrl, WPictureButton. UT99 public source — thin Win32 `CreateWindowEx` wrappers |
+
+**Source:** UT99 reference for Window controls. Ghidra for launcher-specific behavior.
+**Verification:** Build compiles. All 16 binaries have zero stubs. Zero `dummy_stub_func`/`dummy_stub_data` references. Zero `/alternatename` pragmas (except documented `__FUNC_NAME__` compiler artifacts).
+**Maps to:** Phase 7D (window controls) + Phase 9C (launcher behavior)
+
+---
+
+### Batch Execution Summary
+
+| Batch | Module(s) | ~Stubs | Depends On | Ghidra? | Maps to Phase |
+|-------|-----------|--------|------------|---------|---------------|
+| **1** | Engine: serialization/trivial | 400 | — | No | 7B partial |
+| **2** | Engine: physics/movement | 280 | 1 | Yes | 3C |
+| **3** | Engine: animation/mesh | 200 | 1 | Yes | 3D, 7B |
+| **4** | Engine: rendering/scene | 280 | 1 | Yes | 7C |
+| **5** | Engine: net/events/mop-up | 435 | 1-4 | Mixed | 5A, 7A, 7E |
+| **6** | D3DDrv + WinDrv | 10 | 1-5 | Light | 2B |
+| **7** | IpDrv | 37 | 5 | No | 5B |
+| **8** | R6Abstract | 28 | 5 | Light | 4G |
+| **9** | R6Weapons | 29 | 8 | Yes | 4E |
+| **10** | R6Engine | 493 | 8, 9 | Yes | 4A-D, 4G-H |
+| **11** | R6Game | 65 | 10 | Yes | 4F, 5D |
+| **12** | R6GameService | 177 | 8 | Yes | 5C |
+| **13** | Audio (SNDext→SND3D→DARE) | 450 | 5 | Heavy | 6 |
+| **14** | Launch + Window finish | 24 | all | Light | 7D, 9C |
+| | **TOTAL** | **~2,967** | | | |
+
+### Batch Parallelism
+
+```
+Batch 1 (Engine trivial — MUST BE FIRST)
+  │
+  ├─► Batch 2 (physics)  ──────┐
+  ├─► Batch 3 (animation) ─────┤  can run in parallel after Batch 1
+  ├─► Batch 4 (rendering) ─────┤
+  │                             ▼
+  └──────────────────────► Batch 5 (Engine mop-up — depends on 1-4)
+                                │
+              ┌─────────────────┼─────────────────────┐
+              ▼                 ▼                     ▼
+        Batch 6 (drivers)  Batch 7 (IpDrv)      Batch 13 (audio)
+              │                 │                     │
+              ▼                 ▼                     │
+        Batch 8 (R6Abstract) ◄─┘                     │
+              │                                       │
+         ┌────┼────┐                                  │
+         ▼    ▼    ▼                                  │
+    Batch 9  Batch 10  Batch 12 (GameService)         │
+    (R6Wpns) (R6Engine)                               │
+         │    │                                       │
+         └────┤                                       │
+              ▼                                       │
+        Batch 11 (R6Game)                             │
+              │                                       │
+              └───────────────────────────────────────┤
+                                                      ▼
+                                              Batch 14 (final mop-up)
+```
+
+**Critical path:** 1 → 2/3/4 → 5 → 8 → 10 → 11 → 14
+
+Batches 2, 3, 4 can run **in parallel** after Batch 1.
+Batches 7, 12, 13 can run **in parallel** with Batches 9-11.
+Batch 6 is tiny and can slot in whenever convenient after Batch 5.
+
+---
+
 ## Phase Summary
 
-| Phase | Name | Stubs | Approach | Outcome |
-|-------|------|-------|----------|---------|
-| **1** | Foundation & Self-Sufficiency | ~3,080 | Auto-gen + Clean-room + Ghidra | Builds without retail libs |
-| **2** | A Window Into The World | ~76 | UT99 + Ghidra | Window, D3D, menu renders |
-| **3** | The World Simulates | ~156 + ~610 linker | Ghidra-heavy, .bak files | Actors move, collide, animate |
-| **4** | Rainbow Six Comes Alive | ~287 | Ghidra (R6-proprietary) | Single-player playable |
-| **5** | Multiplayer & Networking | ~117 | UT99 + Ghidra + GameSpy SDK | Full multiplayer |
-| **6** | Audio Pipeline | ~450+ | Clean-room (SNDext) + Ghidra | 3D positional audio |
-| **7** | Polish & Remaining | ~600+ | Ghidra + UT99 | 100% complete, zero stubs |
-| **8** | Header & Source Reorganisation | 0 (structural) | UT99 convention guide | Clean, maintainable source tree |
-
-## Parallelism
-
-```
-Phase 1 (MUST BE FIRST — everything depends on self-sufficient build)
-  │
-  ├─► Phase 2 (window/rendering) ─► Phase 3 (simulation) ─► Phase 4 (R6 gameplay)
-  │                                       │
-  │                                       ├─► Phase 5 (multiplayer) ── can start once 3 is done
-  │                                       │
-  ├─► Phase 6 (audio) ───────────────── independent, can start after Phase 1
-  │
-  ├─► Phase 7 (polish) ─────────────── mop-up, after 2-6 provide context
-  │
-  └─► Phase 8 (reorganise) ─────────── after Phase 7, all stubs gone before restructuring
-```
-
-Phases 5, 6, and most of 7 can run in **parallel** with Phase 4.
-Phase 3 and 4 are **sequential** (each builds on the previous).
-Phase 2 and 6 are **independent** of each other.
-Phase 8 is **strictly after Phase 7** — reorganising requires all code to be final.
+| Phase | Name | Stubs | Status | Outcome |
+|-------|------|-------|--------|---------|
+| **1** | Foundation & Self-Sufficiency | ~3,080 | ✅ **COMPLETE** | Builds without retail libs |
+| **2** | A Window Into The World | ~76 | ✅ **~90% COMPLETE** | Window, D3D, canvas, materials, input |
+| **3** | The World Simulates | ~316 EXEC_STUBs | ✅ **EXEC_STUBs COMPLETE** | Zero EXEC_STUB macros remain; linker body stubs → Batches 1-5 |
+| **4** | Rainbow Six Comes Alive | ~90 exec | ✅ **EXEC EXTRACTION COMPLETE** | All 90 R6Engine P_GET done; delegate method bodies → Batches 8-11 |
+| **5** | Multiplayer & Networking | ~117 | 🔲 Remaining → Batches 5a, 7, 12 | Full multiplayer |
+| **6** | Audio Pipeline | ~450+ | 🔲 Remaining → Batch 13 | 3D positional audio |
+| **7** | Polish & Remaining Engine | ~600+ | 🔲 Remaining → Batches 1-5, 6, 14 | 100% complete, zero stubs |
+| **8** | Header & Source Reorganisation | 0 (structural) | 🔲 After all stubs gone | Clean, maintainable source tree |
 
 ## Decisions
 - Scope: All 15 game DLLs. Third-party middleware (bink, OpenAL, ogg, vorbis, EAX, MSVC7.1 RT) stays.
 - Approach: Hybrid — Ghidra for complex/R6, UT99/SDK for standard Unreal.
-- Stub triage tool: Built first (Phase 1B) to classify the 2,612 EngineStubs before implementing them. Guides bulk auto-generation vs targeted Ghidra work.
 - Audio: Full Ghidra decompilation of SNDDSound3D (377 stubs × 2), not an OpenAL replacement. Byte accuracy preferred.
 - GameSpy: Fully decompiled and rebuilt for accuracy. Will not connect to anything (servers dead since 2014) but the code should faithfully reproduce the retail binary. Community uses OpenRVS at the UnrealScript layer for actual server browsing.
 - Multiplayer: Included (Phase 5). Network layer + GameSpy + MP game modes all in scope.
-- .bak files: Reference/starting points. Best candidates: UnMaterial.cpp.bak (adopt), UnActor.cpp.bak (1,000 lines), UnPawn.cpp.bak (150 lines).
+- `.bak` files: All removed. Were reference/starting points during earlier phases; content has been merged into production files.
 - Editor.dll / UCC.exe / UnrealEd.exe: Out of scope.
 - Assets (.u, textures, maps, sounds, .ini): Out of scope — sourced from retail at runtime.
 
 ## Further Considerations
-1. **Phase 1B tool scope**: The triage tool could also generate skeleton implementations for TRIVIAL-classified stubs (e.g. emit a constructor body from the class header fields). Worth deciding whether it's just a classifier or also a code generator.
-2. **SNDDSound3D variant differences**: The _ret and _VSR variants differ by 2 data exports. Verify whether they can share a single source file with `#ifdef` or need separate implementations.
+1. **SNDDSound3D variant differences**: The _ret and _VSR variants differ by 2 data exports. Verify whether they can share a single source file with `#ifdef` or need separate implementations.
+2. **EngineStubs.cpp deletion**: Once Batch 5 completes, `EngineStubs.cpp` should be deleted entirely. The `dummy_stub_func`/`dummy_stub_data` definitions in `EngineLinkerShims.cpp` should also be removed once no pragmas reference them.
+3. **`__FUNC_NAME__` shims are permanent**: The 28+6+3 compiler-version artifacts in `EngineLinkerShims.cpp`, `CoreStubs.cpp`, and `Window.cpp` are inherent to the MSVC 7.1 → modern MSVC difference. They're not stubs and won't be removed — they're linker compatibility infrastructure.
+4. **Batch ordering flexibility**: Batches 2, 3, 4 are independent of each other and can be worked in any order after Batch 1. Similarly, Batches 7, 12, 13 are independent of each other and of Batches 9-11. An agent should pick whichever batch has the best Ghidra reference data available.
