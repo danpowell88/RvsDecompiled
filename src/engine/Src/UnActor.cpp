@@ -3362,11 +3362,9 @@ AActor* AActor::AssociatedLevelGeometry()
 
 INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 {
-	guard(AActor::HasAssociatedLevelGeometry);
-	// Retail 0x103D5B00: returns 1 only if this actor has bWorldGeometry set
-	// AND the Other actor IS this actor.
+	// Retail Engine.dll: test bWorldGeometry flag; returns 1 only if this actor
+	// has bWorldGeometry set AND Other IS this actor.
 	return (bWorldGeometry && Other == this) ? 1 : 0;
-	unguard;
 }
 
 void AActor::KFreezeRagdoll()
@@ -3399,8 +3397,6 @@ void AActor::CheckForErrors()
 
 void AActor::AddMyMarker( AActor* S )
 {
-	guard(AActor::AddMyMarker);
-	unguard;
 }
 
 UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const

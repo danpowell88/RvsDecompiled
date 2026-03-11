@@ -180,9 +180,7 @@ void UObject::ProcessState( FLOAT DeltaSeconds )
 
 INT UObject::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
-	guard(UObject::ProcessRemoteFunction);
 	return 0;
-	unguard;
 }
 
 void UObject::Modify()
