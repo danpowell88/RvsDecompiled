@@ -1912,9 +1912,14 @@ UAnimNotify * USkeletalMeshInstance::AnimGetNotifyObject(void* Channel, int noti
 	return *(UAnimNotify**)(notifyArray + notifyIndex * 12 + 8);
 }
 
-const TCHAR* USkeletalMeshInstance::AnimGetNotifyText(void *,int)
+const TCHAR* USkeletalMeshInstance::AnimGetNotifyText(void* Channel, INT notifyIndex)
 {
-	return NULL;
+	// Retail: 31b. Null-checks Channel (null->returns NULL via fallthrough), then reads FName at
+	// notify entry+4 and returns FName string via operator*. Same layout as UVertMeshInstance.
+	if (!Channel) return NULL;
+	BYTE* notifyArray = *(BYTE**)((BYTE*)Channel + 0x1C);
+	FName name = *(FName*)(notifyArray + notifyIndex * 12 + 4);
+	return *name;
 }
 
 float USkeletalMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
@@ -2418,9 +2423,13 @@ UAnimNotify * UVertMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIn
 	return *(UAnimNotify**)(notifyArray + notifyIndex * 12 + 8);
 }
 
-const TCHAR* UVertMeshInstance::AnimGetNotifyText(void *,int)
+const TCHAR* UVertMeshInstance::AnimGetNotifyText(void* Channel, INT notifyIndex)
 {
-	return NULL;
+	// Retail: 27b. Reads FName at notify entry+4, returns FName string via operator*.
+	// Entry layout: +0 time (float), +4 FName, +8 UAnimNotify* (stride 12b).
+	BYTE* notifyArray = *(BYTE**)((BYTE*)Channel + 0x1C);
+	FName name = *(FName*)(notifyArray + notifyIndex * 12 + 4);
+	return *name;
 }
 
 float UVertMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
@@ -5598,7 +5607,8 @@ void UIndexBuffer::Serialize(FArchive &)
 // --- UInputPlanning ---
 const TCHAR* UInputPlanning::StaticConfigName()
 {
-	return NULL;
+	// Retail: 6b. Returns same hardcoded pointer as UInput::StaticConfigName = L"User".
+	return TEXT("User");
 }
 
 void UInputPlanning::StaticInitInput()
@@ -11966,7 +11976,7 @@ FLOAT UInput::GetInputDelta()
 {
 	return *(FLOAT*)((BYTE*)this + 0xEB0);
 }
-const TCHAR* UInput::StaticConfigName() { return TEXT("Input"); }
+const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }  // Retail: 6b. Returns hardcoded L"User" string pointer from .rdata.
 void UInput::StaticInitInput() {}
 
 // ============================================================================
@@ -11974,7 +11984,16 @@ void UInput::StaticInitInput() {}
 // ============================================================================
 void ALevelInfo::SetVolumes(const TArray<class AVolume*>&) {}
 void ALevelInfo::SetVolumes() {}
-void ALevelInfo::SetZone(INT, INT) {}
+void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
+{
+	// Retail: 51b. If bit 7 of this+0xA0 is set, skip. Otherwise:
+	// store DWORD from this+0x144 to this+0x228, store 0xFFFFFFFF to this+0x22C, 0 to this+0x230.
+	// ZoneNumber and ZoneBitField args are not used in retail bytecode.
+	if (*(BYTE*)((BYTE*)this + 0xA0) & 0x80) return;
+	*(DWORD*)((BYTE*)this + 0x228) = *(DWORD*)((BYTE*)this + 0x144);
+	*(DWORD*)((BYTE*)this + 0x22C) = 0xFFFFFFFF;
+	*(DWORD*)((BYTE*)this + 0x230) = 0;
+}
 void ALevelInfo::PostNetReceive() {}
 void ALevelInfo::PreNetReceive() {}
 void ALevelInfo::CheckForErrors() {}
