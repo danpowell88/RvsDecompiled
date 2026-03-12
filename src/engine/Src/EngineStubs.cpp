@@ -1947,14 +1947,24 @@ int USkeletalMeshInstance::FreezeAnimAt(float,int)
 	return 0;
 }
 
-float USkeletalMeshInstance::GetActiveAnimFrame(int)
+float USkeletalMeshInstance::GetActiveAnimFrame(INT Channel)
 {
-	return 0.0f;
+	// Retail: 93b (SEH). TArray at this+0x10C, stride 0x74=116b, frame float at element+0x10.
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= Channel || Channel < 0) return 0.0f;
+	BYTE* data = *(BYTE**)(seqBase);
+	return *(FLOAT*)(data + Channel * 0x74 + 0x10);
 }
 
-float USkeletalMeshInstance::GetActiveAnimRate(int)
+float USkeletalMeshInstance::GetActiveAnimRate(INT Channel)
 {
-	return 0.0f;
+	// Retail: 93b (SEH). Same TArray at this+0x10C (stride 0x74=116b), rate float at element+0x0C.
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= Channel || Channel < 0) return 0.0f;
+	BYTE* data = *(BYTE**)(seqBase);
+	return *(FLOAT*)(data + Channel * 0x74 + 0x0C);
 }
 
 FName USkeletalMeshInstance::GetActiveAnimSequence(int)
@@ -2025,14 +2035,26 @@ int USkeletalMeshInstance::IsAnimating(int)
 	return 0;
 }
 
-int USkeletalMeshInstance::IsAnimLooping(int)
+int USkeletalMeshInstance::IsAnimLooping(INT Channel)
 {
-	return 0;
+	// Retail: 93b (SEH). TArray at this+0x10C, stride 0x74=116b, loop flag (INT) at element+0x30.
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= Channel || Channel < 0) return 0;
+	BYTE* data = *(BYTE**)(seqBase);
+	return *(INT*)(data + Channel * 0x74 + 0x30);
 }
 
-int USkeletalMeshInstance::IsAnimPastLastFrame(int)
+int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 {
-	return 0;
+	// Retail: 111b (SEH). Compares current frame (element+0x10) with end frame (element+0x14).
+	// Returns 1 if current >= end (animation has reached or passed last frame).
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= Channel || Channel < 0) return 0;
+	BYTE* data = *(BYTE**)(seqBase);
+	BYTE* elem = data + Channel * 0x74;
+	return (*(FLOAT*)(elem + 0x10) >= *(FLOAT*)(elem + 0x14)) ? 1 : 0;
 }
 
 int USkeletalMeshInstance::IsAnimTweening(int)
@@ -2386,14 +2408,20 @@ int UVertMeshInstance::AnimStopLooping(int)
 	return 0;
 }
 
-float UVertMeshInstance::GetActiveAnimFrame(int)
+float UVertMeshInstance::GetActiveAnimFrame(INT Channel)
 {
-	return 0.0f;
+	// Retail: 17b. Returns current frame float from this+0xC0 for channel 0 only.
+	// For Channel != 0, retail falls into next function; approximated as return 0.0f.
+	if (Channel != 0) return 0.0f;
+	return *(FLOAT*)((BYTE*)this + 0xC0);
 }
 
-float UVertMeshInstance::GetActiveAnimRate(int)
+float UVertMeshInstance::GetActiveAnimRate(INT Channel)
 {
-	return 0.0f;
+	// Retail: 17b. Returns animation rate float from this+0xBC for channel 0 only.
+	// For Channel != 0, retail falls into next function; approximated as return 0.0f.
+	if (Channel != 0) return 0.0f;
+	return *(FLOAT*)((BYTE*)this + 0xBC);
 }
 
 FName UVertMeshInstance::GetActiveAnimSequence(int sequenceChannelIndex)
@@ -2487,12 +2515,15 @@ int UVertMeshInstance::IsAnimating(int)
 
 int UVertMeshInstance::IsAnimLooping(int)
 {
-	return 0;
+	// Retail: 9b. Returns loop flag/counter at this+0xE0 (ignores Channel argument).
+	return *(INT*)((BYTE*)this + 0xE0);
 }
 
 int UVertMeshInstance::IsAnimPastLastFrame(int)
 {
-	return 0;
+	// Retail: 31b (scanner shows 27b, stops at first RETN). Compares frame position
+	// (this+0xC0) vs end-frame sentinel (this+0xC4). Returns 1 if frame < end sentinel.
+	return (*(FLOAT*)((BYTE*)this + 0xC0) < *(FLOAT*)((BYTE*)this + 0xC4)) ? 1 : 0;
 }
 
 int UVertMeshInstance::IsAnimTweening(int)
