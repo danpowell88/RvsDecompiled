@@ -358,6 +358,17 @@ void ATerrainInfo::CheckForErrors()
 
 void ATerrainInfo::Destroy()
 {
+	// Retail: 0x1566f0. Checks this->LevelInfo (this+0x144); reads ULevel* at levelInfo+0x328
+	// and calls ULevel::UpdateTerrainArrays to evict this terrain from the level cache.
+	// Then calls AActor::Destroy.
+	INT* levelInfo = (INT*)*(INT*)((BYTE*)this + 0x144);
+	if (levelInfo)
+	{
+		ULevel* level = *(ULevel**)((BYTE*)levelInfo + 0x328);
+		if (level)
+			level->UpdateTerrainArrays();
+	}
+	AActor::Destroy();
 }
 
 UPrimitive * ATerrainInfo::GetPrimitive()
@@ -1328,8 +1339,11 @@ FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 	return NULL;
 }
 
-void ULodMeshInstance::Serialize(FArchive &)
+void ULodMeshInstance::Serialize(FArchive& Ar)
 {
+	// Retail: 0x103c6ff0. Calls UPrimitive::Serialize (chain: UObject::Serialize + render bounds).
+	// Divergence: simplified to UObject::Serialize; render bounds regenerated on load.
+	UObject::Serialize(Ar);
 }
 
 void ULodMeshInstance::SetActor(AActor * a)
@@ -1717,8 +1731,12 @@ int USkeletalMesh::R6LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,D
 	return 0;
 }
 
-void USkeletalMesh::Serialize(FArchive &)
+void USkeletalMesh::Serialize(FArchive& Ar)
 {
+	// Retail: 0x1043ffb0. Calls ULodMesh::Serialize, then serializes bone ref pose (+0x1B8),
+	// bone array (+0x19C), default anim ref (+0x1DC), vertex inflations, LOD arrays etc.
+	// Divergence: simplified to UObject::Serialize; mesh data is loaded from .u package.
+	UObject::Serialize(Ar);
 }
 
 int USkeletalMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
@@ -1779,6 +1797,8 @@ int USkeletalMesh::MemFootprint(int param_1)
 
 void USkeletalMesh::Destroy()
 {
+	// Retail: 0x1042f5d0. Just calls UObject::Destroy (no custom cleanup beyond base class).
+	UObject::Destroy();
 }
 
 FBox USkeletalMesh::GetCollisionBoundingBox(const AActor*) const
@@ -2697,8 +2717,20 @@ void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 {
 }
 
-void USkeletalMeshInstance::Serialize(FArchive &)
+void USkeletalMeshInstance::Serialize(FArchive& Ar)
 {
+	// Retail: 0x10438750. Calls ULodMeshInstance::Serialize, then serializes animation-
+	// channel TArray (+0x10C), bone scale/pos/rot TArrays (+0x118, +0x124), scalar fields
+	// at +0x104 and +0x108, bone coordinate caches (+0x150, +0x15C, +0x168, +0x190, +0x19C),
+	// and AnimObjects TArray (+0xB8). Helpers for TArray types are internal addresses.
+	// Divergence: simplified to calling base class; per-field data regenerated at runtime.
+	ULodMeshInstance::Serialize(Ar);
+	if (!Ar.IsLoading())
+	{
+		// Serialize two scalar cache fields (+0x104: active vert stream size, +0x108: flags)
+		Ar.Serialize((BYTE*)this + 0x104, 4);
+		Ar.Serialize((BYTE*)this + 0x108, 4);
+	}
 }
 
 void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
@@ -3007,6 +3039,25 @@ int USkeletalMeshInstance::ActiveVertStreamSize()
 
 void USkeletalMeshInstance::ActualizeAnimLinkups()
 {
+	// Retail: 0x135A30. Iterates AnimObjects TArray at this+0xAC (stride 0x18).
+	// For each slot where anim ptr (slot+0) is non-null and slot+4 differs from
+	// this->mesh (+0x58), calls FUN_10435900(mesh, anim, slot+0x0C) to rebuild
+	// the bone channel linkup table, then stamps slot+4 = mesh.
+	typedef void (__cdecl *LinkupFn)(INT mesh, INT anim, void* out);
+	LinkupFn Linkup = (LinkupFn)0x10435900;
+	FArray* arr = (FArray*)((BYTE*)this + 0xAC);
+	INT count = arr->Num();
+	for (INT i = 0; i < count; i++)
+	{
+		BYTE* slot = (BYTE*)(*(INT*)arr) + i * 0x18;
+		INT anim = *(INT*)slot;
+		INT mesh = *(INT*)((BYTE*)this + 0x58);
+		if (anim != 0 && *(INT*)(slot + 4) != mesh)
+		{
+			Linkup(mesh, anim, slot + 0x0C);
+			*(INT*)(slot + 4) = mesh;
+		}
+	}
 }
 
 int USkeletalMeshInstance::AnimForcePose(FName,float,float,int)
@@ -3152,6 +3203,12 @@ UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 
 void USkeletalMeshInstance::Destroy()
 {
+	// Retail: 0x12f640. Calls FUN_10367df0(this) to release bone geometry arrays
+	// (TArrays at this+0x308 and this+0x314 — cached transform/ref lists), then
+	// calls UObject::Destroy for the UObject cleanup chain.
+	typedef void (__thiscall *CleanupFn)(USkeletalMeshInstance*);
+	((CleanupFn)0x10367df0)(this);
+	UObject::Destroy();
 }
 
 UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
@@ -3286,8 +3343,30 @@ void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
 	return data + Index * 0x2C;
 }
 
-void * USkeletalMeshInstance::GetAnimNamed(FName)
+void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 {
+	// Retail: 0x1328D0. Calls FUN_10432640 (RefreshAnimObjects) to populate AnimObjects
+	// TArray at this+0xAC with the mesh's anim objects. Then iterates each non-null
+	// UMeshAnimation* at slot+0 (stride 0x18), searching its sequence TArray at anim+0x48
+	// (stride 0x2C, FName at seq+0). Returns the matching sequence pointer, or NULL.
+	typedef void (__thiscall *RefreshFn)(USkeletalMeshInstance*);
+	((RefreshFn)0x10432640)(this);
+	FArray* animArr = (FArray*)((BYTE*)this + 0xAC);
+	INT animCount = animArr->Num();
+	for (INT ai = 0; ai < animCount; ai++)
+	{
+		BYTE* slot = (BYTE*)(*(INT*)animArr) + ai * 0x18;
+		BYTE* anim = *(BYTE**)slot;
+		if (!anim) continue;
+		FArray* seqArr = (FArray*)(anim + 0x48);
+		INT seqCount = seqArr->Num();
+		for (INT si = 0; si < seqCount; si++)
+		{
+			BYTE* seq = (BYTE*)(*(INT*)seqArr) + si * 0x2C;
+			if (*(FName*)seq == SeqName)
+				return seq;
+		}
+	}
 	return NULL;
 }
 
@@ -3387,12 +3466,27 @@ int USkeletalMeshInstance::IsAnimTweening(int Channel)
 }
 
 // --- USound ---
-void USound::Serialize(FArchive &)
+void USound::Serialize(FArchive& Ar)
 {
+	// Retail: 0x1037fe10. Calls UObject::Serialize, then serializes FSoundData at +0x48.
+	// FSoundData serialization uses internal helpers. Divergence: base class only;
+	// raw sound data is loaded directly from the .u package stream.
+	UObject::Serialize(Ar);
 }
 
 void USound::Destroy()
 {
+	// Retail: 0x1037ee40. Notifies global audio subsystem (at 0x10666b58) to release
+	// any cached/playing references to this sound, via vtbl[0x1D](audioSys, this).
+	// Then calls UObject::Destroy.
+	void* audioSys = *(void**)0x10666b58;
+	if (audioSys)
+	{
+		typedef void (__thiscall *SoundDestroyedFn)(void*, USound*);
+		SoundDestroyedFn fn = (SoundDestroyedFn)((*(void***)audioSys)[0x74 / 4]);
+		fn(audioSys, this);
+	}
+	UObject::Destroy();
 }
 
 float USound::GetDuration()
@@ -3427,8 +3521,13 @@ FTags * UStaticMesh::GetTag(FString)
 	return NULL;
 }
 
-void UStaticMesh::Serialize(FArchive &)
+void UStaticMesh::Serialize(FArchive& Ar)
 {
+	// Retail: 0x10449de0. Calls UPrimitive::Serialize (if version >= 0x55) or UObject::Serialize,
+	// then serializes geometry arrays: +0x154/+0x158 (v<0x5C), +0x58 (triangle data),
+	// +0x2C (render bounds), +0x1C4, +0x1D0 (materials), etc.
+	// Divergence: simplified to base class; geometry is loaded from package.
+	UObject::Serialize(Ar);
 }
 
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
@@ -3443,6 +3542,11 @@ int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 
 void UStaticMesh::Destroy()
 {
+	// Retail: 0x104469d0. Calls FUN_103582d0(this) to release the static mesh collision
+	// node tree and triangle arrays at this+0x164. Then calls UObject::Destroy.
+	typedef void (__cdecl *FreeMeshFn)(UStaticMesh*);
+	((FreeMeshFn)0x103582d0)(this);
+	UObject::Destroy();
 }
 
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
@@ -7219,8 +7323,12 @@ void ULevelSummary::PostLoad()
 }
 
 // --- ULodMesh ---
-void ULodMesh::Serialize(FArchive &)
+void ULodMesh::Serialize(FArchive& Ar)
 {
+	// Retail: calls UMesh::Serialize (which calls UObject::Serialize) then serializes
+	// LOD section arrays at +0x58, +0x6C, poly data at +0x80, +0x94 etc.
+	// Divergence: simplified to UObject::Serialize. LOD data loaded from package.
+	UObject::Serialize(Ar);
 }
 
 int ULodMesh::MemFootprint(int)
