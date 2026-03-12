@@ -1192,8 +1192,62 @@ void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags
 	*(DWORD*)((BYTE*)this + 0xB8) = state;
 }
 
-void UCanvas::UseVirtualSize(int,float,float)
+void UCanvas::UseVirtualSize(int bEnable, float SizeX, float SizeY)
 {
+	// Retail: 0x89fd0, ordinal 4960. Two modes:
+	// bEnable==0: restore — set OrgX/OrgY from VirtualX/VirtualY (or viewport dims if virtual is 0),
+	//             reset StretchX/StretchY to 1.0.
+	// bEnable!=0: save — store current OrgX/OrgY into VirtualX/VirtualY;
+	//              if SizeX/SizeY are non-zero, store into m_fSizeX/m_fSizeY;
+	//              set OrgX/OrgY = m_fSizeX/m_fSizeY;
+	//              compute StretchX = ViewportW / m_fSizeX, StretchY = ViewportH / m_fSizeY.
+	// Offsets: OrgX=0x40, OrgY=0x44, HalfClipX=0x48, HalfClipY=0x4C,
+	//          Viewport*=0x7C, m_fSizeX=0x9C, m_fSizeY=0xA0,
+	//          StretchX=0x94, StretchY=0x98, VirtualX=0xA4, VirtualY=0xA8.
+	if (bEnable == 0) {
+		// Restore mode: use VirtualX/VirtualY if > 0, else read viewport dims.
+		FLOAT vx = *(FLOAT*)((BYTE*)this + 0xA4);
+		FLOAT vy = *(FLOAT*)((BYTE*)this + 0xA8);
+		if (vx <= 0.0f || vy <= 0.0f) {
+			// Read viewport native size (stored as INT at viewport+0xA4)
+			INT* Viewport = *(INT**)((BYTE*)this + 0x7C);
+			FLOAT w = (FLOAT)*(INT*)((BYTE*)Viewport + 0xA4);
+			*(FLOAT*)((BYTE*)this + 0x40) = w;
+			*(FLOAT*)((BYTE*)this + 0x44) = w; // Ghidra: both use +0xA4
+		} else {
+			*(FLOAT*)((BYTE*)this + 0x40) = vx;
+			*(FLOAT*)((BYTE*)this + 0x44) = vy;
+		}
+		*(FLOAT*)((BYTE*)this + 0x94) = 1.0f;
+		*(FLOAT*)((BYTE*)this + 0x98) = 1.0f;
+	} else {
+		// Save current OrgX/OrgY into VirtualX/VirtualY.
+		FLOAT orgX = *(FLOAT*)((BYTE*)this + 0x40);
+		FLOAT orgY = *(FLOAT*)((BYTE*)this + 0x44);
+		*(FLOAT*)((BYTE*)this + 0xA8) = orgY;
+		*(FLOAT*)((BYTE*)this + 0xA4) = orgX;
+		// If new size parameters are non-zero, store them; otherwise keep current m_fSizeX/Y.
+		if (SizeX != 0.0f && SizeY != 0.0f) {
+			if (orgX == *(FLOAT*)((BYTE*)this + 0x40) || orgY == *(FLOAT*)((BYTE*)this + 0x44)) {
+				// OrgX/OrgY unchanged: recurse with enable (mirrors retail's recursive call).
+				UseVirtualSize(1, SizeX, SizeY);
+			} else {
+				*(FLOAT*)((BYTE*)this + 0x9C) = SizeX;
+				*(FLOAT*)((BYTE*)this + 0xA0) = SizeY;
+			}
+		}
+		// Set OrgX/OrgY = m_fSizeX/Y and compute stretch ratios.
+		INT* Viewport = *(INT**)((BYTE*)this + 0x7C);
+		INT vpW = *(INT*)((BYTE*)Viewport + 0xA4);
+		INT vpH = *(INT*)((BYTE*)Viewport + 0xA8);
+		*(FLOAT*)((BYTE*)this + 0x40) = *(FLOAT*)((BYTE*)this + 0x9C);
+		*(FLOAT*)((BYTE*)this + 0x44) = *(FLOAT*)((BYTE*)this + 0xA0);
+		*(FLOAT*)((BYTE*)this + 0x94) = (FLOAT)vpW / *(FLOAT*)((BYTE*)this + 0x9C);
+		*(FLOAT*)((BYTE*)this + 0x98) = (FLOAT)vpH / *(FLOAT*)((BYTE*)this + 0xA0);
+	}
+	// Always recompute HalfClipX/Y.
+	*(FLOAT*)((BYTE*)this + 0x48) = *(FLOAT*)((BYTE*)this + 0x40) * 0.5f;
+	*(FLOAT*)((BYTE*)this + 0x4C) = *(FLOAT*)((BYTE*)this + 0x44) * 0.5f;
 }
 
 void UCanvas::SetStretch(float stretchX, float stretchY)
@@ -2423,9 +2477,12 @@ FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName Name)
 	return NULL;
 }
 
-int UVertMeshInstance::StopAnimating(int)
+int UVertMeshInstance::StopAnimating(INT Channel)
 {
-	return 0;
+	// Retail: 15b. Clears the animation sequence name (FName) at this+0xB8 and returns 1.
+	// Channel argument is ignored (single-channel vertex mesh).
+	*(FName*)((BYTE*)this + 0xB8) = FName(NAME_None);
+	return 1;
 }
 
 int UVertMeshInstance::UpdateAnimation(float)
@@ -2628,9 +2685,10 @@ void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 }
 
-FBox UVertMeshInstance::GetRenderBoundingBox(const AActor*)
+FBox UVertMeshInstance::GetRenderBoundingBox(const AActor* Owner)
 {
-	return FBox();
+	// Retail: 33b. Same pattern as GetRenderBoundingSphere: get mesh, call mesh's method.
+	return GetMesh()->GetRenderBoundingBox(Owner);
 }
 
 FSphere UVertMeshInstance::GetRenderBoundingSphere(const AActor*)
@@ -2659,7 +2717,9 @@ int UVertMeshInstance::IsAnimPastLastFrame(int)
 
 int UVertMeshInstance::IsAnimTweening(int)
 {
-	return 0;
+	// Retail: 9b. Returns the tween flag/counter at this+0xE4 (ignores Channel argument).
+	// Analogous to IsAnimLooping which reads this+0xE0.
+	return *(INT*)((BYTE*)this + 0xE4);
 }
 
 
@@ -4601,42 +4661,58 @@ FTexture * FStaticCubemap::GetFace(int)
 
 int FStaticCubemap::GetFirstMip()
 {
-	return 0;
+	// UCubemap* at Pad[0] (this+4); cubemap inherits from UTexture.
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? tex->DefaultLOD() : 0;
 }
 
 ETextureFormat FStaticCubemap::GetFormat()
 {
-	return TEXF_P8;
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? (ETextureFormat)tex->Format : TEXF_P8;
 }
 
 int FStaticCubemap::GetHeight()
 {
-	return 0;
+	// Cubemap face height — UCubemap inherits VSize from UTexture.
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? tex->VSize : 0;
 }
 
 int FStaticCubemap::GetNumMips()
 {
-	return 0;
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? tex->Mips.Num() : 0;
 }
 
 int FStaticCubemap::GetRevision()
 {
-	return 0;
+	// Revision counter at Pad[12] (this+16), same layout as FStaticTexture.
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	if (tex && tex->bRealtimeChanged)
+	{
+		++(*(INT*)&Pad[12]);
+		tex->bRealtimeChanged = 0;
+	}
+	return *(INT*)&Pad[12];
 }
 
 ETexClampMode FStaticCubemap::GetUClamp()
 {
-	return TC_Wrap;
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? (ETexClampMode)tex->UClampMode : TC_Wrap;
 }
 
 ETexClampMode FStaticCubemap::GetVClamp()
 {
-	return TC_Wrap;
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? (ETexClampMode)tex->VClampMode : TC_Wrap;
 }
 
 int FStaticCubemap::GetWidth()
 {
-	return 0;
+	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
+	return tex ? tex->USize : 0;
 }
 
 // --- FStaticLightMapTexture ---
@@ -5810,9 +5886,29 @@ void UMatAction::Initialize()
 }
 
 // --- UMatSubAction ---
-int UMatSubAction::Update(float,ASceneManager *)
+int UMatSubAction::Update(float Pct, ASceneManager*)
 {
-	return 0;
+	// Retail: 0x11d920, 64b. State machine at this+0x2C (BYTE):
+	// 0=not started, 1=running, 2=ending, 3=done.
+	// If ending (2): transition to done (3) and return 0.
+	// Else if Pct in [StartPct, EndPct): set running (1) and return 1.
+	// Else if Pct >= EndPct: set ending (2), return 1.
+	// StartPct at this+0x4C, EndPct at this+0x50.
+	BYTE state = *(BYTE*)((BYTE*)this + 0x2C);
+	if (state == 2) {
+		*(BYTE*)((BYTE*)this + 0x2C) = 3;
+		return 0;
+	}
+	FLOAT StartPct = *(FLOAT*)((BYTE*)this + 0x4C);
+	FLOAT EndPct   = *(FLOAT*)((BYTE*)this + 0x50);
+	if (StartPct < Pct && Pct < EndPct) {
+		*(BYTE*)((BYTE*)this + 0x2C) = 1;
+		return 1;
+	}
+	if (EndPct < Pct || EndPct == Pct) {
+		*(BYTE*)((BYTE*)this + 0x2C) = 2;
+	}
+	return 1;
 }
 
 void UMatSubAction::PostEditChange()
@@ -6530,9 +6626,13 @@ FString USubActionCameraEffect::GetStatString()
 }
 
 // --- USubActionCameraShake ---
-int USubActionCameraShake::Update(float,ASceneManager *)
+int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 {
-	return 0;
+	// Retail: 0x11da60, 116b. Calls parent Update; if running, gets scene manager via
+	// vtable+0x6C (slot 27 = GetSceneManager) and adds a random shake vector from the
+	// FRangeVector at this+0x58 to the scene manager's accumulator at +0x47C.
+	// FRangeVector::GetRand is a complex random-in-range function — stub: call parent and return.
+	return UMatSubAction::Update(Pct, SceneMgr) ? 1 : 0;
 }
 
 FString USubActionCameraShake::GetStatString()
@@ -6563,9 +6663,31 @@ FString USubActionFade::GetStatString()
 }
 
 // --- USubActionGameSpeed ---
-int USubActionGameSpeed::Update(float,ASceneManager *)
+int USubActionGameSpeed::Update(float Pct, ASceneManager* SceneMgr)
 {
-	return 0;
+	// Retail: 0x11e640, 189b. Calls parent update; if running and manager available,
+	// lerps SceneMgr's game-speed multiplier (SceneMgr+0x458 in LevelInfo at SceneMgr+0x144)
+	// from saved start value (this+0x58) to end value (this+0x5C) over the sub-action duration.
+	if (!UMatSubAction::Update(Pct, SceneMgr))
+		return 0;
+	typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionGameSpeed*);
+	ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+	if (!mgr)
+		return 1;
+	// Save start speed on first call (0.0 means not yet saved).
+	FLOAT* SavedStart = (FLOAT*)((BYTE*)this + 0x58);
+	FLOAT* EndSpeed   = (FLOAT*)((BYTE*)this + 0x5C);
+	FLOAT  Duration   = *(FLOAT*)((BYTE*)this + 0x54);
+	FLOAT  StartPct   = *(FLOAT*)((BYTE*)this + 0x4C);
+	ALevelInfo* LI = *(ALevelInfo**)((BYTE*)mgr + 0x144);
+	if (*SavedStart == 0.0f)
+		*SavedStart = *(FLOAT*)((BYTE*)LI + 0x458);
+	FLOAT t = (Pct - StartPct) / Duration;
+	if (t < 0.0001f) t = 0.0001f;
+	if (t > 1.0f)    t = 1.0f;
+	if (*(BYTE*)((BYTE*)this + 0x2C) == 2) t = 1.0f; // ending: snap to end
+	*(FLOAT*)((BYTE*)LI + 0x458) = (*EndSpeed - *SavedStart) * t + *SavedStart;
+	return 1;
 }
 
 FString USubActionGameSpeed::GetStatString()
@@ -6590,13 +6712,38 @@ FString USubActionOrientation::GetStatString()
 
 int USubActionOrientation::IsRunning()
 {
+	// Retail: 0x11db10, 20b. Returns 1 if not in editor AND state (this+0x2C) is 1 or 2 (running or ending).
+	if (!GIsEditor) {
+		BYTE state = *(BYTE*)((BYTE*)this + 0x2C);
+		if (state == 1 || state == 2)
+			return 1;
+	}
 	return 0;
 }
 
 // --- USubActionSceneSpeed ---
-int USubActionSceneSpeed::Update(float,ASceneManager *)
+int USubActionSceneSpeed::Update(float Pct, ASceneManager* SceneMgr)
 {
-	return 0;
+	// Retail: 0x11e700, 173b. Same pattern as USubActionGameSpeed::Update but targets
+	// SceneMgr's scene-speed multiplier at SceneMgr+0x3C8 (instead of LevelInfo+0x458).
+	if (!UMatSubAction::Update(Pct, SceneMgr))
+		return 0;
+	typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionSceneSpeed*);
+	ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+	if (!mgr)
+		return 1;
+	FLOAT* SavedStart = (FLOAT*)((BYTE*)this + 0x58);
+	FLOAT* EndSpeed   = (FLOAT*)((BYTE*)this + 0x5C);
+	FLOAT  Duration   = *(FLOAT*)((BYTE*)this + 0x54);
+	FLOAT  StartPct   = *(FLOAT*)((BYTE*)this + 0x4C);
+	if (*SavedStart == 0.0f)
+		*SavedStart = *(FLOAT*)((BYTE*)mgr + 0x3C8);
+	FLOAT t = (Pct - StartPct) / Duration;
+	if (t < 0.0001f) t = 0.0001f;
+	if (t > 1.0f)    t = 1.0f;
+	if (*(BYTE*)((BYTE*)this + 0x2C) == 2) t = 1.0f;
+	*(FLOAT*)((BYTE*)mgr + 0x3C8) = (*EndSpeed - *SavedStart) * t + *SavedStart;
+	return 1;
 }
 
 FString USubActionSceneSpeed::GetStatString()
