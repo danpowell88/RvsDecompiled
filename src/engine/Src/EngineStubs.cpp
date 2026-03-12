@@ -1887,14 +1887,62 @@ int USkeletalMeshInstance::SetBoneScale(int,float,FName)
 	return 0;
 }
 
-int USkeletalMeshInstance::SetSkelAnim(UMeshAnimation *,USkeletalMesh *)
+int USkeletalMeshInstance::SetSkelAnim(UMeshAnimation* Anim, USkeletalMesh* Mesh)
 {
-	return 0;
+	// Disasm: if Anim==NULL return 0
+	if (!Anim) return 0;
+
+	// Search this->AnimObjects (this+0xAC, stride 0x18) for existing slot
+	FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
+	INT Count = AnimArr->Num();
+	INT Found = -1;
+	for (INT i = 0; i < Count; i++)
+	{
+		BYTE* Slot = (BYTE*)(*(BYTE**)AnimArr) + i * 0x18;
+		if (*(UMeshAnimation**)Slot == Anim)
+		{
+			Found = i;
+			break;
+		}
+	}
+
+	if (Found == -1)
+	{
+		// Add a new slot and store Anim* and Mesh* in it
+		INT Idx = AnimArr->Add(1, 0x18);
+		BYTE* Slot = (BYTE*)(*(BYTE**)AnimArr) + Idx * 0x18;
+		*(UMeshAnimation**)Slot = Anim;
+		*(USkeletalMesh**)(Slot + 4) = Mesh;
+	}
+
+	// vtbl[0x128/4] — notification callback (AnimObjectsChanged)
+	typedef void (__thiscall *NotifyFn)(USkeletalMeshInstance*);
+	NotifyFn Notify = *(NotifyFn*)((*(BYTE**)this) + 0x128);
+	Notify(this);
+	return 1;
 }
 
-int USkeletalMeshInstance::LockRootMotion(int,int)
+int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 {
-	return 0;
+	// Disasm: store Mode at this+0x1C4, set lock flag at this+0x228=1, clear this+0x188=0
+	*(INT*)((BYTE*)this + 0x1C4) = Mode;
+	*(INT*)((BYTE*)this + 0x228) = 1;
+	*(INT*)((BYTE*)this + 0x188) = 0;
+
+	// vtbl[0x8C/4] — GetMesh
+	typedef void* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	(void)GetMesh(this);
+
+	// vtbl[0x84/4] — GetOwner/GetActor  (result unused in our simplified form)
+	typedef void* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+	void* Owner = GetOwner(this);
+
+	// Retail: if owner is NULL, just clean up and return 0 (exception-frame teardown path)
+	// if owner is non-NULL more work is done but is safe to defer
+	if (!Owner) return 0;
+	return 1;
 }
 
 int USkeletalMeshInstance::MatchRefBone(FName)
@@ -2238,9 +2286,33 @@ void USkeletalMeshInstance::ClearChannel(INT Channel)
 	*(INT*)(elem + 0x38) = 0;  // loop
 }
 
-UMeshAnimation * USkeletalMeshInstance::CurrentSkelAnim(int)
+UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 {
-	return NULL;
+	// Bounds check channel
+	if (Channel < 0) return NULL;
+
+	// Channels TArray at this+0x10C, stride 0x74
+	FArray* ChanArr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= ChanArr->Num()) return NULL;
+
+	// Read anim slot index from channel elem+4
+	BYTE* ChanElem = (BYTE*)(*(BYTE**)ChanArr) + Channel * 0x74;
+	INT AnimSlotIdx = *(INT*)(ChanElem + 4);
+	if (AnimSlotIdx < 0) return NULL;
+
+	// Look up anim pointer in this->AnimObjects (this+0xAC, stride 0x18)
+	FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
+	if (AnimSlotIdx >= AnimArr->Num()) return NULL;
+
+	UMeshAnimation* Anim = *(UMeshAnimation**)((BYTE*)(*(BYTE**)AnimArr) + AnimSlotIdx * 0x18);
+	if (Anim) return Anim;
+
+	// Fallback: vtbl[0x8C/4] to get mesh, return mesh's default anim at mesh+0x1DC
+	typedef void* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	void* MeshPtr = GetMesh(this);
+	if (!MeshPtr) return NULL;
+	return *(UMeshAnimation**)((BYTE*)MeshPtr + 0x1DC);
 }
 
 void USkeletalMeshInstance::Destroy()
