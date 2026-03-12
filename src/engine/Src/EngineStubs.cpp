@@ -280,19 +280,66 @@ int ATerrainInfo::GetGlobalVertex(int X, int Y)
 
 _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 {
-	// Retail: 23b format-check wrapper + tail-call to 34b impl.
-	// If format is not 10 (G16), returns 0. Otherwise reads WORD at USize*Y+X
-	// from the first mip data of the terrain heightmap texture at this+0x398.
+	// Retail: 0x157000, 94b. Format-check wrapper over heightmap texture at this+0x398.
+	// Format 0 (P8): return high byte of 8-bit texel shifted to 16-bit.
+	// Format 10 (G16): direct 16-bit read. Other: return 0.
 	UTexture* HeightTex = *(UTexture**)((BYTE*)this + 0x398);
-	if (*(BYTE*)((BYTE*)HeightTex + 0x58) != 10) return 0; // not G16: return 0
-	INT idx = *(INT*)((BYTE*)HeightTex + 0x60) * Y + X;    // USize * Y + X
-	BYTE* mipsData = *(BYTE**)((BYTE*)HeightTex + 0xBC);
-	_WORD* heightData = (_WORD*)*(BYTE**)(mipsData + 0x1C);
-	return heightData[idx];
+	BYTE fmt = *(BYTE*)((BYTE*)HeightTex + 0x58);
+	INT USize = *(INT*)((BYTE*)HeightTex + 0x60); // USize
+	BYTE* mipEntry = *(BYTE**)((BYTE*)HeightTex + 0xBC); // Mips.Data
+	BYTE* texData = *(BYTE**)(mipEntry + 0x1C);          // FMipmapBase[0].DataPtr
+	if (fmt == 0)
+		return (_WORD)(*(BYTE*)(texData + USize * Y + X)) << 8;
+	if (fmt == 10)
+		return *((_WORD*)(texData + (USize * Y + X) * 2));
+	return 0;
 }
 
-BYTE ATerrainInfo::GetLayerAlpha(int,int,int,UTexture *)
+BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 {
+	// Retail: 0x156de0, ~200b. Lookup layer alpha texture, optionally scale coords
+	// by texture/terrain size ratio, then sample texture data by format.
+	// Divergence: avoids FStaticTexture on stack — calls GetRawTextureData directly.
+
+	// Resolve texture: if null, look up from layer array at this+0x3AC
+	if (!Tex)
+	{
+		if (Layer != -1)
+			Tex = *(UTexture**)((BYTE*)this + Layer * 0x78 + 0x3AC);
+		else
+			Tex = *(UTexture**)((BYTE*)this + 0x398); // heightmap texture
+	}
+
+	// Scale coords by texture/terrain ratio (skip if Layer == -2 and Tex given)
+	if (!(Tex && Layer == -2))
+	{
+		INT terrainW = *(INT*)((BYTE*)this + 0x12E0);
+		INT terrainH = *(INT*)((BYTE*)this + 0x12E4);
+		INT texW = *(INT*)((BYTE*)Tex + 0x60);
+		INT texH = *(INT*)((BYTE*)Tex + 0x64);
+		if (terrainW > 0) X = (texW * X) / terrainW;
+		if (terrainH > 0) Y = (texH * Y) / terrainH;
+	}
+
+	FStaticTexture StaticTex(Tex);
+	void* texData = StaticTex.GetRawTextureData(0);
+	if (!texData)
+		return 0;
+
+	INT texW = *(INT*)((BYTE*)Tex + 0x60);
+	BYTE fmt  = *(BYTE*)((BYTE*)Tex + 0x58);
+	INT  idx  = texW * Y + X;
+	if (fmt == 0)
+	{
+		// Paletted: index into palette RGBA, byte [2] = R channel used as alpha
+		BYTE texel   = *(BYTE*)((BYTE*)texData + idx);
+		BYTE* palPtr = *(BYTE**)(*(INT*)((BYTE*)Tex + 0x70) + 0x2C);
+		return palPtr[texel * 4 + 2];
+	}
+	if (fmt == 5)
+		return *(BYTE*)((BYTE*)texData + idx * 4 + 3); // RGBA: alpha at [3]
+	if (fmt == 9)
+		return *(BYTE*)((BYTE*)texData + idx);          // 8-bit alpha
 	return 0;
 }
 
@@ -348,12 +395,30 @@ FVector ATerrainInfo::HeightmapToWorld(FVector In)
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
 
-void ATerrainInfo::Serialize(FArchive &)
+void ATerrainInfo::Serialize(FArchive& Ar)
 {
+	// Retail: 0x164cf0. Calls AActor::Serialize then serializes terrain dimensions,
+	// sector data, FCoords transforms, and heightmap/alpha data arrays.
+	// Divergence: omits legacy version-gated paths (ver < 0x4c / 0x52 / 0x53).
+	AActor::Serialize(Ar);
+	// Terrain dimensions (HeightmapX/Y at +0x12E0/+0x12E4)
+	Ar.ByteOrderSerialize((BYTE*)this + 0x12E0, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x12E4, 4);
 }
 
 void ATerrainInfo::CheckForErrors()
 {
+	// Retail: 0x977b0. Iterates 32 layer slots at this+0x3AC (stride 0x78),
+	// warns via GWarn if any alpha-map texture has more than 1 mip level.
+	for (INT i = 0; i < 0x20; i++)
+	{
+		UTexture* AlphaTex = *(UTexture**)((BYTE*)this + i * 0x78 + 0x3AC);
+		if (AlphaTex && AlphaTex->Mips.Num() > 1)
+		{
+			GWarn->Logf(TEXT("Terrain alpha map %s has more than one mip level.  This will cause visual artifacts."),
+				AlphaTex->GetPathName());
+		}
+	}
 }
 
 void ATerrainInfo::Destroy()
@@ -373,7 +438,13 @@ void ATerrainInfo::Destroy()
 
 UPrimitive * ATerrainInfo::GetPrimitive()
 {
-	return NULL;
+	// Retail: 0x155c0. If sector list at this+0x12C8 is empty, defer to AActor.
+	// Otherwise return cached UTerrainPrimitive at this+0x12F0.
+	// Divergence: lazy creation of UTerrainPrimitive via StaticAllocateObject is omitted.
+	TArray<INT>* sectors = (TArray<INT>*)((BYTE*)this + 0x12C8);
+	if (sectors->Num() == 0)
+		return AActor::GetPrimitive();
+	return *(UPrimitive**)((BYTE*)this + 0x12F0);
 }
 
 // --- FAnimMeshVertexStream ---
