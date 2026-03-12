@@ -8634,6 +8634,35 @@ FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
 // ??1FRebuildTools@@QAE@XZ
 FRebuildTools::~FRebuildTools() {}
 
+// --- FColor ---
+// ?FBrightness@FColor@@QBEMXZ (48b RVA=0x1EE0)
+// Retail: loads byte[2]*2 + byte[1]*3 + byte[0] (with RGBA: 2B+3G+R), scale by 1/1536.
+FLOAT FColor::FBrightness() const
+{
+    return (2.f*B + 3.f*G + R) / 1536.f;
+}
+
+// ?HiColor565@FColor@@QBEGXZ (31b RVA=0x1F10)
+// Retail: DWORD-based packing using shifts/masks.
+// With RGBA dword = R|G<<8|B<<16|A<<24:
+//   (d>>8)&0xF800 → B[7:3] at bits[15:11]
+//   (d>>5)&0x07E0 → G[7:2] at bits[10:5]
+//   d&0xF8        → R[7:3] at bits[7:3]
+// Note: R sits at bits[7:3] not [4:0] – this matches the retail exactly.
+_WORD FColor::HiColor565() const
+{
+    DWORD d = DWColor();
+    return (_WORD)(((d >> 8) & 0xF800) + ((d >> 5) & 0x07E0) + (d & 0xF8));
+}
+
+// ?HiColor555@FColor@@QBEGXZ (31b RVA=0x1F40)
+// Same as HiColor565 but G uses 5 bits (SHR 6 + AND 0x03E0 instead of 0x07E0).
+_WORD FColor::HiColor555() const
+{
+    DWORD d = DWColor();
+    return (_WORD)(((d >> 8) & 0xF800) + ((d >> 6) & 0x03E0) + (d & 0xF8));
+}
+
 // ??0FRotatorF@@QAE@VFRotator@@@Z
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
 
@@ -12204,7 +12233,22 @@ APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseT
 	}
 	return Best;
 }
-INT ALevelInfo::IsSoundAudibleFromZone(INT, INT) { return 1; }
+// Retail (44b + shared epilogue): zone audibility bitmask lookup.
+// Bitmask is an array of 8-byte entries at this+0x650, indexed by Zone1.
+// Each entry is two DWORDs. Bit (Zone2 & 31) of the lo DWORD is checked.
+// CDQ pattern: for Zone2==31 the sign-extended mask also checks the hi DWORD.
+// Returns 1 if audible, 0 if not. (Fallthrough path normalises to 1.)
+INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
+{
+    if (Zone1 == Zone2)
+        return 1;
+    DWORD* Zones = (DWORD*)((BYTE*)this + 0x650);
+    DWORD bit = 1u << Zone2;
+    DWORD lo   = bit & Zones[Zone1 * 2];
+    INT   hiMask = (INT)bit >> 31;  // CDQ: -1 if Zone2==31, else 0
+    DWORD hi   = (DWORD)hiMask & Zones[Zone1 * 2 + 1];
+    return (lo | hi) ? 1 : 0;
+}
 
 // ============================================================================
 // AGameInfo

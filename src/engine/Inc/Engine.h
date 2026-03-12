@@ -97,8 +97,10 @@ public:
 	// Brightness
 	INT Brightness() const
 	{ return Max(Max((INT)R, (INT)G), (INT)B); }
+	// Retail (48b RVA=0x1EE0): loads byte[2]*2 + byte[1]*3 + byte[0], scale by 1/1536.
+	// With RGBA layout (R=byte[0], G=byte[1], B=byte[2]): (2*B + 3*G + R) / 1536.
 	FLOAT FBrightness() const
-	{ return Max(Max(R/255.f, G/255.f), B/255.f); }
+	{ return (2.f*B + 3.f*G + R) / 1536.f; }
 	FColor Brighten( INT Amount )
 	{
 		return FColor( (BYTE)Clamp((INT)R+Amount,0,255), (BYTE)Clamp((INT)G+Amount,0,255), (BYTE)Clamp((INT)B+Amount,0,255), A );
@@ -117,10 +119,15 @@ public:
 	{ return FVector(R/255.f, G/255.f, B/255.f); }
 
 	// High color
+	// Retail (31b): DWORD-based packing. With RGBA dword=R|G<<8|B<<16|A<<24:
+	//   (d>>8)&0xF800 → B[7:3] at bits[15:11]
+	//   (d>>6)&0x03E0 → G[7:3] at bits[9:5]   (5-bit G for 555)
+	//   d&0xF8        → R[7:3] at bits[7:3]
 	_WORD HiColor555() const
-	{ return ((R>>3)<<10) | ((G>>3)<<5) | (B>>3); }
+	{ DWORD d=DWColor(); return (_WORD)(((d>>8)&0xF800)+((d>>6)&0x03E0)+(d&0xF8)); }
+	// Retail (31b): like 555 but G gets 6 bits: (d>>5)&0x07E0
 	_WORD HiColor565() const
-	{ return ((R>>3)<<11) | ((G>>2)<<5) | (B>>3); }
+	{ DWORD d=DWColor(); return (_WORD)(((d>>8)&0xF800)+((d>>5)&0x07E0)+(d&0xF8)); }
 };
 #endif
 
