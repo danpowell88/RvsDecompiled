@@ -3445,8 +3445,34 @@ int ASceneManager::VerifyIntPoints()
 	return 0;
 }
 
-void ASceneManager::RefreshSubActions(float)
+void ASceneManager::RefreshSubActions(float Pct)
 {
+	// Retail: 0x11dcb0, ordinal 4269. For each action in Actions TArray (this+0x3A8),
+	// iterate its sub-actions TArray (action+0x48) and set each sub-action's state
+	// (BYTE at sub+0x2C) based on where Pct falls relative to sub.StartPct (+0x4C)
+	// and sub.EndPct (+0x50): 0=before, 1=in-range, 3=past-end.
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)this + 0x3A8);
+	INT actionCount = Actions.Num();
+	for (INT i = 0; i < actionCount; i++)
+	{
+		BYTE* action = (BYTE*)Actions(i);
+		TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)(action + 0x48);
+		INT subCount = SubActions.Num();
+		for (INT j = 0; j < subCount; j++)
+		{
+			BYTE* sub = (BYTE*)SubActions(j);
+			FLOAT subStart = *(FLOAT*)(sub + 0x4C);
+			FLOAT subEnd   = *(FLOAT*)(sub + 0x50);
+			if (Pct < subStart)
+				*(BYTE*)(sub + 0x2C) = 0;  // before
+			else if (Pct < subEnd)
+				*(BYTE*)(sub + 0x2C) = 1;  // in range
+			else
+				*(BYTE*)(sub + 0x2C) = 3;  // past end
+			subCount = SubActions.Num();   // re-fetch (retail does this)
+		}
+		actionCount = Actions.Num();   // re-fetch
+	}
 }
 
 void ASceneManager::SceneEnded()
@@ -3472,14 +3498,43 @@ void ASceneManager::DeletePathSamples()
 	((TArray<FVector>*)((BYTE*)this + 0x3E4))->Empty();
 }
 
-UMatAction * ASceneManager::GetActionFromPct(float)
+UMatAction * ASceneManager::GetActionFromPct(float Pct)
 {
+	// Retail: 0x11dbe0, ordinal 2878. Walks Actions TArray at this+0x3A8 (TArray<UMatAction*>)
+	// until it finds the first action whose EndPct (action+0x7C) >= Pct. Calls
+	// appFailAssert if the array is exhausted (should not happen in normal use).
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)this + 0x3A8);
+	for (INT i = 0; i < Actions.Num(); i++)
+	{
+		UMatAction* action = Actions(i);
+		if (Pct <= *(FLOAT*)((BYTE*)action + 0x7C))
+			return action;
+	}
+	appFailAssert("0", ".\\UnSceneManager.cpp", 0xa8);
 	return NULL;
 }
 
-float ASceneManager::GetActionPctFromScenePct(float)
+float ASceneManager::GetActionPctFromScenePct(float Pct)
 {
-	return 0.0f;
+	// Retail: 0x11ddd0, ordinal 2881. Uses cached current action at this+0x3D8;
+	// if NULL, calls GetActionFromPct to populate it. Then computes local pct within
+	// the action: (Pct - action.StartPct) / action.Duration. Clamped to [0.0001, 100.0].
+	// action.StartPct at action+0x78, action.Duration at action+0x80.
+	if (*(INT*)((BYTE*)this + 0x3D8) == 0)
+		*(UMatAction**)((BYTE*)this + 0x3D8) = GetActionFromPct(Pct);
+	UMatAction* action = *(UMatAction**)((BYTE*)this + 0x3D8);
+	FLOAT duration = *(FLOAT*)((BYTE*)action + 0x80);
+	FLOAT startPct = *(FLOAT*)((BYTE*)action + 0x78);
+	FLOAT t;
+	if (duration == 0.0f)
+		t = 1.0f;
+	else
+		t = (Pct - startPct) / duration;
+	if (t < 0.0001f)
+		return 0.0001f;
+	if (t > 100.0f)
+		return 100.0f;
+	return t;
 }
 
 FVector ASceneManager::GetLocation(TArray<FVector> *,float)
@@ -6641,9 +6696,34 @@ FString USubActionCameraShake::GetStatString()
 }
 
 // --- USubActionFOV ---
-int USubActionFOV::Update(float,ASceneManager *)
+int USubActionFOV::Update(float Pct, ASceneManager* SceneMgr)
 {
-	return 0;
+	// Retail: 0x11f0e0, 245b. If running and active actor is an APlayerController,
+	// saves current FOV (PC+0x3B0) to this+0x58 on first tick (if still 0),
+	// then lerps FOV from saved (this+0x58) to end (this+0x5C) over the duration.
+	if (!UMatSubAction::Update(Pct, SceneMgr))
+		return 0;
+	typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionFOV*);
+	ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+	if (!mgr)
+		return 1;
+	FLOAT* SavedFOV = (FLOAT*)((BYTE*)this + 0x58);
+	FLOAT* EndFOV   = (FLOAT*)((BYTE*)this + 0x5C);
+	FLOAT  Duration  = *(FLOAT*)((BYTE*)this + 0x54);
+	FLOAT  StartPct  = *(FLOAT*)((BYTE*)this + 0x4C);
+	// SceneMgr+0x3DC = active actor
+	UObject* actor = *(UObject**)((BYTE*)mgr + 0x3DC);
+	// Save current FOV on first active tick
+	if (*SavedFOV == 0.0f && actor && actor->IsA(APlayerController::StaticClass()))
+		*SavedFOV = *(FLOAT*)((BYTE*)actor + 0x3B0);
+	FLOAT t = (Pct - StartPct) / Duration;
+	if (t < 0.0001f) t = 0.0001f;
+	if (t > 1.0f)    t = 1.0f;
+	if (*(BYTE*)((BYTE*)this + 0x2C) == 2) t = 1.0f;
+	// Apply FOV lerp to PlayerController
+	if (actor && actor->IsA(APlayerController::StaticClass()))
+		*(FLOAT*)((BYTE*)actor + 0x3B0) = (*EndFOV - *SavedFOV) * t + *SavedFOV;
+	return 1;
 }
 
 FString USubActionFOV::GetStatString()
@@ -6652,8 +6732,38 @@ FString USubActionFOV::GetStatString()
 }
 
 // --- USubActionFade ---
-int USubActionFade::Update(float,ASceneManager *)
+int USubActionFade::Update(float Pct, ASceneManager* SceneMgr)
 {
+	// Retail: 0x11f1e0, 232b. Gets PlayerController from SceneMgr+0x3DC;
+	// if running and PC is an APlayerController, converts FColor at this+0x5C to FVector
+	// and stores in PC+0x5F8..+0x600 (FadeColor FVector), then updates fade alpha at PC+0x5EC.
+	// The alpha is a lerp t value, optionally inverted by a bReversed flag at this+0x58 bit 0.
+	if (!UMatSubAction::Update(Pct, SceneMgr))
+		return 0;
+	typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionFade*);
+	ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+	if (!mgr)
+		return 1;
+	// SceneMgr+0x3DC = active actor (typically APlayerController)
+	UObject* actor = *(UObject**)((BYTE*)mgr + 0x3DC);
+	if (!actor)
+		return 0;
+	if (!actor->IsA(APlayerController::StaticClass()))
+		return 0;
+	// Convert FColor at this+0x5C to FVector (normalised 0..1 RGB) and store at actor+0x5F8.
+	FColor& fadeColor = *(FColor*)((BYTE*)this + 0x5C);
+	FVector colorVec = (FVector)fadeColor;
+	*(FVector*)((BYTE*)actor + 0x5F8) = colorVec;
+	// Compute interpolation t.
+	FLOAT StartPct  = *(FLOAT*)((BYTE*)this + 0x4C);
+	FLOAT Duration  = *(FLOAT*)((BYTE*)this + 0x54);
+	FLOAT t = (Pct - StartPct) / Duration;
+	if (t < 0.0001f) t = 0.0001f;
+	if (t > 1.0f)    t = 1.0f;
+	if (*(BYTE*)((BYTE*)this + 0x2C) == 2) t = 1.0f;
+	// bReversed: bit 0 of BYTE at this+0x58 inverts alpha
+	if (*(BYTE*)((BYTE*)this + 0x58) & 1) t = 1.0f - t;
+	*(FLOAT*)((BYTE*)actor + 0x5EC) = t;
 	return 0;
 }
 
@@ -6696,8 +6806,24 @@ FString USubActionGameSpeed::GetStatString()
 }
 
 // --- USubActionOrientation ---
-int USubActionOrientation::Update(float,ASceneManager *)
+int USubActionOrientation::Update(float Pct, ASceneManager* SceneMgr)
 {
+	// Retail: 0x11e480, 4919. Calls parent; if running, gets scene manager via vtable+0x6C and
+	// calls ASceneManager::ChangeOrientation with 0xD DWORDs (52b FOrientation) from this+0x58.
+	// Immediately sets state=3 (done) to fire only once.
+	if (!UMatSubAction::Update(Pct, SceneMgr))
+		return 0;
+	typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionOrientation*);
+	ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+	if (!mgr)
+		return 1;
+	// Copy 52 bytes (0xD DWORDs) from this+0x58 as the FOrientation struct and pass to ChangeOrientation.
+	// FOrientation is forward-declared; pass by value via stack copy.
+	struct { DWORD data[13]; } orient;
+	appMemcpy(&orient, (BYTE*)this + 0x58, sizeof(orient));
+	mgr->ChangeOrientation(*(FOrientation*)&orient);
+	// Transition state to done (3) so this fires once.
+	*(BYTE*)((BYTE*)this + 0x2C) = 3;
 	return 0;
 }
 
