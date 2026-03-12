@@ -1820,8 +1820,16 @@ void USkeletalMeshInstance::Serialize(FArchive &)
 {
 }
 
-void USkeletalMeshInstance::SetAnimFrame(int,float)
+void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 {
+	// Retail: 96b SEH. Bounds-checks Channel against TArray count at this+0x10C,
+	// then stores Frame (float) into channel element at Data + Channel*0x74 + 0x10.
+	if (Channel < 0) return;
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (Channel >= count) return;
+	BYTE* data = *(BYTE**)(seqBase);
+	*(FLOAT*)(data + Channel * 0x74 + 0x10) = Frame;
 }
 
 void USkeletalMeshInstance::SetMesh(UMesh *)
@@ -1887,9 +1895,12 @@ FName USkeletalMeshInstance::AnimGetName(void* Channel)
 	return result;
 }
 
-int USkeletalMeshInstance::AnimGetNotifyCount(void *)
+int USkeletalMeshInstance::AnimGetNotifyCount(void* Channel)
 {
-	return 0;
+	// Retail: 20b. Null-checks Channel (returns 0 via fallthrough into next func), then
+	// reads Num of TArray<FMeshAnimNotify> at Channel+0x1C (Num is at Channel+0x20).
+	if (!Channel) return 0;
+	return *(INT*)((BYTE*)Channel + 0x20);
 }
 
 UAnimNotify * USkeletalMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIndex)
@@ -1981,9 +1992,16 @@ float USkeletalMeshInstance::GetActiveAnimRate(INT Channel)
 	return *(FLOAT*)(data + Channel * 0x74 + 0x0C);
 }
 
-FName USkeletalMeshInstance::GetActiveAnimSequence(int)
+FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 {
-	return FName(NAME_None);
+	// Retail: 98b SEH. Reads FName from channel element+0x08 in TArray at this+0x10C.
+	// Returns NAME_None if Channel < 0 or Channel >= count.
+	if (Channel < 0) return FName(NAME_None);
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (Channel >= count) return FName(NAME_None);
+	BYTE* data = *(BYTE**)(seqBase);
+	return *(FName*)(data + Channel * 0x74 + 0x08);
 }
 
 int USkeletalMeshInstance::GetAnimCount()
@@ -2384,9 +2402,11 @@ FName UVertMeshInstance::AnimGetName(void* Channel)
 	return result;
 }
 
-int UVertMeshInstance::AnimGetNotifyCount(void *)
+int UVertMeshInstance::AnimGetNotifyCount(void* Channel)
 {
-	return 0;
+	// Retail: 16b. Reads Num field of TArray<FMeshAnimNotify> embedded at Channel+0x1C.
+	// TArray layout: {Data* at +0, Num at +4}; so count is at Channel+0x20.
+	return *(INT*)((BYTE*)Channel + 0x20);
 }
 
 UAnimNotify * UVertMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIndex)
