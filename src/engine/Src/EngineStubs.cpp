@@ -7336,11 +7336,23 @@ int UViewport::IsDepthComplexity()
 
 int UViewport::IsEditing()
 {
+	// Retail (74b, RVA 0x12B90): RendMap 0x0D/0x0E/0x0F or 1-8 -> editing view
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	INT rm = *(INT*)((BYTE*)st + 0x504);
+	if (rm == 0x0D || rm == 0x0E || rm == 0x0F) return 1;
+	if (rm >= 1 && rm <= 8) return 1;
 	return 0;
 }
 
 int UViewport::IsLit()
 {
+	// Retail (54b, RVA 0x12B60): RendMap 5,7,8,0x1E -> lit; RendMap 0x10 with [state+0x4FC] non-null
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	INT rm = *(INT*)((BYTE*)st + 0x504);
+	if (rm == 5 || rm == 7 || rm == 8 || rm == 0x1E) return 1;
+	if (rm == 0x10) return *(void**)((BYTE*)st + 0x4FC) != NULL ? 1 : 0;
 	return 0;
 }
 

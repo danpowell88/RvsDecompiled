@@ -2152,18 +2152,14 @@ AActor* AActor::GetProjectorBase()
 
 APawn* AActor::GetPawnOrColBoxOwner() const
 {
-	guardSlow(AActor::GetPawnOrColBoxOwner);
+	// Retail (3b): return NULL
 	return NULL;
-	unguardSlow;
 }
 
 APawn* AActor::GetPlayerPawn() const
 {
-	guardSlow(AActor::GetPlayerPawn);
-	if( !IsA(APawn::StaticClass()) )
-		return NULL;
+	// Retail (3b): return NULL (no IsA check in retail)
 	return NULL;
-	unguardSlow;
 }
 
 UPrimitive* AActor::GetPrimitive()
