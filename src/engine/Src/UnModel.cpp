@@ -14,3 +14,81 @@
 
 IMPLEMENT_CLASS(UModel);
 IMPLEMENT_CLASS(UPolys);
+
+// =============================================================================
+// Stubs imported from EngineStubs.cpp during file reorganization.
+// These will be replaced with full implementations as decompilation progresses.
+// =============================================================================
+#pragma optimize("", off)
+
+#pragma warning(push)
+#pragma warning(disable: 4291)
+inline void* operator new(size_t, void* p) noexcept { return p; }
+inline void  operator delete(void*, void*) noexcept {}
+#pragma warning(pop)
+
+#include "EngineDecls.h"
+
+// --- UModel ---
+void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
+{
+}
+
+void UModel::AttachProjector(int,FProjectorRenderInfo *,FPlane *)
+{
+}
+
+
+// --- UPolys ---
+// Forward-declare the free operator<< for FPoly (defined later in this file).
+extern FArchive& operator<<(FArchive& Ar, FPoly& V);
+void UPolys::Serialize(FArchive & Ar)
+{
+	// Retail: 0x2f9c0, 190 bytes. Serialize the FPoly TArray at this+0x2C.
+	// If transient (Ar.IsTrans()), use the transient TArray serialize path.
+	// Otherwise: CountBytes for memory stats, serialize count+max, then loop
+	// streaming each FPoly via operator<<.
+	UObject::Serialize(Ar);
+	FArray& Polys = *(FArray*)((BYTE*)this + 0x2C);
+	if (Ar.IsTrans()) {
+		Polys.CountBytes(Ar, 0x15C);
+		if (Ar.IsLoading()) {
+			FCompactIndex count;
+			Ar << count;
+			INT n = *(INT*)&count;
+			Polys.Empty(0x15C, n);
+			for (INT i = 0; i < n; i++) {
+				INT idx = Polys.Add(1, 0x15C);
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * 0x15C);
+			}
+		} else {
+			// ArrayNum is protected; read it via Num() and serialize as FCompactIndex.
+			INT num = Polys.Num();
+			Ar << *(FCompactIndex*)&num;
+			for (INT i = 0; i < Polys.Num(); i++)
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * 0x15C);
+		}
+	} else {
+		Polys.CountBytes(Ar, 0x15C);
+		if (Ar.IsLoading()) {
+			FCompactIndex count;
+			Ar.ByteOrderSerialize((void*)&count, 4);
+			INT n = *(INT*)&count;
+			Polys.Empty(0x15C, n);
+			for (INT i = 0; i < n; i++) {
+				INT idx = Polys.Add(1, 0x15C);
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * 0x15C);
+			}
+		} else {
+			// Serialize ArrayNum then ArrayMax via raw pointer to bypass protected access.
+			// FArray layout: {void* Data @ 0, INT ArrayNum @ sizeof(void*), INT ArrayMax @ sizeof(void*)+4}
+			INT* rawNum = (INT*)((BYTE*)&Polys + sizeof(void*));
+			INT* rawMax = rawNum + 1;
+			Ar.ByteOrderSerialize(rawNum, 4);
+			Ar.ByteOrderSerialize(rawMax, 4);
+			for (INT i = 0; i < Polys.Num(); i++)
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * 0x15C);
+		}
+	}
+}
+

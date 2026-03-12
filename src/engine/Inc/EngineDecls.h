@@ -1,6 +1,23 @@
 // EngineDecls.h - Class declarations for Engine stubs without headers
 #pragma once
 
+// Raw 32-byte vertex element for FSkinVertexStream / FAnimMeshVertexStream.
+// Both streams use TArray<FStreamVert32> where element size = 32 bytes
+// (confirmed by GetStreamData: FArray::Num * 32 bytes).
+struct FStreamVert32 { BYTE d[32]; };
+
+// 52-byte element type for TArray in FLightMap (Ghidra FUN_1033aac0).
+// Confirmed by FUN_1031eda0 copy constructor: DWORD + TArray<BYTE> + 9 DWORDs.
+struct FLightMapSample52 {
+	DWORD        d0;
+	TArray<BYTE> bytes;
+	DWORD        d4, d5, d6, d7, d8, d9, d10, d11, d12;
+};
+
+// Karma internal types forward-declared for stub signatures.
+struct _KarmaTriListData;
+struct _KarmaGlobals;
+
 class ENGINE_API CBoneDescData {
 public:
 	int fn_bInitFromLbpFile(const TCHAR*);
