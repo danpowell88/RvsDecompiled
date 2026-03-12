@@ -1950,34 +1950,216 @@ int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
 	return 0;
 }
 
-int USkeletalMeshInstance::SetBoneLocation(FName,FVector,float)
+int USkeletalMeshInstance::SetBoneLocation(FName BoneName, FVector Location, FLOAT Scale)
 {
-	// Retail: 0x1317A0, 32b. Returns 0 if bone override array (this+0x124) is at
-	// capacity (>= 256 entries); actual bone location logic unimplemented.
+	// Retail: 0x1317A0. Faithfully decompiled from Ghidra.
+	// this+0x124: bone location override TArray, stride 0x40, max 256.
+	// entry+0x00=boneIdx, +0x04=BoneName, +0x20=Location(FVector), +0x30=0, +0x3C=Scale.
 	FArray* arr = (FArray*)((BYTE*)this + 0x124);
+	if (arr->Num() > 0xFF)
+		return 0;
+
+	INT boneIdx = MatchRefBone(BoneName);
+	if (boneIdx < 0)
+		return 0;
+
+	// Search for existing entry with matching BoneName
+	INT foundIdx = -1;
+	INT count = arr->Num();
+	for (INT i = 0, off = 0; i < count; i++, off += 0x40)
+	{
+		if (*(FName*)((BYTE*)(*(BYTE**)arr) + off + 4) == BoneName)
+		{
+			foundIdx = i;
+			break;
+		}
+	}
+
+	if (foundIdx < 0)
+	{
+		// Add new entry (uninitialized, we set what we need)
+		foundIdx = arr->Num();
+		arr->Add(1, 0x40);
+		BYTE* e = (BYTE*)(*(BYTE**)arr) + foundIdx * 0x40;
+		*(FName*)(e + 4)  = BoneName;
+		*(INT*)  (e + 0x30) = 0;
+		*(INT*)  (e)        = boneIdx;
+	}
+
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + foundIdx * 0x40;
+	*(FLOAT*)  (elem + 0x3C) = Scale;
+	*(FVector*)(elem + 0x20) = Location;
+	return 1;
+}
+
+int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector Loc, FLOAT Scale)
+{
+	// Retail: 0x131BA0. Faithfully decompiled from Ghidra.
+	// this+0x13C: bone position override TArray, stride 0x40, max 256.
+	// entry+0x00=boneIdx, +0x04=BoneName, +0x08=Rotation(FRotator), +0x20=Location(FVector),
+	// +0x30=Scale, +0x3C=Scale (duplicate).
+	FArray* arr = (FArray*)((BYTE*)this + 0x13C);
 	if (arr->Num() >= 0x100)
 		return 0;
-	return 0;
-}
 
-int USkeletalMeshInstance::SetBonePosition(FName,FRotator,FVector,float)
-{
-	return 0;
-}
-
-int USkeletalMeshInstance::SetBoneRotation(FName,FRotator,int,float,float)
-{
-	// Retail: 0x131890, 42b. Returns 0 if bone override array (this+0x124) is at
-	// capacity (>= 256 entries); actual bone rotation logic unimplemented.
-	FArray* arr = (FArray*)((BYTE*)this + 0x124);
-	if (arr->Num() >= 0x100)
+	INT boneIdx = MatchRefBone(BoneName);
+	if (boneIdx < 0)
 		return 0;
-	return 0;
+
+	// Search for existing entry
+	INT foundIdx = -1;
+	for (INT i = 0; i < arr->Num(); i++)
+	{
+		if (*(FName*)((BYTE*)(*(BYTE**)arr) + i * 0x40 + 4) == BoneName)
+		{
+			foundIdx = i;
+			break;
+		}
+	}
+
+	if (foundIdx < 0)
+	{
+		foundIdx = arr->Num();
+		arr->Add(1, 0x40);
+		BYTE* e = (BYTE*)(*(BYTE**)arr) + foundIdx * 0x40;
+		*(FName*)(e + 4)   = BoneName;
+		*(INT*)  (e + 0x3C) = 0;
+		*(INT*)  (e)         = boneIdx;
+	}
+
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + foundIdx * 0x40;
+	*(FLOAT*)  (elem + 0x30) = Scale;
+	*(FLOAT*)  (elem + 0x3C) = Scale;
+	*(FRotator*)(elem + 0x08) = Rot;
+	*(FVector*) (elem + 0x20) = Loc;
+	return 1;
 }
 
-int USkeletalMeshInstance::SetBoneScale(int,float,FName)
+int USkeletalMeshInstance::SetBoneRotation(FName BoneName, FRotator NewRot, INT bNotifyOwner, FLOAT BlendTarget, FLOAT BlendSpeed)
 {
-	return 0;
+	// Retail: 0x131890. Faithfully decompiled from Ghidra.
+	// this+0x124: bone rotation override TArray, stride 0x40, max 256.
+	// entry+0x00=boneIdx, +0x04=BoneName, +0x08=Rotation(FRotator),
+	// +0x14=OldRotation(FRotator), +0x2C=bNotifyOwner, +0x30=BlendTarget,
+	// +0x34=BlendSpeed, +0x38=CurrentBlend(FLOAT).
+	FArray* arr = (FArray*)((BYTE*)this + 0x124);
+	if (arr->Num() > 0xFF)
+		return 0;
+
+	INT boneIdx = MatchRefBone(BoneName);
+	if (boneIdx < 0)
+		return 0;
+
+	// Search for existing entry
+	INT foundIdx = -1;
+	for (INT i = 0, off = 0; i < arr->Num(); i++, off += 0x40)
+	{
+		if (*(FName*)((BYTE*)(*(BYTE**)arr) + off + 4) == BoneName)
+		{
+			foundIdx = i;
+			break;
+		}
+	}
+
+	if (foundIdx < 0)
+	{
+		// Add new entry and zero-initialize rotation fields
+		foundIdx = arr->Num();
+		arr->Add(1, 0x40);
+		BYTE* e = (BYTE*)(*(BYTE**)arr) + foundIdx * 0x40;
+		*(FName*)(e + 4)   = BoneName;
+		*(INT*)  (e + 0x3C) = 0;
+		*(INT*)  (e)         = boneIdx;
+		*(FRotator*)(e + 0x14) = FRotator(0,0,0); // old rotation backup
+		*(FRotator*)(e + 0x08) = FRotator(0,0,0); // current rotation
+		*(INT*)  (e + 0x34)  = 0;                  // blend speed
+		*(INT*)  (e + 0x38)  = 0;                  // current blend
+	}
+
+	INT off = foundIdx * 0x40;
+	BYTE* base = (BYTE*)(*(BYTE**)arr);
+	BYTE* elem = base + off;
+
+	*(INT*)  (elem + 0x2C) = bNotifyOwner;
+	*(FLOAT*)(elem + 0x30) = BlendTarget;
+
+	FLOAT existing = *(FLOAT*)(elem + 0x34);
+	if (BlendSpeed == 0.0f || existing != 0.0f)
+	{
+		*(FLOAT*)(elem + 0x34) = BlendSpeed;
+		if (BlendSpeed == 0.0f)
+		{
+			// Check if rotation changed
+			FRotator curRot = *(FRotator*)(elem + 0x08);
+			if (!(curRot == NewRot))
+			{
+				*(INT*)(elem + 0x38) = 0; // reset blend
+				// Notify owner about blend state
+				typedef BYTE* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+				GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+				BYTE* owner = GetOwner(this);
+				if (owner) *(INT*)(owner + 0x118) = *(INT*)(elem + 0x38);
+			}
+			else
+			{
+				*(FLOAT*)(elem + 0x38) = 1.0f; // 0x3f800000
+			}
+		}
+		else
+		{
+			*(FLOAT*)(elem + 0x38) = 1.0f;
+		}
+		// Copy current rotation to backup
+		*(FRotator*)(elem + 0x14) = *(FRotator*)(elem + 0x08);
+	}
+
+	*(FRotator*)(elem + 0x08) = NewRot;
+	return 1;
+}
+
+int USkeletalMeshInstance::SetBoneScale(INT BoneChannel, FLOAT Scale, FName BoneName)
+{
+	// Retail: 0x131620. Faithfully decompiled from Ghidra.
+	// this+0x118: per-channel bone scale TArray, stride 0x3C, indexed by BoneChannel (0-256).
+	// entry+0x00=boneIdx(-1 if inactive), +0x04=BoneName, +0x08=Scale.
+	// Scale==1.0 with valid BoneName sets the scale; Scale==1.0 with NAME_None resets.
+	if (BoneChannel < 0 || BoneChannel > 0x100)
+		return 0;
+
+	FArray* arr = (FArray*)((BYTE*)this + 0x118);
+
+	// Grow array until it covers BoneChannel index
+	while (arr->Num() <= BoneChannel)
+	{
+		arr->AddZeroed(0x3C, 1);
+		// Mark new entry as invalid
+		INT n = arr->Num();
+		*(INT*)((BYTE*)(*(BYTE**)arr) + (n - 1) * 0x3C) = 0xFFFFFFFF;
+	}
+	arr->Shrink(0x3C);
+
+	if (Scale != 1.0f)
+	{
+		// Set bone scale if BoneName is valid
+		if (BoneName != FName(NAME_None))
+		{
+			INT boneIdx = MatchRefBone(BoneName);
+			if (boneIdx < 0)
+				return 1;
+			BYTE* slot = (BYTE*)(*(BYTE**)arr) + BoneChannel * 0x3C;
+			*(INT*)   slot        = boneIdx;
+			*(FName*) (slot + 4)  = BoneName;
+			*(FLOAT*) (slot + 8)  = Scale;
+			return 1;
+		}
+		// BoneName == NAME_None → fall through to reset
+	}
+
+	// Reset: mark entry inactive
+	BYTE* slot = (BYTE*)(*(BYTE**)arr) + BoneChannel * 0x3C;
+	*(INT*)  slot       = 0xFFFFFFFF; // boneIdx = -1
+	*(FLOAT*)(slot + 4) = 0.0f;       // scale = 0
+	return 1;
 }
 
 int USkeletalMeshInstance::SetSkelAnim(UMeshAnimation* Anim, USkeletalMesh* Mesh)
@@ -2083,8 +2265,20 @@ int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 	return -1;
 }
 
-void USkeletalMeshInstance::BlendToAlpha(int,float,float)
+void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT DeltaTime)
 {
+	// Retail: 0x1351B0, ~130b.
+	// Sets up a timed blend on channel elem+0x38/0x5C/0x60.
+	// If DeltaTime == 0.0f: do nothing (no-op guard at retail).
+	// Otherwise: store BlendAlpha at elem+0x60, DeltaTime at elem+0x5C, set elem+0x38=1.
+	if (DeltaTime == 0.0f) return;
+	if (Channel < 0) return;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= arr->Num()) return;
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + Channel * 0x74;
+	*(INT*)(elem + 0x60)  = *(INT*)&BlendAlpha; // store as int-aliased float
+	*(FLOAT*)(elem + 0x5C) = DeltaTime;
+	*(INT*)(elem + 0x38)   = 1;
 }
 
 void USkeletalMeshInstance::BuildPivotsList()
@@ -2107,17 +2301,45 @@ void USkeletalMeshInstance::ClearSkelAnims()
 	AnimArr->Empty(0x18);
 }
 
-void USkeletalMeshInstance::CopyAnimation(int,int)
+void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 {
+	// Retail: 0x134980, ~200b.
+	// Both Src and Dst must be valid channels (>= 0 and < Num). Dst is ValidateAnimChannel'd.
+	// Copies channel fields from Src to Dst: +8(FName), +4(slotIdx), +0C(rate), +20(rateScale),
+	// +10(frame), +50(blendAlpha), +14(frameCount), +34(isLooping), +2C(loopFlag1).
+	if (Src < 0 || Dst < 0) return;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Src >= arr->Num()) return;
+	ValidateAnimChannel(Dst);
+	if (Dst >= arr->Num()) return;
+	BYTE* base = (BYTE*)(*(BYTE**)arr);
+	BYTE* src  = base + Src * 0x74;
+	BYTE* dst  = base + Dst * 0x74;
+	*(INT*)(dst + 0x08) = *(INT*)(src + 0x08); // FName sequence
+	*(INT*)(dst + 0x04) = *(INT*)(src + 0x04); // anim slot index
+	*(INT*)(dst + 0x0C) = *(INT*)(src + 0x0C); // rate
+	*(INT*)(dst + 0x20) = *(INT*)(src + 0x20); // rate scale
+	*(INT*)(dst + 0x10) = *(INT*)(src + 0x10); // frame
+	*(INT*)(dst + 0x50) = *(INT*)(src + 0x50); // blend alpha
+	*(INT*)(dst + 0x14) = *(INT*)(src + 0x14); // frame count
+	*(INT*)(dst + 0x34) = *(INT*)(src + 0x34); // isLooping
+	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 }
 
-int USkeletalMeshInstance::EnableChannelNotify(int,int)
+int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 {
-	return 0;
+	// Retail: 0x1338B0, ~130b.
+	// ValidateAnimChannel(Channel). Then elem+0x48 = !bEnable (i.e. 0 when enabling, 1 when disabling).
+	// Returns 1 on success, 0 if ValidateAnimChannel fails.
+	if (!ValidateAnimChannel(Channel)) return 0;
+	BYTE* base = (BYTE*)(*(BYTE**)((BYTE*)this + 0x10C));
+	BYTE* elem = base + Channel * 0x74;
+	*(INT*)(elem + 0x48) = (bEnable == 0) ? 1 : 0;
+	return 1;
 }
 
 void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
@@ -2536,9 +2758,237 @@ void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
 }
 
-int USkeletalMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
+int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
-	return 0;
+	// Retail: 0x131D50, ~700b. Faithfully decompiled from Ghidra.
+	// bLooping: loop the animation. bLoopLast: stored at elem+0x40 (bIdle field).
+	// bIdle: if non-zero, use Rate directly; otherwise scale Rate by rateScale.
+	typedef void*  (__thiscall *GetAnimNamedFn)(USkeletalMeshInstance*, FName);
+	typedef BYTE*  (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	typedef void*  (__thiscall *FindAnimObjFn)(USkeletalMeshInstance*, FName);
+	typedef FLOAT  (__thiscall *GetFrameCountFn)(USkeletalMeshInstance*, void*);
+	typedef FLOAT  (__thiscall *GetActiveRateFn)(USkeletalMeshInstance*, void*);
+	typedef INT    (__thiscall *IsLoopingFn)(USkeletalMeshInstance*, void*);
+	typedef INT    (__cdecl   *FindAnimSlotFn)(FArray*, void*);
+	typedef FLOAT  (__cdecl   *TweenRateFn)(FLOAT, FLOAT);
+
+	if (Channel < 0 || !ValidateAnimChannel(Channel))
+		return 0;
+
+	BYTE* vtbl = *(BYTE**)this;
+	GetAnimNamedFn GetAnimNamed    = *(GetAnimNamedFn*) (vtbl + 0xB0);
+	GetOwnerFn     GetOwner        = *(GetOwnerFn*)     (vtbl + 0x84);
+	FindAnimObjFn  FindAnimObjForSeq = *(FindAnimObjFn*)(vtbl + 0x12C);
+	GetFrameCountFn GetFrameCount  = *(GetFrameCountFn*)(vtbl + 0xC0);
+	GetActiveRateFn GetActiveRate  = *(GetActiveRateFn*)(vtbl + 0xC4);
+	IsLoopingFn    IsLooping       = *(IsLoopingFn*)    (vtbl + 0xC8);
+
+	void* seqObj = GetAnimNamed(this, SeqName);
+	if (!seqObj) return 0;
+
+	BYTE* owner = GetOwner(this);
+	if (!owner) return 0;
+
+	void* seqObj2 = FindAnimObjForSeq(this, SeqName);
+	if (!seqObj2) return 0;
+
+	FindAnimSlotFn FindAnimSlot = (FindAnimSlotFn)0x10431D00;
+	INT slotIdx = FindAnimSlot((FArray*)((BYTE*)this + 0xAC), seqObj2);
+
+	BYTE* elem = (BYTE*)(*(BYTE**)((BYTE*)this + 0x10C)) + Channel * 0x74;
+	*(INT*)(elem + 0x04) = slotIdx;
+
+	if (bLooping)
+	{
+		// Looping path
+		FLOAT frameCount = GetFrameCount(this, seqObj);
+		if (frameCount <= 0.0f) return 0;
+		FLOAT nativeRate = GetActiveRate(this, seqObj);
+
+		// Continuation: same anim, already playing, still animating
+		if (*(FName*)(elem + 0x08) == SeqName && *(INT*)(elem + 0x30) && IsAnimating(Channel))
+		{
+			FLOAT rateScale = nativeRate / frameCount;
+			*(FLOAT*)(elem + 0x20) = rateScale;
+			*(FLOAT*)(elem + 0x0C) = bIdle ? Rate : rateScale * Rate;
+			*(INT*)(elem + 0x2C) = 0;
+			*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+			return 1;
+		}
+
+		// New looping animation
+		FLOAT invFC = 1.0f / frameCount;
+		*(FName*)(elem + 0x08) = SeqName;
+		FLOAT rateScale = invFC * nativeRate;
+		*(FLOAT*)(elem + 0x20) = rateScale;
+		*(FLOAT*)(elem + 0x0C) = bIdle ? Rate : rateScale * Rate;
+		*(FLOAT*)(elem + 0x14) = 1.0f - invFC;
+		INT looping = IsLooping(this, seqObj);
+		*(INT*)(elem + 0x40) = bLoopLast;
+		*(INT*)(elem + 0x2C) = 0;
+		*(INT*)(elem + 0x30) = 1;
+		*(INT*)(elem + 0x34) = looping ? 1 : 0;
+
+		FLOAT endFrame = *(FLOAT*)(elem + 0x14);
+		if (endFrame != 0.0f)
+		{
+			// Has end frame: single-shot tween
+			*(INT*)(elem + 0x34) = 0;
+			*(INT*)(elem + 0x1C) = 0;
+			if (TweenTime <= 0.0f)
+			{
+				*(FLOAT*)(elem + 0x18) = 10.0f;
+				*(INT*)(elem + 0x0C)   = 0;
+				*(INT*)(elem + 0x1C)   = 0;
+				*(FLOAT*)(elem + 0x10) = -invFC;
+				return 1;
+			}
+			*(INT*)(elem + 0x0C)   = 0;
+			*(INT*)(elem + 0x1C)   = 0;
+			*(FLOAT*)(elem + 0x18) = 1.0f / TweenTime;
+			*(FLOAT*)(elem + 0x10) = -invFC;
+			return 1;
+		}
+
+		// endFrame == 0: continuous loop with tween
+		if (TweenTime > 0.0f)
+		{
+			*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+			*(FLOAT*)(elem + 0x18) = 1.0f / (frameCount * TweenTime);
+			*(FLOAT*)(elem + 0x10) = -invFC;
+			return 1;
+		}
+		if (TweenTime == -1.0f)
+		{
+			*(DWORD*)(elem + 0x10) = 0x38d1b717u; // tiny positive float (~1e-4)
+			*(INT*)(elem + 0x18)   = 0;
+			*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+			return 1;
+		}
+		*(FLOAT*)(elem + 0x10) = -invFC;
+		FLOAT curTween = *(FLOAT*)(elem + 0x1C);
+		if (curTween > 0.0f)
+		{
+			*(FLOAT*)(elem + 0x18) = curTween;
+			*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+			return 1;
+		}
+		if (curTween >= 0.0f) // == 0.0f
+		{
+			*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+			*(FLOAT*)(elem + 0x18) = 1.0f / (frameCount * 0.025f);
+			return 1;
+		}
+		// curTween < 0: speed-based tween
+		FLOAT ownerSpeed = ((FVector*)(owner + 0x24C))->Size();
+		TweenRateFn CalcTwRate = (TweenRateFn)0x103808E0;
+		*(FLOAT*)(elem + 0x18) = CalcTwRate(*(FLOAT*)(elem + 0x0C) * 0.5f, ownerSpeed * curTween * -1.0f);
+		*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+		return 1;
+	}
+	else
+	{
+		// Non-looping path
+		if (Rate <= 0.0f)
+		{
+			if (Rate < 0.0f) return 0; // negative rate: fail
+			// Rate == 0.0: play at native rate, freeze at end
+			FLOAT frameCount = GetFrameCount(this, seqObj);
+			FLOAT nativeRate = GetActiveRate(this, seqObj);
+			if (frameCount <= 0.0f) return 0;
+			*(FName*)(elem + 0x08) = SeqName;
+			*(INT*)(elem + 0x14)   = 0;
+			*(INT*)(elem + 0x34)   = 0;
+			*(INT*)(elem + 0x2C)   = 0;
+			*(INT*)(elem + 0x30)   = 0;
+			*(INT*)(elem + 0x0C)   = 0;
+			*(INT*)(elem + 0x1C)   = 0;
+			*(FLOAT*)(elem + 0x20) = nativeRate / frameCount;
+			if (TweenTime <= 0.0f)
+			{
+				*(INT*)(elem + 0x18) = 0;
+				*(INT*)(elem + 0x10) = 0;
+			}
+			else
+			{
+				*(FLOAT*)(elem + 0x18) = 1.0f / (frameCount * TweenTime);
+				*(FLOAT*)(elem + 0x10) = -(1.0f / frameCount);
+			}
+			return 1;
+		}
+
+		// Rate > 0: normal non-looping play
+		FLOAT frameCount = GetFrameCount(this, seqObj);
+		if (frameCount <= 0.0f) return 0;
+		*(FName*)(elem + 0x08) = SeqName;
+		FLOAT nativeRate = GetActiveRate(this, seqObj);
+		FLOAT invFC = 1.0f / frameCount;
+		*(FLOAT*)(elem + 0x20) = invFC * nativeRate;
+		*(FLOAT*)(elem + 0x0C) = bIdle ? Rate : invFC * nativeRate * Rate;
+		*(FLOAT*)(elem + 0x14) = 1.0f - invFC;
+		INT looping = IsLooping(this, seqObj);
+		*(INT*)(elem + 0x40) = bLoopLast;
+		*(INT*)(elem + 0x2C) = 0;
+		*(INT*)(elem + 0x30) = 0;
+		*(INT*)(elem + 0x34) = looping ? 1 : 0;
+
+		FLOAT endFrame = *(FLOAT*)(elem + 0x14);
+		if (endFrame == 0.0f)
+		{
+			// Single frame
+			if (TweenTime > 0.0f)
+			{
+				*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+				*(FLOAT*)(elem + 0x18) = 1.0f / (frameCount * TweenTime);
+				*(FLOAT*)(elem + 0x10) = -invFC;
+				return 1;
+			}
+			if (TweenTime == -1.0f)
+			{
+				*(DWORD*)(elem + 0x10) = 0x3a83126fu; // ~0.001f
+				*(INT*)(elem + 0x18)   = 0;
+				*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+				return 1;
+			}
+			*(FLOAT*)(elem + 0x10) = -invFC;
+			FLOAT curTween = *(FLOAT*)(elem + 0x1C);
+			if (curTween > 0.0f)
+			{
+				*(FLOAT*)(elem + 0x18) = curTween;
+				*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+				return 1;
+			}
+			if (curTween >= 0.0f) // == 0.0f
+			{
+				*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+				*(FLOAT*)(elem + 0x18) = 1.0f / (frameCount * 0.025f);
+				return 1;
+			}
+			// curTween < 0
+			FLOAT ownerSpeed = ((FVector*)(owner + 0x24C))->Size();
+			TweenRateFn CalcTwRate = (TweenRateFn)0x103808E0;
+			*(FLOAT*)(elem + 0x18) = CalcTwRate(*(FLOAT*)(elem + 0x0C) * 0.5f, ownerSpeed * curTween * -1.0f);
+			*(FLOAT*)(elem + 0x1C) = *(FLOAT*)(elem + 0x0C);
+			return 1;
+		}
+
+		// endFrame != 0: multi-frame non-looping
+		*(INT*)(elem + 0x34) = 0;
+		*(INT*)(elem + 0x1C) = 0;
+		if (TweenTime <= 0.0f)
+		{
+			*(FLOAT*)(elem + 0x18) = 10.0f;
+			*(INT*)(elem + 0x0C)   = 0;
+			*(INT*)(elem + 0x1C)   = 0;
+			*(FLOAT*)(elem + 0x10) = -invFC;
+			return 1;
+		}
+		*(INT*)(elem + 0x0C)   = 0;
+		*(INT*)(elem + 0x1C)   = 0;
+		*(FLOAT*)(elem + 0x18) = 1.0f / TweenTime;
+		*(FLOAT*)(elem + 0x10) = -invFC;
+		return 1;
+	}
 }
 
 int USkeletalMeshInstance::ActiveVertStreamSize()
