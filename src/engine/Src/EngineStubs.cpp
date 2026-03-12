@@ -6458,8 +6458,56 @@ int UPlayer::Exec(const TCHAR*,FOutputDevice &)
 }
 
 // --- UPolys ---
-void UPolys::Serialize(FArchive &)
+// Forward-declare the free operator<< for FPoly (defined later in this file).
+extern FArchive& operator<<(FArchive& Ar, FPoly& V);
+void UPolys::Serialize(FArchive & Ar)
 {
+	// Retail: 0x2f9c0, 190 bytes. Serialize the FPoly TArray at this+0x2C.
+	// If transient (Ar.IsTrans()), use the transient TArray serialize path.
+	// Otherwise: CountBytes for memory stats, serialize count+max, then loop
+	// streaming each FPoly via operator<<.
+	UObject::Serialize(Ar);
+	FArray& Polys = *(FArray*)((BYTE*)this + 0x2C);
+	if (Ar.IsTrans()) {
+		Polys.CountBytes(Ar, 0x15C);
+		if (Ar.IsLoading()) {
+			FCompactIndex count;
+			Ar << count;
+			INT n = *(INT*)&count;
+			Polys.Empty(0x15C, n);
+			for (INT i = 0; i < n; i++) {
+				INT idx = Polys.Add(1, 0x15C);
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * 0x15C);
+			}
+		} else {
+			// ArrayNum is protected; read it via Num() and serialize as FCompactIndex.
+			INT num = Polys.Num();
+			Ar << *(FCompactIndex*)&num;
+			for (INT i = 0; i < Polys.Num(); i++)
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * 0x15C);
+		}
+	} else {
+		Polys.CountBytes(Ar, 0x15C);
+		if (Ar.IsLoading()) {
+			FCompactIndex count;
+			Ar.ByteOrderSerialize((void*)&count, 4);
+			INT n = *(INT*)&count;
+			Polys.Empty(0x15C, n);
+			for (INT i = 0; i < n; i++) {
+				INT idx = Polys.Add(1, 0x15C);
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * 0x15C);
+			}
+		} else {
+			// Serialize ArrayNum then ArrayMax via raw pointer to bypass protected access.
+			// FArray layout: {void* Data @ 0, INT ArrayNum @ sizeof(void*), INT ArrayMax @ sizeof(void*)+4}
+			INT* rawNum = (INT*)((BYTE*)&Polys + sizeof(void*));
+			INT* rawMax = rawNum + 1;
+			Ar.ByteOrderSerialize(rawNum, 4);
+			Ar.ByteOrderSerialize(rawMax, 4);
+			for (INT i = 0; i < Polys.Num(); i++)
+				Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * 0x15C);
+		}
+	}
 }
 
 // --- UProjectorPrimitive ---
@@ -6676,14 +6724,33 @@ int UReachSpec::operator==(UReachSpec const & other)
 	return 1;
 }
 
-UReachSpec * UReachSpec::operator+(UReachSpec const &) const
+UReachSpec * UReachSpec::operator+(UReachSpec const & other) const
 {
-	return NULL;
+	// Retail: 0xfccd0, 165 bytes. Creates a new UReachSpec in the same outer package,
+	// then sets: CollisionRadius/Height = min of both, reachFlags = OR of both,
+	// Distance = sum of both, MaxLandingVelocity = max of both.
+	UReachSpec* result = (UReachSpec*)UObject::StaticConstructObject(
+		StaticClass(), GetOuter(), NAME_None, 0, NULL, GError, (INT)0);
+	if (!result) return NULL;
+	result->CollisionRadius  = (CollisionRadius  < other.CollisionRadius)  ? CollisionRadius  : other.CollisionRadius;
+	result->CollisionHeight  = (CollisionHeight  < other.CollisionHeight)  ? CollisionHeight  : other.CollisionHeight;
+	result->reachFlags       = reachFlags | other.reachFlags;
+	result->Distance         = Distance + other.Distance;
+	result->MaxLandingVelocity = (MaxLandingVelocity > other.MaxLandingVelocity) ? MaxLandingVelocity : other.MaxLandingVelocity;
+	return result;
 }
 
-int UReachSpec::operator<=(UReachSpec const &)
+int UReachSpec::operator<=(UReachSpec const & other)
 {
-	return 0;
+	// Retail: 0xfc9f0, 68 bytes. Returns 1 if this spec is dominated by other:
+	// other must have at least as wide radius/height, a superset of reachFlags,
+	// and a landing velocity tolerance at least as permissive.
+	if (other.CollisionRadius < CollisionRadius) return 0;
+	if (other.CollisionHeight < CollisionHeight) return 0;
+	if ((reachFlags | other.reachFlags) != other.reachFlags) return 0;
+	INT otherMaxV = (other.MaxLandingVelocity < 0x24F) ? 0x24E : other.MaxLandingVelocity;
+	if (MaxLandingVelocity > otherMaxV) return 0;
+	return 1;
 }
 
 int UReachSpec::BotOnlyPath()
@@ -6761,6 +6828,13 @@ void URenderDevice::HandleFullScreenEffects(int,int)
 // --- UShadowBitmapMaterial ---
 void UShadowBitmapMaterial::Destroy()
 {
+	// Retail: 0x12e3f0, 125 bytes. Free two render buffers at +0x9C and +0xA0 then
+	// call Super::Destroy(). Uses GMalloc->Free (vtable[2]) for deallocation.
+	void** buf0 = (void**)((BYTE*)this + 0x9C);
+	void** buf1 = (void**)((BYTE*)this + 0xA0);
+	if (*buf0) { appFree(*buf0); *buf0 = NULL; }
+	if (*buf1) { appFree(*buf1); *buf1 = NULL; }
+	UObject::Destroy();
 }
 
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
