@@ -1,6 +1,6 @@
 ---
 slug: finding-your-way
-title: "Finding Your Way — Implementing the Path Builder"
+title: "29. Finding Your Way — Implementing the Path Builder"
 authors: [default]
 date: 2025-01-29
 tags: [decompilation, pathfinding, bsp, unreal-engine, reverse-engineering]

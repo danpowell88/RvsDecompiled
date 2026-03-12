@@ -28,6 +28,15 @@
 =============================================================================*/
 #pragma optimize("", off)
 
+// Placement new: MSVC 2019+ with Win32 target requires explicit operator new(size_t,void*)
+// when custom operator new overloads are in scope (UnFile.h overrides the allocating forms).
+// Declaring it here satisfies all `new ((BYTE*)...) T(...)` calls in this file.
+#pragma warning(push)
+#pragma warning(disable: 4291) // no matching operator delete found
+inline void* operator new(size_t, void* p) noexcept { return p; }
+inline void  operator delete(void*, void*) noexcept {}
+#pragma warning(pop)
+
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
 
@@ -164,7 +173,7 @@ void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 	if (*(BYTE*)((BYTE*)HeightTex + 0x58) != 10) return; // must be G16/format-10
 	INT idx = *(INT*)((BYTE*)HeightTex + 0x60) * Y + X;  // USize * Y + X
 	BYTE* mipsData = *(BYTE**)((BYTE*)HeightTex + 0xBC); // Mips.Data ptr (first field of TArray)
-	WORD* heightData = (WORD*)*(BYTE**)(mipsData + 0x1C); // FMipmapBase[0].DataPtr
+	_WORD* heightData = (_WORD*)*(BYTE**)(mipsData + 0x1C); // FMipmapBase[0].DataPtr
 	heightData[idx] = Value;
 }
 
@@ -278,7 +287,7 @@ _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 	if (*(BYTE*)((BYTE*)HeightTex + 0x58) != 10) return 0; // not G16: return 0
 	INT idx = *(INT*)((BYTE*)HeightTex + 0x60) * Y + X;    // USize * Y + X
 	BYTE* mipsData = *(BYTE**)((BYTE*)HeightTex + 0xBC);
-	WORD* heightData = (WORD*)*(BYTE**)(mipsData + 0x1C);
+	_WORD* heightData = (_WORD*)*(BYTE**)(mipsData + 0x1C);
 	return heightData[idx];
 }
 
@@ -837,7 +846,7 @@ int FRawIndexBuffer::GetRevision()
 int FRawIndexBuffer::GetSize()
 {
 	// Retail (12b): ADD ECX,4; call Num(); SHL EAX,1 = return Data.Num() * 2
-	// TArray<WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
+	// TArray<_WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
 	return *(INT*)(Pad + 4) << 1;
 }
 
@@ -2514,7 +2523,10 @@ float UVertMeshInstance::AnimGetRate(void* Channel)
 	// Retail: 10b. Returns float rate from Channel+0x18 (no null check per retail).
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
+
+int UVertMeshInstance::AnimIsInGroup(void*, FName)
 {
+	// Retail: 48b. Has complex sub-call — stub returns 0.
 	return 0;
 }
 
@@ -4405,27 +4417,27 @@ int FRawIndexBuffer::Stripify()
 
 FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 {
-	// Ghidra 0x18d80: vtable set by compiler; TArray<WORD> at +4 (stride 2); 3 DWORDs at +10..+18
-	new ((BYTE*)this + 0x04) TArray<WORD>(*(const TArray<WORD>*)((const BYTE*)&Other + 0x04));
+	// Ghidra 0x18d80: vtable set by compiler; TArray<_WORD> at +4 (stride 2); 3 DWORDs at +10..+18
+	new ((BYTE*)this + 0x04) TArray<_WORD>(*(const TArray<_WORD>*)((const BYTE*)&Other + 0x04));
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
 FRawIndexBuffer::FRawIndexBuffer()
 {
-	// Initialize TArray<WORD> at +4 to empty
-	new ((BYTE*)this + 0x04) TArray<WORD>();
+	// Initialize TArray<_WORD> at +4 to empty
+	new ((BYTE*)this + 0x04) TArray<_WORD>();
 }
 
 FRawIndexBuffer::~FRawIndexBuffer()
 {
-	// destroy TArray<WORD> at +4
-	((TArray<WORD>*)((BYTE*)this + 0x04))->~TArray();
+	// destroy TArray<_WORD> at +4
+	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
 }
 
 FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 {
-	// Ghidra 0x18dc0: skip vtable +0; +4=TArray<WORD>; +0x10,+0x14,+0x18=3 DWORDs
-	*(TArray<WORD>*)((BYTE*)this + 0x04) = *(const TArray<WORD>*)((const BYTE*)&Other + 0x04);
+	// Ghidra 0x18dc0: skip vtable +0; +4=TArray<_WORD>; +0x10,+0x14,+0x18=3 DWORDs
+	*(TArray<_WORD>*)((BYTE*)this + 0x04) = *(const TArray<_WORD>*)((const BYTE*)&Other + 0x04);
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C);
 	return *this;
 }
@@ -6280,7 +6292,7 @@ void UReachSpec::Init()
 	CollisionHeight = 0;
 	reachFlags = 0;
 	MaxLandingVelocity = 0;
-	bForced = FALSE;
+	bForced = 0;
 	Start = NULL;
 	End = NULL;
 }
@@ -8635,42 +8647,9 @@ FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
 FRebuildTools::~FRebuildTools() {}
 
 // --- FColor ---
-// ?FBrightness@FColor@@QBEMXZ (48b RVA=0x1EE0)
-// Retail: loads byte[2]*2 + byte[1]*3 + byte[0], scale by 1/1536.
-// With BGRA layout (B=byte[0], G=byte[1], R=byte[2]): (2*R + 3*G + B) / 1536.
-FLOAT FColor::FBrightness() const
-{
-    return (2.f*R + 3.f*G + B) / 1536.f;
-}
-
-// ?HiColor565@FColor@@QBEGXZ (31b RVA=0x1F10)
-// Retail: DWORD-based packing. With BGRA dword = B|G<<8|R<<16|A<<24:
-//   (d>>8)&0xF800 → R[7:3] at bits[15:11]  (standard R5 position)
-//   (d>>5)&0x07E0 → G[7:2] at bits[10:5]   (standard G6 position)
-//   d&0xF8        → B[7:3] at bits[7:3]     (B5, but shifted up vs standard RGB565)
-// The B component sits at bits[7:3] not [4:0] — matches retail binary exactly.
-_WORD FColor::HiColor565() const
-{
-    DWORD d = DWColor();
-    return (_WORD)(((d >> 8) & 0xF800) + ((d >> 5) & 0x07E0) + (d & 0xF8));
-}
-
-// ?HiColor555@FColor@@QBEGXZ (31b RVA=0x1F40)
-// Same as HiColor565 but G uses 5 bits (SHR 6 + AND 0x03E0 instead of 0x07E0).
-_WORD FColor::HiColor555() const
-{
-    DWORD d = DWColor();
-    return (_WORD)(((d >> 8) & 0xF800) + ((d >> 6) & 0x03E0) + (d & 0xF8));
-}
-
-// ??BFColor@@QBE?AVFVector@@XZ (64b RVA=0x1FE0)
-// Retail: loads byte[0], byte[1], byte[2] each *1/255, stores Z=byte[0],Y=byte[1],X=byte[2].
-// With BGRA (B=byte[0], G=byte[1], R=byte[2]): FVector(X=R/255, Y=G/255, Z=B/255).
-FColor::operator FVector() const
-{
-    const FLOAT c = 1.f / 255.f;
-    return FVector(R * c, G * c, B * c);
-}
+// Note: FBrightness, HiColor565, HiColor555, operator FVector are defined inline in Engine.h (FColor struct).
+// Ordinals ?FBrightness@FColor@@QBEMXZ, ?HiColor565@FColor@@QBEGXZ,
+//          ?HiColor555@FColor@@QBEGXZ, ??BFColor@@QBE?AVFVector@@XZ
 
 
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}

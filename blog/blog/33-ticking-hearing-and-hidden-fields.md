@@ -1,9 +1,9 @@
 ---
 slug: ticking-hearing-and-hidden-fields
-title: "Ticking, Hearing, and Hidden Fields"
+title: "33. Ticking, Hearing, and Hidden Fields"
 authors: [dan]
 tags: [physics, ai, engine, networking]
-date: 2025-07-12
+date: 2025-02-02
 ---
 
 Four batches of work land in one post this time. We've been steadily chipping through the actor lifecycle — implementing how objects update every frame, how AI characters hear footsteps and gunshots, and how player controllers manage their state. Along the way we also had to play detective with memory layouts when the original SDK left out the juicy bits.

@@ -1,8 +1,9 @@
 ---
 slug: canvas-config-and-more-channels
-title: "Blog #40: Canvas, Config Names, and More Animation Channels"
+title: "40. Canvas, Config Names, and More Animation Channels"
 authors: [dan]
 tags: [decompilation, animation, canvas, ue2, batch]
+date: 2025-02-09
 ---
 
 # Canvas, Config Names, and More Animation Channels

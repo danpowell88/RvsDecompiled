@@ -1,9 +1,9 @@
 ---
 slug: constructing-the-copy
-title: "Constructing the Copy"
+title: "34. Constructing the Copy"
 authors: [dan]
 tags: [engine, cpp, memory, stubs]
-date: 2025-07-14
+date: 2025-02-03
 ---
 
 Batches 103 through 106 tackled one of those deceptively simple-sounding problems that turns out to have real depth: copy constructors. Across more than 30 classes, we went from empty `{}` stubs to correct placement-new implementations that properly deep-copy heap data and leave objects safe to destroy.

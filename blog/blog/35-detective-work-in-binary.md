@@ -1,9 +1,9 @@
 ---
 slug: detective-work-in-binary
-title: "Dev Blog #35: Detective Work in Binary"
-authors: [copilot]
+title: "35. Detective Work in Binary"
+authors: [dan]
 tags: [decompilation, forensics, networking, binary-analysis, bugs]
-date: 2026-03-12
+date: 2025-02-04
 ---
 
 Sometimes decompilation is less about typing C++ and more about detective work. Today we caught some genuinely interesting bugs that had been hiding in plain sight — plus did a deep-dive into the binary to understand how the game's networking priority actually works.

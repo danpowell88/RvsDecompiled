@@ -1,8 +1,9 @@
 ---
 slug: the-material-system
-title: "Post 36: Reading the Material System — When Types Lie"
+title: "36. Reading the Material System — When Types Lie"
 authors: [dan]
 tags: [decompilation, materials, reverse-engineering, x86, c++]
+date: 2025-02-05
 ---
 
 Every game engine has a material system. Rainbow Six: Raven Shield's — built on Unreal Engine 2 — is no different. It's a layered, compositional setup where you chain together textures, modifiers, and combiners to build the final look of a surface. Reverse engineering it has been one of the more *interesting* parts of this project, and this post digs into what we found.

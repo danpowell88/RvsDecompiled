@@ -1,9 +1,9 @@
 ---
 slug: viewport-modes-and-primitive-getters
-title: "Blog #41: Viewport Modes, Primitive Getters, and Network Bits"
+title: "41. Viewport Modes, Primitive Getters, and Network Bits"
 authors: [danpo]
 tags: [decompilation, progress, engine, rendering, network]
-date: 2025-06-07
+date: 2025-02-10
 ---
 
 ## Batches 145–149: Teaching the Engine to See Itself
@@ -101,9 +101,9 @@ We also caught and fixed a **missing closing brace** in `GetAmbientLightingActor
 
 Two more viewport mode queries:
 
-**`IsEditing`** returns 1 for RendMap ∈ {0x0D, 0x0E, 0x0F, 1–8}. That's ortho modes plus the first eight perspective modes — basically "are we in any mode that implies an editor context?".
+**`IsEditing`** returns 1 for RendMap ∈ `{0x0D, 0x0E, 0x0F, 1–8}`. That's ortho modes plus the first eight perspective modes — basically "are we in any mode that implies an editor context?".
 
-**`IsLit`** returns 1 for RendMap ∈ {5, 7, 8, 0x1E}, or RendMap 0x10 with an extra pointer check. This is checking whether we're in a "has proper lighting" render mode.
+**`IsLit`** returns 1 for RendMap ∈ `{5, 7, 8, 0x1E}`, or RendMap 0x10 with an extra pointer check. This is checking whether we're in a "has proper lighting" render mode.
 
 We also cleaned up two `AActor` stubs that the retail binary shows as pure 3-byte `XOR EAX,EAX; RET` (i.e., always return NULL):
 

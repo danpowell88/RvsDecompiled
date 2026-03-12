@@ -1,9 +1,9 @@
 ---
 slug: 32-transforms-and-the-physics-of-walking
-title: "Dev Blog #32: Transforms, Actors, and the Physics of Walking"
+title: "32. Transforms, Actors, and the Physics of Walking"
 authors: [dan]
 tags: [decompilation, math, physics, ue2engine]
-date: 2025-07-11
+date: 2025-02-01
 ---
 
 This post covers Batches 83 and 84: implementing the actor transform matrices, a cluster of utility collision functions, and the core APawn physics machinery that makes characters actually walk around.

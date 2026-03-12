@@ -1,6 +1,6 @@
 ---
 slug: 42-color-archaeology-and-byte-accuracy
-title: "Dev Blog #42: Color Archaeology and the Joy of Being Wrong"
+title: "42. Color Archaeology and the Joy of Being Wrong"
 authors: [danpo]
 tags: [decompilation, fcolor, bgra, retail-accuracy, batches-153-155]
 ---

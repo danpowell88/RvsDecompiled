@@ -1,6 +1,6 @@
 ---
 slug: the-invisible-world
-title: "The Invisible World — Collision, Octrees, and Finding the Floor"
+title: "30. The Invisible World — Collision, Octrees, and Finding the Floor"
 authors: [default]
 date: 2025-01-30
 tags: [decompilation, collision, spatial-data-structures, pathfinding, unreal-engine, reverse-engineering]

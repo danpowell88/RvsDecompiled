@@ -1,8 +1,9 @@
 ---
 slug: terrain-and-texture-internals
-title: "Post 37: Digging into the Terrain — Heightmaps, Floor Plans, and Linked Lists"
+title: "37. Digging into the Terrain — Heightmaps, Floor Plans, and Linked Lists"
 authors: [dan]
 tags: [decompilation, terrain, textures, reverse-engineering, x86, c++]
+date: 2025-02-06
 ---
 
 Batches 117 through 119 covered a range of functions that all share a common theme: they deal with *data management* — reading and writing tightly packed arrays, advancing linked lists, and dispatching lifecycle callbacks. Some of them were deceptively simple (three bytes!), others needed careful disassembly to decode packed nibble tricks. Let's walk through them.

@@ -1,8 +1,9 @@
 ---
 slug: geometry-and-delegation
-title: "Post 38: The Box, The Matrix, and the Chain of Delegation"
+title: "38. The Box, The Matrix, and the Chain of Delegation"
 authors: [dan]
 tags: [decompilation, geometry, math, x86, reverse-engineering, c++, meshes, patterns]
+date: 2025-02-07
 ---
 
 Batches 122 through 127 cover a lot of ground — literally. We fixed terrain coordinate transforms, collision bounding boxes, virtual render delegation, an inverted null check, and a coordinate system function that copies from a global identity matrix. Sounds random? There's actually a set of beautiful recurring patterns hiding in all of it.

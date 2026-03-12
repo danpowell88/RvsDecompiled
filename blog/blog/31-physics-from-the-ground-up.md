@@ -1,6 +1,6 @@
 ---
 slug: physics-from-the-ground-up
-title: "Physics from the Ground Up — Rebuilding How the World Moves"
+title: "31. Physics from the Ground Up — Rebuilding How the World Moves"
 authors: [dan]
 tags: [physics, decompilation, unreal-engine, batch-82]
 date: 2025-01-31
