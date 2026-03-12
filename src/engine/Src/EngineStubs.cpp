@@ -1865,9 +1865,13 @@ FName USkeletalMeshInstance::AnimGetGroup(void *)
 	return FName(NAME_None);
 }
 
-FName USkeletalMeshInstance::AnimGetName(void *)
+FName USkeletalMeshInstance::AnimGetName(void* Channel)
 {
-	return FName(NAME_None);
+	// Retail: 19b. Same as VertMesh but with null check on Channel.
+	FName result;
+	if (Channel)
+		*(INT*)&result = *(INT*)Channel;
+	return result;
 }
 
 int USkeletalMeshInstance::AnimGetNotifyCount(void *)
@@ -1875,9 +1879,13 @@ int USkeletalMeshInstance::AnimGetNotifyCount(void *)
 	return 0;
 }
 
-UAnimNotify * USkeletalMeshInstance::AnimGetNotifyObject(void *,int)
+UAnimNotify * USkeletalMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIndex)
 {
-	return NULL;
+	// Retail: 25b. Same as VertMesh but with null check on Channel.
+	// Notify array pointer at Channel+0x1C, 12 bytes/entry, ptr at entry+8.
+	if (!Channel) return NULL;
+	BYTE* notifyArray = *(BYTE**)((BYTE*)Channel + 0x1C);
+	return *(UAnimNotify**)(notifyArray + notifyIndex * 12 + 8);
 }
 
 const TCHAR* USkeletalMeshInstance::AnimGetNotifyText(void *,int)
@@ -1962,9 +1970,17 @@ void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,in
 {
 }
 
-UMaterial * USkeletalMeshInstance::GetMaterial(int,AActor *)
+UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 {
-	return NULL;
+	// Retail: 49b. Identical implementation to UVertMeshInstance::GetMaterial.
+	// Calls Actor vtable slot 40 twice; returns NULL if Actor null or first call null.
+	if (!Actor) return NULL;
+	typedef UMaterial* (__thiscall *GetSkinFn)(AActor*, int);
+	void** vtbl = *(void***)Actor;
+	UMaterial* m = ((GetSkinFn)vtbl[40])(Actor, materialIndex);
+	if (!m) return NULL;
+	vtbl = *(void***)Actor;
+	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
@@ -2242,8 +2258,10 @@ void UVertMeshInstance::Serialize(FArchive &)
 {
 }
 
-void UVertMeshInstance::SetAnimFrame(int,float)
+void UVertMeshInstance::SetAnimFrame(int, float Frame)
 {
+	// Retail: 13b. Stores Frame float value at this+0xC0 (ignores channel index).
+	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
 }
 
 void UVertMeshInstance::SetScale(FVector)
@@ -2270,9 +2288,13 @@ FName UVertMeshInstance::AnimGetGroup(void *)
 	return FName(NAME_None);
 }
 
-FName UVertMeshInstance::AnimGetName(void *)
+FName UVertMeshInstance::AnimGetName(void* Channel)
 {
-	return FName(NAME_None);
+	// Retail: 15b. Copies the FName index (first DWORD) from *Channel to output.
+	// Animation name is stored at the start of the animation channel struct.
+	FName result;
+	*(INT*)&result = *(INT*)Channel;
+	return result;
 }
 
 int UVertMeshInstance::AnimGetNotifyCount(void *)
@@ -2280,9 +2302,13 @@ int UVertMeshInstance::AnimGetNotifyCount(void *)
 	return 0;
 }
 
-UAnimNotify * UVertMeshInstance::AnimGetNotifyObject(void *,int)
+UAnimNotify * UVertMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIndex)
 {
-	return NULL;
+	// Retail: 21b. Returns UAnimNotify* from packed notify array.
+	// Channel+0x1C = pointer to notify array (12 bytes/entry).
+	// Notify pointer is at byte offset 8 within each entry.
+	BYTE* notifyArray = *(BYTE**)((BYTE*)Channel + 0x1C);
+	return *(UAnimNotify**)(notifyArray + notifyIndex * 12 + 8);
 }
 
 const TCHAR* UVertMeshInstance::AnimGetNotifyText(void *,int)
@@ -2344,9 +2370,18 @@ void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,
 {
 }
 
-UMaterial * UVertMeshInstance::GetMaterial(int,AActor *)
+UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 {
-	return NULL;
+	// Retail: 49b. Calls Actor->vtable[40] (GetSkin, vtable offset 0xA0) twice:
+	// once to check if skin exists, once to retrieve it. Returns NULL if Actor is
+	// null or first call returns NULL.
+	if (!Actor) return NULL;
+	typedef UMaterial* (__thiscall *GetSkinFn)(AActor*, int);
+	void** vtbl = *(void***)Actor;
+	UMaterial* m = ((GetSkinFn)vtbl[40])(Actor, materialIndex);
+	if (!m) return NULL;
+	vtbl = *(void***)Actor;
+	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
