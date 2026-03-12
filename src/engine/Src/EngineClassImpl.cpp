@@ -1208,7 +1208,11 @@ void UGameEngine::MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
 void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
-INT UGameEngine::ChallengeResponse( INT Challenge ) { return 0; }
+INT UGameEngine::ChallengeResponse( INT Challenge ) {
+	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
+	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
+	return ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE;
+}
 FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
 INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error ) { return 0; }
@@ -1457,7 +1461,13 @@ void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 void AReplicationInfo::CloseVideo(UCanvas* Canvas)
 {
 }
-void ASceneManager::SetCurrentTime( FLOAT NewTime ) {}
+void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
+	// Retail: 42b. Stores raw time at this+0x3D0, clears reset counter at this+0x448,
+	// then calls RefreshSubActions with time normalized by TotalSceneTime at this+0x3CC.
+	*(FLOAT*)((BYTE*)this + 0x3D0) = NewTime;
+	*(INT*)((BYTE*)this + 0x448) = 0;
+	RefreshSubActions( NewTime / *(FLOAT*)((BYTE*)this + 0x3CC) );
+}
 void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
