@@ -1647,9 +1647,33 @@ int USkeletalMesh::SetAttachmentLocation(AActor *,AActor *)
 	return 0;
 }
 
-int USkeletalMesh::LODFootprint(int,int)
+int USkeletalMesh::LODFootprint(int param_1, int param_2)
 {
-	return 0;
+	// Retail: 0x140640. Returns memory footprint in bytes for the given LOD model.
+	// param_2 == 0: include render-stream sizes. LOD models TArray at this+0x1AC, stride 0x11C.
+	if (param_1 < 0)
+		return 0;
+	INT numLods = ((FArray*)((BYTE*)this + 0x1AC))->Num();
+	if (param_1 >= numLods)
+		return 0;
+	BYTE* lod = (BYTE*)(*(INT*)((BYTE*)this + 0x1AC)) + param_1 * 0x11C;
+	INT total = 0;
+	if (param_2 == 0) {
+		INT s0 = ((FArray*)(lod + 0xB0))->Num();
+		INT s1 = ((FArray*)(lod + 0xC8))->Num();
+		INT s2 = ((FArray*)(lod + 0xE0))->Num();
+		INT s3 = ((FArray*)(lod + 0xF8))->Num();
+		total = s0 * 8 + s1 * 0xC + s2 * 8 + (s3 + 8) * 0xC;
+	}
+	INT n0 = ((FArray*)(lod))->Num();
+	INT n1 = ((FArray*)(lod + 0xC))->Num();
+	INT n2 = ((FArray*)(lod + 0x1C))->Num();
+	INT n3 = ((FArray*)(lod + 0x28))->Num();
+	INT n4 = ((FArray*)(lod + 0x98))->Num();
+	INT n5 = ((FArray*)(lod + 0x38))->Num();
+	INT n6 = ((FArray*)(lod + 0x54))->Num();
+	INT n7 = ((FArray*)(lod + 0x8C))->Num();
+	return n7 * 0x20 + total + n0 * 4 + n1 * 0x10 + n2 * 0x14 + n3 * 0x14 + 0xBC + n4 * 2 + n5 * 2 + n6 * 2;
 }
 
 void USkeletalMesh::NormalizeInfluences(int)
@@ -1697,9 +1721,55 @@ int USkeletalMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWO
 	return 0;
 }
 
-int USkeletalMesh::MemFootprint(int)
+int USkeletalMesh::MemFootprint(int param_1)
 {
-	return 0;
+	// Retail: 0x140350. Sum memory of all mesh data arrays.
+	// param_1 == 0: also count render streams. LOD array at this+0x1AC, stride 0x11C.
+	INT total = 0;
+	INT lodRender = 0;
+	if (param_1 == 0) {
+		// Count base mesh arrays (bones, weights, verts, faces, etc.)
+		INT n0  = ((FArray*)((BYTE*)this + 0x100))->Num();
+		INT n1  = ((FArray*)((BYTE*)this + 0x118))->Num();
+		INT n2  = ((FArray*)((BYTE*)this + 0x130))->Num();
+		INT n3  = ((FArray*)((BYTE*)this + 0x148))->Num();
+		INT n4  = ((FArray*)((BYTE*)this + 0x160))->Num();
+		INT n5  = ((FArray*)((BYTE*)this + 0x178))->Num();
+		INT n6  = ((FArray*)((BYTE*)this + 0x190))->Num();
+		total = n0 * 0xC + n1 * 4 + n2 * 0xC + n3 * 0xC + n4 * 8 + n5 * 2 + 0xA8 + n6 * 2;
+		// Sum per-LOD render stream sizes
+		FArray* lodArr = (FArray*)((BYTE*)this + 0x1AC);
+		INT numLods = lodArr->Num();
+		for (INT i = 0; i < numLods; i++) {
+			BYTE* lod = (BYTE*)(*(INT*)lodArr) + i * 0x11C;
+			INT s0 = ((FArray*)(lod + 0xB0))->Num();
+			INT s1 = ((FArray*)(lod + 0xC8))->Num();
+			INT s2 = ((FArray*)(lod + 0xE0))->Num();
+			INT s3 = ((FArray*)(lod + 0xF8))->Num();
+			total += s0 * 8 + s1 * 0xC + s2 * 8 + (s3 + 8) * 0xC;
+		}
+	}
+	// Sum per-LOD index/vertex arrays
+	FArray* lodArr2 = (FArray*)((BYTE*)this + 0x1AC);
+	INT numLods2 = lodArr2->Num();
+	for (INT j = 0; j < numLods2; j++) {
+		BYTE* lod = (BYTE*)(*(INT*)lodArr2) + j * 0x11C;
+		INT n0 = ((FArray*)(lod))->Num();
+		INT n1 = ((FArray*)(lod + 0xC))->Num();
+		INT n2 = ((FArray*)(lod + 0x1C))->Num();
+		INT n3 = ((FArray*)(lod + 0x28))->Num();
+		INT n4 = ((FArray*)(lod + 0x98))->Num();
+		INT n5 = ((FArray*)(lod + 0x38))->Num();
+		INT n6 = ((FArray*)(lod + 0x54))->Num();
+		INT n7 = ((FArray*)(lod + 0x8C))->Num();
+		total += n7 * 0x20 + n0 * 4 + n1 * 0x10 + n2 * 0x14 + n3 * 0x14 + 0xBC + n4 * 2 + n5 * 2 + n6 * 2;
+	}
+	// Animation and extra arrays
+	INT a0 = ((FArray*)((BYTE*)this + 0x2B8))->Num();
+	INT a1 = ((FArray*)((BYTE*)this + 0x2D0))->Num();
+	INT a2 = ((FArray*)((BYTE*)this + 0x2DC))->Num();
+	INT a3 = ((FArray*)((BYTE*)this + 0x2E8))->Num();
+	return total + (a3 + 3) * 0x30 + a0 * 0x30 + a1 * 4 + a2 * 4;
 }
 
 void USkeletalMesh::Destroy()
@@ -1932,9 +2002,35 @@ FCoords USkeletalMeshInstance::GetTagPosition(FName)
 	return FCoords();
 }
 
-int USkeletalMeshInstance::StopAnimating(int)
+int USkeletalMeshInstance::StopAnimating(int bClearAll)
 {
-	return 0;
+	// Retail: 0x135800. Clear animation play state for all channels.
+	// Sets rate (elem+0x0C), tween (elem+0x18), and notifier (elem+0x50) to 0.
+	// If bClearAll: also empty blend shape arrays, clear channels 1+ names to None.
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	INT count = arr->Num();
+	for (INT i = 0; i < count; i++) {
+		BYTE* elem = (BYTE*)(*(INT*)arr) + i * 0x74;
+		*(INT*)(elem + 0x0C) = 0;
+		*(INT*)(elem + 0x18) = 0;
+		*(INT*)(elem + 0x50) = 0;
+	}
+	if (bClearAll) {
+		((FArray*)((BYTE*)this + 0x124))->Empty(0x40);
+		((FArray*)((BYTE*)this + 0x130))->Empty(0x40);
+		UObject* owner = (*(UObject* (__thiscall**)(USkeletalMeshInstance*))((*(void***)this)[0x84 / sizeof(void*)]))(this);
+		INT keepShape = owner && owner->IsA(APawn::StaticClass()) && *(INT*)((BYTE*)owner + 0x3A4) == 0xB14E;
+		if (!keepShape)
+			((FArray*)((BYTE*)this + 0x118))->Empty(0x3C);
+		FName none(NAME_None);
+		count = arr->Num();
+		for (INT i = 1; i < count; i++) {
+			BYTE* elem = (BYTE*)(*(INT*)arr) + i * 0x74;
+			*(INT*)(elem + 0x50) = 0;
+			*(FName*)(elem + 0x08) = none;
+		}
+	}
+	return 1;
 }
 
 int USkeletalMeshInstance::UpdateAnimation(float)
@@ -2144,7 +2240,21 @@ FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 
 int USkeletalMeshInstance::GetAnimCount()
 {
-	return 0;
+	// Retail: 0x132810. Iterate anim object slots in TArray at this+0xAC (stride 0x18).
+	// Each slot has a UMeshAnimation* at slot+0 and a sequence TArray at anim+0x48.
+	// Sum the count of sequences across all valid (non-null) animation objects.
+	FArray* arr = (FArray*)((BYTE*)this + 0xAC);
+	INT total = 0;
+	INT count = arr->Num();
+	for (INT i = 0; i < count; i++) {
+		BYTE* slot = (BYTE*)(*(INT*)arr) + i * 0x18;
+		UMeshAnimation* anim = *(UMeshAnimation**)slot;
+		if (anim) {
+			INT seqs = ((FArray*)((BYTE*)anim + 0x48))->Num();
+			total += seqs;
+		}
+	}
+	return total;
 }
 
 void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
@@ -2200,8 +2310,26 @@ FSphere USkeletalMeshInstance::GetRenderBoundingSphere(const AActor*)
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
-int USkeletalMeshInstance::IsAnimating(int)
+int USkeletalMeshInstance::IsAnimating(int Channel)
 {
+	// Retail: 0x130FB0, 133 bytes. Returns 1 if the animation channel has a non-None
+	// sequence name AND a non-zero rate (either forward elem+0x0C or backward via elem+0x18).
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	INT count = arr->Num();
+	if (Channel < 0 || Channel >= count)
+		return 0;
+	BYTE* elem = (BYTE*)(*(INT*)arr) + Channel * 0x74;
+	FName seqName = *(FName*)(elem + 0x08);
+	if (seqName == FName(NAME_None))
+		return 0;
+	if (*(FLOAT*)(elem + 0x10) < 0.0f) {
+		// negative frame = tween backward: check elem+0x18 (tween rate)
+		if (*(FLOAT*)(elem + 0x18) != 0.0f)
+			return 1;
+	} else {
+		if (*(FLOAT*)(elem + 0x0C) != 0.0f)
+			return 1;
+	}
 	return 0;
 }
 
@@ -2227,9 +2355,21 @@ int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 	return (*(FLOAT*)(elem + 0x10) >= *(FLOAT*)(elem + 0x14)) ? 1 : 0;
 }
 
-int USkeletalMeshInstance::IsAnimTweening(int)
+int USkeletalMeshInstance::IsAnimTweening(int Channel)
 {
-	return 0;
+	// Retail: 0x131110, 117 bytes. Returns 1 if channel's current frame < 0 and vtbl
+	// IsAnimating check (vtbl[0xD8/4]) also returns non-zero.
+	// TArray at this+0x10C, stride 0x74, frame at elem+0x10.
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	INT count = arr->Num();
+	if (Channel < 0 || Channel >= count)
+		return 0;
+	BYTE* elem = (BYTE*)(*(INT*)arr) + Channel * 0x74;
+	if (*(FLOAT*)(elem + 0x10) >= 0.0f)
+		return 0;
+	typedef INT (__thiscall *AnimCheckFn)(USkeletalMeshInstance*, INT);
+	AnimCheckFn fn = (AnimCheckFn)((*(void***)this)[0xD8 / sizeof(void*)]);
+	return fn(this, Channel) ? 1 : 0;
 }
 
 // --- USound ---
@@ -3386,9 +3526,19 @@ int AR6DecalManager::AddDecal(FVector *,FRotator *,UTexture *,eDecalType,int,flo
 	return 0;
 }
 
-AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType)
+AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 {
-	return NULL;
+	// Retail: 0x177820, 66 bytes. Returns the decal group for the given type.
+	// 5 types map to fields at this+0x398 through this+0x3A8 (4 bytes apart).
+	switch (type)
+	{
+		case 0: return *(AR6DecalGroup**)((BYTE*)this + 0x398);
+		case 1: return *(AR6DecalGroup**)((BYTE*)this + 0x39C);
+		case 2: return *(AR6DecalGroup**)((BYTE*)this + 0x3A0);
+		case 3: return *(AR6DecalGroup**)((BYTE*)this + 0x3A4);
+		case 4: return *(AR6DecalGroup**)((BYTE*)this + 0x3A8);
+		default: return NULL;
+	}
 }
 
 // --- AR6DecalsBase ---
