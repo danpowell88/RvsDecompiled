@@ -114,9 +114,10 @@ void ATerrainInfo::UpdateVertices(float,int,int,int,int)
 {
 }
 
-FVector ATerrainInfo::WorldToHeightmap(FVector)
+FVector ATerrainInfo::WorldToHeightmap(FVector In)
 {
-	return FVector(0,0,0);
+	// Retail: 29b. ECX=this+0x1330 (heightmap FCoords), call FVector::TransformPointBy.
+	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1330));
 }
 
 void ATerrainInfo::Render(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
@@ -332,9 +333,10 @@ FVector ATerrainInfo::GetVertexNormal(int,int)
 	return FVector(0,0,0);
 }
 
-FVector ATerrainInfo::HeightmapToWorld(FVector)
+FVector ATerrainInfo::HeightmapToWorld(FVector In)
 {
-	return FVector(0,0,0);
+	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
+	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
 
 void ATerrainInfo::Serialize(FArchive &)
@@ -5415,6 +5417,9 @@ void UGameEngine::InitializeMissionDescription(FString &)
 // --- UI3DL2Listener ---
 void UI3DL2Listener::PostEditChange()
 {
+	// Retail: 30b. Call UObject::PostEditChange via import, then mark dirty flag at this+0x64.
+	UObject::PostEditChange();
+	*(INT*)((BYTE*)this + 0x64) = 1;
 }
 
 // --- UIndexBuffer ---
@@ -5794,7 +5799,8 @@ void UProjectorPrimitive::Destroy()
 
 FBox UProjectorPrimitive::GetCollisionBoundingBox(AActor const *) const
 {
-	return FBox();
+	// Retail: 30b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x470.
+	return *(FBox*)((BYTE*)this + 0x470);
 }
 
 FVector UProjectorPrimitive::GetEncroachCenter(AActor *)
@@ -6902,6 +6908,15 @@ FMatrix * UTexPanner::GetMatrix(float)
 // --- UTexRotator ---
 void UTexRotator::PostLoad()
 {
+	// Retail: 28b. Call parent PostLoad (imports UObject::PostLoad from Core.dll),
+	// then convert legacy bit 0 of this+0x68: if set, clear it and set this+0x64=1.
+	Super::PostLoad();
+	DWORD& flags = *(DWORD*)((BYTE*)this + 0x68);
+	if (flags & 1)
+	{
+		flags &= ~1u;
+		*(BYTE*)((BYTE*)this + 0x64) = 1;
+	}
 }
 
 FMatrix * UTexRotator::GetMatrix(float)
