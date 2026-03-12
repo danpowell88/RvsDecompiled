@@ -1967,9 +1967,19 @@ int USkeletalMeshInstance::GetAnimCount()
 	return 0;
 }
 
-void * USkeletalMeshInstance::GetAnimIndexed(int)
+void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
 {
-	return NULL;
+	// Retail: 88b. Calls vtbl[0x130/4=76] with arg 0 to get anim channel array object.
+	// Checks count at obj+0x48 TArray; returns Data + Index*0x2C, or NULL if out of range.
+	typedef BYTE* (__thiscall *GetChannelFn)(USkeletalMeshInstance*, INT);
+	GetChannelFn fn = (GetChannelFn)((*(void***)this)[0x130 / sizeof(void*)]);
+	BYTE* obj = fn(this, 0);
+	if (!obj) return NULL;
+	INT count = *(INT*)(obj + 0x48 + 4);
+	if (count <= Index) return NULL;
+	obj = fn(this, 0);
+	BYTE* data = *(BYTE**)(obj + 0x48);
+	return data + Index * 0x2C;
 }
 
 void * USkeletalMeshInstance::GetAnimNamed(FName)
@@ -2398,16 +2408,43 @@ FName UVertMeshInstance::GetActiveAnimSequence(int sequenceChannelIndex)
 
 int UVertMeshInstance::GetAnimCount()
 {
-	return 0;
+	// Retail: 18b. Gets mesh via vtbl[35], returns TArray.Num from TArray at mesh+0x118.
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	GetMeshFn fn = (GetMeshFn)((*(void***)this)[0x8C / sizeof(void*)]);
+	BYTE* obj = fn(this);
+	return *(INT*)(obj + 0x118 + 4);
 }
 
-void * UVertMeshInstance::GetAnimIndexed(int)
+void * UVertMeshInstance::GetAnimIndexed(INT Index)
 {
-	return NULL;
+	// Retail: 34b. Gets mesh via vtbl[35], returns TArray.Data[Index] (stride 0x2C=44b).
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	GetMeshFn fn = (GetMeshFn)((*(void***)this)[0x8C / sizeof(void*)]);
+	BYTE* obj = fn(this);
+	BYTE* data = *(BYTE**)(obj + 0x118);
+	return data + Index * 0x2C;
 }
 
-void * UVertMeshInstance::GetAnimNamed(FName)
+void * UVertMeshInstance::GetAnimNamed(FName Name)
 {
+	// Retail: ~144b. Gets mesh via vtbl[35], searches TArray at mesh+0x118 (stride 0x2C=44b,
+	// FName at element+0). Retail re-calls vtbl[35] per iteration; divergence: we call once.
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	GetMeshFn fn = (GetMeshFn)((*(void***)this)[0x8C / sizeof(void*)]);
+	BYTE* obj = fn(this);
+	BYTE* tarray = obj + 0x118;
+	INT count = *(INT*)(tarray + 4);
+	if (count <= 0) return NULL;
+	BYTE* data = *(BYTE**)(tarray);
+	INT i = 0, byteOff = 0;
+	while (i < count)
+	{
+		BYTE* elem = data + byteOff;
+		if (*(FName*)elem == Name) return data + i * 0x2C;
+		i++;
+		byteOff += 0x2C;
+		count = *(INT*)(tarray + 4);
+	}
 	return NULL;
 }
 
