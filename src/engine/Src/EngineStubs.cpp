@@ -1751,12 +1751,19 @@ void USkeletalMeshInstance::ForceAnimRate(int,float)
 
 int USkeletalMeshInstance::GetAnimChannelCount()
 {
-	return 0;
+	// Retail: 12b. Adjusts this to TArray at this+0x10C, then jumps to TArray::Num via IAT.
+	// Equivalent to reading the TArray ArrayNum field directly.
+	return *(INT*)((BYTE*)this + 0x110); // this+0x10C is TArray start; +0x04 = ArrayNum
 }
 
-float USkeletalMeshInstance::GetAnimFrame(int)
+float USkeletalMeshInstance::GetAnimFrame(INT Channel)
 {
-	return 0.0f;
+	// Retail: 93b SEH. Same TArray at this+0x10C (stride 0x74), frame float at element+0x10.
+	if (Channel < 0) return 0.0f;
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (Channel >= count) return 0.0f;
+	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x10);
 }
 
 float USkeletalMeshInstance::GetAnimRateOnChannel(int)
@@ -1764,14 +1771,26 @@ float USkeletalMeshInstance::GetAnimRateOnChannel(int)
 	return 0.0f;
 }
 
-FName USkeletalMeshInstance::GetAnimSequence(int)
+FName USkeletalMeshInstance::GetAnimSequence(INT Channel)
 {
-	return FName(NAME_None);
+	// Retail: 98b SEH. Reads FName.Index from channel element+0x08 in TArray at this+0x10C.
+	// Same layout as GetActiveAnimSequence; [ebp+0xC] used as arg due to hidden return ptr.
+	if (Channel < 0) return FName(NAME_None);
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (Channel >= count) return FName(NAME_None);
+	BYTE* data = *(BYTE**)(seqBase);
+	return *(FName*)(data + Channel * 0x74 + 0x08);
 }
 
-float USkeletalMeshInstance::GetBlendAlpha(int)
+float USkeletalMeshInstance::GetBlendAlpha(INT Channel)
 {
-	return 0.0f;
+	// Retail: 93b SEH. Same TArray at this+0x10C (stride 0x74), blend alpha float at element+0x50.
+	if (Channel < 0) return 0.0f;
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (Channel >= count) return 0.0f;
+	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50);
 }
 
 FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
