@@ -1463,8 +1463,10 @@ void UFileChannel::Destroy()
 {
 }
 
-void UFileChannel::Init(UNetConnection *,int,int)
+void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
+	// Retail: 0x180f30. Just delegates to UChannel::Init.
+	UChannel::Init(Conn, ChIndex, InType);
 }
 
 // --- UGameEngine ---
@@ -1947,9 +1949,10 @@ void USkeletalMesh::Destroy()
 	UObject::Destroy();
 }
 
-FBox USkeletalMesh::GetCollisionBoundingBox(const AActor*) const
+FBox USkeletalMesh::GetCollisionBoundingBox(const AActor* Owner) const
 {
-	return FBox();
+	// Retail: 0x12f6e0. Delegates to UPrimitive::GetCollisionBoundingBox.
+	return UPrimitive::GetCollisionBoundingBox(Owner);
 }
 
 FBox USkeletalMesh::GetRenderBoundingBox(const AActor* Owner)
