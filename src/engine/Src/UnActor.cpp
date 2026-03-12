@@ -2296,9 +2296,11 @@ void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* S
 
 void AActor::NetDirty( UProperty* Property )
 {
-	guard(AActor::NetDirty);
-	bNetDirty = 1;
-	unguard;
+	// Retail (27b, RVA 0x70920): only mark bNetDirty if Property is non-null
+	// AND has bit 5 of PropertyFlags at +0x40 set (CPF_Net = 0x20 = replicated).
+	if (!Property) return;
+	if (!(*(BYTE*)((BYTE*)Property + 0x40) & 0x20)) return;
+	*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000u;  // set bNetDirty (bit 30 of bitfield at +0xA0)
 }
 
 INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )

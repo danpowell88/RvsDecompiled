@@ -5462,7 +5462,14 @@ void UDownload::Tick()
 
 int UDownload::TrySkipFile()
 {
-	return 0;
+	// Retail (28b, RVA 0x188AF0): need the connection object at +0x48 to exist,
+	// and the flag at [[this+0x34]+0x40] bit 1 to be set. If so, set +0x450=1 and return 1.
+	void* conn = *(void**)((BYTE*)this + 0x48);
+	if (!conn) return 0;
+	void* channel = *(void**)((BYTE*)this + 0x34);
+	if (!(*(BYTE*)((BYTE*)channel + 0x40) & 0x02)) return 0;
+	*(INT*)((BYTE*)this + 0x450) = 1;
+	return 1;
 }
 
 void UDownload::ReceiveData(BYTE*,int)

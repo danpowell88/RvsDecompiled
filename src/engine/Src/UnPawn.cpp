@@ -852,9 +852,11 @@ INT APawn::HurtByVolume( AActor* V )
 
 INT APawn::IsBlockedBy( const AActor* Other ) const
 {
-	guardSlow(APawn::IsBlockedBy);
-	return AActor::IsBlockedBy( Other );
-	unguardSlow;
+	// Retail (21b+tail, RVA 0x79000): if bit 17 of [Other+0xA8] is set, not blocked.
+	// Otherwise delegate to AActor::IsBlockedBy via tail call.
+	if (*(DWORD*)((BYTE*)Other + 0xA8) & 0x00020000u)
+		return 0;
+	return AActor::IsBlockedBy(Other);
 }
 
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
