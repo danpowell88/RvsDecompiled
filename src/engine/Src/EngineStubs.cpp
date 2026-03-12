@@ -6837,12 +6837,16 @@ BYTE UTexModifier::RequiredUVStreams()
 
 int UTexModifier::MaterialUSize()
 {
-	return 0;
+	// Retail: 17b. Delegates to Material->MaterialUSize(); returns 0 if null.
+	if (!Material) return 0;
+	return Material->MaterialUSize();
 }
 
 int UTexModifier::MaterialVSize()
 {
-	return 0;
+	// Retail: 17b. Delegates to Material->MaterialVSize(); returns 0 if null.
+	if (!Material) return 0;
+	return Material->MaterialVSize();
 }
 
 FMatrix * UTexModifier::GetMatrix(float)
