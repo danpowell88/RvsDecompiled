@@ -45,10 +45,12 @@ class ENGINE_API FColor
 {
 public:
 	// Variables.
+	// Retail uses BGRA layout (D3D compatible): B at byte[0], G at byte[1],
+	// R at byte[2], A at byte[3].  All DWORD-based operations depend on this.
 #if __INTEL_BYTE_ORDER__
-	BYTE R,G,B,A;
+	BYTE B,G,R,A;
 #else
-	BYTE A,B,G,R;
+	BYTE A,R,G,B;
 #endif
 	FColor() {}
 	FColor( BYTE InR, BYTE InG, BYTE InB )
@@ -98,9 +100,9 @@ public:
 	INT Brightness() const
 	{ return Max(Max((INT)R, (INT)G), (INT)B); }
 	// Retail (48b RVA=0x1EE0): loads byte[2]*2 + byte[1]*3 + byte[0], scale by 1/1536.
-	// With RGBA layout (R=byte[0], G=byte[1], B=byte[2]): (2*B + 3*G + R) / 1536.
+	// byte[0]=B, byte[1]=G, byte[2]=R in BGRA: (2*R + 3*G + B) / 1536
 	FLOAT FBrightness() const
-	{ return (2.f*B + 3.f*G + R) / 1536.f; }
+	{ return (2.f*R + 3.f*G + B) / 1536.f; }
 	FColor Brighten( INT Amount )
 	{
 		return FColor( (BYTE)Clamp((INT)R+Amount,0,255), (BYTE)Clamp((INT)G+Amount,0,255), (BYTE)Clamp((INT)B+Amount,0,255), A );
@@ -119,10 +121,10 @@ public:
 	{ return FVector(R/255.f, G/255.f, B/255.f); }
 
 	// High color
-	// Retail (31b): DWORD-based packing. With RGBA dword=R|G<<8|B<<16|A<<24:
-	//   (d>>8)&0xF800 → B[7:3] at bits[15:11]
-	//   (d>>6)&0x03E0 → G[7:3] at bits[9:5]   (5-bit G for 555)
-	//   d&0xF8        → R[7:3] at bits[7:3]
+	// Retail (31b): DWORD-based packing. With BGRA dword=B|G<<8|R<<16|A<<24:
+	//   (d>>8)&0xF800 → R[7:3] at bits[15:11]  (standard R5 position)
+	//   (d>>6)&0x03E0 → G[7:3] at bits[9:5]    (5-bit G for 555)
+	//   d&0xF8        → B[7:3] at bits[7:3]     (non-standard position)
 	_WORD HiColor555() const
 	{ DWORD d=DWColor(); return (_WORD)(((d>>8)&0xF800)+((d>>6)&0x03E0)+(d&0xF8)); }
 	// Retail (31b): like 555 but G gets 6 bits: (d>>5)&0x07E0

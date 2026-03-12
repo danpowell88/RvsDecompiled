@@ -8636,19 +8636,19 @@ FRebuildTools::~FRebuildTools() {}
 
 // --- FColor ---
 // ?FBrightness@FColor@@QBEMXZ (48b RVA=0x1EE0)
-// Retail: loads byte[2]*2 + byte[1]*3 + byte[0] (with RGBA: 2B+3G+R), scale by 1/1536.
+// Retail: loads byte[2]*2 + byte[1]*3 + byte[0], scale by 1/1536.
+// With BGRA layout (B=byte[0], G=byte[1], R=byte[2]): (2*R + 3*G + B) / 1536.
 FLOAT FColor::FBrightness() const
 {
-    return (2.f*B + 3.f*G + R) / 1536.f;
+    return (2.f*R + 3.f*G + B) / 1536.f;
 }
 
 // ?HiColor565@FColor@@QBEGXZ (31b RVA=0x1F10)
-// Retail: DWORD-based packing using shifts/masks.
-// With RGBA dword = R|G<<8|B<<16|A<<24:
-//   (d>>8)&0xF800 → B[7:3] at bits[15:11]
-//   (d>>5)&0x07E0 → G[7:2] at bits[10:5]
-//   d&0xF8        → R[7:3] at bits[7:3]
-// Note: R sits at bits[7:3] not [4:0] – this matches the retail exactly.
+// Retail: DWORD-based packing. With BGRA dword = B|G<<8|R<<16|A<<24:
+//   (d>>8)&0xF800 → R[7:3] at bits[15:11]  (standard R5 position)
+//   (d>>5)&0x07E0 → G[7:2] at bits[10:5]   (standard G6 position)
+//   d&0xF8        → B[7:3] at bits[7:3]     (B5, but shifted up vs standard RGB565)
+// The B component sits at bits[7:3] not [4:0] — matches retail binary exactly.
 _WORD FColor::HiColor565() const
 {
     DWORD d = DWColor();
@@ -8663,7 +8663,16 @@ _WORD FColor::HiColor555() const
     return (_WORD)(((d >> 8) & 0xF800) + ((d >> 6) & 0x03E0) + (d & 0xF8));
 }
 
-// ??0FRotatorF@@QAE@VFRotator@@@Z
+// ??BFColor@@QBE?AVFVector@@XZ (64b RVA=0x1FE0)
+// Retail: loads byte[0], byte[1], byte[2] each *1/255, stores Z=byte[0],Y=byte[1],X=byte[2].
+// With BGRA (B=byte[0], G=byte[1], R=byte[2]): FVector(X=R/255, Y=G/255, Z=B/255).
+FColor::operator FVector() const
+{
+    const FLOAT c = 1.f / 255.f;
+    return FVector(R * c, G * c, B * c);
+}
+
+
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
 
 // ??0FRotatorF@@QAE@MMM@Z
