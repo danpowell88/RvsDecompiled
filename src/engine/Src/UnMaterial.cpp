@@ -306,7 +306,8 @@ UBOOL UModifier::IsTransparent()
 
 BYTE UModifier::RequiredUVStreams()
 {
-	return Material ? Material->RequiredUVStreams() : 1;
+	// Retail (21b): returns 0 when Material is null
+	return Material ? Material->RequiredUVStreams() : 0;
 }
 
 /*=============================================================================
@@ -356,10 +357,11 @@ UBOOL UCombiner::RequiresSorting()
 
 BYTE UCombiner::RequiredUVStreams()
 {
-	// Retail: OR together Material1 and Material2 stream requirements.
-	// Each defaults to 1 if null.
+	// Retail (56b): OR together Material1 and Material2 stream requirements.
+	// Material1 null defaults to 1 (BF 01 00 00 00 MOV EDI,1).
+	// Material2 null defaults to 0 (JZ → OR EAX=0, EDI).
 	BYTE m1 = Material1 ? Material1->RequiredUVStreams() : 1;
-	BYTE m2 = Material2 ? Material2->RequiredUVStreams() : 1;
+	BYTE m2 = Material2 ? Material2->RequiredUVStreams() : 0;
 	return m1 | m2;
 }
 

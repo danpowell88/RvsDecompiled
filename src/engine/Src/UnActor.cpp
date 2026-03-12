@@ -2790,7 +2790,8 @@ void AActor::UpdateRenderData()
 
 FLOAT AActor::WorldLightRadius() const
 {
-	return 25.f * ((INT)LightRadius + 1);
+	// Retail (19b): LightRadius * 1.0 * 25.0
+	return 25.f * LightRadius;
 }
 
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
