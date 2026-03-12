@@ -2363,12 +2363,40 @@ void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 	*(FLOAT*)(data + Channel * 0x74 + 0x10) = Frame;
 }
 
-void USkeletalMeshInstance::SetMesh(UMesh *)
+void USkeletalMeshInstance::SetMesh(UMesh* NewMesh)
 {
+	// Disasm: 0x135AA0, ~60b.
+	// Store mesh pointer at this+0x58, empty animation/bone caches, notify.
+	*(UMesh**)((BYTE*)this + 0x58) = NewMesh;
+	// Empty bone transform and blend arrays
+	((FArray*)((BYTE*)this + 0x150))->Empty(0x10);
+	((FArray*)((BYTE*)this + 0x15C))->Empty(0x0C);
+	((FArray*)((BYTE*)this + 0xB8))->Empty(0x30);
+	((FArray*)((BYTE*)this + 0x118))->Empty(0x3C);
+	((FArray*)((BYTE*)this + 0x124))->Empty(0x40);
+	((FArray*)((BYTE*)this + 0x130))->Empty(0x40);
+	// If mesh is non-null, trigger ActualizeAnimLinkups notification
+	if (NewMesh)
+	{
+		typedef void (__thiscall *NotifyFn)(USkeletalMeshInstance*);
+		NotifyFn Notify = *(NotifyFn*)((*(BYTE**)this) + 0x128);
+		Notify(this);
+	}
 }
 
-void USkeletalMeshInstance::SetScale(FVector)
+void USkeletalMeshInstance::SetScale(FVector Scale)
 {
+	// Disasm: 0x130E40, 96b.
+	// Get mesh via vtbl[0x8C/4], write Scale to mesh+0x7C,
+	// then ensure mesh+0x84 (some float, likely DrawScale) is non-negative.
+	typedef BYTE* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh_fn = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	BYTE* Mesh = GetMesh_fn(this);
+	if (!Mesh) return;
+	*(FVector*)(Mesh + 0x7C) = Scale;
+	// Abs-value the draw scale at mesh+0x84
+	FLOAT* DrawScale = (FLOAT*)(Mesh + 0x84);
+	if (*DrawScale < 0.0f) *DrawScale = -*DrawScale;
 }
 
 int USkeletalMeshInstance::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
@@ -2578,9 +2606,40 @@ UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 	return NULL;
 }
 
-int USkeletalMeshInstance::FreezeAnimAt(float,int)
+int USkeletalMeshInstance::FreezeAnimAt(FLOAT Frame, INT Channel)
 {
-	return 0;
+	// Disasm: 0x131040, 200b.
+	// Freezes a channel at a normalised frame position.
+	// 1. Bounds-check Channel.
+	// 2. Get sequence name from channel+8, call GetAnimNamed to get seq object.
+	// 3. GetAnimFrameCount(seqObj) to get natural frame count.
+	// 4. Normalise Frame by frameCount; clamp to [0, frameCount].
+	// 5. Store at elem+0x10 (current frame), zero rate and tween.
+	if (Channel < 0) return 0;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= arr->Num()) return 0;
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + Channel * 0x74;
+	FName SeqName = *(FName*)(elem + 8);
+
+	typedef void* (__thiscall *GetAnimNamedFn)(USkeletalMeshInstance*, FName);
+	GetAnimNamedFn GetAnimNamed_fn = *(GetAnimNamedFn*)((*(BYTE**)this) + 0xB0);
+	void* SeqObj = GetAnimNamed_fn(this, SeqName);
+
+	// Get frame count; normalise Frame if frameCount > 0
+	typedef FLOAT (__thiscall *GetFrameCountFn)(USkeletalMeshInstance*, void*);
+	GetFrameCountFn GetFrameCount = *(GetFrameCountFn*)((*(BYTE**)this) + 0xC0);
+	FLOAT FrameCount = GetFrameCount(this, SeqObj);
+	FLOAT NormFrame = Frame;
+	if (FrameCount != 0.0f)
+		NormFrame = Frame / FrameCount;
+	// Clamp to [0, frameCount]
+	if (NormFrame < 0.0f) NormFrame = 0.0f;
+	if (NormFrame > FrameCount && FrameCount > 0.0f) NormFrame = FrameCount;
+	// Freeze: set frame, zero rate and tween
+	*(FLOAT*)(elem + 0x10) = NormFrame;
+	*(INT*)(elem + 0x0C) = 0;
+	*(INT*)(elem + 0x18) = 0;
+	return 1;
 }
 
 float USkeletalMeshInstance::GetActiveAnimFrame(INT Channel)
