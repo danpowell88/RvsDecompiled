@@ -3383,10 +3383,9 @@ void ASceneManager::ChangeOrientation(FOrientation)
 
 void ASceneManager::DeletePathSamples()
 {
-	// Retail: 17b. Empties the PathSamples TArray at this+0x3E4 (12-byte elements).
-	// Calls an indirect TArray resize function with count=0, elementSize=12.
-	INT* arr = (INT*)((BYTE*)this + 0x3E4);  // TArray: [0]=Data*, [4]=ArrayNum, [8]=ArrayMax
-	arr[1] = 0;  // ArrayNum = 0 (retail may also free/realloc the buffer)
+	// Retail: 17b. Empties the PathSamples TArray at this+0x3E4 (FVector elements, 12b each).
+	// Sequence: push 0 (Extra), add ecx 0x3E4, push 0x0C (ElementSize), call TArray::Empty IAT.
+	((TArray<FVector>*)((BYTE*)this + 0x3E4))->Empty();
 }
 
 UMatAction * ASceneManager::GetActionFromPct(float)
@@ -3401,12 +3400,24 @@ float ASceneManager::GetActionPctFromScenePct(float)
 
 FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 {
-	return FVector(0,0,0);
+	// Retail: 102b SEH. Returns the current action's cached location if the scene is playing.
+	// Bit 2 (mask 4) of the state byte at this+0x398 indicates "playing".
+	// When playing, dereferences the action pointer at this+0x3DC and reads FVector at +0x234.
+	if (!(*(BYTE*)((BYTE*)this + 0x398) & 4))
+		return FVector(0,0,0);
+	BYTE* action = *(BYTE**)((BYTE*)this + 0x3DC);
+	return *(FVector*)(action + 0x234);
 }
 
 FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMatAction *,int)
 {
-	return FRotator(0,0,0);
+	// Retail: 106b SEH. Same guard as GetLocation: bit 2 of state byte at this+0x398.
+	// When playing, reads FRotator from action data pointer (this+0x3DC) at offset +0x240.
+	// The extra parameters (FVector, FRotator, UMatAction*, INT) are accepted but unused here.
+	if (!(*(BYTE*)((BYTE*)this + 0x398) & 4))
+		return FRotator(0,0,0);
+	BYTE* action = *(BYTE**)((BYTE*)this + 0x3DC);
+	return *(FRotator*)(action + 0x240);
 }
 
 void ASceneManager::InitializeActions()
