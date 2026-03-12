@@ -3955,9 +3955,20 @@ FSphere UVertMeshInstance::GetRenderBoundingSphere(const AActor*)
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
-int UVertMeshInstance::IsAnimating(int)
+int UVertMeshInstance::IsAnimating(int Channel)
 {
-	return 0;
+	// Retail: 0x1725d0, 74b. Only channel 0 supported on vertex meshes.
+	// If actor (this+0x5C) is set AND channel is 0 AND anim name (this+0xB8) is not NAME_None:
+	//   if frame (this+0xC0) < 0 (tweening): return whether tween-rate (this+0xC8) != 0
+	//   else: return whether anim-rate (this+0xBC) != 0
+	if (!*(INT*)((BYTE*)this + 0x5C) || Channel != 0)
+		return 0;
+	FName none(NAME_None);
+	if (*(FName*)((BYTE*)this + 0xB8) == none)
+		return 0;
+	if (*(FLOAT*)((BYTE*)this + 0xC0) < 0.0f)
+		return (*(FLOAT*)((BYTE*)this + 0xC8) != 0.0f) ? 1 : 0;
+	return (*(FLOAT*)((BYTE*)this + 0xBC) != 0.0f) ? 1 : 0;
 }
 
 int UVertMeshInstance::IsAnimLooping(int)
@@ -7442,18 +7453,34 @@ int UMaterialSwitch::CheckCircularReferences(TArray<UMaterial *> &)
 }
 
 // --- UMesh ---
-void UMesh::Serialize(FArchive &)
+void UMesh::Serialize(FArchive& Ar)
 {
+	// Retail: 0xca570, 60b. Calls UPrimitive::Serialize, then if archive is not
+	// persistent (in-memory), serializes the mesh instance pointer at this+0x58.
+	UPrimitive::Serialize(Ar);
+	if (!Ar.IsPersistent())
+		Ar << *(UObject**)((BYTE*)this + 0x58);
 }
 
-UMeshInstance * UMesh::MeshGetInstance(AActor const *)
+UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
-	return NULL;
+	// Retail: 0xca620, 96b. Gets or creates a mesh instance for the actor.
+	// Full impl creates new instances via StaticConstructObject; we use the simple path:
+	// check actor's mesh instance slot at actor+0x324, fall back to this+0x58.
+	// Divergence: no on-demand instance creation.
+	if (!Owner)
+		return *(UMeshInstance**)((BYTE*)this + 0x58);
+	if ((*(BYTE*)((BYTE*)Owner + 0xA0) & 0x80))
+		return *(UMeshInstance**)((BYTE*)this + 0x58);
+	UMeshInstance* inst = *(UMeshInstance**)((BYTE*)Owner + 0x324);
+	if (inst) return inst;
+	return *(UMeshInstance**)((BYTE*)this + 0x58);
 }
 
 UClass * UMesh::MeshGetInstanceClass()
 {
-	return NULL;
+	// Retail: base UMesh uses UMeshInstance; subclasses override this.
+	return UMeshInstance::StaticClass();
 }
 
 // --- UMeshAnimation ---
