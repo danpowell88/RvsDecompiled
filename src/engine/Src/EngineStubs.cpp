@@ -1906,17 +1906,20 @@ const TCHAR* USkeletalMeshInstance::AnimGetNotifyText(void *,int)
 	return NULL;
 }
 
-float USkeletalMeshInstance::AnimGetNotifyTime(void *,int)
+float USkeletalMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
 {
-	return 0.0f;
+	// Retail: 24b. Null-check Channel; returns time float at notify_array[notifyIndex*12] (entry+0).
+	if (!Channel) return 0.0f;
+	BYTE* notifyArray = *(BYTE**)((BYTE*)Channel + 0x1C);
+	return *(FLOAT*)(notifyArray + notifyIndex * 12);
 }
 
-float USkeletalMeshInstance::AnimGetRate(void *)
+float USkeletalMeshInstance::AnimGetRate(void* Channel)
 {
-	return 0.0f;
+	// Retail: 14b. Returns float rate from Channel+0x18, or 0.0f if Channel NULL.
+	if (!Channel) return 0.0f;
+	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
-
-int USkeletalMeshInstance::AnimIsInGroup(void *,FName)
 {
 	return 0;
 }
@@ -2400,17 +2403,18 @@ const TCHAR* UVertMeshInstance::AnimGetNotifyText(void *,int)
 	return NULL;
 }
 
-float UVertMeshInstance::AnimGetNotifyTime(void *,int)
+float UVertMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
 {
-	return 0.0f;
+	// Retail: 20b. Returns time float from Channel's notify array (stride 12b, float at entry+0).
+	BYTE* notifyArray = *(BYTE**)((BYTE*)Channel + 0x1C);
+	return *(FLOAT*)(notifyArray + notifyIndex * 12);
 }
 
-float UVertMeshInstance::AnimGetRate(void *)
+float UVertMeshInstance::AnimGetRate(void* Channel)
 {
-	return 0.0f;
+	// Retail: 10b. Returns float rate from Channel+0x18 (no null check per retail).
+	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
-
-int UVertMeshInstance::AnimIsInGroup(void *,FName)
 {
 	return 0;
 }
@@ -2520,7 +2524,8 @@ FBox UVertMeshInstance::GetRenderBoundingBox(const AActor*)
 
 FSphere UVertMeshInstance::GetRenderBoundingSphere(const AActor*)
 {
-	return FSphere();
+	// Retail: 84b (SEH). Calls vtbl[35] to get mesh, copies FSphere from mesh+0x48.
+	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
 int UVertMeshInstance::IsAnimating(int)
