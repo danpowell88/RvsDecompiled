@@ -2252,8 +2252,26 @@ void UTexture::Init(int,int)
 
 
 // --- UVertMeshInstance ---
-FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName)
+FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName Name)
 {
+	// Retail: ~90b. Calls vtbl[0x8C/4=35] on this to get the underlying mesh object,
+	// then searches TArray at mesh+0x118 (stride 0x2C=44b, FName at element+0).
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	GetMeshFn fn = (GetMeshFn)((*(void***)this)[0x8C / sizeof(void*)]);
+	BYTE* mesh = fn(this);
+	BYTE* seqBase = mesh + 0x118;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= 0) return NULL;
+	BYTE* data = *(BYTE**)(seqBase);
+	INT i = 0, byteOff = 0;
+	while (i < count)
+	{
+		BYTE* elem = data + byteOff;
+		if (*(FName*)elem == Name) return (FMeshAnimSeq*)elem;
+		i++;
+		byteOff += 0x2C;
+		count = *(INT*)(seqBase + 4);
+	}
 	return NULL;
 }
 
@@ -5667,13 +5685,44 @@ void UMeshAnimation::ClearAnimNotifys()
 {
 }
 
-FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName)
+FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
 {
+	// Retail: 79b. Linear search through Sequences TArray (this+0x48, stride 0x2C=44b).
+	// Compares FName at element+0. Re-fetches count each iteration. Returns element ptr or NULL.
+	BYTE* seqBase = (BYTE*)this + 0x48;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= 0) return NULL;
+	BYTE* data = *(BYTE**)(seqBase);
+	INT i = 0, byteOff = 0;
+	while (i < count)
+	{
+		BYTE* elem = data + byteOff;
+		if (*(FName*)elem == Name) return (FMeshAnimSeq*)elem;
+		i++;
+		byteOff += 0x2C;
+		count = *(INT*)(seqBase + 4);
+	}
 	return NULL;
 }
 
-MotionChunk * UMeshAnimation::GetMovement(FName)
+MotionChunk * UMeshAnimation::GetMovement(FName Name)
 {
+	// Retail: ~90b. Searches Sequences (this+0x48, stride 0x2C) for FName match.
+	// Returns MotionChunk at Movements.Data (*(this+0x3C)) + index*0x58 (stride=88b).
+	BYTE* seqBase = (BYTE*)this + 0x48;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= 0) return NULL;
+	BYTE* seqData = *(BYTE**)(seqBase);
+	BYTE* moveData = *(BYTE**)((BYTE*)this + 0x3C);
+	INT i = 0, byteOff = 0;
+	while (i < count)
+	{
+		BYTE* elem = seqData + byteOff;
+		if (*(FName*)elem == Name) return (MotionChunk*)(moveData + i * 0x58);
+		i++;
+		byteOff += 0x2C;
+		count = *(INT*)(seqBase + 4);
+	}
 	return NULL;
 }
 
