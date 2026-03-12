@@ -959,15 +959,47 @@ void ANavigationPoint::CheckForErrors() { Super::CheckForErrors(); }
 INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav) { return 0; }
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
 void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
-void ANavigationPoint::ClearPaths() {}
+void ANavigationPoint::ClearPaths()
+{
+	// Retail: 104b SEH. Zeros the 4 path-chain pointer fields, then empties PathList.
+	// PathList confirmed at this+0x3D8 via disassembly; chain ptrs from +0x3A8.
+	nextNavigationPoint = NULL;
+	nextOrdered         = NULL;
+	prevOrdered         = NULL;
+	previousPath        = NULL;
+	((TArray<UReachSpec*>*)((BYTE*)this + 0x3D8))->Empty();
+}
 void ANavigationPoint::FindBase() {}
 INT ANavigationPoint::PrunePaths() { return 0; }
 INT ANavigationPoint::IsIdentifiedAs(FName Name) { return 0; }
 INT ANavigationPoint::ReviewPath(APawn* Scout) { return 0; }
 INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
-void ANavigationPoint::CleanUpPruned() {}
+void ANavigationPoint::CleanUpPruned()
+{
+	// Retail: 124b SEH. Iterates PathList backwards, removing specs with bPruned set.
+	// Finishes with TArray::Shrink to release excess memory.
+	TArray<UReachSpec*>* myPathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+	for (INT i = myPathList->Num() - 1; i >= 0; i--)
+	{
+		UReachSpec* Spec = (*myPathList)(i);
+		if (Spec && Spec->bPruned)
+			myPathList->Remove(i, 1);
+	}
+	myPathList->Shrink();
+}
 INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
-UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav) { return NULL; }
+UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
+{
+	// Retail: 103b SEH. Linear scan of PathList (at this+0x3D8) for spec->End == Nav.
+	TArray<UReachSpec*>* myPathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+	for (INT i = 0; i < myPathList->Num(); i++)
+	{
+		UReachSpec* Spec = (*myPathList)(i);
+		if (Spec->End == Nav)
+			return Spec;
+	}
+	return NULL;
+}
 INT ANavigationPoint::ShouldBeBased()
 {
 	// Retail: 32b (JNZ at +24 uses shared return-0 epilog 3 bytes past function end).
