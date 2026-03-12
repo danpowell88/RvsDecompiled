@@ -1865,17 +1865,23 @@ float USkeletalMeshInstance::AnimGetFrameCount(void *)
 	return 0.0f;
 }
 
-FName USkeletalMeshInstance::AnimGetGroup(void *)
+FName USkeletalMeshInstance::AnimGetGroup(void* Channel)
 {
-	return FName(NAME_None);
+	// Retail: 34b. Check *(Channel+4) is non-null via IAT guard, then double-deref to get FName.Index.
+	// Same bytecode as UVertMeshInstance::AnimGetGroup.
+	FName result;
+	if (*(void**)((BYTE*)Channel + 4))
+		*(INT*)&result = *(INT*)*(void**)((BYTE*)Channel + 4);
+	return result;
 }
 
 FName USkeletalMeshInstance::AnimGetName(void* Channel)
 {
-	// Retail: 19b. Same as VertMesh but with null check on Channel.
+	// Retail: 19b. Null-check Channel, then double-deref: FName.Index = *(*(Channel+0)).
+	// Channel[0] is a pointer to an animation state struct; its first DWORD is FName.Index.
 	FName result;
 	if (Channel)
-		*(INT*)&result = *(INT*)Channel;
+		*(INT*)&result = *(INT*)*(void**)Channel;
 	return result;
 }
 
@@ -2294,9 +2300,14 @@ float UVertMeshInstance::AnimGetFrameCount(void *)
 	return 0.0f;
 }
 
-FName UVertMeshInstance::AnimGetGroup(void *)
+FName UVertMeshInstance::AnimGetGroup(void* Channel)
 {
-	return FName(NAME_None);
+	// Retail: 34b. Identical bytecode to USkeletalMeshInstance::AnimGetGroup.
+	// Check *(Channel+4) non-null, then double-deref for FName.Index.
+	FName result;
+	if (*(void**)((BYTE*)Channel + 4))
+		*(INT*)&result = *(INT*)*(void**)((BYTE*)Channel + 4);
+	return result;
 }
 
 FName UVertMeshInstance::AnimGetName(void* Channel)
@@ -2357,9 +2368,14 @@ float UVertMeshInstance::GetActiveAnimRate(int)
 	return 0.0f;
 }
 
-FName UVertMeshInstance::GetActiveAnimSequence(int)
+FName UVertMeshInstance::GetActiveAnimSequence(int sequenceChannelIndex)
 {
-	return FName(NAME_None);
+	// Retail: 23b. Only returns a value for channel index 0 (reads FName.Index from this+0xB8).
+	// For index != 0, retail returns uninitialized — we return NAME_None for safety (divergence).
+	if (sequenceChannelIndex != 0) return FName(NAME_None);
+	FName result;
+	*(INT*)&result = *(INT*)((BYTE*)this + 0xB8);
+	return result;
 }
 
 int UVertMeshInstance::GetAnimCount()
