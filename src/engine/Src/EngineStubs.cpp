@@ -5556,6 +5556,13 @@ void UMatAction::PostEditChange()
 
 void UMatAction::PostLoad()
 {
+	// Retail: 89b. Call Super::PostLoad() then clear stale object reference.
+	// If the UObject* at this+0x40 has bit 7 set in its flags byte at obj+0xA0
+	// (indicating pending-delete), the reference is cleared to NULL.
+	Super::PostLoad();
+	UObject* ref = *(UObject**)((BYTE*)this + 0x40);
+	if (ref && (*(BYTE*)((BYTE*)ref + 0xA0) & 0x80))
+		*(UObject**)((BYTE*)this + 0x40) = NULL;
 }
 
 void UMatAction::Initialize()
@@ -5592,12 +5599,15 @@ void UMatSubAction::Initialize()
 
 int UMatSubAction::IsEnding()
 {
-	return 0;
+	// Retail: 12b. Returns 1 if status byte at this+0x2C == 2 (SETE pattern).
+	return *(BYTE*)((BYTE*)this + 0x2C) == 2 ? 1 : 0;
 }
 
 int UMatSubAction::IsRunning()
 {
-	return 0;
+	// Retail: 14b. Returns 1 if status byte at this+0x2C is 1 (started) or 2 (ending).
+	BYTE status = *(BYTE*)((BYTE*)this + 0x2C);
+	return (status == 1 || status == 2) ? 1 : 0;
 }
 
 // --- UMaterial ---
