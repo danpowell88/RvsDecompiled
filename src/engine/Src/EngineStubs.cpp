@@ -1435,9 +1435,10 @@ void * UMeshInstance::GetAnimNamed(FName)
 	return NULL;
 }
 
-FBox UMeshInstance::GetCollisionBoundingBox(const AActor*)
+FBox UMeshInstance::GetCollisionBoundingBox(const AActor* Owner)
 {
-	return FBox();
+	// Retail: 32b. Get mesh via vtable[35] (GetMesh), call GetCollisionBoundingBox on mesh.
+	return GetMesh()->GetCollisionBoundingBox(Owner);
 }
 
 void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
@@ -1454,14 +1455,16 @@ UMesh * UMeshInstance::GetMesh()
 	return NULL;
 }
 
-FBox UMeshInstance::GetRenderBoundingBox(const AActor*)
+FBox UMeshInstance::GetRenderBoundingBox(const AActor* Owner)
 {
-	return FBox();
+	// Retail: 32b. Get mesh via vtable[35] (GetMesh), call GetRenderBoundingBox on mesh.
+	return GetMesh()->GetRenderBoundingBox(Owner);
 }
 
-FSphere UMeshInstance::GetRenderBoundingSphere(const AActor*)
+FSphere UMeshInstance::GetRenderBoundingSphere(const AActor* Owner)
 {
-	return FSphere();
+	// Retail: 32b. Get mesh via vtable[35] (GetMesh), call GetRenderBoundingSphere on mesh.
+	return GetMesh()->GetRenderBoundingSphere(Owner);
 }
 
 int UMeshInstance::GetStatus()
@@ -1606,14 +1609,16 @@ FBox USkeletalMesh::GetCollisionBoundingBox(const AActor*) const
 	return FBox();
 }
 
-FBox USkeletalMesh::GetRenderBoundingBox(const AActor*)
+FBox USkeletalMesh::GetRenderBoundingBox(const AActor* Owner)
 {
-	return FBox();
+	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
+	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
 }
 
-FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor*)
+FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 {
-	return FSphere();
+	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
+	return MeshGetInstance(Owner)->GetRenderBoundingSphere(Owner);
 }
 
 // --- USkeletalMeshInstance ---
@@ -1989,12 +1994,14 @@ void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 
 FBox USkeletalMeshInstance::GetRenderBoundingBox(const AActor*)
 {
-	return FBox();
+	// Retail: 33b. GetMesh() + copy FBox from mesh+0x2C (cached render bounds).
+	return *(FBox*)((BYTE*)GetMesh() + 0x2C);
 }
 
 FSphere USkeletalMeshInstance::GetRenderBoundingSphere(const AActor*)
 {
-	return FSphere();
+	// Retail: 31b. GetMesh() + copy FSphere from mesh+0x48 via ctor.
+	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
 int USkeletalMeshInstance::IsAnimating(int)
@@ -5229,8 +5236,13 @@ void UDownload::ReceiveData(BYTE*,int)
 {
 }
 
-void UDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
+void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR* /*Data*/, int /*DataSize*/)
 {
+	// Retail: 32b. Stores connection/channel, computes channel base offset.
+	*(DWORD*)((BYTE*)this + 0x2C) = (DWORD)Connection;
+	*(INT*)((BYTE*)this + 0x30) = Channel;
+	BYTE* ChannelTable = *(BYTE**)((BYTE*)Connection + 0xC8);
+	*(INT*)((BYTE*)this + 0x34) = Channel * 0x44 + *(INT*)(ChannelTable + 0x2C);
 }
 
 void UDownload::Serialize(FArchive &)
@@ -5348,7 +5360,8 @@ int UFluidSurfacePrimitive::PointCheck(FCheckResult &,AActor *,FVector,FVector,D
 
 FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 {
-	return FBox();
+	// Retail: 29b. REP MOVSD 7 DWORDs from *(this+0x58)+0x448.
+	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
@@ -6966,14 +6979,16 @@ void UVertMesh::PostLoad()
 {
 }
 
-FBox UVertMesh::GetRenderBoundingBox(AActor const *)
+FBox UVertMesh::GetRenderBoundingBox(AActor const * Owner)
 {
-	return FBox();
+	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
+	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
 }
 
-FSphere UVertMesh::GetRenderBoundingSphere(AActor const *)
+FSphere UVertMesh::GetRenderBoundingSphere(AActor const * Owner)
 {
-	return FSphere();
+	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
+	return MeshGetInstance(Owner)->GetRenderBoundingSphere(Owner);
 }
 
 // --- UVertMeshInstance ---
