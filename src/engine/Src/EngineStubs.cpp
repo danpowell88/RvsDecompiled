@@ -3218,6 +3218,17 @@ FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMa
 
 void ASceneManager::InitializeActions()
 {
+	// Retail: 48b. Calls Initialize() on each action in the Actions TArray at this+0x3A8.
+	// Count is re-checked each iteration (retail re-fetches via IAT) in case Initialize()
+	// modifies the array.
+	BYTE* actionsBase = (BYTE*)this + 0x3A8;
+	INT count = *(INT*)(actionsBase + 4);
+	for (INT i = 0; i < count; i++)
+	{
+		UMatAction* action = (*(UMatAction***)(actionsBase))[i];
+		action->Initialize();
+		count = *(INT*)(actionsBase + 4);
+	}
 }
 
 // --- AScout ---
@@ -5834,14 +5845,17 @@ FBox UProjectorPrimitive::GetCollisionBoundingBox(AActor const *) const
 	return *(FBox*)((BYTE*)this + 0x470);
 }
 
-FVector UProjectorPrimitive::GetEncroachCenter(AActor *)
+FVector UProjectorPrimitive::GetEncroachCenter(AActor* Actor)
 {
-	return FVector(0,0,0);
+	// Retail: 41b. Allocates temp FBox, calls virtual GetCollisionBoundingBox(Actor),
+	// then calls FBox::GetCenter() on the result. Mirrors UStaticMesh::GetEncroachCenter.
+	return GetCollisionBoundingBox(Actor).GetCenter();
 }
 
-FVector UProjectorPrimitive::GetEncroachExtent(AActor *)
+FVector UProjectorPrimitive::GetEncroachExtent(AActor* Actor)
 {
-	return FVector(0,0,0);
+	// Retail: 41b. Same pattern as GetEncroachCenter but calls FBox::GetExtent().
+	return GetCollisionBoundingBox(Actor).GetExtent();
 }
 
 // --- UProxyBitmapMaterial ---
