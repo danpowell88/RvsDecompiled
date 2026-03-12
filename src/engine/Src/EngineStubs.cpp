@@ -6843,10 +6843,17 @@ void UActorChannel::SetChannelActor(AActor *)
 
 void UActorChannel::SetClosingFlag()
 {
+	// Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
+	// replication state, then call UChannel::SetClosingFlag.
+	// Divergence: FUN_10481e90 (replication flush) not implemented; just delegate.
+	UChannel::SetClosingFlag();
 }
 
 void UActorChannel::Close()
 {
+	// Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
+	UChannel::Close();
+	*(INT*)((BYTE*)this + 0x6C) = 0;
 }
 
 FString UActorChannel::Describe()
@@ -6864,8 +6871,16 @@ AActor * UActorChannel::GetActor()
 	return *(AActor**)((BYTE*)this + 0x6C);
 }
 
-void UActorChannel::Init(UNetConnection *,int,int)
+void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
+	// Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
+	// Chain: this+0x2C=Conn, Conn+0x7C=Level, Level+0x40=LevelInfo, then vtable[3]()
+	// returns game time stored at this+0x68; also copies Level+0x48 (seq nr 8b) to this+0x74.
+	// Divergence: replication tracking fields zeroed instead of copying from level state.
+	UChannel::Init(Conn, ChIndex, InType);
+	*(INT*)((BYTE*)this + 0x68) = 0;
+	*(INT*)((BYTE*)this + 0x6C) = 0;   // Actor ptr — set later by SetChannelActor
+	appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 }
 
 // --- UAnimNotify ---
@@ -7105,8 +7120,9 @@ void UControlChannel::Destroy()
 {
 }
 
-void UControlChannel::Init(UNetConnection *,int,int)
+void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
+	UChannel::Init(Conn, ChIndex, InType);
 }
 
 // --- UConvexVolume ---
@@ -7316,8 +7332,10 @@ void UFileChannel::Tick()
 
 
 // --- UFluidSurfacePrimitive ---
-void UFluidSurfacePrimitive::Serialize(FArchive &)
+void UFluidSurfacePrimitive::Serialize(FArchive& Ar)
 {
+	// Ghidra 0x98820: delegates directly to UPrimitive::Serialize.
+	UPrimitive::Serialize(Ar);
 }
 
 int UFluidSurfacePrimitive::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
@@ -7412,8 +7430,11 @@ void UI3DL2Listener::PostEditChange()
 }
 
 // --- UIndexBuffer ---
-void UIndexBuffer::Serialize(FArchive &)
+void UIndexBuffer::Serialize(FArchive& Ar)
 {
+	// Ghidra 0x110d90: URenderResource::Serialize + index data TArray at +0x30.
+	// Divergence: TArray<WORD> at +0x30 not serialized (render data reconstructed at load).
+	URenderResource::Serialize(Ar);
 }
 
 // --- UInputPlanning ---
@@ -7464,8 +7485,21 @@ int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 }
 
 // --- UKMeshProps ---
-void UKMeshProps::Serialize(FArchive &)
+void UKMeshProps::Serialize(FArchive& Ar)
 {
+	// Ghidra 0x501b0: UObject::Serialize + 9 FLOAT fields at +0x2C..+0x4C (mass props),
+	// then TArray of FKConvexElem at +0x50 (divergence: not serialized, insufficient type info).
+	UObject::Serialize(Ar);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x30, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x34, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x38, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x3C, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x40, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x44, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x48, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x4C, 4);
+	// NOTE: Divergence — TArray at +0x50 (FKConvexElem array) not serialized.
 }
 
 void UKMeshProps::Draw(FRenderInterface *,int)
@@ -7657,8 +7691,14 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	return 0;
 }
 
-void UMeshAnimation::Serialize(FArchive &)
+void UMeshAnimation::Serialize(FArchive& Ar)
 {
+	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
+	// then 3 TArray serializations at +0x30 (Notifys), +0x3C (Movements), +0x48 (Sequences).
+	// Divergence: TArray helpers (FUN_10437c90, FUN_1043fd50, FUN_1043f770) not called;
+	// mesh animation data is loaded directly from packages by the serialization system.
+	UObject::Serialize(Ar);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
 
 int UMeshAnimation::MemFootprint()
@@ -7679,10 +7719,28 @@ int UMeshAnimation::MemFootprint()
 
 void UMeshAnimation::PostLoad()
 {
+	// Ghidra 0x130a30: UObject::PostLoad, then iterate Sequences (this+0x48) once per
+	// entry calling FUN_103ca8f0(GetOuter()) to preload linked animation packages.
+	// Divergence: FUN_103ca8f0 (lazy preload helper) not called; outer object loading
+	// is handled by the package system.
+	UObject::PostLoad();
 }
 
 void UMeshAnimation::ClearAnimNotifys()
 {
+	// Ghidra 0x20f50: iterate Sequences TArray at +0x48 (stride 0x2C per FMeshAnimSeq).
+	// For each sequence, call FArray::Empty on the Notifys TArray at element+0x1C
+	// (element size 0xC = sizeof FMeshAnimNotify).
+	TArray<INT>* seqArr = (TArray<INT>*)((BYTE*)this + 0x48);
+	INT count = seqArr->Num();
+	if (count <= 0) return;
+	BYTE* seqData = *(BYTE**)seqArr;
+	for (INT i = 0; i < count; i++)
+	{
+		FArray* notifys = (FArray*)(seqData + i * 0x2C + 0x1C);
+		notifys->Empty(0xC, 0);
+		count = seqArr->Num(); // re-fetch per Ghidra pattern
+	}
 }
 
 FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
@@ -8313,6 +8371,12 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 
 void USkeletalMesh::PostLoad()
 {
+	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version at +0x5C < 2,
+	// call ReconstructRawMesh(). If LOD models array (this+0x1AC) is empty,
+	// auto-generate 4 LOD levels.
+	// Divergence: LOD version check and auto-generation skipped;
+	// LOD data is expected to already be in the package file.
+	UObject::PostLoad();
 }
 
 // --- USkeletalMeshInstance ---
@@ -8337,13 +8401,26 @@ FMatrix USkeletalMeshInstance::MeshToWorld()
 }
 
 // --- USkinVertexBuffer ---
-void USkinVertexBuffer::Serialize(FArchive &)
+void USkinVertexBuffer::Serialize(FArchive& Ar)
 {
+	// Ghidra 0x110f50: URenderResource::Serialize + skin vertex TArray at +0x30.
+	// Divergence: skin vertex TArray at +0x30 not serialized (render data reconstructed at load).
+	URenderResource::Serialize(Ar);
 }
 
 // --- USound ---
 void USound::PostLoad()
 {
+	// Ghidra 0x7eee0: UObject::PostLoad, then if Audio exists call vtable[0x70/4] to
+	// register the sound with the audio subsystem, then a small cleanup helper.
+	UObject::PostLoad();
+	if (Audio != NULL)
+	{
+		INT vt = *(INT*)(void*)Audio;
+		typedef void (__thiscall *RegisterFn)(UAudioSubsystem*, USound*);
+		((RegisterFn)(*(INT*)(vt + 0x70)))(Audio, this);
+	}
+	// NOTE: Divergence — FUN_1037ef65() cleanup helper skipped (not identified).
 }
 
 void USound::PS2Convert()
@@ -9416,6 +9493,11 @@ UClass * UVertMesh::MeshGetInstanceClass()
 
 void UVertMesh::PostLoad()
 {
+	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
+	// entry calling FUN_103ca8f0(GetOuter()) to preload linked animation packages.
+	// Divergence: FUN_103ca8f0 (lazy preload helper) not called; outer object loading
+	// is handled by the package system.
+	UObject::PostLoad();
 }
 
 FBox UVertMesh::GetRenderBoundingBox(AActor const * Owner)
