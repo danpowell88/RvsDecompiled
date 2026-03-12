@@ -1671,8 +1671,17 @@ void USkeletalMeshInstance::SetAnimSequence(int,FName)
 {
 }
 
-void USkeletalMeshInstance::SetBlendAlpha(int,float)
+void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 {
+	// Retail: 145b SEH. Clamps Alpha to [0.0, 1.0] and stores at element+0x50 in TArray at this+0x10C.
+	if (Channel < 0) return;
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (Channel >= count) return;
+	FLOAT clamped = Alpha;
+	if (clamped < 0.0f) clamped = 0.0f;
+	if (clamped > 1.0f) clamped = 1.0f;
+	*(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50) = clamped;
 }
 
 int USkeletalMeshInstance::SetBlendParams(int,float,float,float,FName,int)
@@ -1982,7 +1991,10 @@ float USkeletalMeshInstance::AnimGetRate(void* Channel)
 	if (!Channel) return 0.0f;
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
+
+int USkeletalMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 {
+	// Retail: 37b. Has direct call — not fully implemented (complex relative call).
 	return 0;
 }
 
