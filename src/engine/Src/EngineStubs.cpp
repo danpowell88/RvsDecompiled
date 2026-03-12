@@ -1860,9 +1860,11 @@ int USkeletalMeshInstance::AnimForcePose(FName,float,float,int)
 	return 0;
 }
 
-float USkeletalMeshInstance::AnimGetFrameCount(void *)
+float USkeletalMeshInstance::AnimGetFrameCount(void* Channel)
 {
-	return 0.0f;
+	// Retail: 14b. Returns float of int frame count at Channel+0x14. Checks Channel != NULL.
+	if (!Channel) return 0.0f;
+	return (FLOAT)(*(INT*)((BYTE*)Channel + 0x14));
 }
 
 FName USkeletalMeshInstance::AnimGetGroup(void* Channel)
@@ -1919,9 +1921,18 @@ int USkeletalMeshInstance::AnimIsInGroup(void *,FName)
 	return 0;
 }
 
-int USkeletalMeshInstance::AnimStopLooping(int)
+int USkeletalMeshInstance::AnimStopLooping(INT channel)
 {
-	return 0;
+	// Retail: 104b (SEH). TArray at this+0x10C, stride 0x74=116b.
+	// Clears loop flag at element+0x30 and element+0x2C, returns 1.
+	BYTE* seqBase = (BYTE*)this + 0x10C;
+	INT count = *(INT*)(seqBase + 4);
+	if (count <= channel || channel < 0) return 0;
+	BYTE* data = *(BYTE**)(seqBase);
+	BYTE* elem = data + channel * 0x74;
+	*(INT*)(elem + 0x30) = 0;
+	*(INT*)(elem + 0x2C) = 0;
+	return 1;
 }
 
 void USkeletalMeshInstance::ClearChannel(int)
@@ -2345,9 +2356,10 @@ int UVertMeshInstance::AnimForcePose(FName,float,float,int)
 	return 0;
 }
 
-float UVertMeshInstance::AnimGetFrameCount(void *)
+float UVertMeshInstance::AnimGetFrameCount(void* Channel)
 {
-	return 0.0f;
+	// Retail: 10b. Returns float of int frame count at Channel+0x14 (no null check per retail).
+	return (FLOAT)(*(INT*)((BYTE*)Channel + 0x14));
 }
 
 FName UVertMeshInstance::AnimGetGroup(void* Channel)
@@ -2405,7 +2417,10 @@ int UVertMeshInstance::AnimIsInGroup(void *,FName)
 
 int UVertMeshInstance::AnimStopLooping(int)
 {
-	return 0;
+	// Retail: 22b. Clears loop flag at this+0xE0 and this+0xDC, returns 1.
+	*(INT*)((BYTE*)this + 0xE0) = 0;
+	*(INT*)((BYTE*)this + 0xDC) = 0;
+	return 1;
 }
 
 float UVertMeshInstance::GetActiveAnimFrame(INT Channel)
