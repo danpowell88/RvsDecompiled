@@ -1821,12 +1821,75 @@ int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 	return 1;
 }
 
-void USkeletalMeshInstance::SetAnimRate(int,float)
+void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 {
+	// Disasm: 0x134A90, 240b.
+	// Multiplies Rate by the per-channel rate scale (elem+0x20) and stores to elem+0x0C.
+	// With a zero rate, sets elem+0x40 = 0 (paused); non-zero sets elem+0x40 = 1 (playing).
+	if (Channel < 0) return;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= arr->Num()) return;
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + Channel * 0x74;
+	FLOAT Scale = *(FLOAT*)(elem + 0x20);
+	FLOAT Stored = Rate * Scale;
+	*(FLOAT*)(elem + 0x0C) = Stored;
+	*(INT*)(elem + 0x40) = (Rate > 0.0f) ? 1 : 0;
 }
 
-void USkeletalMeshInstance::SetAnimSequence(int,FName)
+void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 {
+	// Disasm: 0x134FC0, 304b.
+	// Looks up the anim object for SeqName, then sets channel slot+seq fields and
+	// computes the rate scale (elem+0x20) via vtable calls on the anim object.
+	if (Channel < 0) return;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= arr->Num()) return;
+
+	// Find the anim object that contains this sequence
+	typedef void* (__thiscall *FindAnimObjFn)(USkeletalMeshInstance*, FName);
+	FindAnimObjFn FindAnimObj = *(FindAnimObjFn*)((*(BYTE**)this) + 0x12C);
+	void* AnimObj = FindAnimObj(this, SeqName);
+
+	INT SlotIdx = -1;
+	if (AnimObj)
+	{
+		// Find slot index of this anim in AnimObjects array
+		typedef INT (*FindSlotFn)(FArray*, void*);
+		FindSlotFn FindSlot = (FindSlotFn)0x10431D00;
+		FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
+		SlotIdx = FindSlot(AnimArr, AnimObj);
+	}
+
+	// Get the sequence object (vtbl[0xB0/4] = GetAnimIndexed or equivalent)
+	typedef void* (__thiscall *GetAnimNamedFn)(USkeletalMeshInstance*, FName);
+	GetAnimNamedFn GetAnimNamed_fn = *(GetAnimNamedFn*)((*(BYTE**)this) + 0xB0);
+	void* SeqObj = GetAnimNamed_fn(this, SeqName);
+
+	if (SlotIdx < 0 || !SeqObj) return;
+
+	// Compute channel element offset
+	BYTE* ChannelData = *(BYTE**)arr;
+	BYTE* elem = ChannelData + Channel * 0x74;
+
+	// Store slot index and sequence name
+	*(INT*)(elem + 4) = SlotIdx;
+	*(FName*)(elem + 8) = SeqName;
+
+	// Compute rate scale = vtbl[0xC4](seqObj) / vtbl[0xC0](seqObj)
+	// vtbl[0xC4/4] = GetActiveAnimRate, vtbl[0xC0/4] = GetAnimFrameCount (returns anim native rate)
+	typedef FLOAT (__thiscall *GetRateFn)(USkeletalMeshInstance*, void*);
+	typedef FLOAT (__thiscall *GetFrameCountFn)(USkeletalMeshInstance*, void*);
+	GetRateFn GetRate     = *(GetRateFn*)((*(BYTE**)this) + 0xC4);
+	GetFrameCountFn GetFC = *(GetFrameCountFn*)((*(BYTE**)this) + 0xC0);
+	FLOAT NativeRate = GetRate(this, SeqObj);
+	FLOAT FrameCount = GetFC(this, SeqObj);
+	if (FrameCount != 0.0f)
+		*(FLOAT*)(elem + 0x20) = NativeRate / FrameCount;
+
+	// vtbl[0xC8/4] = AnimStopLooping (or IsLooping check) — store as bool in elem+0x34
+	typedef INT (__thiscall *IsLoopingFn)(USkeletalMeshInstance*, void*);
+	IsLoopingFn IsLooping = *(IsLoopingFn*)((*(BYTE**)this) + 0xC8);
+	*(INT*)(elem + 0x34) = (IsLooping(this, SeqObj) != 0) ? 1 : 0;
 }
 
 void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
@@ -2057,9 +2120,30 @@ float USkeletalMeshInstance::GetAnimFrame(INT Channel)
 	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x10);
 }
 
-float USkeletalMeshInstance::GetAnimRateOnChannel(int)
+float USkeletalMeshInstance::GetAnimRateOnChannel(INT Channel)
 {
-	return 0.0f;
+	// Disasm: 0x135B20, 96b.
+	// Validates channel, then returns GetActiveAnimRate(GetAnimNamed(channel_seqname)).
+	// Returns 0.0f if channel is invalid or anim not found.
+	typedef INT (__thiscall *ValidateFn)(USkeletalMeshInstance*, INT);
+	ValidateFn Validate = (ValidateFn)0x10430F40;
+	if (!Validate(this, Channel)) return 0.0f;
+
+	// Get sequence FName from channel elem+8
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + Channel * 0x74;
+	FName SeqName = *(FName*)(elem + 8);
+
+	// GetAnimNamed(SeqName) → anim object pointer
+	typedef void* (__thiscall *GetAnimNamedFn)(USkeletalMeshInstance*, FName);
+	GetAnimNamedFn GetAnimNamed_fn = *(GetAnimNamedFn*)((*(BYTE**)this) + 0xB0);
+	void* SeqObj = GetAnimNamed_fn(this, SeqName);
+	if (!SeqObj) return 0.0f;
+
+	// GetActiveAnimRate(SeqObj) → current channel rate
+	typedef FLOAT (__thiscall *GetActiveRateFn)(USkeletalMeshInstance*, void*);
+	GetActiveRateFn GetActiveRate = *(GetActiveRateFn*)((*(BYTE**)this) + 0xC4);
+	return GetActiveRate(this, SeqObj);
 }
 
 FName USkeletalMeshInstance::GetAnimSequence(INT Channel)
@@ -2149,7 +2233,32 @@ FVector USkeletalMeshInstance::GetRootLocation()
 
 FVector USkeletalMeshInstance::GetRootLocationDelta()
 {
-	return FVector(0,0,0);
+	// Disasm: 0x133790, 288b.
+	// 1. Guard: root motion lock (this+0x228) set AND GetOwner vtable non-null.
+	// 2. Call vtbl[0x110/4] to refresh root motion caches.
+	// 3. delta = current location (this+0x1C8) - prev location (this+0x1E0).
+	// 4. Update prev cache to current.
+	// 5. If this+0x22C != 0, call LockRootMotion(this+0x100, 1).
+	if (!*(INT*)((BYTE*)this + 0x228)) return FVector(0,0,0);
+	typedef void* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+	if (!GetOwner(this)) return FVector(0,0,0);
+	// Trigger root motion update (vtbl slot 0x110/4 = UpdateAnimation-like)
+	typedef void (__thiscall *UpdateRootFn)(USkeletalMeshInstance*);
+	UpdateRootFn UpdateRoot = *(UpdateRootFn*)((*(BYTE**)this) + 0x110);
+	UpdateRoot(this);
+	// Compute per-axis deltas
+	FLOAT dX = *(FLOAT*)((BYTE*)this + 0x1C8) - *(FLOAT*)((BYTE*)this + 0x1E0);
+	FLOAT dY = *(FLOAT*)((BYTE*)this + 0x1CC) - *(FLOAT*)((BYTE*)this + 0x1E4);
+	FLOAT dZ = *(FLOAT*)((BYTE*)this + 0x1D0) - *(FLOAT*)((BYTE*)this + 0x1E8);
+	// Update previous position cache
+	*(FLOAT*)((BYTE*)this + 0x1E0) = *(FLOAT*)((BYTE*)this + 0x1C8);
+	*(FLOAT*)((BYTE*)this + 0x1E4) = *(FLOAT*)((BYTE*)this + 0x1CC);
+	*(FLOAT*)((BYTE*)this + 0x1E8) = *(FLOAT*)((BYTE*)this + 0x1D0);
+	// If additional autolock flag set, re-lock root motion
+	if (*(INT*)((BYTE*)this + 0x22C))
+		LockRootMotion(*(INT*)((BYTE*)this + 0x100), 1);
+	return FVector(dX, dY, dZ);
 }
 
 FRotator USkeletalMeshInstance::GetRootRotation()
@@ -2165,7 +2274,27 @@ FRotator USkeletalMeshInstance::GetRootRotation()
 
 FRotator USkeletalMeshInstance::GetRootRotationDelta()
 {
-	return FRotator(0,0,0);
+	// Disasm: 0x12F9B0, 224b.
+	// 1. Guard: root motion lock (this+0x228) set AND GetOwner vtable non-null.
+	// 2. Call vtbl[0x110/4] to refresh root motion caches.
+	// 3. Compute Yaw delta = current yaw (this+0x1D4+4) - previous yaw (this+0x1EC+4).
+	// 4. Update prev rotation cache (this+0x1EC) = current (this+0x1D4).
+	// 5. Return {0, deltaYaw, 0} — retail only extracts Yaw component.
+	if (!*(INT*)((BYTE*)this + 0x228)) return FRotator(0,0,0);
+	typedef void* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+	if (!GetOwner(this)) return FRotator(0,0,0);
+	// Trigger root motion update
+	typedef void (__thiscall *UpdateRootFn)(USkeletalMeshInstance*);
+	UpdateRootFn UpdateRoot = *(UpdateRootFn*)((*(BYTE**)this) + 0x110);
+	UpdateRoot(this);
+	// Read current and previous rotations
+	FRotator Current = *(FRotator*)((BYTE*)this + 0x1D4);
+	FRotator Prev    = *(FRotator*)((BYTE*)this + 0x1EC);
+	// Update previous rotation cache
+	*(FRotator*)((BYTE*)this + 0x1EC) = Current;
+	// Return yaw-only delta (retail zeroes Pitch and Roll)
+	return FRotator(0, Current.Yaw - Prev.Yaw, 0);
 }
 
 FCoords USkeletalMeshInstance::GetTagCoords(FName)
@@ -7268,7 +7397,13 @@ void USkeletalMesh::PostLoad()
 // --- USkeletalMeshInstance ---
 int USkeletalMeshInstance::WasSkeletonUpdated()
 {
-	return 0;
+	// Disasm: 0x12F8B0, 64b.
+	// 1. If TArray at this+0xB8 is empty (Num()==0), bone data invalid → return 0.
+	// 2. Compare update stamp QWORD at this+0x64 with GTicks-1.
+	// 3. Return 1 if updated this tick or last tick.
+	if (((FArray*)((BYTE*)this + 0xB8))->Num() == 0) return 0;
+	SQWORD UpdateStamp = *(SQWORD*)((BYTE*)this + 0x64);
+	return (UpdateStamp >= GTicks - 1) ? 1 : 0;
 }
 
 void USkeletalMeshInstance::MeshBuildBounds()
