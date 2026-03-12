@@ -2088,14 +2088,16 @@ FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
 	return FBox();
 }
 
-FVector UStaticMesh::GetEncroachCenter(AActor *)
+FVector UStaticMesh::GetEncroachCenter(AActor * Actor)
 {
-	return FVector(0,0,0);
+	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetCenter().
+	return GetCollisionBoundingBox(Actor).GetCenter();
 }
 
-FVector UStaticMesh::GetEncroachExtent(AActor *)
+FVector UStaticMesh::GetEncroachExtent(AActor * Actor)
 {
-	return FVector(0,0,0);
+	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetExtent().
+	return GetCollisionBoundingBox(Actor).GetExtent();
 }
 
 FBox UStaticMesh::GetRenderBoundingBox(const AActor*)
@@ -9595,7 +9597,8 @@ FCameraSceneNode * FSceneNode::GetCameraSceneNode() { return NULL; }
 FLevelSceneNode * FSceneNode::GetLevelSceneNode() { return NULL; }
 
 // ?MeshToWorld@UMeshInstance@@UAE?AVFMatrix@@XZ
-FMatrix UMeshInstance::MeshToWorld() { return FMatrix(); }
+FMatrix UMeshInstance::MeshToWorld() { // Retail: 36b. Copies FMatrix::Identity (from Core.dll IAT) to return buffer.
+ return FMatrix::Identity; }
 
 // ?GetMirrorSceneNode@FSceneNode@@UAEPAVFMirrorSceneNode@@XZ
 FMirrorSceneNode * FSceneNode::GetMirrorSceneNode() { return NULL; }
