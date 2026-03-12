@@ -5,7 +5,18 @@ authors: [danpo]
 tags: [decompilation, scene-manager, matinee, subaction, animation, batch-160]
 ---
 
-Batch 160 is almost entirely about the scene manager sub-action system — the
+Picture the opening of a Rainbow Six mission briefing: the camera sweeps across
+the operations room, the screen fades from black, a radio crackle is heard, and
+a dialogue sequence plays out. None of that required the level designer to write
+code — it was authored in **Matinee**, Unreal Engine 2's in-engine cinematic tool.
+
+Matinee scenes are driven by a single float that advances from 0.0 to 1.0 as
+the scene plays. Every effect — "fade in from black between 0% and 5%", "slow
+the game down between 30% and 50%" — is described as a *sub-action* with a start
+percentage and an end percentage. The `ASceneManager` actor manages this whole
+system at runtime.
+
+Batch 160 is almost entirely about this sub-action system — the
 machinery that drives cutscene events: FOV changes, fade effects, game-speed
 and scene-speed multipliers, and orientation overrides. With the `UMatSubAction`
 base-class state machine fixed in Batch 159, this batch fills in the derived classes
@@ -23,6 +34,10 @@ at +0x48; each sub-action declares its active window via `StartPct` at +0x4C and
 The `ASceneManager` drives the whole system through a float percentage that advances
 each tick. Each tick, it calls `RefreshSubActions` to update every sub-action's
 state byte, then calls `Update(Pct, SceneMgr)` on each active sub-action.
+
+:::tip TArray and raw offsets
+`TArray<T>` is Unreal's equivalent of `List<T>` in C# — a heap-allocated, resizable array. Where you'd write `myList[i]` in C#, Unreal writes `MyArray(i)`. The `+0x48` notation means "48 bytes into the object's memory block, there's a TArray." We work with raw byte offsets like this because the original header definitions are incomplete — we're reconstructing the layout from the binary, not from source code.
+:::
 
 State byte at sub+0x2C:
 - `0` = not yet started

@@ -5,6 +5,27 @@ authors: [danpo]
 tags: [decompilation, scene-manager, matinee, cutscene, batch-161]
 ---
 
+Every object in a game engine has a *lifecycle* — it's created, it initialises,
+it runs for a while, and then it cleanly shuts down. For cutscenes in Unreal
+Engine 2, that lifecycle belongs to the `ASceneManager` actor: it starts the
+scene, ticks it along frame by frame, then ends it when the playback percentage
+reaches 1.0.
+
+This batch completes the two ends of that lifecycle — `SceneStarted` and
+`SceneEnded` — plus two more sub-action sub-classes that fire events *during*
+the scene. The `ASceneManager` doesn't just play back animation; it also wires
+up the player's camera, registers the scene globally (so multiple overlapping
+scenes don't stomp on each other), and toggles the viewport's rendering flag.
+
+:::tip Game object lifecycles vs C# lifecycles
+If you've used ASP.NET middleware or Unity's `MonoBehaviour`, you'll recognise
+the pattern: `OnStart()`, `Update()` each frame, `OnStop()`. `SceneStarted` and
+`SceneEnded` are exactly that. The critical difference from managed code is that
+there's no garbage collector — every resource acquired in `SceneStarted` must be
+manually released in `SceneEnded`, or it leaks. The symmetry you'll see below is
+deliberate and necessary.
+:::
+
 Batch 161 completes the `ASceneManager` lifecycle methods — the start/end
 bookends of a cutscene — and fills in the remaining sub-action sub-classes:
 `USubActionCameraEffect` and `USubActionTrigger`. Along the way we discovered
@@ -132,7 +153,7 @@ understood.
 - The effect object is stored at `this+0x58` as a pointer.
 - Alpha at `effect+0x2C` is either snapped (if duration == 0) or lerped from
   `startAlpha` (this+0x5C) → `endAlpha` (this+0x60) over the sub-action's duration.
-- If the resulting alpha <= 0 and we're not ending with a reversed flag:
+- If the resulting alpha is `<= 0` and we're not ending with a reversed flag:
   calls `eventAddCameraEffect(effect, 1)` to add the effect to the viewport.
 - Otherwise calls `eventRemoveCameraEffect(effect)` to remove it.
 

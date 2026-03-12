@@ -5,11 +5,30 @@ authors: [danpo]
 tags: [decompilation, texture, animation, canvas, scene-manager, batch-159]
 ---
 
-Batch 159 picks up where the last batch's cleanup left off. The function targets
-this time span three subsystems: the `FStaticCubemap` render interface (mirroring
-a pattern we'd already solved for `FStaticTexture`), the `UVertMeshInstance` single-channel
-animation system, and the `ASceneManager` sub-action machinery — including the
-`UMatSubAction` base-class state machine that everything else depended on.
+Batch 159 covers three distinct areas of the engine: environment-map reflections,
+vertex-mesh animation state, and the cutscene timing machinery. Before diving
+into the assembly, let's set the scene for each of them.
+
+**Environment maps** are how games fake reflections cheaply. Rather than
+ray-tracing every bounce of light, a game pre-renders six views of the world
+(up, down, left, right, forward, back) and packs them into a *cubemap* — a
+cube-shaped texture. When you see a shiny floor or a metallic surface in a
+late-1990s / early-2000s game, it's almost certainly sampling a cubemap. The
+`FStaticCubemap` class wraps one of these assets and hands it to the renderer
+via a standard interface.
+
+**Vertex mesh animation** is the older, simpler animation style: instead of a
+skeleton driving vertices through bone weights, every keyframe simply stores the
+full position of every vertex. It's memory-hungry but fast to interpolate. Unreal
+keeps the playback *state* (what frame, what speed, is it looping?) in a separate
+*instance* object alongside the mesh asset.
+
+**Matinee sub-actions** are the building blocks of Unreal's in-engine cutscene
+system. A cutscene scene in Matinee is described as a timeline normalised to the
+range 0.0→1.0. Actions and *sub-actions* fire when that timeline value enters
+their declared window. Think of it like `Animation.AddEvent(startTime, endTime,
+handler)` — except that the handler is a tiny state-machine class that can lerp
+game speed, change FOV, or trigger other effects.
 
 <!-- truncate -->
 
@@ -17,6 +36,13 @@ animation system, and the `ASceneManager` sub-action machinery — including the
 
 `FStaticTexture` was solved in an earlier batch. It wraps a `UTexture*` and provides
 a `FBaseTexture` interface (GetHeight, GetWidth, GetFormat, etc.) used by the renderer.
+Think of `FBaseTexture` as an `ITexture` interface in C# terms — the renderer only
+cares that it can call `GetWidth()` and `GetHeight()`, not whether the underlying
+object is a flat texture, a cubemap, a procedural effect, or anything else.
+
+:::tip Coming from C#?
+In managed languages you'd express this as an `interface ITexture { int Width { get; } ... }` and the renderer would call methods through that interface. In unmanaged C++ the equivalent is an *abstract class with pure virtual methods* — you literally cannot instantiate it, only subclasses can exist. Unreal's `FBaseTexture` and the `F` prefix classes follow this pattern throughout.
+:::
 
 `FStaticCubemap` looked like it would be different — it wraps a `UCubemap` rather than
 a plain `UTexture`. But the memory layout turned out to parallel `FStaticTexture`
@@ -102,14 +128,18 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 ## UMatSubAction: The Missing State Machine
 
-The `UMatSubAction` hierarchy drives cutscene sub-actions — things like FOV changes,
-game-speed lerps, orientation overrides, and camera shake effects. These are driven
-by an `ASceneManager` ticking through a percentage value from 0.0 to 1.0.
+Unreal's cutscene tool — Matinee — lets designers place timed actions along a
+0→1 progress value: "at 20% of the scene, start fading to black; at 40%, switch
+camera angle; at 90%, restore game speed." The *sub-actions* that implement
+each of those effects all inherit from `UMatSubAction`, and they each share a
+tiny four-state lifecycle:
 
-Every sub-action calls `UMatSubAction::Update(float Pct, ASceneManager*)` at the
-base of its call chain. That base implementation was returning 0 unconditionally
-in our stub — meaning all sub-action `Update` methods were dead. The real
-implementation is a simple state machine:
+- **0 — idle**: the scene hasn't reached this sub-action's start point yet
+- **1 — running**: the scene is inside this sub-action's window, update every tick
+- **2 — ending**: the window just closed, fire any wrap-up logic once
+- **3 — done**: finished, stop ticking
+
+The base class `UMatSubAction::Update` manages those state transitions — and it was returning 0 unconditionally in our stub, meaning *all* derived classes were silently broken. Here's the real implementation:
 
 ```cpp
 int UMatSubAction::Update(float Pct, ASceneManager*)

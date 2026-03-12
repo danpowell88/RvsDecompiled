@@ -10,6 +10,13 @@ date: 2025-02-08
 
 ## Batches 131–134: Four Batches, Eighteen Stubs
 
+When a character in a game plays a reload animation, the engine needs to answer
+several questions every frame: *which* animation is playing, how far through it
+we are, whether it should loop, and how quickly it should play. Those answers
+live in the *animation instance* classes — objects that track playback state
+separately from the animation data itself. This batch is almost entirely about
+those state-tracking classes and the queries you can run against them.
+
 We've just wrapped up four consecutive batches (131 through 134) focused almost entirely on the animation subsystem. This felt like a natural area to dig into — the stubs were dense with adjacent classes (UMeshAnimation, UVertMeshInstance, USkeletalMeshInstance) all sharing similar patterns once you knew what to look for.
 
 <!-- truncate -->
@@ -53,6 +60,17 @@ FMeshAnimSeq* UMeshAnimation::GetAnimSeq(FName Name) {
 ```
 
 A few things to note:
+
+:::tip Coming from C#?
+`TArray<T>` in Unreal is the equivalent of `List<T>` in C# — a heap-allocated
+array that can grow. The difference is that in C# you call `myList.Count`, while
+here the struct is just three words in memory: `{T* Data, int Num, int Max}`.
+To read `Num` we literally do `*(int*)(arrayAddress + 4)` — add 4 bytes (one
+`int` in) to get past the `Data` pointer, and read the next integer. It sounds
+low-level, but it's exactly what the CLR does internally for `List<T>.Count` —
+we're just doing it by hand.
+:::
+
 1. **The TArray pattern**: Unreal's `TArray<T>` is just `{T* Data, INT Num, INT Max}`. To get the count, we read `*(INT*)(arr + 4)` — the `Num` field is at offset 4.
 2. **Re-fetching the count**: The retail code re-reads `Num` on every loop iteration. This is compiler-generated code that can't prove the count doesn't change, so it re-checks. We preserved this for accuracy.
 3. **`FMeshAnimSeq` is incomplete**: The struct is only ever used as a pointer in our headers — no body definition. That's fine! C++ lets you return pointers to incomplete types without knowing the full layout.

@@ -10,6 +10,12 @@ date: 2025-02-09
 
 ## Batches 136–139: Fifteen More Stubs
 
+When you hear a footstep sound at exactly the right moment in a game animation,
+that's not a coincidence — it's a *notify* embedded in the animation data itself.
+At frame 12, the animator placed a marker called "FootstepLeft"; the engine spots
+that marker as playback passes it, looks up whatever `UAnimNotify` is attached,
+and fires it. This post unpacks how that system works under the hood.
+
 Four more batches landed cleanly this week (136–139), and they cover three pretty distinct areas of the engine: more animation channel machinery, the UCanvas rendering interface, and some small config/input fixes. Let me walk through each area.
 
 <!-- truncate -->
@@ -50,6 +56,10 @@ The skeletal version adds a null check on Channel (it can be NULL when there's n
 `AnimGetNotifyText` returns the name of a notify entry at a given index. This needed us to interact with `FName` in an interesting way.
 
 In Unreal Engine, `FName` is essentially just an integer — an index into a global name table. The actual string backing it lives in `GNames[index]->Name`. To get the `const TCHAR*` from an `FName`, you use `FName::operator*()`, defined inline in `UnName.h`:
+
+:::tip FName vs C# strings
+In C# every `"FootstepLeft"` is a heap object, and comparing two strings means comparing characters. Unreal's `FName` is just a 4-byte integer — an index into a global table called `GNames`. Two `FName` values are equal if their integers are equal, which is a single CPU instruction. The string data lives once in the table, not copied everywhere. This is the same idea as `string.Intern()` in C# but done unavoidably at the language level. The `operator*()` call below is how you get the actual text back out when you need to display it.
+:::
 
 ```cpp
 // From sdk/Raven_Shield_C_SDK/432Core/Inc/UnName.h, line 67
