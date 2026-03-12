@@ -1461,6 +1461,36 @@ FString UFileChannel::Describe()
 
 void UFileChannel::Destroy()
 {
+	// Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
+	// If InType (+0x3C) and download at +0x68 exist, flush/delete download.
+	// Then assert Channels[ChIndex]==this, UChannel::Destroy.
+	check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
+	if (RouteDestroy() == 0)
+	{
+		void** sendFile = (void**)((BYTE*)this + 0x6C);
+		if (*sendFile)
+		{
+			INT vt = *(INT*)*sendFile;
+			typedef void (__thiscall *DtorFn)(void*, INT);
+			((DtorFn)(*(INT*)(vt + 0)))(*sendFile, 1);
+			*sendFile = NULL;
+		}
+		INT inType = *(INT*)((BYTE*)this + 0x3C);
+		void** dld = (void**)((BYTE*)this + 0x68);
+		if (inType && *dld)
+		{
+			INT vt = *(INT*)*dld;
+			typedef void (__thiscall *TickFn)(void*);
+			((TickFn)(*(INT*)(vt + 0x78)))(*dld);
+			if (*dld)
+			{
+				vt = *(INT*)*dld;
+				typedef void (__thiscall *DtorFn2)(void*, INT);
+				((DtorFn2)(*(INT*)(vt + 0xC)))(*dld, 1);
+			}
+		}
+		UChannel::Destroy();
+	}
 }
 
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
@@ -1766,8 +1796,12 @@ void UNetDriver::Serialize(FArchive &Ar)
 	unguard;
 }
 
-void UNetDriver::NotifyActorDestroyed(AActor *)
+void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
+	// Ghidra 0x18c2d0: for each client connection, if actor has open channel
+	// (ServerConnection or ClientConnections TArray at +0x30), close it.
+	// Divergence: actor channel tracking via FUN_103b7b70 not implemented.
+	(void)Actor;
 }
 
 void UNetDriver::AssertValid()
@@ -4580,8 +4614,27 @@ void APlayerController::R6PBKickPlayer(FString)
 {
 }
 
-void APlayerController::SetPlayer(UPlayer *)
+void APlayerController::SetPlayer(UPlayer* InPlayer)
 {
+	// Ghidra 0x7a5c0: bi-directional controller<->player link, init input if viewport.
+	if (!InPlayer)
+		appFailAssert("InPlayer!=NULL", ".\\UnActor.cpp", 0x760);
+
+	// Clear old player's back-pointer to this controller
+	APlayerController* oldActor = *(APlayerController**)((BYTE*)InPlayer + 0x34);
+	if (oldActor)
+		*(UPlayer**)((BYTE*)oldActor + 0x5B4) = NULL;
+
+	// Establish bidirectional link
+	*(UPlayer**)((BYTE*)this + 0x5B4) = InPlayer;
+	*(APlayerController**)((BYTE*)InPlayer + 0x34) = this;
+
+	// If InPlayer is a viewport, initialise input system
+	if (InPlayer->IsA(UViewport::StaticClass()))
+		eventInitInputSystem();
+
+	// Log
+	debugf(TEXT("%s"), GetFullName());
 }
 
 int APlayerController::LocalPlayerController()
@@ -7118,6 +7171,11 @@ FString UControlChannel::Describe()
 
 void UControlChannel::Destroy()
 {
+	// Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.
+	// If returns 0: assert Channels[ChIndex]==this, call UChannel::Destroy.
+	check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
+	if (RouteDestroy() == 0)
+		UChannel::Destroy();
 }
 
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
@@ -7514,6 +7572,17 @@ void UKarmaParams::PostEditChange()
 // --- ULevelSummary ---
 void ULevelSummary::PostLoad()
 {
+	// Ghidra 0xfd00: UObject::PostLoad, then localize the Level title from package.
+	// Localize("LevelInfo0", "Title", OuterName) -> set Title (FString at +0x30).
+	UObject::PostLoad();
+	UObject* Outer = GetOuter();
+	if (Outer)
+	{
+		const TCHAR* outerName = Outer->GetName();
+		const TCHAR* localTitle = Localize(TEXT("LevelInfo0"), TEXT("Title"), outerName, NULL, 1);
+		if (localTitle && *localTitle)
+			*(FString*)((BYTE*)this + 0x30) = localTitle;
+	}
 }
 
 // --- ULodMesh ---
