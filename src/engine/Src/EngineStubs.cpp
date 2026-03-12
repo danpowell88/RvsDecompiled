@@ -853,13 +853,11 @@ int FSkinVertexStream::GetComponents(FVertexComponent* C)
 
 void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
-	// Retail: field at Pad[0x18] (this+0x1C) is a lock flag; data at Pad[0x1C] (this+0x20)
+	// Retail: 20b. GPU-only skin stream; no CPU-accessible raw pointer.
+	// If stream data ptr at this+0x1C is non-null: set *ppData = NULL (GPU ptr, unreadable).
+	// If null: cross-function-jump (stream not allocated).
 	if (*(DWORD*)(Pad + 0x18))
-	{
 		*ppData = NULL;
-		return;
-	}
-	*ppData = *(BYTE**)(Pad + 0x1C) + (FirstVertex << 5);
 }
 
 int FSkinVertexStream::GetRevision()
@@ -3010,8 +3008,12 @@ int AR6ColBox::ShouldTrace(AActor *,DWORD)
 	return 0;
 }
 
-void AR6ColBox::SetBase(AActor *,FVector,int)
+void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 {
+	// Retail: 21b. If NewBase is NULL, calls error handler (3x null push + call).
+	// If non-NULL, cross-function-jumps to AActor::SetBase.
+	if (!NewBase) return;
+	AActor::SetBase(NewBase, FloorNormal, bNotifyActor);
 }
 
 int AR6ColBox::CanStepUp(FVector)
@@ -4668,11 +4670,9 @@ FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLa
 // --- FTerrainTools ---
 void FTerrainTools::SetAdjust(int Value)
 {
-	INT* BrushPtr = *(INT**)&Pad[0];
-	if (BrushPtr)
+	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
+	if (*(INT**)&Pad[0])
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x60) = Value;
-	else
-		*(INT*)&Pad[0x88] = Value;
 }
 
 void FTerrainTools::SetCurrentBrush(int)
@@ -4695,46 +4695,37 @@ void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)
 
 void FTerrainTools::SetFloorOffset(int Value)
 {
-	// Ghidra (36B): clamp to [-7, 7]
+	// Retail: 20b. Clamp to minimum of -7 only; no upper clamp.
 	if (Value < -7) Value = -7;
-	if (Value > 7) Value = 7;
 	*(INT*)&Pad[0x40] = Value;
 }
 
 void FTerrainTools::SetInnerRadius(int Value)
 {
-	INT* BrushPtr = *(INT**)&Pad[0];
-	if (BrushPtr)
+	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
+	if (*(INT**)&Pad[0])
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x54) = Value;
-	else
-		*(INT*)&Pad[0x7C] = Value;
 }
 
 void FTerrainTools::SetMirrorAxis(int Value)
 {
-	INT* BrushPtr = *(INT**)&Pad[0];
-	if (BrushPtr)
+	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
+	if (*(INT**)&Pad[0])
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x64) = Value;
-	else
-		*(INT*)&Pad[0x8C] = Value;
 }
 
 void FTerrainTools::SetOuterRadius(int Value)
 {
-	INT* BrushPtr = *(INT**)&Pad[0];
-	if (BrushPtr)
+	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
+	if (*(INT**)&Pad[0])
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x58) = Value;
-	else
-		*(INT*)&Pad[0x80] = Value;
 }
 
 void FTerrainTools::SetStrength(int Value)
 {
-	INT* BrushPtr = *(INT**)&Pad[0];
-	if (BrushPtr)
+	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
+	if (*(INT**)&Pad[0])
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x5C) = Value;
-	else
-		*(INT*)&Pad[0x84] = Value;
 }
 
 FTerrainTools::FTerrainTools(FTerrainTools const &)
@@ -6798,6 +6789,11 @@ void UTexCoordSource::PostEditChange()
 // --- UTexEnvMap ---
 FMatrix * UTexEnvMap::GetMatrix(float)
 {
+	// Retail: 21b. When env mapping mode (this+0x64) == 1: set coord-generation
+	// mode byte at this+0x5C = 0x0B (GL_REFLECTION_MAP). Returns NULL always.
+	BYTE envMode = *(BYTE*)((BYTE*)this + 0x64);
+	if (envMode == 1)
+		*(BYTE*)((BYTE*)this + 0x5C) = 0x0B;
 	return NULL;
 }
 
@@ -11938,9 +11934,10 @@ void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 	}
 }
 
-// Ghidra at 0x187cf0 (16 bytes). Only flushes if not a client connection.
+// Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
+// JNZ path: if ServerConnection != NULL, cross-function-jump to UNetConnection::FlushNet.
 void UDemoRecConnection::FlushNet() {
-	if (Driver->ServerConnection == NULL)
+	if (Driver->ServerConnection != NULL)
 		UNetConnection::FlushNet();
 }
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
