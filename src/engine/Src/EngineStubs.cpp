@@ -3436,13 +3436,55 @@ void AR6eviLTesting::evilTestUpdateSystem()
 }
 
 // --- ASceneManager ---
-void ASceneManager::UpdateViewerFromPct(float)
+void ASceneManager::UpdateViewerFromPct(float Pct)
 {
+	// Retail: 0x11f6d0, ordinal 4956. Clamps Pct to [0.0001, 100.0].
+	// If Pct <= 1.0: gets current action via GetActionFromPct, fires ActionStart event
+	// if action changed, updates all sub-actions via their Update vtable slot.
+	if (Pct < 0.0001f) Pct = 0.0001f;
+	else if (Pct > 100.0f) Pct = 100.0f;
+	// Save previous action
+	*(DWORD*)((BYTE*)this + 0x3D4) = *(DWORD*)((BYTE*)this + 0x3D8);
+	if (Pct > 1.0f)
+		return;
+	// Update current action
+	UMatAction* prevAction = *(UMatAction**)((BYTE*)this + 0x3D4);
+	UMatAction* curAction  = GetActionFromPct(Pct);
+	*(UMatAction**)((BYTE*)this + 0x3D8) = curAction;
+	if (prevAction != curAction)
+		curAction->eventActionStart(*(AActor**)((BYTE*)this + 0x3DC));
+	// In editor, refresh sub-actions
+	if (GIsEditor)
+		RefreshSubActions(Pct);
+	// Update all sub-actions in the 0x3F0 TArray (vtable offset 0x64 = virtual Update)
+	TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)((BYTE*)this + 0x3F0);
+	for (INT i = 0; i < SubActions.Num(); i++)
+	{
+		UMatSubAction* sub = SubActions(i);
+		if (*(BYTE*)((BYTE*)sub + 0x2C) != 3)  // not done
+		{
+			typedef INT (__thiscall* UpdateFn)(UMatSubAction*, FLOAT, ASceneManager*);
+			((UpdateFn)(*(void***)sub)[0x64 / 4])(sub, Pct, this);
+		}
+	}
 }
 
 int ASceneManager::VerifyIntPoints()
 {
-	return 0;
+	// Retail: 0x11db90, ordinal 4965. Returns 0 if playing (bit 2 of state byte at this+0x398 set).
+	// Otherwise walks Actions TArray at this+0x3A8; returns 0 if any action's int-point
+	// pointer at action+0x40 is NULL. Returns 1 if all int-points are valid.
+	if (*(BYTE*)((BYTE*)this + 0x398) & 4)
+		return 1;
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)this + 0x3A8);
+	INT count = Actions.Num();
+	for (INT i = 0; i < count; i++)
+	{
+		if (*(INT*)((BYTE*)Actions(i) + 0x40) == 0)
+			return 0;
+		count = Actions.Num();
+	}
+	return 1;
 }
 
 void ASceneManager::RefreshSubActions(float Pct)
@@ -3477,18 +3519,114 @@ void ASceneManager::RefreshSubActions(float Pct)
 
 void ASceneManager::SceneEnded()
 {
+	// Retail: 0x11f2d0, ordinal 4353. Clears playing/hasPC flags (bits 1+2) of state at this+0x3C0,
+	// zeros this+0x448, fires SceneEnded script event, empties PathSamples TArray at this+0x3E4,
+	// decrements global scene counter at 0x1061b80c, clears PC fade if applicable,
+	// then calls all registered scene listeners.
+	extern ENGINE_API INT GNumActiveScenes;
+	*(DWORD*)((BYTE*)this + 0x3C0) &= ~0x00000006u;
+	*(DWORD*)((BYTE*)this + 0x448) = 0;
+	eventSceneEnded();
+	((TArray<FVector>*)((BYTE*)this + 0x3E4))->Empty();
+	--GNumActiveScenes;
+	// Clear PC fade state
+	UObject* actor = *(UObject**)((BYTE*)this + 0x3DC);
+	if (actor && actor->IsA(APlayerController::StaticClass()))
+	{
+		if ((*(BYTE*)((BYTE*)this + 0x398) & 2) != 0)
+		{
+			UObject* viewport = *(UObject**)((BYTE*)actor + 0x5B4);
+			if (viewport && viewport->IsA(UViewport::StaticClass()))
+				*(DWORD*)((BYTE*)viewport + 0x138) = 0;
+		}
+	}
 }
 
 void ASceneManager::SceneStarted()
 {
+	// Retail: 0x11fcd0, ordinal 4354. Calls InitializeActions, sets bit 1 (flag 2) of
+	// this+0x3C0 (playing), calls SetSceneStartTime, fires SceneStarted script event,
+	// sets scene-speed this+0x3C8=1.0 and clears cached action ptr this+0x3D8.
+	// Calls ChangeOrientation with a zero FOrientation, increments global scene counter,
+	// and if PC is valid via IsA check, enables the viewport rendering flag.
+	extern ENGINE_API INT GNumActiveScenes;
+	InitializeActions();
+	*(DWORD*)((BYTE*)this + 0x3C0) |= 2;
+	eventSceneStarted();
+	if (*(INT*)((BYTE*)this + 0x3DC) == 0)
+		return;
+	*(FLOAT*)((BYTE*)this + 0x3C8) = 1.0f;
+	*(DWORD*)((BYTE*)this + 0x3D8) = 0;
+	// Zero out initial FOrientation and latch it via ChangeOrientation
+	FOrientation zeroOrient;
+	appMemzero(&zeroOrient, sizeof(zeroOrient));
+	ChangeOrientation(zeroOrient);
+	++GNumActiveScenes;
+	// Enable viewport if PC has one and bit 1 (flag 2) of state set
+	UObject* actor = *(UObject**)((BYTE*)this + 0x3DC);
+	if (actor && actor->IsA(APlayerController::StaticClass()) &&
+		((*(BYTE*)((BYTE*)this + 0x398) & 2) != 0))
+	{
+		UObject* viewport = *(UObject**)((BYTE*)actor + 0x5B4);
+		if (viewport && viewport->IsA(UViewport::StaticClass()))
+			*(DWORD*)((BYTE*)viewport + 0x138) = 1;
+	}
 }
 
 void ASceneManager::PreparePath()
 {
+	// Retail: 0x11f970, ordinal 3984. Empties global PathSamples (this+0x3E4).
+	// For each action in Actions TArray (this+0x3A8):
+	//   - Empties action's local samples TArray at action+0x84
+	//   - Calls GMatineeTools.GetSamples(this, prevAction, &PathSamples) to fill globals
+	//   - Calls GMatineeTools.GetSamples(this, prevAction2, &action.Samples) to fill local
+	//   - If flag bit 1 of action+0x30 is set and action+0x38 != 0, computes speed:
+	//     action+0x34 = action+0x3C / action+0x38
+	// If in editor, calls SetSceneStartTime.
+	extern ENGINE_API FMatineeTools GMatineeTools;
+	((TArray<FVector>*)((BYTE*)this + 0x3E4))->Empty();
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)this + 0x3A8);
+	INT i = 0;
+	INT count = Actions.Num();
+	if (count > 0)
+	{
+		do
+		{
+			UMatAction* action = Actions(i);
+			// Empty action's own sample TArray at action+0x84
+			((TArray<FVector>*)((BYTE*)action + 0x84))->Empty();
+			// Fill global PathSamples from previous action's spline
+			UMatAction* prevAction = GMatineeTools.GetPrevAction(this, action);
+			GMatineeTools.GetSamples(this, prevAction, (TArray<FVector>*)((BYTE*)this + 0x3E4));
+			// Fill action's local samples from prev action's spline
+			UMatAction* prevAction2 = GMatineeTools.GetPrevAction(this, action);
+			GMatineeTools.GetSamples(this, prevAction2, (TArray<FVector>*)((BYTE*)action + 0x84));
+			// Compute speed ratio if flag set and divisor non-zero
+			if ((*(BYTE*)((BYTE*)action + 0x30) & 2) != 0)
+			{
+				FLOAT totalDist = *(FLOAT*)((BYTE*)action + 0x38);
+				if (totalDist != 0.0f)
+					*(FLOAT*)((BYTE*)action + 0x34) = *(FLOAT*)((BYTE*)action + 0x3C) / totalDist;
+			}
+			i++;
+			count = Actions.Num();
+		} while (i < count);
+	}
+	// if (GIsEditor)
+	//     SetSceneStartTime(this);
 }
 
-void ASceneManager::ChangeOrientation(FOrientation)
+void ASceneManager::ChangeOrientation(FOrientation orient)
 {
+	// Retail: 0x11e1e0, ordinal 2349. Copies the passed FOrientation (13 DWORDs = 52 bytes)
+	// to this+0x3FC (cached orientation), then snapshot current actor rotation from
+	// active actor (this+0x3DC) at offsets +0x240/+0x244/+0x248, stores in this+0x424/+0x428/+0x42C.
+	// Calls FUN_1041db30 (likely an orientation matrix rebuild) via a local continuation.
+	*(FOrientation*)((BYTE*)this + 0x3FC) = orient;
+	INT actor = *(INT*)((BYTE*)this + 0x3DC);
+	*(DWORD*)((BYTE*)this + 0x424) = *(DWORD*)(actor + 0x240);
+	*(DWORD*)((BYTE*)this + 0x428) = *(DWORD*)(actor + 0x244);
+	*(DWORD*)((BYTE*)this + 0x42C) = *(DWORD*)(actor + 0x248);
 }
 
 void ASceneManager::DeletePathSamples()
@@ -6670,9 +6808,51 @@ void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 }
 
 // --- USubActionCameraEffect ---
-int USubActionCameraEffect::Update(float,ASceneManager *)
+int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 {
-	return 0;
+	// Retail: 0x86800, ordinal 4914. Calls parent Update; if not running returns 0.
+	// Gets scene manager via vtable+0x6C. If manager has a valid actor (IsA PlayerController)
+	// and the camera effect at this+0x58 exists:
+	//   If duration (this+0x54) == 0: snap alpha directly from this+0x60 -> effect+0x2C.
+	//   Else lerp: ((endAlpha - startAlpha) / duration) * (Pct - startPct) + startAlpha.
+	// If effect alpha <= 0 and state != ending or bReversed==0: AddCameraEffect.
+	// Else RemoveCameraEffect.
+	if (!UMatSubAction::Update(Pct, SceneMgr))
+		return 0;
+	typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionCameraEffect*);
+	ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+	if (!mgr)
+		return 1;
+	UObject* actor = *(UObject**)((BYTE*)mgr + 0x3DC);
+	if (!actor || !actor->IsA(APlayerController::StaticClass()))
+		return 1;
+	INT effectPtr = *(INT*)((BYTE*)this + 0x58);
+	if (!effectPtr)
+		return 1;
+	FLOAT duration = *(FLOAT*)((BYTE*)this + 0x54);
+	if (duration <= 0.0f)
+	{
+		*(FLOAT*)(effectPtr + 0x2C) = *(FLOAT*)((BYTE*)this + 0x60);
+	}
+	else
+	{
+		FLOAT endAlpha   = *(FLOAT*)((BYTE*)this + 0x60);
+		FLOAT startAlpha = *(FLOAT*)((BYTE*)this + 0x5C);
+		FLOAT startPct   = *(FLOAT*)((BYTE*)this + 0x4C);
+		*(FLOAT*)(effectPtr + 0x2C) = ((endAlpha - startAlpha) / duration) * (Pct - startPct) + startAlpha;
+	}
+	FLOAT alpha = *(FLOAT*)(effectPtr + 0x2C);
+	INT ending   = (*(BYTE*)((BYTE*)this + 0x2C) == 2) ? 1 : 0;
+	INT reversed = ((*(BYTE*)((BYTE*)this + 0x64) & 1) != 0) ? 1 : 0;
+	if (alpha <= 0.0f && (!ending || !reversed))
+	{
+		((APlayerController*)actor)->eventAddCameraEffect((UCameraEffect*)effectPtr, 1);
+	}
+	else
+	{
+		((APlayerController*)actor)->eventRemoveCameraEffect((UCameraEffect*)effectPtr);
+	}
+	return 1;
 }
 
 FString USubActionCameraEffect::GetStatString()
@@ -6878,8 +7058,26 @@ FString USubActionSceneSpeed::GetStatString()
 }
 
 // --- USubActionTrigger ---
-int USubActionTrigger::Update(float,ASceneManager *)
+int USubActionTrigger::Update(float Pct, ASceneManager* SceneMgr)
 {
+	// Retail: 0x11f090, ordinal 4921 (74b). Calls base Update; if not running returns 0.
+	// Gets scene manager via vtable+0x6C slot 27. If manager non-null, fires eventTriggerEvent
+	// on the scene manager with trigger name (this+0x58), active actor pointer (mgr+0x3DC), and
+	// a second name from mgr+0x3E0.
+	INT ran = UMatSubAction::Update(Pct, SceneMgr);
+	if (ran)
+	{
+		typedef ASceneManager* (__thiscall* GetSceneMgrFn)(USubActionTrigger*);
+		ASceneManager* mgr = ((GetSceneMgrFn)(*(void***)this)[0x6C / 4])(this);
+		if (!mgr)
+			return 1;
+		// eventTriggerEvent(FName, AActor*, APawn*)
+		// mgr+0x3DC = active actor, mgr+0x3E0 = instigator (APawn*)
+		((AActor*)SceneMgr)->eventTriggerEvent(
+			*(FName*)((BYTE*)this + 0x58),
+			*(AActor**)((BYTE*)mgr + 0x3DC),
+			*(APawn**)((BYTE*)mgr + 0x3E0));
+	}
 	return 0;
 }
 

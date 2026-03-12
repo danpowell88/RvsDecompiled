@@ -100,6 +100,7 @@ ENGINE_API FStats			GStats;
 ENGINE_API FRebuildTools	GRebuildTools;
 ENGINE_API FMatineeTools	GMatineeTools;
 ENGINE_API FTerrainTools	GTerrainTools;
+ENGINE_API INT				GNumActiveScenes		= 0;
 
 // Debug visualisation.
 ENGINE_API FStatGraph*		GStatGraph			= NULL;
