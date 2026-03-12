@@ -1330,7 +1330,15 @@ INT UViewport::IsRealtime()
 }
 INT UViewport::IsWire() { return 0; }
 void UViewport::ScreenShot() {}
-BYTE* UViewport::_Screen( INT X, INT Y ) { return NULL; }
+BYTE* UViewport::_Screen( INT X, INT Y )
+{
+	// Retail (31b, RVA 0x129D0): return FrameBuffer + (Pitch * Y + X) * BytesPerPixel
+	// Pitch at [this+0x160], BytesPerPixel at [this+0xCC], FrameBuffer at [this+0x15C]
+	INT Pitch         = *(INT*)((BYTE*)this + 0x160);
+	INT BytesPerPixel = *(INT*)((BYTE*)this + 0xCC);
+	BYTE* FrameBuffer = *(BYTE**)((BYTE*)this + 0x15C);
+	return FrameBuffer + (Pitch * Y + X) * BytesPerPixel;
+}
 
 // =============================================================================
 // UModel

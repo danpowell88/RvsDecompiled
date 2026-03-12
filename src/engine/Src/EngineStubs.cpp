@@ -836,7 +836,9 @@ int FRawIndexBuffer::GetRevision()
 
 int FRawIndexBuffer::GetSize()
 {
-	return 0;
+	// Retail (12b): ADD ECX,4; call Num(); SHL EAX,1 = return Data.Num() * 2
+	// TArray<WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
+	return *(INT*)(Pad + 4) << 1;
 }
 
 // --- FSkinVertexStream ---
@@ -1603,9 +1605,11 @@ void USkeletalMesh::InsertLodModel(int,USkeletalMesh *,float,int)
 {
 }
 
-int USkeletalMesh::UseCylinderCollision(const AActor*)
+int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 {
-	return 0;
+	// Retail (18b, RVA 0x12F6C0): returns 0 only for ragdoll actors (Physics byte at Actor+0x2C == 0x0E = PHYS_KarmaRagDoll).
+	// PHYS_KarmaRagDoll = 14/0x0E. All other physics modes use cylinder collision.
+	return Actor->Physics != PHYS_KarmaRagDoll;
 }
 
 int USkeletalMesh::R6LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
