@@ -86,7 +86,16 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 void ULevel::ShrinkLevel() {}
 void ULevel::CompactActors() {}
 INT ULevel::Listen( FString& Error ) { return 0; }
-INT ULevel::IsServer() { return 0; }
+INT ULevel::IsServer()
+{
+	// Retail (34b, RVA 0xBF270): return 1 (server) unless NetDriver or DemoRecDriver
+	// has an active ServerConnection (which indicates we are a client on that driver).
+	if (NetDriver && NetDriver->ServerConnection)
+		return 0;
+	if (!DemoRecDriver || !DemoRecDriver->ServerConnection)
+		return 1;
+	return 0;
+}
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra ) { return 1; }
 INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra ) { return 1; }
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce ) { return 0; }

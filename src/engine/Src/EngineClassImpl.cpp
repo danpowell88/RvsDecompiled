@@ -950,7 +950,14 @@ FCoords ABrush::OldToWorld() const { return FCoords(); }
 
 void ANavigationPoint::Destroy() { Super::Destroy(); }
 void ANavigationPoint::PostEditMove() {}
-void ANavigationPoint::Spawned() {}
+void ANavigationPoint::Spawned()
+{
+	// Retail (27b, RVA 0xD5B50): clear bit 11 (bPathsChanged) of Zone's flags at +0x450,
+	// then mark our own bPathsChanged = 1.
+	AZoneInfo* Z = Region.Zone;
+	*(DWORD*)((BYTE*)Z + 0x450) &= ~0x800u;
+	bPathsChanged = 1;
+}
 void ANavigationPoint::InitForPathFinding() {}
 void ANavigationPoint::CheckSymmetry(ANavigationPoint* Other) {}
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}

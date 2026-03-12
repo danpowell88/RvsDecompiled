@@ -6206,9 +6206,15 @@ int UReachSpec::findBestReachable(AScout *)
 	return 0;
 }
 
-int UReachSpec::supports(int,int,int,int)
+int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
 {
-	return 0;
+  // Retail (52b, RVA 0xFF90): check if this spec can be used by a mover with
+  // the given collision radius/height, required reach flags, and max landing velocity.
+  if (CollisionRadius < Radius)       return 0;
+  if (CollisionHeight < Height)       return 0;
+  if ((reachFlags & ReqFlags) != reachFlags) return 0;
+  if (MaxLandingVelocity > MaxV)      return 0;
+  return 1;
 }
 
 int UReachSpec::defineFor(ANavigationPoint *,ANavigationPoint *,APawn *)
