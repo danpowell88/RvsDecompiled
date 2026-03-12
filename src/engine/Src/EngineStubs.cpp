@@ -911,8 +911,12 @@ unsigned __int64 FRawIndexBuffer::GetCacheId()
 	return *(QWORD*)(Pad + 12);
 }
 
-void FRawIndexBuffer::GetContents(void *)
+void FRawIndexBuffer::GetContents(void* Dest)
 {
+	// Retail: 0x1141c0. TArray<WORD> at this+4 (= Pad+0). Copy Num*2 bytes.
+	void*  data = *(void**)Pad;
+	INT    num  = *(INT*)(Pad + 4);
+	appMemcpy(Dest, data, num * 2);
 }
 
 int FRawIndexBuffer::GetIndexSize()
@@ -973,8 +977,26 @@ int FSkinVertexStream::GetSize()
 	return fn(obj) << 5; // vertex_count * 32
 }
 
-void FSkinVertexStream::GetStreamData(void *)
+void FSkinVertexStream::GetStreamData(void* Dest)
 {
+	// Retail: 0x130c50. Two paths:
+	// GPU: if skinned VB exists (Pad+0x18 != 0) and parent object (Pad+4) != NULL,
+	//      call vtable[0x134/4=0x4D] on that parent object.
+	// CPU: copy TArray of 32-byte verts at this+0x20 (= Pad+0x1C).
+	if (*(INT*)(Pad + 0x18) != 0 && *(INT*)(Pad + 4) != 0)
+	{
+		// GPU path: dispatch to parent vertex buffer at vtable[0x4D]
+		INT  objAddr  = *(INT*)(Pad + 4);
+		INT  vtable   = *(INT*)objAddr;
+		typedef void (__thiscall *GetDataFn)(INT, void*);
+		GetDataFn fn = (GetDataFn)(*(INT*)(vtable + 0x134));
+		fn(objAddr, Dest);
+		return;
+	}
+	// CPU path: copy raw vertex array
+	void*  data = *(void**)(Pad + 0x1C);
+	INT    num  = *(INT*)(Pad + 0x20);
+	appMemcpy(Dest, data, num << 5); // num * 32
 }
 
 int FSkinVertexStream::GetStride()
@@ -1113,8 +1135,12 @@ int FStaticMeshVertexStream::GetSize()
 	return Num * 0x18;
 }
 
-void FStaticMeshVertexStream::GetStreamData(void *)
+void FStaticMeshVertexStream::GetStreamData(void* Dest)
 {
+	// Retail: 0x1c970. TArray of 24-byte verts at this+4 (= Pad+0). Copy Num*24 bytes.
+	void*  data = *(void**)Pad;
+	INT    num  = *(INT*)(Pad + 4);
+	appMemcpy(Dest, data, num * 0x18);
 }
 
 int FStaticMeshVertexStream::GetStride()
