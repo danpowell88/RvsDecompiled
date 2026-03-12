@@ -2091,12 +2091,14 @@ FVector UStaticMesh::GetEncroachExtent(AActor *)
 
 FBox UStaticMesh::GetRenderBoundingBox(const AActor*)
 {
-	return FBox();
+	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x2C to return buffer.
+	return *(FBox*)((BYTE*)this + 0x2C);
 }
 
 FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 {
-	return FSphere();
+	// Retail: 23b. Copy-constructs FSphere from this+0x48.
+	return *(FSphere*)((BYTE*)this + 0x48);
 }
 
 void UStaticMesh::Illuminate(AActor *,int)
@@ -5140,7 +5142,8 @@ void UConvexVolume::Serialize(FArchive &)
 
 FBox UConvexVolume::GetRenderBoundingBox(AActor const *)
 {
-	return FBox();
+	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x70 to return buffer.
+	return *(FBox*)((BYTE*)this + 0x70);
 }
 
 int UConvexVolume::IsPointInside(FVector,FMatrix)
@@ -6097,6 +6100,14 @@ int USparkEmitter::RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 
 void USparkEmitter::PostEditChange()
 {
+	// Retail: 28b. Call parent, then call vtable[26]() and vtable[25](this+0x3C).
+	// vtable[26]=Reset, vtable[25]=Initialize(MaxParticles).
+	UParticleEmitter::PostEditChange();
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall* NoArgFn)(USparkEmitter*);
+	typedef void(__thiscall* IntFn)(USparkEmitter*, INT);
+	((NoArgFn)vtbl[26])(this);
+	((IntFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
 void USparkEmitter::CleanUp()
@@ -6120,6 +6131,14 @@ int USpriteEmitter::RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDyn
 
 void USpriteEmitter::PostEditChange()
 {
+	// Retail: 28b. Same as USparkEmitter::PostEditChange — call parent,
+	// then vtable[26]() (Reset) and vtable[25](this+0x3C) (Initialize).
+	UParticleEmitter::PostEditChange();
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall* NoArgFn)(USpriteEmitter*);
+	typedef void(__thiscall* IntFn)(USpriteEmitter*, INT);
+	((NoArgFn)vtbl[26])(this);
+	((IntFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
 void USpriteEmitter::CleanUp()
@@ -6784,6 +6803,15 @@ INT UTexCoordMaterial::MaterialVSize()
 // --- UTexCoordSource ---
 void UTexCoordSource::PostEditChange()
 {
+	// Retail: 25b. Call parent, then clamp TexCoordCount at this+0x64 to 0 if negative.
+	// Also zeroes mode byte at this+0x5C when clamping.
+	UModifier::PostEditChange();
+	INT& coordCount = *(INT*)((BYTE*)this + 0x64);
+	if (coordCount < 0)
+	{
+		coordCount = 0;
+		*(BYTE*)((BYTE*)this + 0x5C) = 0;
+	}
 }
 
 // --- UTexEnvMap ---
@@ -6965,8 +6993,11 @@ void UViewport::PopHit(int)
 {
 }
 
-void UViewport::ChangeInputSet(BYTE)
+void UViewport::ChangeInputSet(BYTE bReset)
 {
+	// Retail: 23b. If bReset==0, restores input set ptr: copy this+0x84 to this+0x80.
+	if (!bReset)
+		*(DWORD*)((BYTE*)this + 0x80) = *(DWORD*)((BYTE*)this + 0x84);
 }
 
 void UViewport::ExecProfile(const TCHAR*,int,FOutputDevice &)
