@@ -2128,9 +2128,16 @@ FVector AActor::GetCylinderExtent() const
 
 AActor* AActor::GetAmbientLightingActor()
 {
-	return (AActor*)this;
-}
-
+	// Retail: 27b. Follows the ambient lighting relay chain via this+0x15C
+	// until an actor without bit 0 of this+0xA8 set, or when the chain ends.
+	AActor* actor = this;
+	while (*(BYTE*)((BYTE*)actor + 0xA8) & 1)
+	{
+		AActor* next = *(AActor**)((BYTE*)actor + 0x15C);
+		if (!next) break;
+		actor = next;
+	}
+	return actor;
 FRotator AActor::GetViewRotation()
 {
 	return Rotation;

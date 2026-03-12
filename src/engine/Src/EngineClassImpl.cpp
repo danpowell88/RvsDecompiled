@@ -968,7 +968,16 @@ INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
 void ANavigationPoint::CleanUpPruned() {}
 INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
 UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav) { return NULL; }
-INT ANavigationPoint::ShouldBeBased() { return 0; }
+INT ANavigationPoint::ShouldBeBased()
+{
+	// Retail: 32b (JNZ at +24 uses shared return-0 epilog 3 bytes past function end).
+	// Check the object at this+0x164 (Level): if [Level+0x410] bit 6 is set => always base nav point.
+	// Otherwise check bNotBased (bit 10 of bitfield DWORD at this+0x3A4): if set => return 0.
+	BYTE* levelObj = *(BYTE**)((BYTE*)this + 0x164);
+	if (*(BYTE*)(levelObj + 0x410) & 0x40)
+		return 1;
+	return bNotBased ? 0 : 1;
+}
 
 /*-- UInteraction screen/world transforms ------------------------------*/
 

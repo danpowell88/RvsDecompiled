@@ -11541,7 +11541,18 @@ void KarmaTriListDataInit(_KarmaTriListData * p0) {}
 // =============================================================================
 UVertexStreamBase::UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType)
 : ElementSize(InElementSize), StreamFlags(InFlags), StreamType(InType) {}
-void UVertexStreamBase::Serialize(FArchive& Ar) { URenderResource::Serialize(Ar); }
+void UVertexStreamBase::Serialize(FArchive& Ar)
+{
+	// Retail: 80b. After parent serialize, if Ar.Ver() >= 75 (0x4B),
+	// serialize ElementSize, StreamFlags, StreamType (3x 4 bytes via Ar.Serialize).
+	Super::Serialize(Ar);
+	if (Ar.Ver() >= 75)
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+}
 void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
 	DWORD OldFlags = StreamFlags;
 	StreamFlags = Flags;
