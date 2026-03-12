@@ -128,7 +128,15 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection ) {}
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
 ULevel* ULevel::NotifyGetLevel() { return this; }
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text ) {}
-INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID ) { return 1; }
+INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
+{
+	// Retail (18b, RVA 0xBF590): returns 1 if [this+0x14]->field@+0x3C is NULL, else 0.
+	// Connection and GUID params are NOT referenced in retail assembly.
+	// [this+0x14] is likely the embedded NetDriver/network object pointer.
+	void* driver = *(void**)((BYTE*)this + 0x14);
+	if (!driver) return 1; // safety: not present in retail, but avoids NULL deref
+	return (*(DWORD*)((BYTE*)driver + 0x3C) == 0) ? 1 : 0;
+}
 void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced ) {}
 
 // Non-virtual methods.
@@ -142,7 +150,19 @@ INT ULevel::GetActorIndex( AActor* Actor )
 	return INDEX_NONE;
 }
 ALevelInfo* ULevel::GetLevelInfo() { return (Actors.Num()>0 && Actors(0)) ? (ALevelInfo*)Actors(0) : NULL; }
-AZoneInfo* ULevel::GetZoneActor( INT iZone ) { return NULL; }
+AZoneInfo* ULevel::GetZoneActor( INT iZone )
+{
+	// Retail (27b, RVA 0x1C0E0): Accesses Zones array data at [this+0x90].
+	// Element layout: stride 72 bytes, AZoneInfo* field at base offset 288
+	// (i.e., index = 72*iZone + 288 byte offset into Zones.Data).
+	// Retail calls a fallback function if result is NULL; omitted here (TODO).
+	BYTE* data = *(BYTE**)((BYTE*)this + 0x90);
+	if (!data) return NULL;
+	AZoneInfo* zone = *(AZoneInfo**)(data + 72 * iZone + 288);
+	if (zone) return zone;
+	// TODO: retail calls fallback at RVA 0x1C080 when zone is NULL
+	return NULL;
+}
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
 void ULevel::UpdateTerrainArrays() {}

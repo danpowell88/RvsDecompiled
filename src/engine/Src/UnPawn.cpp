@@ -1346,10 +1346,10 @@ INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation
 
 void APawn::ClearSerpentine()
 {
-	guard(APawn::ClearSerpentine);
-	SerpentineTime = 1000.0f;
+	// Retail (21b, RVA 0xE5260): stores 999.0f (0x4479C000) at SerpentineTime (+0x420),
+	// clears SerpentineDist (+0x41C) to 0. No guard in retail.
+	SerpentineTime = 999.0f;
 	SerpentineDist = 0.0f;
-	unguard;
 }
 
 void APawn::Crouch(INT bClientSimulation)
