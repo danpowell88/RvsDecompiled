@@ -12624,7 +12624,8 @@ TArray<BYTE>& TArray<BYTE>::operator+=(const TArray<BYTE>& Other)
 // FPointRegion constructors (moved from inline to out-of-line)
 // ============================================================================
 FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
-FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(0), ZoneNumber(0) {}
+// Retail (RVA=0x2980): 1-arg ctor sets iLeaf = -1 (INDEX_NONE = no BSP leaf), not 0.
+FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE), ZoneNumber(0) {}
 FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
 
 // ============================================================================

@@ -2054,7 +2054,9 @@ INT AActor::IsPendingKill()
 
 INT AActor::IsPendingDelete()
 {
-	return bPendingDelete;
+	// Retail (32b RVA=0x5C00): checks bDeleteMe (bit7 @0xA0) first (JS path),
+	// then bPendingDelete (bit0 @0xA9). Returns 1 if either is set.
+	return bDeleteMe || bPendingDelete;
 }
 
 // Brush type queries

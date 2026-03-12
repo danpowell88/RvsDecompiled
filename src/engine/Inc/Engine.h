@@ -97,8 +97,10 @@ public:
 	{ return *(DWORD*)this; }
 
 	// Brightness
+	// Retail (32b RVA=0x1EC0): (3*G + 2*R + B) >> 3
+	// Note: different from FBrightness() — integer path, same weight coefficients.
 	INT Brightness() const
-	{ return Max(Max((INT)R, (INT)G), (INT)B); }
+	{ return (3*(INT)G + 2*(INT)R + (INT)B) >> 3; }
 	// Retail (48b RVA=0x1EE0): loads byte[2]*2 + byte[1]*3 + byte[0], scale by 1/1536.
 	// byte[0]=B, byte[1]=G, byte[2]=R in BGRA: (2*R + 3*G + B) / 1536
 	FLOAT FBrightness() const
