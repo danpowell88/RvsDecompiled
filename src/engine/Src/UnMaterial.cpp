@@ -357,11 +357,10 @@ UBOOL UCombiner::RequiresSorting()
 
 BYTE UCombiner::RequiredUVStreams()
 {
-	// Retail (56b): OR together Material1 and Material2 stream requirements.
-	// Material1 null defaults to 1 (BF 01 00 00 00 MOV EDI,1).
-	// Material2 null defaults to 0 (JZ → OR EAX=0, EDI).
+	// Retail (80b RVA=0xBD70): OR together Material1 and Material2 stream requirements.
+	// Both Material1 and Material2 null default to 1 (MOV EDI/EAX, 1 at both null paths).
 	BYTE m1 = Material1 ? Material1->RequiredUVStreams() : 1;
-	BYTE m2 = Material2 ? Material2->RequiredUVStreams() : 0;
+	BYTE m2 = Material2 ? Material2->RequiredUVStreams() : 1;
 	return m1 | m2;
 }
 
