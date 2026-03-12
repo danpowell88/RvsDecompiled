@@ -1945,9 +1945,49 @@ int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 	return 1;
 }
 
-int USkeletalMeshInstance::MatchRefBone(FName)
+int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 {
-	return 0;
+	// Disasm: 0x130D40, 256b.
+	// Phase 0: get mesh via vtbl[0x8C/4], reject NAME_None
+	typedef BYTE* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	BYTE* Mesh = GetMesh(this);
+	if (!Mesh) return -1;
+
+	if (BoneName == FName(NAME_None)) return -1;
+
+	// Phase 1: search mesh->RefBoneNames TArray at mesh+0x2D0 (stride 4 = FName array)
+	FArray* BoneNameArr = (FArray*)(Mesh + 0x2D0);
+	INT BoneCount = BoneNameArr->Num();
+	if (BoneCount <= 0) return -1;
+
+	BYTE* BoneNameData = *(BYTE**)BoneNameArr;
+	INT FoundIdx = -1;
+	for (INT i = 0; i < BoneCount; i++)
+	{
+		FName* Entry = (FName*)(BoneNameData + i * 4);
+		if (*Entry == BoneName) { FoundIdx = i; break; }
+	}
+	if (FoundIdx < 0) return -1;
+
+	// Phase 2: get bone index from mesh->RefBoneIndices TArray at mesh+0x2DC
+	BYTE* BoneIdxData = *(BYTE**)(Mesh + 0x2DC);
+	INT BoneIdx = *(INT*)(BoneIdxData + FoundIdx * 4);
+
+	// Phase 3: search mesh->RefBones TArray at mesh+0x19C (stride 0x40)
+	// for a slot whose first DWORD matches BoneIdx
+	Mesh = GetMesh(this);
+	FArray* SkelArr = (FArray*)(Mesh + 0x19C);
+	INT SkelCount = SkelArr->Num();
+	if (SkelCount <= 0) return -1;
+
+	BYTE* SkelData = *(BYTE**)SkelArr;
+	for (INT j = 0; j < SkelCount; j++)
+	{
+		BYTE* Slot = SkelData + j * 0x40;
+		if (*(INT*)Slot == BoneIdx) return j;
+	}
+	return -1;
 }
 
 void USkeletalMeshInstance::BlendToAlpha(int,float,float)
@@ -1960,6 +2000,18 @@ void USkeletalMeshInstance::BuildPivotsList()
 
 void USkeletalMeshInstance::ClearSkelAnims()
 {
+	// Disasm: 0x13D860, 128b.
+	// For each slot in AnimObjects (this+0xAC, stride 0x18), empty the inner FArray at slot+0x0C.
+	// Then destroy each slot object, then empty the whole AnimObjects array.
+	FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
+	INT Count = AnimArr->Num();
+	BYTE* Data = *(BYTE**)AnimArr;
+	for (INT i = 0; i < Count; i++)
+	{
+		FArray* Inner = (FArray*)(Data + i * 0x18 + 0x0C);
+		Inner->Empty(4);
+	}
+	AnimArr->Empty(0x18);
 }
 
 void USkeletalMeshInstance::CopyAnimation(int,int)
@@ -2042,8 +2094,31 @@ int USkeletalMeshInstance::GetBoneCylinder(int,FCylinder &)
 	return 0;
 }
 
-FName USkeletalMeshInstance::GetBoneName(FName)
+FName USkeletalMeshInstance::GetBoneName(FName BoneName)
 {
+	// Disasm: 0x133680, 128b.
+	// Gets mesh, searches mesh->RefBoneNames (mesh+0x2D0, stride 4) for BoneName.
+	// On success returns the corresponding entry from mesh->RefBoneIndices (mesh+0x2DC).
+	typedef BYTE* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	BYTE* Mesh = GetMesh(this);
+	if (!Mesh) return FName(NAME_None);
+
+	FArray* BoneNameArr = (FArray*)(Mesh + 0x2D0);
+	INT Count = BoneNameArr->Num();
+	BYTE* NameData = *(BYTE**)BoneNameArr;
+	for (INT i = 0; i < Count; i++)
+	{
+		FName* Entry = (FName*)(NameData + i * 4);
+		if (*Entry == BoneName)
+		{
+			// Return the mapped bone index from RefBoneIndices (mesh+0x2DC) as a FName
+			BYTE* IndexData = *(BYTE**)(Mesh + 0x2DC);
+			FName Result;
+			*(INT*)&Result = *(INT*)(IndexData + i * 4);
+			return Result;
+		}
+	}
 	return FName(NAME_None);
 }
 
@@ -2059,7 +2134,17 @@ FRotator USkeletalMeshInstance::GetBoneRotation(FName,int)
 
 FVector USkeletalMeshInstance::GetRootLocation()
 {
-	return FVector(0,0,0);
+	// Disasm: 0x12F8F0, 96b.
+	// If root motion lock (this+0x228) is set AND owner (vtbl[0x84/4]) is non-null:
+	//   call vtbl[0x110/4](this, outVec, owner, 0,0,0, 3) to fill root motion data,
+	//   then copy this+0x1C8 (root location cache) to output.
+	// Else return zero vector.
+	if (!*(INT*)((BYTE*)this + 0x228)) return FVector(0,0,0);
+	typedef void* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+	if (!GetOwner(this)) return FVector(0,0,0);
+	// Return cached root location at this+0x1C8
+	return *(FVector*)((BYTE*)this + 0x1C8);
 }
 
 FVector USkeletalMeshInstance::GetRootLocationDelta()
@@ -2069,7 +2154,13 @@ FVector USkeletalMeshInstance::GetRootLocationDelta()
 
 FRotator USkeletalMeshInstance::GetRootRotation()
 {
-	return FRotator(0,0,0);
+	// Disasm: 0x12F950, 96b. Same pattern as GetRootLocation but reads this+0x1D4.
+	if (!*(INT*)((BYTE*)this + 0x228)) return FRotator(0,0,0);
+	typedef void* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+	if (!GetOwner(this)) return FRotator(0,0,0);
+	// Return cached root rotation at this+0x1D4
+	return *(FRotator*)((BYTE*)this + 0x1D4);
 }
 
 FRotator USkeletalMeshInstance::GetRootRotationDelta()
@@ -2167,7 +2258,16 @@ int USkeletalMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 
 int USkeletalMeshInstance::ActiveVertStreamSize()
 {
-	return 0;
+	// Disasm: 0x133960, 48b.
+	// Gets LODIndex from this+0x104, then gets mesh via vtbl[0x8C/4].
+	// Returns *(INT*)(mesh->LODMeshes.Data + LODIndex * 0x11C + 0x18).
+	INT LODIdx = *(INT*)((BYTE*)this + 0x104);
+	typedef BYTE* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	BYTE* Mesh = GetMesh(this);
+	if (!Mesh) return 0;
+	BYTE* LODData = *(BYTE**)(Mesh + 0x1AC);  // mesh.LODMeshes TArray data ptr
+	return *(INT*)(LODData + LODIdx * 0x11C + 0x18);
 }
 
 void USkeletalMeshInstance::ActualizeAnimLinkups()
@@ -2319,8 +2419,33 @@ void USkeletalMeshInstance::Destroy()
 {
 }
 
-UMeshAnimation * USkeletalMeshInstance::FindAnimObjectForSequence(FName)
+UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 {
+	// Disasm: 0x132A50, 112b.
+	// 1. Call FUN_10432640 (RefreshAnimObjects) to ensure this->AnimObjects is populated
+	// 2. Iterate AnimObjects TArray at this+0xAC (stride 0x18), for each non-null anim:
+	//    call vtbl[0x64/4=25](anim, SeqName) — UMeshAnimation::FindAnimSeq(FName)
+	//    if non-null result return anim
+	// 3. Ensure populated first
+	typedef void (__thiscall *RefreshFn)(USkeletalMeshInstance*);
+	// RefreshAnimObjects is internal (not exported), call it only if array is empty
+	// We cannot call it by address portably, so we check manually and skip if non-empty
+	FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
+	INT Count = AnimArr->Num();
+	if (Count <= 0) return NULL;  // Can't refresh without calling internal fn
+
+	BYTE* Data = *(BYTE**)AnimArr;
+	for (INT i = 0; i < Count; i++)
+	{
+		BYTE* Slot = Data + i * 0x18;
+		UMeshAnimation* Anim = *(UMeshAnimation**)Slot;
+		if (!Anim) continue;
+
+		// vtbl[0x64/4=25](Anim, SeqName) — FindAnimSeq on UMeshAnimation
+		typedef void* (__thiscall *FindSeqFn)(UMeshAnimation*, FName);
+		FindSeqFn FindSeq = *(FindSeqFn*)((*(BYTE**)Anim) + 0x64);
+		if (FindSeq(Anim, SeqName)) return Anim;
+	}
 	return NULL;
 }
 
