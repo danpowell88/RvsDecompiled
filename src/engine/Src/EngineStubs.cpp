@@ -1148,12 +1148,29 @@ void UBinaryFileDownload::DownloadError(const TCHAR*)
 }
 
 // --- UCanvas ---
-void UCanvas::SetVirtualSize(float,float)
+void UCanvas::SetVirtualSize(FLOAT SizeX, FLOAT SizeY)
 {
+	// Retail: 59b. Only stores new virtual size if current virtual dims >= origin dims.
+	// this+0x40=OrgX, this+0x44=OrgY, this+0xA4=VirtualX, this+0xA8=VirtualY.
+	// Retail uses FUCOMPP+TEST AH,0x44+JP to compare -- divergence: uses < instead.
+	if (*(FLOAT*)((BYTE*)this + 0xA4) < *(FLOAT*)((BYTE*)this + 0x40)) return;
+	if (*(FLOAT*)((BYTE*)this + 0xA8) < *(FLOAT*)((BYTE*)this + 0x44)) return;
+	*(FLOAT*)((BYTE*)this + 0x9C) = SizeX;
+	*(FLOAT*)((BYTE*)this + 0xA0) = SizeY;
 }
 
-void UCanvas::StartFade(FColor,FColor,float,int)
+void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags)
 {
+	// Retail: 47b. Stores fade parameters and updates fade state word at this+0xB8.
+	// State: sets bit 1 from Flags&1, ensures bit 0 is set, clears this+0xC8.
+	*(DWORD*)((BYTE*)this + 0xC4) = *(DWORD*)&Time;
+	*(DWORD*)((BYTE*)this + 0xC0) = *(DWORD*)&FromColor;
+	*(DWORD*)((BYTE*)this + 0xBC) = *(DWORD*)&EndColor;
+	DWORD state = *(DWORD*)((BYTE*)this + 0xB8);
+	state = (state & ~2u) | ((Flags & 1) << 1);
+	state |= 1u;
+	*(DWORD*)((BYTE*)this + 0xC8) = 0;
+	*(DWORD*)((BYTE*)this + 0xB8) = state;
 }
 
 void UCanvas::UseVirtualSize(int,float,float)
@@ -1180,8 +1197,18 @@ void UCanvas::WrappedDrawString(ERenderStyle,int &,int &,UFont *,int,const TCHAR
 {
 }
 
-void UCanvas::SetClip(int,int,int,int)
+void UCanvas::SetClip(INT ClipX, INT ClipY, INT ClipW, INT ClipH)
 {
+	// Retail: 59b. Clears flags at this+0x50/0x54, stores INT args as floats at
+	// this+0x38..0x44 (via FILD), and stores ClipW/H scaled by global 0.5f at this+0x48/0x4C.
+	*(INT*)((BYTE*)this + 0x50) = 0;
+	*(INT*)((BYTE*)this + 0x54) = 0;
+	*(FLOAT*)((BYTE*)this + 0x38) = (FLOAT)ClipX;
+	*(FLOAT*)((BYTE*)this + 0x3C) = (FLOAT)ClipY;
+	*(FLOAT*)((BYTE*)this + 0x40) = (FLOAT)ClipW;
+	*(FLOAT*)((BYTE*)this + 0x44) = (FLOAT)ClipH;
+	*(FLOAT*)((BYTE*)this + 0x48) = ClipW * 0.5f;
+	*(FLOAT*)((BYTE*)this + 0x4C) = ClipH * 0.5f;
 }
 
 void UCanvas::DrawIcon(UMaterial *,float,float,float,float,float,FPlane,FPlane)
@@ -5539,9 +5566,13 @@ FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 }
 
 // --- UFont ---
-_WORD UFont::RemapChar(_WORD)
+_WORD UFont::RemapChar(_WORD Char)
 {
-	return 0;
+	// Retail: 15b. If remap table ptr at this+0x50 is null, return Char unchanged.
+	// Non-null path falls into adjacent helper (CJK lookup via this+0x3C) -- divergence:
+	// we return Char unchanged as safe fallback in the remap case too.
+	if (!*(DWORD*)((BYTE*)this + 0x50)) return Char;
+	return Char; // divergence: remap table lookup not implemented
 }
 
 void UFont::Serialize(FArchive &)
