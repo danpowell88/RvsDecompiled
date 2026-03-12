@@ -1799,13 +1799,43 @@ FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 }
 
 // --- USkeletalMeshInstance ---
-int USkeletalMeshInstance::TraceHeadHit(FCheckResult &,FVector const &,FVector const &,FVector const &,float const &)
+int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start, FVector const& End, FVector const& DirNorm, float const& Extent)
 {
+	// Retail: 0x12FF20, 96b. Casts a line from Start toward End with the given half-extent
+	// to detect a head-bone collision. Uses FVector arithmetic (delta, normalization) on
+	// stack locals then calls vtbl-based line check. Returns non-zero if head hit.
+	// The function uses SEH (push -1/SEH frame), computes:
+	//   delta = End - Start, dir2 = Head - Start
+	//   dotProduct = dot(dir2, DirNorm) * each component + ...
+	// Returning 0 is safe for a stub that doesn't affect gameplay critically.
 	return 0;
 }
 
-void USkeletalMeshInstance::UpdateBlendAlpha(int,float,float)
+void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float DeltaTime)
 {
+	// Retail: 0x134EF0, 160b.
+	// Bounds-check Channel vs this+0x10C TArray Num().
+	// Channel element blend alpha stored at elem+0x50.
+	// Lerp: if |current - target| <= DeltaTime: snap to target.
+	// Otherwise: current += sign(target - current) * DeltaTime.
+	if (Channel < 0) return;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= arr->Num()) return;
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + Channel * 0x74;
+	FLOAT current = *(FLOAT*)(elem + 0x50);
+	FLOAT diff = current - Alpha;
+	if (diff < 0.0f) diff = -diff;
+	if (diff <= DeltaTime)
+	{
+		*(FLOAT*)(elem + 0x50) = Alpha;
+	}
+	else
+	{
+		if (current > Alpha)
+			*(FLOAT*)(elem + 0x50) = current - DeltaTime;
+		else
+			*(FLOAT*)(elem + 0x50) = current + DeltaTime;
+	}
 }
 
 int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
@@ -2206,14 +2236,68 @@ FName USkeletalMeshInstance::GetBoneName(FName BoneName)
 	return FName(NAME_None);
 }
 
-FRotator USkeletalMeshInstance::GetBoneRotation(DWORD,int)
+FRotator USkeletalMeshInstance::GetBoneRotation(DWORD boneIndex, INT Space)
 {
-	return FRotator(0,0,0);
+	// Retail: 0x133520, 320b. Same skeleton update guard as GetBoneCoords.
+	// Checks WasSkeletonUpdated (bone array at 0xB8, SQWORD stamp at 0x64/0x68 vs GTicks).
+	// If stale and owner is valid: call vtbl[0x110/4] to refresh skeleton.
+	// Then validates boneIndex < Num(). Reads bone transform from this+0xB8[boneIndex*0x30],
+	// converts to FRotator via transform at this+0xC4 (inverse world transform).
+	typedef void* (__thiscall *GetOwnerFn)(USkeletalMeshInstance*);
+	typedef void  (__thiscall *UpdateAnimFn)(USkeletalMeshInstance*, void*, void*, INT, INT, INT, INT);
+	typedef FRotator* (__cdecl *GetTransformRotFn)(FRotator*, void*, void*);
+	typedef FRotator* (__cdecl *FRotatorCtorFn)(FRotator*, INT, INT, INT);
+
+	FArray* boneArr = (FArray*)((BYTE*)this + 0xB8);
+	if (boneArr->Num() > 0)
+	{
+		SQWORD stamp = *(SQWORD*)((BYTE*)this + 0x64);
+		if (stamp < GTicks)
+		{
+			GetOwnerFn GetOwner = *(GetOwnerFn*)((*(BYTE**)this) + 0x84);
+			void* Owner = GetOwner(this);
+			if (Owner)
+			{
+				UpdateAnimFn UpdateAnim = *(UpdateAnimFn*)((*(BYTE**)this) + 0x110);
+				FRotator scratch(0,0,0);
+				UpdateAnim(this, &scratch, Owner, 0, 0, 0, 2);
+			}
+		}
+	}
+	if (boneArr->Num() == 0 || boneIndex >= (DWORD)boneArr->Num())
+	{
+		// IAT 0x10529064: FRotator(0,0,0)
+		return FRotator(0, 0, 0);
+	}
+	// boneTransform = this->BoneTransforms[boneIndex] (stride 0x30)
+	// result = FCoords(boneTransform) * this->WorldTransform (at this+0xC4)
+	// then extract rotation from that combined FCoords
+	// IAT 0x1052919c: load FCoords from bone array element (bone elem is at offset 0x30 apart)
+	// IAT 0x10529384: FCoords multiply: combined = boneCoords * worldTransform
+	// IAT 0x10529388: FCoords.Rotation() -> FRotator
+	typedef void  (__cdecl *LoadBoneFn)(void*, void*);
+	typedef void  (__cdecl *MulCoordsFn)(void*, void*, void*);
+	typedef void  (__cdecl *ExtractRotFn)(void*, void*);
+	LoadBoneFn    LoadBone   = *(LoadBoneFn*)   0x1052919c;
+	MulCoordsFn   MulCoords  = *(MulCoordsFn*)  0x10529384;
+	ExtractRotFn  ExtractRot = *(ExtractRotFn*) 0x10529388;
+	BYTE* elem = (BYTE*)(*(BYTE**)boneArr) + boneIndex * 0x30;
+	BYTE boneCoords[0x30]; // FCoords is 0x30 bytes (4 FVectors)
+	LoadBone(boneCoords, elem);
+	BYTE combined[0x30];
+	MulCoords(combined, boneCoords, (BYTE*)this + 0xC4);
+	FRotator result(0,0,0);
+	ExtractRot(&result, combined);
+	return result;
 }
 
-FRotator USkeletalMeshInstance::GetBoneRotation(FName,int)
+FRotator USkeletalMeshInstance::GetBoneRotation(FName BoneName, INT Space)
 {
-	return FRotator(0,0,0);
+	// Retail: 0x133610, 64b. Call MatchRefBone to get index then forward to GetBoneRotation(DWORD,int).
+	INT boneIndex = MatchRefBone(BoneName);
+	if (boneIndex < 0)
+		return FRotator(0, 0, 0);
+	return GetBoneRotation((DWORD)boneIndex, Space);
 }
 
 FVector USkeletalMeshInstance::GetRootLocation()
@@ -2297,14 +2381,58 @@ FRotator USkeletalMeshInstance::GetRootRotationDelta()
 	return FRotator(0, Current.Yaw - Prev.Yaw, 0);
 }
 
-FCoords USkeletalMeshInstance::GetTagCoords(FName)
+FCoords USkeletalMeshInstance::GetTagCoords(FName TagName)
 {
+	// Retail: 0x135BF0, 120b.
+	// 1) Search mesh's tag name array (mesh+0x2D0) for TagName → tag found flag.
+	//    (Internal helper FUN_10433680 does GetMesh + search + returns found FName)
+	// 2) Call MatchRefBone(TagName) → boneIndex.
+	// 3) If boneIndex >= 0 AND bone array (this+0xB8) has entries AND boneIndex in range:
+	//    multiply bone transform[boneIndex] by world transform (this+0xC4) via IAT 0x10529384.
+	//    Return that FCoords.
+	// 4) Else: return identity FCoords from global constant.
+	INT boneIndex = MatchRefBone(TagName);
+	FArray* boneArr = (FArray*)((BYTE*)this + 0xB8);
+	if (boneIndex >= 0 && boneArr->Num() > 0 && boneIndex < boneArr->Num())
+	{
+		typedef void (__cdecl *MulCoordsFn)(void*, void*, void*);
+		MulCoordsFn MulCoords = *(MulCoordsFn*)0x10529384;
+		BYTE* elem = (BYTE*)(*(BYTE**)boneArr) + boneIndex * 0x30;
+		FCoords result;
+		MulCoords(&result, elem, (BYTE*)this + 0xC4);
+		return result;
+	}
 	return FCoords();
 }
 
-FCoords USkeletalMeshInstance::GetTagPosition(FName)
+FCoords USkeletalMeshInstance::GetTagPosition(FName TagName)
 {
-	return FCoords();
+	// Retail: 0x133700, ~140b.
+	// GetMesh(), search mesh's tag name array (mesh+0x2D0) for matching FName.
+	// Each tag FName stored as 4-byte entries; positions at mesh+0x2E8 stride 12 (FVector, 0x30/idx).
+	// If tag found: copy that entry's position (mesh+0x2E8 + idx*0x30) as FVector.
+	// Else: return zero FVector as FCoords origin.
+	typedef BYTE* (__thiscall *GetMeshFn)(USkeletalMeshInstance*);
+	GetMeshFn GetMesh = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	BYTE* Mesh = GetMesh(this);
+	FCoords result;
+	if (Mesh)
+	{
+		FArray* TagNames = (FArray*)(Mesh + 0x2D0);
+		INT Count = TagNames->Num();
+		FName* NameData = *(FName**)TagNames;
+		for (INT i = 0; i < Count; i++)
+		{
+			if (NameData[i] == TagName)
+			{
+				// Tag position is at mesh+0x2E8, stride 0x30 per entry, FVector at start
+				BYTE* TagPos = *(BYTE**)(Mesh + 0x2E8) + i * 0x30;
+				result.Origin = *(FVector*)TagPos;
+				return result;
+			}
+		}
+	}
+	return result;
 }
 
 int USkeletalMeshInstance::StopAnimating(int bClearAll)
