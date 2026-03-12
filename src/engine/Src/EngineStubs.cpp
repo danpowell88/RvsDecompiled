@@ -1197,18 +1197,18 @@ void UCanvas::WrappedDrawString(ERenderStyle,int &,int &,UFont *,int,const TCHAR
 {
 }
 
-void UCanvas::SetClip(INT ClipX, INT ClipY, INT ClipW, INT ClipH)
+void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
 {
-	// Retail: 59b. Clears flags at this+0x50/0x54, stores INT args as floats at
-	// this+0x38..0x44 (via FILD), and stores ClipW/H scaled by global 0.5f at this+0x48/0x4C.
-	*(INT*)((BYTE*)this + 0x50) = 0;
-	*(INT*)((BYTE*)this + 0x54) = 0;
-	*(FLOAT*)((BYTE*)this + 0x38) = (FLOAT)ClipX;
-	*(FLOAT*)((BYTE*)this + 0x3C) = (FLOAT)ClipY;
-	*(FLOAT*)((BYTE*)this + 0x40) = (FLOAT)ClipW;
-	*(FLOAT*)((BYTE*)this + 0x44) = (FLOAT)ClipH;
-	*(FLOAT*)((BYTE*)this + 0x48) = ClipW * 0.5f;
-	*(FLOAT*)((BYTE*)this + 0x4C) = ClipH * 0.5f;
+  // Retail (59b, RVA 0x881D0): set clip origin and size, compute half-sizes,
+  // reset cursor. Global constant at data+0x22C608 = 0.5f.
+  OrgX      = (FLOAT)X;
+  OrgY      = (FLOAT)Y;
+  ClipX     = (FLOAT)W;
+  ClipY     = (FLOAT)H;
+  HalfClipX = W * 0.5f;
+  HalfClipY = H * 0.5f;
+  CurX      = 0.0f;
+  CurY      = 0.0f;
 }
 
 void UCanvas::DrawIcon(UMaterial *,float,float,float,float,float,FPlane,FPlane)

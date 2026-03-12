@@ -70,9 +70,19 @@ INT UPrimitive::UseCylinderCollision( const AActor* Owner )
 void UPrimitive::Illuminate( AActor* Owner, INT bDynamic )
 {}
 FVector UPrimitive::GetEncroachExtent( AActor* Owner )
-{ return FVector(0,0,0); }
+{
+	// Retail (37b, RVA 0xF78E0): cylindrical half-extents — uses CollisionRadius
+	// for both X and Y, and CollisionHeight for Z.
+	// CollisionRadius at Owner+0xF8, CollisionHeight at Owner+0xFC.
+	FLOAT r = *(FLOAT*)((BYTE*)Owner + 0xF8);
+	FLOAT h = *(FLOAT*)((BYTE*)Owner + 0xFC);
+	return FVector(r, r, h);
+}
 FVector UPrimitive::GetEncroachCenter( AActor* Owner )
-{ return FVector(0,0,0); }
+{
+	// Retail (38b, RVA 0xF7730): returns FVector at Owner+0x234 (actor world position).
+	return *(FVector*)((BYTE*)Owner + 0x234);
+}
 
 /*-----------------------------------------------------------------------------
 	Global variables.
