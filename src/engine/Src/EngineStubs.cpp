@@ -2642,7 +2642,8 @@ void AKConeLimit::KUpdateConstraintParams()
 // --- AKConstraint ---
 MdtBaseConstraint * AKConstraint::getKConstraint() const
 {
-	return NULL;
+	// Retail: 7b. MOV EAX, [ECX+0x418]; RET — returns the Karma constraint pointer.
+	return *(MdtBaseConstraint**)((BYTE*)this + 0x418);
 }
 
 _McdModel * AKConstraint::getKModel() const
@@ -3724,6 +3725,12 @@ FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 
 void FKAggregateGeom::EmptyElements()
 {
+	// Retail: 44b. Calls TArray::Empty(0) on each sub-array.
+	// Retail order: boxes (0x0C), convex (0x24), cylinders (0x18), spheres (0x00).
+	((TArray<FKBoxElem>*)     ((BYTE*)this + 0x0C))->Empty();
+	((TArray<FKConvexElem>*)  ((BYTE*)this + 0x24))->Empty();
+	((TArray<FKCylinderElem>*)((BYTE*)this + 0x18))->Empty();
+	((TArray<FKSphereElem>*)  ((BYTE*)this + 0x00))->Empty();
 }
 
 // Ghidra: sum of 4 TArray Num() at offsets 0x00, 0x0C, 0x18, 0x24
@@ -6820,9 +6827,9 @@ BYTE UTexModifier::RequiredUVStreams()
 			BYTE matResult = Material->RequiredUVStreams();
 			return (BYTE)((1 << TexCoordSource) | matResult);
 		}
-		return (BYTE)((1 << TexCoordSource) | 1);
+		return 0; // Retail: JZ to RET with EAX=0 when Material is NULL
 	}
-	// TexCoordSource > 7 (world/camera coords etc.): delegate to material if present
+	// TexCoordSource > 7 (world/camera coords etc.): retail cross-function-jump (divergence)
 	if (Material)
 		return Material->RequiredUVStreams();
 	return 1;
@@ -6885,6 +6892,16 @@ FMatrix * UTexScaler::GetMatrix(float)
 
 void UTexture::Prime()
 {
+	// Retail: 49b. Loops while PrimeCurrent < PrimeCount, calling vtable[42]
+	// (prime-one-mip callback) each iteration.
+	// PrimeCount BYTE at this+0xAC, PrimeCurrent BYTE at this+0xAD.
+	while (PrimeCurrent < PrimeCount)
+	{
+		++PrimeCurrent;
+		void** vtbl = *(void***)this;
+		typedef void (__thiscall *PrimeFn)(UTexture*);
+		((PrimeFn)vtbl[42])(this);
+	}
 }
 
 // --- UVertMesh ---
