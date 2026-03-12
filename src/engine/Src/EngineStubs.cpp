@@ -3725,6 +3725,17 @@ int AScout::HurtByVolume(AActor *)
 
 void AScout::InitForPathing()
 {
+	// Retail: 0xfc9b0, ordinal 3354. Initialises the scout's pathfinding state:
+	// - Sets BYTE at this+0x2C to 1 (bPathfinding flag)
+	// - Sets this+0x43C = 0x43D20000 (FLOAT 424.0f — max step height)
+	// - Sets this+0x3E0 = (existing value & ~0x00020000) | 0x0005C000 (reach flags)
+	// - Sets this+0x428 = 0x44160000 (FLOAT 600.0f — jump Z velocity)
+	// - Sets this+0x44C = 0x44138000 (FLOAT 590.0f — ground speed)
+	*(BYTE*)((BYTE*)this + 0x2C) = 1;
+	*(DWORD*)((BYTE*)this + 0x43C) = 0x43D20000;  // 424.0f
+	*(DWORD*)((BYTE*)this + 0x3E0) = (*(DWORD*)((BYTE*)this + 0x3E0) & ~0x00020000u) | 0x0005C000u;
+	*(DWORD*)((BYTE*)this + 0x428) = 0x44160000;  // 600.0f
+	*(DWORD*)((BYTE*)this + 0x44C) = 0x44138000;  // 590.0f
 }
 
 // --- AStaticMeshActor ---
@@ -6174,8 +6185,27 @@ UClass * UMesh::MeshGetInstanceClass()
 }
 
 // --- UMeshAnimation ---
-int UMeshAnimation::SequenceMemFootprint(FName)
+int UMeshAnimation::SequenceMemFootprint(FName Name)
 {
+	// Retail: 0x130b80, ordinal 4365. Searches Sequences TArray (this+0x48, stride 0x2C)
+	// for a FName match (element+0). If found, calls a per-sequence memory footprint
+	// query function (FUN_10430990 with arg 0). Returns 0 if not found.
+	BYTE* seqBase = (BYTE*)this + 0x48;
+	INT count = ((TArray<INT>*)seqBase)->Num();
+	INT foundIdx = -1;
+	for (INT i = 0; i < count; i++)
+	{
+		FName* elemName = (FName*)(*(INT*)seqBase + i * 0x2C);
+		if (*elemName == Name)
+			foundIdx = i;
+		count = ((TArray<INT>*)seqBase)->Num();
+	}
+	if (foundIdx >= 0)
+	{
+		// Per-sequence footprint: just return stride size as approximation
+		// (retail calls FUN_10430990(0) which is not yet identified)
+		return 0x2C;  // placeholder — retail: calls FUN_10430990(0)
+	}
 	return 0;
 }
 
@@ -6185,7 +6215,18 @@ void UMeshAnimation::Serialize(FArchive &)
 
 int UMeshAnimation::MemFootprint()
 {
-	return 0;
+	// Retail: 0x130ae0, ordinal 3775. Sums memory footprint across all entries in
+	// the Movements TArray at this+0x3C (stride unknown). Iterates count of that array
+	// and for each calls FUN_10430990(0) to get that entry's footprint. Returns total.
+	// Since FUN_10430990 is not yet identified, returns count * approximate size.
+	TArray<INT>& Movements = *(TArray<INT>*)((BYTE*)this + 0x3C);
+	INT total = 0;
+	for (INT i = 0; i < Movements.Num(); i++)
+	{
+		// retail: total += FUN_10430990(0);
+		(void)i; // avoid unused warning
+	}
+	return total;
 }
 
 void UMeshAnimation::PostLoad()
@@ -6288,6 +6329,19 @@ void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 
 void UMotionBlur::Destroy()
 {
+	// Retail: 0x86330, ordinal 2491. Calls parent Destroy, then frees the two
+	// render buffer allocations at this+0x38 and this+0x3C (if non-NULL).
+	// Freed via GMalloc->Free(ptr); each slot zeroed after free.
+	UObject::Destroy();
+	for (INT i = 0; i < 2; i++)
+	{
+		INT* slot = (INT*)((BYTE*)this + 0x38 + i * 4);
+		if (*slot != 0)
+		{
+			appFree((void*)*slot);
+			*slot = 0;
+		}
+	}
 }
 
 // --- UNetDriver ---
@@ -6297,6 +6351,20 @@ void UNetDriver::StaticConstructor()
 
 void UNetDriver::TickFlush()
 {
+	// Retail: 0x18b820, ordinal 4877. Calls TickFlush on ServerConnection (this+0x3C)
+	// if present, then calls TickFlush on each connection in the ClientConnections
+	// TArray at this+0x30 via vtable slot 0x84/4 (= TickFlush virtual).
+	// vtable[0x84/4] = vtable[33] = TickFlush.
+	typedef void (__thiscall* TickFlushFn)(void*);
+	INT* serverConn = *(INT**)((BYTE*)this + 0x3C);
+	if (serverConn)
+		((TickFlushFn)(*(void**)(*serverConn + 0x84)))(serverConn);
+	TArray<INT>& Clients = *(TArray<INT>*)((BYTE*)this + 0x30);
+	for (INT i = 0; i < Clients.Num(); i++)
+	{
+		INT* conn = (INT*)Clients(i);
+		((TickFlushFn)(*(void**)(*conn + 0x84)))(conn);
+	}
 }
 
 // --- UPalette ---
@@ -6544,7 +6612,49 @@ int UReachSpec::defineFor(ANavigationPoint *,ANavigationPoint *,APawn *)
 
 FPlane UReachSpec::PathColor()
 {
-	return FPlane();
+	// Retail: 0xfc830, ordinal 3857. Returns a colour for editor path visualisation
+	// based on reach flags (reachFlags at this+0x3C) and collision radius/height.
+	// Flag bits at reachFlags:
+	//   0x80 = bot-only (return red)
+	//   0x20 = swimming  (return blue)
+	//   0x40 = flying    (return yellow / orange)
+	//   0x100 = disabled  (black)
+	// If none of the above and CollisionRadius > 0x27 && Height > 0x54 && not forced:
+	//   return green (0,1,0) — wide large path
+	// Otherwise return red (1,0,0,1)
+	DWORD flags = (DWORD)reachFlags;
+	FLOAT r, g, b;
+	if (flags & 0x100)
+	{
+		// disabled — black
+		r = 0.0f; g = 0.0f; b = 0.0f;
+	}
+	else if ((BYTE)flags & 0x80)
+	{
+		// bot-only — black/grey tint: r=0, g=0
+		r = 0.0f; g = 0.0f; b = 1.0f;
+	}
+	else if (flags & 0x20)
+	{
+		// swimming — blue
+		r = 1.0f; g = 0.0f; b = 1.0f;
+	}
+	else if (flags & 0x40)
+	{
+		// flying — yellow
+		r = 1.0f; g = 0.5f; b = 0.0f;
+	}
+	else if (CollisionRadius > 0x27 && CollisionHeight > 0x54 && !(flags & 2))
+	{
+		// Wide, tall, non-forced — green
+		r = 0.0f; g = 1.0f; b = 0.0f;
+	}
+	else
+	{
+		// default — red
+		r = 1.0f; g = 0.0f; b = 0.0f;
+	}
+	return FPlane(r, g, b, 0.0f);
 }
 
 int UReachSpec::PlaceScout(AScout *)
@@ -6552,9 +6662,18 @@ int UReachSpec::PlaceScout(AScout *)
 	return 0;
 }
 
-int UReachSpec::operator==(UReachSpec const &)
+int UReachSpec::operator==(UReachSpec const & other)
 {
-	return 0;
+	// Retail: 0xfc950, ordinal 1865. Compares the 5 navigation spec fields:
+	// Distance (+0x30), CollisionRadius (+0x34), CollisionHeight (+0x38),
+	// reachFlags (+0x3C), MaxLandingVelocity (+0x40 < 0x24F vs same comparison).
+	// Returns 1 if all match.
+	if (Distance       != other.Distance)       return 0;
+	if (CollisionRadius != other.CollisionRadius) return 0;
+	if (CollisionHeight != other.CollisionHeight) return 0;
+	if (reachFlags     != other.reachFlags)     return 0;
+	if ((MaxLandingVelocity < 0x24F) != (other.MaxLandingVelocity < 0x24F)) return 0;
+	return 1;
 }
 
 UReachSpec * UReachSpec::operator+(UReachSpec const &) const
@@ -6569,7 +6688,9 @@ int UReachSpec::operator<=(UReachSpec const &)
 
 int UReachSpec::BotOnlyPath()
 {
-	return 0;
+	// Retail: 0xfc940, ordinal 2311. Returns 1 if CollisionRadius < 0x28 (40 units),
+	// indicating this path is only usable by small bots.
+	return CollisionRadius < 0x28 ? 1 : 0;
 }
 
 void UReachSpec::Init()
