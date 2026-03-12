@@ -7328,7 +7328,10 @@ void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor *
 
 int UViewport::IsDepthComplexity()
 {
-	return 0;
+	// Retail (25b, RVA 0x12AF0): RendMap == 0x08 → depth complexity view
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	return (*(DWORD*)((BYTE*)st + 0x504) == 0x08) ? 1 : 0;
 }
 
 int UViewport::IsEditing()
@@ -7343,7 +7346,10 @@ int UViewport::IsLit()
 
 int UViewport::IsTopView()
 {
-	return 0;
+	// Retail (25b, RVA 0x12A70): RendMap == 0x0D → top-down ortho view
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	return (*(DWORD*)((BYTE*)st + 0x504) == 0x0D) ? 1 : 0;
 }
 
 

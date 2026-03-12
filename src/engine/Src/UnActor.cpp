@@ -2138,6 +2138,8 @@ AActor* AActor::GetAmbientLightingActor()
 		actor = next;
 	}
 	return actor;
+}
+
 FRotator AActor::GetViewRotation()
 {
 	return Rotation;
@@ -2166,7 +2168,17 @@ APawn* AActor::GetPlayerPawn() const
 
 UPrimitive* AActor::GetPrimitive()
 {
-	return NULL;
+	// Retail (47b, RVA 0x78DE0): check 3 direct primitive fields, then a
+	// nested StaticMeshInstance-like chain at +0x328.
+	UPrimitive* p;
+	if ((p = *(UPrimitive**)((BYTE*)this + 0x16C)) != NULL) return p; // Mesh
+	if ((p = *(UPrimitive**)((BYTE*)this + 0x170)) != NULL) return p; // StaticMesh
+	if ((p = *(UPrimitive**)((BYTE*)this + 0x17C)) != NULL) return p; // AntiPortal
+	void* c = *(void**)((BYTE*)this + 0x328);
+	if (!c) return NULL;
+	p = *(UPrimitive**)((BYTE*)c + 0x44);
+	if (!p) return NULL;
+	return *(UPrimitive**)((BYTE*)p + 0x40);
 }
 
 // Simple setters

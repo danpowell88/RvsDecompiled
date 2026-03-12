@@ -935,7 +935,18 @@ void ABrush::PostLoad() { Super::PostLoad(); }
 void ABrush::PostEditChange() { Super::PostEditChange(); }
 FCoords ABrush::ToLocal() const { return FCoords(); }
 FCoords ABrush::ToWorld() const { return FCoords(); }
-UPrimitive* ABrush::GetPrimitive() { return NULL; }
+UPrimitive* ABrush::GetPrimitive()
+{
+	// Retail (27b, RVA 0x78E20): check Brush/UModel primitive field, then
+	// fall through to the same nested StaticMeshInstance-like chain at +0x328.
+	UPrimitive* p;
+	if ((p = *(UPrimitive**)((BYTE*)this + 0x178)) != NULL) return p; // Brush/UModel
+	void* c = *(void**)((BYTE*)this + 0x328);
+	if (!c) return NULL;
+	p = *(UPrimitive**)((BYTE*)c + 0x44);
+	if (!p) return NULL;
+	return *(UPrimitive**)((BYTE*)p + 0x40);
+}
 void ABrush::CheckForErrors() { Super::CheckForErrors(); }
 void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
 void ABrush::InitPosRotScale() {}
@@ -1289,9 +1300,34 @@ void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
 void UViewport::InitInput() {}
-INT UViewport::IsOrtho() { return 0; }
-INT UViewport::IsPerspective() { return 1; }
-INT UViewport::IsRealtime() { return 0; }
+INT UViewport::IsOrtho()
+{
+	// Retail (34b, RVA 0x12A60): load state ptr at +0x34, check RendMap at +0x504
+	// for ortho modes 0x0D, 0x0E, 0x0F.
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	INT rm = *(INT*)((BYTE*)st + 0x504);
+	return (rm == 0x0D || rm == 0x0E || rm == 0x0F) ? 1 : 0;
+}
+INT UViewport::IsPerspective()
+{
+	// Retail (74b, RVA 0x12A00): same state ptr; RendMap 1-7 or 0x1E → perspective.
+	// RendMap == 0x10 only if [state+0x4FC] is non-null.
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	INT rm = *(INT*)((BYTE*)st + 0x504);
+	if (rm >= 1 && rm <= 7) return 1;
+	if (rm == 0x1E) return 1;
+	if (rm == 0x10) return *(void**)((BYTE*)st + 0x4FC) != NULL ? 1 : 0;
+	return 0;
+}
+INT UViewport::IsRealtime()
+{
+	// Retail (26b, RVA 0x12A90): state ptr at +0x34; flags at +0x4F8 bits 11,14.
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
+}
 INT UViewport::IsWire() { return 0; }
 void UViewport::ScreenShot() {}
 BYTE* UViewport::_Screen( INT X, INT Y ) { return NULL; }
