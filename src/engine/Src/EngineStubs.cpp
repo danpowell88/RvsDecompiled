@@ -871,7 +871,15 @@ int FSkinVertexStream::GetRevision()
 
 int FSkinVertexStream::GetSize()
 {
-	return 0;
+	// Retail (22b): guard on Pad+0x18 ([this+0x1C]) = skin verts pointer.
+	// If null, no data allocated → return 0.
+	// Otherwise: load parent object from Pad+4 ([this+8]), call vtable slot 78
+	// (offset 0x138) to get vertex count, multiply by stride 32 (SHL 5).
+	if (!*(DWORD*)(Pad + 0x18)) return 0;
+	void* obj = *(void**)(Pad + 4);
+	typedef INT (__thiscall* FnType)(void*);
+	FnType fn = (FnType)(*(void***)obj)[0x138 / sizeof(void*)];
+	return fn(obj) << 5; // vertex_count * 32
 }
 
 void FSkinVertexStream::GetStreamData(void *)
