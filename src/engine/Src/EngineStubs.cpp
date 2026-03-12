@@ -1401,18 +1401,22 @@ void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight
 
 void UMeshInstance::SetActor(AActor *)
 {
+	// Retail (3b): base no-op, subclasses override.
 }
 
 void UMeshInstance::SetAnimFrame(int,float)
 {
+	// Retail (3b): base no-op, subclasses override.
 }
 
 void UMeshInstance::SetMesh(UMesh *)
 {
+	// Retail (3b): base no-op, subclasses override.
 }
 
 void UMeshInstance::SetScale(FVector)
 {
+	// Retail (3b): base no-op, subclasses override.
 }
 
 void UMeshInstance::SetStatus(int)
@@ -1493,6 +1497,7 @@ int UMeshInstance::AnimStopLooping(int)
 
 void UMeshInstance::ClearChannel(int)
 {
+	// Retail (3b): base no-op, subclasses override.
 }
 
 int UMeshInstance::FreezeAnimAt(float,int)
@@ -1803,9 +1808,17 @@ void USkeletalMeshInstance::UpdateBlendAlpha(int,float,float)
 {
 }
 
-int USkeletalMeshInstance::ValidateAnimChannel(int)
+int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 {
-	return 0;
+	// Retail: 0x130F40, 92b. Bounds-check channel [0..255]. If TArray at this+0x10C
+	// has fewer than Channel+1 slots, grow it by adding zero-initialised elements
+	// (stride 0x74). Returns 1 always (indicates channel is or has become valid).
+	if (Channel > 255 || Channel < 0)
+		return 1;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	while (arr->Num() <= Channel)
+		arr->Add(1, 0x74);
+	return 1;
 }
 
 void USkeletalMeshInstance::SetAnimRate(int,float)
@@ -1836,11 +1849,21 @@ int USkeletalMeshInstance::SetBlendParams(int,float,float,float,FName,int)
 
 int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
 {
+	// Retail: 0x131A90, 32b. Returns 0 if bone override array (this+0x130) is at
+	// capacity (>= 256 entries); actual bone direction logic unimplemented.
+	FArray* arr = (FArray*)((BYTE*)this + 0x130);
+	if (arr->Num() >= 0x100)
+		return 0;
 	return 0;
 }
 
 int USkeletalMeshInstance::SetBoneLocation(FName,FVector,float)
 {
+	// Retail: 0x1317A0, 32b. Returns 0 if bone override array (this+0x124) is at
+	// capacity (>= 256 entries); actual bone location logic unimplemented.
+	FArray* arr = (FArray*)((BYTE*)this + 0x124);
+	if (arr->Num() >= 0x100)
+		return 0;
 	return 0;
 }
 
@@ -1851,6 +1874,11 @@ int USkeletalMeshInstance::SetBonePosition(FName,FRotator,FVector,float)
 
 int USkeletalMeshInstance::SetBoneRotation(FName,FRotator,int,float,float)
 {
+	// Retail: 0x131890, 42b. Returns 0 if bone override array (this+0x124) is at
+	// capacity (>= 256 entries); actual bone rotation logic unimplemented.
+	FArray* arr = (FArray*)((BYTE*)this + 0x124);
+	if (arr->Num() >= 0x100)
+		return 0;
 	return 0;
 }
 
@@ -1899,8 +1927,17 @@ int USkeletalMeshInstance::EnableChannelNotify(int,int)
 	return 0;
 }
 
-void USkeletalMeshInstance::ForceAnimRate(int,float)
+void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
 {
+	// Retail: 0x134B80, 96b. Stores Rate at channel element+0x0C in TArray at this+0x10C
+	// (stride 0x74). Bounds-checks channel first; ignores negative channel.
+	if (Channel < 0)
+		return;
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel >= arr->Num())
+		return;
+	BYTE* elem = (BYTE*)(*(INT*)arr) + Channel * 0x74;
+	*(FLOAT*)(elem + 0x0C) = Rate;
 }
 
 int USkeletalMeshInstance::GetAnimChannelCount()
@@ -2183,8 +2220,22 @@ int USkeletalMeshInstance::AnimStopLooping(INT channel)
 	return 1;
 }
 
-void USkeletalMeshInstance::ClearChannel(int)
+void USkeletalMeshInstance::ClearChannel(INT Channel)
 {
+	// Retail: 0x132500, 141b. If Channel is within the channel TArray (this+0x10C,
+	// stride 0x74), reset the slot: sequence name→NAME_None, frame/rate/tween/etc→0.
+	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
+	if (Channel < 0 || Channel >= arr->Num())
+		return;
+	BYTE* elem = (BYTE*)(*(INT*)arr) + Channel * 0x74;
+	*(FName*)(elem + 0x08) = FName(NAME_None);
+	*(INT*)(elem + 0x10) = 0;  // frame
+	*(INT*)(elem + 0x0C) = 0;  // rate
+	*(INT*)(elem + 0x18) = 0;  // tween
+	*(INT*)(elem + 0x50) = 0;  // notifier
+	*(INT*)(elem + 0x60) = 0;
+	*(INT*)(elem + 0x5C) = 0;
+	*(INT*)(elem + 0x38) = 0;  // loop
 }
 
 UMeshAnimation * USkeletalMeshInstance::CurrentSkelAnim(int)
