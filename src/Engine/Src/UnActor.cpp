@@ -2485,7 +2485,10 @@ void AActor::PostNetReceiveLocation()
 
 INT AActor::PlayerControlled()
 {
+	guard(AActor::PlayerControlled);
+	// Retail: 0x114310 shared null-stub. Base always returns 0; APawn overrides.
 	return 0;
+	unguard;
 }
 
 INT AActor::IsBlockedBy( const AActor* Other ) const
@@ -3655,7 +3658,10 @@ void AActor::postKarmaStep_skeletal()
 
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
 {
+	guard(AActor::KMP2DynKarmaInterface);
+	// Retail: 0x5e90, 6b (xor eax,eax; ret). Base actor has no Karma dynamic interface.
 	return 0;
+	unguard;
 }
 
 AActor* AActor::AssociatedLevelGeometry()
@@ -3681,17 +3687,26 @@ void AActor::KFreezeRagdoll()
 
 INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 {
+	guard(AActor::IsRelevantToPawnHeartBeat);
+	// Retail: 0x114310 shared null-stub. Base actors are not heart-beat relevant.
 	return 0;
+	unguard;
 }
 
 INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 {
+	guard(AActor::IsRelevantToPawnHeatVision);
+	// Retail: 0x114310 shared null-stub. Base actors are not heat-vision relevant.
 	return 0;
+	unguard;
 }
 
 INT AActor::IsRelevantToPawnRadar( APawn* P )
 {
+	guard(AActor::IsRelevantToPawnRadar);
+	// Retail: 0x114310 shared null-stub. Base actors are not radar relevant.
 	return 0;
+	unguard;
 }
 
 void AActor::CheckForErrors()
@@ -3921,7 +3936,10 @@ INT AActor::NativeNonUbiMatchMakingHost()
 
 INT AActor::NativeStartedByGSClient()
 {
-	return 0;
+	guard(AActor::NativeStartedByGSClient);
+	// Retail: 0x123920, 27b. Check command-line for GS start flag.
+	return ParseParam( appCmdLine(), TEXT("GS:\"StartedByGS\"") );
+	unguard;
 }
 
 void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )

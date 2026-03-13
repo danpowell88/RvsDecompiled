@@ -61,7 +61,11 @@ void UTexture::SetLastUpdateTime(double Time)
 }
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
+	guard(UTexture::Compress);
+	// Retail: 0x16c600, 2427b. DXT compression pipeline — too complex to decompile.
+	// TODO: implement full per-format DXT compression.
 	return 0;
+	unguard;
 }
 ETextureFormat UTexture::ConvertDXT(int,int,int,void * *)
 {
@@ -115,11 +119,59 @@ void UTexture::CreateMips(int param1, int param2)
 }
 int UTexture::Decompress(ETextureFormat)
 {
+	guard(UTexture::Decompress);
+	// Retail: 0x16b0c0, ~250b. DXT1 block decompression — too complex to decompile.
+	// TODO: implement DXT1→RGBA8 conversion.
 	return 0;
+	unguard;
 }
 int UTexture::DefaultLOD()
 {
+	guard(UTexture::DefaultLOD);
+	// Retail: 0x1691d0, 130b. Picks the highest-quality mip level the client is
+	// configured to use, clamped by LODSet, MinLODMips and MaxLODMips.
+	// UClient raw offsets: +0x64 = INT LODBias table indexed by LODSet (4 bytes/entry),
+	//                      +0x84 = INT MinLODMips, +0x88 = INT MaxLODMips.
+	if (!__Client || !*(BYTE*)((BYTE*)this + 0xA0)) // LODSet at +0xA0
+		return 0;
+	if (!GIsEditor)
+	{
+		FArray* mips = (FArray*)((BYTE*)this + 0xBC); // Mips TArray
+		INT mipCount = mips->Num();
+		// Only apply LOD clamp when there are no mips yet, or when the first mip
+		// is large enough (USize > 8 && VSize > 8) that dropping a level matters.
+		if (mipCount == 0 ||
+			(8 < *(INT*)(*(INT*)mips + 4) &&  // mips->Data->USize  (FMipmapBase+0x04)
+			 8 < *(INT*)(*(INT*)mips + 8)))    // mips->Data->VSize  (FMipmapBase+0x08)
+		{
+			// LOD bias from the per-LODSet table in the client.
+			DWORD bias = *(DWORD*)((BYTE*)__Client + (DWORD)*(BYTE*)((BYTE*)this + 0xA0) * 4 + 100);
+			mipCount = mips->Num();
+			if ((INT)(mipCount - 1) < (INT)bias)
+				bias = (DWORD)(mipCount - 1);
+			mipCount = mips->Num();
+			// MinLODMips: ensure at least this many mips remain usable.
+			if ((INT)(mipCount - bias) < *(INT*)((BYTE*)__Client + 0x84))
+			{
+				bias = (DWORD)(mipCount - *(INT*)((BYTE*)__Client + 0x84));
+				// Ghidra: `((int)bias < 1) - 1 & bias` — clamp to 0 if negative.
+				bias = (DWORD)(((INT)bias < 1) - 1) & bias;
+			}
+			// MaxLODMips: do not skip more mips than this allows.
+			if (*(INT*)((BYTE*)__Client + 0x88) < (INT)(mipCount - bias))
+			{
+				DWORD clamped = (DWORD)(mipCount - *(INT*)((BYTE*)__Client + 0x88));
+				if ((INT)bias < (INT)clamped)
+					bias = clamped;
+			}
+			DWORD result = (DWORD)(mipCount - 1);
+			if ((INT)bias <= (INT)(mipCount - 1))
+				result = bias;
+			return (INT)result;
+		}
+	}
 	return 0;
+	unguard;
 }
 FColor * UTexture::GetColors()
 {
@@ -246,9 +298,15 @@ void UTexture::ConstantTimeTick()
 	void* nxt = *(void**)((BYTE*)cur + 0xA4);
 	*(void**)((BYTE*)this + 0xA8) = nxt ? nxt : this; // advance or wrap to self
 }
-UBitmapMaterial * UTexture::Get(double,UViewport *)
+UBitmapMaterial * UTexture::Get(double Time, UViewport *)
 {
-	return NULL;
+	// Retail: 0x4490, 18b. Advance the texture animation via vtable[0xB4/4] (time-tick),
+	// then return the current animation frame at +0xA8, falling back to 'this'.
+	typedef void (__thiscall *TimeTickFn)(UTexture*, double);
+	void** vtbl = *(void***)this;
+	((TimeTickFn)vtbl[0xB4/4])(this, Time); // vtable[45] = animation time-tick
+	UBitmapMaterial* cur = *(UBitmapMaterial**)((BYTE*)this + 0xA8); // AnimCurrent
+	return cur ? cur : (UBitmapMaterial*)this;
 }
 FBaseTexture * UTexture::GetRenderInterface()
 {
@@ -540,13 +598,53 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 // --- UPalette ---
 UPalette * UPalette::ReplaceWithExisting()
 {
+	// Retail: 0x16aea0, ~200b with SEH. Iterates GObjObjects to find a matching
+	// palette and returns it, or returns 'this' if none found.
+	// TODO: implement — requires GObj iterator helper FUN_10318850.
 	return NULL;
 }
 
 
-BYTE UPalette::BestMatch(FColor,int)
+BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 {
-	return 0;
+	guard(UPalette::BestMatch);
+	// Retail: 0x169890, ~70b. Returns the palette index (>= StartIdx) with the
+	// smallest weighted color distance to InColor.
+	// FColor memory layout: [B=byte0, G=byte1, R=byte2, A=byte3] (BGRA).
+	// Distance metric: dB^2 + (dR^2 + dG^2*2) * 4  (G weighted x8, R x4, B x1).
+	DWORD cB = InColor.B;
+	DWORD cG = InColor.G;
+	DWORD cR = InColor.R;
+	INT  bestDist  = 0x7FFFFFFF;
+	INT  pruneDist = 0x7FFFFFFF; // fast-prune: skip entry if dG^2 >= last bestDist/8
+	INT  bestIdx   = StartIdx;
+	INT  curIdx    = StartIdx;
+	if (StartIdx < 0x100)
+	{
+		BYTE* pal = (BYTE*)(*(INT*)((BYTE*)this + 0x2C)) + StartIdx * 4; // Colors.Data
+		do
+		{
+			INT dG  = (INT)(DWORD)pal[1] - (INT)cG;
+			INT dG2 = dG * dG;
+			if (dG2 < pruneDist)
+			{
+				INT dR   = (INT)(DWORD)pal[2] - (INT)cR;
+				INT dB   = (INT)(DWORD)pal[0] - (INT)cB;
+				INT dist = dB * dB + (dR * dR + dG2 * 2) * 4;
+				if (dist < bestDist)
+				{
+					bestIdx   = curIdx;
+					pruneDist = (dist + 7) >> 3;
+					bestDist  = dist;
+				}
+			}
+			curIdx++;
+			pal += 4;
+		} while (curIdx < 0x100);
+		return (BYTE)bestIdx;
+	}
+	return (BYTE)bestIdx;
+	unguard;
 }
 
 void UPalette::FixPalette()
@@ -633,6 +731,8 @@ void UShadowBitmapMaterial::Destroy()
 
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
+	// Retail: 0x12e3e0, 2594b. Shadow map rendering pipeline — too complex to decompile.
+	// TODO: implement shadow projection and render-to-texture.
 	return NULL;
 }
 
@@ -733,7 +833,10 @@ int UTexModifier::MaterialVSize()
 
 FMatrix * UTexModifier::GetMatrix(float)
 {
+	guard(UTexModifier::GetMatrix);
+	// Retail: 0x4720 shared null-stub. Base UTexModifier returns NULL; subclasses override.
 	return NULL;
+	unguard;
 }
 
 int UTexModifier::GetValidated()
@@ -749,14 +852,20 @@ int UTexModifier::GetValidated()
 // --- UTexOscillator ---
 FMatrix * UTexOscillator::GetMatrix(float)
 {
+	guard(UTexOscillator::GetMatrix);
+	// Retail: 0x4720 shared null-stub. TODO: oscillating UV matrix.
 	return NULL;
+	unguard;
 }
 
 
 // --- UTexPanner ---
 FMatrix * UTexPanner::GetMatrix(float)
 {
+	guard(UTexPanner::GetMatrix);
+	// Retail: 0x4720 shared null-stub. TODO: panning UV matrix.
 	return NULL;
+	unguard;
 }
 
 
@@ -776,13 +885,19 @@ void UTexRotator::PostLoad()
 
 FMatrix * UTexRotator::GetMatrix(float)
 {
+	guard(UTexRotator::GetMatrix);
+	// Retail: 0x4720 shared null-stub. TODO: rotating UV matrix.
 	return NULL;
+	unguard;
 }
 
 
 // --- UTexScaler ---
 FMatrix * UTexScaler::GetMatrix(float)
 {
+	guard(UTexScaler::GetMatrix);
+	// Retail: 0x4720 shared null-stub. TODO: scaling UV matrix.
 	return NULL;
+	unguard;
 }
 

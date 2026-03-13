@@ -91,17 +91,26 @@ void UMaterial::SetValidated( UBOOL InValidated )
 
 UBOOL UMaterial::IsTransparent()
 {
+	guard(UMaterial::IsTransparent);
+	// Retail: 0x114310 shared null-stub (xor eax,eax; ret). Base returns 0; subclasses override.
 	return 0;
+	unguard;
 }
 
 INT UMaterial::MaterialUSize()
 {
+	guard(UMaterial::MaterialUSize);
+	// Retail: 0x114310 shared null-stub. Base returns 0; subclasses override.
 	return 0;
+	unguard;
 }
 
 INT UMaterial::MaterialVSize()
 {
+	guard(UMaterial::MaterialVSize);
+	// Retail: 0x114310 shared null-stub. Base returns 0; subclasses override.
 	return 0;
+	unguard;
 }
 
 UBOOL UMaterial::RequiresSorting()
