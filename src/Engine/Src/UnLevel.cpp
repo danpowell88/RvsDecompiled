@@ -74,18 +74,300 @@ void ULevel::Destroy()
 	ULevelBase::Destroy();
 }
 
-void ULevel::Modify( INT DoTransArrays ) {}
-void ULevel::SetActorCollision( INT bCollision, INT bUnused ) {}
-void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds ) {}
-void ULevel::TickNetClient( FLOAT DeltaSeconds ) {}
-void ULevel::TickNetServer( FLOAT DeltaSeconds ) {}
-INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds ) { return 0; }
-void ULevel::ReconcileActors() {}
-void ULevel::RememberActors() {}
-INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-void ULevel::ShrinkLevel() {}
-void ULevel::CompactActors() {}
-INT ULevel::Listen( FString& Error ) { return 0; }
+// GNewCollisionHash is defined in UnCamera.cpp
+ENGINE_API FCollisionHashBase* GNewCollisionHash();
+
+void ULevel::Modify( INT DoTransArrays )
+{
+	guard(ULevel::Modify);
+	UObject::Modify();
+	UModel* m = *(UModel**)((BYTE*)this + 0x90);
+	if (m) m->Modify(DoTransArrays);
+	unguard;
+}
+
+void ULevel::SetActorCollision( INT bCollision, INT bUnused )
+{
+	guard(ULevel::SetActorCollision);
+	FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+	if ( bCollision == 0 )
+	{
+		if ( hash )
+		{
+			if ( bUnused == 0 )
+			{
+				for ( INT i = 0; i < Actors.Num(); i++ )
+				{
+					AActor* a = Actors(i);
+					if ( a && (*(DWORD*)((BYTE*)a + 0xa8) & 0x800) )
+						hash->RemoveActor(a);
+				}
+			}
+			if ( GIsEditor )
+			{
+				for ( INT i = 0; i < Actors.Num(); i++ )
+				{
+					AActor* a = Actors(i);
+					if (a)
+						((FArray*)((BYTE*)a + 0x338))->Empty(4, 0);
+				}
+			}
+			delete hash;
+			*(FCollisionHashBase**)((BYTE*)this + 0xf0) = NULL;
+		}
+	}
+	else
+	{
+		if ( !hash )
+		{
+			FCollisionHashBase* nh = GNewCollisionHash();
+			*(FCollisionHashBase**)((BYTE*)this + 0xf0) = nh;
+			for ( INT i = 0; i < Actors.Num(); i++ )
+			{
+				AActor* a = Actors(i);
+				if ( a && (*(DWORD*)((BYTE*)a + 0xa8) & 0x800) )
+					nh->AddActor(a);
+			}
+		}
+	}
+	unguard;
+}
+
+void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
+{
+	guard(ULevel::Tick);
+	/* TODO: Full ULevel::Tick implementation */
+	unguard;
+}
+
+void ULevel::TickNetClient( FLOAT DeltaSeconds )
+{
+	guard(ULevel::TickNetClient);
+	if ( !*(INT*)((BYTE*)this + 0x40) )
+		return;
+	// State 3 = connected; replicate player-controlled pawns
+	INT connState = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)this + 0x40) + 0x3c) + 0x80);
+	if ( connState == 3 )
+	{
+		BYTE* serverConn = *(BYTE**)(*(BYTE**)((BYTE*)this + 0x40) + 0x3c);
+		FArray* channels = (FArray*)(serverConn + 0x4b94);
+		INT nCh = *(INT*)((BYTE*)channels + 4);
+		for ( INT i = 0; i < nCh; i++ )
+		{
+			UActorChannel* ch = *(UActorChannel**)(*(BYTE**)channels + 8 + i * 0xc);
+			if ( !ch ) continue;
+			UObject* pawn = *(UObject**)((BYTE*)ch + 0x6c);
+			if ( pawn && pawn->IsA(APawn::StaticClass()) )
+			{
+				UObject* ctrl = *(UObject**)((BYTE*)pawn + 0x4ec);
+				if ( ctrl
+					 && ctrl->IsA(APlayerController::StaticClass())
+					 && *(INT*)((BYTE*)ctrl + 0x5b4) != 0 )
+				{
+					ch->ReplicateActor();
+				}
+			}
+		}
+	}
+	else if ( connState == 1 )
+	{
+		UEngine* eng = *(UEngine**)((BYTE*)this + 0x44);
+		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
+		if ( nVP == 0 )
+			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x2fa);
+		/* TODO: Browse to ?failed */
+	}
+	unguard;
+}
+
+void ULevel::TickNetServer( FLOAT DeltaSeconds )
+{
+	guard(ULevel::TickNetServer);
+	/* TODO: Full TickNetServer implementation */
+	unguard;
+}
+
+INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
+{
+	guard(ULevel::ServerTickClient);
+	/* TODO: Full ServerTickClient implementation */
+	return 0;
+	unguard;
+}
+
+void ULevel::ReconcileActors()
+{
+	guard(ULevel::ReconcileActors);
+	if ( !GIsEditor )
+		appFailAssert("GIsEditor", ".\\UnLevel.cpp", 0x1aa);
+
+	// Pass 1: clear viewport back-pointers on all PlayerControllers
+	for ( INT i = 0; i < Actors.Num(); i++ )
+	{
+		AActor* a = Actors(i);
+		if ( a && a->IsA(APlayerController::StaticClass())
+			 && *(INT*)((BYTE*)a + 0x5b4) != 0 )
+		{
+			*(INT*)((BYTE*)a + 0x5b4) = 0;
+		}
+	}
+
+	// Pass 2: match existing cameras to viewports by name
+	BYTE* client = *(BYTE**)(*(BYTE**)((BYTE*)this + 0x44) + 0x44);
+	FArray* vpArr = (FArray*)(client + 0x30);
+	INT nVP = *(INT*)((BYTE*)vpArr + 4);
+	for ( INT vi = 0; vi < nVP; vi++ )
+	{
+		BYTE* vp = *(BYTE**)(*(BYTE**)vpArr + vi * 4);
+		if ( *(INT*)(vp + 0x34) != 0 ) continue;
+		for ( INT ai = 0; ai < Actors.Num(); ai++ )
+		{
+			AActor* a = Actors(ai);
+			if ( !a || !a->IsA(ACamera::StaticClass()) ) continue;
+			const TCHAR* vpName  = ((UObject*)vp)->GetName();
+			FName& camTag        = *(FName*)((BYTE*)a + 0x19c);
+			if ( appStricmp(*camTag, vpName) == 0 )
+			{
+				*(DWORD*)(vp + 0x34)        = (DWORD)(size_t)a;
+				*(DWORD*)((BYTE*)a + 0x5b4) = (DWORD)(size_t)vp;
+				break;
+			}
+		}
+	}
+
+	// Pass 3: spawn camera actors for viewports still without one
+	for ( INT vi = 0; vi < nVP; vi++ )
+	{
+		BYTE* vp = *(BYTE**)(*(BYTE**)vpArr + vi * 4);
+		if ( *(INT*)(vp + 0x34) == 0 )
+			SpawnViewActor((UViewport*)vp);
+	}
+
+	// Pass 4: sync camera properties to actor fields; destroy orphaned cameras
+	for ( INT ai = 0; ai < Actors.Num(); )
+	{
+		AActor* a = Actors(ai);
+		if ( a && a->IsA(ACamera::StaticClass()) )
+		{
+			BYTE* vp = *(BYTE**)((BYTE*)a + 0x5b4);
+			if ( vp && ((UObject*)vp)->IsA(UViewport::StaticClass()) )
+			{
+				a->ClearFlags(1);
+				BYTE* vpActor = *(BYTE**)(vp + 0x34);
+				*(INT*)(vpActor + 0x558) = *(INT*)(vp + 0x190); // 400 dec = 0x190
+				*(INT*)(vpActor + 0x3b0) = *(INT*)(vp + 0x194);
+				*(INT*)(vpActor + 0x4f8) = *(INT*)(vp + 0x198);
+				*(INT*)(vpActor + 0x504) = *(INT*)(vp + 0x19c);
+				*(INT*)(vpActor + 0x4fc) = *(INT*)(vp + 0x1a0);
+				*(INT*)(vpActor + 0x500) = *(INT*)(vp + 0x1a4);
+				ai++;
+			}
+			else
+			{
+				DestroyActor(a, 0);
+				// DestroyActor may have compacted the array; don't increment
+			}
+		}
+		else
+		{
+			ai++;
+		}
+	}
+	unguard;
+}
+
+void ULevel::RememberActors()
+{
+	guard(ULevel::RememberActors);
+	UEngine* eng = *(UEngine**)((BYTE*)this + 0x44);
+	BYTE* client = *(BYTE**)((BYTE*)eng + 0x44);
+	if ( client )
+	{
+		FArray* vpArr = (FArray*)(client + 0x30);
+		INT nVP = *(INT*)((BYTE*)vpArr + 4);
+		for ( INT vi = 0; vi < nVP; vi++ )
+		{
+			BYTE* vp    = *(BYTE**)(*(BYTE**)vpArr + vi * 4);
+			BYTE* actor = *(BYTE**)(vp + 0x34);
+			if ( actor && *(ULevel**)((BYTE*)actor + 0x328) == this )
+			{
+				*(INT*)(vp + 0x190) = *(INT*)(actor + 0x558);
+				*(INT*)(vp + 0x194) = *(INT*)(actor + 0x3b0);
+				*(INT*)(vp + 0x198) = *(INT*)(actor + 0x4f8);
+				*(INT*)(vp + 0x19c) = *(INT*)(actor + 0x504);
+				*(INT*)(vp + 0x1a0) = *(INT*)(actor + 0x4fc);
+				*(INT*)(vp + 0x1a4) = *(INT*)(actor + 0x500);
+				*(INT*)(vp + 0x34)  = 0;
+			}
+		}
+	}
+	unguard;
+}
+
+INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
+{
+	guard(ULevel::Exec);
+	/* TODO: Full Exec implementation */
+	return 0;
+	unguard;
+}
+
+void ULevel::ShrinkLevel()
+{
+	guard(ULevel::ShrinkLevel);
+	UModel* m = *(UModel**)((BYTE*)this + 0x90);
+	if (m) m->ShrinkModel();
+	unguard;
+}
+
+void ULevel::CompactActors()
+{
+	guard(ULevel::CompactActors);
+	INT iFirst = *(INT*)((BYTE*)this + 0x104); // iFirstDynamicActor
+	INT iDst   = iFirst;
+	for ( INT iSrc = iFirst; iSrc < Actors.Num(); iSrc++ )
+	{
+		AActor* a = Actors(iSrc);
+		if ( a )
+		{
+			if ( (INT)(*(signed char*)((BYTE*)a + 0xa0)) >= -1 ) // not deleted
+			{
+				if ( iDst != iSrc && GUndo )
+					GUndo->SaveArray(*(UObject**)((BYTE*)this + 0x3c),
+						(FArray*)&Actors, iDst, 1, 0, sizeof(AActor*), NULL, NULL);
+				*(AActor**)(*(BYTE**)&Actors + iDst * 4) = a;
+				iDst++;
+			}
+			else
+			{
+				debugf(TEXT("CompactActors: removing deleted actor"));
+			}
+		}
+	}
+	INT endCount = Actors.Num();
+	if ( iDst != endCount )
+	{
+		if ( GUndo )
+			GUndo->SaveArray(*(UObject**)((BYTE*)this + 0x3c),
+				(FArray*)&Actors, iDst, endCount - iDst, 0xffffffff, sizeof(AActor*), NULL, NULL);
+		// Raw remove without undo (we already notified GUndo above)
+		((FArray*)&Actors)->Remove(iDst, endCount - iDst, sizeof(AActor*));
+	}
+	unguard;
+}
+
+INT ULevel::Listen( FString& Error )
+{
+	guard(ULevel::Listen);
+	if ( !*(INT*)((BYTE*)this + 0x40) ) // NetDriver == NULL
+	{
+		/* TODO: Create UNetDriver, call InitListen, spawn GameInfo actors */
+		return 1;
+	}
+	Error = LocalizeError(TEXT("NetAlready"), TEXT("Engine"), NULL);
+	return 0;
+	unguard;
+}
 INT ULevel::IsServer()
 {
 	// Retail (34b, RVA 0xBF270): return 1 (server) unless NetDriver or DemoRecDriver
@@ -96,29 +378,372 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra ) { return 1; }
-INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra ) { return 1; }
-INT ULevel::DestroyActor( AActor* Actor, INT bNetForce ) { return 0; }
-void ULevel::CleanupDestroyed( INT bForce ) {}
-AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRotator Rotation, AActor* Template, INT bNoCollisionFail, INT bRemoteOwned, AActor* SpawnTag, APawn* Instigator ) { return NULL; }
-ABrush* ULevel::SpawnBrush() { return NULL; }
-void ULevel::SpawnViewActor( UViewport* Viewport ) {}
-APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error ) { return NULL; }
-INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester ) { return 1; }
-INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor ) { return 0; }
-INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify ) { return 0; }
-INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors ) { return 0; }
-INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors ) { return 0; }
-INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVector& End, const FVector& Start, DWORD TraceFlags, FVector Extent ) { return 0; }
-INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, AActor* Actor ) { return 0; }
-FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester ) { return NULL; }
-FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor ) { return NULL; }
-void ULevel::DetailChange( INT NewDetail ) {}
-INT ULevel::TickDemoRecord( FLOAT DeltaSeconds ) { return 0; }
-INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds ) { return 0; }
-void ULevel::UpdateTime( ALevelInfo* Info ) {}
-INT ULevel::IsPaused() { return 0; }
-void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional ) {}
+INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
+{
+	guard(ULevel::MoveActor);
+	/* TODO: Full MoveActor implementation */
+	return 1;
+	unguard;
+}
+
+INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra )
+{
+	guard(ULevel::FarMoveActor);
+	if ( !Actor )
+		appFailAssert("Actor!=NULL", ".\\UnLevAct.cpp", 0x49f);
+	// bStatic or not bMovable — cannot move in non-editor mode
+	if ( ((*(BYTE*)((BYTE*)Actor + 0xa0) & 1) != 0
+		  || (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x20) == 0)
+		 && !GIsEditor )
+	{
+		return 0;
+	}
+	FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+	// Remove from hash before move
+	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
+		hash->RemoveActor(Actor);
+	/* TODO: Full movement / sweep logic */
+	// Re-add to hash after move
+	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
+		hash->AddActor(Actor);
+	return 1;
+	unguard;
+}
+
+INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
+{
+	guard(ULevel::DestroyActor);
+	/* TODO: Full DestroyActor implementation */
+	return 0;
+	unguard;
+}
+
+void ULevel::CleanupDestroyed( INT bForce )
+{
+	guard(ULevel::CleanupDestroyed);
+	// Tick renderer if game mode and not a forced cleanup
+	if ( !GIsEditor && !bForce )
+	{
+		typedef void (__thiscall* TickRenderFn)(ULevel*);
+		((TickRenderFn)(*(DWORD*)(*(DWORD*)this + 0x8c)))(this);
+	}
+	// Walk FirstDeleted linked list
+	INT* firstDeleted = (INT*)*(DWORD*)((BYTE*)this + 0xf4);
+	if ( firstDeleted )
+	{
+		INT count = 0;
+		for ( INT* p = firstDeleted; p; p = (INT*)*(DWORD*)((BYTE*)p + 0x160) )
+			count++;
+		if ( count > 0x7f || bForce )
+		{
+			// Refresh collision on all actors
+			for ( INT i = 0; i < Actors.Num(); i++ )
+			{
+				AActor* a = Actors(i);
+				if (a)
+				{
+					UClass* cls = a->GetClass();
+					typedef void (__thiscall* RefreshFn)(AActor*);
+					((RefreshFn)(*(DWORD*)(*(DWORD*)cls + 0x84)))(a);
+				}
+			}
+			// Actually destroy pending actors (non-editor only)
+			if ( !GIsEditor )
+			{
+				debugf(TEXT("CleanupDestroyed: flushing %d actors"), count);
+				while ( *(DWORD*)((BYTE*)this + 0xf4) != 0 )
+				{
+					INT* actor = *(INT**)((BYTE*)this + 0xf4);
+					if ( (INT)(*(signed char*)((BYTE*)actor + 0xa0)) >= -1 )
+						appFailAssert("FirstDeleted->bDeleteMe", ".\\UnLevAct.cpp", 0x274);
+					*(DWORD*)((BYTE*)this + 0xf4) = *(DWORD*)((BYTE*)actor + 0x160);
+					if ( (INT)(*(signed char*)((BYTE*)actor + 0xa0)) >= -1 )
+						appFailAssert("ActorToKill->bDeleteMe", ".\\UnLevAct.cpp", 0x277);
+					// Close actor channel if present
+					INT* actorChannel = (INT*)*(DWORD*)((BYTE*)actor + 0x324);
+					if ( actorChannel )
+					{
+						typedef void (__thiscall* CloseFn)(void*);
+						((CloseFn)(*(DWORD*)(*(DWORD*)actorChannel + 0xc)))(actorChannel);
+						*(DWORD*)((BYTE*)actor + 0x324) = 0;
+					}
+					// ConditionalDestroy (vtable slot 3 on UObject)
+					typedef void (__thiscall* ConditionalDestroyFn)(void*);
+					((ConditionalDestroyFn)(*(DWORD*)(*(DWORD*)actor + 0xc)))(actor);
+				}
+			}
+		}
+	}
+	unguard;
+}
+
+AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRotator Rotation, AActor* Template, INT bNoCollisionFail, INT bRemoteOwned, AActor* SpawnTag, APawn* Instigator )
+{
+	guard(ULevel::SpawnActor);
+	/* TODO: Full SpawnActor implementation */
+	return NULL;
+	unguard;
+}
+
+ABrush* ULevel::SpawnBrush()
+{
+	guard(ULevel::SpawnBrush);
+	ABrush* result = (ABrush*)SpawnActor(ABrush::StaticClass());
+	if (!result)
+		appFailAssert("Result", ".\\UnLevAct.cpp", 0xc2);
+	return result;
+	unguard;
+}
+
+void ULevel::SpawnViewActor( UViewport* Viewport )
+{
+	guard(ULevel::SpawnViewActor);
+	/* TODO: Full SpawnViewActor implementation */
+	unguard;
+}
+
+APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
+{
+	guard(ULevel::SpawnPlayActor);
+	/* TODO: Full SpawnPlayActor implementation */
+	return NULL;
+	unguard;
+}
+
+INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
+{
+	guard(ULevel::FindSpot);
+	/* TODO: Full FindSpot implementation */
+	return 1;
+	unguard;
+}
+
+INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
+{
+	guard(ULevel::CheckSlice);
+	/* TODO: Full CheckSlice implementation */
+	return 0;
+	unguard;
+}
+
+INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
+{
+	guard(ULevel::CheckEncroachment);
+	/* TODO: Full CheckEncroachment implementation */
+	return 0;
+	unguard;
+}
+
+INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
+{
+	guard(ULevel::SinglePointCheck);
+	FMemMark Mark(GMem);
+	FCheckResult* res = MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, bActors, 0, 0, NULL);
+	if ( !res ) { Mark.Pop(); return 1; }
+	appMemcpy(&Hit, res, sizeof(FCheckResult));
+	// Walk list to find closest to Location (skip SourceActor)
+	for ( FCheckResult* cur = res->GetNext(); cur; cur = cur->GetNext() )
+	{
+		if ( cur->Actor == SourceActor ) continue;
+		FVector dCur = cur->Location - Location;
+		FVector dHit = Hit.Location - Location;
+		if ( dCur.SizeSquared() < dHit.SizeSquared() )
+			appMemcpy(&Hit, cur, sizeof(FCheckResult));
+	}
+	Mark.Pop();
+	return 0;
+	unguard;
+}
+
+INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
+{
+	guard(ULevel::SinglePointCheck);
+	FMemMark Mark(GMem);
+	FCheckResult* res = MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, bActors, 0, 0, NULL);
+	if ( !res ) { Mark.Pop(); return 1; }
+	appMemcpy(&Hit, res, sizeof(FCheckResult));
+	// Walk list to find closest to Location
+	for ( FCheckResult* cur = res->GetNext(); cur; cur = cur->GetNext() )
+	{
+		FVector dCur = cur->Location - Location;
+		FVector dHit = Hit.Location - Location;
+		if ( dCur.SizeSquared() < dHit.SizeSquared() )
+			appMemcpy(&Hit, cur, sizeof(FCheckResult));
+	}
+	Mark.Pop();
+	return 0;
+	unguard;
+}
+
+INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVector& End, const FVector& Start, DWORD TraceFlags, FVector Extent )
+{
+	guard(ULevel::SingleLineCheck);
+	FMemMark Mark(GMem);
+	ALevelInfo* traceLevel = (TraceFlags & TRACE_Level) ? GetLevelInfo() : NULL;
+	FCheckResult* res = MultiLineCheck(GMem, End, Start, Extent, traceLevel, TraceFlags | TRACE_SingleResult, SourceActor);
+	if ( !res )
+	{
+		Hit.Time  = 1.0f;
+		Hit.Actor = NULL;
+		Mark.Pop();
+		return 1;
+	}
+	appMemcpy(&Hit, res, sizeof(FCheckResult));
+	Mark.Pop();
+	return 0;
+	unguard;
+}
+
+INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, AActor* Actor )
+{
+	guard(ULevel::EncroachingWorldGeometry);
+	FMemMark Mark(GMem);
+	FCheckResult* res = MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, 1, 1, 1, Actor);
+	if ( !res )
+	{
+		Mark.Pop();
+		return 0;
+	}
+	appMemcpy(&Hit, res, sizeof(FCheckResult));
+	Mark.Pop();
+	return 1;
+	unguard;
+}
+
+FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
+{
+	guard(ULevel::MultiPointCheck);
+	/* TODO: Full MultiPointCheck implementation */
+	return NULL;
+	unguard;
+}
+
+FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
+{
+	guard(ULevel::MultiLineCheck);
+	/* TODO: Full MultiLineCheck implementation */
+	return NULL;
+	unguard;
+}
+
+void ULevel::DetailChange( INT NewDetail )
+{
+	guard(ULevel::DetailChange);
+	ALevelInfo* info = GetLevelInfo();
+	if ( !info ) return;
+	// Toggle bHighDetailMode (bit 7 of flags dword at 0x450)
+	{
+		DWORD& flags = *(DWORD*)((BYTE*)info + 0x450);
+		flags = flags ^ ((DWORD(NewDetail) << 7 ^ flags) & 0x80u);
+	}
+	info = GetLevelInfo();
+	// Notify GameReplicationInfo if present (at offset 0x4cc)
+	UObject* gri = *(UObject**)((BYTE*)info + 0x4cc);
+	if ( gri )
+	{
+		static FName NAME_DetailChange(TEXT("DetailChange"), FNAME_Find);
+		if ( NAME_DetailChange != NAME_None )
+		{
+			UFunction* func = gri->FindFunctionChecked(NAME_DetailChange, 0);
+			if ( func )
+			{
+				typedef void (__thiscall* ProcessEventFn)(UObject*, UFunction*, void*, void*);
+				((ProcessEventFn)(*(DWORD*)(*(DWORD*)gri + 0x10)))(gri, func, NULL, NULL);
+			}
+		}
+	}
+	unguard;
+}
+
+INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
+{
+	guard(ULevel::TickDemoRecord);
+	if ( !*(INT*)((BYTE*)this + 0x8c) ) // DemoRecDriver == NULL
+		return 0;
+	/* TODO: Iterate actors and replicate to DemoRecDriver */
+	return 1;
+	unguard;
+}
+
+INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
+{
+	guard(ULevel::TickDemoPlayback);
+	ALevelInfo* info = GetLevelInfo();
+	UEngine* eng     = *(UEngine**)((BYTE*)this + 0x44);
+	// DemoRecDriver->ServerConnection->State
+	INT state = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)this + 0x8c) + 0x3c) + 0x80);
+	if ( *(BYTE*)((BYTE*)info + 0x928) == 3 && state != 2 )
+	{
+		*(BYTE*)((BYTE*)info + 0x928) = 0;
+		// ServerTravel("","",0) — vtable slot 0xb0/4 on UEngine
+		typedef void (__thiscall* ServerTravelFn)(UEngine*, const TCHAR*, const TCHAR*, INT);
+		((ServerTravelFn)(*(DWORD*)(*(DWORD*)eng + 0xb0)))(eng, TEXT(""), TEXT(""), 0);
+	}
+	if ( state == 1 )
+	{
+		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
+		if ( nVP == 0 )
+			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x527);
+		/* TODO: BrowseLevel to ?entry */
+	}
+	return 1;
+	unguard;
+}
+
+void ULevel::UpdateTime( ALevelInfo* Info )
+{
+	guard(ULevel::UpdateTime);
+	appSystemTime(
+		*(INT*)((BYTE*)Info + 0x92c),  // Year
+		*(INT*)((BYTE*)Info + 0x930),  // Month
+		*(INT*)((BYTE*)Info + 0x938),  // DayOfWeek
+		*(INT*)((BYTE*)Info + 0x934),  // Day
+		*(INT*)((BYTE*)Info + 0x93c),  // Hour
+		*(INT*)((BYTE*)Info + 0x940),  // Minute
+		*(INT*)((BYTE*)Info + 0x944),  // Second
+		*(INT*)((BYTE*)Info + 0x948)   // Millisecond
+	);
+	unguard;
+}
+
+INT ULevel::IsPaused()
+{
+	guard(ULevel::IsPaused);
+	ALevelInfo* info = GetLevelInfo();
+	if ( info && *(INT*)((BYTE*)info + 0x4b0) != 0 ) // Pauser != NULL
+	{
+		FLOAT pauseDelay  = *(FLOAT*)((BYTE*)info + 0x460);
+		FLOAT timeSeconds = (FLOAT)*(DOUBLE*)((BYTE*)this + 0xd4);
+		if ( pauseDelay < timeSeconds )
+			return 1;
+	}
+	return 0;
+	unguard;
+}
+
+void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
+{
+	guard(ULevel::WelcomePlayer);
+	// Copy driver's package map into connection's package map
+	/* TODO: UPackageMap::Copy(Connection+0xC8, Driver+0x44) */
+	Connection->SendPackageMap();
+	ALevelInfo* info = GetLevelInfo();
+	UObject* outer   = GetOuter();
+	const TCHAR* mapName = outer ? outer->GetName() : TEXT("");
+	if ( !Optional || Optional[0] == 0 )
+	{
+		INT bHighDetail = (*(DWORD*)((BYTE*)info + 0x450) >> 7) & 1;
+		debugf(TEXT("WelcomePlayer: detail=%d map=%s"), bHighDetail, mapName);
+	}
+	else
+	{
+		debugf(TEXT("WelcomePlayer: optional=%s map=%s"), Optional, mapName);
+	}
+	// Notify connection (vtable slot 0x80/4 = 32)
+	typedef void (__thiscall* Fn32)(void*);
+	((Fn32)(*(DWORD*)(*(DWORD*)Connection + 0x80)))(Connection);
+	unguard;
+}
 INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion ) { return 1; }
 FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner ) { return 25.f * ((INT)SoundRadius + 1); }
 
@@ -165,7 +790,48 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 }
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
-void ULevel::UpdateTerrainArrays() {}
+void ULevel::UpdateTerrainArrays()
+{
+	guard(ULevel::UpdateTerrainArrays);
+	UModel* model = *(UModel**)((BYTE*)this + 0x90);
+	if ( !model ) return;
+
+	// Clear terrain (Terrains TArray at +0x3C0) on all zone actors stored in the Model
+	// Zone data layout in Model: stride = 9 DWORDs, start offset = 0x24*8 = 0x120
+	BYTE* modelBase = (BYTE*)model;
+	for ( INT iZone = 0; iZone < 0x100; iZone++ )
+	{
+		INT* zoneActor = *(INT**)(modelBase + (iZone * 9 + 0x24) * 8);
+		if ( zoneActor )
+			((FArray*)((BYTE*)zoneActor + 0x3c0))->Empty(4, 0);
+	}
+
+	// Iterate actors looking for ATerrainInfo actors to update
+	for ( INT i = 0; i < Actors.Num(); i++ )
+	{
+		AActor* a = Actors(i);
+		if ( a
+			 && (INT)(*(signed char*)((BYTE*)a + 0xa0)) >= -1
+			 && a->IsA(ATerrainInfo::StaticClass()) )
+		{
+			// SetCollision on terrain info (vtable slot 0x10c bytes into ULevel vtable)
+			typedef void (__thiscall* SetCollisionFn)(AActor*, INT, INT);
+			((SetCollisionFn)(*(DWORD*)(*(DWORD*)this + 0x10c)))((AActor*)Actors(0), 1, 0);
+			/* TODO: FUN_10481dd0 - terrain zone registration helper */
+		}
+	}
+
+	// Validate Actors(0) is a valid LevelInfo
+	if ( !Actors(0) )
+		appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1ad);
+	if ( !Actors(0)->IsA(ALevelInfo::StaticClass()) )
+		appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1ae);
+
+	// Clear Terrains array on LevelInfo as well
+	if ( Actors(0) )
+		((FArray*)((BYTE*)Actors(0) + 0x3c0))->Empty(4, 0);
+	unguard;
+}
 
 /*=============================================================================
 	ALevelInfo / AGameInfo native function implementations.

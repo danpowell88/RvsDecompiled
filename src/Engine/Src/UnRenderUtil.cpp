@@ -358,20 +358,36 @@ int FLightMap::GetWidth()
 
 
 // --- FLightMapTexture ---
-FLightMapTexture::FLightMapTexture(FLightMapTexture const &)
+FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 {
+	// Ghidra 0x20e50: vtable set by compiler; copy DWORD at +4; copy TArray<FLOAT> at +8;
+	// copy FStaticLightMapTexture sub-object at +0x14
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	new ((BYTE*)this + 0x08) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x08));
+	new ((BYTE*)this + 0x14) FStaticLightMapTexture(*(const FStaticLightMapTexture*)((const BYTE*)&Other + 0x14));
+	appMemcpy((BYTE*)this + 0x60, (const BYTE*)&Other + 0x60, 0x0C); // 3 DWORDs
 }
 
-FLightMapTexture::FLightMapTexture(ULevel *)
+FLightMapTexture::FLightMapTexture(ULevel* Level)
 {
+	// Ghidra 0x110bd0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4
+	new ((BYTE*)this + 0x08) TArray<FLOAT>();
+	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
+	*(ULevel**)((BYTE*)this + 0x04) = Level;
 }
 
 FLightMapTexture::FLightMapTexture()
 {
+	// Ghidra 0x279b0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14
+	new ((BYTE*)this + 0x08) TArray<FLOAT>();
+	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
 }
 
 FLightMapTexture::~FLightMapTexture()
 {
+	// Ghidra 0x20df0: destroy FStaticLightMapTexture at +0x14, then TArray<FLOAT> at +8
+	((FStaticLightMapTexture*)((BYTE*)this + 0x14))->~FStaticLightMapTexture();
+	((TArray<FLOAT>*)((BYTE*)this + 0x08))->~TArray();
 }
 
 FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
@@ -479,34 +495,101 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-void FLineBatcher::DrawConvexVolume(FConvexVolume,FColor)
+void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
+	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
+	// DIVERGENCE: stub only.
 }
 
 // (merged from earlier occurrence)
-void FLineBatcher::DrawBox(FBox,FColor)
+void FLineBatcher::DrawBox(FBox Box, FColor Color)
 {
+	// Ghidra 0x1147c0: draw 12 edges of an axis-aligned box.
+	// Iterates over all 4 combinations of (i,j) in {0,1}^2, drawing 3 edges per combo.
+	FVector V[2] = { Box.Min, Box.Max };
+	for (INT i = 0; i < 2; i++)
+	{
+		for (INT j = 0; j < 2; j++)
+		{
+			// Z-direction edge (fix X=V[i], Y=V[j], vary Z)
+			DrawLine(FVector(V[i].X, V[j].Y, V[0].Z), FVector(V[i].X, V[j].Y, V[1].Z), Color);
+			// X-direction edge (fix Y=V[i], Z=V[j], vary X)
+			DrawLine(FVector(V[0].X, V[i].Y, V[j].Z), FVector(V[1].X, V[i].Y, V[j].Z), Color);
+			// Y-direction edge (fix X=V[i], Z=V[j], vary Y)
+			DrawLine(FVector(V[i].X, V[0].Y, V[j].Z), FVector(V[i].X, V[1].Y, V[j].Z), Color);
+		}
+	}
 }
-void FLineBatcher::DrawCircle(FVector,FVector,FVector,FColor,float,int)
+
+void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color, FLOAT Radius, INT NumSides)
 {
+	// Ghidra 0x1149f0: draw a circle using NumSides line segments.
+	// X and Y are the in-plane axes; Radius scales them.
+	if (NumSides <= 0) return;
+	FLOAT Step = 2.0f * PI / (FLOAT)NumSides;
+	FVector Prev = Center + X * (Radius * appCos(0.0f)) + Y * (Radius * appSin(0.0f));
+	for (INT i = 1; i <= NumSides; i++)
+	{
+		FLOAT Angle = i * Step;
+		FVector Next = Center + X * (Radius * appCos(Angle)) + Y * (Radius * appSin(Angle));
+		DrawLine(Prev, Next, Color);
+		Prev = Next;
+	}
 }
-void FLineBatcher::DrawCylinder(FRenderInterface *,FVector,FVector,FVector,FVector,FColor,float,float,int)
+
+void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
+	// Ghidra 0x114e50: too complex to fully decompile; left empty.
+	// DIVERGENCE: stub only.
 }
-void FLineBatcher::DrawDirectionalArrow(FVector,FRotator,FColor,float)
+
+void FLineBatcher::DrawDirectionalArrow(FVector Origin, FRotator Rotation, FColor Color, FLOAT ArrowSize)
 {
+	// Ghidra 0x115190: convert Rotation to FCoords, draw main shaft + two arrow-head wings.
+	FCoords Coords = GMath.UnitCoords / Rotation;
+	FLOAT Length = ArrowSize * 48.0f;
+	FVector Forward  = Coords.XAxis * Length;
+	FVector Tip      = Origin + Forward;
+	// Main shaft: Tip -> Origin
+	DrawLine(Tip, Origin, Color);
+	// Arrow head wings
+	FLOAT WingScale = ArrowSize * 16.0f;
+	DrawLine(Tip - Forward * (1.0f / 3.0f) + Coords.YAxis * WingScale, Tip, Color);
+	DrawLine(Tip - Forward * (1.0f / 3.0f) - Coords.YAxis * WingScale, Tip, Color);
 }
-void FLineBatcher::DrawLine(FVector,FVector,FColor)
+
+void FLineBatcher::DrawLine(FVector Start, FVector End, FColor Color)
 {
+	// Ghidra 0x1143c0: add two FLineVertex entries (16 bytes each) to TArray at this+4.
+	TArray<FLineVertex>* Verts = (TArray<FLineVertex>*)((BYTE*)this + 4);
+	INT i = Verts->Add(1);
+	new (&(*Verts)(i)) FLineVertex(Start, Color);
+	i = Verts->Add(1);
+	new (&(*Verts)(i)) FLineVertex(End, Color);
 }
-void FLineBatcher::DrawPoint(FSceneNode *,FVector,FColor)
+
+void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 {
+	// Ghidra 0x1144a0: draw a screen-aligned square cross at Point using camera axes.
+	// Camera right at Scene+0x19C, camera up at Scene+0x1A8.
+	FVector CamX = *(FVector*)((BYTE*)Scene + 0x19C);
+	FVector CamY = *(FVector*)((BYTE*)Scene + 0x1A8);
+	DrawLine(Point - CamX - CamY, Point + CamX - CamY, Color);
+	DrawLine(Point + CamX - CamY, Point + CamX + CamY, Color);
+	DrawLine(Point + CamX + CamY, Point - CamX + CamY, Color);
+	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
-void FLineBatcher::DrawSphere(FVector,FColor,float,int)
+
+void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
+	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
+	// DIVERGENCE: stub only.
 }
-void FLineBatcher::Flush(DWORD)
+
+void FLineBatcher::Flush(DWORD Flags)
 {
+	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
+	// DIVERGENCE: stub only.
 }
 unsigned __int64 FLineBatcher::GetCacheId()
 {
@@ -699,6 +782,10 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 // (merged from earlier occurrence)
 void FRawIndexBuffer::CacheOptimize()
 {
+	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
+	// Those functions are not reconstructed; increment revision counter only.
+	// DIVERGENCE: optimisation pass skipped; revision still bumped for cache invalidation.
+	*(INT*)(Pad + 20) += 1;
 }
 unsigned __int64 FRawIndexBuffer::GetCacheId()
 {
@@ -820,16 +907,36 @@ int FSkinVertexStream::GetStride()
 
 
 // --- FStaticLightMapTexture ---
-FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &)
+FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Other)
 {
+	// Ghidra 0x20cf0: vtable set by compiler; copy-construct 2 TLazyArray<BYTE> at +4 and +0x1C (stride 0x18);
+	// copy extra scalar fields at +0x34..+0x48.
+	// TLazyArray contains 2 scalar DWORDs followed by a TArray<BYTE>.
+	appMemcpy((BYTE*)this + 0x08, (const BYTE*)&Other + 0x08, 0x08); // TLazyArray[0] header DWORDs
+	new ((BYTE*)this + 0x10) TArray<BYTE>(*(const TArray<BYTE>*)((const BYTE*)&Other + 0x10));
+	appMemcpy((BYTE*)this + 0x20, (const BYTE*)&Other + 0x20, 0x08); // TLazyArray[1] header DWORDs
+	new ((BYTE*)this + 0x28) TArray<BYTE>(*(const TArray<BYTE>*)((const BYTE*)&Other + 0x28));
+	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 0x18); // 6 DWORDs (+0x34..+0x4B)
 }
 
 FStaticLightMapTexture::FStaticLightMapTexture()
 {
+	// Ghidra 0x27960: vtable set by compiler; default-construct 2 TLazyArray<BYTE> at +4/+0x1C (stride 0x18);
+	// cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
+	// revision at +0x48 = 0.
+	appMemzero((BYTE*)this + 0x08, 0x08); // TLazyArray[0] header DWORDs
+	new ((BYTE*)this + 0x10) TArray<BYTE>();
+	appMemzero((BYTE*)this + 0x20, 0x08); // TLazyArray[1] header DWORDs
+	new ((BYTE*)this + 0x28) TArray<BYTE>();
+	appMemzero((BYTE*)this + 0x34, 0x18); // extra fields (includes CacheId, Revision = 0)
+	// DIVERGENCE: CacheId left 0; retail uses a global per-resource counter (DAT_1060b564).
 }
 
 FStaticLightMapTexture::~FStaticLightMapTexture()
 {
+	// Ghidra 0x20cd0: destroy 2 TLazyArray<BYTE> in reverse order (at +0x28 then +0x10).
+	((TArray<BYTE>*)((BYTE*)this + 0x28))->~TArray();
+	((TArray<BYTE>*)((BYTE*)this + 0x10))->~TArray();
 }
 
 FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapTexture& Other)
@@ -891,6 +998,7 @@ int FStaticLightMapTexture::GetRevision()
 }
 void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
+	// Ghidra: retail implementation deferred (complex lazy-load + DXT decode). DIVERGENCE: stub only.
 }
 ETexClampMode FStaticLightMapTexture::GetUClamp()
 {
@@ -986,8 +1094,14 @@ FStaticTexture::FStaticTexture(FStaticTexture const &Other)
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
-FStaticTexture::FStaticTexture(UTexture *)
+FStaticTexture::FStaticTexture(UTexture* Texture)
 {
+	// Ghidra 0x16a9a0: store texture pointer, compute CacheId, set initial revision.
+	// Layout (Pad is at this+4): Pad[0..7]=CacheId QWORD; Pad[8..11]=UTexture*; Pad[12..15]=Revision.
+	*(UTexture**)&Pad[8]  = Texture;
+	DWORD Idx             = Texture ? Texture->GetIndex() : 0;
+	*(QWORD*)&Pad[0]      = (QWORD)Idx * 0x100 + 0xE0;
+	*(INT*)&Pad[12]       = 1;
 }
 
 FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
@@ -1067,6 +1181,7 @@ int FStaticTexture::GetRevision()
 }
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
+	// Ghidra: retail implementation deferred (complex lazy-load path). DIVERGENCE: stub only.
 }
 ETexClampMode FStaticTexture::GetUClamp()
 {
@@ -1157,10 +1272,13 @@ FConvexVolume::FConvexVolume(const FConvexVolume& Other)
 
 FConvexVolume::FConvexVolume()
 {
+	// Ghidra: default ctor; no heap allocation; stack/member data left to caller init.
+	NumPlanes = 0;
 }
 
 FConvexVolume::~FConvexVolume()
 {
+	// Ghidra: trivial dtor; no heap to free.
 }
 
 FConvexVolume& FConvexVolume::operator=(const FConvexVolume& Other)
@@ -1199,6 +1317,8 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 // --- FDynamicActor ---
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
+	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
+	// DIVERGENCE: stub only.
 }
 
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
@@ -1207,12 +1327,20 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-FDynamicActor::FDynamicActor(AActor *)
+FDynamicActor::FDynamicActor(AActor* Actor)
 {
+	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
+	// FMatrix at this+4, FBox at this+0x48, FSphere at this+0x64; actor pointer at this+0.
+	new ((BYTE*)this + 0x04) FMatrix();
+	new ((BYTE*)this + 0x48) FBox();
+	new ((BYTE*)this + 0x64) FSphere();
+	*(AActor**)this = Actor;
+	// DIVERGENCE: complex mesh/physics transform setup omitted (requires FUN_* stubs).
 }
 
 FDynamicActor::~FDynamicActor()
 {
+	// Ghidra: trivial dtor; no heap to free.
 }
 
 FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
@@ -1311,8 +1439,15 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-FDynamicLight::FDynamicLight(AActor *)
+FDynamicLight::FDynamicLight(AActor* Actor)
 {
+	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
+	// FPlane at this+4, FVector at this+0x14, FVector at this+0x20; actor at this+0.
+	new ((BYTE*)this + 0x04) FPlane();
+	new ((BYTE*)this + 0x14) FVector();
+	new ((BYTE*)this + 0x20) FVector();
+	*(AActor**)this = Actor;
+	// DIVERGENCE: complex light-effect and color setup omitted (requires FGetHSV + LightEffect dispatch).
 }
 
 FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
@@ -1365,8 +1500,14 @@ FStaticCubemap::FStaticCubemap(FStaticCubemap const &Other)
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
-FStaticCubemap::FStaticCubemap(UCubemap *)
+FStaticCubemap::FStaticCubemap(UCubemap* Cubemap)
 {
+	// Ghidra 0x16a9f0: store cubemap pointer, compute CacheId, set initial revision.
+	// Layout (Pad is at this+4): Pad[0..3]=UCubemap*; Pad[4..11]=CacheId QWORD; Pad[12..15]=Revision.
+	*(UCubemap**)&Pad[0] = Cubemap;
+	DWORD Idx            = Cubemap ? ((UObject*)Cubemap)->GetIndex() : 0;
+	*(QWORD*)(Pad + 4)   = (QWORD)Idx * 0x100 + 0xE0;
+	*(INT*)(Pad + 12)    = 1;
 }
 
 FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap& Other)
@@ -1461,8 +1602,34 @@ int FStaticCubemap::GetWidth()
 
 
 // --- FTempLineBatcher ---
-void FTempLineBatcher::Render(FRenderInterface *,int)
+void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 {
+	// Ghidra 0x1180b0: create a temporary FLineBatcher, draw all stored lines and boxes, flush.
+	// Line starts at this+0, ends at this+0xC, line colors at this+0x18 (DWORD in FLOAT slot).
+	// Boxes at this+0x24, box colors at this+0x30.
+	// DIVERGENCE: FLineBatcher ctor args (cache-key counter DAT_1060b564) not reconstructed;
+	// using FLineBatcher(RI, Flags, 0) and relying on existing ctor stub.
+	FLineBatcher Batcher(RI, Flags, 0);
+	TArray<FVector>* Starts     = (TArray<FVector>*)((BYTE*)this + 0x00);
+	TArray<FVector>* Ends       = (TArray<FVector>*)((BYTE*)this + 0x0C);
+	TArray<FLOAT>*   LineColors = (TArray<FLOAT>*)  ((BYTE*)this + 0x18);
+	INT LineCount = Starts->Num();
+	for (INT i = 0; i < LineCount; i++)
+	{
+		FColor Color;
+		*(DWORD*)&Color = *(DWORD*)&(*LineColors)(i);
+		Batcher.DrawLine((*Starts)(i), (*Ends)(i), Color);
+	}
+	TArray<FBox>*  Boxes     = (TArray<FBox>*) ((BYTE*)this + 0x24);
+	TArray<FLOAT>* BoxColors = (TArray<FLOAT>*)((BYTE*)this + 0x30);
+	INT BoxCount = Boxes->Num();
+	for (INT i = 0; i < BoxCount; i++)
+	{
+		FColor Color;
+		*(DWORD*)&Color = *(DWORD*)&(*BoxColors)(i);
+		Batcher.DrawBox((*Boxes)(i), Color);
+	}
+	Batcher.Flush(0);
 }
 
 FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &Other)
@@ -1507,18 +1674,37 @@ FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
 	return *this;
 }
 
-void FTempLineBatcher::AddBox(FBox,FColor)
+void FTempLineBatcher::AddBox(FBox Box, FColor Color)
 {
+	// Ghidra 0x20950: append FBox (0x1C bytes) to TArray<FBox> at this+0x24; append Color DWORD to TArray<FLOAT> at this+0x30.
+	TArray<FBox>*  Boxes  = (TArray<FBox>*) ((BYTE*)this + 0x24);
+	INT i = Boxes->Add(1);
+	(*Boxes)(i) = Box;
+	TArray<FLOAT>* Colors = (TArray<FLOAT>*)((BYTE*)this + 0x30);
+	i = Colors->Add(1);
+	*(DWORD*)&(*Colors)(i) = Color.DWColor();
 }
 
-void FTempLineBatcher::AddLine(FVector,FVector,FColor)
+void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 {
+	// Ghidra 0x208d0: append Start to TArray<FVector>@+0, End to TArray<FVector>@+0xC, Color DWORD to TArray<FLOAT>@+0x18.
+	TArray<FVector>* Starts = (TArray<FVector>*)((BYTE*)this + 0x00);
+	INT i = Starts->Add(1);
+	(*Starts)(i) = Start;
+	TArray<FVector>* Ends = (TArray<FVector>*)((BYTE*)this + 0x0C);
+	i = Ends->Add(1);
+	(*Ends)(i) = End;
+	TArray<FLOAT>* Colors = (TArray<FLOAT>*)((BYTE*)this + 0x18);
+	i = Colors->Add(1);
+	*(DWORD*)&(*Colors)(i) = Color.DWColor();
 }
 
 
 // --- UConvexVolume ---
-void UConvexVolume::Serialize(FArchive &)
+void UConvexVolume::Serialize(FArchive& Ar)
 {
+	// Ghidra: trivial serialize stub; no persistent data beyond UObject base.
+	// DIVERGENCE: stub only.
 }
 
 FBox UConvexVolume::GetRenderBoundingBox(AActor const *)
