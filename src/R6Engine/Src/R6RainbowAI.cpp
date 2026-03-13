@@ -20,9 +20,46 @@ IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execSetOrientation)
 
 // --- AR6RainbowAI ---
 
-INT AR6RainbowAI::AClearShotIsAvailable(APawn *, FVector)
+INT AR6RainbowAI::AClearShotIsAvailable(APawn* TargetPawn, FVector ShotTarget)
 {
-	return 0;
+	guard(AR6RainbowAI::AClearShotIsAvailable);
+
+	FVector ShootFrom;
+	if (TargetPawn == Enemy)
+	{
+		// Use cached aim location stored in controller (TODO: no typed field name)
+		ShootFrom.X = *(FLOAT*)((BYTE*)this + 0x498);
+		ShootFrom.Y = *(FLOAT*)((BYTE*)this + 0x49c);
+		ShootFrom.Z = *(FLOAT*)((BYTE*)this + 0x4a0);
+	}
+	else
+	{
+		// Get head location from the spotter pawn (at +0x598, TODO: no typed field name)
+		AR6Pawn* Spotter = *(AR6Pawn**)((BYTE*)this + 0x598);
+		ShootFrom = Spotter->GetHeadLocation(NULL);
+	}
+
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, (AActor*)Pawn, ShotTarget, ShootFrom, 0x4400bf, FVector(0,0,0));
+
+	// Ghidra: vtable[0x6c/4] on hit actor = GetPawnOrColBoxOwner
+	if (Hit.Actor != NULL)
+	{
+		APawn* HitPawn = Hit.Actor->GetPawnOrColBoxOwner();
+		if (Hit.Actor != NULL && HitPawn != TargetPawn)
+		{
+			if (HitPawn != NULL
+				&& !HitPawn->IsFriend(HitPawn)
+				&& !HitPawn->IsNeutral(HitPawn))
+			{
+				return 1; // blocked by enemy — shot is usable
+			}
+			return 0; // blocked by friendly or neutral
+		}
+	}
+
+	return 1; // nothing in the way
+	unguard;
 }
 
 INT AR6RainbowAI::ClearToSnipe(FVector Position, FRotator Direction)
@@ -38,7 +75,76 @@ INT AR6RainbowAI::ClearToSnipe(FVector Position, FRotator Direction)
 
 AActor * AR6RainbowAI::FindSafeSpot()
 {
+	guard(AR6RainbowAI::FindSafeSpot);
+
+	APawn* P = (APawn*)Pawn;
+
+	// Cached danger/safe origin position (TODO: no typed field name found at +0x5d0)
+	FLOAT SafeX = *(FLOAT*)((BYTE*)this + 0x5d0);
+	FLOAT SafeY = *(FLOAT*)((BYTE*)this + 0x5d4);
+	FLOAT SafeZ = *(FLOAT*)((BYTE*)this + 0x5d8);
+
+	FLOAT PawnX = P->Location.X;
+	FLOAT PawnY = P->Location.Y;
+	FLOAT PawnZ = P->Location.Z;
+
+	// Squared distance from pawn to the danger origin
+	FLOAT CachedDistSq = (PawnX - SafeX)*(PawnX - SafeX)
+	                   + (PawnY - SafeY)*(PawnY - SafeY)
+	                   + (PawnZ - SafeZ)*(PawnZ - SafeZ);
+
+	// First: search anchor's path list for nodes farther from danger than we are
+	if (P->ValidAnchor() != 0)
+	{
+		ANavigationPoint* Anchor = P->Anchor;
+		for (INT i = 0; i < Anchor->PathList.Num(); i++)
+		{
+			ANavigationPoint* Node = Anchor->PathList(i)->End;
+			if (Node == NULL)
+				continue;
+
+			FLOAT ndx = PawnX - Node->Location.X;
+			FLOAT ndy = PawnY - Node->Location.Y;
+			FLOAT ndz = PawnZ - Node->Location.Z;
+			FLOAT NodeDistSq = ndx*ndx + ndy*ndy + ndz*ndz;
+
+			FLOAT sdx = SafeX - Node->Location.X;
+			FLOAT sdy = SafeY - Node->Location.Y;
+			FLOAT sdz = SafeZ - Node->Location.Z;
+			FLOAT SafeToNodeSq = sdx*sdx + sdy*sdy + sdz*sdz;
+
+			if (NodeDistSq < 1440000.0f       // within 1200 units
+				&& SafeToNodeSq > CachedDistSq // node is farther from danger
+				&& P->actorReachable(Node, 0, 0) != 0)
+			{
+				return Node;
+			}
+		}
+	}
+
+	// Second: search all navigation points
+	for (ANavigationPoint* Nav = Level->NavigationPointList; Nav != NULL; Nav = Nav->nextNavigationPoint)
+	{
+		FLOAT ndx = PawnX - Nav->Location.X;
+		FLOAT ndy = PawnY - Nav->Location.Y;
+		FLOAT ndz = PawnZ - Nav->Location.Z;
+		FLOAT NodeDistSq = ndx*ndx + ndy*ndy + ndz*ndz;
+
+		FLOAT sdx = SafeX - Nav->Location.X;
+		FLOAT sdy = SafeY - Nav->Location.Y;
+		FLOAT sdz = SafeZ - Nav->Location.Z;
+		FLOAT SafeToNodeSq = sdx*sdx + sdy*sdy + sdz*sdz;
+
+		if (NodeDistSq < 1440000.0f
+			&& SafeToNodeSq > CachedDistSq
+			&& P->actorReachable(Nav, 0, 0) != 0)
+		{
+			return Nav;
+		}
+	}
+
 	return NULL;
+	unguard;
 }
 
 FVector AR6RainbowAI::GetTeamLeftOfDoorPosition(INT, AR6Door *)

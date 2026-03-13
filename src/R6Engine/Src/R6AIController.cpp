@@ -53,14 +53,146 @@ void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 	unguard;
 }
 
-INT AR6AIController::CanHear(FVector, FLOAT, AActor *, enum ENoiseType, enum EPawnType)
+INT AR6AIController::CanHear(FVector SoundLoc, FLOAT Volume, AActor* SoundActor, enum ENoiseType NoiseType, enum EPawnType PawnType)
 {
+	guard(AR6AIController::CanHear);
+
+	// SoundActor->Controller offset 0x148; check it has a pawn
+	INT SndCtrl = *(INT*)((BYTE*)SoundActor + 0x148);
+	if (SndCtrl == 0 || *(INT*)(SndCtrl + 0x4ec) == 0)
+		return 0;
+	if (Pawn == NULL)
+		return 0;
+
+	// Pass if PawnType==4 (all-team) or teams differ (team at +0x3b0)
+	if ((INT)PawnType != 4 && *(INT*)((BYTE*)Pawn + 0x3b0) == *(INT*)(SndCtrl + 0x3b0))
+		return 0;
+
+	// Zone indices: Region.Zone (at +0x228) -> sound zone byte at +0x397
+	BYTE  OurZone = *(BYTE*)(*(INT*)((BYTE*)Pawn + 0x228) + 0x397);
+	DWORD SndZone = (DWORD)*(BYTE*)(*(INT*)((BYTE*)SoundActor + 0x228) + 0x397);
+	ALevelInfo* LI = XLevel->GetLevelInfo();
+
+	// Zone connectivity bitmask table at LI+0x650 (pair of DWORDs per zone, 8-byte stride)
+	DWORD ZoneBit = 1u << (OurZone & 0x1f);
+	if ((DWORD)OurZone != SndZone
+		&& (ZoneBit & *(DWORD*)((BYTE*)LI + SndZone * 8 + 0x650)) == 0
+		&& ((INT)ZoneBit >> 0x1f & *(DWORD*)((BYTE*)LI + SndZone * 8 + 0x654)) == 0)
+	{
+		return 0;
+	}
+
+	if ((INT)NoiseType == 0)
+	{
+		// NOISE_None: log sound actor name only, no hearing check
+		return 0;
+	}
+
+	// Distance check against skill-scaled hearing radius
+	APawn* P = (APawn*)Pawn;
+	FLOAT dx = P->Location.X - SoundLoc.X;
+	FLOAT dy = P->Location.Y - SoundLoc.Y;
+	FLOAT dz = P->Location.Z - SoundLoc.Z;
+	FLOAT DistSq = dx*dx + dy*dy + dz*dz;
+
+	FLOAT Skill   = ((AR6AbstractPawn*)P)->eventGetSkill((BYTE)7);
+	FLOAT HearRad = (Skill * 0.5f + 0.75f) * Volume;
+	FLOAT HearRadSq = HearRad * HearRad;
+
+	if (DistSq >= HearRadSq)
+		return 0;
+
+	// Direct same-zone check (flags at +0x3e4: bit 5=bLOSHearing, bit 6=bSameZoneHearing)
+	DWORD PawnFlags = *(DWORD*)((BYTE*)P + 0x3e4);
+	if ((PawnFlags & 0x60) != 0
+		&& *(INT*)((BYTE*)P + 0x228) == *(INT*)((BYTE*)SoundActor + 0x228))
+	{
+		return 1;
+	}
+
+	// Zone portal adjacency check (bit 6 + zone reachability table via XLevel+0x90)
+	if ((PawnFlags & 0x40) != 0)
+	{
+		// TODO: zone-portal adjacency table at *(XLevel+0x90)+0x128; see FUN_10001750
+		DWORD SndActorZoneBit = 1u << (*(BYTE*)((BYTE*)SoundActor + 0x230) & 0x1f);
+		INT   SndActorZoneHi  = (INT)(*(BYTE*)((BYTE*)SoundActor + 0x230)) >> 5;
+		DWORD PawnZoneRow     = (DWORD)(*(BYTE*)((BYTE*)P + 0x230)) * 0x12;
+		INT   ZoneTableBase   = *(INT*)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x90) + 0x128
+		                          + (SndActorZoneHi + (INT)PawnZoneRow) * 4);
+		if ((*(DWORD*)&ZoneTableBase & SndActorZoneBit) != 0)
+			return 1;
+	}
+
+	// Line-of-hearing via eye position (bit 4 = bAdjacentZoneHearing)
+	if ((PawnFlags & 0x10) != 0)
+	{
+		FVector EyeOff = P->eventEyePosition();
+		FVector EyeLoc(P->Location.X + EyeOff.X,
+		               P->Location.Y + EyeOff.Y,
+		               P->Location.Z + EyeOff.Z);
+
+		if (HearingCheck(EyeLoc, SoundLoc) != 0)
+			return 1;
+
+		if ((PawnFlags & 0x80) != 0 && DistSq * 4.0f < HearRadSq)
+		{
+			// TODO: secondary path-portal hearing check via FSortedPathList
+			// Ghidra: FUN_10001750 + portal traversal + HearingCheck per node
+		}
+
+		if ((PawnFlags & 0x100) != 0)
+		{
+			// TODO: sorted portal traversal hearing fallback
+		}
+	}
+
 	return 0;
+	unguard;
 }
 
-INT AR6AIController::CanWalkTo(FVector, INT)
+INT AR6AIController::CanWalkTo(FVector Dest, INT bIgnoreActors)
 {
+	guard(AR6AIController::CanWalkTo);
+
+	// Trace down 200 units from destination to find floor
+	FVector DownEnd(Dest.X, Dest.Y, Dest.Z - 200.0f);
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, this, DownEnd, Dest, 0x86, FVector(0,0,0));
+
+	// Ghidra: Hit.Time != 0 means trace was not start-blocked (floor found)
+	if (Hit.Time != 0.0f)
+	{
+		APawn* P         = (APawn*)Pawn;
+		FLOAT ColRadius  = P->CollisionRadius;
+		FLOAT ColHeight  = P->CollisionHeight;
+		FVector PawnLoc  = P->Location;
+		FLOAT PawnZ      = PawnLoc.Z;
+
+		FLOAT HitZ = Hit.Location.Z;
+		FLOAT TopZ = HitZ + ColHeight + 2.4f;
+
+		// If pawn can't jump (flag bit 9 at +0x3e0), offset heights by 33
+		if ((*(DWORD*)((BYTE*)P + 0x3e0) & 0x200) == 0)
+		{
+			PawnZ += 33.0f;
+			TopZ  += 33.0f;
+		}
+
+		FLOAT HeightDiff = TopZ - PawnZ;
+		if (HeightDiff < 0.0f)
+			HeightDiff = -HeightDiff;
+
+		if (HeightDiff < 33.0f)
+		{
+			FVector End2(Hit.Location.X, Hit.Location.Y, TopZ);
+			FVector Extent(ColRadius, ColRadius, ColHeight);
+			INT bClear = XLevel->SingleLineCheck(Hit, this, End2, PawnLoc, 0x296, Extent);
+			return bClear;
+		}
+	}
+
 	return 0;
+	unguard;
 }
 
 void AR6AIController::ClearActionSpot()
@@ -74,9 +206,59 @@ void AR6AIController::ClearActionSpot()
 	unguard;
 }
 
-AR6ActionSpot * AR6AIController::FindNearestActionSpot(FLOAT, FVector, INT (CDECL*)(AR6Pawn *, AR6ActionSpot *, struct STActionSpotCheck &), struct STActionSpotCheck &)
+AR6ActionSpot * AR6AIController::FindNearestActionSpot(FLOAT Radius, FVector Center, INT (CDECL*Callback)(AR6Pawn *, AR6ActionSpot *, struct STActionSpotCheck &), struct STActionSpotCheck & CheckData)
 {
-	return NULL;
+	guard(AR6AIController::FindNearestActionSpot);
+
+	if (Pawn == NULL)
+		return NULL;
+
+	ClearActionSpot();
+
+	// Mark all action spots within radius that pass the callback
+	INT LastValidSpot = 0;
+	for (AR6ActionSpot* Spot = Level->m_ActionSpotList; Spot; Spot = Spot->m_NextSpot)
+	{
+		FLOAT dx = Spot->Location.X - Center.X;
+		FLOAT dy = Spot->Location.Y - Center.Y;
+		FLOAT dz = Spot->Location.Z - Center.Z;
+		if (dx*dx + dy*dy + dz*dz < Radius * Radius
+			&& Callback(m_r6pawn, Spot, CheckData) != 0)
+		{
+			Spot->m_bValidTarget = 1;
+			// Mark the spot's anchor room as containing a valid target
+			*(DWORD*)(*(INT*)((BYTE*)Spot + 0x3a0) + 0x3e4) |= 1; // Spot->m_Anchor->roomFlags |= 1
+			LastValidSpot = (INT)Spot;
+		}
+	}
+
+	if (LastValidSpot == 0)
+		return NULL;
+
+	// Find a path to the last valid spot
+	AActor* PathAnchor = FindPath(FVector(0,0,0), (AActor*)LastValidSpot, 0);
+	if (PathAnchor == NULL)
+		return NULL;
+
+	// Only refine if route goal radius is within caller's radius
+	if (*(FLOAT*)((BYTE*)this + 0x3cc) >= Radius) // m_fRouteGoalRadius
+		return NULL;
+
+	// Find the first action spot whose anchor matches the path anchor's room
+	AR6ActionSpot* Result = NULL;
+	for (AR6ActionSpot* Spot = Level->m_ActionSpotList; Spot; Spot = Spot->m_NextSpot)
+	{
+		// Compare Spot->m_Anchor with this->m_pathAnchor (field at +0x44c, TODO: no typed name)
+		if (*(INT*)((BYTE*)Spot + 0x3a0) == *(INT*)((BYTE*)this + 0x44c)
+			&& Spot->m_bValidTarget)
+		{
+			Result = Spot;
+			break;
+		}
+	}
+
+	return Result;
+	unguard;
 }
 
 void AR6AIController::FollowPath(enum eMovementPace Pace, FName Label, INT bResetIndex)

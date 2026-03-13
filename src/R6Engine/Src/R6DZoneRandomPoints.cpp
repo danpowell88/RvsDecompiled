@@ -148,7 +148,54 @@ void AR6DZoneRandomPoints::FirstInit()
 
 INT AR6DZoneRandomPoints::GetNbOfTerroristToSpawn()
 {
-	return 0;
+	guard(AR6DZoneRandomPoints::GetNbOfTerroristToSpawn);
+
+	// GameInfo->GameType FString at offset 0x4b0 (TODO: no typed field name in AGameInfo)
+	const FString& GameType = *(const FString*)((BYTE*)Level->Game + 0x4b0);
+
+	DWORD bUseDynamic = Level->eventGameTypeUseNbOfTerroristToSpawn(GameType);
+
+	INT Count;
+	if (bUseDynamic == 0)
+	{
+		if (!(GameType == TEXT("RGM_CountDownMode")))
+		{
+			Count = m_iMinTerrorist;
+			if (Count < m_iMaxTerrorist)
+				Count += appRand() % (m_iMaxTerrorist - m_iMinTerrorist + 1);
+			goto NbCap;
+		}
+	}
+
+	// Get count from GRI or GameInfo depending on network mode
+	if (Level->NetMode == 0) // NETMODE_Standalone
+	{
+		// TODO: deep GEngine chain: Engine+0x44 -> +0x30 -> **int -> +0x38 -> +0x34 -> +0x2c -> +0x39c
+		INT A  = *(INT*)((BYTE*)GEngine + 0x44);
+		INT B  = *(INT*)(A + 0x30);
+		INT C  = *(INT*)(*(INT*)B);   // double deref
+		INT D  = *(INT*)(C + 0x38);
+		INT E  = *(INT*)(D + 0x34);
+		INT F  = *(INT*)(E + 0x2c);
+		Count  = *(INT*)(F + 0x39c);  // GRI->m_iNbOfTerroristToSpawn or similar
+	}
+	else
+	{
+		Count = *(INT*)((BYTE*)Level->Game + 0x4d8); // GameInfo->m_iNbOfTerrorist (TODO: no typed name)
+	}
+
+NbCap:
+	{
+		INT MaxCap = *(INT*)((BYTE*)this + 0x4a4); // m_iNbOfTerroristMax (TODO: no typed field name)
+		if (MaxCap < Count)
+		{
+			GLog->Logf(TEXT("%s: NbOfTerrorist capped at %d"), GetName(), MaxCap);
+			Count = MaxCap;
+		}
+	}
+
+	return Count;
+	unguard;
 }
 
 // Verified from Ghidra: shares function body at 0x193c0 with HurtByVolume — returns 0.

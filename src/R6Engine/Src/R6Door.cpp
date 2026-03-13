@@ -10,6 +10,7 @@ IMPLEMENT_CLASS(AR6Door)
 
 AActor * AR6Door::AssociatedLevelGeometry()
 {
+	// Retail 0x1cfb0: shared null-stub, no SEH frame.
 	return NULL;
 }
 

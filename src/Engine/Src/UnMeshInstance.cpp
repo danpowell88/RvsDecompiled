@@ -17,6 +17,7 @@ public:
 // --- ULodMeshInstance ---
 FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 {
+	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
@@ -56,6 +57,7 @@ void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,D
 
 UMaterial * ULodMeshInstance::GetMaterial(int,AActor *)
 {
+	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
@@ -168,6 +170,7 @@ int UMeshInstance::AnimForcePose(FName,float,float,int)
 
 float UMeshInstance::AnimGetFrameCount(void *)
 {
+	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
@@ -191,6 +194,7 @@ int UMeshInstance::AnimGetNotifyCount(void *)
 
 UAnimNotify * UMeshInstance::AnimGetNotifyObject(void *,int)
 {
+	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
@@ -202,6 +206,7 @@ const TCHAR* UMeshInstance::AnimGetNotifyText(void *,int)
 
 float UMeshInstance::AnimGetNotifyTime(void *,int)
 {
+	// Retail 0x145b0: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
@@ -242,11 +247,13 @@ int UMeshInstance::FreezeAnimAt(float,int)
 
 float UMeshInstance::GetActiveAnimFrame(int)
 {
+	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
 float UMeshInstance::GetActiveAnimRate(int)
 {
+	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
@@ -257,6 +264,7 @@ FName UMeshInstance::GetActiveAnimSequence(int)
 
 AActor * UMeshInstance::GetActor()
 {
+	// Retail 0x114310: shared null-stub, no SEH frame.
 	return NULL;
 }
 
@@ -270,11 +278,13 @@ int UMeshInstance::GetAnimCount()
 
 void * UMeshInstance::GetAnimIndexed(int)
 {
+	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
 void * UMeshInstance::GetAnimNamed(FName)
 {
+	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
@@ -293,11 +303,13 @@ void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWOR
 
 UMaterial * UMeshInstance::GetMaterial(int,AActor *)
 {
+	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
 UMesh * UMeshInstance::GetMesh()
 {
+	// Retail 0x114310: shared null-stub, no SEH frame.
 	return NULL;
 }
 
