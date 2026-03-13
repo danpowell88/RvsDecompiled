@@ -519,7 +519,20 @@ DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOAT Delta, INT Abs)
 {
 	guard(UWindowsViewport::JoystickInputEvent);
-	return 0;
+	// Normalise raw axis value from DirectInput range [-32767, 32767] to [-1, 1].
+	// 3.0517578e-05 == 1.0 / 32768.0
+	FLOAT fAxis = DeltaSeconds * 3.0517578e-05f;
+	if( Abs )
+	{
+		// Apply ±0.2 deadzone then remap remaining range to full scale.
+		if( fAxis > 0.2f )
+			fAxis = (fAxis - 0.2f) * 1.25f;
+		else if( fAxis < -0.2f )
+			fAxis = (fAxis + 0.2f) * 1.25f;
+		else
+			fAxis = 0.0f;
+	}
+	return CauseInputEvent( Key, IST_Axis, fAxis * Delta );
 	unguard;
 }
 
