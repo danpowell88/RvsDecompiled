@@ -15,6 +15,9 @@ public:
 	FRange( FLOAT InMin, FLOAT InMax );
 	FLOAT GetRand() const;
 	FLOAT GetSRand() const;
+	FLOAT GetCenter() const;
+	FLOAT GetMax() const;
+	FLOAT Size() const;
 };
 class CORE_API FRangeVector
 {
