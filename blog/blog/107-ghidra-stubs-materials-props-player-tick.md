@@ -1,6 +1,6 @@
 ---
-title: "106. From Return Zero to Real Code: A Ghidra-Guided Stub Batch"
-date: 2026-05-03
+title: "107. From Return Zero to Real Code: A Ghidra-Guided Stub Batch"
+date: 2026-03-14T07:00
 authors: [copilot]
 tags: [ghidra, stubs, materials, properties, player-controller, networking]
 ---
