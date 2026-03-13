@@ -8,12 +8,73 @@ IMPLEMENT_CLASS(AR6StairVolume)
 
 // --- AR6StairVolume ---
 
-void AR6StairVolume::AddMyMarker(AActor *)
+void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
+	guard(AR6StairVolume::AddMyMarker);
+
+	// TODO: Complex function at 0x3c500 (~800 bytes).
+	// Spawns stair navigation markers (R6Stairs) at calculated positions
+	// along the stair volume using the stair orientation direction.
+	// Involves StaticFindObjectChecked for "R6Stairs" class, rotation vector
+	// cross product for stair normal, and multiple SpawnActor vtable calls.
+
+	unguard;
 }
 
 void AR6StairVolume::CheckForErrors()
 {
+	guard(AR6StairVolume::CheckForErrors);
+
+	ABrush::CheckForErrors();
+
+	if (!m_pStairOrientation)
+	{
+		GWarn->Logf(TEXT("%s has no stair orientation marker."), GetName());
+	}
+	else
+	{
+		if (!Encompasses(m_pStairOrientation->Location))
+		{
+			// DIVERGENCE: retail format strings are in data sections; approximate text used.
+			GWarn->Logf(TEXT("%s: stair orientation is outside the volume."), GetName());
+			GWarn->Logf(TEXT("%s might not be the in %s "),
+				m_pStairOrientation->GetName(), GetName());
+		}
+	}
+
+	// Iterate all level actors; count AR6StairOrientation actors pointing to this volume.
+	// Always ends with SetGameType("RGM_AllMode") when the list is exhausted.
+	INT Count = 0;
+	UObject* LastFound = NULL;
+	for (INT i = 0; i < XLevel->Actors.Num(); i++)
+	{
+		AActor* Actor = XLevel->Actors(i);
+		if (!Actor || !Actor->IsA(AR6StairOrientation::StaticClass()))
+			continue;
+
+		AR6StairOrientation* SO = (AR6StairOrientation*)Actor;
+		if (SO->m_pStairVolume != this)
+			continue;
+
+		Count++;
+		LastFound = Actor;
+
+		if (Count > 1)
+		{
+			if (Count == 2)
+			{
+				GWarn->Logf(TEXT("%s has multiple stair orientation actors."), GetName());
+				GWarn->Logf(TEXT("%s might not be the in %s "),
+					LastFound->GetName(), GetName());
+			}
+			GWarn->Logf(TEXT("%s: extra stair orientation actor %s."),
+				GetName(), Actor->GetName());
+		}
+	}
+
+	SetGameType(FString(TEXT("RGM_AllMode")));
+
+	unguard;
 }
 
 void AR6StairVolume::PostScriptDestroyed()

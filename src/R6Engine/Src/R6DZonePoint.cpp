@@ -71,8 +71,13 @@ INT AR6DZonePoint::IsPointInZone(FVector const & Point)
 	return 0;
 }
 
-void AR6DZonePoint::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6DZonePoint::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6DZonePoint::RenderEditorInfo);
+	AR6DeploymentZone::RenderEditorInfo(SceneNode, RI, DA);
+	// Ghidra: additionally draws a bounding box and (if m_bUseReactionZone) a reaction-zone box
+	// when selected (Flags & 0x4000). FLineBatcher drawing is a stub in this project.
+	unguard;
 }
 
 void AR6DZonePoint::Spawned()

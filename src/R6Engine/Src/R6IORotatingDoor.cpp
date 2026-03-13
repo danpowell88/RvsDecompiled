@@ -15,8 +15,20 @@ static FVector GRotatingDoor_OldLocation;
 
 // --- AR6IORotatingDoor ---
 
-void AR6IORotatingDoor::AddMyMarker(AActor *)
+void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
+	guard(AR6IORotatingDoor::AddMyMarker);
+
+	// TODO: Extremely complex function (5061 bytes at 0x1f330).
+	// Spawns R6Door navigation markers at the door's pivot position,
+	// calculates door normal via cross product of rotation vector and Up,
+	// then spawns up to two door actors (m_DoorActorA / m_DoorActorB)
+	// at offset positions depending on m_bIsOpeningClockWise and m_bIsSlidingDoor.
+	// Involves vtable calls to XLevel->SpawnActor via raw pointer dispatch
+	// (*(code**)(*(int*)(this+0x328)+0xa8))() and (*(code**)(*(int*)(this+0x328)+0xcc))().
+	// Full implementation requires resolving multiple FUN_ helpers.
+
+	unguard;
 }
 
 INT AR6IORotatingDoor::DoorOpenTowards(FVector Point)
@@ -73,8 +85,43 @@ void AR6IORotatingDoor::PreNetReceive()
 	unguard;
 }
 
-void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6IORotatingDoor::RenderEditorInfo);
+
+	if ((*(DWORD*)((BYTE*)this + 0xAC) & 0x4000) != 0)
+	{
+		// Ghidra at 0x1d550: computes a rotated direction vector from the door's rotation,
+		// adjusting Yaw by (m_iOpenAngle * 0xFFFF / 360) with sign based on m_bIsOpeningClockWise.
+		// Draws a line from Location to Location + Dir * 128 using FLineBatcher::DrawLine
+		// with color 0xff0000ff (blue).
+
+		FLineBatcher Batcher(*(FRenderInterface**)(*(INT*)((BYTE*)SceneNode + 4) + 0x164), 1, 0);
+
+		FRotator DrawRot;
+		DrawRot.Pitch = *(INT*)((BYTE*)this + 0x240);
+		DrawRot.Roll  = *(INT*)((BYTE*)this + 0x248);
+
+		INT angleUnreal = (*(INT*)((BYTE*)this + 0x46c) * 0xFFFF) / 0x168;
+		if ((((BYTE*)this)[0x488] & 0x40) == 0)
+			angleUnreal = -angleUnreal;
+		DrawRot.Yaw = *(INT*)((BYTE*)this + 0x244) - 0x8000 + angleUnreal;
+
+		FVector Dir = DrawRot.Vector();
+		FVector Start;
+		Start.X = *(FLOAT*)((BYTE*)this + 0x234);
+		Start.Y = *(FLOAT*)((BYTE*)this + 0x238);
+		Start.Z = *(FLOAT*)((BYTE*)this + 0x23c);
+
+		FVector End;
+		End.X = Dir.X * 128.0f + Start.X;
+		End.Y = Dir.Y * 128.0f + Start.Y;
+		End.Z = Dir.Z * 128.0f + Start.Z;
+
+		Batcher.DrawLine(Start, End, FColor((DWORD)0xff0000ff));
+	}
+
+	unguard;
 }
 
 INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)

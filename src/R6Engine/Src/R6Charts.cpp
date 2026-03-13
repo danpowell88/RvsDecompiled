@@ -9,6 +9,9 @@
 
 R6Charts::R6Charts()
 {
+	guard(R6Charts::R6Charts);
+	// Ghidra: constructor body is just 'return this' (implicit).
+	unguard;
 }
 
 R6Charts& R6Charts::operator=(R6Charts const &)

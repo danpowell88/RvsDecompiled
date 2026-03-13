@@ -62,6 +62,44 @@ INT AR6PlayerController::PlayPriority(INT)
 
 void AR6PlayerController::PlayVoicesPriority()
 {
+	guard(AR6PlayerController::PlayVoicesPriority);
+
+	if (m_PlayVoicesPriority.Num() > 0)
+	{
+		for (INT i = 0; i < m_PlayVoicesPriority.Num(); i++)
+		{
+			INT* Entry = (INT*)*(INT*)(*(INT*)((BYTE*)this + 0x900) + i * 4);
+
+			// Entry[5] = bIsPlaying flag
+			if (Entry[5] != 0)
+			{
+				AActor* SoundActor = SelectActorForSound((AR6SoundReplicationInfo*)Entry[0]);
+
+				// Check if sound is still playing via audio subsystem vtable call
+				INT iResult = (*(INT(__thiscall**)(AActor*, INT))
+					(**(INT**)(*(INT*)g_pEngine + 0x48) + 0x8c))
+					(SoundActor, Entry[1]);
+
+				if (iResult == 0)
+				{
+					StopAndRemoveVoices(i);
+				}
+			}
+		}
+
+		if (m_PlayVoicesPriority.Num() > 0)
+		{
+			if (!PlayPriority(5))
+			{
+				if (!PlayPriority(10))
+				{
+					PlayPriority(15);
+				}
+			}
+		}
+	}
+
+	unguard;
 }
 
 void AR6PlayerController::PostNetReceive()
@@ -92,8 +130,27 @@ AActor * AR6PlayerController::SelectActorForSound(AR6SoundReplicationInfo * Soun
 	return (AActor*)SoundRepInfo;
 }
 
-void AR6PlayerController::StopAndRemoveVoices(INT &)
+void AR6PlayerController::StopAndRemoveVoices(INT & Index)
 {
+	guard(AR6PlayerController::StopAndRemoveVoices);
+
+	INT* Entry = (INT*)*(INT*)(*(INT*)((BYTE*)this + 0x900) + Index * 4);
+
+	// If sound is playing, stop it via audio subsystem
+	if (Entry[5] != 0)
+	{
+		AActor* SoundActor = SelectActorForSound((AR6SoundReplicationInfo*)Entry[0]);
+		(*(void(__thiscall**)(AActor*, INT))
+			(**(INT**)(*(INT*)g_pEngine + 0x48) + 0x100))
+			(SoundActor, Entry[1]);
+	}
+
+	// Remove from the TArray and free the memory
+	m_PlayVoicesPriority.Remove(Index, 1);
+	GMalloc->Free(Entry);
+	Index--;
+
+	unguard;
 }
 
 INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
@@ -109,18 +166,73 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 
 void AR6PlayerController::UpdateCircumstantialAction()
 {
+	guard(AR6PlayerController::UpdateCircumstantialAction);
+
+	// TODO: Extremely complex function (0x308c0, ~2000 bytes).
+	// Queries the circumtstantial action system (m_CircumstantialAction at this+0x8b4):
+	// 1. If Role==ROLE_Authority (this[0x2d]==4), clears action query state
+	// 2. Fires a line trace from eye position along view direction (m_fCircumActionRange at this+0x848)
+	// 3. Checks hit actor class hierarchy via IsA for various interactive/pawn types
+	// 4. Extracts material info from hit (bone index, texture params) for reticule identification
+	// 5. In capture-the-enemy mode, does secondary trace for pawn identification
+	// 6. Calls eventR6QueryCircumstantialAction on the hit actor
+	// 7. Updates reticule target position at (this+0x9bc, 0x9c0, 0x9c4)
+	// Full implementation requires resolving PrivateStaticClass_exref comparisons,
+	// FVector0_exref, and vtable dispatch patterns.
+
+	unguard;
 }
 
-void AR6PlayerController::UpdateReticule(FLOAT)
+void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
+	guard(AR6PlayerController::UpdateReticule);
+
+	// TODO: Complex function (0x31010, ~1100 bytes).
+	// Iterates all pawns in the level (XLevel->Actors at this+0x328+0x101c0),
+	// checks if they are alive terrorists (type 0x2), gets bone positions via
+	// USkeletalMeshInstance::GetBoneCoords for "R6 PonyTail1" bone,
+	// projects them to screen via FUN_1002ff80, and finds the closest enemy
+	// in screen-space within the reticule radius. Updates aim target info
+	// at (this+0x8b0, 0x918, 0x91c, 0x920, 0x86c, 0x870).
+	// When target changes, sets blend time at (this+0x87c) to 0.15f (0x3e19999a).
+	// Smoothly interpolates reticule position using DeltaTime / blendTime.
+
+	unguard;
 }
 
-void AR6PlayerController::UpdateReticuleIdentification(AActor *)
+void AR6PlayerController::UpdateReticuleIdentification(AActor * param_1)
 {
+	guard(AR6PlayerController::UpdateReticuleIdentification);
+
+	FString InfoString;
+
+	AR6EngineWeapon* Weapon = *(AR6EngineWeapon**)(*(INT*)((BYTE*)this + 0x8a8) + 0x4fc);
+
+	DWORD bIdentify = 0;
+	if (param_1 != NULL && (*(DWORD*)((BYTE*)param_1 + 0xa4) & 0x800) != 0 &&
+		param_1 != *(AActor**)((BYTE*)this + 0x3d8))
+	{
+		bIdentify = param_1->eventGetReticuleInfo(*(APawn**)((BYTE*)this + 0x3d8), InfoString);
+	}
+
+	Weapon->eventSetIdentifyTarget(bIdentify, bIdentify, InfoString);
+
+	unguard;
 }
 
 void AR6PlayerController::UpdateSpectatorReticule()
 {
+	guard(AR6PlayerController::UpdateSpectatorReticule);
+
+	// TODO: Complex function (0x305f0, 656 bytes).
+	// In spectator mode (Flags & 0x20000): uses own Rotation vector and Location.
+	// Otherwise: uses ViewTarget's GetViewRotation and EyePosition.
+	// Fires a line trace from eye to eye + viewDir * m_fCircumActionRange (this+0x848)
+	// with trace flags 0x210bf. If hit actor has a Pawn owner, copies the pawn's
+	// PlayerReplicationInfo->PlayerName (or Pawn's PlayerName at offset 0x630)
+	// into (this+0xa68). Clears name to empty string if no valid target.
+
+	unguard;
 }
 
 void AR6PlayerController::eventClientNotifySendMatchResults()

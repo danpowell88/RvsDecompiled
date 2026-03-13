@@ -326,8 +326,117 @@ void AR6RainbowAI::resetBoneRotation()
 	MeshInst->SetBoneRotation(FName(TEXT("R6 Neck"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
 }
 
-void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation)
+void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation param_1)
 {
+	guard(AR6RainbowAI::setMemberOrientation);
+
+	INT iYawOffset = 0;
+	BYTE bDesiredPitch = 0;
+
+	// If pawn is prone, skip orientation changes
+	if ((*(DWORD*)(*(INT*)((BYTE*)this + 0x3d8) + 0x3e0) & 0x200) != 0)
+		return;
+
+	// If param_1 matches current orientation, recalculate from formation
+	if (((BYTE*)this)[0x56d] == (BYTE)param_1)
+	{
+		enum ePawnOrientation eNewOri = updatePawnOrientation();
+		((BYTE*)this)[0x56d] = (BYTE)eNewOri;
+	}
+
+	// Need a skeletal mesh
+	INT pawnPtr = *(INT*)((BYTE*)this + 0x3d8);
+	if (*(INT*)(pawnPtr + 0x16c) == 0)
+		return;
+
+	// Verify mesh IsA USkeletalMesh
+	check(*(INT*)(*(INT*)(pawnPtr + 0x16c) + 0x24) != 0 || true);
+
+	// Get the mesh instance - vtable call to MeshGetInstance
+	INT pawnMesh = *(INT*)(pawnPtr + 0x16c);
+	(*(void(__thiscall**)(INT, INT))(**(INT**)pawnMesh + 0x88))(pawnMesh, pawnPtr);
+
+	// Handle peek orientations specially
+	if (param_1 == (enum EPawnOrientation)7)  // PO_PeekLeft
+	{
+		resetBoneRotation();
+		(*(AR6Pawn**)((BYTE*)this + 0x598))->eventSetPeekingInfo(1, 2000.0f, 0);
+		return;
+	}
+	if (param_1 == (enum EPawnOrientation)6)  // PO_PeekRight
+	{
+		resetBoneRotation();
+		(*(AR6Pawn**)((BYTE*)this + 0x598))->eventSetPeekingInfo(1, 0.0f, 1);
+		return;
+	}
+
+	// Clear peeking state if currently peeking
+	AR6Pawn* peekPawn = *(AR6Pawn**)((BYTE*)this + 0x598);
+	if (((BYTE*)peekPawn)[0x39c] != 0)
+	{
+		peekPawn->eventSetPeekingInfo(0, 1000.0f, 0);
+	}
+
+	// If still in a peeking transition, don't change bone rotation
+	FLOAT peekRatio = peekPawn->GetPeekingRatioNorm(
+		*(FLOAT*)((BYTE*)peekPawn + 0x734));
+	if (peekRatio > 0.0f)
+		return;
+
+	// Map orientation enum to yaw offset
+	switch (param_1)
+	{
+	case 1: // PO_FrontLeft
+	case 7: // PO_PeekLeft
+		iYawOffset = 0x1555;
+		break;
+	case 2: // PO_Left
+		iYawOffset = 0x2aab;
+		break;
+	case 3: // PO_Right
+		iYawOffset = -0x2aab;
+		break;
+	case 4: // PO_FrontRight
+	case 6: // PO_PeekRight
+		iYawOffset = -0x1555;
+		break;
+	}
+
+	pawnPtr = *(INT*)((BYTE*)this + 0x3d8);
+
+	// Adjust yaw based on stair climbing state and formation member index
+	if ((*(DWORD*)(pawnPtr + 0x6c4) & 1) != 0)
+	{
+		// On stairs: adjust pitch based on stair direction
+		if ((*(DWORD*)(pawnPtr + 0x6c4) & 2) == 0)
+			bDesiredPitch = (BYTE)((((param_1 != 5) - 1) & 0x1c70) - 0xe38 >> 8);
+		else
+			bDesiredPitch = (BYTE)(((INT)((param_1 != 5) - 1) & (INT)0xffffe390) + 0xe38 >> 8);
+	}
+	else
+	{
+		// Adjust yaw offset based on formation position
+		INT formIdx = *(INT*)((BYTE*)this + 0x574);
+		if (*(INT*)(pawnPtr + 0x68c) == 1 && param_1 != 5)
+		{
+			if (formIdx > 1 && formIdx >= 4)
+				iYawOffset -= 0xe38;
+			// else keep iYawOffset unchanged
+		}
+		else
+		{
+			if (formIdx > 0 && formIdx >= 3)
+				iYawOffset -= 0xe38;
+			else
+				iYawOffset += 0xe38;
+		}
+	}
+
+	// Apply the calculated yaw and pitch to the pawn's desired aim
+	*(BYTE*)(pawnPtr + 0xa28) = bDesiredPitch;
+	*(BYTE*)(pawnPtr + 0xa2a) = (BYTE)(iYawOffset >> 8);
+
+	unguard;
 }
 
 enum ePawnOrientation AR6RainbowAI::updatePawnOrientation()

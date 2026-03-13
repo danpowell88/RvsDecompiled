@@ -13,6 +13,38 @@ static FLOAT GInteractiveObject_OldNetDamagePercentage;
 
 void AR6InteractiveObject::CheckForErrors()
 {
+	guard(AR6InteractiveObject::CheckForErrors);
+
+	// Only check actors of type 8 (interactive objects with a StaticMesh)
+	if (((BYTE*)this)[0x2f] == 0x8 && *(int*)((BYTE*)this + 0x170) != 0 &&
+		*(int*)((BYTE*)this + 0x444) > 0)
+	{
+		for (INT stateIdx = 0; stateIdx < *(int*)((BYTE*)this + 0x444); stateIdx++)
+		{
+			INT stateBase = *(int*)((BYTE*)this + 0x440) + stateIdx * 0x3c;
+			INT actorCount = *(int*)(stateBase + 0x20);
+
+			for (INT actorIdx = 0; actorIdx < actorCount; actorIdx++)
+			{
+				INT actorEntry = *(int*)(stateBase + 0x1c) + actorIdx * 0x10;
+				FString* tagName = (FString*)(actorEntry + 4);
+
+				if (*tagName != TEXT(""))
+				{
+					FString tagCopy = *tagName;
+					UStaticMesh* SM = *(UStaticMesh**)((BYTE*)this + 0x170);
+					FTags* Tag = SM->GetTag(tagCopy);
+					if (Tag == NULL)
+					{
+						GWarn->Logf(TEXT("Invalid tag <%s> in m_StateList[%d].ActorList[%d]"),
+							**tagName, stateIdx, *(int*)(actorEntry + 0xc));
+					}
+				}
+			}
+		}
+	}
+
+	unguard;
 }
 
 void AR6InteractiveObject::PostNetReceive()
@@ -40,8 +72,11 @@ void AR6InteractiveObject::PostNetReceive()
 }
 
 // Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
+// Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
 void AR6InteractiveObject::PostScriptDestroyed()
 {
+	guard(AR6InteractiveObject::PostScriptDestroyed);
+	unguard;
 }
 
 void AR6InteractiveObject::PreNetReceive()
@@ -52,8 +87,30 @@ void AR6InteractiveObject::PreNetReceive()
 	unguard;
 }
 
-void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6InteractiveObject::RenderEditorInfo);
+
+	if ((*(DWORD*)((BYTE*)this + 0xAC) & 0x4000) != 0 &&
+		*(FLOAT*)((BYTE*)this + 0x3b4) != 0.0f)
+	{
+		FLineBatcher Batcher(*(FRenderInterface**)(*(INT*)((BYTE*)SceneNode + 4) + 0x164), 1, 0);
+
+		FPlane Plane;
+		Plane.X = 0.75f;  // 0x3f400000
+		Plane.Y = 1.0f;   // 0x3f800000
+		Plane.Z = 0.0f;
+		Plane.W = 0.0f;
+		FColor Color(Plane);
+
+		FVector Pos;
+		Pos.X = *(FLOAT*)((BYTE*)this + 0x234);
+		Pos.Y = *(FLOAT*)((BYTE*)this + 0x238);
+		Pos.Z = *(FLOAT*)((BYTE*)this + 0x23c);
+		Batcher.DrawSphere(Pos, Color, 10.0f, 8);
+	}
+
+	unguard;
 }
 
 INT AR6InteractiveObject::ShouldTrace(AActor* Other, DWORD TraceFlags)

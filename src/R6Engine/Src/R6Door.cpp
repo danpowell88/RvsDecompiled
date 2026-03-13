@@ -64,8 +64,12 @@ INT AR6Door::PrunePaths()
 	unguard;
 }
 
-void AR6Door::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6Door::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6Door::RenderEditorInfo);
+	// Ghidra: draws direction lines and arc spheres for the door's swing when selected.
+	// FLineBatcher drawing is a stub in this project.
+	unguard;
 }
 
 void AR6Door::addReachSpecs(APawn* Scout, INT bOnlyChanged)

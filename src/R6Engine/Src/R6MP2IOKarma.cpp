@@ -12,6 +12,9 @@ IMPLEMENT_FUNCTION(AMP2IOKarma, -1, execMP2IOKarmaAllNativeFct)
 
 void AMP2IOKarma::CheckForErrors()
 {
+	guard(AMP2IOKarma::CheckForErrors);
+	// Verified from Ghidra: shares function body at 0x1c220 (no-op, just returns).
+	unguard;
 }
 
 INT AMP2IOKarma::KMP2DynKarmaInterface(INT, FVector, FRotator, AActor *)
@@ -19,8 +22,19 @@ INT AMP2IOKarma::KMP2DynKarmaInterface(INT, FVector, FRotator, AActor *)
 	return 0;
 }
 
-void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AMP2IOKarma::RenderEditorInfo);
+
+	if ((*(DWORD*)((BYTE*)this + 0xAC) & 0x4000) != 0)
+	{
+		// TODO: Complex editor rendering that iterates karma constraint list at (this+0x480),
+		// transforms positions by inverse GMath coords, and draws spheres at each constraint point.
+		// Involves FLineBatcher, FCoords, FVector::TransformVectorByTranspose, and per-constraint
+		// iteration with stride 0x2c. Omitted due to unresolved helper FUN_1000d610/FUN_1000ea00.
+	}
+
+	unguard;
 }
 
 void AMP2IOKarma::eventReinitSimulation(INT A)

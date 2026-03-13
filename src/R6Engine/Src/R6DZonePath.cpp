@@ -135,8 +135,14 @@ void AR6DZonePath::PostScriptDestroyed()
 	unguard;
 }
 
-void AR6DZonePath::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6DZonePath::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6DZonePath::RenderEditorInfo);
+	AR6DeploymentZone::RenderEditorInfo(SceneNode, RI, DA);
+	// Ghidra at line 14047: draws lines connecting path nodes and circles around each node
+	// when selected (Flags & 0x4000). Propagates selection to child nodes.
+	// FLineBatcher drawing is a stub in this project.
+	unguard;
 }
 
 void AR6DZonePath::SpawnANewNode(FVector)

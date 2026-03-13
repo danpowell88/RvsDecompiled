@@ -170,8 +170,15 @@ void AR6DZoneRandomPoints::PostScriptDestroyed()
 	unguard;
 }
 
-void AR6DZoneRandomPoints::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6DZoneRandomPoints::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6DZoneRandomPoints::RenderEditorInfo);
+	AR6DeploymentZone::RenderEditorInfo(SceneNode, RI, DA);
+	// Ghidra at line 14815: draws bounding boxes around each random point node
+	// when selected (Flags & 0x4000). Propagates selection state to child nodes
+	// if bSelectNodeInEditor is set.
+	// FLineBatcher drawing is a stub in this project.
+	unguard;
 }
 
 void AR6DZoneRandomPoints::SpawnANewNode(FVector)

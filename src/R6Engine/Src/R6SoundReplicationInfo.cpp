@@ -4,6 +4,9 @@
 
 #include "R6EnginePrivate.h"
 
+// External engine globals
+extern ENGINE_API UEngine* g_pEngine;
+
 IMPLEMENT_CLASS(AR6SoundReplicationInfo)
 
 IMPLEMENT_FUNCTION(AR6SoundReplicationInfo, -1, execPlayLocalWeaponSound)
@@ -46,12 +49,87 @@ INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*
 	return 1;
 }
 
-void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound, BYTE)
+void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYTE CurrentWeapon)
 {
+	guard(AR6SoundReplicationInfo::PlayWeaponSound);
+
+	// Show weapon particules on the pawn's weapon
+	if (*(INT*)((BYTE*)this + 0x3ac) != 0)
+	{
+		AR6EngineWeapon* Weapon = *(AR6EngineWeapon**)(*(INT*)((BYTE*)this + 0x3ac) + 0x4fc);
+		if (Weapon != NULL)
+			Weapon->eventShowWeaponParticules((BYTE)WeaponSound);
+	}
+
+	// Need a weapon info reference
+	if (*(INT*)((BYTE*)this + 0x3b0) == 0)
+		return;
+
+	// If currently playing looping fire sound, stop it first before new sound
+	if (((BYTE*)this)[0x39c] == 6 && (INT)WeaponSound != 10)
+		PlayWeaponSound((enum EWeaponSound)10, CurrentWeapon);
+
+	// Get audio subsystem from engine
+	INT* AudioSub = *(INT**)(*(INT*)((BYTE*)g_pEngine) + 0x48);
+	if (AudioSub == NULL)
+		goto Done;
+
+	// TODO: Full implementation dispatches to audio subsystem based on WeaponSound enum:
+	// case 2: play fire sound
+	// case 3: play fire + echo sound (+ silencer echo if equipped)
+	// case 4: play reload sound
+	// case 5: play fire + suppressed sound (+ silencer suppressed if equipped)
+	// case 6: play looping fire sound (only if not already looping and not flagged)
+	// case 7: play fire + echo + alt fire sound
+	// case 8: play special fire sound
+	// case 9: play special alt fire sound
+	// case 10: stop looping fire, play stop sound (+ silencer stop if equipped)
+	// Each uses vtable call at (*(code**)(*AudioSub + 0x84))(this, soundRef, 2, 0)
+	// Sound references are stored at weapon info offsets (0x3a0..0x460) indexed by CurrentWeapon.
+
+Done:
+	*(DWORD*)((BYTE*)this + 0x3a0) |= 1;
+	((BYTE*)this)[0x39c] = (BYTE)WeaponSound;
+
+	unguard;
 }
 
 void AR6SoundReplicationInfo::PostNetReceive()
 {
+	guard(AR6SoundReplicationInfo::PostNetReceive);
+
+	AActor::PostNetReceive();
+
+	// Decode packed pawn state byte: low nibble = weapon state, high nibble = stance
+	BYTE NewPawnStateByte = ((BYTE*)this)[0x396];
+	if (GSoundRepInfo_OldNewPawnState != NewPawnStateByte)
+	{
+		((BYTE*)this)[0x398] = NewPawnStateByte & 0xf;
+		((BYTE*)this)[0x39a] = NewPawnStateByte >> 4;
+	}
+
+	// Process weapon sound changes
+	if (*(INT*)((BYTE*)this + 0x3b0) != 0)
+	{
+		// TODO: Full implementation checks if the weapon owner has a valid AR6Pawn
+		// via IsA check on the owner's class hierarchy, then:
+		// - If current weapon changed and was playing looping fire (0x6), stops it
+		// - Decodes m_NewWeaponSound byte: low nibble = sound enum, bit 4 = fire flag
+		// - If sound hasn't been played yet (!flag bit 0) and not looping, sets initial state
+		// - Otherwise calls PlayWeaponSound with the decoded sound enum
+	}
+
+	// Sync replicated location to actual Location
+	if (GSoundRepInfo_OldLocation.X != *(FLOAT*)((BYTE*)this + 0x3b4) ||
+		GSoundRepInfo_OldLocation.Y != *(FLOAT*)((BYTE*)this + 0x3b8) ||
+		GSoundRepInfo_OldLocation.Z != *(FLOAT*)((BYTE*)this + 0x3bc))
+	{
+		*(FLOAT*)((BYTE*)this + 0x234) = *(FLOAT*)((BYTE*)this + 0x3b4);
+		*(FLOAT*)((BYTE*)this + 0x238) = *(FLOAT*)((BYTE*)this + 0x3b8);
+		*(FLOAT*)((BYTE*)this + 0x23c) = *(FLOAT*)((BYTE*)this + 0x3bc);
+	}
+
+	unguard;
 }
 
 void AR6SoundReplicationInfo::PreNetReceive()

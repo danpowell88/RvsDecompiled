@@ -27,8 +27,30 @@ IMPLEMENT_FUNCTION(AR6AIController, -1, execPollMoveToPosition)
 
 // --- AR6AIController ---
 
-void AR6AIController::AdjustFromWall(FVector, AActor *)
+void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 {
+	guard(AR6AIController::AdjustFromWall);
+
+	// Only adjust when the AI has the appropriate flag set and is in a movement latent action
+	if ((((BYTE*)this)[0x4ec] & 2) != 0)
+	{
+		INT LatentAction = *(INT*)(*(INT*)((BYTE*)this + 0xc) + 0x28);
+		if (LatentAction == 0x1f5 || LatentAction == 0x1f7 || LatentAction == 0x25a)
+		{
+			// If hit actor is a rotating door and we have a pawn and a door reference
+			if (HitActor != NULL && HitActor->IsA(AR6IORotatingDoor::StaticClass()) &&
+				*(INT*)((BYTE*)this + 0x3d8) != 0 && *(INT*)((BYTE*)this + 0x3e0) != 0)
+			{
+				// TODO: Full implementation gets the door from m_Door (this+0x3e0),
+				// calculates cross product of door-to-pawn direction with door rotation vector,
+				// determines which side the pawn is on, and adjusts the AdjustLoc
+				// to navigate around the door. Involves FUN_1000db10 and vtable dispatch.
+				*(DWORD*)((BYTE*)this + 0x3a8) |= 0x40;
+			}
+		}
+	}
+
+	unguard;
 }
 
 INT AR6AIController::CanHear(FVector, FLOAT, AActor *, enum ENoiseType, enum EPawnType)

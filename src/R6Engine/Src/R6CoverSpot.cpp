@@ -8,8 +8,12 @@ IMPLEMENT_CLASS(AR6CoverSpot)
 
 // --- AR6CoverSpot ---
 
-void AR6CoverSpot::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6CoverSpot::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6CoverSpot::RenderEditorInfo);
+	// Ghidra: draws an arrow cylinder at Location when selected (Flags & 0x4000).
+	// FLineBatcher drawing is a stub in this project.
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

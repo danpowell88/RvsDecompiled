@@ -304,8 +304,14 @@ INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
 	unguard;
 }
 
-void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, FDynamicActor *)
+void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AR6DeploymentZone::RenderEditorInfo);
+	// Ghidra at line 13279: draws deployment zone boundary visualization when selected
+	// (Flags & 0x4000). Draws rectangle or circle outline depending on zone type,
+	// with color coding for terrorist vs hostage zones.
+	// FLineBatcher drawing is a stub in this project.
+	unguard;
 }
 
 void AR6DeploymentZone::SpawnAHostage()
