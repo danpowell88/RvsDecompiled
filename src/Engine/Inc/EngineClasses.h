@@ -6204,6 +6204,9 @@ class ENGINE_API UAnimNotify_DestroyEffect : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_DestroyEffect,UAnimNotify,0,Engine)
+	// Fields at 0x30 (immediately after UAnimNotify::Revision at 0x2C)
+	BITFIELD bExpireParticles : 1; // 0x30 — expire particles on destroy
+	FName    DestroyTag;           // 0x34 — tag of effect actor(s) to destroy
 	// Auto-generated method declarations
 	virtual void Notify(UMeshInstance *,AActor *);
 };
@@ -6220,6 +6223,8 @@ class ENGINE_API UAnimNotify_MatSubAction : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_MatSubAction,UAnimNotify,0,Engine)
+	// Fields at 0x30
+	class UMatSubAction* SubAction; // 0x30 — mat action to start on notify
 	// Auto-generated method declarations
 	virtual void Notify(UMeshInstance *,AActor *);
 };
@@ -6228,6 +6233,8 @@ class ENGINE_API UAnimNotify_Script : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_Script,UAnimNotify,0,Engine)
+	// Fields at 0x30
+	FName NotifyName; // 0x30 — UnrealScript function name to call on the actor
 	// Auto-generated method declarations
 	virtual void Notify(UMeshInstance *,AActor *);
 };
@@ -6246,6 +6253,10 @@ class ENGINE_API UAnimNotify_Sound : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_Sound,UAnimNotify,0,Engine)
+	// Fields at 0x30
+	INT           Radius; // 0x30 — sound radius override
+	FLOAT         Volume; // 0x34 — sound volume override
+	class USound* Sound;  // 0x38 — sound asset to play
 	// Auto-generated method declarations
 	virtual void Notify(UMeshInstance *,AActor *);
 };
