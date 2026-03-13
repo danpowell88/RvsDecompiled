@@ -17,36 +17,50 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- ACamera ---
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
+	guard(ACamera::RenderEditorInfo);
+	unguard;
 }
 
 void ACamera::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
+	guard(ACamera::RenderEditorSelected);
+	unguard;
 }
 
 
 // --- UCameraEffect ---
 void UCameraEffect::PostRender(UViewport *,FRenderInterface *)
 {
+	guard(UCameraEffect::PostRender);
+	unguard;
 }
 
 void UCameraEffect::PreRender(UViewport *,FRenderInterface *)
 {
+	guard(UCameraEffect::PreRender);
+	unguard;
 }
 
 
 // --- UCameraOverlay ---
 void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 {
+	guard(UCameraOverlay::PostRender);
+	unguard;
 }
 
 
 // --- UMotionBlur ---
 void UMotionBlur::PostRender(UViewport *,FRenderInterface *)
 {
+	guard(UMotionBlur::PostRender);
+	unguard;
 }
 
 void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 {
+	guard(UMotionBlur::PreRender);
+	unguard;
 }
 
 void UMotionBlur::Destroy()
@@ -70,14 +84,20 @@ void UMotionBlur::Destroy()
 // --- UViewport ---
 void UViewport::PushHit(HHitProxy const &,int)
 {
+	guard(UViewport::PushHit);
+	unguard;
 }
 
 void UViewport::RefreshAll()
 {
+	guard(UViewport::RefreshAll);
+	unguard;
 }
 
 void UViewport::LockOnActor(AActor *)
 {
+	guard(UViewport::LockOnActor);
+	unguard;
 }
 
 int UViewport::MultiShot()
@@ -87,6 +107,8 @@ int UViewport::MultiShot()
 
 void UViewport::PopHit(int)
 {
+	guard(UViewport::PopHit);
+	unguard;
 }
 
 void UViewport::ChangeInputSet(BYTE bReset)
@@ -98,10 +120,14 @@ void UViewport::ChangeInputSet(BYTE bReset)
 
 void UViewport::ExecProfile(const TCHAR*,int,FOutputDevice &)
 {
+	guard(UViewport::ExecProfile);
+	unguard;
 }
 
 void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor * *)
 {
+	guard(UViewport::ExecuteHits);
+	unguard;
 }
 
 int UViewport::IsDepthComplexity()
