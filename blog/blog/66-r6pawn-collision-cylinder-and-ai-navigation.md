@@ -1,5 +1,5 @@
 ---
-title: "67. R6Pawn: Collision Cylinders, Crouch Blending, and AI Navigation"
+title: "66. R6Pawn: Collision Cylinders, Crouch Blending, and AI Navigation"
 authors: [rvs-team]
 tags: [r6engine, r6pawn, collision, crouch, ai, navigation, ghidra, decompilation]
 ---
