@@ -2653,6 +2653,31 @@ void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 
 void AActor::StartAnimPoll()
 {
+	// Retail RVA 0x120930.
+	// Ensures MeshInstance is current, then queries animation state through
+	// UMeshInstance virtuals at vtable offsets 0xe8 (IsAnimating), 0xf0
+	// (vtable[60] — per-frame anim action), and the DrawType==DT_Mesh helper
+	// at 0x10370b90 which calls AnimGetNotifyCount.  If that returns non-zero
+	// and vtable[0xec] (IsAnimLooping) is false, signals FinishAnim completion.
+	// NOTE: UMeshInstance virtual order in our header may differ from retail
+	// vtable — all base implementations are stubs returning 0, so behaviour
+	// is functionally correct. Verify ordering when USkeletalMeshInstance is
+	// implemented.
+	if( !Mesh )
+		return;
+	Mesh->MeshGetInstance( this );
+	UMeshInstance* mi = MeshInstance;
+	INT fi = appRound( LatentFloat );
+	if( mi->IsAnimating( fi ) )
+		mi->IsAnimPastLastFrame( fi );
+	if( DrawType == DT_Mesh && Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		mi = MeshInstance;
+		if( (INT)mi->AnimGetNotifyCount( reinterpret_cast<void*>(fi) ) )
+			if( !mi->IsAnimLooping( fi ) )
+				GetStateFrame()->LatentAction = EPOLL_FinishAnim;
+	}
 }
 
 INT AActor::CheckAnimFinished( INT Channel )

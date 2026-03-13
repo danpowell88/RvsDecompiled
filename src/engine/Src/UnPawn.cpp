@@ -1814,6 +1814,27 @@ void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 
 void AController::StartAnimPoll()
 {
+	// Retail RVA 0x1209E0.
+	// Mirrors AActor::StartAnimPoll but operates on Pawn's mesh/MeshInstance
+	// while using the controller's own LatentFloat and GetStateFrame().
+	// MeshGetInstance is called with 'this' (controller) as the actor context.
+	if( !Pawn )
+		return;
+	if( !Pawn->Mesh )
+		return;
+	Pawn->Mesh->MeshGetInstance( this );
+	UMeshInstance* mi = Pawn->MeshInstance;
+	INT fi = appRound( LatentFloat );
+	if( mi->IsAnimating( fi ) )
+		mi->IsAnimPastLastFrame( fi );
+	if( Pawn->DrawType == DT_Mesh && Pawn->Mesh )
+	{
+		Pawn->Mesh->MeshGetInstance( this );
+		mi = Pawn->MeshInstance;
+		if( (INT)mi->AnimGetNotifyCount( reinterpret_cast<void*>(fi) ) )
+			if( !mi->IsAnimLooping( fi ) )
+				GetStateFrame()->LatentAction = EPOLL_FinishAnim;
+	}
 }
 
 INT AController::CheckAnimFinished( INT Channel )
