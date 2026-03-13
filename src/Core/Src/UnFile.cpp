@@ -1345,7 +1345,16 @@ CORE_API const TCHAR* appFExt( const TCHAR* Filename )
 
 CORE_API UBOOL appUpdateFileModTime( TCHAR* Filename )
 {
+	guard(appUpdateFileModTime);
+	// Open file for append (which updates its modification time), then close immediately.
+	FArchive* Writer = GFileManager->CreateFileWriter( Filename, FILEWRITE_Append, GNull );
+	if( Writer )
+	{
+		delete Writer;
+		return 1;
+	}
 	return 0;
+	unguard;
 }
 
 CORE_API UBOOL appFindPackageFile( const TCHAR* In, const FGuid* Guid, TCHAR* Out )

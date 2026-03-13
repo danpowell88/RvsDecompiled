@@ -1358,6 +1358,8 @@ void UObject::ResetLoaders( UObject* Pkg, INT DynamicOnly, INT ForceLazyLoad )
 void UObject::VerifyLinker( ULinkerLoad* Linker )
 {
 	guard(UObject::VerifyLinker);
+	if( Linker )
+		Linker->Verify();
 	unguard;
 }
 

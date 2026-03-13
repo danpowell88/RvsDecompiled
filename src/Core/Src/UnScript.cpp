@@ -3702,6 +3702,12 @@ void UObject::execLoadConfig( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 1010, execLoadConfig );
 
+// Static state for package-class iteration (mirrors DAT_101cea80/84/DAT_101ca668 in retail)
+static UObject*         GPkgIterPackage  = NULL;
+static UClass*          GPkgIterClass    = NULL;
+static TArray<UClass*>* GPkgIterArray    = NULL;
+static INT              GPkgIterIndex    = 0;
+
 // native(1005)
 void UObject::execGetFirstPackageClass( FFrame& Stack, RESULT_DECL )
 {
@@ -3709,7 +3715,39 @@ void UObject::execGetFirstPackageClass( FFrame& Stack, RESULT_DECL )
 	P_GET_STR(Package);
 	P_GET_OBJECT(UClass,ObjectClass);
 	P_FINISH;
-	*(UClass**)Result = NULL;
+
+	// Free any previous iteration state.
+	if( GPkgIterArray )
+	{
+		delete GPkgIterArray;
+		GPkgIterArray = NULL;
+	}
+	GPkgIterPackage = NULL;
+	GPkgIterClass   = ObjectClass;
+	GPkgIterIndex   = 0;
+
+	// Load the requested package.
+	const TCHAR* PkgName = Package.Len() ? *Package : TEXT("Core");
+	GPkgIterPackage = LoadPackage( NULL, PkgName, LOAD_NoWarn );
+
+	// Build an array of classes inside this package that match ObjectClass.
+	if( GPkgIterPackage )
+	{
+		GPkgIterArray = new TArray<UClass*>();
+		for( INT i=0; i<GObjObjects.Num(); i++ )
+		{
+			UObject* Obj = GObjObjects(i);
+			if( Obj && Obj->IsA(UClass::StaticClass()) && Obj->IsIn(GPkgIterPackage) )
+			{
+				if( !GPkgIterClass || ((UClass*)Obj)->IsChildOf(GPkgIterClass) )
+					GPkgIterArray->AddItem( (UClass*)Obj );
+			}
+		}
+	}
+
+	*(UClass**)Result = ( GPkgIterArray && GPkgIterArray->Num() > 0 )
+		? (*GPkgIterArray)(0) : NULL;
+	GPkgIterIndex = 1;
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1005, execGetFirstPackageClass );
@@ -3719,7 +3757,10 @@ void UObject::execGetNextClass( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNextClass);
 	P_FINISH;
-	*(UClass**)Result = NULL;
+	if( GPkgIterArray && GPkgIterIndex < GPkgIterArray->Num() )
+		*(UClass**)Result = (*GPkgIterArray)(GPkgIterIndex++);
+	else
+		*(UClass**)Result = NULL;
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1006, execGetNextClass );
@@ -3729,7 +3770,9 @@ void UObject::execRewindToFirstClass( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRewindToFirstClass);
 	P_FINISH;
-	*(UClass**)Result = NULL;
+	GPkgIterIndex = 0;
+	*(UClass**)Result = ( GPkgIterArray && GPkgIterArray->Num() > 0 )
+		? (*GPkgIterArray)(GPkgIterIndex++) : NULL;
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1301, execRewindToFirstClass );
@@ -3739,6 +3782,15 @@ void UObject::execFreePackageObjects( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFreePackageObjects);
 	P_FINISH;
+	// Reset iteration state (mirrors DAT_101cea80=0, DAT_101cea84=0, free DAT_101ca668).
+	GPkgIterPackage = NULL;
+	GPkgIterClass   = NULL;
+	GPkgIterIndex   = 0;
+	if( GPkgIterArray )
+	{
+		delete GPkgIterArray;
+		GPkgIterArray = NULL;
+	}
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1007, execFreePackageObjects );
@@ -3748,6 +3800,7 @@ void UObject::execClearOuter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClearOuter);
 	P_FINISH;
+	Outer = NULL;
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1850, execClearOuter );
@@ -3795,7 +3848,11 @@ void UObject::execGetRegistryKey( FFrame& Stack, RESULT_DECL )
 	P_GET_STR(Key);
 	P_GET_STR_REF(Value);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	FString OutVal;
+	INT bSuccess = RegGet( Dir, Key, OutVal );
+	if( bSuccess )
+		*Value = OutVal;
+	*(INT*)Result = bSuccess;
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1854, execGetRegistryKey );
@@ -3808,7 +3865,7 @@ void UObject::execSetRegistryKey( FFrame& Stack, RESULT_DECL )
 	P_GET_STR(Key);
 	P_GET_STR(Value);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(INT*)Result = RegSet( Dir, Key, Value );
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 1855, execSetRegistryKey );

@@ -408,6 +408,10 @@ public:
 
 CORE_API INT appIsDebuggerPresent();
 
+// Registry helpers (defined in CoreStubs.cpp).
+CORE_API INT RegGet( FString Key, FString Name, FString& Value );
+CORE_API INT RegSet( FString Key, FString Name, FString Value );
+
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
