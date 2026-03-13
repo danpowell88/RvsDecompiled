@@ -1,8 +1,38 @@
 #pragma optimize("", off)
 #include "EnginePrivate.h"
 // --- AJumpDest ---
-void AJumpDest::SetupForcedPath(APawn *,UReachSpec *)
+void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 {
+	guard(AJumpDest::SetupForcedPath);
+	// Retail 0xd67a0, 117B.
+	// AJumpDest-specific fields after ANavigationPoint (starting at +0x3E8):
+	//   +0x3E8: INT NumForcedPaths
+	//   +0x3EC: UReachSpec*[8] ForcedPathSpecs
+	//   +0x40C: FVector[8] ForcedPathVelocities (12 bytes each)
+	INT& count = *(INT*)((BYTE*)this + 0x3E8);
+	if (count > 7)
+	{
+		GWarn->Logf(TEXT("More than 8 paths to this JumpDest!"));
+		return;
+	}
+	FLOAT* vel = (FLOAT*)((BYTE*)this + count * 0xC + 0x40C);
+	vel[0] = 0.0f;
+	vel[1] = 0.0f;
+	vel[2] = 474.0f;  // 0x43e70000 — default Z velocity
+	*(FLOAT*)((BYTE*)Scout + 0x43C) = 9999.0f;  // Scout MaxStepHeight
+	Scout->SetCollisionSize(40.0f, 85.0f);
+	if (XLevel->FarMoveActor(Scout, Spec->End->Location, 0, 0, 0, 0))
+	{
+		FVector jv = Scout->SuggestJumpVelocity(Location, 600.0f, 0.0f);
+		vel = (FLOAT*)((BYTE*)this + count * 0xC + 0x40C);
+		vel[0] = jv.X;
+		vel[1] = jv.Y;
+		vel[2] = jv.Z;
+	}
+	*(FLOAT*)((BYTE*)Scout + 0x43C) = 424.0f;  // 0x43d20000 — restore MaxStepHeight
+	*(UReachSpec**)((BYTE*)this + count * 4 + 0x3EC) = Spec;
+	count++;
+	unguard;
 }
 
 void AJumpDest::ClearPaths()

@@ -17,10 +17,13 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UBinaryFileDownload ---
 void UBinaryFileDownload::StaticConstructor()
 {
+	// Retail: 0x189160, 71b. Sets the config key FString at +0x38 to "Enabled".
+	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
 void UBinaryFileDownload::Tick()
 {
+	// Retail: 0x176d60 (shared empty stub)
 }
 
 int UBinaryFileDownload::TrySkipFile()
@@ -50,6 +53,7 @@ void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 }
 void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 {
+	// Retail: 0x14770 (shared empty stub)
 }
 void UBinaryFileDownload::Serialize(FArchive& Ar)
 {
@@ -85,12 +89,15 @@ void UBinaryFileDownload::DownloadDone()
 }
 void UBinaryFileDownload::DownloadError(const TCHAR*)
 {
+	// Retail: 0x176d60 (shared empty stub)
 }
 
 
 // --- UChannelDownload ---
 void UChannelDownload::StaticConstructor()
 {
+	// Retail: 0x188ea0, 71b. Sets the config key FString at +0x38 to "Enabled".
+	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
 int UChannelDownload::TrySkipFile()
@@ -98,26 +105,66 @@ int UChannelDownload::TrySkipFile()
 	return 0;
 }
 
-void UChannelDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
+void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex, const TCHAR* Data, int DataSize)
 {
+	// Retail: 0x1898c0, 310b.
+	UDownload::ReceiveFile(Connection, PackageIndex, Data, DataSize);
+
+	UChannel* ch = Connection->CreateChannel(CHTYPE_File, 1, -1);
+	*(UChannel**)((BYTE*)this + 0x458) = ch;
+	if (!ch)
+	{
+		const TCHAR* err = LocalizeError(TEXT("ChAllocate"), TEXT("Engine"), NULL);
+		DownloadError(err);
+		DownloadDone();
+		return;
+	}
+
+	// Store back-pointer in channel+0x68, copy channel index to channel+0x270
+	*(UChannelDownload**)((BYTE*)ch + 0x68) = this;
+	*(INT*)((BYTE*)ch + 0x270) = *(INT*)((BYTE*)this + 0x30);
+
+	// Create a bit-packed send bunch, serialize the package GUID into it, then send
+	FOutBunch bunch(ch, 0);
+	typedef void (*GuidSerFn)(void*, void*);
+	((GuidSerFn)0x103bef40)(&bunch, (void*)(*(INT*)((BYTE*)this + 0x34) + 0x14));
+
+	// FArchive::ArIsError is at +0x30 in the FArchive base
+	if (*(UBOOL*)((BYTE*)&bunch + 0x30))
+		appFailAssert("!Bunch.IsError()", ".\\UnDownload.cpp", 0x105);
+
+	ch->SendBunch(&bunch, 0);
 }
 
-void UChannelDownload::Serialize(FArchive &)
+void UChannelDownload::Serialize(FArchive& Ar)
 {
+	// Retail: 0x188f20, 84b.
+	UDownload::Serialize(Ar);
+	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
 
 void UChannelDownload::Destroy()
 {
+	// Retail: 0x1890d0, 84b. Clear the channel's back-pointer, then chain to base Destroy.
+	INT ch = *(INT*)((BYTE*)this + 0x458);
+	if (ch != 0 && *(UChannelDownload**)(ch + 0x68) == this)
+		*(DWORD*)(ch + 0x68) = 0;
+	*(DWORD*)((BYTE*)this + 0x458) = 0;
+	UDownload::Destroy();
 }
 
 
 // --- UDownload ---
 void UDownload::StaticConstructor()
 {
+	// Retail: 0x1889d0, 80b. Initialise config key FString at +0x38 to "" and zero +0x44.
+	*(FString*)((BYTE*)this + 0x38) = TEXT("");
+	*(DWORD*)((BYTE*)this + 0x44) = 0;
 }
 
 void UDownload::Tick()
 {
+	// Retail: 0x176d60 (shared empty stub)
 }
 
 int UDownload::TrySkipFile()
@@ -132,8 +179,32 @@ int UDownload::TrySkipFile()
 	return 1;
 }
 
-void UDownload::ReceiveData(BYTE*,int)
+void UDownload::ReceiveData(BYTE* Data, int Size)
 {
+	// Retail: 0x188b10, 544b. Lazy-open a temp file on the first call, then append data.
+	// +0x44c = total bytes received; +0x48 = FArchive* write handle; +0x4c = temp path buffer.
+	if (*(INT*)((BYTE*)this + 0x44c) == 0 && *(INT*)((BYTE*)this + 0x48) == 0)
+	{
+		// Ensure the cache directory exists, then create a unique temp filename inside it
+		const TCHAR* cachePath = *((FString*)((BYTE*)GSys + 0x44));
+		GFileManager->MakeDirectory(cachePath);
+		cachePath = *((FString*)((BYTE*)GSys + 0x44));
+		appCreateTempFilename(cachePath, (TCHAR*)((BYTE*)this + 0x4c));
+		*(FArchive**)((BYTE*)this + 0x48) = GFileManager->CreateFileWriter(
+			(const TCHAR*)((BYTE*)this + 0x4c), 0, GNull);
+	}
+	FArchive* archive = *(FArchive**)((BYTE*)this + 0x48);
+	if (!archive)
+	{
+		const TCHAR* err = LocalizeError(TEXT("NetOpen"), TEXT("Engine"), NULL);
+		DownloadError(err);
+		return;
+	}
+	if (Size > 0)
+	{
+		archive->Serialize(Data, Size);
+		*(INT*)((BYTE*)this + 0x44c) += Size;
+	}
 }
 
 void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR* /*Data*/, int /*DataSize*/)
@@ -145,19 +216,105 @@ void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR
 	*(INT*)((BYTE*)this + 0x34) = Channel * 0x44 + *(INT*)(ChannelTable + 0x2C);
 }
 
-void UDownload::Serialize(FArchive &)
+void UDownload::Serialize(FArchive& Ar)
 {
+	// Retail: 0x188a60, 82b.
+	UObject::Serialize(Ar);
+	Ar << *(UObject**)((BYTE*)this + 0x2c);
 }
 
 void UDownload::Destroy()
 {
+	// Retail: 0x188df0, 124b. Close and delete the temp file, clear connection back-pointer.
+	if (*(INT*)((BYTE*)this + 0x48) != 0)
+	{
+		// Virtual delete: vtable[0](archive, 1) = scalar_deleting_destructor with flag 1
+		void* arch = *(void**)((BYTE*)this + 0x48);
+		typedef void (__thiscall* DtorFn)(void*, INT);
+		((DtorFn)(*(INT*)(*(INT*)arch)))(arch, 1);
+		*(INT*)((BYTE*)this + 0x48) = 0;
+		GFileManager->Delete((const TCHAR*)((BYTE*)this + 0x4c), 0, 0);
+	}
+	INT conn = *(INT*)((BYTE*)this + 0x2c);
+	if (conn != 0 && *(UDownload**)(conn + 0x4ba8) == this)
+		*(INT*)(conn + 0x4ba8) = 0;
+	*(INT*)((BYTE*)this + 0x2c) = 0;
+	UObject::Destroy();
 }
 
 void UDownload::DownloadDone()
 {
+	// Retail: 0x18ae80, 1347b. Finalises the download: closes the temp file, moves it
+	// to the cache directory under a GUID-based name, and triggers package loading.
+	// NOTE: Full package-load sequence (FUN_103b1d90 + cache.ini write) is a TODO.
+
+	// 1. Close and free the write archive
+	if (*(INT*)((BYTE*)this + 0x48) != 0)
+	{
+		void* arch = *(void**)((BYTE*)this + 0x48);
+		typedef void (__thiscall* DtorFn)(void*, INT);
+		((DtorFn)(*(INT*)(*(INT*)arch)))(arch, 1);
+		*(INT*)((BYTE*)this + 0x48) = 0;
+	}
+
+	// 2. If not skip mode, do the cache move + package load
+	if (*(INT*)((BYTE*)this + 0x450) == 0)
+	{
+		// Build final cache path: "CachePath\<GUID>.uxx"
+		typedef const TCHAR* (*GuidStrFn)(void*);
+		const TCHAR* guidStr = ((GuidStrFn)0x103bef50)((void*)(*(INT*)((BYTE*)this + 0x34) + 0x14));
+		TCHAR finalPath[512];
+		appSprintf(finalPath, TEXT("%s\\%s.uxx"), *((FString*)((BYTE*)GSys + 0x44)), guidStr);
+
+		// If no data arrived and no prior error, report a refused download
+		if (*(WCHAR*)((BYTE*)this + 0x24c) == 0 && *(INT*)((BYTE*)this + 0x44c) == 0)
+		{
+			const TCHAR* err = LocalizeError(TEXT("NetRefused"), TEXT("Engine"), NULL);
+			DownloadError(err);
+		}
+
+		if (*(WCHAR*)((BYTE*)this + 0x24c) == 0)
+		{
+			// Verify the received file size matches the expected package size
+			INT expectedSize = *(INT*)(*(INT*)((BYTE*)this + 0x34) + 0x24);
+			INT actualSize = GFileManager->FileSize((const TCHAR*)((BYTE*)this + 0x4c));
+			if (actualSize != expectedSize)
+			{
+				const TCHAR* err = LocalizeError(TEXT("NetSize"), TEXT("Engine"), NULL);
+				DownloadError(err);
+			}
+
+			if (*(WCHAR*)((BYTE*)this + 0x24c) == 0)
+			{
+				// Move temp file to final cache path
+				INT moved = GFileManager->Move(finalPath, (const TCHAR*)((BYTE*)this + 0x4c), 1, 0, 0);
+				if (!moved)
+				{
+					const TCHAR* err = LocalizeError(TEXT("NetMove"), TEXT("Engine"), NULL);
+					DownloadError(err);
+				}
+
+				if (*(WCHAR*)((BYTE*)this + 0x24c) == 0)
+				{
+					// TODO: full package-load sequence
+					// FUN_103b1d90() + write to cache.ini via appSprintf + FString
+					typedef void (*PkgLoadFn)();
+					((PkgLoadFn)0x103b1d90)();
+				}
+			}
+		}
+	}
+
+	// 3. Clear the connection back-pointer
+	INT conn = *(INT*)((BYTE*)this + 0x2c);
+	if (conn != 0 && *(UDownload**)(conn + 0x4ba8) == this)
+		*(INT*)(conn + 0x4ba8) = 0;
+	*(INT*)((BYTE*)this + 0x2c) = 0;
 }
 
-void UDownload::DownloadError(const TCHAR*)
+void UDownload::DownloadError(const TCHAR* Error)
 {
+	// Retail: 0x188d70, 79b. Copy error string into the error buffer at +0x24c.
+	appStrcpy((TCHAR*)((BYTE*)this + 0x24c), Error);
 }
 

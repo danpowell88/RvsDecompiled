@@ -413,8 +413,179 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
 	guard(ULevel::DestroyActor);
-	/* TODO: Full DestroyActor implementation */
-	return 0;
+
+	if ( !Actor )
+		appFailAssert("ThisActor", ".\\UnLevAct.cpp", 0x11f);
+	if ( !Actor->IsValid() )
+		appFailAssert("ThisActor->IsValid()", ".\\UnLevAct.cpp", 0x120);
+
+	if ( !GIsEditor )
+	{
+		// bStatic (0x1) or bNoDelete (0x4): cannot destroy
+		if ( *(DWORD*)((BYTE*)Actor + 0xa0) & 0x5 )
+			return 0;
+		// bDeleteMe (0x80): already being destroyed
+		if ( *(DWORD*)((BYTE*)Actor + 0xa0) & 0x80 )
+			return 1;
+
+		// Network: if client, non-Authority actors normally can't be destroyed
+		// (simplified — full net logic omitted, TODO: FUN_103b7b70 check)
+		ALevelInfo* li = GetLevelInfo();
+		if ( li && *(BYTE*)((BYTE*)li + 0x425) == 3 && // NM_Client
+		     NetDriver && NetDriver->ServerConnection )
+		{
+			// TODO: FUN_103b7b70 — server-driven destruction check
+		}
+
+		// Role check: if not Authority and no bNetForce/bHiddenEd/bBegunPlay
+		if ( Actor->Role != ROLE_Authority && !bNetForce &&
+		     !(*(DWORD*)((BYTE*)Actor + 0xa0) & 0x10000000) && // bNetTemporary
+		     !(*(DWORD*)((BYTE*)Actor + 0xa0) & 0x10) &&        // bHiddenEd
+		     li && !(*(BYTE*)((BYTE*)li + 0x454) & 1) )        // not bBegunPlay
+			return 0;
+	}
+
+	// Find actor's slot in Actors array
+	INT iActor = GetActorIndex(Actor);
+
+	// Notify undo system
+	if ( GUndo )
+		GUndo->SaveArray(*(UObject**)((BYTE*)this + 0x3c),
+			(FArray*)&Actors, iActor, 1, 0, sizeof(AActor*), NULL, NULL);
+
+	// Collision off: vtable slot 0x20 (some actor pre-destroy notify)
+	typedef void (__thiscall* VoidFn)(void*);
+	typedef void (__thiscall* SetBaseFn)(void*, void*, INT);
+	((VoidFn)(*(DWORD*)(*(DWORD*)Actor + 0x20)))(Actor);
+
+	// Mark bBlockActors/bBlockPlayers bits cleared
+	*(DWORD*)((BYTE*)Actor + 0xa8) |= 0x100; // bBlockPlayers clear
+
+	// End state
+	FStateFrame* sf = Actor->GetStateFrame();
+	if ( sf && sf->Code && sf->StateNode )
+		Actor->eventEndState();
+
+	if ( !Actor->bDeleteMe )
+	{
+		// Detach from base (vtable slot 0xd0 on actor = SetBase(NULL))
+		if ( *(INT*)((BYTE*)Actor + 0x15c) ) // bNetOwner or attachment flag
+		{
+			typedef void (__thiscall* SetBaseFn2)(void*, void*, FVector, INT);
+			((SetBaseFn2)(*(DWORD*)(*(DWORD*)Actor + 0xd0)))(Actor, NULL, FVector(0,0,-1), 1);
+		}
+
+		// Detach all attached actors
+		INT nAttached = ((FArray*)((BYTE*)Actor + 0x1d4))->Num();
+		for ( INT i = 0; i < nAttached; i++ )
+		{
+			AActor* child = *(AActor**)(*(BYTE**)((BYTE*)Actor + 0x1d4) + i * 4);
+			if ( child )
+			{
+				typedef void (__thiscall* SetBaseFn3)(void*, void*, FVector, INT);
+				((SetBaseFn3)(*(DWORD*)(*(DWORD*)child + 0xd0)))(child, NULL, FVector(0,0,-1), 1);
+			}
+		}
+
+		// Fire Destroyed event if probing
+		if ( Actor->IsProbing(NAME_Destroyed) )
+		{
+			UFunction* fn = Actor->FindFunctionChecked(NAME_Destroyed, 0);
+			Actor->ProcessEvent(fn, NULL, NULL);
+		}
+
+		// Post-script-destroyed vtable (slot 0xb8)
+		((VoidFn)(*(DWORD*)(*(DWORD*)Actor + 0xb8)))(Actor);
+
+		if ( !Actor->bDeleteMe )
+		{
+			// Detach from owner / base chains and fire touch/EndTouch
+			for ( INT i = 0; i < Actors.Num(); i++ )
+			{
+				AActor* a = Actors(i);
+				if ( !a ) continue;
+				if ( *(AActor**)((BYTE*)a + 0x140) == Actor ) // Base == Actor
+				{
+					a->SetOwner(NULL);
+					if ( Actor->bDeleteMe ) return 1;
+				}
+				// TODO: FUN_1037a010 — touching check + EndTouch
+			}
+
+			// LostChild notification to base
+			AActor* base = *(AActor**)((BYTE*)Actor + 0x140);
+			if ( !base || !Actor->bDeleteMe )
+			{
+				if ( base )
+					base->eventLostChild(Actor);
+
+				if ( !Actor->bDeleteMe )
+				{
+					// Notify net drivers
+					if ( *(INT*)((BYTE*)this + 0x40) ) // NetDriver
+					{
+						typedef void (__thiscall* NotifyFn)(void*, void*);
+						((NotifyFn)(*(DWORD*)(**(DWORD**)((BYTE*)this + 0x40) + 0x84)))(
+							*(void**)((BYTE*)this + 0x40), Actor);
+					}
+
+					BYTE* demoDriver = *(BYTE**)((BYTE*)this + 0x8c);
+					if ( demoDriver && *(INT*)(demoDriver + 0xf * 4) == 0 )
+					{
+						typedef void (__thiscall* NotifyFn2)(void*, void*);
+						((NotifyFn2)(*(DWORD*)(*(DWORD*)demoDriver + 0x84)))(demoDriver, Actor);
+					}
+
+					// Remove from collision hash
+					FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+					if ( hash )
+					{
+						if ( *(DWORD*)((BYTE*)Actor + 0xa8) & 0x800 ) // bCollideActors
+							hash->RemoveActor(Actor);
+						// ActorOverlapCheck cleanup (vtable 0x24 of hash)
+						typedef void (__thiscall* OverlapFn)(void*, void*);
+						((OverlapFn)(*(DWORD*)(*(DWORD*)hash + 0x24)))(hash, Actor);
+					}
+
+					// Sanity check and null out slot
+					if ( *(AActor**)(*(BYTE**)&Actors + iActor * 4) != Actor )
+						appFailAssert("Actors(iActor)==ThisActor", ".\\UnLevAct.cpp", 0x1d9);
+					*(AActor**)(*(BYTE**)&Actors + iActor * 4) = NULL;
+
+					// Set bDeleteMe
+					*(DWORD*)((BYTE*)Actor + 0xa0) |= 0x80;
+
+					// Notify engine renderer (Engine->Client renderer at 0x48)
+					{
+						BYTE* eng = *(BYTE**)((BYTE*)this + 0x44);
+						BYTE* renderer = *(BYTE**)(eng + 0x48);
+						if ( renderer )
+						{
+							typedef void (__thiscall* RenderFn)(void*, void*);
+							((RenderFn)(*(DWORD*)(*(DWORD*)renderer + 0x104)))(renderer, Actor);
+						}
+					}
+
+					Actor->ConditionalDestroy();
+
+					if ( !GIsEditor )
+					{
+						// Add to FirstDeleted linked list
+						*(INT*)((BYTE*)Actor + 0x160) = *(INT*)((BYTE*)this + 0xf4);
+						*(AActor**)((BYTE*)this + 0xf4) = Actor;
+					}
+					else
+					{
+						// Editor: compact actors
+						typedef void (__thiscall* CompactFn)(void*, INT);
+						((CompactFn)(*(DWORD*)(*(DWORD*)this + 0xa4)))(this, 1);
+					}
+				}
+			}
+		}
+	}
+
+	return 1;
 	unguard;
 }
 
@@ -480,8 +651,212 @@ void ULevel::CleanupDestroyed( INT bForce )
 AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRotator Rotation, AActor* Template, INT bNoCollisionFail, INT bRemoteOwned, AActor* SpawnTag, APawn* Instigator )
 {
 	guard(ULevel::SpawnActor);
-	/* TODO: Full SpawnActor implementation */
-	return NULL;
+
+	// Null class check
+	if ( !Class )
+	{
+		GLog->Logf(TEXT("SpawnActor: NULL class"));
+		return NULL;
+	}
+
+	// Abstract class check: byte at +0x48c, bit 0 = CLASS_Abstract
+	if ( *(BYTE*)((BYTE*)Class + 0x48c) & 1 )
+	{
+		GLog->Logf(TEXT("SpawnActor: cannot spawn abstract class %s"), Class->GetName());
+		return NULL;
+	}
+
+	// Must be a child of AActor
+	if ( !Class->IsChildOf(AActor::StaticClass()) )
+	{
+		GLog->Logf(TEXT("SpawnActor: %s is not an AActor subclass"), Class->GetName());
+		return NULL;
+	}
+
+	// Get default object as template if not provided
+	if ( !Template )
+		Template = Class->GetDefaultActor();
+	if ( !Template )
+		appFailAssert("Template!=NULL", ".\\UnLevAct.cpp", 0x3e);
+
+	// Reject static/no-delete actors in game mode
+	if ( !GIsEditor )
+	{
+		if ( (*(BYTE*)((BYTE*)Template + 0xa0) & 0x1) || // bStatic
+		     (*(BYTE*)((BYTE*)Template + 0xa0) & 0x4) )  // bNoDelete
+			return NULL;
+	}
+
+	// FindSpot pre-check if bCollideWhenPlacing or (bShouldBaseAtStartup and not a client)
+	if ( !bNoCollisionFail &&
+	     ( (*(DWORD*)((BYTE*)Template + 0xa8) & 0x1000) ||   // bCollideWhenPlacing
+	       ( (*(DWORD*)((BYTE*)Template + 0xa8) & 0x8) &&    // bShouldBaseAtStartup
+	         GetLevelInfo() && *(BYTE*)((BYTE*)GetLevelInfo() + 0x425) != 3 ) ) ) // not NM_Client
+	{
+		FVector Extent = Template->GetCylinderExtent();
+		if ( !FindSpot(Extent, Location, 1, NULL) )
+			return NULL;
+	}
+
+	// Find a free slot in the Actors array (implements FUN_10318800)
+	INT slot = INDEX_NONE;
+	{
+		INT iFirst = *(INT*)((BYTE*)this + 0x104); // iFirstDynamicActor
+		for ( INT i = iFirst; i < Actors.Num(); i++ )
+		{
+			if ( Actors(i) == NULL ) { slot = i; break; }
+		}
+		if ( slot == INDEX_NONE )
+		{
+			Actors.AddItem(NULL);
+			slot = Actors.Num() - 1;
+		}
+	}
+
+	// Construct the actor object
+	AActor* Actor = (AActor*)UObject::StaticConstructObject(Class, GetOuter(), NAME_None, 0, Template, GError, NULL);
+	*(AActor**)(*(BYTE**)&Actors + slot * 4) = Actor;
+	Actor->SetFlags(RF_Transactional);
+
+	// Set Tag to the class FName
+	Actor->Tag = Class->GetFName();
+
+	// Zone / region setup
+	ALevelInfo* LI = GetLevelInfo();
+	*(ALevelInfo**)((BYTE*)Actor + 0x228) = LI; // Zone
+	*(INT*)((BYTE*)Actor + 0x22c) = INDEX_NONE; // iZone
+	*(INT*)((BYTE*)Actor + 0x230) = 0;          // Region.ZoneIndex cleared
+
+	// Level refs
+	Actor->Level  = LI;
+	Actor->XLevel = this;
+
+	// bTicked = (FrameTag == 0): set bit 0 of the flag DWORD at +0x320
+	{
+		INT FrameTag = *(INT*)((BYTE*)this + 0x100);
+		DWORD& ticked = *(DWORD*)((BYTE*)Actor + 0x320);
+		ticked = ticked ^ ( ((DWORD)(FrameTag == 0) ^ ticked) & 1 );
+	}
+
+	// Role must be ROLE_Authority on freshly constructed actors
+	if ( Actor->Role != ROLE_Authority )
+		appFailAssert("Actor->Role==ROLE_Authority", ".\\UnLevAct.cpp", 0x54);
+
+	// If bRemoteOwned, swap Role and RemoteRole
+	if ( bRemoteOwned )
+	{
+		BYTE tmp = Actor->Role;
+		Actor->Role = Actor->RemoteRole;
+		Actor->RemoteRole = tmp;
+	}
+
+	// Clear physics
+	Actor->Physics = 0;
+
+	// Set location and rotation
+	Actor->Location = Location;
+	Actor->Rotation = Rotation;
+
+	// Add to collision hash
+	FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash ) // bCollideActors
+		hash->AddActor(Actor);
+
+	// Re-setup zone and region
+	*(ALevelInfo**)((BYTE*)Actor + 0x228) = GetLevelInfo();
+	*(INT*)((BYTE*)Actor + 0x22c) = INDEX_NONE;
+	*(INT*)((BYTE*)Actor + 0x230) = 0;
+
+	// Copy CullDistance from LevelInfo
+	*(FLOAT*)((BYTE*)Actor + 0x164) = *(FLOAT*)((BYTE*)GetLevelInfo() + 0x164);
+
+	// Set owner and instigator
+	Actor->SetOwner(SpawnTag);
+	Actor->Instigator = Instigator;
+
+	// TODO: FUN_10359790 — actor zone/BSP-leaf initialisation helper
+
+	// InitExecution and SetBase (base=NULL)
+	typedef void (__thiscall* VoidFn)(void*);
+	((VoidFn)(*(DWORD*)(*(DWORD*)Actor + 0x3c)))(Actor); // InitExecution
+	((VoidFn)(*(DWORD*)(*(DWORD*)Actor + 0x90)))(Actor); // SetBase(NULL)
+
+	// Pre-play events
+	Actor->eventPreBeginPlay();
+	Actor->eventBeginPlay();
+
+	// If actor was destroyed during BeginPlay, bail out
+	if ( Actor->bDeleteMe )
+		return NULL;
+
+	// Post-BeginPlay collision init (vtable slot 0x10c)
+	((VoidFn)(*(DWORD*)(*(DWORD*)Actor + 0x10c)))(Actor);
+
+	// Update render data
+	Actor->UpdateRenderData();
+
+	// Encroachment check (if bNoCollisionFail == 0)
+	if ( !bNoCollisionFail )
+	{
+		if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
+			hash->RemoveActor(Actor);
+
+		INT encroach = CheckEncroachment(Actor, Actor->Location, Actor->Rotation, 0);
+		if ( encroach )
+		{
+			DestroyActor(Actor, 0);
+			return NULL;
+		}
+
+		if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
+			hash->AddActor(Actor);
+	}
+
+	// Post-spawn events
+	Actor->eventPostBeginPlay();
+
+	// Rigid body / rendering init (vtable slot 0x118)
+	((VoidFn)(*(DWORD*)(*(DWORD*)Actor + 0x118)))(Actor);
+
+	Actor->eventSaveAndResetData();
+
+	// PostNetBeginPlay only on server/standalone (not NM_Client = 3)
+	if ( LI && *(BYTE*)((BYTE*)LI + 0x425) != 3 )
+		Actor->eventPostNetBeginPlay();
+
+	Actor->eventSetInitialState();
+
+	// FindBase if not static and physics is PHYS_None/PHYS_Rotating and not editor
+	if ( !GIsEditor &&
+	     !(*(INT*)((BYTE*)Actor + 0x15c)) &&  // not bNetTemporary-like flag
+	     (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x1000) && // bCollideWhenPlacing
+	     ((signed char)(*(DWORD*)((BYTE*)Actor + 0xa8)) < 0) && // bBlockActors (highest bit)
+	     ( Actor->Physics == 0 || Actor->Physics == 5 ) ) // PHYS_None or PHYS_Rotating
+	{
+		Actor->FindBase();
+	}
+
+	// If ticking, add to NewlySpawned list (single-linked list in GEngineMem)
+	if ( *(INT*)((BYTE*)this + 0xfc) ) // bInTick
+	{
+		BYTE* node = (BYTE*)GEngineMem.PushBytes(8, 8);
+		if ( node )
+		{
+			*(AActor**)node = Actor;
+			*(DWORD*)(node + 4) = *(DWORD*)((BYTE*)this + 0xf8);
+		}
+		*(BYTE**)((BYTE*)this + 0xf8) = node;
+	}
+
+	// In editor: initialise game type if hidden-in-editor
+	if ( GIsEditor && (*(DWORD*)((BYTE*)Actor + 0xa0) & 0x10) ) // bHiddenEd
+	{
+		ALevelInfo* li2 = GetLevelInfo();
+		FString gameTypeName = li2 ? *(FString*)((BYTE*)li2 + 0x8b0) : FString();
+		Actor->SetGameType(gameTypeName);
+	}
+
+	return Actor;
 	unguard;
 }
 

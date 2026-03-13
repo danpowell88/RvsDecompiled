@@ -181,6 +181,10 @@ int FBspVertexStream::GetStride()
 // --- FLevelSceneNode ---
 void FLevelSceneNode::Render(FRenderInterface *)
 {
+	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
+	// TODO: translate full Ghidra body.
+	guard(FLevelSceneNode::Render);
+	unguard;
 }
 
 int FLevelSceneNode::FilterActor(AActor* Actor)
@@ -338,6 +342,12 @@ int FLightMap::GetRevision()
 }
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
+	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
+	// computes lighting contributions from each dynamic light, and copies
+	// the result into param_2. Too complex to translate in full here.
+	// TODO: translate full Ghidra body.
+	guard(FLightMap::GetTextureData);
+	unguard;
 }
 ETexClampMode FLightMap::GetUClamp()
 {
@@ -1460,10 +1470,17 @@ FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
 // --- FLightMapIndex ---
 FLightMapIndex::FLightMapIndex()
 {
+	// Ghidra 0x2b40: constructs FMatrix at +8 and +0x48, FVector at +0x88, +0x94, +0xA0.
+	// Header omits member fields; sub-object construction handled by compiler via member decls.
+	guard(FLightMapIndex::FLightMapIndex);
+	unguard;
 }
 
 FLightMapIndex::~FLightMapIndex()
 {
+	// Ghidra 0x2bc0: destructs FMatrix at +0x48 then +8.
+	guard(FLightMapIndex::~FLightMapIndex);
+	unguard;
 }
 
 FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex& Other)
@@ -1483,6 +1500,9 @@ FLineVertex::FLineVertex(FVector InPoint, FColor InColor)
 
 FLineVertex::FLineVertex()
 {
+	// Ghidra 0x3810: calls FVector::FVector((FVector*)this) — Point default-initialised.
+	guard(FLineVertex::FLineVertex);
+	unguard;
 }
 
 FLineVertex& FLineVertex::operator=(const FLineVertex& Other)
