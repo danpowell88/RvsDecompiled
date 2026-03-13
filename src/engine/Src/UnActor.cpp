@@ -2554,7 +2554,27 @@ void AActor::UpdateTimers( FLOAT DeltaSeconds )
 INT AActor::CheckOwnerUpdated()
 {
 	guard(AActor::CheckOwnerUpdated);
-	return 1;
+	// Retail 0xC3460: detect owner network-state change and queue actor for replication.
+	// this+0x140 = Owner, Owner+0x320 bit0 = network state bit,
+	// this+0x328 = replication-node ptr (ctrl), ctrl+0x100 = stored state, ctrl+0xF8 = list head.
+	// Divergence: retail uses a FMemStack frame-arena allocator; we use appMalloc.
+	AActor* owner = *(AActor**)((BYTE*)this + 0x140);
+	if ( !owner ) return 1;
+	INT ownerBit = *(INT*)((BYTE*)owner + 0x320) & 1;
+	BYTE* ctrl   = *(BYTE**)((BYTE*)this + 0x328);
+	INT   ctrlBit = *(INT*)(ctrl + 0x100);
+	if ( ownerBit == ctrlBit ) return 1;
+	struct OwnedActorLink { void* Actor; OwnedActorLink* Prev; };
+	OwnedActorLink* node = (OwnedActorLink*)appMalloc( sizeof(OwnedActorLink), TEXT("OwnerUpdateNode") );
+	if ( !node )
+	{
+		*(void**)(ctrl + 0xF8) = NULL;
+		return 0;
+	}
+	node->Actor = this;
+	node->Prev  = *(OwnedActorLink**)(ctrl + 0xF8);
+	*(OwnedActorLink**)(ctrl + 0xF8) = node;
+	return 0;
 	unguard;
 }
 

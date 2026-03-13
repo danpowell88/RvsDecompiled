@@ -80,7 +80,34 @@ void AKConstraint::CheckForErrors()
 
 int AKConstraint::CheckOwnerUpdated()
 {
-	return 0;
+	// Retail 0x5A410: same replication-queue logic as AActor, but checks Owner,
+	// this+0x3C0 (KConstraintActor1) and this+0x3C4 (KConstraintActor2).
+	// If any of the three changes network state, queue this actor and return 0.
+	guard(AKConstraint::CheckOwnerUpdated);
+	struct OwnedActorLink { void* Actor; OwnedActorLink* Prev; };
+	auto tryQueue = [&]() -> INT
+	{
+		BYTE* ctrl = *(BYTE**)((BYTE*)this + 0x328);
+		OwnedActorLink* node = (OwnedActorLink*)appMalloc( sizeof(OwnedActorLink), TEXT("OwnerUpdateNode") );
+		if ( !node ) { *(void**)(ctrl + 0xF8) = NULL; return 0; }
+		node->Actor = this;
+		node->Prev  = *(OwnedActorLink**)(ctrl + 0xF8);
+		*(OwnedActorLink**)(ctrl + 0xF8) = node;
+		return 0;
+	};
+	BYTE* ctrl = *(BYTE**)((BYTE*)this + 0x328);
+	INT stored = *(INT*)(ctrl + 0x100);
+	AActor* owner = *(AActor**)((BYTE*)this + 0x140);
+	if ( owner && (*(INT*)((BYTE*)owner + 0x320) & 1) != stored )
+		return tryQueue();
+	AActor* act2 = *(AActor**)((BYTE*)this + 0x3C0);
+	if ( act2  && (*(INT*)((BYTE*)act2  + 0x320) & 1) != stored )
+		return tryQueue();
+	AActor* act3 = *(AActor**)((BYTE*)this + 0x3C4);
+	if ( act3  && (*(INT*)((BYTE*)act3  + 0x320) & 1) != stored )
+		return tryQueue();
+	return 1;
+	unguard;
 }
 
 

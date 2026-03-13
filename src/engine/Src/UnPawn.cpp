@@ -779,7 +779,40 @@ FLOAT APawn::GetMaxSpeed()
 INT APawn::CheckOwnerUpdated()
 {
 	guard(APawn::CheckOwnerUpdated);
-	return AActor::CheckOwnerUpdated();
+	// Retail 0xC34E0: same replication-queue logic as AActor, plus checks actor at this+0x4EC.
+	// Does NOT call super; duplicates the logic and adds the second actor check.
+	struct OwnedActorLink { void* Actor; OwnedActorLink* Prev; };
+	AActor* owner = *(AActor**)((BYTE*)this + 0x140);
+	if ( owner )
+	{
+		INT ownerBit = *(INT*)((BYTE*)owner + 0x320) & 1;
+		BYTE* ctrl   = *(BYTE**)((BYTE*)this + 0x328);
+		if ( ownerBit != *(INT*)(ctrl + 0x100) )
+		{
+			OwnedActorLink* node = (OwnedActorLink*)appMalloc( sizeof(OwnedActorLink), TEXT("OwnerUpdateNode") );
+			if ( !node ) { *(void**)(ctrl + 0xF8) = NULL; return 0; }
+			node->Actor = this;
+			node->Prev  = *(OwnedActorLink**)(ctrl + 0xF8);
+			*(OwnedActorLink**)(ctrl + 0xF8) = node;
+			return 0;
+		}
+	}
+	AActor* actor2 = *(AActor**)((BYTE*)this + 0x4EC);
+	if ( actor2 )
+	{
+		INT actorBit = *(INT*)((BYTE*)actor2 + 0x320) & 1;
+		BYTE* ctrl   = *(BYTE**)((BYTE*)this + 0x328);
+		if ( actorBit != *(INT*)(ctrl + 0x100) )
+		{
+			OwnedActorLink* node = (OwnedActorLink*)appMalloc( sizeof(OwnedActorLink), TEXT("OwnerUpdateNode") );
+			if ( !node ) { *(void**)(ctrl + 0xF8) = NULL; return 0; }
+			node->Actor = this;
+			node->Prev  = *(OwnedActorLink**)(ctrl + 0xF8);
+			*(OwnedActorLink**)(ctrl + 0xF8) = node;
+			return 0;
+		}
+	}
+	return 1;
 	unguard;
 }
 
@@ -1430,7 +1463,14 @@ void APawn::UnCrouch(INT bClientSimulation)
 INT APawn::ValidAnchor()
 {
 	guard(APawn::ValidAnchor);
-	return 0;
+	// Retail 0x11C1D0: check that the cached Anchor navigation point is still reachable.
+	// Returns 0 if null, blocked (bBlocked/bNoAutoConnect flags), or destination not reached.
+	if ( !Anchor ) return 0;
+	INT flags = *(INT*)((BYTE*)Anchor + 0x3A4);
+	if ( flags & 0x0002 ) return 0;  // bBlocked
+	if ( flags & 0x0200 ) return 0;  // bNoAutoConnect
+	FVector delta = Anchor->Location - Location;
+	return ReachedDestination( delta, Anchor ) ? 1 : 0;
 	unguard;
 }
 
@@ -1482,6 +1522,19 @@ void APawn::clearPath(ANavigationPoint* Node)
 
 void APawn::clearPaths()
 {
+	// Retail 0x11C170: walk the level's NavigationPointList and reset pathfinding state
+	// on every node — mirrors clearPath() but applied to all nav points at once.
+	ALevelInfo* info = XLevel ? XLevel->GetLevelInfo() : NULL;
+	if ( !info ) return;
+	for ( ANavigationPoint* nav = info->NavigationPointList; nav; nav = nav->nextNavigationPoint )
+	{
+		nav->bEndPoint    = 0;
+		nav->cost         = nav->ExtraCost;
+		nav->visitedWeight = 10000000;
+		nav->nextOrdered  = NULL;
+		nav->prevOrdered  = NULL;
+		nav->previousPath = NULL;
+	}
 }
 
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
