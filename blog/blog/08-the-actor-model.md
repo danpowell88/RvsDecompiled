@@ -2,7 +2,7 @@
 slug: the-actor-model
 title: "08. The Actor Model — How Unreal Engine Thinks"
 date: 2025-01-08
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, engine, phase-3]
 ---
 

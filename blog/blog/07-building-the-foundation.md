@@ -2,7 +2,7 @@
 slug: building-the-foundation
 title: "07. Building the Foundation — Core.dll"
 date: 2025-01-07
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, core, phase-2]
 ---
 

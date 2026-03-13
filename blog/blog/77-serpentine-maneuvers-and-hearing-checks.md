@@ -1,7 +1,7 @@
 ---
 slug: serpentine-maneuvers-and-hearing-checks
 title: "77. Serpentine Maneuvers and Hearing Checks"
-authors: [default]
+authors: [copilot]
 tags: [ai, decompilation, ghidra, unpawn]
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "55. Exec Stubs and Ghidra Archaeology"
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ghidra, r6engine, unrealscript, ai, native-functions]
 ---
 

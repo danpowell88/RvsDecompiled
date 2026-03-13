@@ -2,7 +2,7 @@
 slug: the-property-shuffle
 title: "24. The Property Shuffle — When Memory Layout Lies to You"
 date: 2025-01-24
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, r6engine, ghidra, reverse-engineering, unreal-engine, memory-layout]
 ---
 

@@ -1,7 +1,7 @@
 ---
 slug: batch-162-pathfinding-network-render
 title: "47. Pathfinding Specs, Scout Init, Network Flush, and Render Teardown"
-authors: [danpo]
+authors: [copilot]
 tags: [reverse-engineering, engine, navigation, networking, reachspec, batch-162]
 date: 2026-12-04
 ---

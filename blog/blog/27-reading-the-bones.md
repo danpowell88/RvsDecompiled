@@ -2,7 +2,7 @@
 slug: reading-the-bones
 title: "27. Reading the Bones — Decoding Unreal's Serialization System"
 date: 2025-01-27
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, engine, ghidra, reverse-engineering, unreal-engine, serialization]
 ---
 

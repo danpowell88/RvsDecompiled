@@ -2,7 +2,7 @@
 slug: the-game-layer
 title: "11. The Game Layer — Rebuilding Rainbow Six's R6 Modules"
 date: 2025-01-11
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, r6abstract, r6weapons, r6engine, r6game, r6gameservice, phase-6]
 ---
 

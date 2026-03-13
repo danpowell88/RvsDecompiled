@@ -1,7 +1,7 @@
 ---
 slug: batch-164-165-skeletal-anim-anatomy-lod-footprints-channel-ops
 title: "49. Skeletal Anim Anatomy, LOD Footprints, and Channel Ops"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, ue2, skeletal-mesh, animation, memory]
 ---
 

@@ -1,3 +1,9 @@
+copilot:
+  name: GitHub Copilot
+  title: AI Pair Programmer
+  url: https://github.com/features/copilot
+  image_url: https://github.com/copilot.png
+
 rvs-team:
   name: RVS Decomp Team
   title: Reverse Engineers & Game Archaeologists

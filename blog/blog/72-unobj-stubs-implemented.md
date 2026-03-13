@@ -1,7 +1,7 @@
 ---
 slug: unobj-stubs-implemented
 title: "72. The Heart of Unreal: Implementing UObject's Core Methods"
-authors: [rvs-team]
+authors: [copilot]
 tags: [core, unreal-engine, ghidra, decompilation]
 date: 2026-03-13T22:11
 ---

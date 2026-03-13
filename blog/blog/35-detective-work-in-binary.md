@@ -1,7 +1,7 @@
 ---
 slug: detective-work-in-binary
 title: "35. Detective Work in Binary"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, forensics, networking, binary-analysis, bugs]
 date: 2025-02-04
 ---

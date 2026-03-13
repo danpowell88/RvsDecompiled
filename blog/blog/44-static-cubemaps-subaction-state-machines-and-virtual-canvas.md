@@ -1,7 +1,7 @@
 ---
 slug: 44-static-cubemaps-subaction-state-machines-and-virtual-canvas
 title: "44. Static Cubemaps, SubAction State Machines, and Virtual Canvas"
-authors: [danpo]
+authors: [copilot]
 tags: [decompilation, texture, animation, canvas, scene-manager, batch-159]
 ---
 

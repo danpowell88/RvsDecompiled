@@ -1,7 +1,7 @@
 ---
 slug: core-stubs-filling-the-engine-foundation
 title: "75. Core Stubs: Filling the Engine Foundation"
-authors: [default]
+authors: [copilot]
 tags: [core, ghidra, decompilation, math, streaming, unreal-engine]
 ---
 

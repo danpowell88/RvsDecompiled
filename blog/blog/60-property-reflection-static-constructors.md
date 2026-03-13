@@ -1,7 +1,7 @@
 ---
 slug: property-reflection-static-constructors
 title: "60. Teaching the Engine About Itself: StaticConstructors and Property Reflection"
-authors: [rvs-team]
+authors: [copilot]
 tags: [core, reflection, properties, ghidra, ue2]
 ---
 

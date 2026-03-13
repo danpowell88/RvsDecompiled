@@ -1,7 +1,7 @@
 ---
 slug: 57-lighting-visibility-and-bone-blending
 title: "57. Lighting, Visibility, and Bone Blending"
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, engine, rendering, animation, lighting]
 ---
 

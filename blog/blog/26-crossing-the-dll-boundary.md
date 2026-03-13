@@ -2,7 +2,7 @@
 slug: crossing-the-dll-boundary
 title: "26. Crossing the DLL Boundary — When Game Code Meets Engine Code"
 date: 2025-01-26
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, engine, ghidra, reverse-engineering, unreal-engine, pathfinding, physics]
 ---
 

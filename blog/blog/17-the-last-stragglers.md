@@ -2,7 +2,7 @@
 slug: the-last-stragglers
 title: "17. The Last Stragglers — Finishing Phase 9's Stub Audit"
 date: 2025-01-17
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, progress, deep-dive]
 ---
 

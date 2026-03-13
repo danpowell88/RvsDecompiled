@@ -2,7 +2,7 @@
 slug: weapons-walls-and-doors
 title: "12. Weapons, Walls, and Doors — What Makes R6 Tick"
 date: 2025-01-12
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, r6weapons, r6engine, weapons, doors, ai, phase-6]
 ---
 

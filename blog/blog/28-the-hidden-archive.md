@@ -1,7 +1,7 @@
 ---
 slug: the-hidden-archive
 title: "28. The Hidden Archive — Unlocking 4.6 Million Lines of Engine Secrets"
-authors: [default]
+authors: [copilot]
 date: 2025-01-28
 tags: [decompilation, ghidra, serialization, reverse-engineering]
 ---

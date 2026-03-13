@@ -2,7 +2,7 @@
 slug: ragdoll-physics
 title: "21. Ragdoll Physics — Rebuilding a Corpse Simulator"
 date: 2025-01-21
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, physics, ragdoll, game-engine]
 ---
 

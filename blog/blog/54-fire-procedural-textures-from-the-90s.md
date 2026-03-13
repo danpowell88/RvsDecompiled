@@ -1,6 +1,6 @@
 ---
 title: "54. Fire — Procedural Textures from the '90s"
-authors: [rvs-team]
+authors: [copilot]
 tags: [fire, textures, procedural-generation, unreal-engine, decompilation]
 ---
 

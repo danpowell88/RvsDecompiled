@@ -1,7 +1,7 @@
 ---
 slug: ticking-hearing-and-hidden-fields
 title: "33. Ticking, Hearing, and Hidden Fields"
-authors: [dan]
+authors: [copilot]
 tags: [physics, ai, engine, networking]
 date: 2025-02-02
 ---

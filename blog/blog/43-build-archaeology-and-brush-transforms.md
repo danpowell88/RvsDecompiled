@@ -1,7 +1,7 @@
 ---
 slug: 43-build-archaeology-and-brush-transforms
 title: "43. Build Archaeology and Brush Transforms"
-authors: [danpo]
+authors: [copilot]
 tags: [decompilation, cmake, win32, fcoords, abrush, transforms, batch-158]
 ---
 

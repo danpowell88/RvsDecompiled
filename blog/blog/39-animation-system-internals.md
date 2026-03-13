@@ -1,7 +1,7 @@
 ---
 slug: animation-system-internals
 title: "39. Animation System Internals — Channels, Sequences, and FPU Comparisons"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, animation, meshes, batch]
 date: 2025-02-08
 ---

@@ -1,7 +1,7 @@
 ---
 slug: 76-package-iterators-and-registry-keys
 title: "76. Package Iterators and Registry Keys"
-authors: [default]
+authors: [copilot]
 tags: [core, decompilation, unreal-engine, uscript, registry]
 ---
 

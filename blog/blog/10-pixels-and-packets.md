@@ -2,7 +2,7 @@
 slug: pixels-and-packets
 title: "10. Pixels and Packets — Rebuilding the Driver Layer (WinDrv & D3DDrv)"
 date: 2025-01-10
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, windrv, d3ddrv, directinput, direct3d, phase-5]
 ---
 

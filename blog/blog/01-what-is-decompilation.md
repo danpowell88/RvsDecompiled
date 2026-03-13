@@ -2,7 +2,7 @@
 slug: what-is-decompilation
 title: "01. What Is Decompilation? A Gentle Introduction"
 date: 2025-01-01
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation]
 ---
 

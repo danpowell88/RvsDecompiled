@@ -1,7 +1,7 @@
 ---
 slug: 32-transforms-and-the-physics-of-walking
 title: "32. Transforms, Actors, and the Physics of Walking"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, math, physics, ue2engine]
 date: 2025-02-01
 ---

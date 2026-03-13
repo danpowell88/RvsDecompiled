@@ -2,7 +2,7 @@
 slug: how-games-hear
 title: "13. How Games Hear — The DARE Audio System"
 date: 2025-01-13
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, audio, dare, directsound, phase-7]
 ---
 

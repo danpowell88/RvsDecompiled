@@ -1,7 +1,7 @@
 ---
 slug: geometry-and-delegation
 title: "38. The Box, The Matrix, and the Chain of Delegation"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, geometry, math, x86, reverse-engineering, c++, meshes, patterns]
 date: 2025-02-07
 ---

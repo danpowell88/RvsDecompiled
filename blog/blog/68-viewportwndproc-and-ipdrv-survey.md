@@ -1,7 +1,7 @@
 ---
 slug: viewportwndproc-and-ipdrv-survey
 title: "68. ViewportWndProc and the IpDrv Networking Survey"
-authors: [default]
+authors: [copilot]
 tags: [windrv, ipdrv, networking, windows, directinput, decompilation]
 date: 2026-03-13T22:11
 ---

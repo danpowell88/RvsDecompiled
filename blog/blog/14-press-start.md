@@ -2,7 +2,7 @@
 slug: press-start
 title: "14. Press Start — Launching the Engine"
 date: 2025-01-14
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, launcher, winmain, safedisc, phase-8]
 ---
 

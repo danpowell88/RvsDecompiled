@@ -1,7 +1,7 @@
 ---
 slug: 46-scene-lifecycle-and-triggering-cutscene-events
 title: "46. Scene Lifecycle and Triggering Cutscene Events"
-authors: [danpo]
+authors: [copilot]
 tags: [decompilation, scene-manager, matinee, cutscene, batch-161]
 ---
 

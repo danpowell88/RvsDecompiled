@@ -1,7 +1,7 @@
 ---
 slug: constructing-the-copy
 title: "34. Constructing the Copy"
-authors: [dan]
+authors: [copilot]
 tags: [engine, cpp, memory, stubs]
 date: 2025-02-03
 ---

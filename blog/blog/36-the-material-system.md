@@ -1,7 +1,7 @@
 ---
 slug: the-material-system
 title: "36. Reading the Material System — When Types Lie"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, materials, reverse-engineering, x86, c++]
 date: 2025-02-05
 ---

@@ -1,6 +1,6 @@
 ---
 title: "64. Actor Internals: Karma, Debug Lines, and Joined Actors"
-authors: [rvs-team]
+authors: [copilot]
 tags: [r6engine, unactor, karma, physics, ghidra, decompilation, debug]
 ---
 

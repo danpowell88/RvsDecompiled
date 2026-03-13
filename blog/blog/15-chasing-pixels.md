@@ -2,7 +2,7 @@
 slug: chasing-pixels
 title: "15. Chasing Pixels — Reconstructing the D3D8 Render Pipeline"
 date: 2025-01-15
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, d3d8, rendering, phase-9]
 ---
 

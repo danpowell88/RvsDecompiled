@@ -2,7 +2,7 @@
 slug: the-difficulty-cliff
 title: "25. The Difficulty Cliff — When the Easy Stubs Run Out"
 date: 2025-01-25
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, r6engine, ghidra, reverse-engineering, ai-navigation, latent-actions, unreal-engine]
 ---
 

@@ -1,7 +1,7 @@
 ---
 slug: terrain-and-texture-internals
 title: "37. Digging into the Terrain — Heightmaps, Floor Plans, and Linked Lists"
-authors: [dan]
+authors: [copilot]
 tags: [decompilation, terrain, textures, reverse-engineering, x86, c++]
 date: 2025-02-06
 ---

@@ -2,7 +2,7 @@
 slug: rebuilding-the-skeleton
 title: "23. Rebuilding the Skeleton — Class Hierarchies and the Deployment Zone"
 date: 2025-01-23
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, r6engine, class-hierarchy, ghidra, reverse-engineering, unreal-engine]
 ---
 

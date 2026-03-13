@@ -1,6 +1,6 @@
 ---
 title: "58. The Complete Exec Stub Survey"
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ghidra, r6engine, unrealscript, ai, native-functions, pathfinding]
 ---
 

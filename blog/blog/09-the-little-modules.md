@@ -2,7 +2,7 @@
 slug: the-little-modules
 title: "09. The Little Modules That Could — Fire, Window, and IpDrv"
 date: 2025-01-09
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, ravenshield, fire, window, ipdrv, phase-4]
 ---
 

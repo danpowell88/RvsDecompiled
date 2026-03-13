@@ -2,7 +2,7 @@
 slug: who-can-hear-you
 title: "22. Who Can Hear You? — Network Relevancy and Terrorist Senses"
 date: 2025-01-22
-authors: [rvs-team]
+authors: [copilot]
 tags: [decompilation, r6engine, networking, ai, ghidra, reverse-engineering]
 ---
 

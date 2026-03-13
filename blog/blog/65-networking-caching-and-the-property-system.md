@@ -1,6 +1,6 @@
 ---
 title: "65. Networking, Caching, and the Property System"
-authors: [rvs-team]
+authors: [copilot]
 tags: [core, networking, cache, properties, reflection, ghidra, decompilation]
 ---
 

@@ -1,7 +1,7 @@
 ---
 slug: viewport-modes-and-primitive-getters
 title: "41. Viewport Modes, Primitive Getters, and Network Bits"
-authors: [danpo]
+authors: [copilot]
 tags: [decompilation, progress, engine, rendering, network]
 date: 2025-02-10
 ---
