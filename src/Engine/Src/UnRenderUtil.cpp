@@ -18,6 +18,7 @@ inline void  operator delete(void*, void*) noexcept {}
 extern INT GHashActorCount;
 extern INT GHashLinkCellCount;
 extern INT GHashExtraCount;
+extern CORE_API UBOOL GHideHiddenInEditor;
 
 // --- FAnimMeshVertexStream ---
 FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
@@ -182,9 +183,84 @@ void FLevelSceneNode::Render(FRenderInterface *)
 {
 }
 
-int FLevelSceneNode::FilterActor(AActor *)
+int FLevelSceneNode::FilterActor(AActor* Actor)
 {
-	return 0;
+	// Retail: 0x100E30, ~220b. Complex actor visibility filter used during scene rendering.
+	// Returns 1 if Actor should be rendered in this scene, 0 if it should be culled.
+	if (!Actor) return 0;
+	// In game (non-editor), cull actors with bHidden set or bHiddenEdTemporary flag
+	if (!GIsEditor && *(INT*)((BYTE*)Actor + 0xBC) == 0 && (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x8000000) == 0)
+		return 0;
+	// Level pointer at this+4
+	INT levelPtr = *(INT*)((BYTE*)this + 4);
+	// Zone info visibility checks
+	if ((*(BYTE*)(levelPtr + 0x1F0) & 1) != 0 && (*(DWORD*)((BYTE*)Actor + 0xAC) & 0x200000) == 0)
+	{
+		if (*(INT*)((BYTE*)Actor + 0xF8) == 1) return 0;
+		if (*(INT*)(levelPtr + 500) < *(INT*)((BYTE*)Actor + 0x70)) return 0;
+		if (*(INT*)((BYTE*)Actor + 0x74) < *(INT*)(levelPtr + 500)) return 0;
+	}
+	// BSP / static mesh check (when ShowFlags bit not set)
+	if ((*(BYTE*)(*(INT*)(levelPtr + 0x34) + 0x4F8) & 8) == 0)
+	{
+		if (!Actor->IsA(ABrush::StaticClass()) && !Actor->IsA(AStaticMeshActor::StaticClass()))
+			return 0;
+	}
+	// Karma model visibility
+	if (*(INT*)((BYTE*)Actor + 0x170) != 0 &&
+		(SBYTE)((*(DWORD*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x4F8)) >> 8) >= 0)
+		return 0;
+	if (!GIsEditor)
+	{
+		if ((*(DWORD*)((BYTE*)Actor + 0xA8) & 0x8000000) != 0)
+			*(INT*)((BYTE*)Actor + 0xBC) = 0;
+		// bHidden flag
+		if ((*(BYTE*)((BYTE*)Actor + 0xA0) & 2) != 0) return 0;
+		if ((*(DWORD*)((BYTE*)Actor + 0xA4) & 0x4000000) != 0) return 0;
+		// Tag filter
+		if (*(INT*)((BYTE*)Actor + 0x15C) != 0)
+		{
+			FName none(NAME_None);
+			if (*(FName*)((BYTE*)Actor + 0x1B0) != none) return 0;
+		}
+		INT ownedByCamera = Actor->IsOwnedBy(*(AActor**)((BYTE*)this + 0x1C0));
+		if ((*(DWORD*)((BYTE*)Actor + 0xA0) & 0x2000) != 0 && !ownedByCamera) return 0;
+		if ((*(DWORD*)((BYTE*)Actor + 0xA0) & 0x1000) == 0) return 1;
+		if (!ownedByCamera) return 1;
+		BYTE showOwned = *(BYTE*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x524) & 0x20;
+		return (showOwned != 0) ? 0 : 1;
+	}
+	// Editor path
+	if ((*(DWORD*)((BYTE*)Actor + 0xAC) & 0x1800) != 0) return 0;
+	if (*(INT*)((BYTE*)Actor + 0x15C) != 0)
+	{
+		FName none(NAME_None);
+		if (*(FName*)((BYTE*)Actor + 0x1B0) != none) return 0;
+	}
+	// Editor: check bEdShouldSnap, Volume, etc.
+	if (*(INT*)((BYTE*)Actor + 0x178) == 0)
+	{
+		// Not a volume - check general filter
+		if (*(INT*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x4F8) == 0) return 0;
+	}
+	else
+	{
+		if (!Actor->IsA(AVolume::StaticClass()))
+		{
+			if (*(INT*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x4F8) == 0) return 0;
+			goto label_check_model;
+		}
+		if ((*(DWORD*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x4F8) & 0x800000) == 0) return 0;
+	}
+label_check_model:
+	// Check if it's a model/brush and filter based on flags
+	if ((*(DWORD*)((BYTE*)Actor + 0xAC) & 0x400) != 0 &&
+		(*(DWORD*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x4F8) & 0x400) == 0)
+		return 0;
+	if (*(INT*)(*(INT*)(*(INT*)((BYTE*)this + 4) + 0x34) + 0x4F8) == 0) return 1;
+	BYTE bVar = (BYTE)*(INT*)((BYTE*)Actor + 0xA0) & 2;
+	if (bVar == 0) return 1;
+	return GHideHiddenInEditor ? 0 : 1;
 }
 
 FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
@@ -313,9 +389,23 @@ unsigned __int64 FLightMapTexture::GetCacheId()
 {
 	return *(QWORD*)(Pad + 92);
 }
-FTexture * FLightMapTexture::GetChild(int,int *,int *)
+FTexture * FLightMapTexture::GetChild(int Index, int* OutWidth, int* OutHeight)
 {
-	return NULL;
+	// Retail: 0x10FD50, 56b. Returns the FTexture for a given face index into the
+	// lightmap's per-face array. Stores USize/VSize into caller's output pointers.
+	// this+4 = pointer to ULevel; this+8 = pointer to TArray<INT> of per-face indices.
+	INT levelPtr  = *(INT*)((BYTE*)this + 4);
+	INT* indexArr = *(INT**)((BYTE*)this + 8);
+	INT faceIdx   = indexArr[Index];
+	// Level's static lightmap texture array at level+0x90, each element 0xA4 bytes.
+	INT texBase   = *(INT*)(levelPtr + 0x90);
+	BYTE* texElem = (BYTE*)(texBase) + faceIdx * 0xA4;
+	// Link back: store level pointer into element+4 (owner pointer)
+	*(INT*)(texElem + 4) = levelPtr;
+	// USize at element+0x14 (== level+0xF4 of the face entry), VSize at element+0x18
+	*OutWidth  = *(INT*)(texElem + 0x14);
+	*OutHeight = *(INT*)(texElem + 0x18);
+	return (FTexture*)texElem;
 }
 int FLightMapTexture::GetFirstMip()
 {
@@ -778,9 +868,22 @@ int FStaticLightMapTexture::GetNumMips()
 {
 	return 2;
 }
-void * FStaticLightMapTexture::GetRawTextureData(int)
+void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 {
-	return NULL;
+	// Retail: 0x10FE60, ~100b SEH. In editor only (asserts GIsEditor).
+	// Loads mip data via lazy-loader at this + MipIndex*0x18 + 0x10 if not yet loaded.
+	// DIVERGENCE: GIsEditor assertion removed; returns NULL when not editor-loaded.
+	if (!GIsEditor) return NULL;
+	FArray* mipArr = (FArray*)((BYTE*)this + MipIndex * 0x18 + 0x10);
+	if (mipArr->Num() == 0)
+	{
+		// Trigger lazy-load: vtable call on the lazy loader at this + MipIndex*0x18 + 4
+		void** lazyVtable = *(void***)((BYTE*)this + MipIndex * 0x18 + 4);
+		typedef void (__thiscall *LoadFn)(void*);
+		LoadFn Load = (LoadFn)lazyVtable[0];
+		Load((void*)((BYTE*)this + MipIndex * 0x18 + 4));
+	}
+	return *(void**)((BYTE*)this + MipIndex * 0x18 + 0x10);
 }
 int FStaticLightMapTexture::GetRevision()
 {
@@ -1121,8 +1224,80 @@ FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 
 
 // --- FDynamicLight ---
-float FDynamicLight::SampleIntensity(FVector,FVector)
+float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 {
+	// Retail: 0x10D5D0, ~200b. Evaluates per-sample light intensity based on light type.
+	// Light type byte is stored at vtable+0x37 (custom descriptor, not C++ vtable).
+	// LightPos = this+0x14 (FVector), LightDir = this+0x20 (FVector), Radius = this+0x2C.
+	BYTE lightType = *(BYTE*)(*(BYTE**)this + 0x37);
+
+	if (lightType == 0x14) // LT_Directional — dot-product with surface normal
+	{
+		FVector* LightDir = (FVector*)((BYTE*)this + 0x20);
+		FLOAT dot = Normal.X * LightDir->X + Normal.Y * LightDir->Y + Normal.Z * LightDir->Z;
+		if (dot < 0.0f) return dot * -2.0f;
+	}
+	else if (lightType == 0x11) // LT_Cylinder — 2D radial falloff, 3D range check
+	{
+		FLOAT dX = *(FLOAT*)((BYTE*)this + 0x14) - Point.X;
+		FLOAT dY = *(FLOAT*)((BYTE*)this + 0x18) - Point.Y;
+		FLOAT dZ = *(FLOAT*)((BYTE*)this + 0x1C) - Point.Z;
+		FLOAT dist3D = appSqrt(dX*dX + dY*dY + dZ*dZ);
+		FLOAT Radius  = *(FLOAT*)((BYTE*)this + 0x2C);
+		if (dist3D < Radius)
+		{
+			FLOAT r_sq = dX*dX + dY*dY; // XY plane only
+			FLOAT falloff = 1.0f - r_sq / (Radius * Radius);
+			if (falloff <= 0.0f) falloff = 0.0f;
+			return falloff + falloff;
+		}
+	}
+	else if (lightType == 0x0D) // LT_Cone — dot check + sqrt falloff
+	{
+		FLOAT dX = *(FLOAT*)((BYTE*)this + 0x14) - Point.X;
+		FLOAT dY = *(FLOAT*)((BYTE*)this + 0x18) - Point.Y;
+		FLOAT dZ = *(FLOAT*)((BYTE*)this + 0x1C) - Point.Z;
+		FLOAT dist = appSqrt(dX*dX + dY*dY + dZ*dZ);
+		FLOAT Radius = *(FLOAT*)((BYTE*)this + 0x2C);
+		FLOAT inDot = dX * Normal.X + dZ * Normal.Z + dY * Normal.Y;
+		if (inDot > 0.0f && dist < Radius)
+		{
+			FLOAT f = appSqrt(1.02f - dist / Radius);
+			return f + f;
+		}
+	}
+	else
+	{
+		// Types 0x0C, 0x08 and others: distance falloff + optional cone attenuation.
+		// DIVERGENCE: FUN_1040d530 (radius-based falloff via x87 FPU stack) not implemented;
+		// approximated as linear falloff. Cases 0x0C/0x08 use same formula, cone attenuation
+		// applied for non-0x0C/0x08 types when falloff > 0.
+		FLOAT dX = *(FLOAT*)((BYTE*)this + 0x14) - Point.X;
+		FLOAT dY = *(FLOAT*)((BYTE*)this + 0x18) - Point.Y;
+		FLOAT dZ = *(FLOAT*)((BYTE*)this + 0x1C) - Point.Z;
+		FLOAT dist   = appSqrt(dX*dX + dY*dY + dZ*dZ);
+		FLOAT Radius = *(FLOAT*)((BYTE*)this + 0x2C);
+		// Approximate FUN_1040d530: linear falloff
+		FLOAT baseFalloff = (Radius > 0.0f) ? (1.0f - dist / Radius) : 0.0f;
+		if (baseFalloff <= 0.0f) return 0.0f;
+
+		if (lightType == 0x0C || lightType == 0x08)
+			return baseFalloff; // No cone attenuation for these types
+
+		// Apply cone attenuation (spot light style)
+		FLOAT cosOuter = 1.0f - *(BYTE*)(*(BYTE**)this + 0x3C) * (1.0f/256.0f);
+		if (cosOuter >= 1.0f) return 0.0f;
+		FLOAT invRange  = 1.0f / (1.0f - cosOuter);
+		FVector* LightDir = (FVector*)((BYTE*)this + 0x20);
+		FLOAT coneDot = -dX * LightDir->X - dY * LightDir->Y - dZ * LightDir->Z;
+		if (coneDot <= 0.0f) return 0.0f;
+		FLOAT distSq = dX*dX + dY*dY + dZ*dZ;
+		if (distSq < coneDot * coneDot)
+		{
+			FLOAT coneAtten = (coneDot / dist) * invRange - invRange * cosOuter;
+			return coneAtten * coneAtten * baseFalloff;
+		}
+	}
 	return 0.0f;
 }
 
@@ -1208,9 +1383,24 @@ unsigned __int64 FStaticCubemap::GetCacheId()
 	return *(QWORD*)(Pad + 4);
 }
 
-FTexture * FStaticCubemap::GetFace(int)
+FTexture * FStaticCubemap::GetFace(int FaceIndex)
 {
-	return NULL;
+	// Retail: 0x16A3B0, 38b. Returns the render-interface texture for the given cubemap face.
+	// this+4 = UCubemap pointer.
+	// UCubemap+0xD8 = array of 6 face UTexture* pointers (one per face).
+	// UCubemap+0xD0 = double (last update time), passed to the Get() vtable call.
+	INT cubeMapPtr = *(INT*)((BYTE*)this + 4);
+	UTexture* faceTex = *(UTexture**)(cubeMapPtr + 0xD8 + FaceIndex * 4);
+	if (!faceTex) return NULL;
+	// Call faceTex->Get(lastUpdateTime, NULL) via vtable slot 0x94/4
+	typedef UBitmapMaterial* (__thiscall *GetFn)(UTexture*, double, UViewport*);
+	GetFn Get = *(GetFn*)((*(BYTE**)faceTex) + 0x94);
+	UBitmapMaterial* bm = Get(faceTex, *(double*)(cubeMapPtr + 0xD0), NULL);
+	if (!bm) return NULL;
+	// Call bm->GetRenderInterface() via vtable slot 0x90/4
+	typedef FBaseTexture* (__thiscall *GetRIFn)(UBitmapMaterial*);
+	GetRIFn GetRI = *(GetRIFn*)((*(BYTE**)bm) + 0x90);
+	return (FTexture*)GetRI(bm);
 }
 
 int FStaticCubemap::GetFirstMip()
@@ -1337,9 +1527,22 @@ FBox UConvexVolume::GetRenderBoundingBox(AActor const *)
 	return *(FBox*)((BYTE*)this + 0x70);
 }
 
-int UConvexVolume::IsPointInside(FVector,FMatrix)
+int UConvexVolume::IsPointInside(FVector Point, FMatrix Matrix)
 {
-	return 0;
+	// Retail: 0x91D90, ~130b SEH. Transforms each plane by Matrix, then checks if Point
+	// is on the positive side of any plane (outside). Returns 0 if outside, 1 if inside.
+	// Planes TArray at this+0x58, each plane element is 0x1C bytes (FPlane + padding).
+	FArray* planes = (FArray*)((BYTE*)this + 0x58);
+	INT count = planes->Num();
+	for (INT i = 0; i < count; i++)
+	{
+		FPlane* src = (FPlane*)((BYTE*)(*(BYTE**)planes) + i * 0x1C);
+		FPlane transformed = src->TransformBy(Matrix);
+		if (transformed.PlaneDot(Point) > 0.0f)
+			return 0;
+		count = planes->Num(); // Ghidra re-fetches count each iteration
+	}
+	return 1;
 }
 
 

@@ -409,9 +409,30 @@ void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 	*(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50) = clamped;
 }
 
-int USkeletalMeshInstance::SetBlendParams(int,float,float,float,FName,int)
+int USkeletalMeshInstance::SetBlendParams(INT Channel, FLOAT Alpha, FLOAT UScale, FLOAT VScale, FName BoneRef, INT bBlend)
 {
-	return 0;
+	// Retail: 0x1326B0. Validates channel, then stores blend params into channel slot.
+	// Channel 0 is reserved (base channel) — logs a warning if Channel==0 and returns 0.
+	// BoneRef is resolved via MatchRefBone; invalid bones default to index 0.
+	if (!ValidateAnimChannel(Channel))
+		return 0;
+	if (Channel == 0)
+	{
+		// Retail: logs GetName() + warning via GLog on channel 0 access
+		return 0;
+	}
+	INT boneIdx = MatchRefBone(BoneRef);
+	if (boneIdx < 0)
+		boneIdx = 0;
+	BYTE* elem = (BYTE*)(*(BYTE**)((BYTE*)this + 0x10C)) + Channel * 0x74;
+	*(FLOAT*)(elem + 0x50) = Alpha;
+	if (UScale < 1.0f) UScale = 1.0f;
+	*(FLOAT*)(elem + 0x54) = UScale;
+	if (VScale < 1.0f) VScale = 1.0f;
+	*(FLOAT*)(elem + 0x58) = VScale;
+	*(INT*)  (elem + 0x68) = boneIdx;
+	*(DWORD*)(elem + 0x4C) = (bBlend != 0) ? 1u : 0u;
+	return 1;
 }
 
 int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
