@@ -52,6 +52,7 @@ CORE_API DWORD					GPageSize				= 0;
 CORE_API DWORD					GProcessorCount			= 1;
 CORE_API unsigned long			GPhysicalMemory			= 0;
 CORE_API DWORD					GUglyHackFlags			= 0;
+CORE_API UBOOL					GTimestamp				= 1;
 CORE_API UBOOL					GIsScriptable			= 0;
 CORE_API UBOOL					GIsEditor				= 0;
 CORE_API UBOOL					GIsClient				= 0;

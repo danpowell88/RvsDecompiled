@@ -126,7 +126,7 @@ UCommandlet::~UCommandlet()
 INT UCommandlet::Main( const TCHAR* Parms )
 {
 	guard(UCommandlet::Main);
-	return 0;
+	return eventMain( Parms );
 	unguard;
 }
 
@@ -167,7 +167,26 @@ USystem::USystem()
 void USystem::StaticConstructor()
 {
 	guard(USystem::StaticConstructor);
-	// Properties are loaded from [Core.System] in the INI by the config system.
+
+	// Retail binary sets CDO LicenseeMode=1 at class registration time.
+	LicenseeMode = 1;
+
+	new(GetClass(),TEXT("PurgeCacheDays"),RF_Public) UIntProperty(CPP_PROPERTY(PurgeCacheDays), TEXT("Options"), CPF_Config);
+	new(GetClass(),TEXT("SavePath"),     RF_Public) UStrProperty(CPP_PROPERTY(SavePath),      TEXT("Options"), CPF_Config);
+	new(GetClass(),TEXT("CachePath"),    RF_Public) UStrProperty(CPP_PROPERTY(CachePath),     TEXT("Options"), CPF_Config);
+	new(GetClass(),TEXT("CacheExt"),     RF_Public) UStrProperty(CPP_PROPERTY(CacheExt),      TEXT("Options"), CPF_Config);
+
+	UArrayProperty* PA = new(GetClass(),TEXT("Paths"),   RF_Public) UArrayProperty(CPP_PROPERTY(Paths),    TEXT("Options"), CPF_Config);
+	PA->Inner          = new(PA,         TEXT("StrProperty0"),  RF_Public) UStrProperty(EC_CppProperty,  0, TEXT("Options"), CPF_Config);
+
+	UArrayProperty* SA = new(GetClass(),TEXT("Suppress"),RF_Public) UArrayProperty(CPP_PROPERTY(Suppress), TEXT("Options"), CPF_Config);
+	SA->Inner          = new(SA,         TEXT("NameProperty0"), RF_Public) UNameProperty(EC_CppProperty, 0, TEXT("Options"), CPF_Config);
+
+	// DIVERGENCE: Ghidra shows a 12-byte gap between CacheExt (+0x50) and Paths (+0x68)
+	// suggesting an additional FString field not present in our reconstruction.
+	// CPP_PROPERTY offsets will differ from binary; Paths/Suppress config loading
+	// may not match retail exactly.
+
 	unguard;
 }
 
