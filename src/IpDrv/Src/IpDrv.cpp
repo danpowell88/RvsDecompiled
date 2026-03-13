@@ -4,6 +4,7 @@
 =============================================================================*/
 
 #include "IpDrvPrivate.h"
+#include <intrin.h>
 
 /*-----------------------------------------------------------------------------
 	Package.
@@ -79,17 +80,262 @@ IMPLEMENT_FUNCTION(AUdpLink, -1, execSendText)
 IMPLEMENT_FUNCTION(AUdpLink, -1, execSetPlayingTime)
 
 /*-----------------------------------------------------------------------------
+	Placement new — required for in-place UTcpipConnection construction.
+-----------------------------------------------------------------------------*/
+
+#pragma warning(push)
+#pragma warning(disable: 4291)
+inline void* operator new(size_t, void* p) noexcept { return p; }
+inline void  operator delete(void*, void*) noexcept {}
+#pragma warning(pop)
+
+/*-----------------------------------------------------------------------------
+	EConnectionState — only forward-declared in IpDrvPrivate.h; define here.
+-----------------------------------------------------------------------------*/
+
+enum EConnectionState
+{
+	USOCK_Invalid = 0,
+	USOCK_Closed  = 1,
+	USOCK_Pending = 2,
+	USOCK_Open    = 3,
+};
+
+/*-----------------------------------------------------------------------------
+	Async hostname resolution state.
+	Layout matches binary: 0x308 bytes.
+	+0x000: DWORD Addr     – resolved IP (network byte order from gethostbyname)
+	+0x004: DWORD bWorking – non-zero while resolution is pending
+	+0x008: char  HostName[256] – ANSI hostname
+	+0x108: short Error    – WSAGetLastError() on failure, 0 on success
+-----------------------------------------------------------------------------*/
+
+class FResolveInfo
+{
+public:
+	DWORD Addr;
+	DWORD bWorking;
+	char  HostName[256];
+	short Error;
+	BYTE  _Pad[776 - 2 - 256 - 8]; // pad to 0x308 = 776 bytes total
+};
+
+/*-----------------------------------------------------------------------------
+	Player time entry — used by AUdpLink to track per-player session times.
+	Size: FString(12) + FLOAT(4) + FLOAT(4) = 0x14 bytes.
+-----------------------------------------------------------------------------*/
+
+#pragma pack(push, 4)
+struct FPlayerTimeEntry
+{
+	FString IPAddr;       // +0x00: 12 bytes (TArray<TCHAR>)
+	FLOAT   LoginTime;    // +0x0c: TSC-based login timestamp
+	FLOAT   ActiveTime;   // +0x10: TSC-based last-active timestamp
+};
+#pragma pack(pop)
+// sizeof(FPlayerTimeEntry) should be 0x14 = 20
+// (FString = 12, FLOAT x2 = 8)
+
+static FArray GPlayerTimes; // Raw FArray for player time tracking
+
+/*-----------------------------------------------------------------------------
+	Globals and helpers.
+-----------------------------------------------------------------------------*/
+
+// WSA state flag – set on first successful WSAStartup.
+static INT GWSAInitialized = 0;
+
+// Global socket for network driver (mirrors DAT_1072310c in binary).
+static UINT GDrvSocket = 0;
+
+// Helper: initialise WinSock if not already done.
+static INT InitWSA(FString& Error)
+{
+	if (!GWSAInitialized)
+	{
+		WSADATA WsaData;
+		INT Err = WSAStartup(0x0101, &WsaData);
+		if (Err != 0)
+		{
+			Error = FString::Printf(TEXT("WinSock: WSAStartup() failed (%d)"), Err);
+			return 0;
+		}
+		GWSAInitialized = 1;
+	}
+	return 1;
+}
+
+// Helper: set socket non-blocking. Returns ioctlsocket error code (0 = OK).
+static INT SetNonBlocking(SOCKET s)
+{
+	u_long NonBlocking = 1;
+	return ioctlsocket(s, FIONBIO, &NonBlocking);
+}
+
+// Helper: return true if socket handle is valid.
+static bool IsValidSocket(SOCKET s)
+{
+	return s != INVALID_SOCKET;
+}
+
+// Helper: get local IP for binding (INADDR_ANY = all interfaces).
+// In the original binary this is FUN_10701be0 which returns the configured bind address.
+static UINT GetLocalBindIP()
+{
+	return INADDR_ANY; // host order = 0
+}
+
+// Helper: bind socket and update address with assigned port.
+// mask=1 → bind once; mask=10 → cycle through successive ports (for client reuse).
+// Returns assigned port (host order) on success, 0 on failure.
+static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
+{
+	if (bReuseAddr)
+	{
+		int optval = 1;
+		setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval));
+	}
+	if (mask & 8)
+	{
+		for (INT i = 0; i < 100; i++)
+		{
+			if (bind(s, (sockaddr*)Addr, sizeof(sockaddr_in)) == 0)
+			{
+				int len = sizeof(sockaddr_in);
+				getsockname(s, (sockaddr*)Addr, &len);
+				return ntohs(Addr->sin_port);
+			}
+			Addr->sin_port = htons(ntohs(Addr->sin_port) + 1);
+		}
+		return 0;
+	}
+	if (bind(s, (sockaddr*)Addr, sizeof(sockaddr_in)) == 0)
+	{
+		int len = sizeof(sockaddr_in);
+		getsockname(s, (sockaddr*)Addr, &len);
+		return ntohs(Addr->sin_port);
+	}
+	return 0;
+}
+
+// Helper: set post-bind socket options. Always succeeds in this implementation.
+static bool SetSocketOptions(SOCKET s)
+{
+	(void)s;
+	return true;
+}
+
+// Helper: format IP (stored network-byte-order in a DWORD) as FString.
+// For 1.2.3.4 stored as 0x04030201 on LE: b1=1, b2=2, b3=3, b4=4.
+static FString IpAddrToStr(UINT Addr, UINT Port)
+{
+	BYTE b1 = (BYTE)( Addr        & 0xFF);
+	BYTE b2 = (BYTE)((Addr >>  8) & 0xFF);
+	BYTE b3 = (BYTE)((Addr >> 16) & 0xFF);
+	BYTE b4 = (BYTE)((Addr >> 24) & 0xFF);
+	if (Port)
+		return FString::Printf(TEXT("%d.%d.%d.%d:%d"), b1, b2, b3, b4, Port);
+	return FString::Printf(TEXT("%d.%d.%d.%d"), b1, b2, b3, b4);
+}
+
+// Async DNS resolve thread — fills FResolveInfo then clears bWorking.
+static DWORD WINAPI ResolveThread(LPVOID Param)
+{
+	FResolveInfo* Info = (FResolveInfo*)Param;
+	PHOSTENT he = gethostbyname(Info->HostName);
+	if (he)
+	{
+		Info->Addr  = *(DWORD*)he->h_addr_list[0]; // network byte order
+		Info->Error = 0;
+	}
+	else
+	{
+		Info->Addr  = 0;
+		Info->Error = (short)WSAGetLastError();
+	}
+	Info->bWorking = 0;
+	return 0;
+}
+
+// Helper: initialise FResolveInfo and start DNS thread (FUN_10701780).
+static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
+{
+	FResolveInfo* Info = (FResolveInfo*)Buffer;
+	Info->Addr     = 0;
+	Info->bWorking = 1;
+	Info->Error    = 0;
+	WideCharToMultiByte(CP_ACP, 0, HostName, -1,
+	                    Info->HostName, (int)sizeof(Info->HostName), NULL, NULL);
+	DWORD ThreadId;
+	HANDLE h = CreateThread(NULL, 0, ResolveThread, Info, 0, &ThreadId);
+	if (h) CloseHandle(h);
+	return Info;
+}
+
+// Helper: get TSC-based elapsed time matching the binary's rdtsc formula.
+// Returns a large float increasing monotonically, with 16777216 as epoch offset.
+static float GetTSCTime()
+{
+	unsigned __int64 tsc = __rdtsc();
+	float hi = (float)(int)(tsc >> 32);
+	float lo = (float)(int)(tsc & 0xFFFFFFFFull);
+	if ((int)(tsc >> 32)            < 0) hi += 4294967296.0f;
+	if ((int)(tsc & 0xFFFFFFFFull)  < 0) lo += 4294967296.0f;
+	return (lo + hi * 4294967296.0f) * (float)GSecondsPerCycle + 16777216.0f;
+}
+
+/*
+DIVERGENCES FROM BINARY:
+- appFree/appMalloc used instead of raw GMalloc vtable calls for clarity.
+- execValidate: CD key validation helpers (FUN_10703730 etc.) not implemented; returns empty string.
+- GPlayerTimes uses FArray::Num() method instead of raw global DAT_10724a5c address.
+- UTcpNetDriver::StaticConstructor: empty body; CPP_PROPERTY cannot take address
+  of bitfield members in standard C++, matching the D3DDrv approach.
+- UTcpNetDriver::InitConnect/InitListen: Super call omitted because the stub
+  UNetDriver::InitConnect/InitListen returns 0, which would falsely abort init.
+- TickDispatch simplified: new-connection spawn path and per-IP rate-limiting omitted.
+- GetLocalBindIP() returns INADDR_ANY; original may read from config.
+- FPlayerTimeEntry uses FString instead of FStringNoInit for IPAddr.
+*/
+
+/*-----------------------------------------------------------------------------
 	AInternetLink implementation.
 -----------------------------------------------------------------------------*/
 
 void AInternetLink::Destroy()
 {
+	if (Socket != -1)
+	{
+		closesocket((SOCKET)Socket);
+		Socket = -1;
+	}
 	Super::Destroy();
 }
 
 INT AInternetLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
-	return Super::Tick(DeltaTime, TickType);
+	INT Ret = Super::Tick(DeltaTime, TickType);
+	FResolveInfo* Info = GetResolveInfo();
+	if (Info && Info->bWorking == 0)
+	{
+		if (Info->Error == 0)
+		{
+			FIpAddr Addr;
+			Addr.Addr = (INT)ntohl(Info->Addr);
+			Addr.Port = 0;
+			debugf(NAME_DevNet, TEXT("Resolved %s to %s"),
+			       appFromAnsi(Info->HostName), *IpAddrToStr(Info->Addr, 0));
+			eventResolved(Addr);
+		}
+		else
+		{
+			debugf(NAME_DevNet, TEXT("Failed to resolve hostname"));
+			eventResolveFailed();
+		}
+		appFree(Info);
+		PrivateResolveInfo = 0;
+	}
+	return Ret;
 }
 
 FResolveInfo*& AInternetLink::GetResolveInfo()
@@ -117,46 +363,114 @@ void AInternetLink::eventResolved(FIpAddr Addr)
 void AInternetLink::execGetLastError(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(INT*)Result = 0;
+	*(INT*)Result = GWSAInitialized ? WSAGetLastError() : 0;
 }
 
 void AInternetLink::execGetLocalIP(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT_REF(FIpAddr, Addr);
 	P_FINISH;
+	if (GWSAInitialized && Socket != -1)
+	{
+		sockaddr_in sa;
+		int len = sizeof(sa);
+		if (getsockname((SOCKET)Socket, (sockaddr*)&sa, &len) == 0)
+			Addr->Addr = (INT)ntohl(sa.sin_addr.s_addr);
+	}
 }
 
 void AInternetLink::execIpAddrToString(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT(FIpAddr, A);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	// A.Addr is host-order; shift gives correct octets
+	*(FString*)Result = FString::Printf(TEXT("%i.%i.%i.%i:%i"),
+	    (A.Addr >> 24) & 0xFF,
+	    (A.Addr >> 16) & 0xFF,
+	    (A.Addr >>  8) & 0xFF,
+	     A.Addr        & 0xFF,
+	     A.Port);
 }
 
 void AInternetLink::execIsDataPending(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = DataPending;
 }
 
 void AInternetLink::execParseURL(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(Url);
+	P_GET_STR_REF(Addr);
+	P_GET_INT_REF(Port);
+	P_GET_STR_REF(LevelName);
+	P_GET_STR_REF(EntryName);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	FURL ParsedURL(NULL, *Url, TRAVEL_Absolute);
+	*Addr      = ParsedURL.Host;
+	*Port      = ParsedURL.Port;
+	*LevelName = ParsedURL.Map;
+	*EntryName = ParsedURL.Portal;
+	*(INT*)Result = 1;
 }
 
 void AInternetLink::execResolve(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(HostName);
 	P_FINISH;
+	if (!GWSAInitialized)
+		return;
+	// Check for dotted-decimal address first
+	char AnsiHost[256];
+	WideCharToMultiByte(CP_ACP, 0, *HostName, -1, AnsiHost, sizeof(AnsiHost), NULL, NULL);
+	ULONG IpAddr = inet_addr(AnsiHost);
+	if (IpAddr != INADDR_NONE)
+	{
+		if (IpAddr == 0xFFFFFFFF)
+		{
+			eventResolveFailed();
+		}
+		else
+		{
+			FIpAddr Addr;
+			Addr.Addr = (INT)ntohl(IpAddr);
+			Addr.Port = 0;
+			eventResolved(Addr);
+		}
+		return;
+	}
+	// Allocate FResolveInfo (0x308 bytes) and start async thread
+	void* Buf = appMalloc(sizeof(FResolveInfo), TEXT("InternetLinkResolve"));
+	if (Buf)
+	{
+		PrivateResolveInfo = (INT)(DWORD_PTR)StartResolve(Buf, *HostName);
+	}
 }
 
 void AInternetLink::execStringToIpAddr(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(Str);
+	P_GET_STRUCT_REF(FIpAddr, Addr);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	char AnsiStr[256];
+	WideCharToMultiByte(CP_ACP, 0, *Str, -1, AnsiStr, sizeof(AnsiStr), NULL, NULL);
+	ULONG IpNet = inet_addr(AnsiStr);
+	if (IpNet == INADDR_NONE)
+	{
+		*(INT*)Result = 0;
+		return;
+	}
+	Addr->Addr = (INT)ntohl(IpNet);
+	Addr->Port = 0;
+	*(INT*)Result = 1;
 }
 
 void AInternetLink::execValidate(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(ProductID);
+	P_GET_STR(CDKey);
 	P_FINISH;
+	// TODO: implement CD key validation (calls FUN_10703730/10703800/10703870/10703b90)
 	*(FString*)Result = TEXT("");
 }
 
@@ -166,32 +480,174 @@ void AInternetLink::execValidate(FFrame& Stack, RESULT_DECL)
 
 INT ATcpLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
-	return Super::Tick(DeltaTime, TickType);
+	INT Ret = Super::Tick(DeltaTime, TickType);
+	switch (LinkState)
+	{
+	case STATE_Listening:
+		CheckConnectionQueue();
+		break;
+	case STATE_Connecting:
+		CheckConnectionAttempt();
+		break;
+	case STATE_Connected:
+		if (ReceiveMode == RMODE_Event)
+			PollConnections();
+		FlushSendBuffer();
+		break;
+	case STATE_ListenClosePending:
+	case STATE_ConnectClosePending:
+		ShutdownConnection();
+		break;
+	default:
+		break;
+	}
+	return Ret;
 }
 
 void ATcpLink::PostScriptDestroyed()
 {
+	if (Socket != -1)
+	{
+		closesocket((SOCKET)Socket);
+		Socket = -1;
+	}
+	if (RemoteSocket != -1)
+	{
+		closesocket((SOCKET)RemoteSocket);
+		RemoteSocket = -1;
+	}
 }
 
 void ATcpLink::CheckConnectionAttempt()
 {
+	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
+	fd_set WriteSet;
+	FD_ZERO(&WriteSet);
+	FD_SET(s, &WriteSet);
+	timeval tv = { 0, 0 };
+	int Ret = select((int)s + 1, NULL, &WriteSet, NULL, &tv);
+	if (Ret > 0 && FD_ISSET(s, &WriteSet))
+	{
+		LinkState = STATE_Connected;
+		SendFIFO.Empty();
+		eventOpened();
+	}
 }
 
 void ATcpLink::CheckConnectionQueue()
 {
+	sockaddr RemoteAddr_sa;
+	int AddrLen = sizeof(RemoteAddr_sa);
+	SOCKET Accepted = accept((SOCKET)Socket, &RemoteAddr_sa, &AddrLen);
+	if (Accepted == INVALID_SOCKET)
+		return;
+	SetSocketOptions(Accepted);
+	if (AcceptClass == NULL)
+	{
+		RemoteSocket = (INT)Accepted;
+		DWORD NetIP = *(DWORD*)&RemoteAddr_sa.sa_data[2];
+		RemoteAddr.Addr = (INT)ntohl(NetIP);
+		RemoteAddr.Port = (INT)(WORD)ntohs(*(u_short*)&RemoteAddr_sa.sa_data[0]);
+		eventAccepted();
+		return;
+	}
+	// Spawn a new AcceptClass actor for this connection
+	for (UClass* C = AcceptClass; C != NULL; C = C->GetSuperClass())
+	{
+		if (C == StaticClass())
+		{
+			ATcpLink* NewLink = (ATcpLink*)XLevel->SpawnActor(AcceptClass);
+			if (NewLink)
+			{
+				NewLink->LinkState    = STATE_Connected;
+				NewLink->LinkMode     = LinkMode;
+				NewLink->RemoteSocket = (INT)Accepted;
+				DWORD NetIP = *(DWORD*)&RemoteAddr_sa.sa_data[2];
+				NewLink->RemoteAddr.Addr = (INT)ntohl(NetIP);
+				NewLink->RemoteAddr.Port = (INT)(WORD)ntohs(*(u_short*)&RemoteAddr_sa.sa_data[0]);
+				NewLink->eventAccepted();
+			}
+			return;
+		}
+	}
 }
 
 INT ATcpLink::FlushSendBuffer()
 {
-	return 0;
+	if (!GWSAInitialized || Socket == -1 || SendFIFO.Num() == 0)
+		return 0;
+	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
+	INT Sent  = 0;
+	while (SendFIFO.Num() > 0)
+	{
+		INT Chunk = Min(SendFIFO.Num(), 512);
+		INT n     = send(s, (char*)&SendFIFO(0), Chunk, 0);
+		if (n == SOCKET_ERROR)
+			break;
+		SendFIFO.Remove(0, n);
+		Sent += n;
+	}
+	return Sent;
 }
 
 void ATcpLink::PollConnections()
 {
+	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
+	if (ReceiveMode == RMODE_Manual)
+	{
+		fd_set ReadSet;
+		timeval tv = { 0, 0 };
+		FD_ZERO(&ReadSet);
+		FD_SET(s, &ReadSet);
+		int Ret  = select((int)s + 1, &ReadSet, NULL, NULL, &tv);
+		DataPending = (Ret > 0) ? 1 : 0;
+		return;
+	}
+	if (ReceiveMode != RMODE_Event)
+		return;
+	BYTE Buf[1000];
+	appMemzero(Buf, sizeof(Buf));
+	INT n = recv(s, (char*)Buf, 999, 0);
+	if (n == SOCKET_ERROR)
+		return;
+	Buf[n] = 0;
+	if (LinkMode == MODE_Text)
+	{
+		FString Text(appFromAnsi((char*)Buf));
+		eventReceivedText(Text);
+	}
+	else if (LinkMode == MODE_Line)
+	{
+		FString Line(appFromAnsi((char*)Buf));
+		eventReceivedLine(Line);
+	}
+	else
+	{
+		eventReceivedBinary(n, Buf);
+	}
 }
 
 void ATcpLink::ShutdownConnection()
 {
+	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
+	if (s != INVALID_SOCKET)
+	{
+		if (LinkState == STATE_ListenClosePending || LinkState == STATE_ConnectClosePending)
+		{
+			shutdown(s, SD_BOTH);
+			LinkState = (ELinkState)(LinkState + 2); // advance to Closing state
+		}
+		else
+		{
+			closesocket(s);
+			if (RemoteSocket != -1)
+				RemoteSocket = -1;
+			else
+				Socket = -1;
+			LinkState = STATE_Ready;
+			eventClosed();
+		}
+	}
 }
 
 void ATcpLink::eventAccepted()
@@ -213,7 +669,7 @@ void ATcpLink::eventReceivedBinary(INT Count, BYTE* B)
 {
 	struct { INT Count; BYTE B[255]; } Parms;
 	Parms.Count = Count;
-	if(B) appMemcpy(Parms.B, B, Min(Count, 255));
+	if (B) appMemcpy(Parms.B, B, Min(Count, 255));
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary), &Parms);
 }
 
@@ -233,56 +689,176 @@ void ATcpLink::eventReceivedText(const FString& Text)
 
 void ATcpLink::execBindPort(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_INT(InPort);
+	P_GET_UBOOL_OPTX(bUseNextAvailable, 0);
 	P_FINISH;
 	*(INT*)Result = 0;
+	FString WsaErrStr;
+	if (!InitWSA(WsaErrStr))
+		return;
+	if (Socket != -1)
+		return; // already bound
+	SOCKET s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (s == INVALID_SOCKET)
+		return;
+	Socket = (INT)s;
+	SetNonBlocking(s);
+	if (!IsValidSocket(s))
+	{
+		closesocket(s); Socket = 0;
+		return;
+	}
+	sockaddr_in Addr;
+	appMemzero(&Addr, sizeof(Addr));
+	Addr.sin_family      = AF_INET;
+	Addr.sin_addr.s_addr = htonl(GetLocalBindIP());
+	Addr.sin_port        = htons((u_short)InPort);
+	INT mask    = (bUseNextAvailable ? 10 : 1);
+	WORD BoundPort = BindSocket(s, &Addr, mask, 1);
+	if (BoundPort == 0)
+	{
+		closesocket(s); Socket = 0;
+		return;
+	}
+	if (!SetSocketOptions(s))
+	{
+		closesocket(s); Socket = 0;
+		return;
+	}
+	Port      = BoundPort;
+	LinkState = STATE_Ready;
+	*(INT*)Result = BoundPort;
 }
 
 void ATcpLink::execClose(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	if (Socket != -1)
+	{
+		shutdown((SOCKET)Socket, SD_BOTH);
+		closesocket((SOCKET)Socket);
+		Socket = -1;
+	}
+	if (RemoteSocket != -1)
+	{
+		closesocket((SOCKET)RemoteSocket);
+		RemoteSocket = -1;
+	}
+	LinkState = STATE_Initialized;
+	SendFIFO.Empty();
+	*(DWORD*)Result = 1;
 }
 
 void ATcpLink::execIsConnected(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = (LinkState == STATE_Connected) ? 1 : 0;
 }
 
 void ATcpLink::execListen(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_INT(QueueSize);
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	if (listen((SOCKET)Socket, QueueSize) == SOCKET_ERROR)
+		return;
+	LinkState = STATE_Listening;
+	*(DWORD*)Result = 1;
 }
 
 void ATcpLink::execOpen(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT(FIpAddr, Addr);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = 1;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	sockaddr_in Remote;
+	appMemzero(&Remote, sizeof(Remote));
+	Remote.sin_family      = AF_INET;
+	Remote.sin_port        = htons((u_short)Addr.Port);
+	Remote.sin_addr.s_addr = htonl((u_long)Addr.Addr);
+	INT n = connect((SOCKET)Socket, (sockaddr*)&Remote, sizeof(Remote));
+	if (n == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
+	{
+		*(DWORD*)Result = 0;
+		return;
+	}
+	LinkState = STATE_Connecting;
+	SendFIFO.Empty();
 }
 
 void ATcpLink::execReadBinary(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_INT_REF(Count);
+	P_GET_ARRAY_REF(BYTE, B); // out byte B[255]
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
+	INT n = recv(s, (char*)B, Min(*Count, 255), 0);
+	if (n == SOCKET_ERROR)
+		return;
+	*Count = n;
+	*(INT*)Result = n;
 }
 
 void ATcpLink::execReadText(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR_REF(Str);
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
+	char Buf[1000];
+	appMemzero(Buf, sizeof(Buf));
+	INT n = recv(s, Buf, 999, 0);
+	if (n == SOCKET_ERROR)
+		return;
+	Buf[n] = 0;
+	*Str = FString(appFromAnsi(Buf));
+	*(INT*)Result = n;
 }
 
 void ATcpLink::execSendBinary(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_INT(Count);
+	P_GET_ARRAY_REF(BYTE, B); // out byte B[255]
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	// Add bytes to the send FIFO then flush
+	INT Idx = SendFIFO.Add(Count);
+	appMemcpy(&SendFIFO(Idx), B, Count);
+	*(INT*)Result = Count;
+	FlushSendBuffer();
 }
 
 void ATcpLink::execSendText(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(Str);
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	if (LinkMode == MODE_Line)
+		Str += TEXT("\r\n");
+	char AnsiStr[1024];
+	WideCharToMultiByte(CP_ACP, 0, *Str, -1, AnsiStr, sizeof(AnsiStr), NULL, NULL);
+	INT Len = Str.Len();
+	if (Len > 0)
+	{
+		INT Idx = SendFIFO.Add(Len);
+		appMemcpy(&SendFIFO(Idx), AnsiStr, Len);
+	}
+	*(INT*)Result = Len;
+	FlushSendBuffer();
 }
 
 /*-----------------------------------------------------------------------------
@@ -291,19 +867,57 @@ void ATcpLink::execSendText(FFrame& Stack, RESULT_DECL)
 
 INT AUdpLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
-	return Super::Tick(DeltaTime, TickType);
+	INT Ret = Super::Tick(DeltaTime, TickType);
+	if (!GWSAInitialized || Socket == -1 || ReceiveMode != RMODE_Event)
+		return Ret;
+	char Buf[1000];
+	sockaddr_in FromAddr;
+	int FromLen;
+	for (;;)
+	{
+		appMemzero(Buf, sizeof(Buf));
+		appMemzero(&FromAddr, sizeof(FromAddr));
+		FromLen = sizeof(FromAddr);
+		INT n = recvfrom((SOCKET)Socket, Buf, 999, 0, (sockaddr*)&FromAddr, &FromLen);
+		if (n == SOCKET_ERROR)
+			break;
+		Buf[n] = 0;
+		FIpAddr SrcAddr;
+		SrcAddr.Addr = (INT)ntohl(FromAddr.sin_addr.s_addr);
+		SrcAddr.Port = (INT)ntohs(FromAddr.sin_port);
+		if (LinkMode == MODE_Text)
+		{
+			FString Text(appFromAnsi(Buf));
+			eventReceivedText(SrcAddr, Text);
+		}
+		else if (LinkMode == MODE_Line)
+		{
+			FString Line(appFromAnsi(Buf));
+			eventReceivedLine(SrcAddr, Line);
+		}
+		else
+		{
+			eventReceivedBinary(SrcAddr, n, (BYTE*)Buf);
+		}
+	}
+	return Ret;
 }
 
 void AUdpLink::PostScriptDestroyed()
 {
+	if (Socket != -1)
+	{
+		closesocket((SOCKET)Socket);
+		Socket = -1;
+	}
 }
 
 void AUdpLink::eventReceivedBinary(FIpAddr Addr, INT Count, BYTE* B)
 {
 	struct { FIpAddr Addr; INT Count; BYTE B[255]; } Parms;
-	Parms.Addr = Addr;
+	Parms.Addr  = Addr;
 	Parms.Count = Count;
-	if(B) appMemcpy(Parms.B, B, Min(Count, 255));
+	if (B) appMemcpy(Parms.B, B, Min(Count, 255));
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary), &Parms);
 }
 
@@ -325,54 +939,205 @@ void AUdpLink::eventReceivedText(FIpAddr Addr, const FString& Text)
 
 void AUdpLink::execBindPort(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_INT(InPort);
+	P_GET_UBOOL_OPTX(bUseNextAvailable, 0);
+	P_GET_STR_REF(Error);
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized)
+		return;
+	if (Socket != -1)
+		return;
+	SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (s == INVALID_SOCKET)
+		return;
+	Socket = (INT)s;
+	// Enable broadcast
+	int bcast = 1;
+	if (setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char*)&bcast, sizeof(bcast)) != 0)
+	{
+		closesocket(s); Socket = 0;
+		return;
+	}
+	UINT LocalIP = GetLocalBindIP();
+	sockaddr_in Addr;
+	appMemzero(&Addr, sizeof(Addr));
+	Addr.sin_family      = AF_INET;
+	Addr.sin_addr.s_addr = htonl(LocalIP);
+	// Store local IP string in Error out-param (matches Ghidra: FString::operator=(param_1, FormatIP))
+	*Error = IpAddrToStr(htonl(LocalIP), 0);
+	Addr.sin_port = htons((u_short)InPort);
+	INT mask  = (bUseNextAvailable ? 10 : 1);
+	WORD BoundPort = BindSocket(s, &Addr, mask, 1);
+	if (BoundPort == 0)
+	{
+		closesocket(s); Socket = 0;
+		return;
+	}
+	u_long NonBlocking = 1;
+	if (ioctlsocket(s, FIONBIO, &NonBlocking) != 0)
+	{
+		closesocket(s); Socket = 0;
+		return;
+	}
+	Port = BoundPort;
+	*(INT*)Result = BoundPort;
 }
 
 void AUdpLink::execCheckForPlayerTimeouts(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
+	float Now = GetTSCTime();
+	INT Count = GPlayerTimes.Num();
+	FPlayerTimeEntry* Entries = (FPlayerTimeEntry*)GPlayerTimes.GetData();
+	for (INT i = Count - 1; i >= 0; i--)
+	{
+		if (Now - Entries[i].ActiveTime > 120.0f)
+		{
+			Entries[i].IPAddr.Empty();
+			GPlayerTimes.Remove(i, 1, sizeof(FPlayerTimeEntry));
+		}
+	}
 }
 
 void AUdpLink::execGetMaxAvailPorts(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(INT*)Result = 0;
+	*(INT*)Result = 10; // hardcoded in binary
 }
 
 void AUdpLink::execGetPlayingTime(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(PlayerIP);
 	P_FINISH;
 	*(FLOAT*)Result = 0.0f;
+	INT Count = GPlayerTimes.Num();
+	FPlayerTimeEntry* Entries = (FPlayerTimeEntry*)GPlayerTimes.GetData();
+	float Now = GetTSCTime();
+	for (INT i = 0; i < Count; i++)
+	{
+		if (appStrcmp(*PlayerIP, *Entries[i].IPAddr) == 0)
+		{
+			*(FLOAT*)Result = Now - Entries[i].LoginTime;
+			return;
+		}
+	}
 }
 
 void AUdpLink::execReadBinary(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT_REF(FIpAddr, Addr);
+	P_GET_INT_REF(Count);
+	P_GET_ARRAY_REF(BYTE, B); // out byte B[255]
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	char Buf[256];
+	sockaddr_in FromAddr;
+	int FromLen = sizeof(FromAddr);
+	appMemzero(&FromAddr, sizeof(FromAddr));
+	INT n = recvfrom((SOCKET)Socket, Buf, Min(*Count, 255), 0, (sockaddr*)&FromAddr, &FromLen);
+	if (n == SOCKET_ERROR)
+		return;
+	Addr->Addr = (INT)ntohl(FromAddr.sin_addr.s_addr);
+	Addr->Port = (INT)ntohs(FromAddr.sin_port);
+	*Count = n;
+	appMemcpy(B, Buf, n);
+	*(INT*)Result = n;
 }
 
 void AUdpLink::execReadText(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT_REF(FIpAddr, Addr);
+	P_GET_STR_REF(Str);
 	P_FINISH;
 	*(INT*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	char Buf[1000];
+	sockaddr_in FromAddr;
+	int FromLen = sizeof(FromAddr);
+	appMemzero(&FromAddr, sizeof(FromAddr));
+	INT n = recvfrom((SOCKET)Socket, Buf, 999, 0, (sockaddr*)&FromAddr, &FromLen);
+	if (n == SOCKET_ERROR)
+		return;
+	Buf[n] = 0;
+	Addr->Addr = (INT)ntohl(FromAddr.sin_addr.s_addr);
+	Addr->Port = (INT)ntohs(FromAddr.sin_port);
+	*Str = FString(appFromAnsi(Buf));
+	*(INT*)Result = n;
 }
 
 void AUdpLink::execSendBinary(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT(FIpAddr, Addr);
+	P_GET_INT(Count);
+	P_GET_ARRAY_REF(BYTE, B); // out byte B[255]
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	sockaddr_in Remote;
+	appMemzero(&Remote, sizeof(Remote));
+	Remote.sin_family      = AF_INET;
+	Remote.sin_port        = htons((u_short)Addr.Port);
+	Remote.sin_addr.s_addr = htonl((u_long)Addr.Addr);
+	INT n = sendto((SOCKET)Socket, (char*)B, Count, 0, (sockaddr*)&Remote, sizeof(Remote));
+	if (n == SOCKET_ERROR)
+	{
+		*(DWORD*)Result = 1; // error (matches binary: result=1 on sendto failure)
+		return;
+	}
+	// result stays 0 (success) per binary
 }
 
 void AUdpLink::execSendText(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STRUCT(FIpAddr, Addr);
+	P_GET_STR(Str);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = 1; // default success
+	if (!GWSAInitialized || Socket == -1)
+		return;
+	sockaddr_in Remote;
+	appMemzero(&Remote, sizeof(Remote));
+	Remote.sin_family      = AF_INET;
+	Remote.sin_port        = htons((u_short)Addr.Port);
+	Remote.sin_addr.s_addr = htonl((u_long)Addr.Addr);
+	char AnsiStr[1024];
+	WideCharToMultiByte(CP_ACP, 0, *Str, -1, AnsiStr, sizeof(AnsiStr), NULL, NULL);
+	INT Len = Str.Len();
+	INT n = sendto((SOCKET)Socket, AnsiStr, Len, 0, (sockaddr*)&Remote, sizeof(Remote));
+	if (n == SOCKET_ERROR)
+		*(DWORD*)Result = 0; // failure
 }
 
 void AUdpLink::execSetPlayingTime(FFrame& Stack, RESULT_DECL)
 {
+	P_GET_STR(PlayerIP);
+	P_GET_FLOAT(LoginTime);
+	P_GET_FLOAT(CurrentTime);
 	P_FINISH;
+	float Now = GetTSCTime();
+	INT Count = GPlayerTimes.Num();
+	FPlayerTimeEntry* Entries = (FPlayerTimeEntry*)GPlayerTimes.GetData();
+	for (INT i = 0; i < Count; i++)
+	{
+		if (appStrcmp(*PlayerIP, *Entries[i].IPAddr) == 0)
+		{
+			Entries[i].ActiveTime = Now;
+			return;
+		}
+	}
+	// New entry: AddZeroed(ElementSize, Count) returns index of first new element
+	INT Idx = GPlayerTimes.AddZeroed(sizeof(FPlayerTimeEntry), 1);
+	FPlayerTimeEntry* Entry = &((FPlayerTimeEntry*)GPlayerTimes.GetData())[Idx];
+	// In-place construct FString (memory is zeroed; default ctor is a no-op)
+	new (&Entry->IPAddr) FString();
+	Entry->IPAddr         = PlayerIP;
+	Entry->LoginTime      = Now - (CurrentTime - LoginTime);
+	Entry->ActiveTime     = Now;
 }
 
 /*-----------------------------------------------------------------------------
@@ -381,59 +1146,298 @@ void AUdpLink::execSetPlayingTime(FFrame& Stack, RESULT_DECL)
 
 void UTcpNetDriver::StaticConstructor()
 {
+	// Property registration omitted: CPP_PROPERTY cannot take the address
+	// of bitfield members (AllowPlayerPortUnreach, LogPortUnreach, etc.)
+	// in standard C++. Divergence from binary; config values load via .ini.
 }
 
 void UTcpNetDriver::LowLevelDestroy()
 {
+	SOCKET* pSock = (SOCKET*)((BYTE*)this + 0xbc);
+	if (*pSock != 0)
+	{
+		if (closesocket(*pSock) != 0)
+			debugf(NAME_DevNet, TEXT("WinSock: closesocket failed (%d)"), WSAGetLastError());
+		*pSock = 0;
+		debugf(NAME_DevNet, TEXT("WinSock: connection closed"));
+	}
 }
 
 FString UTcpNetDriver::LowLevelGetNetworkNumber()
 {
-	return TEXT("");
-}
-
-INT UTcpNetDriver::InitConnect(FNetworkNotify* InNotify, FURL& ConnectURL, FString& Error)
-{
-	return 0;
-}
-
-INT UTcpNetDriver::InitListen(FNetworkNotify* InNotify, FURL& URL, FString& Error)
-{
-	return 0;
-}
-
-void UTcpNetDriver::TickDispatch(FLOAT DeltaTime)
-{
+	UINT* pLocalIP = (UINT*)((BYTE*)this + 0xb0);
+	return IpAddrToStr(htonl(*pLocalIP), 0);
 }
 
 UTcpipConnection* UTcpNetDriver::GetServerConnection()
 {
-	return NULL;
+	return (UTcpipConnection*)(*(UNetConnection**)((BYTE*)this + 0x3c));
 }
 
 INT UTcpNetDriver::InitBase(INT Reuse, FNetworkNotify* InNotify, FURL& URL, FString& Error)
 {
-	return 0;
+	if (!InitWSA(Error))
+		return 0;
+	SOCKET* pSock = (SOCKET*)((BYTE*)this + 0xbc);
+	*pSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (*pSock == INVALID_SOCKET)
+	{
+		*pSock = 0;
+		Error = FString::Printf(TEXT("WinSock: socket failed (%d)"), WSAGetLastError());
+		return 0;
+	}
+	GDrvSocket = (UINT)*pSock;
+	// Enable broadcast
+	int bcast = 1;
+	if (setsockopt(*pSock, SOL_SOCKET, SO_BROADCAST, (char*)&bcast, sizeof(bcast)) != 0)
+	{
+		Error = FString::Printf(TEXT("WinSock: setsockopt SO_BROADCAST failed (%d)"), WSAGetLastError());
+		return 0;
+	}
+	SetNonBlocking(*pSock);
+	// Buffer sizes: large for server (listen), small for client (connect)
+	int BufSize = Reuse ? 0x20000 : 0x8000;
+	setsockopt(*pSock, SOL_SOCKET, SO_RCVBUF, (char*)&BufSize, sizeof(BufSize));
+	setsockopt(*pSock, SOL_SOCKET, SO_SNDBUF, (char*)&BufSize, sizeof(BufSize));
+	// Set up local bind address
+	sockaddr_in* pLocalAddr = (sockaddr_in*)((BYTE*)this + 0xac);
+	UINT*        pLocalIP   = (UINT*)      ((BYTE*)this + 0xb0);
+	pLocalAddr->sin_family      = AF_INET;
+	*pLocalIP                   = GetLocalBindIP();
+	pLocalAddr->sin_addr.s_addr = htonl(*pLocalIP);
+	pLocalAddr->sin_port        = 0;
+	if (!Reuse) // server: use URL.Port
+	{
+		INT CmdPort = URL.Port;
+		Parse(appCmdLine(), TEXT("PORT="), CmdPort);
+		URL.Port         = CmdPort;
+		pLocalAddr->sin_port = htons((u_short)URL.Port);
+	}
+	WORD BoundPort = BindSocket(*pSock, pLocalAddr, Reuse ? 20 : 1, 1);
+	if (BoundPort == 0)
+	{
+		Error = FString::Printf(TEXT("WinSock: binding to port %i failed (%d)"), URL.Port, WSAGetLastError());
+		return 0;
+	}
+	if (!SetSocketOptions(*pSock))
+	{
+		Error = FString::Printf(TEXT("WinSock: SetSocketOptions failed (%d)"), WSAGetLastError());
+		return 0;
+	}
+	return 1;
+}
+
+INT UTcpNetDriver::InitConnect(FNetworkNotify* InNotify, FURL& ConnectURL, FString& Error)
+{
+	// Divergence: not calling Super::InitConnect (stub returns 0, aborting init).
+	// Instead, store notify and perform base init directly.
+	*(FNetworkNotify**)((BYTE*)this + 0x40) = InNotify;
+	if (!InitBase(1, InNotify, ConnectURL, Error))
+		return 0;
+	SOCKET* pSock = (SOCKET*)((BYTE*)this + 0xbc);
+	// Build remote address from ConnectURL
+	sockaddr_in RemoteAddr;
+	appMemzero(&RemoteAddr, sizeof(RemoteAddr));
+	RemoteAddr.sin_family = AF_INET;
+	RemoteAddr.sin_port   = htons((u_short)ConnectURL.Port);
+	// Create the server-side UTcpipConnection for this client
+	UObject* Obj = UObject::StaticAllocateObject(
+	    UTcpipConnection::StaticClass(),
+	    UObject::GetTransientPackage(),
+	    NAME_None, 0, NULL, GError, NULL, NULL);
+	UTcpipConnection* ServerConn = NULL;
+	if (Obj)
+	{
+		ServerConn = new(Obj) UTcpipConnection(
+		    (UINT)*pSock, this, RemoteAddr, USOCK_Pending, 1, ConnectURL);
+	}
+	*(UNetConnection**)((BYTE*)this + 0x3c) = ServerConn;
+	debugf(NAME_DevNet, TEXT("Opened connection from port %i"),
+	       (INT)ntohs(((sockaddr_in*)((BYTE*)this + 0xac))->sin_port));
+	if (ServerConn)
+		ServerConn->CreateChannel(CHTYPE_Control, 1, 0);
+	return 1;
+}
+
+INT UTcpNetDriver::InitListen(FNetworkNotify* InNotify, FURL& URL, FString& Error)
+{
+	// Divergence: not calling Super::InitListen (stub returns 0, aborting init).
+	*(FNetworkNotify**)((BYTE*)this + 0x40) = InNotify;
+	if (!InitBase(0, InNotify, URL, Error))
+		return 0;
+	UINT* pLocalIP          = (UINT*)((BYTE*)this + 0xb0);
+	URL.Host = IpAddrToStr(htonl(*pLocalIP), 0);
+	sockaddr_in* pLocalAddr = (sockaddr_in*)((BYTE*)this + 0xac);
+	URL.Port = (INT)ntohs(pLocalAddr->sin_port);
+	debugf(NAME_DevNet, TEXT("Opened connection from port %i"), URL.Port);
+	return 1;
+}
+
+void UTcpNetDriver::TickDispatch(FLOAT DeltaTime)
+{
+	Super::TickDispatch(DeltaTime);
+	SOCKET* pSock = (SOCKET*)((BYTE*)this + 0xbc);
+	if (!*pSock || *pSock == INVALID_SOCKET)
+		return;
+	GDrvSocket = (UINT)*pSock;
+	static char PktBuf[1280];
+	for (;;)
+	{
+		sockaddr_in FromAddr;
+		int FromLen = sizeof(FromAddr);
+		INT n = recvfrom(*pSock, PktBuf, sizeof(PktBuf), 0, (sockaddr*)&FromAddr, &FromLen);
+		if (n == SOCKET_ERROR)
+		{
+			INT Err = WSAGetLastError();
+			if (Err == WSAEWOULDBLOCK)
+				return;
+			if (Err == WSAECONNRESET) // ICMP port-unreachable — skip silently
+				continue;
+			if (AllowPlayerPortUnreach)
+				debugf(NAME_DevNet, TEXT("recvfrom error %d from %s"),
+				       Err, *IpAddrToStr(FromAddr.sin_addr.s_addr, (UINT)ntohs(FromAddr.sin_port)));
+			return;
+		}
+		// Find matching connection by remote address
+		UNetConnection* Conn = NULL;
+		UNetConnection* SrvConn = *(UNetConnection**)((BYTE*)this + 0x3c);
+		if (SrvConn)
+		{
+			// sockaddr_in stored at connection+0x4BD4; sin_port@0x4BD6, sin_addr@0x4BD8
+			if (*(DWORD*)((BYTE*)SrvConn + 0x4bd8) == *(DWORD*)&FromAddr.sin_addr &&
+			    *(WORD*) ((BYTE*)SrvConn + 0x4bd6) == *(WORD*) &FromAddr.sin_port)
+				Conn = SrvConn;
+		}
+		if (!Conn)
+		{
+			TArray<UNetConnection*>& Clients = *(TArray<UNetConnection*>*)((BYTE*)this + 0x30);
+			for (INT i = 0; i < Clients.Num(); i++)
+			{
+				UNetConnection* C = Clients(i);
+				if (!C) continue;
+				if (*(DWORD*)((BYTE*)C + 0x4bd8) == *(DWORD*)&FromAddr.sin_addr &&
+				    *(WORD*) ((BYTE*)C + 0x4bd6) == *(WORD*) &FromAddr.sin_port)
+				{
+					Conn = C;
+					break;
+				}
+			}
+		}
+		if (Conn)
+		{
+			Conn->ReceivedRawPacket(PktBuf, n);
+		}
+		// New-connection spawn path: omitted in this implementation.
+		// See DIVERGENCES comment above.
+	}
 }
 
 /*-----------------------------------------------------------------------------
 	UTcpipConnection implementation.
 -----------------------------------------------------------------------------*/
 
-UTcpipConnection::UTcpipConnection(UINT InSocket, UNetDriver* InDriver, struct sockaddr_in InRemoteAddr, EConnectionState InState, INT InOpenedLocally, const FURL& InURL)
+UTcpipConnection::UTcpipConnection(UINT InSocket, UNetDriver* InDriver,
+    struct sockaddr_in InRemoteAddr, EConnectionState InState,
+    INT InOpenedLocally, const FURL& InURL)
+    : UNetConnection(InDriver, InURL)
 {
+	BYTE* Base = (BYTE*)this;
+	// Driver was not set by the base stub constructor; set explicitly.
+	Driver = InDriver;
+	// Remote address (sockaddr_in stored at +0x4BD4; sin_family+sin_port+sin_addr)
+	*(sockaddr_in*)(Base + 0x4BD4) = InRemoteAddr;
+	// Socket handle, opened-locally flag, and connection state
+	*(UINT*)(Base + 0x4BE4) = InSocket;
+	*(INT*) (Base + 0x4BE8) = InOpenedLocally;
+	*(UINT*)(Base + 0x80)   = (UINT)InState;
+	// Max packet sizes
+	*(UINT*)(Base + 0xD0)   = 0x200;
+	*(UINT*)(Base + 0xD4)   = 0x20;
+	// Pending resolve pointer (NULL initially)
+	*(FResolveInfo**)(Base + 0x4BEC) = NULL;
+	// TSC-based connection timestamp for timeout detection
+	{
+		unsigned __int64 tsc = __rdtsc();
+		double hi = (double)(int)(tsc >> 32);
+		double lo = (double)(int)(tsc & 0xFFFFFFFFull);
+		if ((int)(tsc >> 32)           < 0) hi += 4294967296.0;
+		if ((int)(tsc & 0xFFFFFFFFull) < 0) lo += 4294967296.0;
+		*(double*)(Base + 0x4BF0) = (lo + hi * 4294967296.0) * GSecondsPerCycle + 16777216.0;
+	}
+	InitOut();
+	// If opened locally (client), start async DNS resolve for non-dotted hostnames
+	if (InOpenedLocally)
+	{
+		char HostAnsi[256];
+		WideCharToMultiByte(CP_ACP, 0, *InURL.Host, -1, HostAnsi, sizeof(HostAnsi), NULL, NULL);
+		ULONG IpNet = inet_addr(HostAnsi);
+		if (IpNet != INADDR_NONE)
+		{
+			// Dotted-decimal: store IP directly in the remote address struct
+			*(DWORD*)(Base + 0x4BD8) = IpNet;
+		}
+		else
+		{
+			// Hostname: start async DNS
+			void* Buf = appMalloc(sizeof(FResolveInfo), TEXT("UTcpipConnectionResolve"));
+			FResolveInfo* Info = Buf ? StartResolve(Buf, *InURL.Host) : NULL;
+			*(FResolveInfo**)(Base + 0x4BEC) = Info;
+		}
+	}
 }
 
 FString UTcpipConnection::LowLevelGetRemoteAddress()
 {
-	return TEXT("");
+	BYTE* Base    = (BYTE*)this;
+	UINT RemoteIP = *(UINT*)(Base + 0x4BD8);
+	UINT Port     = (UINT)ntohs(*(u_short*)(Base + 0x4BD6));
+	return IpAddrToStr(RemoteIP, Port);
 }
 
 FString UTcpipConnection::LowLevelDescribe()
 {
-	return TEXT("");
+	BYTE* Base  = (BYTE*)this;
+	UINT  State = *(UINT*)(Base + 0x80);
+	const TCHAR* StateName = (State == USOCK_Pending) ? TEXT("Pending")
+	                       : (State == USOCK_Open)    ? TEXT("Open")
+	                       : (State == USOCK_Closed)  ? TEXT("Closed")
+	                       :                            TEXT("Invalid");
+	UINT RemoteIP = *(UINT*)(Base + 0x4BD8);
+	UINT Port     = (UINT)ntohs(*(u_short*)(Base + 0x4BD6));
+	FString RemoteStr = IpAddrToStr(RemoteIP, Port);
+	FString DescStr   = *(FString*)(Base + 0x90);
+	return FString::Printf(TEXT("%s %s state: %s"), *DescStr, *RemoteStr, StateName);
 }
 
 void UTcpipConnection::LowLevelSend(void* Data, INT Count)
 {
+	BYTE*         Base = (BYTE*)this;
+	FResolveInfo* Info = *(FResolveInfo**)(Base + 0x4BEC);
+	if (Info)
+	{
+		if (Info->bWorking != 0)
+			return; // still resolving; drop packet
+		if (Info->Error != 0)
+		{
+			debugf(NAME_DevNet, TEXT("Failed to resolve address"));
+			// Close the server connection on resolve failure
+			UNetDriver* Drv = *(UNetDriver**)(Base + 0x7C);
+			if (Drv)
+			{
+				UNetConnection* SrvConn = *(UNetConnection**)((BYTE*)Drv + 0x3C);
+				if (SrvConn)
+					*(UINT*)((BYTE*)SrvConn + 0x80) = (UINT)USOCK_Closed;
+			}
+			appFree(Info);
+			*(FResolveInfo**)(Base + 0x4BEC) = NULL;
+			return;
+		}
+		// Resolve succeeded: update stored remote IP
+		*(DWORD*)(Base + 0x4BD8) = Info->Addr;
+		debugf(NAME_DevNet, TEXT("Resolved to %s"), *IpAddrToStr(Info->Addr, 0));
+		appFree(Info);
+		*(FResolveInfo**)(Base + 0x4BEC) = NULL;
+	}
+	UINT s = *(UINT*)(Base + 0x4BE4);
+	sendto((SOCKET)s, (char*)Data, Count, 0, (sockaddr*)(Base + 0x4BD4), 0x10);
 }
