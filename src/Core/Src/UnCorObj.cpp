@@ -193,6 +193,39 @@ void USystem::StaticConstructor()
 UBOOL USystem::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(USystem::Exec);
+	if( ParseCommand( &Cmd, TEXT("MEMSTAT") ) )
+	{
+		MEMORYSTATUS Status;
+		Status.dwLength = sizeof(Status);
+		GlobalMemoryStatus( &Status );
+		Ar.Logf( TEXT("Memory status:") );
+		Ar.Logf( TEXT("  Physical: %uk used, %uk total"), (Status.dwTotalPhys - Status.dwAvailPhys) / 1024, Status.dwTotalPhys / 1024 );
+		Ar.Logf( TEXT("  Pagefile: %uk used, %uk total"), (Status.dwTotalPageFile - Status.dwAvailPageFile) / 1024, Status.dwTotalPageFile / 1024 );
+		Ar.Logf( TEXT("  Virtual:  %uk used, %uk total"), (Status.dwTotalVirtual - Status.dwAvailVirtual) / 1024, Status.dwTotalVirtual / 1024 );
+		return 1;
+	}
+	else if( ParseCommand( &Cmd, TEXT("CONFIGHASH") ) )
+	{
+		GConfig->Dump( Ar );
+		return 1;
+	}
+	else if( ParseCommand( &Cmd, TEXT("EXIT") ) || ParseCommand( &Cmd, TEXT("QUIT") ) )
+	{
+		Ar.Log( TEXT("Exiting.") );
+		GIsRequestingExit = 1;
+		return 1;
+	}
+	else if( ParseCommand( &Cmd, TEXT("RELAUNCH") ) )
+	{
+		GIsRequestingExit = 1;
+		return 1;
+	}
+	else if( ParseCommand( &Cmd, TEXT("DEBUG") ) )
+	{
+		if( appIsDebuggerPresent() )
+			appDebugBreak();
+		return 1;
+	}
 	return 0;
 	unguard;
 }

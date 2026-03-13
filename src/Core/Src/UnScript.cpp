@@ -3178,7 +3178,9 @@ IMPLEMENT_FUNCTION( UObject, 536, execSaveConfig );
 void UObject::execStaticSaveConfig( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStaticSaveConfig);
-	// Save default config.
+	P_FINISH;
+	// Save config for the class default object so it persists for all instances.
+	GetClass()->GetDefaultObject()->SaveConfig( CPF_Config, NULL );
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 537, execStaticSaveConfig );

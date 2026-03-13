@@ -101,6 +101,7 @@ void UField::Register()
 void UField::AddCppProperty( UProperty* Property )
 {
 	guard(UField::AddCppProperty);
+	appErrorf( TEXT("UField::AddCppProperty") );
 	unguard;
 }
 

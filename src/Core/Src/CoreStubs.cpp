@@ -520,6 +520,10 @@ CORE_API INT IsRavenShieldCDInDrive()
 	return 1;
 }
 
+// Forward-declare globals defined later in this file.
+extern CORE_API TArray<FEdLoadError> GEdLoadErrors;
+extern Native GCasts[256];
+
 CORE_API void EdClearLoadErrors()
 {
 	GEdLoadErrors.Empty();
@@ -1267,12 +1271,70 @@ FCylinder& FCylinder::operator=( const FCylinder& Other )
 
 INT FCylinder::LineCheck( const FVector& Start, const FVector& End, FVector& HitNormal ) const
 {
-	return 0;
+	// DIVERGENCE: The binary FCylinder has additional fields (Center FVector,
+	// Axis FVector, HalfHeight FLOAT) at offsets 0x0-0x1C that are not present
+	// in our reconstructed struct (which only has Radius and Height).
+	// We implement a simplified axis-aligned cylinder centred at origin.
+	FLOAT HitTime[2];
+	if( !LineIntersection( Start, End, HitTime ) )
+		return 0;
+
+	// Direction vector.
+	FVector Dir = End - Start;
+	FLOAT Len = Dir.Size();
+	if( Len < 0.0001f )
+		return 0;
+	FLOAT InvLen = 1.0f / Len;
+	Dir *= InvLen;
+
+	FLOAT t = HitTime[0];
+	if( t < 0.0f || t >= Len )
+	{
+		t = HitTime[1];
+		if( t < 0.0f || t >= Len )
+			return 0;
+	}
+
+	FVector HitPos = Start + Dir * t;
+	// Normal points radially outward from the cylinder axis.
+	HitNormal = FVector( HitPos.X, HitPos.Y, 0.0f );
+	HitNormal.Normalize();
+	return 1;
 }
 
 INT FCylinder::LineIntersection( const FVector& Start, const FVector& End, FLOAT* const HitTime ) const
 {
-	return 0;
+	// DIVERGENCE: Same as LineCheck above — binary has Center/Axis/HalfHeight fields.
+	// Simplified axis-aligned (Z-axis) cylinder centred at origin.
+	FVector Dir = End - Start;
+	FLOAT Len = Dir.Size();
+	if( Len < 0.0001f )
+		return 0;
+	FLOAT InvLen = 1.0f / Len;
+	FVector D = Dir * InvLen;
+
+	// Ray-cylinder intersection (infinite Z-axis cylinder of radius Radius).
+	FLOAT a = D.X*D.X + D.Y*D.Y;
+	if( a < 0.0001f )
+		return 0; // Ray is parallel to axis.
+	FLOAT b = 2.0f * (Start.X*D.X + Start.Y*D.Y);
+	FLOAT c = Start.X*Start.X + Start.Y*Start.Y - Radius*Radius;
+	FLOAT Discriminant = b*b - 4.0f*a*c;
+	if( Discriminant < 0.0f )
+		return 0;
+	FLOAT SqrtDisc = appSqrt( (DOUBLE)Discriminant );
+	HitTime[0] = (-b - SqrtDisc) / (2.0f * a);
+	HitTime[1] = (-b + SqrtDisc) / (2.0f * a);
+
+	// Clamp to Z height.
+	for( INT i = 0; i < 2; i++ )
+	{
+		FLOAT z = Start.Z + HitTime[i] * D.Z;
+		if( z < -Height * 0.5f || z > Height * 0.5f )
+			HitTime[i] = -1.0f;
+	}
+
+	return ( HitTime[0] >= 0.0f || HitTime[1] >= 0.0f ) ? 1 : 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1842,6 +1904,25 @@ void UObject::LoadLocalized( INT Flags, UClass* Class )
 
 void UObject::SetKey( UClass* Class, const TCHAR* Section )
 {
+	guard(UObject::SetKey);
+	// Import properties from config for the given section.
+	// Iterates the class properties and calls ImportText for each one
+	// that has a matching key=value entry in the config section.
+	if( !Class || !Section || !GConfig )
+		return;
+	for( TFieldIterator<UProperty> It(Class); It; ++It )
+	{
+		UProperty* Prop = *It;
+		if( !(Prop->PropertyFlags & CPF_Config) )
+			continue;
+		TCHAR Value[4096];
+		if( GConfig->GetString( Section, Prop->GetName(), Value, ARRAY_COUNT(Value) ) )
+		{
+			const TCHAR* Buf = Value;
+		Prop->ImportText( Buf, (BYTE*)Class->GetDefaultObject() + Prop->Offset, PPF_Localized );
+		}
+	}
+	unguard;
 }
 
 void UObject::InitProperties( BYTE* Data, INT DataCount, UClass* DefaultsClass, BYTE* Defaults, INT DefaultsCount, UObject* DestObject, INT bNativeDefaults )
