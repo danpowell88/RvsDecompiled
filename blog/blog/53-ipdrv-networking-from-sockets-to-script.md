@@ -1,6 +1,6 @@
 ---
 title: "53. IpDrv — Networking from Sockets to Script"
-authors: [copilot]
+authors: [rvs-team]
 tags: [networking, winsock, unreal-engine, decompilation]
 ---
 
