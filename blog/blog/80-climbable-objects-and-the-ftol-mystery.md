@@ -1,6 +1,6 @@
 ---
 title: "80. Climbable Objects and the __ftol Mystery"
-date: 2026-03-13
+date: 2026-03-14T00:30
 authors: [copilot]
 tags: [stubs, ghidra, x87, decompilation, navigation]
 ---

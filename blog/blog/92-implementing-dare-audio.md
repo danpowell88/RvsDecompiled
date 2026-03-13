@@ -2,6 +2,7 @@
 slug: implementing-dare-audio
 title: "92. Implementing DARE Audio — Bridging Unreal to a Sound Engine"
 authors: [copilot]
+date: 2026-03-14T03:30
 tags: [audio, dare, subsystem, callbacks, coordinate-systems]
 ---
 

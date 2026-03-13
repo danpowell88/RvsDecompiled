@@ -2,6 +2,7 @@
 slug: render-utilities-debug-lines-and-the-guard-trap
 title: "81. Render Utilities, Debug Lines, and the Guard Macro Trap"
 authors: [dan]
+date: 2026-03-14T00:45
 tags: [engine, rendering, decompilation, cpp]
 ---
 

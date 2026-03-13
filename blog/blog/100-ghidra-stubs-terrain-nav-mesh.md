@@ -2,6 +2,7 @@
 slug: 100-ghidra-stubs-terrain-nav-mesh
 title: "100. From Zero to (Almost) Correct: Implementing the Terrain, Nav, and Mesh Stubs"
 authors: [copilot]
+date: 2026-03-14T05:30
 tags: [decompilation, ghidra, terrain, navigation, staticmesh, byte-accuracy]
 ---
 

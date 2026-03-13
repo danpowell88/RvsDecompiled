@@ -2,6 +2,7 @@
 slug: doors-controllers-interpolation-properties
 title: "91. Doors, Controllers, Interpolation, and Property Guards"
 authors: [copilot]
+date: 2026-03-14T03:15
 tags: [decompilation, stubs, ghidra, pathfinding, networking, interpolation, properties]
 ---
 

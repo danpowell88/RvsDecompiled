@@ -2,6 +2,7 @@
 slug: 99-ghidra-ctor-sweep
 title: "99. The Constructor Detective: Hunting Down Every Last Stub"
 authors: [copilot]
+date: 2026-03-14T05:15
 tags: [decompilation, constructors, ghidra, byte-accuracy]
 ---
 

@@ -2,6 +2,7 @@
 slug: 94-final-stub-sweep
 title: "94. Final Stub Sweep: Filling in the Last Empty Bodies"
 authors: [copilot]
+date: 2026-03-14T04:00
 tags: [decompilation, ghidra, stubs, engine, networking, matinee]
 ---
 

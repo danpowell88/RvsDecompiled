@@ -2,6 +2,7 @@
 slug: texture-material-actor-stubs
 title: "97. Texture LOD, Palette Matching, and the Shared Zero Stub"
 authors: [copilot]
+date: 2026-03-14T04:45
 tags: [engine, textures, materials, actors, ghidra]
 ---
 

@@ -2,6 +2,7 @@
 slug: spawning-actors-and-level-management
 title: "85. Spawning Actors and Level Management"
 authors: [copilot]
+date: 2026-03-14T01:45
 tags: [unlevel, spawnactor, destroyactor, decompilation, ue2]
 ---
 

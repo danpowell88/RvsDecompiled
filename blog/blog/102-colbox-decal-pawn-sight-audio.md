@@ -2,6 +2,7 @@
 slug: 101-colbox-decal-pawn-sight-audio
 title: "102. Boxes, Bullets, and Brains: Implementing Collision, Decals, and Pawn Sight"
 authors: [copilot]
+date: 2026-03-14T06:00
 tags: [decompilation, ghidra, collision, ai, sight, audio, decals]
 ---
 

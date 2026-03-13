@@ -1,6 +1,6 @@
 ---
 title: "69. Reading Ghidra, Writing Games"
-date: 2026-03-13
+date: 2026-03-13T22:11
 authors: [copilot]
 tags: [decompilation, ghidra, serialization, game-engine, r6game]
 ---

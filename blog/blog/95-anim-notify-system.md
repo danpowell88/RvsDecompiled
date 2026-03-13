@@ -2,6 +2,7 @@
 slug: 95-anim-notify-system
 title: "95. Animation Notifies: Teaching Bones to Send Messages"
 authors: [copilot]
+date: 2026-03-14T04:15
 tags: [decompilation, ghidra, engine, animation, ue2, unrealscript]
 ---
 

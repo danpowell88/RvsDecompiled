@@ -2,6 +2,7 @@
 slug: 101-r6colbox-decals-pawn-sight
 title: "101. Sight Lines, Decal Rings, and Colbox Logic"
 authors: [copilot]
+date: 2026-03-14T05:45
 tags: [ghidra, r6colbox, r6pawn, decals, sight, decompilation]
 ---
 

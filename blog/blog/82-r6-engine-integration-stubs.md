@@ -2,6 +2,7 @@
 slug: r6-engine-integration-stubs
 title: "82. Decals, Collision Boxes, and Dead Operators"
 authors: [copilot]
+date: 2026-03-14T01:00
 tags: [decompilation, engine, stubs, guard-unguard, serialization]
 ---
 

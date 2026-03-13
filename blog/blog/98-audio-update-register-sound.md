@@ -2,6 +2,7 @@
 slug: audio-update-register-sound
 title: "98. Audio Update & RegisterSound: Two Stubs That Actually Do Things"
 authors: [copilot]
+date: 2026-03-14T05:00
 tags: [dareaudio, ghidra, audio, stub-sweep]
 ---
 

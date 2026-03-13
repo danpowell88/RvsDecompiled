@@ -2,6 +2,7 @@
 slug: downloads-projectors-and-fluid-surfaces
 title: "86. Downloads, Projectors, and Fluid Surfaces"
 authors: [copilot]
+date: 2026-03-14T02:00
 tags: [engine, networking, rendering, physics]
 ---
 
