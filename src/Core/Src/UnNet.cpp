@@ -99,7 +99,8 @@ void UPackageMap::Destroy()
 UBOOL UPackageMap::CanSerializeObject( UObject* Obj )
 {
 	guard(UPackageMap::CanSerializeObject);
-	return 0;
+	appErrorf( TEXT("Unexpected UPackageMap::CanSerializeObject") );
+	return 1;
 	unguard;
 }
 
@@ -142,6 +143,12 @@ UBOOL UPackageMap::SerializeName( FArchive& Ar, FName& Name )
 INT UPackageMap::ObjectToIndex( UObject* Object )
 {
 	guard(UPackageMap::ObjectToIndex);
+	if( Object && Object->_Linker && Object->_LinkerIndex != INDEX_NONE )
+	{
+		INT* Idx = LinkerMap.Find( (UObject*)Object->_Linker );
+		if( Idx && Object->_LinkerIndex < List(*Idx).ObjectCount )
+			return List(*Idx).ObjectBase + Object->_LinkerIndex;
+	}
 	return INDEX_NONE;
 	unguard;
 }
@@ -149,6 +156,24 @@ INT UPackageMap::ObjectToIndex( UObject* Object )
 UObject* UPackageMap::IndexToObject( INT Index, UBOOL Load )
 {
 	guard(UPackageMap::IndexToObject);
+	if( Index >= 0 )
+	{
+		for( INT i=0; i<List.Num(); i++ )
+		{
+			if( Index < List(i).ObjectCount )
+			{
+				UObject*& Obj = List(i).Linker->ExportMap(Index)._Object;
+				if( !Obj && Load )
+				{
+					BeginLoad();
+					List(i).Linker->CreateExport( Index );
+					EndLoad();
+				}
+				return Obj;
+			}
+			Index -= List(i).ObjectCount;
+		}
+	}
 	return NULL;
 	unguard;
 }

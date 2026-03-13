@@ -141,7 +141,33 @@ BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignm
 void FMemCache::Tick()
 {
 	guard(FMemCache::Tick);
+
+	// Start timing this tick.
+	DWORD TickStart = appCycles();
+	TickCycles -= TickStart;
+
+	// Reset MRU so items don't get free access across tick boundaries.
+	MruId   = 0;
+	MruItem = NULL;
+
+	// Reset per-tick stats.
+	ItemsFresh = 0;
+	ItemsStale = 0;
+	ItemGaps   = 0;
+	MemFresh   = 0;
+	MemStale   = 0;
+
+	// Decay cost for stale items (ones not accessed this tick).
+	for( FCacheItem* Item=CacheItems; Item!=LastItem; Item=Item->LinearNext )
+	{
+		if( Item->Id != 0 && (INT)(DWORD)Item->Time < Time )
+			Item->Cost -= Item->Cost >> 5;
+	}
+
+	// Advance the time counter.
 	Time++;
+
+	TickCycles += appCycles() - 0x22;
 	unguard;
 }
 
