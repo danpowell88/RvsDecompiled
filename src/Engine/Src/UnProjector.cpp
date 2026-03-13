@@ -13,6 +13,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
+#include <intrin.h>
 
 // DAT_10780140 in retail: the singleton UProjectorPrimitive instance.
 static UPrimitive* GProjectorPrimitive = NULL;
@@ -219,7 +220,7 @@ void AProjector::Detach(int Flush)
 	*(double*)((BYTE*)renderInfo + 0xc) = (lo + hi * 4294967296.0) * GSecondsPerCycle + 16777216.0;
 
 	if (Flush)
-		*(UINT64*)((BYTE*)renderInfo + 4) = 0;
+		*(unsigned __int64*)((BYTE*)renderInfo + 4) = 0;
 
 	*renderInfo -= 1;
 	if (*renderInfo == 0)

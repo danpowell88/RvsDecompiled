@@ -14,33 +14,152 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
 
+// Forward declaration for the DrawSprite free function (defined in EngineStubs.cpp)
+void DrawSprite(AActor* Actor, FVector Pos, UMaterial* Sprite, FLevelSceneNode* SceneNode, FRenderInterface* RI);
+
+// FUN_103db080: removes an oscillator pointer (passed as &ptr) from the target
+// fluid surface's oscillator TArray at surface+0x47c.
+static void RemoveOscillatorFromList(void* oscPtr)
+{
+	typedef void (*FnType)(void*);
+	((FnType)0x103db080)(oscPtr);
+}
+
 // --- AFluidSurfaceInfo ---
 void AFluidSurfaceInfo::UpdateOscillatorList()
 {
+	// Retail: 0x99f30, 208b. Scan the level actor list at Level+0x30 for
+	// AFluidSurfaceOscillator actors that reference this surface, and append
+	// them to the oscillator list TArray at this+0x47c.
+	INT level = *(INT*)((BYTE*)this + 0x328);
+	if (!level) return;
+	INT i = 0;
+	while (true)
+	{
+		FArray* actors = (FArray*)(level + 0x30);
+		INT count = actors->Num();
+		if (count <= i) break;
+		UObject* actor = *(UObject**)(*(INT*)actors + i * 4);
+		if (actor && (*(char*)((BYTE*)actor + 0xa0) >= 0) &&
+		    actor->IsA(AFluidSurfaceOscillator::StaticClass()))
+		{
+			actor = *(UObject**)(*(INT*)actors + i * 4);
+			if (!actor || !actor->IsA(AFluidSurfaceOscillator::StaticClass()))
+				actor = NULL;
+			if (actor && *(AFluidSurfaceInfo**)((BYTE*)actor + 0x3a4) == this)
+			{
+				FArray* oscList = (FArray*)((BYTE*)this + 0x47c);
+				INT idx = oscList->Add(1, 4);
+				*(UObject**)(*(INT*)oscList + idx * 4) = actor;
+			}
+		}
+		i++;
+	}
 }
 
 void AFluidSurfaceInfo::RebuildClampedBitmap()
 {
+	// Retail: 0x9a030, 1114b. Iterate level actors and test their collision boxes
+	// against the fluid surface bounds to set/clear bits in the clamped bitmap.
+	// TODO: full actor intersection loop.
 }
 
-void AFluidSurfaceInfo::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
+void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TList<FDynamicLight*>* Lights, FRenderInterface* RI)
 {
+	// Retail: 0x9abf0, 864b. Update vertex/index buffers then submit a DrawMesh call.
+	// TODO: full buffer-update, lighting, and draw-mesh sequence.
 }
 
-void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
+void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	// Retail: 0x1065c0, 127b. Draw base editor info then overlay the sprite icon.
+	AActor::RenderEditorInfo(SceneNode, RI, DA);
+	if (*(INT*)((BYTE*)this + 0x168) != 0)
+	{
+		DrawSprite(this,
+		           *(FVector*)((BYTE*)this + 0x234),
+		           *(UMaterial**)((BYTE*)this + 0x168),
+		           SceneNode, RI);
+	}
 }
 
-void AFluidSurfaceInfo::SetClampedBitmap(int,int,int)
+void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 {
+	// Retail: 0x1cad0, 72b. Set or clear a single bit in the clamped-bitmap for (X, Y).
+	// Bitmap base pointer is at *(this+0x404); grid width at this+0x39c.
+	INT bit   = *(INT*)((BYTE*)this + 0x39c) * Y + X;
+	DWORD mask = 1u << (bit & 0x1f);
+	DWORD* word = (DWORD*)(*(INT*)((BYTE*)this + 0x404) + (bit >> 5) * 4);
+	if (Value) *word |= mask;
+	else       *word &= ~mask;
 }
 
-void AFluidSurfaceInfo::FillIndexBuffer(void *)
+void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 {
+	// Retail: 0x98a50, 648b. Fill the triangle index buffer for the fluid mesh.
+	// FluidGridType at this+0x394: 1 = hex (offset) grid, otherwise square grid.
+	// FluidXSize at this+0x39c, FluidYSize at this+0x3a0.
+	short* indices = (short*)Buf;
+	INT fluidType  = *(BYTE*)((BYTE*)this + 0x394);
+	INT xSize      = *(INT*)((BYTE*)this + 0x39c);
+	INT ySize      = *(INT*)((BYTE*)this + 0x3a0);
+
+	if (fluidType == 1)
+	{
+		// Hex (offset) grid: alternate triangle winding per row
+		for (INT row = 0; row < ySize - 1; row++)
+		{
+			short r  = (short)row;
+			short r1 = r + 1;
+			for (INT col = 0; col < xSize - 1; col++)
+			{
+				short c = (short)col;
+				if ((row & 1) == 0)
+				{
+					*indices++ = (short)(xSize * r  + c);
+					*indices++ = (short)(xSize * r1 + c);
+					*indices++ = (short)(xSize * r  + 1 + c);
+					*indices++ = (short)(xSize * r1 + c);
+					*indices++ = (short)(xSize * r1 + 1 + c);
+					*indices++ = (short)(xSize * r  + 1 + c);
+				}
+				else
+				{
+					*indices++ = (short)(xSize * r  + c);
+					*indices++ = (short)(xSize * r1 + 1 + c);
+					*indices++ = (short)(xSize * r  + 1 + c);
+					*indices++ = (short)(xSize * r  + c);
+					*indices++ = (short)(xSize * r1 + c);
+					*indices++ = (short)(xSize * r1 + 1 + c);
+				}
+			}
+		}
+	}
+	else
+	{
+		// Square grid: simple row-major winding
+		for (INT row = 0; row < ySize - 1; row++)
+		{
+			short r  = (short)row;
+			short r1 = r + 1;
+			for (INT col = 0; col < xSize - 1; col++)
+			{
+				short c = (short)col;
+				*indices++ = (short)(xSize * r  + c);
+				*indices++ = (short)(xSize * r  + 1 + c);
+				*indices++ = (short)(xSize * r1 + c);
+				*indices++ = (short)(xSize * r  + 1 + c);
+				*indices++ = (short)(xSize * r1 + 1 + c);
+				*indices++ = (short)(xSize * r1 + c);
+			}
+		}
+	}
 }
 
-void AFluidSurfaceInfo::FillVertexBuffer(void *)
+void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 {
+	// Retail: 0x991e0, 2890b. Build per-vertex position + normal data for all grid points.
+	// TODO: full implementation (complex hex-offset and normal-from-heights logic).
 }
 
 int AFluidSurfaceInfo::GetClampedBitmap(int,int)
@@ -48,8 +167,29 @@ int AFluidSurfaceInfo::GetClampedBitmap(int,int)
 	return 0;
 }
 
-void AFluidSurfaceInfo::GetNearestIndex(FVector const &,int &,int &)
+void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 {
+	// Retail: 0x990d0, 199b. Map a world-space position to the nearest grid indices.
+	// Grid origin at this+0x464 (X) / this+0x468 (Y); cell size at this+0x398.
+	// Hex grid (this+0x394==1) uses a Y step of cellSize * 0.866025.
+	FLOAT cellSize = *(FLOAT*)((BYTE*)this + 0x398);
+	FLOAT originX  = *(FLOAT*)((BYTE*)this + 0x464);
+	FLOAT originY  = *(FLOAT*)((BYTE*)this + 0x468);
+	INT   xSize    = *(INT*)((BYTE*)this + 0x39c);
+	INT   ySize    = *(INT*)((BYTE*)this + 0x3a0);
+
+	INT xi = appRound((Pos.X - originX) / cellSize);
+	X = xi;
+	if (xi < 0)           xi = 0;
+	else if (xi >= xSize - 1) xi = xSize - 1;
+	X = xi;
+
+	FLOAT yCellSize = (*(BYTE*)((BYTE*)this + 0x394) == 1) ? cellSize * 0.866025f : cellSize;
+	INT yi = appRound((Pos.Y - originY) / yCellSize);
+	Y = yi;
+	if (yi < 0)           yi = 0;
+	else if (yi >= ySize - 1) yi = ySize - 1;
+	Y = yi;
 }
 
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
@@ -59,16 +199,82 @@ FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 
 
 // --- AFluidSurfaceOscillator ---
-void AFluidSurfaceOscillator::UpdateOscillation(float)
+void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 {
+	// Retail: 0x9af90, 293b. Advance the oscillator's phase and call AFluidSurfaceInfo::Pling.
+	if ((*(BYTE*)((BYTE*)this + 0xa0) & 0x80) == 0)
+	{
+		UObject* surface = *(UObject**)((BYTE*)this + 0x3a4);
+		if (surface && surface->IsA(AFluidSurfaceInfo::StaticClass()) &&
+		    (*(BYTE*)((BYTE*)surface + 0xa0) & 0x80) == 0)
+		{
+			// Accumulate time
+			*(FLOAT*)((BYTE*)this + 0x3a8) += DeltaTime;
+			FLOAT accTime  = *(FLOAT*)((BYTE*)this + 0x3a8);
+			FLOAT period   = *(FLOAT*)((BYTE*)this + 0x398);   // seconds per cycle
+			FLOAT amplitude = *(FLOAT*)((BYTE*)this + 0x39c);  // peak strength
+			FLOAT strength;
+			if (period <= 0.0001f)
+			{
+				strength = amplitude;
+			}
+			else
+			{
+				// Phase offset encoded as BYTE 0-255 → 0..1 normalised fraction
+				FLOAT phaseOff = (FLOAT)*(BYTE*)((BYTE*)this + 0x394) * (1.0f / 255.0f);
+				FLOAT wrapped  = (FLOAT)appFmod((DOUBLE)accTime, (DOUBLE)period);
+				strength = amplitude * (FLOAT)appSin(
+				    (DOUBLE)((phaseOff + wrapped / period) * 6.283185307f));
+			}
+			((AFluidSurfaceInfo*)surface)->Pling(
+			    *(FVector*)((BYTE*)this + 0x234),
+			    strength,
+			    *(FLOAT*)((BYTE*)this + 0x3a0));
+		}
+	}
 }
 
 void AFluidSurfaceOscillator::PostEditChange()
 {
+	// Retail: 0x9b0f0, 215b. Re-register with the target fluid surface on property change.
+	INT level = *(INT*)((BYTE*)this + 0x328);
+	if (!level) return;
+
+	// Remove this oscillator from any existing fluid surface oscillator lists
+	INT i = 0;
+	while (true)
+	{
+		FArray* actors = (FArray*)(level + 0x30);
+		INT count = actors->Num();
+		if (count <= i) break;
+		UObject* actor = *(UObject**)(*(INT*)actors + i * 4);
+		if (actor && (*(char*)((BYTE*)actor + 0xa0) >= 0) &&
+		    actor->IsA(AFluidSurfaceInfo::StaticClass()))
+		{
+			void* selfPtr = this;
+			RemoveOscillatorFromList(&selfPtr);
+		}
+		i++;
+	}
+
+	// Add to the target surface's oscillator list if set
+	if (*(INT*)((BYTE*)this + 0x3a4) != 0)
+	{
+		FArray* oscList = (FArray*)(*(INT*)((BYTE*)this + 0x3a4) + 0x47c);
+		INT idx = oscList->Add(1, 4);
+		*(AFluidSurfaceOscillator**)(*(INT*)oscList + idx * 4) = this;
+	}
 }
 
 void AFluidSurfaceOscillator::Destroy()
 {
+	// Retail: 0x9b200, 92b. Remove from the target surface's list then chain to base.
+	AActor::Destroy();
+	if (*(INT*)((BYTE*)this + 0x3a4) != 0)
+	{
+		void* selfPtr = this;
+		RemoveOscillatorFromList(&selfPtr);
+	}
 }
 
 

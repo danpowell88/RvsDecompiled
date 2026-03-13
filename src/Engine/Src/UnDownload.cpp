@@ -186,9 +186,9 @@ void UDownload::ReceiveData(BYTE* Data, int Size)
 	if (*(INT*)((BYTE*)this + 0x44c) == 0 && *(INT*)((BYTE*)this + 0x48) == 0)
 	{
 		// Ensure the cache directory exists, then create a unique temp filename inside it
-		const TCHAR* cachePath = *((FString*)((BYTE*)GSys + 0x44));
+		const TCHAR* cachePath = ((FString*)((BYTE*)GSys + 0x44))->operator*();
 		GFileManager->MakeDirectory(cachePath);
-		cachePath = *((FString*)((BYTE*)GSys + 0x44));
+		cachePath = ((FString*)((BYTE*)GSys + 0x44))->operator*();
 		appCreateTempFilename(cachePath, (TCHAR*)((BYTE*)this + 0x4c));
 		*(FArchive**)((BYTE*)this + 0x48) = GFileManager->CreateFileWriter(
 			(const TCHAR*)((BYTE*)this + 0x4c), 0, GNull);
@@ -264,16 +264,16 @@ void UDownload::DownloadDone()
 		typedef const TCHAR* (*GuidStrFn)(void*);
 		const TCHAR* guidStr = ((GuidStrFn)0x103bef50)((void*)(*(INT*)((BYTE*)this + 0x34) + 0x14));
 		TCHAR finalPath[512];
-		appSprintf(finalPath, TEXT("%s\\%s.uxx"), *((FString*)((BYTE*)GSys + 0x44)), guidStr);
+		appSprintf(finalPath, TEXT("%s\\%s.uxx"), ((FString*)((BYTE*)GSys + 0x44))->operator*(), guidStr);
 
 		// If no data arrived and no prior error, report a refused download
-		if (*(WCHAR*)((BYTE*)this + 0x24c) == 0 && *(INT*)((BYTE*)this + 0x44c) == 0)
+		if (*(unsigned short*)((BYTE*)this + 0x24c) == 0 && *(INT*)((BYTE*)this + 0x44c) == 0)
 		{
 			const TCHAR* err = LocalizeError(TEXT("NetRefused"), TEXT("Engine"), NULL);
 			DownloadError(err);
 		}
 
-		if (*(WCHAR*)((BYTE*)this + 0x24c) == 0)
+		if (*(unsigned short*)((BYTE*)this + 0x24c) == 0)
 		{
 			// Verify the received file size matches the expected package size
 			INT expectedSize = *(INT*)(*(INT*)((BYTE*)this + 0x34) + 0x24);
@@ -284,7 +284,7 @@ void UDownload::DownloadDone()
 				DownloadError(err);
 			}
 
-			if (*(WCHAR*)((BYTE*)this + 0x24c) == 0)
+			if (*(unsigned short*)((BYTE*)this + 0x24c) == 0)
 			{
 				// Move temp file to final cache path
 				INT moved = GFileManager->Move(finalPath, (const TCHAR*)((BYTE*)this + 0x4c), 1, 0, 0);
@@ -294,7 +294,7 @@ void UDownload::DownloadDone()
 					DownloadError(err);
 				}
 
-				if (*(WCHAR*)((BYTE*)this + 0x24c) == 0)
+				if (*(unsigned short*)((BYTE*)this + 0x24c) == 0)
 				{
 					// TODO: full package-load sequence
 					// FUN_103b1d90() + write to cache.ini via appSprintf + FString
