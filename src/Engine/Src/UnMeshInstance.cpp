@@ -1307,7 +1307,8 @@ int USkeletalMeshInstance::StopAnimating(int bClearAll)
 	if (bClearAll) {
 		((FArray*)((BYTE*)this + 0x124))->Empty(0x40);
 		((FArray*)((BYTE*)this + 0x130))->Empty(0x40);
-		UObject* owner = (*(UObject* (__thiscall**)(USkeletalMeshInstance*))((*(void***)this)[0x84 / sizeof(void*)]))(this);
+		typedef UObject* (__thiscall *GetOwnerFn2)(USkeletalMeshInstance*);
+	UObject* owner = ((GetOwnerFn2)(*(void***)this)[0x84 / sizeof(void*)])(this);
 		INT keepShape = owner && owner->IsA(APawn::StaticClass()) && *(INT*)((BYTE*)owner + 0x3A4) == 0xB14E;
 		if (!keepShape)
 			((FArray*)((BYTE*)this + 0x118))->Empty(0x3C);
