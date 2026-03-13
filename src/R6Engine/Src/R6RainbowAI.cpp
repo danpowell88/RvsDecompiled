@@ -1,0 +1,384 @@
+/*=============================================================================
+	R6RainbowAI.cpp
+	AR6RainbowAI — Rainbow AI controller: formation, sniping, room entry.
+=============================================================================*/
+
+#include "R6EnginePrivate.h"
+
+IMPLEMENT_CLASS(AR6RainbowAI)
+
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execAClearShotIsAvailable)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execCheckEnvironment)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execClearToSnipe)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execFindSafeSpot)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execGetEntryPosition)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execGetGuardPosition)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execGetLadderPosition)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execGetTargetPosition)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execLookAroundRoom)
+IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execSetOrientation)
+
+// --- AR6RainbowAI ---
+
+INT AR6RainbowAI::AClearShotIsAvailable(APawn *, FVector)
+{
+	return 0;
+}
+
+INT AR6RainbowAI::ClearToSnipe(FVector Position, FRotator Direction)
+{
+	guard(AR6RainbowAI::ClearToSnipe);
+	FVector Dir = Direction.Vector() * 300.0f;
+	FVector End = Position + Dir;
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, Pawn, End, Position, 0x4400BF, FVector(0,0,0));
+	return Hit.Actor == NULL;
+	unguard;
+}
+
+AActor * AR6RainbowAI::FindSafeSpot()
+{
+	return NULL;
+}
+
+FVector AR6RainbowAI::GetTeamLeftOfDoorPosition(INT, AR6Door *)
+{
+	return FVector(0,0,0);
+}
+
+AActor * AR6RainbowAI::GetTeamManager()
+{
+	return m_TeamManager;
+}
+
+FVector AR6RainbowAI::GetTeamRightOfDoorPosition(INT, AR6Door *)
+{
+	return FVector(0,0,0);
+}
+
+void AR6RainbowAI::LookAroundRoom(INT param_1)
+{
+	guard(AR6RainbowAI::LookAroundRoom);
+
+	BYTE uVar2 = 0;
+	BYTE uVar3 = 0;
+
+	if (Enemy != NULL)
+		goto ApplyYaw;
+
+	if (param_1 == 0)
+	{
+		if (m_eCurrentRoomLayout == 0)
+		{
+			if (m_eCoverDirection == 3)
+				goto ApplyYaw;
+		}
+		else
+		{
+			if (m_eCurrentRoomLayout > 2)
+				goto ApplyYaw;
+			switch (m_eCoverDirection)
+			{
+			case 0:
+				uVar2 = 0x15; uVar3 = 0xF1;
+				goto ApplyYaw;
+			case 1:
+				break; // fall through to common assignment
+			case 2:
+				uVar2 = 0xEA; uVar3 = 0x0E;
+				goto ApplyYaw;
+			default:
+				goto ApplyYaw;
+			}
+		}
+		uVar2 = 0xEA;
+		uVar3 = 0x15;
+		goto ApplyYaw;
+	}
+
+	{
+		AR6Pawn* r6pawn = (AR6Pawn*)Pawn;
+		if (r6pawn->m_iID == m_TeamManager->m_iMemberCount - 1)
+		{
+			switch (m_eCurrentRoomLayout)
+			{
+			case 0: uVar2 = 0x15; uVar3 = 0xEA; break;
+			case 1: uVar2 = 0xE0; uVar3 = 0x0E; break;
+			case 2: uVar2 = 0x20; uVar3 = 0xF1; break;
+			case 3: uVar2 = 0x0E; uVar3 = 0xF1; break;
+			}
+		}
+		else
+		{
+			switch (m_eCurrentRoomLayout)
+			{
+			case 0:
+			case 2: uVar2 = 0x0E; uVar3 = 0xEA; break;
+			case 1: uVar2 = 0xF1; uVar3 = 0x15; break;
+			case 3: uVar2 = 0x0E; uVar3 = 0xF1; break;
+			}
+		}
+	}
+
+ApplyYaw:
+	{
+		AR6Rainbow* rainbow = (AR6Rainbow*)Pawn;
+		if (m_iTurn == 0)
+			rainbow->m_u8DesiredYaw = uVar2;
+		else if (m_iTurn != 1)
+			rainbow->m_u8DesiredYaw = 0;
+		else
+			rainbow->m_u8DesiredYaw = uVar3;
+	}
+
+	unguard;
+}
+
+void AR6RainbowAI::UpdateTimers(FLOAT DeltaTime)
+{
+	if (m_fAttackTimerRate > 0.0f)
+	{
+		FLOAT fAccum = m_fAttackTimerCounter + DeltaTime;
+		m_fAttackTimerCounter = fAccum;
+
+		if (fAccum >= m_fAttackTimerRate)
+		{
+			if (m_fAttackTimerRate > 0.0f)
+			{
+				m_fAttackTimerCounter = fAccum - (FLOAT)(INT)(fAccum / m_fAttackTimerRate) * m_fAttackTimerRate;
+			}
+
+			if (Enemy != NULL || bFire != 0)
+			{
+				eventAttackTimer();
+
+				if (bFire != 0)
+				{
+					m_fFiringAttackTimer = (FLOAT)(appRand() % 6 + 1) * 0.05f;
+				}
+			}
+
+			goto CallSuper;
+		}
+	}
+
+	if (bFire != 0 && m_fFiringAttackTimer <= m_fAttackTimerCounter)
+	{
+		eventStopAttack();
+	}
+
+CallSuper:
+	AActor::UpdateTimers(DeltaTime);
+}
+
+void AR6RainbowAI::checkEnvironment()
+{
+	guard(AR6RainbowAI::checkEnvironment);
+
+	if (m_eFormation != 0)
+	{
+		// Trace right: pawn rotation + 60 degrees
+		FCheckResult Hit1(1.0f);
+		FRotator RightRot = Pawn->Rotation;
+		RightRot.Yaw += 0x2AAB;
+		FVector RightDir = RightRot.Vector() * 300.0f;
+		FVector RightEnd = Pawn->Location + RightDir;
+		XLevel->SingleLineCheck(Hit1, this, RightEnd, Pawn->Location, TRACE_World, FVector(0, 0, 0));
+
+		// Trace left: pawn rotation - 60 degrees
+		FCheckResult Hit2(1.0f);
+		FRotator LeftRot = Pawn->Rotation;
+		LeftRot.Yaw -= 0x2AAB;
+		FVector LeftDir = LeftRot.Vector() * 300.0f;
+		FVector LeftEnd = Pawn->Location + LeftDir;
+		XLevel->SingleLineCheck(Hit2, this, LeftEnd, Pawn->Location, TRACE_World, FVector(0, 0, 0));
+
+		// Classify environment based on trace results
+		if (Hit1.Time < 1.0f)
+		{
+			if (Hit2.Time < 1.0f)
+				m_eFormation = 4; // Both sides blocked
+			else
+				m_eFormation = 3; // Right blocked only
+		}
+		else if (Hit2.Time < 1.0f)
+		{
+			m_eFormation = 2; // Left blocked only
+		}
+		else
+		{
+			m_eFormation = 1; // Both sides open
+		}
+
+		m_TeamManager->eventRequestFormationChange(m_eFormation);
+	}
+
+	unguard;
+}
+
+void AR6RainbowAI::eventAttackTimer()
+{
+	ProcessEvent(FindFunctionChecked(R6ENGINE_AttackTimer), NULL);
+}
+
+void AR6RainbowAI::eventStopAttack()
+{
+	ProcessEvent(FindFunctionChecked(R6ENGINE_StopAttack), NULL);
+}
+
+void AR6RainbowAI::execAClearShotIsAvailable(FFrame& Stack, RESULT_DECL)
+{
+	P_GET_OBJECT(APawn, PTarget);
+	P_GET_STRUCT(FVector, vStart);
+	P_FINISH;
+	*(DWORD*)Result = AClearShotIsAvailable(PTarget, vStart);
+}
+
+void AR6RainbowAI::execCheckEnvironment(FFrame& Stack, RESULT_DECL)
+{
+	P_FINISH;
+	*(FVector*)Result = FVector(0,0,0);
+}
+
+void AR6RainbowAI::execClearToSnipe(FFrame& Stack, RESULT_DECL)
+{
+	P_GET_STRUCT(FVector, vStart);
+	P_GET_STRUCT(FRotator, rSnipingDir);
+	P_FINISH;
+	*(DWORD*)Result = ClearToSnipe(vStart, rSnipingDir);
+}
+
+void AR6RainbowAI::execFindSafeSpot(FFrame& Stack, RESULT_DECL)
+{
+	P_FINISH;
+	*(UObject**)Result = FindSafeSpot();
+}
+
+void AR6RainbowAI::execGetEntryPosition(FFrame& Stack, RESULT_DECL)
+{
+	P_GET_UBOOL(bInsideRoom);
+	P_FINISH;
+	*(FVector*)Result = getEntryPosition();
+}
+
+void AR6RainbowAI::execGetGuardPosition(FFrame& Stack, RESULT_DECL)
+{
+	P_FINISH;
+	*(FVector*)Result = getGuardPosition();
+}
+
+void AR6RainbowAI::execGetLadderPosition(FFrame& Stack, RESULT_DECL)
+{
+	P_FINISH;
+	*(FVector*)Result = getLadderPosition();
+}
+
+void AR6RainbowAI::execGetTargetPosition(FFrame& Stack, RESULT_DECL)
+{
+	P_FINISH;
+	*(FVector*)Result = getTargetPosition();
+}
+
+void AR6RainbowAI::execLookAroundRoom(FFrame& Stack, RESULT_DECL)
+{
+	P_GET_UBOOL(bIsLeadingRoomEntry);
+	P_FINISH;
+	LookAroundRoom(bIsLeadingRoomEntry);
+}
+
+void AR6RainbowAI::execSetOrientation(FFrame& Stack, RESULT_DECL)
+{
+	P_GET_BYTE(eOverrideOrientation);
+	P_FINISH;
+}
+
+FVector AR6RainbowAI::getEntryPosition()
+{
+	return FVector(0,0,0);
+}
+
+FVector AR6RainbowAI::getGuardPosition()
+{
+	return FVector(0,0,0);
+}
+
+FVector AR6RainbowAI::getLadderPosition()
+{
+	return FVector(0,0,0);
+}
+
+FVector AR6RainbowAI::getPreEntryPosition()
+{
+	return FVector(0,0,0);
+}
+
+FVector AR6RainbowAI::getTargetPosition()
+{
+	return FVector(0,0,0);
+}
+
+void AR6RainbowAI::resetBoneRotation()
+{
+	USkeletalMeshInstance* MeshInst = (USkeletalMeshInstance*)Pawn->Mesh->MeshGetInstance(Pawn);
+	MeshInst->SetBoneRotation(FName(TEXT("R6 Spine"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
+	MeshInst->SetBoneRotation(FName(TEXT("R6 Spine1"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
+	MeshInst->SetBoneRotation(FName(TEXT("R6 Neck"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
+}
+
+void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation)
+{
+}
+
+enum ePawnOrientation AR6RainbowAI::updatePawnOrientation()
+{
+	guard(AR6RainbowAI::updatePawnOrientation);
+
+	AR6Pawn* r6pawn = (AR6Pawn*)Pawn;
+	INT iID = r6pawn->m_iID;
+
+	// Prone pawns always face forward
+	if (r6pawn->m_bIsProne)
+		return PO_Front;
+
+	// Last team member always faces back
+	if (m_eFormation != 0 && iID != 0 && iID == m_TeamManager->m_iMemberCount - 1)
+		return PO_Back;
+
+	switch (m_eFormation)
+	{
+	case 1:
+		if (iID == 1) return r6pawn->m_bIsClimbingStairs ? PO_Front : PO_PeekLeft;
+		if (iID == 2) return r6pawn->m_bIsClimbingStairs ? PO_Front : PO_PeekRight;
+		break;
+	case 2:
+		if (iID == 1) return PO_FrontLeft;
+		if (iID == 2) return PO_Left;
+		break;
+	case 3:
+		if (iID == 1) return PO_FrontRight;
+		if (iID == 2) return PO_Right;
+		break;
+	case 4:
+		if (iID == 1) return PO_FrontLeft;
+		if (iID == 2) return PO_FrontRight;
+		break;
+	case 5:
+		if (iID == 1) return PO_PeekRight;
+		if (iID == 2) return PO_PeekLeft;
+		return PO_Front;
+	default:
+		return PO_Front;
+	}
+
+	// For cases 1-4, member 3 faces back
+	if (iID == 3)
+		return PO_Back;
+
+	return PO_Front;
+
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
+	The End.
+-----------------------------------------------------------------------------*/
