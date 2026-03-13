@@ -337,6 +337,19 @@ void UMatAction::PostLoad()
 
 void UMatAction::Initialize()
 {
+	// Retail: 0x11e880, 74b. Fire the UScript Initialize event then forward to all sub-actions.
+	eventInitialize();
+	FArray* subActions = (FArray*)((BYTE*)this + 0x48);
+	INT i     = 0;
+	INT count = subActions->Num();
+	while (i < count)
+	{
+		UMatSubAction* sub = *(UMatSubAction**)(*(INT*)subActions + i * 4);
+		typedef void (__thiscall* InitFn)(UMatSubAction*);
+		((InitFn)(*(void***)sub)[0x74/4])(sub);
+		i++;
+		count = subActions->Num();
+	}
 }
 
 
@@ -386,6 +399,8 @@ FString UMatSubAction::GetStatusDesc()
 
 void UMatSubAction::Initialize()
 {
+	// Retail: 0xce50, 33b. Fire the UScript Initialize event for this sub-action.
+	eventInitialize();
 }
 
 int UMatSubAction::IsEnding()
@@ -609,6 +624,13 @@ int USubActionOrientation::Update(float Pct, ASceneManager* SceneMgr)
 
 void USubActionOrientation::PostLoad()
 {
+	// Retail: 0x11d7e0, 89b. Clear stale (pending-kill) UObject reference at +0x5c.
+	UObject::PostLoad();
+	if (*(INT*)((BYTE*)this + 0x5c) != 0 &&
+	    *(char*)(*(INT*)((BYTE*)this + 0x5c) + 0xa0) < 0)
+	{
+		*(INT*)((BYTE*)this + 0x5c) = 0;
+	}
 }
 
 FString USubActionOrientation::GetStatString()
