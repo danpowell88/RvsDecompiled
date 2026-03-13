@@ -19,7 +19,7 @@ if(SOURCE_COUNT GREATER 0)
         CORE_API=__declspec\(dllexport\)
         ThisPackage=Core
     )
-    # BEFORE ensures src/core/Inc/ local header overrides take priority over SDK.
+    # BEFORE ensures src/Core/Inc/ local header overrides take priority over SDK.
     target_include_directories(Core BEFORE PRIVATE
         ${CORE_SRC_DIR}/Inc
         ${CSDK_CORE_INC}

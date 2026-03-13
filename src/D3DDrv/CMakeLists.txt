@@ -16,7 +16,7 @@ if(SOURCE_COUNT GREATER 0)
     target_compile_definitions(D3DDrv PRIVATE D3DDRV_EXPORTS ThisPackage=D3DDrv)
     target_include_directories(D3DDrv BEFORE PRIVATE
         ${D3DDRV_SRC_DIR}/Inc
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
         ${DXSDK_INCLUDE}
     )
     target_link_libraries(D3DDrv

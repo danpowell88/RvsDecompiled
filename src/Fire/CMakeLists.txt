@@ -15,10 +15,10 @@ list(LENGTH FIRE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_library(Fire MODULE ${FIRE_SOURCES} ${FIRE_SRC_DIR}/Src/Fire.def)
     target_compile_definitions(Fire PRIVATE FIRE_EXPORTS ThisPackage=Fire)
-    # BEFORE ensures src/engine/Inc/ shim headers beat global UT99_ENGINE_INC.
+    # BEFORE ensures src/Engine/Inc/ shim headers beat global UT99_ENGINE_INC.
     target_include_directories(Fire BEFORE PRIVATE
         ${FIRE_SRC_DIR}/Inc
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
     target_link_libraries(Fire Core_Dep Engine_Dep)
 else()

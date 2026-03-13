@@ -91,7 +91,7 @@ Blog Post: *"First Contact — What Ghidra Found"* ✅ Written
 
 Zero game dependencies. Every other module depends on Core. Best UT99 reference coverage.
 
-**Status:** Reconstructed ~9,900 lines across 20 source files in `src/core/`.
+**Status:** Reconstructed ~9,900 lines across 20 source files in `src/Core/`.
 
 **Conversion order (sub-components, least deps first):**
 1. ✅ Memory subsystem — `FMallocWindows`, `FMallocAnsi` (standalone)
@@ -108,7 +108,7 @@ Zero game dependencies. Every other module depends on Core. Best UT99 reference 
 **Build configuration:** Release only. `sdk/Raven_Shield_C_SDK/432Core/Inc/UnBuild.h` contains a `#error` guard that rejects Debug builds unless `_REALLY_WANT_DEBUG` is defined — this is an intentional SDK constraint, not a code regression. Always build with `--config Release`.
 
 **Deferred to Phase 9B:**
-- `UObject::ProcessEvent` — implemented in `src/core/UnObj.cpp`; parameter marshaling, native/script dispatch, and out-param propagation now restored and Release-build validated
+- `UObject::ProcessEvent` — implemented in `src/Core/UnObj.cpp`; parameter marshaling, native/script dispatch, and out-param propagation now restored and Release-build validated
 - `execCompress` / `execExpand` — implemented using the engine codec stack (`RLE -> BWT -> MTF -> RLE -> Huffman`) with an ASCII wrapper; exact retail string packing remains a documented divergence
 
 ~10 commits. Blog Post: *"Building the Foundation — Core.dll"* ✅ Written
@@ -322,13 +322,13 @@ Blog Post: *"Press Start — Launching the Engine"*
 
 | Component | File | Status |
 |-----------|------|--------|
-| LaunchPrivate.h | `src/launch/LaunchPrivate.h` | ✅ Complete — API linkage, system headers, R6 compat shims, Window.h include |
-| Launch.cpp | `src/launch/Launch.cpp` | ✅ Complete — WinMain, InitEngine, MainLoop, FExecHook, splash screen |
-| FMallocWindows.h | `src/launch/FMallocWindows.h` | ✅ Shim — redirects to UT99 version (CSDK has method bodies commented out) |
-| LaunchRes.h / .rc | `src/launch/Res/` | ✅ Complete — splash dialog resource (IDDIALOG_Splash, IDICON_Mainframe) |
-| RavenShield.def | `src/launch/RavenShield.def` | ✅ Complete — ordinal-accurate EXE exports for `hInstance` and `GPackage` |
-| LaunchGlobals.cpp | `src/launch/LaunchGlobals.cpp` | ✅ Complete — local `GTimestamp` storage/thunk without leaking an unintended EXE export |
-| CMakeLists.txt | `src/launch/CMakeLists.txt` | ✅ Complete — links Core, Engine, Window + system libs |
+| LaunchPrivate.h | `src/Launch/LaunchPrivate.h` | ✅ Complete — API linkage, system headers, R6 compat shims, Window.h include |
+| Launch.cpp | `src/Launch/Launch.cpp` | ✅ Complete — WinMain, InitEngine, MainLoop, FExecHook, splash screen |
+| FMallocWindows.h | `src/Launch/FMallocWindows.h` | ✅ Shim — redirects to UT99 version (CSDK has method bodies commented out) |
+| LaunchRes.h / .rc | `src/Launch/Res/` | ✅ Complete — splash dialog resource (IDDIALOG_Splash, IDICON_Mainframe) |
+| RavenShield.def | `src/Launch/RavenShield.def` | ✅ Complete — ordinal-accurate EXE exports for `hInstance` and `GPackage` |
+| LaunchGlobals.cpp | `src/Launch/LaunchGlobals.cpp` | ✅ Complete — local `GTimestamp` storage/thunk without leaking an unintended EXE export |
+| CMakeLists.txt | `src/Launch/CMakeLists.txt` | ✅ Complete — links Core, Engine, Window + system libs |
 
 ### Key Discoveries
 - Retail exe is **SafeDisc v2** wrapped — Ghidra only sees the encrypted packer stub. Reconstruction based on import table analysis + UT99 reference code
@@ -539,12 +539,12 @@ Make `src/` fully self-contained: all compilable source code (C++ headers, Unrea
 
 ### 13A. Internalize C++ Headers
 1. Copy all SDK headers currently referenced by `#include` paths into `src/` subdirectories:
-   - `sdk/Raven_Shield_C_SDK/432Core/Inc/*.h` → `src/core/inc/`
-   - Used headers from `sdk/Ut99PubSrc/Core/Inc/` → `src/core/inc/` (merge with CSDK copies where both exist)
-   - Used headers from `sdk/Ut99PubSrc/Engine/Inc/` → `src/engine/inc/`
-   - `sdk/Ut99PubSrc/Window/Inc/Window.h` + resources → `src/window/inc/`
-   - `sdk/Ut99PubSrc/Fire/Inc/` → `src/fire/inc/`
-   - GameSpy SDK headers used by IpDrv → `src/ipdrv/inc/`
+   - `sdk/Raven_Shield_C_SDK/432Core/Inc/*.h` → `src/Core/inc/`
+   - Used headers from `sdk/Ut99PubSrc/Core/Inc/` → `src/Core/inc/` (merge with CSDK copies where both exist)
+   - Used headers from `sdk/Ut99PubSrc/Engine/Inc/` → `src/Engine/inc/`
+   - `sdk/Ut99PubSrc/Window/Inc/Window.h` + resources → `src/Window/inc/`
+   - `sdk/Ut99PubSrc/Fire/Inc/` → `src/Fire/inc/`
+   - GameSpy SDK headers used by IpDrv → `src/IpDrv/inc/`
 2. Update all CMakeLists.txt `target_include_directories` to point to `src/*/inc/` instead of `sdk/`
 3. Verify full build still passes with zero `sdk/` include paths
 4. Carry forward all R6-specific modifications already applied (Localize 6-param, ResetConfig 3-param, appMsgf overload, etc.)

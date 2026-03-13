@@ -57,7 +57,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 **Goal:** Build compiles against its own libs, not retail. No runtime behaviour change yet — just cut the umbilical cord.
 
 ### 1A. Core.dll — Math & Container Implementations (~80 stubs)
-- **Files:** src/core/CoreStubs.cpp, src/core/Core.cpp
+- **Files:** src/Core/CoreStubs.cpp, src/Core/Core.cpp
 - **What:** Math intrinsics (appFloor, appCeil, appAtan2, appSqrt), FString operators, TArray template instantiations, FName lookup helpers
 - **Approach:** Clean-room from UT99 public source (sdk/Ut99PubSrc/Core/Inc/) — standard template/math code
 - **Build:** Switch Core_Dep from sdk/.../Core.lib → build/bin/Core.lib
@@ -72,7 +72,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Use `undname.exe` (MSVC demangler) or Python `undecorate` to demangle, then regex classify.
 
 ### 1C. Engine Linker Stubs — Trivial Bulk (~1,200 stubs)
-- **Files:** src/engine/EngineStubs1-4.cpp
+- **Files:** src/Engine/EngineStubs1-4.cpp
 - **What:** Auto-generate or implement the stubs triage tool classified as TRIVIAL:
   - All `??0` constructors / `??1` destructors (pattern: initialize members to defaults / call member destructors)
   - All `??4` assignment operators (pattern: memberwise copy, return *this)
@@ -84,7 +84,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Key insight:** This eliminates ~1,200 pragmas and makes the remaining stubs visible
 
 ### 1D. Engine Linker Stubs — Serialization & Accessors (~1,800 stubs)
-- **Files:** src/engine/EngineStubs1-4.cpp (continuing)
+- **Files:** src/Engine/EngineStubs1-4.cpp (continuing)
 - **What:** Medium-complexity functions requiring class layout knowledge:
   - `Serialize` methods (read/write members through FArchive)
   - `PostLoad`, `PreLoad` lifecycle methods
@@ -123,7 +123,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 **Goal:** Game creates a window, initializes Direct3D, and renders *something*. You see pixels.
 
 ### 2A. WinDrv — Viewport & Input (43 stubs across modules)
-- **Files:** src/windrv/WinDrv.cpp
+- **Files:** src/WinDrv/WinDrv.cpp
 - **What — UWindowsClient** (~10 methods):
   - `Init()` — create DirectInput8, enumerate devices, initial config
   - `Tick()` — process Windows messages, poll input devices
@@ -140,7 +140,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** None — can start immediately after Phase 1
 
 ### 2B. D3DDrv — Finish Renderer (5 remaining stubs)
-- **Files:** src/d3ddrv/D3DDrv.cpp (already ~85% implemented)
+- **Files:** src/D3DDrv/D3DDrv.cpp (already ~85% implemented)
 - **What:**
   - `SetEmulationMode()` — display mode emulation (Ghidra)
   - `StartVideo()` — Bink video integration (reference existing Bink code in file)
@@ -148,7 +148,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** 2A (viewport must exist for D3D to bind)
 
 ### 2C. Window.dll — Base Framework
-- **Files:** src/window/Window.cpp, src/window/WindowPrivate.h
+- **Files:** src/Window/Window.cpp, src/Window/WindowPrivate.h
 - **What:**
   - WWindow base class: Init, Show, DoDestroy, OnClose
   - WWindowManager::Tick
@@ -157,7 +157,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Note:** The 17 DECLARE_WINDOW_STUB control classes (WButton, WEdit, WListBox etc.) are NOT needed yet — the game UI is UnrealScript-based. These are only needed for editor/console dialogs.
 
 ### 2D. Canvas & HUD Rendering (28 EXEC_STUBs)
-- **Files:** src/engine/UnRender.cpp
+- **Files:** src/Engine/UnRender.cpp
 - **What:** UCanvas drawing functions needed to render menus and HUD:
   - State: `execSetPos`, `execSetOrigin`, `execSetClip`, `execSetDrawColor`, `execSetVirtualSize`, `execUseVirtualSize`
   - Drawing: `execDrawText`, `execDrawTextClipped`, `execDrawTile`, `execDrawTileClipped`, `execDrawStretchedTextureSegmentNative`, `execDrawActor`, `execDraw3DLine`
@@ -169,7 +169,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** UnRender.cpp.bak has real implementations for SetPos/SetOrigin/SetClip/SetDrawColor. UT99 reference for DrawText/DrawTile (standard canvas operations). Ghidra for R6 video integration.
 
 ### 2E. Materials System
-- **Files:** src/engine/UnMaterial.cpp
+- **Files:** src/Engine/UnMaterial.cpp
 - **What:** Adopt from UnMaterial.cpp.bak — described as ~69% real, production-ready:
   - Material property queries (MaterialUSize, MaterialVSize, IsTransparent)
   - Shader and modifier hierarchies, UV stream requirements
@@ -177,11 +177,11 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Direct port from .bak file with validation
 
 **Phase 2 Status (2026-06-23):**
-- **WinDrv (2A):** `src/windrv/Src/WinDrv.cpp` fully implemented — ~30 methods with real logic: `OpenWindow` (CreateWindowW + DirectInput device creation), `UpdateInput` (keyboard/mouse polling via GetDeviceState), `CauseInputEvent`, `ViewportWndProc`, `GetWindow`, `SetMouseCapture`, `TryRenderDevice`, `IsFullscreen`, `ResizeViewport`, `Minimize/Maximize/Restore`, `UWindowsClient::Init` (DirectInput8Create), `UWindowsClient::Tick` (PeekMessage pump), `MakeCurrent`, `GetLastCurrent`, viewport iteration
-- **D3DDrv (2B):** `src/d3ddrv/Src/D3DDrv.cpp` ~95% complete from prior work — D3D8 device management, Bink video, shader caches, gamma, Lock/Unlock/Present
-- **Window (2C):** `src/window/Src/Window.cpp` cleaned up — replaced 3 opaque `dummy_stub_data` pragmas with named `__FUNC_NAME__` wide-string blobs following Core/Engine pattern
-- **Canvas & HUD (2D):** `src/engine/Src/UnRender.cpp` canvas exec functions upgraded from empty stubs to render-device-dispatching implementations: `DrawText`/`DrawTextClipped` call `_DrawString`, `DrawTile`/`DrawTileClipped` call RenDev virtuals, `Draw3DLine`/`Video*` dispatch through RenDev, `StrLen`/`TextSize` return approximate measurements, `GetScreenCoordinate` returns center-screen approximation
-- **Materials (2E):** `src/engine/Src/UnMaterial.cpp` ~300 lines fully implemented from prior work
+- **WinDrv (2A):** `src/WinDrv/Src/WinDrv.cpp` fully implemented — ~30 methods with real logic: `OpenWindow` (CreateWindowW + DirectInput device creation), `UpdateInput` (keyboard/mouse polling via GetDeviceState), `CauseInputEvent`, `ViewportWndProc`, `GetWindow`, `SetMouseCapture`, `TryRenderDevice`, `IsFullscreen`, `ResizeViewport`, `Minimize/Maximize/Restore`, `UWindowsClient::Init` (DirectInput8Create), `UWindowsClient::Tick` (PeekMessage pump), `MakeCurrent`, `GetLastCurrent`, viewport iteration
+- **D3DDrv (2B):** `src/D3DDrv/Src/D3DDrv.cpp` ~95% complete from prior work — D3D8 device management, Bink video, shader caches, gamma, Lock/Unlock/Present
+- **Window (2C):** `src/Window/Src/Window.cpp` cleaned up — replaced 3 opaque `dummy_stub_data` pragmas with named `__FUNC_NAME__` wide-string blobs following Core/Engine pattern
+- **Canvas & HUD (2D):** `src/Engine/Src/UnRender.cpp` canvas exec functions upgraded from empty stubs to render-device-dispatching implementations: `DrawText`/`DrawTextClipped` call `_DrawString`, `DrawTile`/`DrawTileClipped` call RenDev virtuals, `Draw3DLine`/`Video*` dispatch through RenDev, `StrLen`/`TextSize` return approximate measurements, `GetScreenCoordinate` returns center-screen approximation
+- **Materials (2E):** `src/Engine/Src/UnMaterial.cpp` ~300 lines fully implemented from prior work
 - **Source reorganization:** All 16 modules reorganized into UT99-style `Inc/`/`Src/` layout. All `.bak` backup files removed from engine. Build verified clean.
 
 **Phase 2 Milestone Progress:** Window creation, input polling, canvas rendering, and D3D viewport bridge are all implemented. Remaining: full runtime verification (game creates window, D3D initializes, scene renders).
@@ -202,7 +202,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 **Goal:** Actors exist, move, collide, animate, and make sounds. The world is alive but R6-specific gameplay doesn't work yet.
 
 ### 3A. Core Boot & Level Initialization (13 EXEC_STUBs)
-- **Files:** src/engine/UnLevel.cpp, src/engine/Engine.cpp, src/engine/UnActor.cpp
+- **Files:** src/Engine/UnLevel.cpp, src/Engine/Engine.cpp, src/Engine/UnActor.cpp
 - **What — Boot path:**
   - `ALevelInfo`: execGetAddressURL, execGetLocalURL, execFinalizeLoading, execResetLevelInNative, execSetBankSound, execNotifyMatchStart
   - `AGameInfo`: execGetNetworkNumber, execGetCurrentMapNum, execSetCurrentMapNum, execProcessR6Availabilty
@@ -211,7 +211,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** UT99 reference for level/game initialization. Ghidra for R6-specific additions.
 
 ### 3B. Actor Spawning & Lifecycle (15 EXEC_STUBs + related linker stubs)
-- **Files:** src/engine/UnActor.cpp, src/engine/UnLevel.cpp
+- **Files:** src/Engine/UnActor.cpp, src/Engine/UnLevel.cpp
 - **What:**
   - `execSpawn`, `execDestroy` — actor instantiation and cleanup
   - All iterator functions: `execAllActors`, `execDynamicActors`, `execChildActors`, `execRadiusActors`, `execVisibleActors`, `execVisibleCollidingActors`, `execTouchingActors`, `execBasedActors`, `execTraceActors`, `execCollidingActors`
@@ -222,7 +222,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Reference:** UnActor.cpp.bak (~1,000 lines usable code for touch system, base/owner, timers)
 
 ### 3C. Movement & Physics (62 EXEC_STUBs + ~280 linker stubs)
-- **Files:** src/engine/UnActor.cpp, src/engine/UnPawn.cpp, src/engine/EngineExtra.cpp, EngineStubs1.cpp
+- **Files:** src/Engine/UnActor.cpp, src/Engine/UnPawn.cpp, src/Engine/EngineExtra.cpp, EngineStubs1.cpp
 - **What — Movement exec stubs:**
   - `execMove`, `execMoveSmooth`, `execSetLocation`, `execSetRotation`, `execSetRelativeLocation`, `execSetRelativeRotation`
   - `execSetPhysics`, `execAutonomousPhysics`
@@ -236,7 +236,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra-heavy — physics simulation is the most algorithmically complex subsystem. UnActor.cpp.bak has coordinate transforms (ToLocal/ToWorld), collision queries (IsBlockedBy), and fix-up math (fixedTurn, TwoWallAdjust).
 
 ### 3D. Animation System (36 EXEC_STUBs + ~150 linker stubs)
-- **Files:** src/engine/UnActor.cpp, EngineStubs1-4.cpp
+- **Files:** src/Engine/UnActor.cpp, EngineStubs1-4.cpp
 - **What — Exec stubs (all in UnActor.cpp):**
   - Playback: `execPlayAnim`, `execLoopAnim`, `execTweenAnim`, `execFinishAnim`, `execStopAnimating`, `execFreezeAnimAt`
   - Query: `execIsAnimating`, `execIsTweening`, `execHasAnim`, `execGetAnimGroup`, `execGetAnimParams`
@@ -248,7 +248,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra for bone blending and multi-channel animation. UT99 reference for basic animation sequence playback.
 
 ### 3E. Sound Hooks (23 EXEC_STUBs)
-- **Files:** src/engine/UnActor.cpp, src/engine/UnPawn.cpp, src/engine/EngineExtra.cpp
+- **Files:** src/Engine/UnActor.cpp, src/Engine/UnPawn.cpp, src/Engine/EngineExtra.cpp
 - **What:**
   - Playback: `execPlaySound`, `execPlayOwnedSound`, `execStopSound`, `execStopAllSounds`, `execFadeSound`
   - Query: `execIsPlayingSound`, `execGetSoundDuration`
@@ -258,7 +258,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** These are dispatch hooks that delegate to the DARE audio subsystem. Ghidra for the delegation pattern; actual sound processing is in Phase 6 (DareAudio/SNDDSound3D).
 
 ### 3F. Effects & Projectors (7 EXEC_STUBs)
-- **Files:** src/engine/UnEffects.cpp
+- **Files:** src/Engine/UnEffects.cpp
 - **What:**
   - `AEmitter::execKill`
   - `AProjector`: execAbandonProjector, execAttachProjector, execDetachProjector, execAttachActor, execDetachActor
@@ -318,7 +318,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 > next step for full gameplay functionality.
 
 ### 4A. R6 Player Control (~35 R6Engine stubs + related)
-- **Files:** src/r6engine/Src/R6Engine.cpp (AR6PlayerController, AR6Pawn sections)
+- **Files:** src/R6Engine/Src/R6Engine.cpp (AR6PlayerController, AR6Pawn sections)
 - **What:**
   - **AR6PlayerController** (25 methods): PlayerTick, UpdateRotation, SpawnDefaultHUD, ClientRestart, SetupInputSystem, CheckJumpInput, ServerChangeWeapon, ServerDoFire
   - **AR6Pawn stance system** (10 methods): stand/crouch/prone/crawl transitions, fluid peeking (lean left/right), PawnLook/PawnLookAt/PawnLookAbsolute
@@ -328,7 +328,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** Phase 3 (movement/physics must work for player to move)
 
 ### 4B. AI Controllers (~65 R6Engine stubs)
-- **Files:** src/r6engine/R6Engine.cpp (AR6AIController, AR6RainbowAI, AR6TerroristAI, AR6HostageAI sections)
+- **Files:** src/R6Engine/R6Engine.cpp (AR6AIController, AR6RainbowAI, AR6TerroristAI, AR6HostageAI sections)
 - **What:**
   - **AR6AIController base** (17 methods): MoveToPosition, FollowPath, FollowPathTo, CanWalkTo, ActorReachableFromLocation, FindNearbyWaitSpot, FindPlaceToFire, FindPlaceToTakeCover, GotoOpenDoorState
   - **AR6RainbowAI** (20+ methods): GetEntryPosition, GetGuardPosition, GetTargetPosition, AClearShotIsAvailable, ClearToSnipe, LookAroundRoom, SetOrientation — elite tactical AI
@@ -339,7 +339,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** Phase 3 (movement/collision) + 4A (player must exist for AI to perceive)
 
 ### 4C. Interactive World (~45 R6Engine stubs)
-- **Files:** src/r6engine/R6Engine.cpp (door/ladder/electronics/bomb sections)
+- **Files:** src/R6Engine/R6Engine.cpp (door/ladder/electronics/bomb sections)
 - **What:**
   - **AR6Door/AR6IORotatingDoor** (~15): WillOpenOnTouch, DoorOpenTowards, AddBreach, RemoveBreach, SetNewDamageState — door mechanics including breach charges
   - **AR6Ladder/AR6LadderVolume** (~8): ladder zone registration, climb path specs
@@ -350,7 +350,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** Phase 3 (collision) + 4A (player needs to trigger interactions)
 
 ### 4D. Deployment & Spawning (~50 R6Engine stubs)
-- **Files:** src/r6engine/R6Engine.cpp (deployment zone sections)
+- **Files:** src/R6Engine/R6Engine.cpp (deployment zone sections)
 - **What:**
   - **AR6DeploymentZone** (25): FirstInit, Spawned, CheckForErrors, FindRandomPointInArea, FindClosestPointTo, FindSpawningPoint, GetNbOfTerroristToSpawn, IsPointInZone, HaveHostage, HaveTerrorist
   - **AR6DZonePath** (9): node insertion/deletion, path revalidation
@@ -361,7 +361,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** 4B (AI controllers needed for spawned entities)
 
 ### 4E. Weapons (~10 R6Weapons stubs + related R6Engine stubs)
-- **Files:** src/r6weapons/R6Weapons.cpp, related EngineExtra stubs
+- **Files:** src/R6Weapons/R6Weapons.cpp, related EngineExtra stubs
 - **What:**
   - `ComputeEffectiveAccuracy()` — R6's accuracy model
   - `GetMovingModifier()` — movement accuracy penalty
@@ -372,7 +372,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra — R6-specific ballistics.
 
 ### 4F. Game Flow & State (~25 R6Game stubs)
-- **Files:** src/r6game/R6Game.cpp
+- **Files:** src/R6Game/R6Game.cpp
 - **What:**
   - **AR6GameInfo** (10): BeginPlay, RestartGame, InitGameInfoGameService, NotifyKilled, ReduceDamage — match initialization and rules
   - **UR6GameManager** (5): Init, Created, AddPlayer, RemovePlayer, GetState — player tracking
@@ -383,7 +383,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Dependencies:** 4A-4D (need player, AI, world, spawning to drive game flow)
 
 ### 4G. Team Management & Abstract (~52 stubs across R6Abstract + R6Engine)
-- **Files:** src/r6abstract/R6Abstract.cpp, src/r6engine/R6Engine.cpp (team sections)
+- **Files:** src/R6Abstract/R6Abstract.cpp, src/R6Engine/R6Engine.cpp (team sections)
 - **What:**
   - **UR6AbstractGameService** (32 virtual stubs): Created, Destroy, Tick, GetGSStatus, BuildGSQueryString — abstract service layer
   - **AR6RainbowTeam** (~10): RequestFormationChange, UpdateTeamFormation — squad coordination
@@ -392,7 +392,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra for R6 team mechanics. R6Abstract service layer may be simpler than it looks (many methods may just be no-ops for single-player).
 
 ### 4H. Effects & Animation Extensions (~30 R6Engine stubs)
-- **Files:** src/r6engine/R6Engine.cpp (ragdoll/matinee sections)
+- **Files:** src/R6Engine/R6Engine.cpp (ragdoll/matinee sections)
 - **What:**
   - **AR6RagDoll** (9): physics simulation, collision, impulse application — ragdoll death animations
   - **AR6MatineeRainbow/Terrorist/Hostage** (~7): matinee cinematic attachments
@@ -419,7 +419,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 **Goal:** Server hosting, joining, and competitive play works.
 
 ### 5A. Engine Network Layer (10 EXEC_STUBs + ~120 linker stubs)
-- **Files:** src/engine/UnPawn.cpp, src/engine/EngineExtra.cpp, src/engine/UnNet.cpp, EngineStubs3.cpp
+- **Files:** src/Engine/UnPawn.cpp, src/Engine/EngineExtra.cpp, src/Engine/UnNet.cpp, EngineStubs3.cpp
 - **What:**
   - EXEC_STUBs: `GetPlayerNetworkAddress`, `ClientLeaveServer`, `ConnectionInterrupted`, `LaunchListenSrv`, `StartJoinServer`, `StartLogInProcedure`
   - EngineStubs: `UChannel::ReceivedBunch`, `UChannel::SendBunch`, `UChannel::InitOut`, `UNetConnection::*`, `UPackageMap::*` (~120 linker stubs)
@@ -427,7 +427,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** UT99 reference for channel/connection management (standard Unreal networking). Ghidra for R6-specific replication.
 
 ### 5B. IpDrv — TCP/UDP (37 EXEC_STUBs)
-- **Files:** src/ipdrv/IpDrv.cpp
+- **Files:** src/IpDrv/IpDrv.cpp
 - **What:**
   - **AInternetLink** (8): GetLocalIP, Resolve, GetLastError, IsDataPending, ParseURL, IpAddrToString
   - **ATcpLink** (9): Open, Listen, Close, SendText, SendBinary, ReadText, ReadBinary, FlushSendBuffer
@@ -437,7 +437,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** UT99 public source has complete IpDrv — WinSock2 integration.
 
 ### 5C. R6GameService — GameSpy Integration (60 stubs)
-- **Files:** src/r6gameservice/R6GameService.cpp
+- **Files:** src/R6GameService/R6GameService.cpp
 - **What:**
   - Server lifecycle: Created, Init, Tick, Destroy
   - CD key auth: AuthenticateGSCDKeyID, RequestGSCDKeyAuthID, ResetAuthId, GetAuthStatus
@@ -446,7 +446,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra + GameSpy SDK (full source in sdk/GameSpySDK/). Full decompilation for accuracy — the code should match retail behaviour even though GameSpy master servers are long dead (shut down 2014). The community uses OpenRVS for server browsing via UnrealScript, but R6GameService should be properly reconstructed as part of the overall decompilation goal. This ensures the rebuilt DLL is a faithful reproduction of the original binary.
 
 ### 5D. Multiplayer Game Modes (~10 R6Game stubs)
-- **Files:** src/r6game/R6Game.cpp (multiplayer sections)
+- **Files:** src/R6Game/R6Game.cpp (multiplayer sections)
 - **What:** AR6MultiPlayerGameInfo stubs — multiplayer-specific game rules, scoring, round management
 
 **Phase 5 Verification:**
@@ -465,7 +465,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 **Goal:** Full 3D positional audio. Currently the engine can dispatch sound events (Phase 3E), but nothing plays — this phase gives them a voice.
 
 ### 6A. SNDext — Platform Abstraction (32 stubs × 2 variants) ✅ COMPLETE
-- **Files:** src/sndext/Src/SNDext.cpp
+- **Files:** src/SNDext/Src/SNDext.cpp
 - **Status:** Fully implemented (2026-03-11). Both SNDext_ret.dll and SNDext_VSR.dll
   build with 32 matching exports. All stubs replaced with real implementations.
 - **Implemented:**
@@ -482,7 +482,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Clean-room — Win32 wrappers. Retail binary disassembled to confirm function behaviour.
 
 ### 6B. SNDDSound3D — DirectSound3D Backend (377 stubs × 2 variants)
-- **Files:** src/sndsound3d/SNDDSound3D.cpp
+- **Files:** src/SNDDSound3D/SNDDSound3D.cpp
 - **What:** Full DirectSound3D implementation:
   - Sound buffer creation & management (IDirectSoundBuffer, IDirectSound3DBuffer)
   - 3D audio positioning, Doppler, distance attenuation
@@ -493,7 +493,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra — most complex audio module. This is the bulk of audio work. Full decompilation for accuracy, matching the retail DirectSound3D implementation.
 
 ### 6C. DareAudio — DARE Engine Bridge (87 exports × 3 variants)
-- **Files:** src/dareaudio/DareAudio.cpp
+- **Files:** src/DareAudio/DareAudio.cpp
 - **What:** Bridges Unreal's audio subsystem to DARE/SND backends:
   - StaticConstructor — audio engine configuration
   - Destroy / ShutdownAfterError — cleanup
@@ -523,7 +523,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra — Karma maps to MathEngine SDK. These are the bridge functions.
 
 ### 7B. Terrain & Mesh Systems (~200+ linker stubs)
-- **Files:** EngineStubs1-4.cpp (terrain/mesh sections), src/engine/UnMesh.cpp, src/engine/UnModel.cpp
+- **Files:** EngineStubs1-4.cpp (terrain/mesh sections), src/Engine/UnMesh.cpp, src/Engine/UnModel.cpp
 - **What:**
   - Terrain: `UpdateVertices`, `GetVertexNormal`, `FillVertexBuffer`, terrain deformation (~80 stubs)
   - Skeletal mesh: UMesh, USkeletalMesh, UAnimation class implementations (~70 stubs)
@@ -536,7 +536,7 @@ The ~1,695 EngineStubs.cpp method body stubs break down as:
 - **Approach:** Ghidra. These are the internal rendering pipeline that connects the Engine to D3DDrv.
 
 ### 7D. Window Control Classes (17 classes)
-- **Files:** src/window/WindowClasses.h
+- **Files:** src/Window/WindowClasses.h
 - **What:** Replace DECLARE_WINDOW_STUB for WButton, WEdit, WRichEdit, WListBox, WCheckListBox, WComboBox, WScrollBar, WTreeView, WTabControl, WTrackBar, WProgressBar, WListView, WUrlButton, WLabel, WToolTip, WHeaderCtrl, WPictureButton
 - **Approach:** UT99 public source — thin Win32 CreateWindowEx wrappers.
 - **Note:** Only needed for native dialogs (preferences, console). Game menus use UnrealScript.
@@ -587,13 +587,13 @@ Apply this structure to every module in `src/`. Current state has headers and so
 **Transformation for each module:**
 | Current | Target |
 |---------|--------|
-| `src/core/CorePrivate.h` | `src/core/Inc/CorePrivate.h` |
-| `src/core/Core.cpp` | `src/core/Src/Core.cpp` |
-| `src/engine/Engine.h` | `src/engine/Inc/Engine.h` |
-| `src/engine/EngineClasses.h` | `src/engine/Inc/EngineClasses.h` |
-| `src/engine/EnginePrivate.h` | `src/engine/Inc/EnginePrivate.h` |
-| `src/engine/UnActor.cpp` | `src/engine/Src/UnActor.cpp` |
-| `src/r6engine/R6Engine.cpp` | `src/r6engine/Src/R6Engine.cpp` |
+| `src/Core/CorePrivate.h` | `src/Core/Inc/CorePrivate.h` |
+| `src/Core/Core.cpp` | `src/Core/Src/Core.cpp` |
+| `src/Engine/Engine.h` | `src/Engine/Inc/Engine.h` |
+| `src/Engine/EngineClasses.h` | `src/Engine/Inc/EngineClasses.h` |
+| `src/Engine/EnginePrivate.h` | `src/Engine/Inc/EnginePrivate.h` |
+| `src/Engine/UnActor.cpp` | `src/Engine/Src/UnActor.cpp` |
+| `src/R6Engine/R6Engine.cpp` | `src/R6Engine/Src/R6Engine.cpp` |
 | ... | ... |
 
 Update all `#include` paths and CMakeLists.txt `target_include_directories` accordingly.
@@ -619,7 +619,7 @@ UT99 has one header per major class or subsystem (e.g. `AActor.h`, `APawn.h`, `U
 - `EnginePrivate.h` → module-internal declarations, includes the public headers
 
 **R6 module splits:**
-- `src/r6engine/R6Engine.cpp` is likely one enormous file. Split into per-subsystem source files:
+- `src/R6Engine/R6Engine.cpp` is likely one enormous file. Split into per-subsystem source files:
   - `Src/R6PlayerController.cpp` — player control, stance system, camera
   - `Src/R6AIController.cpp` — AI base + Rainbow/Terrorist/Hostage AI
   - `Src/R6Door.cpp` — doors, breaching, interactive objects
@@ -770,7 +770,7 @@ Each batch is designed to be:
 
 **Source:** Ghidra + UT99 for networking fundamentals.
 **Files touched:** Expand `UnNet.cpp`, `UnLevel.cpp`, `UnActor.cpp`. **Delete `EngineStubs.cpp`** when empty. Remove `dummy_stub_func`/`dummy_stub_data` from `EngineLinkerShims.cpp`.
-**Verification:** Build compiles. **EngineStubs.cpp is deleted.** `grep dummy_stub_func src/engine/` returns zero hits.
+**Verification:** Build compiles. **EngineStubs.cpp is deleted.** `grep dummy_stub_func src/Engine/` returns zero hits.
 **Maps to:** Phase 5A (engine network), Phase 7A (Karma), Phase 7E (misc)
 
 ---

@@ -18,7 +18,7 @@ if(SOURCE_COUNT GREATER 0)
     # Common settings applied to all variants via a helper function
     # Use our rebuilt Engine.lib — the SDK's Engine.lib is missing symbols
     # that DareAudio needs (e.g. UAudioSubsystem default constructor).
-    set(ENGINE_BUILT_LIB ${CMAKE_BINARY_DIR}/src/engine/Release/Engine.lib)
+    set(ENGINE_BUILT_LIB ${CMAKE_BINARY_DIR}/src/Engine/Release/Engine.lib)
 
     function(dareaudio_target TARGET_NAME SND_DEP)
         add_library(${TARGET_NAME} MODULE ${DAREAUDIO_SOURCES} ${DAREAUDIO_SRC_DIR}/Src/DareAudio.def)
@@ -26,7 +26,7 @@ if(SOURCE_COUNT GREATER 0)
         # BEFORE ensures our local engine headers beat the UT99 SDK headers.
         target_include_directories(${TARGET_NAME} BEFORE PRIVATE
             ${DAREAUDIO_SRC_DIR}/Inc
-            ${PROJECT_SOURCE_DIR}/src/engine/Inc
+            ${PROJECT_SOURCE_DIR}/src/Engine/Inc
         )
         target_link_libraries(${TARGET_NAME}
             Core_Dep

@@ -15,10 +15,10 @@ list(LENGTH WINDRV_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_library(WinDrv MODULE ${WINDRV_SOURCES} ${WINDRV_SRC_DIR}/Src/WinDrv.def)
     target_compile_definitions(WinDrv PRIVATE WINDRV_EXPORTS ThisPackage=WinDrv)
-    set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/window/Release/Window.lib)
+    set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/Window/Release/Window.lib)
     target_include_directories(WinDrv BEFORE PRIVATE
         ${WINDRV_SRC_DIR}/Inc
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
         ${DXSDK_INCLUDE}
     )
     target_link_libraries(WinDrv

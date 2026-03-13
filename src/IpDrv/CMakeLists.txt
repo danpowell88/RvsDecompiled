@@ -16,7 +16,7 @@ if(SOURCE_COUNT GREATER 0)
     target_compile_definitions(IpDrv PRIVATE IPDRV_EXPORTS ThisPackage=IpDrv)
     target_include_directories(IpDrv BEFORE PRIVATE
         ${IPDRV_SRC_DIR}/Inc
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
     target_link_libraries(IpDrv Core_Dep Engine_Dep ws2_32)
 else()

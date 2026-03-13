@@ -15,7 +15,7 @@ if(SOURCE_COUNT GREATER 0)
     target_compile_definitions(R6Abstract PRIVATE R6ABSTRACT_EXPORTS ThisPackage=R6Abstract)
     target_include_directories(R6Abstract BEFORE PRIVATE
         ${R6ABSTRACT_SRC_DIR}/Inc
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
     target_link_libraries(R6Abstract Core_Dep Engine_Dep)
 else()

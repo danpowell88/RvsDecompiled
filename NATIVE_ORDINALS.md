@@ -16,7 +16,7 @@ Parser tool: `tools/parse_core_u.py`
 
 ## 1. IMPLEMENT_FUNCTION Entries with WRONG Ordinals (42 total)
 
-These entries exist in `src/core/UnScript.cpp` but register at the **wrong**
+These entries exist in `src/Core/UnScript.cpp` but register at the **wrong**
 GNatives[] slot. They must be corrected to match Core.u.
 
 ### Byte operators (swapped, delta ±2 to ±6)
@@ -404,7 +404,7 @@ UFunction serial layout:
 
 Validated against 5 known ordinals: IsA(303), Enable(117), Log(231), GotoState(113), SaveConfig(536).
 
-Cross-referenced against 244 IMPLEMENT_FUNCTION entries parsed from `src/core/UnScript.cpp`
+Cross-referenced against 244 IMPLEMENT_FUNCTION entries parsed from `src/Core/UnScript.cpp`
 using regex extraction of `IMPLEMENT_FUNCTION( ClassName, ordinal_expr, exec_funcname )`.
 
 ### Next steps for remaining unknowns

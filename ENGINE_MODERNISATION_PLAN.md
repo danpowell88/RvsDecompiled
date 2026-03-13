@@ -38,7 +38,7 @@ Cross-platform rendering library supporting D3D11, D3D12, Vulkan, Metal, OpenGL.
 3. **M1.3 — Modern graphics** (*depends on M1.2*): PBR material pipeline (reinterpret UShader/UModifier as roughness/metallic/normal), HDR with tone mapping, cascaded shadow maps, SSAO (GTAO), HDR bloom, FXAA/TAA, normal mapping, per-pixel dynamic lighting, volumetric fog, screen-space reflections.
 4. **M1.4 — Post-processing** (*depends on M1.3*): Configurable post-process chain (film grain, vignette, color grading LUT, depth of field for scopes, night vision phosphor shader, optional motion blur).
 
-**Relevant files:** `src/d3ddrv/D3DDrv.cpp`, `src/engine/UnRender.cpp`, `src/engine/EngineClasses.h`, `src/engine/UnMaterial.cpp`
+**Relevant files:** `src/D3DDrv/D3DDrv.cpp`, `src/Engine/UnRender.cpp`, `src/Engine/EngineClasses.h`, `src/Engine/UnMaterial.cpp`
 
 ---
 
@@ -53,7 +53,7 @@ OpenAL Soft is a drop-in for the existing OpenAL32.dll reference with HRTF suppo
 2. **M2.2 — Steam Audio spatial** (*depends on M2.1*): Physics-based propagation using BSP room geometry, real-time occlusion through walls/doors, material-based acoustics (concrete vs metal vs wood), binaural headphone rendering.
 3. **M2.3 — Enhancement features** (*depends on M2.1*): EAX replacement via Steam Audio reverb zones, configurable voice count (>20), distance-based low-pass filtering, Doppler.
 
-**Relevant files:** `src/dareaudio/`, `src/engine/UnAudio.cpp`, `retail/system/DARE.INI`
+**Relevant files:** `src/DareAudio/`, `src/Engine/UnAudio.cpp`, `retail/system/DARE.INI`
 
 ---
 
@@ -71,7 +71,7 @@ Used by Horizon Forbidden West. Excellent ragdoll, constraints, character contro
 3. **M3.3 — Ragdoll system** (*depends on M3.2*): Convert skeletal bone hierarchies to Jolt ragdoll descriptions, map `UKarmaParamsSkel` constraints, implement death→ragdoll transitions.
 4. **M3.4 — Constraint objects** (*depends on M3.2*): Door hinges, breakable constraints, interactive objects, ladders.
 
-**Relevant files:** `src/engine/UnActor.cpp` (100+ execK* functions), `src/engine/UnPawn.cpp`, `src/engine/EngineClasses.h` (AKActor, UKarmaParams)
+**Relevant files:** `src/Engine/UnActor.cpp` (100+ execK* functions), `src/Engine/UnPawn.cpp`, `src/Engine/EngineClasses.h` (AKActor, UKarmaParams)
 
 ---
 
@@ -84,7 +84,7 @@ Used by Horizon Forbidden West. Excellent ragdoll, constraints, character contro
 1. **M4.1 — FFmpeg integration** (*no deps*): Create `src/ffmpegvideo/`. Decode video frames → texture. Wire into render device `OpenVideo()/DisplayVideo()/StopVideo()/CloseVideo()`. Sync audio track.
 2. **M4.2 — HD video support** (*depends on M4.1*): Support H.264/H.265 .mp4 files. Fallback chain: look for `{name}.mp4`, then `{name}.bik`.
 
-**Relevant files:** `src/d3ddrv/D3DDrv.cpp` (Bink integration), `retail/Videos/` (18 .bik files)
+**Relevant files:** `src/D3DDrv/D3DDrv.cpp` (Bink integration), `retail/Videos/` (18 .bik files)
 
 ---
 

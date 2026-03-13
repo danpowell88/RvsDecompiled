@@ -7,7 +7,7 @@
 # hInstance so DLLs loaded at runtime can find them.
 
 set(LAUNCH_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/window/Release/Window.lib)
+set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/Window/Release/Window.lib)
 
 file(GLOB_RECURSE LAUNCH_SOURCES
     ${LAUNCH_SRC_DIR}/Inc/*.h
@@ -29,14 +29,14 @@ if(SOURCE_COUNT GREATER 0)
 
     # BEFORE so our local headers beat global SDK paths.
     # Include paths needed:
-    #   src/launch/Inc       — LaunchPrivate.h, FMallocWindows.h
-    #   src/launch/Src       — Res/LaunchRes.h (resource header)
-    #   src/engine/Inc       — EngineClasses.h (our reconstructed engine headers)
+    #   src/Launch/Inc       — LaunchPrivate.h, FMallocWindows.h
+    #   src/Launch/Src       — Res/LaunchRes.h (resource header)
+    #   src/Engine/Inc       — EngineClasses.h (our reconstructed engine headers)
     #   sdk/.../Window/Inc   — Window.h framework (relative includes resolve from here)
     target_include_directories(RavenShield BEFORE PRIVATE
         ${LAUNCH_SRC_DIR}/Inc
         ${LAUNCH_SRC_DIR}/Src
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
         ${PROJECT_SOURCE_DIR}/sdk/Ut99PubSrc/Window/Inc
     )
 

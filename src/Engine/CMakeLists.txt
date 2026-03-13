@@ -19,7 +19,7 @@ if(SOURCE_COUNT GREATER 0)
         ENGINE_API=__declspec\(dllexport\)
         ThisPackage=Engine
     )
-    # BEFORE ensures src/engine/Inc/ shim headers override conflicting UT99/CSDK headers.
+    # BEFORE ensures src/Engine/Inc/ shim headers override conflicting UT99/CSDK headers.
     target_include_directories(Engine BEFORE PRIVATE
         ${ENGINE_SRC_DIR}/Inc
     )

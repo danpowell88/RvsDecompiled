@@ -90,16 +90,16 @@ include_directories(
 add_library(Core_Dep INTERFACE)
 target_include_directories(Core_Dep INTERFACE ${CSDK_CORE_INC} ${UT99_CORE_INC})
 target_link_libraries(Core_Dep INTERFACE
-    ${CMAKE_BINARY_DIR}/src/core/Release/Core.lib)
+    ${CMAKE_BINARY_DIR}/src/Core/Release/Core.lib)
 
 # --- Engine (rebuilt from source) ---
 add_library(Engine_Dep INTERFACE)
 target_include_directories(Engine_Dep INTERFACE
-    ${PROJECT_SOURCE_DIR}/src/engine/Inc
+    ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     ${UT99_ENGINE_INC}
 )
 target_link_libraries(Engine_Dep INTERFACE
-    ${CMAKE_BINARY_DIR}/src/engine/Release/Engine.lib)
+    ${CMAKE_BINARY_DIR}/src/Engine/Release/Engine.lib)
 
 # --- Helper macro for game modules ---
 macro(add_rvs_module MODULE_NAME)
@@ -142,32 +142,32 @@ endmacro()
 # =============================================================================
 
 # --- Phase 2: Core engine ---
-add_subdirectory(src/core)
+add_subdirectory(src/Core)
 
 # --- Phase 3: Engine ---
-add_subdirectory(src/engine)
+add_subdirectory(src/Engine)
 
 # --- Phase 4: Support modules ---
-add_subdirectory(src/fire)
-add_subdirectory(src/window)
-add_subdirectory(src/ipdrv)
+add_subdirectory(src/Fire)
+add_subdirectory(src/Window)
+add_subdirectory(src/IpDrv)
 
 # --- Phase 5: Drivers ---
-add_subdirectory(src/windrv)
-add_subdirectory(src/d3ddrv)
+add_subdirectory(src/WinDrv)
+add_subdirectory(src/D3DDrv)
 
 # --- Phase 6: R6 game modules ---
-add_subdirectory(src/r6abstract)
-add_subdirectory(src/r6weapons)
-add_subdirectory(src/r6engine)
-add_subdirectory(src/r6game)
-add_subdirectory(src/r6gameservice)
+add_subdirectory(src/R6Abstract)
+add_subdirectory(src/R6Weapons)
+add_subdirectory(src/R6Engine)
+add_subdirectory(src/R6Game)
+add_subdirectory(src/R6GameService)
 
 # --- Phase 7: Audio ---
 # Bottom-up: SNDext → SNDDSound3D → DareAudio
-add_subdirectory(src/sndext)
-add_subdirectory(src/sndsound3d)
-add_subdirectory(src/dareaudio)
+add_subdirectory(src/SNDext)
+add_subdirectory(src/SNDDSound3D)
+add_subdirectory(src/DareAudio)
 
 # --- Phase 8: Main executable ---
-add_subdirectory(src/launch)
+add_subdirectory(src/Launch)

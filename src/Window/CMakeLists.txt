@@ -13,12 +13,12 @@ list(LENGTH WINDOW_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
     add_library(Window MODULE ${WINDOW_SOURCES} ${WINDOW_SRC_DIR}/Src/Window.def)
     target_compile_definitions(Window PRIVATE WINDOW_EXPORTS ThisPackage=Window)
-    # BEFORE so src/window/Inc/ and src/engine/Inc/ shim headers beat UT99 headers.
+    # BEFORE so src/Window/Inc/ and src/Engine/Inc/ shim headers beat UT99 headers.
     # The UT99 Window/Inc path lets Window.h's relative includes resolve:
-    #   ..\Src\Res\WindowRes.h  and  ..\..\core\inc\unmsg.h
+    #   ..\Src\Res\WindowRes.h  and  ..\..\Core\Inc\unmsg.h
     target_include_directories(Window BEFORE PRIVATE
         ${WINDOW_SRC_DIR}/Inc
-        ${PROJECT_SOURCE_DIR}/src/engine/Inc
+        ${PROJECT_SOURCE_DIR}/src/Engine/Inc
         ${PROJECT_SOURCE_DIR}/sdk/Ut99PubSrc/Window/Inc
     )
     target_link_libraries(Window
