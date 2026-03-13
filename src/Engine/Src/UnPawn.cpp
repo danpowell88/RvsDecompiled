@@ -1687,6 +1687,15 @@ INT APawn::calcMoveFlags()
 INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 {
 	guard(APawn::checkFloor);
+	// Trace 33 units in Dir direction from Location
+	FVector End = Location - Dir * 33.f;
+	XLevel->SingleLineCheck(Hit, this, End, Location, TRACE_AllBlocking,
+		FVector(CollisionRadius, CollisionRadius, CollisionHeight));
+	if ( Hit.Time < 1.f )
+	{
+		processHitWall(Hit.Normal, Hit.Actor);
+		return 1;
+	}
 	return 0;
 	unguard;
 }
@@ -1765,14 +1774,36 @@ ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 INT APawn::jumpReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::jumpReachable);
-	return 0;
+	FVector SavedLoc = Location;
+	ETestMoveResult hit = jumpLanding(Velocity, 1);
+	if ( hit == TESTMOVE_Stopped )
+		return 0;
+	INT result = walkReachable(Dest, bClearPath | 8, GoalActor);
+	XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+	return result;
 	unguard;
 }
 
 INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::ladderReachable);
-	return 0;
+	if ( OnLadder && GoalActor )
+	{
+		ALadderVolume* goalLadder = NULL;
+		if ( GoalActor->IsA(ALadder::StaticClass()) )
+		{
+			// DIVERGENCE: ALadder::LadderVolume field not in header; raw offset +0x3E8
+			goalLadder = *(ALadderVolume**)((BYTE*)GoalActor + 0x3E8);
+		}
+		else
+		{
+			// DIVERGENCE: GoalActor OnLadder via raw offset +0x51c
+			goalLadder = *(ALadderVolume**)((BYTE*)GoalActor + 0x51c);
+		}
+		if ( goalLadder && goalLadder == OnLadder )
+			return bClearPath | 0x40;
+	}
+	return walkReachable(Dest, bClearPath, GoalActor);
 	unguard;
 }
 
@@ -1805,6 +1836,32 @@ void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 
 void APawn::setMoveTimer(FLOAT DeltaTime)
 {
+	guard(APawn::setMoveTimer);
+	if ( !Controller )
+		return;
+
+	if ( DesiredSpeed != 0.f )
+	{
+		FLOAT mult = 2.0f;
+		// DIVERGENCE: bIsCrouched (bit5) | bIsWalking (bit2) via named bitfields
+		if ( bIsCrouched || bIsWalking )
+		{
+			FLOAT inv = 1.0f / CrouchedPct;
+			if ( inv > 2.0f )
+				mult = inv;
+		}
+		Controller->MoveTimer = (mult * DeltaTime) / (GetMaxSpeed() * DesiredSpeed) + 1.0f;
+	}
+	else
+	{
+		Controller->MoveTimer = 0.5f;
+	}
+
+	// DIVERGENCE: Ghidra checks bit7 of Controller+0x3a8; mapped to bPreparingMove (bit 7 of first bitfield byte)
+	if ( Controller->bPreparingMove && Controller->Enemy )
+		Controller->MoveTimer += 2.0f;
+
+	unguard;
 }
 
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
@@ -1978,6 +2035,8 @@ void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLO
 DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 {
 	guard(AController::LineOfSightTo);
+	if ( Other && Pawn )
+		return Pawn->R6LineOfSightTo(Other, bUseLOSFlag);
 	return 0;
 	unguard;
 }
@@ -1991,6 +2050,14 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 
 void AController::CheckEnemyVisible()
 {
+	guard(AController::CheckEnemyVisible);
+	// DIVERGENCE: Ghidra has rdtsc profiling; omitted
+	if ( Enemy )
+	{
+		if ( !LineOfSightTo(Enemy, 0) )
+			eventEnemyNotVisible();
+	}
+	unguard;
 }
 
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
