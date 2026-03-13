@@ -93,8 +93,146 @@ INT AR6Weapons::GetHeartBeatStatus()
 	return 0;
 }
 
-void AR6Weapons::ShowWeaponParticles(AR6Pawn*, AR6PlayerController*)
+void AR6Weapons::ShowWeaponParticles(AR6Pawn* param_1, AR6PlayerController* param_2)
 {
+	guard(AR6Weapons::ShowWeaponParticles);
+
+	// vtable[0x22] (byte offset 0x88) on a particle emitter: activate/trigger
+	typedef void (__thiscall* PFNTRIGGER)(void*, INT);
+
+	if (*(INT*)((BYTE*)this + 0x398) < 1)   // pending particle count < 1
+	{
+		// No shots pending — hide the muzzle-flash emitter
+		INT sfx = *(INT*)((BYTE*)this + 0x5a0);                       // AR6SFX at this+0x5a0
+		if (sfx != 0 && *(INT*)(sfx + 0x39c) != 0)
+		{
+			*(BYTE*)(sfx + 0x36)  = 0;                                // bHidden = false
+			*(DWORD*)(sfx + 0xa0) &= 0xfffffeff;                      // clear bit 8
+		}
+	}
+	else
+	{
+		INT archetype = *(INT*)((BYTE*)this + 0x144);                  // weapon archetype ptr
+		if (*(FLOAT*)((BYTE*)this + 0x3a4) <= *(FLOAT*)(archetype + 0x45c))
+		{
+			FLOAT fireInterval = *(FLOAT*)(archetype + 0x45c);         // fire interval
+			*(INT*)((BYTE*)this + 0x398) -= 1;                         // --pendingParticleCount
+			*(FLOAT*)((BYTE*)this + 0x3a4) = *(FLOAT*)((BYTE*)this + 0x58c) + fireInterval;
+
+			if (*(BYTE*)(archetype + 0x425) == 3)                      // fire mode == burst (3)
+			{
+				DWORD uFlags = *(DWORD*)((BYTE*)this + 0x3a0);
+				*(DWORD*)((BYTE*)this + 0x3a0) = uFlags | 0x10;         // set burst-in-progress bit
+				if (!(*(DWORD*)((BYTE*)param_1 + 0x3e0) & 0x200) || !(uFlags & 2))
+					((APawn*)param_1)->eventPlayWeaponAnimation();
+				else
+					param_1->eventUpdateBipodPosture();
+			}
+
+			// Walk Level->Engine->Clients[0] chain to reach the local player controller.
+			// this+0x328 = Owner (AActor*); Owner+0x44 = XLevel (ULevel*);
+			// [+0x44] = Engine; [+0x30] = Clients array ptr; [0]+0x34 = local PC.
+			AR6PlayerController* pAVar3 = *(AR6PlayerController**)
+				(**(INT**)(*(INT*)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x44) + 0x30) + 0x34);
+
+			if (*(AR6Pawn**)((BYTE*)pAVar3 + 0x3d8) == param_1          // pAVar3->Pawn == param_1
+				|| *(AR6Pawn**)((BYTE*)pAVar3 + 0x5b8) != param_1       // pAVar3->field_0x5b8 != param_1
+				|| (*(BYTE*)((BYTE*)pAVar3 + 0x524) & 0x20))            // pAVar3->field_0x524 bit 5
+			{
+				INT sfx = *(INT*)((BYTE*)this + 0x5a0);                 // muzzle-flash AR6SFX
+				if (sfx != 0 && *(INT*)(sfx + 0x39c) != 0)
+				{
+					if (!(*(BYTE*)((BYTE*)this + 0x3a0) & 0x40))        // not ADS / first-person flag
+					{
+						// Set up emitter colour/life parameters
+						DWORD u = *(DWORD*)(sfx + 0xa0) ^ 0x100;
+						*(DWORD*)(sfx + 0xa0) = (u & 0xfffff7ff) | 0x200;
+						*(BYTE*)(sfx + 0x36)  = (BYTE)(u >> 8) & 1;
+						*(DWORD*)(sfx + 0x104) = 0x43400000;            // 192.0f
+						*(BYTE*)(sfx + 0x38)  = 0xc0;
+						*(BYTE*)(sfx + 0x39)  = 0xc0;
+						*(DWORD*)(sfx + 0x108) = 0x41200000;            // 10.0f
+					}
+
+					INT arrBase = *(INT*)(sfx + 0x398);                 // emitter array base ptr
+
+					// emitter[0]: always trigger
+					INT e0 = *(INT*)arrBase;
+					if (e0 != 0)
+					{
+						PFNTRIGGER fn = *(PFNTRIGGER*)((BYTE*)(*(INT*)e0) + 0x88);
+						fn((void*)e0, 1);
+					}
+
+					// emitter[1]
+					if (*(INT*)(sfx + 0x39c) > 1)
+					{
+						INT* e1 = *(INT**)(arrBase + 4);
+						if (e1 != NULL)
+						{
+							PFNTRIGGER fn = *(PFNTRIGGER*)((BYTE*)(*e1) + 0x88);
+							fn(e1, 1);
+						}
+					}
+
+					// emitters [2] and [3]: suppressed when local player is ADS (bit 6 set)
+					if (!(*(BYTE*)((BYTE*)this + 0x3a0) & 0x40)
+						&& (param_2 != pAVar3 || (*(BYTE*)((BYTE*)param_2 + 0x524) & 0x20)))
+					{
+						if (*(INT*)(sfx + 0x39c) > 2)
+						{
+							INT* e2 = *(INT**)(arrBase + 8);
+							if (e2 != NULL)
+							{
+								PFNTRIGGER fn = *(PFNTRIGGER*)((BYTE*)(*e2) + 0x88);
+								fn(e2, 1);
+							}
+						}
+						if (*(INT*)(sfx + 0x39c) > 3)
+						{
+							INT* e3 = *(INT**)(arrBase + 0xc);
+							if (e3 != NULL)
+							{
+								PFNTRIGGER fn = *(PFNTRIGGER*)((BYTE*)(*e3) + 0x88);
+								fn(e3, 1);
+							}
+						}
+					}
+
+					// emitter[4]: thermal/NV effect — local, non-ADS, non-bipod only
+					if (!(*(BYTE*)((BYTE*)this + 0x3a0) & 0x40)
+						&& param_2 == pAVar3
+						&& !(*(BYTE*)((BYTE*)param_2 + 0x524) & 0x20)
+						&& !(*(BYTE*)((BYTE*)param_2 + 0x838) & 4)
+						&& *(INT*)(sfx + 0x39c) > 4)
+					{
+						INT* e4 = *(INT**)(arrBase + 0x10);
+						if (e4 != NULL)
+						{
+							PFNTRIGGER fn = *(PFNTRIGGER*)((BYTE*)(*e4) + 0x88);
+							fn(e4, 1);
+						}
+					}
+				}
+
+				// Second SFX (e.g., ejected-shell emitter at this+0x59c).
+				// Ghidra has an early return here; it is equivalent to fall-through since
+				// there is no code between this block and the function end.
+				INT sfx2 = *(INT*)((BYTE*)this + 0x59c);
+				if (sfx2 != 0 && *(INT*)(sfx2 + 0x39c) != 0)
+				{
+					INT e0_2 = *(INT*)(*(INT*)(sfx2 + 0x398));          // sfx2 emitter[0]
+					if ((INT*)e0_2 != NULL)
+					{
+						PFNTRIGGER fn = *(PFNTRIGGER*)((BYTE*)(*(INT*)e0_2) + 0x88);
+						fn((void*)e0_2, 1);
+					}
+				}
+			}
+		}
+	}
+
+	unguard;
 }
 
 FLOAT AR6Weapons::ComputeEffectiveAccuracy(FLOAT DeltaTime, FLOAT DeltaFrame)

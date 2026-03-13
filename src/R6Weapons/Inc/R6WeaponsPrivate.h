@@ -31,6 +31,7 @@
 
 #include "Engine.h"
 #include "R6AbstractClasses.h"
+#include "../../R6Engine/Inc/R6EngineClasses.h"
 #include "R6WeaponsClasses.h"
 
 /*----------------------------------------------------------------------------
