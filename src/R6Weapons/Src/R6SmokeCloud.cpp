@@ -15,7 +15,9 @@ INT AR6SmokeCloud::IsBlockedBy(AActor const* Other) const
 
 INT AR6SmokeCloud::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
-	return 0;
+	if (TraceFlags & 0x80000)
+		return 0;
+	return TraceFlags & 0x20000;
 }
 
 /*-----------------------------------------------------------------------------
