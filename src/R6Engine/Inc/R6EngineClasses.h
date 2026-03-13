@@ -693,6 +693,7 @@ enum ePawnOrientation{
 	,PO_PeekLeft=6
 	,PO_PeekRight=7
 };
+typedef enum ePawnOrientation EPawnOrientation;
 
 enum eCoverDirection{
 	 COVER_Left=0

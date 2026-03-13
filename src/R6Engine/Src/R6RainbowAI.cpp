@@ -237,7 +237,7 @@ void AR6RainbowAI::execAClearShotIsAvailable(FFrame& Stack, RESULT_DECL)
 void AR6RainbowAI::execCheckEnvironment(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-	*(FVector*)Result = FVector(0,0,0);
+	checkEnvironment();
 }
 
 void AR6RainbowAI::execClearToSnipe(FFrame& Stack, RESULT_DECL)
@@ -290,6 +290,7 @@ void AR6RainbowAI::execSetOrientation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_BYTE(eOverrideOrientation);
 	P_FINISH;
+	setMemberOrientation((EPawnOrientation)eOverrideOrientation);
 }
 
 FVector AR6RainbowAI::getEntryPosition()

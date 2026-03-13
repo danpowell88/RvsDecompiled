@@ -243,7 +243,10 @@ void AR6AIController::execActorReachableFromLocation(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(AActor, Target);
 	P_GET_STRUCT(FVector, vLocation);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	if (Target != NULL && Pawn != NULL)
+		*(DWORD*)Result = ((AR6Pawn*)Pawn)->actorReachableFromLocation(Target, vLocation);
+	else
+		*(DWORD*)Result = 0;
 }
 
 void AR6AIController::execCanWalkTo(FFrame& Stack, RESULT_DECL)
