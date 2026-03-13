@@ -1,5 +1,5 @@
 ---
-title: "62. Textures, Canvas, and the Memory Layout Maze"
+title: "63. Textures, Canvas, and the Memory Layout Maze"
 authors: [rvs-team]
 tags: [r6engine, textures, canvas, ghidra, decompilation, memory-layout]
 ---

@@ -1,6 +1,6 @@
 ---
 slug: stubs-to-code-implementing-ai-and-matinee
-title: "63. Stubs to Code: Implementing AI Movement and Matinee Animation"
+title: "64. Stubs to Code: Implementing AI Movement and Matinee Animation"
 authors: [dan]
 tags: [decompilation, ai, matinee, windrv, unreal-engine]
 ---

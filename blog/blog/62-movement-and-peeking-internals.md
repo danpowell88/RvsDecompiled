@@ -1,5 +1,5 @@
 ---
-title: "61. Movement Speeds, Peeking Colboxes, and Ghidra Archaeology"
+title: "62. Movement Speeds, Peeking Colboxes, and Ghidra Archaeology"
 authors: [rvs-team]
 tags: [r6engine, movement, physics, peeking, ghidra, decompilation]
 ---
