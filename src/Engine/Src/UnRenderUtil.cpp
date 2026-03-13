@@ -1500,9 +1500,8 @@ FLineVertex::FLineVertex(FVector InPoint, FColor InColor)
 
 FLineVertex::FLineVertex()
 {
-	// Ghidra 0x3810: calls FVector::FVector((FVector*)this) — Point default-initialised.
-	guard(FLineVertex::FLineVertex);
-	unguard;
+	// Ghidra 0x3810: calls FVector::FVector((FVector*)this) then returns.
+	// No SEH frame; compiler default-constructs Point (FVector trivial ctor).
 }
 
 FLineVertex& FLineVertex::operator=(const FLineVertex& Other)

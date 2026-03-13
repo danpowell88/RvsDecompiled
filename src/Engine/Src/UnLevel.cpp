@@ -64,6 +64,20 @@ void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Sec
 ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 :	ULevelBase( InEngine )
 {
+	guard(ULevel::ULevel);
+	// Ghidra 0xc2c40: large constructor body.
+	// Phase 1 (compiler-generated): FArray::FArray() on all TArray/TMap member fields.
+	// Phase 2 (TMap hash-table setup): many pairs of (ptr[+0xC]=0, ptr[+0x10]=8, FUN_103*())
+	//          at offsets 0xdc, 0x10150, 0x10164, 0x101ac, 0x101e4, 0x101f8, 0x1020c, …
+	//          TODO: implement FUN_1031f850/f990/fa30/fb80/fc20 (TMap rehash, 8 initial buckets).
+	// Phase 3 (runtime init):
+	SetFlags( RF_Transactional );
+	// TODO: allocate Model via StaticAllocateObject/UModel ctor at this+0x90, set RF_Transactional.
+	// TODO: FRotator(0,0,0) + SpawnActor(ALevelInfo::PrivateStaticClass).
+	// TODO: SpawnBrush(); assign Brush->Brush; SetFlags on brush/model RF_Transactional|RF_Public|….
+	// TODO: GetLevelInfo()->GetDefaultPhysicsVolume().
+	// TODO: zero GScriptCycles, GScriptEntryTag; set this[0x10178]=1, this[0x1017c]=1; zero 0x1011c-0x10128.
+	unguard;
 }
 
 void ULevel::Serialize( FArchive& Ar )

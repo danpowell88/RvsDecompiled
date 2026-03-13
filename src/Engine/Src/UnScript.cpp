@@ -39,8 +39,14 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimNotify_Effect ---
-void UAnimNotify_Effect::Notify(UMeshInstance *,AActor *)
+// 0x136b20 — 875 bytes. Spawns the Effect actor (this->Effect at +0x40) at
+// Owner's location/rotation.  Editor path logs the effect name.  Full body
+// involves FCoords rotation math and SpawnActor — not yet reconstructed.
+void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
+	guard(UAnimNotify_Effect::Notify);
+	// TODO: implement from Ghidra 0x136b20 (spawn effect actor at owner location)
+	unguard;
 }
 
 

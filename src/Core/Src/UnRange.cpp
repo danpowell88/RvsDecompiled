@@ -25,9 +25,10 @@ FRange::FRange( FLOAT InVal )
 }
 
 FRange::FRange( FLOAT InMin, FLOAT InMax )
-:	Min( InMin )
-,	Max( InMax )
+:	Min( InMin < InMax ? InMin : InMax )
+,	Max( InMin < InMax ? InMax : InMin )
 {
+	// Ghidra 0x94b0: sorts inputs so Min <= Max.
 }
 
 FLOAT FRange::GetCenter() const

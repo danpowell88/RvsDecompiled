@@ -28,6 +28,12 @@ FClassNetCache::FClassNetCache()
 ,	RepConditionCount ( 0 )
 ,	Class             ( NULL )
 {
+	guard(FClassNetCache::FClassNetCache);
+	// TArray default ctor is trivially-empty; zero fields explicitly (Ghidra 0x1ab10).
+	appMemzero( &RepProperties, sizeof(RepProperties) );
+	appMemzero( &Fields,        sizeof(Fields)        );
+	// TODO: FUN_10118f90(&FieldMap) — initialises FieldMap hash table with 8 initial buckets.
+	unguard;
 }
 
 FClassNetCache::FClassNetCache( UClass* InClass )
@@ -36,6 +42,12 @@ FClassNetCache::FClassNetCache( UClass* InClass )
 ,	RepConditionCount ( 0 )
 ,	Class             ( InClass )
 {
+	guard(FClassNetCache::FClassNetCache);
+	// TArray default ctor is trivially-empty; zero fields explicitly (Ghidra 0x1a580).
+	appMemzero( &RepProperties, sizeof(RepProperties) );
+	appMemzero( &Fields,        sizeof(Fields)        );
+	// TODO: FUN_10118f90(&FieldMap) — initialises FieldMap hash table with 8 initial buckets.
+	unguard;
 }
 
 FArchive& operator<<( FArchive& Ar, FClassNetCache& Cache )
