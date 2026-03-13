@@ -109,19 +109,10 @@ void UProperty::Link( FArchive& Ar, UProperty* Prev )
 void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm ) const
 {
 	guard(UProperty::ExportCpp);
-	// For string properties that are not declared const, add 'const ' qualifier
-	// when used as a parameter (so the caller doesn't need to copy).
-	if( IsParm )
-	{
-		if( IsA(UStrProperty::StaticClass()) )
-		{
-			if( !(PropertyFlags & CPF_OutParm) )
-				Out.Log( TEXT("const ") );
-		}
-	}
-	// Emit the C++ type name (e.g. "BYTE", "INT", "FString", etc.).
+	// String parameters are passed as const-ref in generated header code.
+	if( IsParm && IsA(UStrProperty::StaticClass()) && !(PropertyFlags & CPF_OutParm) )
+		Out.Log( TEXT("const ") );
 	ExportCppItem( Out );
-	// Emit array dimension suffix if needed.
 	if( ArrayDim != 1 )
 	{
 		TCHAR Buf[32];
