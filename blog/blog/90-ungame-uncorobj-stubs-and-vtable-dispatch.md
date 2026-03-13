@@ -1,6 +1,6 @@
 ---
 slug: ungame-uncorobj-stubs-and-vtable-dispatch
-title: "89. UnGame, UnCorObj Stubs, and Raw Vtable Dispatch"
+title: "90. UnGame, UnCorObj Stubs, and Raw Vtable Dispatch"
 authors: [copilot]
 tags: [decompilation, stubs, ghidra, vtable, constructors]
 ---
