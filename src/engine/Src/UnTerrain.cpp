@@ -121,7 +121,8 @@ void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 	INT mask = 0x0F << bit_pos;
 	INT* word_ptr = &planData[idx >> 3];
 	*word_ptr = (*word_ptr & ~mask) | (((Value + 8) & 0x0F) << bit_pos);
-	// TODO: flag at this+0x12B4 also ORed in retail (terrain-dirty marking).
+	// Retail 0x104570D0: mark terrain dirty for rebuild (bit 2 of DWORD at +0x12B4).
+	*(DWORD*)((BYTE*)this + 0x12B4) |= 4;
 }
 void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 {

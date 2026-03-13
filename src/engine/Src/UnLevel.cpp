@@ -160,8 +160,8 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 	if (!data) return NULL;
 	AZoneInfo* zone = *(AZoneInfo**)(data + 72 * iZone + 288);
 	if (zone) return zone;
-	// TODO: retail calls fallback at RVA 0x1C080 when zone is NULL
-	return NULL;
+	// Retail 0x1C080 fallback: returns LevelInfo as the default (background) zone.
+	return (AZoneInfo*)GetLevelInfo();
 }
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
