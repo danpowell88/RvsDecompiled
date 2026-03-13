@@ -60,8 +60,7 @@ const TCHAR* WWindowsViewportWindow::GetPackageName()
 
 void WWindowsViewportWindow::GetWindowClassName(TCHAR* OutName)
 {
-	// Build the window class name: e.g. "WinDrvUnreal" or "WinDrvUnrealChild"
-	appSprintf(OutName, TEXT("%sUnreal"), appPackage());
+	appStrcpy(OutName, TEXT("WWindowsViewportWindow"));
 }
 
 LONG WWindowsViewportWindow::WndProc(UINT Message, UINT wParam, LONG lParam)

@@ -104,13 +104,20 @@ INT UWindowsViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 INT UWindowsViewport::Lock(BYTE* HitData, INT* HitSize)
 {
 	guard(UWindowsViewport::Lock);
-	return 1;
+	// DIVERGENCE: retail checks WWindowsViewportWindow (this+0x204+4), HoldCount
+	// (this+0x214), and render resource flags before delegating. We test HWND validity only.
+	if (GViewportHWnd && !IsWindow(GViewportHWnd))
+		return 0;
+	return Super::Lock(HitData, HitSize);
 	unguard;
 }
 
 void UWindowsViewport::Unlock()
 {
 	guard(UWindowsViewport::Unlock);
+	// DIVERGENCE: HoldCount is at raw offset 0x214 in UViewport; not exposed in local headers.
+	check(*(INT*)((BYTE*)this + 0x214) == 0);
+	Super::Unlock();
 	unguard;
 }
 
@@ -374,6 +381,9 @@ void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT New
 void UWindowsViewport::Hold(INT Horiz)
 {
 	guard(UWindowsViewport::Hold);
+	// DIVERGENCE: HoldCount is at raw offset 0x214 in UViewport; not exposed in local headers.
+	INT& HoldCount = *(INT*)((BYTE*)this + 0x214);
+	if (Horiz) HoldCount++; else HoldCount--;
 	unguard;
 }
 
@@ -411,8 +421,25 @@ void UWindowsViewport::CheckCD()
 void UWindowsViewport::AcquireKeyboard()
 {
 	guard(UWindowsViewport::AcquireKeyboard);
-	if (UWindowsViewport::Keyboard)
-		UWindowsViewport::Keyboard->Acquire();
+	if (DirectInput8 && !Keyboard)
+	{
+		HRESULT hr = DirectInput8->CreateDevice(GUID_SysKeyboard, &Keyboard, NULL);
+		if (SUCCEEDED(hr) && Keyboard)
+		{
+			hr = Keyboard->SetDataFormat(&c_dfDIKeyboard);
+			if (SUCCEEDED(hr))
+			{
+				// DIVERGENCE: retail uses m_Window->hWnd (this+0x204+4); we use GViewportHWnd.
+				hr = Keyboard->SetCooperativeLevel(GViewportHWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+				if (SUCCEEDED(hr))
+					Keyboard->Acquire();
+			}
+		}
+	}
+	else if (Keyboard)
+	{
+		Keyboard->Acquire();
+	}
 	unguard;
 }
 

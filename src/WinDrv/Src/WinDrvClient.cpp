@@ -131,7 +131,7 @@ void UWindowsClient::Tick()
 INT UWindowsClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UWindowsClient::Exec);
-	return 0;
+	return Super::Exec(Cmd, Ar) != 0;
 	unguard;
 }
 
