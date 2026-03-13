@@ -59,7 +59,17 @@ void UMaterial::Serialize( FArchive& Ar )
 UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UMaterial::CheckCircularReferences);
-	return 0;
+	// If we are already in the traversal history this is a cycle.
+	for( INT i = 0; i < History.Num(); i++ )
+		if( History(i) == this )
+			return 0;
+	if( !FallbackMaterial )
+		return 1;
+	INT idx = History.AddItem( this );
+	if( !FallbackMaterial->CheckCircularReferences( History ) )
+		return 0;
+	History.Remove( idx, 1 );
+	return 1;
 	unguard;
 }
 
@@ -187,7 +197,18 @@ void UShader::PostEditChange()
 UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UShader::CheckCircularReferences);
-	return 0;
+	if( !UMaterial::CheckCircularReferences( History ) )
+		return 0;
+	INT idx = History.AddItem( this );
+	if( Diffuse              && !Diffuse->CheckCircularReferences( History ) )              return 0;
+	if( Opacity              && !Opacity->CheckCircularReferences( History ) )              return 0;
+	if( Specular             && !Specular->CheckCircularReferences( History ) )             return 0;
+	if( SpecularityMask      && !SpecularityMask->CheckCircularReferences( History ) )      return 0;
+	if( SelfIllumination     && !SelfIllumination->CheckCircularReferences( History ) )     return 0;
+	if( SelfIlluminationMask && !SelfIlluminationMask->CheckCircularReferences( History ) ) return 0;
+	if( Detail               && !Detail->CheckCircularReferences( History ) )               return 0;
+	History.Remove( idx, 1 );
+	return 1;
 	unguard;
 }
 
@@ -280,7 +301,13 @@ void UModifier::PostEditChange()
 UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UModifier::CheckCircularReferences);
-	return Material ? Material->CheckCircularReferences( History ) : 0;
+	if( !UMaterial::CheckCircularReferences( History ) )
+		return 0;
+	INT idx = History.AddItem( this );
+	if( Material && !Material->CheckCircularReferences( History ) )
+		return 0;
+	History.Remove( idx, 1 );
+	return 1;
 	unguard;
 }
 
@@ -324,7 +351,14 @@ void UCombiner::PostEditChange()
 UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UCombiner::CheckCircularReferences);
-	return 0;
+	if( !UMaterial::CheckCircularReferences( History ) )
+		return 0;
+	INT idx = History.AddItem( this );
+	if( Material1 && !Material1->CheckCircularReferences( History ) ) return 0;
+	if( Material2 && !Material2->CheckCircularReferences( History ) ) return 0;
+	if( Mask      && !Mask->CheckCircularReferences( History ) )      return 0;
+	History.Remove( idx, 1 );
+	return 1;
 	unguard;
 }
 

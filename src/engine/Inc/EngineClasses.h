@@ -6107,6 +6107,9 @@ class ENGINE_API UMaterialSwitch : public UModifier
 {
 public:
 	DECLARE_CLASS(UMaterialSwitch,UModifier,0,Engine)
+	// Data members (from MaterialSwitch.uc). Current at 0x5C, Materials at 0x60.
+	INT Current;
+	TArray<UMaterial*> Materials;
 	// Auto-generated method declarations
 	virtual void PostEditChange();
 	virtual int CheckCircularReferences(TArray<UMaterial *> &);

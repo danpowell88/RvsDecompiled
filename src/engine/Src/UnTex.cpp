@@ -281,9 +281,18 @@ void UMaterialSwitch::PostEditChange()
 {
 }
 
-int UMaterialSwitch::CheckCircularReferences(TArray<UMaterial *> &)
+UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 {
-	return 0;
+	guard(UMaterialSwitch::CheckCircularReferences);
+	if( !UModifier::CheckCircularReferences( History ) )
+		return 0;
+	INT idx = History.AddItem( this );
+	for( INT i = 0; i < Materials.Num(); i++ )
+		if( Materials(i) && !Materials(i)->CheckCircularReferences( History ) )
+			return 0;
+	History.Remove( idx, 1 );
+	return 1;
+	unguard;
 }
 
 
