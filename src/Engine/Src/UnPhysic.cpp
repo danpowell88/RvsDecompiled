@@ -15,8 +15,42 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- APhysicsVolume ---
-void APhysicsVolume::SetZone(int,int)
+void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 {
+	guard(APhysicsVolume::SetZone);
+	// Ghidra 0xb77a0 (263 bytes): query BSP for new zone/leaf, fire zone-change
+	// events, then register self as own PhysicsVolume (physics volumes live in
+	// themselves, unlike regular actors which look up the enclosing volume).
+	if (!bDeleteMe)
+	{
+		if (bJustTeleported)
+		{
+			Region.Zone      = Level;
+			Region.iLeaf     = -1;
+			Region.ZoneNumber = 0;
+		}
+		FPointRegion NewRegion;
+		UModel* pModel = *(UModel**)((BYTE*)XLevel + 0x90);
+		NewRegion = pModel ? pModel->PointRegion(Level, Location)
+		                   : FPointRegion(Level);
+		if (NewRegion.Zone == Region.Zone)
+		{
+			Region = NewRegion;
+		}
+		else
+		{
+			if (!bTest)
+			{
+				Region.Zone->eventActorLeaving(this);
+				eventZoneChange(NewRegion.Zone);
+			}
+			Region = NewRegion;
+			if (!bTest)
+				Region.Zone->eventActorEntered(this);
+		}
+		PhysicsVolume = this;
+	}
+	unguard;
 }
 
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
@@ -41,6 +75,14 @@ int AVolume::ShouldTrace(AActor *,DWORD)
 
 void AVolume::PostBeginPlay()
 {
+	guard(AVolume::PostBeginPlay);
+	Super::PostBeginPlay();
+	// Ghidra 0x175ab0 (886 bytes): R6-specific decoration volume spawning.
+	// When a decoration-spec array is attached at +0x3f8, iterates the specs,
+	// randomly places ADecoVolumeObject actors within the brush bounds using
+	// ULevel::ToFloor, and optionally randomises rotation/scale per spec entry.
+	// Deferred: requires the undocumented R6 struct layout at offset +0x3f8.
+	unguard;
 }
 
 int AVolume::Encompasses(FVector Location)
@@ -59,14 +101,48 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-void AWarpZoneInfo::AddMyMarker(AActor *)
+void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
+	guard(AWarpZoneInfo::AddMyMarker);
+	// Ghidra 0xe12c0 (453 bytes): when a Scout is placed at this WarpZone, verify
+	// it can fit (findStart), then spawn an AWarpZoneMarker at the scout's location
+	// and link it back to this WarpZoneInfo.
+	if (!param_1)
+		return;
+
+	if (param_1->IsA(AScout::StaticClass()))
+	{
+		AScout* Scout = (AScout*)param_1;
+		if (!Scout->findStart(Scout->Location) || Scout->Region.Zone != Region.Zone)
+		{
+			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
+			if (!Scout->findStart(Scout->Location) || Scout->Region.Zone != Region.Zone)
+			{
+				// Ghidra: calls Level->vtable[0x27] (slot 0x9c) when scout still
+				// cannot reach the zone after resize; deferred (unknown method).
+			}
+			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
+		}
+
+		// Find the WarpZoneMarker class and spawn one at the scout's position.
+		UClass* WZMClass = (UClass*)UObject::StaticFindObjectChecked(
+			UClass::StaticClass(), (UObject*)-1, TEXT("WarpZoneMarker"), 0);
+		AActor* Marker = XLevel->SpawnActor(WZMClass, NAME_None, Scout->Location);
+		if (Marker && !Marker->IsA(AWarpZoneMarker::StaticClass()))
+			Marker = NULL;
+
+		// Link marker back to this WarpZoneInfo (offset 0x3E8 in AWarpZoneMarker).
+		*(AWarpZoneInfo**)((BYTE*)Marker + 0x3E8) = this;
+	}
+	unguard;
 }
 
 
 // --- AWarpZoneMarker ---
-void AWarpZoneMarker::addReachSpecs(APawn *,int)
+void AWarpZoneMarker::addReachSpecs(APawn*,int)
 {
+	guardSlow(AWarpZoneMarker::addReachSpecs);
+	unguardSlow;
 }
 
 int AWarpZoneMarker::IsIdentifiedAs(FName)
@@ -78,6 +154,8 @@ int AWarpZoneMarker::IsIdentifiedAs(FName)
 // --- AZoneInfo ---
 void AZoneInfo::PostEditChange()
 {
+	guard(AZoneInfo::PostEditChange);
+	unguard;
 }
 
 
@@ -90,6 +168,9 @@ FZoneProperties::FZoneProperties(const FZoneProperties& Other)
 
 FZoneProperties::FZoneProperties()
 {
+	// Ghidra 0x18b40 (53 bytes): zeroes offsets 0x08–0x44 (16 DWORDs).
+	// First 8 bytes are left untouched (written only by the copy ctor / operator=).
+	appMemzero((BYTE*)this + 8, 0x40);
 }
 
 FZoneProperties& FZoneProperties::operator=(const FZoneProperties& Other)
