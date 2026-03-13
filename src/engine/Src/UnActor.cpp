@@ -2839,14 +2839,77 @@ void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenT
 void AActor::PlayReplicatedAnim()
 {
 	guard(AActor::PlayReplicatedAnim);
-	// TODO: Apply replicated animation state from SimAnim.
+	// Retail 0x10370A80: decode SimAnim packed bytes and drive MeshInstance->PlayAnim + SetAnimFrame.
+	//
+	// SimAnim field encoding (set by ReplicateAnim, recovered here):
+	//   AnimRate  [+8]  = round((Rate_clamped[-4,4] + 4.0) * 31.0)
+	//                     decoded as Rate = (byte - 124.0) / 31.0
+	//   AnimFrame [+9]  = round((TweenTime_clamped[-1,1] + 1.0) * 127.0)
+	//                     decoded as Frame = (byte - 127.0) / 127.0 for SetAnimFrame
+	//   TweenRate [+10] = round(Frame_clamped[0,63] * 4.0)
+	//                     decoded as TweenTime = 4.0 / byte for PlayAnim
+	if( !Mesh )
+		return;
+	Mesh->MeshGetInstance( this );
+	if( !MeshInstance )
+		return;
+	INT bLooping = SimAnim.bAnimLoop ? -1 : 0;
+	FLOAT Rate     = ((FLOAT)SimAnim.AnimRate - 124.0f) * (1.0f / 31.0f);
+	FLOAT TweenTime = (SimAnim.TweenRate != 0) ? (4.0f / (FLOAT)SimAnim.TweenRate) : 0.0f;
+	MeshInstance->PlayAnim( 0, SimAnim.AnimSequence, Rate, TweenTime, bLooping, 0, 0 );
+	FLOAT Frame    = ((FLOAT)SimAnim.AnimFrame - 127.0f) * (1.0f / 127.0f);
+	MeshInstance->SetAnimFrame( 0, Frame );
 	unguard;
 }
 
 void AActor::ReplicateAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, FLOAT Frame, FLOAT LastFrame, INT bLooping )
 {
 	guard(AActor::ReplicateAnim);
-	// TODO: Send animation state for network replication.
+	// Retail 0x10377B40: pack animation state into SimAnim for network replication.
+	// Only Channel 0 is replicated via SimAnim.
+	if( Channel != 0 )
+		return;
+
+	// Encode Rate → AnimRate byte: round((clamp(Rate,-4,4) + 4.0) * 31.0).
+	// Special case: if LastFrame == 0 (no referece frame) use neutral value 124.
+	BYTE NewAnimRate;
+	if( LastFrame == 0.0f )
+		NewAnimRate = 124;
+	else
+	{
+		FLOAT r = Clamp( Rate, -4.0f, 4.0f );
+		NewAnimRate = (BYTE)appRound( (r + 4.0f) * 31.0f );
+	}
+
+	// Encode TweenTime → AnimFrame byte: round((clamp(TweenTime,0,1) + 1.0) * 127.0).
+	// Negative or zero tween encodes as 0.
+	BYTE NewAnimFrame;
+	if( TweenTime <= 0.0f )
+		NewAnimFrame = 0;
+	else
+	{
+		FLOAT t = Clamp( TweenTime, 0.0f, 1.0f );
+		NewAnimFrame = (BYTE)appRound( (t + 1.0f) * 127.0f );
+	}
+
+	// Encode Frame → TweenRate byte: round(clamp(Frame,0,63) * 4.0).
+	BYTE NewTweenRate = (BYTE)appRound( Clamp( Frame, 0.0f, 63.0f ) * 4.0f );
+
+	// Mark actor dirty for replication if any field changed.
+	if( SimAnim.AnimSequence  != SequenceName  ||
+	    SimAnim.AnimRate      != NewAnimRate    ||
+	    SimAnim.AnimFrame     != NewAnimFrame   ||
+	    SimAnim.TweenRate     != NewTweenRate   ||
+	    (INT)SimAnim.bAnimLoop != (bLooping != 0 ? 1 : 0) )
+	{
+		*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000u;  // set bNetDirty
+	}
+
+	SimAnim.AnimSequence  = SequenceName;
+	SimAnim.bAnimLoop     = (bLooping != 0) ? 1 : 0;
+	SimAnim.AnimRate      = NewAnimRate;
+	SimAnim.AnimFrame     = NewAnimFrame;
+	SimAnim.TweenRate     = NewTweenRate;
 	unguard;
 }
 
