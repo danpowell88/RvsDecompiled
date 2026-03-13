@@ -298,3 +298,209 @@ FSphere UVertMesh::GetRenderBoundingSphere(AActor const * Owner)
 	return MeshGetInstance(Owner)->GetRenderBoundingSphere(Owner);
 }
 
+
+// --- USkeletalMesh ---
+void USkeletalMesh::m_bLoadLbpFile(FString FileName)
+{
+	// Retail: 0x12f410. Extracts raw TCHAR* from FString and initialises
+	// the CBoneDescData bone descriptor at this+0x294 from the LBP file.
+	CBoneDescData* boneDesc = (CBoneDescData*)((BYTE*)this + 0x294);
+	boneDesc->fn_bInitFromLbpFile(*FileName);
+}
+
+int USkeletalMesh::SetAttachAlias(FName,FName,FCoords &)
+{
+	return 0;
+}
+
+int USkeletalMesh::SetAttachmentLocation(AActor *,AActor *)
+{
+	return 0;
+}
+
+int USkeletalMesh::LODFootprint(int param_1, int param_2)
+{
+	// Retail: 0x140640. Returns memory footprint in bytes for the given LOD model.
+	// param_2 == 0: include render-stream sizes. LOD models TArray at this+0x1AC, stride 0x11C.
+	if (param_1 < 0)
+		return 0;
+	INT numLods = ((FArray*)((BYTE*)this + 0x1AC))->Num();
+	if (param_1 >= numLods)
+		return 0;
+	BYTE* lod = (BYTE*)(*(INT*)((BYTE*)this + 0x1AC)) + param_1 * 0x11C;
+	INT total = 0;
+	if (param_2 == 0) {
+		INT s0 = ((FArray*)(lod + 0xB0))->Num();
+		INT s1 = ((FArray*)(lod + 0xC8))->Num();
+		INT s2 = ((FArray*)(lod + 0xE0))->Num();
+		INT s3 = ((FArray*)(lod + 0xF8))->Num();
+		total = s0 * 8 + s1 * 0xC + s2 * 8 + (s3 + 8) * 0xC;
+	}
+	INT n0 = ((FArray*)(lod))->Num();
+	INT n1 = ((FArray*)(lod + 0xC))->Num();
+	INT n2 = ((FArray*)(lod + 0x1C))->Num();
+	INT n3 = ((FArray*)(lod + 0x28))->Num();
+	INT n4 = ((FArray*)(lod + 0x98))->Num();
+	INT n5 = ((FArray*)(lod + 0x38))->Num();
+	INT n6 = ((FArray*)(lod + 0x54))->Num();
+	INT n7 = ((FArray*)(lod + 0x8C))->Num();
+	return n7 * 0x20 + total + n0 * 4 + n1 * 0x10 + n2 * 0x14 + n3 * 0x14 + 0xBC + n4 * 2 + n5 * 2 + n6 * 2;
+}
+
+void USkeletalMesh::NormalizeInfluences(int)
+{
+}
+
+void USkeletalMesh::CalculateNormals(TArray<FVector> &,int)
+{
+}
+
+void USkeletalMesh::ClearAttachAliases()
+{
+	// Retail: 0x135bb0. Empties the three attach alias arrays.
+	// Alias names at this+0x2D0 (stride 4), alias targets at this+0x2DC (stride 4),
+	// alias coord data at this+0x2E8 (stride 0x30).
+	((TArray<INT>*)((BYTE*)this + 0x2D0))->Empty();
+	((TArray<INT>*)((BYTE*)this + 0x2DC))->Empty();
+	((TArray<INT>*)((BYTE*)this + 0x2E8))->Empty();
+}
+
+void USkeletalMesh::FlipFaces()
+{
+}
+
+void USkeletalMesh::GenerateLodModel(int,float,float,int,int)
+{
+}
+
+void USkeletalMesh::InsertLodModel(int,USkeletalMesh *,float,int)
+{
+}
+
+int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
+{
+	// Retail (18b, RVA 0x12F6C0): returns 0 only for ragdoll actors (Physics byte at Actor+0x2C == 0x0E = PHYS_KarmaRagDoll).
+	// PHYS_KarmaRagDoll = 14/0x0E. All other physics modes use cylinder collision.
+	return Actor->Physics != PHYS_KarmaRagDoll;
+}
+
+int USkeletalMesh::R6LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+{
+	return 0;
+}
+
+void USkeletalMesh::Serialize(FArchive& Ar)
+{
+	// Retail: 0x1043ffb0. Calls ULodMesh::Serialize, then serializes bone ref pose (+0x1B8),
+	// bone array (+0x19C), default anim ref (+0x1DC), vertex inflations, LOD arrays etc.
+	// Divergence: simplified to UObject::Serialize; mesh data is loaded from .u package.
+	UObject::Serialize(Ar);
+}
+
+int USkeletalMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+{
+	return 0;
+}
+
+int USkeletalMesh::MemFootprint(int param_1)
+{
+	// Retail: 0x140350. Sum memory of all mesh data arrays.
+	// param_1 == 0: also count render streams. LOD array at this+0x1AC, stride 0x11C.
+	INT total = 0;
+	INT lodRender = 0;
+	if (param_1 == 0) {
+		// Count base mesh arrays (bones, weights, verts, faces, etc.)
+		INT n0  = ((FArray*)((BYTE*)this + 0x100))->Num();
+		INT n1  = ((FArray*)((BYTE*)this + 0x118))->Num();
+		INT n2  = ((FArray*)((BYTE*)this + 0x130))->Num();
+		INT n3  = ((FArray*)((BYTE*)this + 0x148))->Num();
+		INT n4  = ((FArray*)((BYTE*)this + 0x160))->Num();
+		INT n5  = ((FArray*)((BYTE*)this + 0x178))->Num();
+		INT n6  = ((FArray*)((BYTE*)this + 0x190))->Num();
+		total = n0 * 0xC + n1 * 4 + n2 * 0xC + n3 * 0xC + n4 * 8 + n5 * 2 + 0xA8 + n6 * 2;
+		// Sum per-LOD render stream sizes
+		FArray* lodArr = (FArray*)((BYTE*)this + 0x1AC);
+		INT numLods = lodArr->Num();
+		for (INT i = 0; i < numLods; i++) {
+			BYTE* lod = (BYTE*)(*(INT*)lodArr) + i * 0x11C;
+			INT s0 = ((FArray*)(lod + 0xB0))->Num();
+			INT s1 = ((FArray*)(lod + 0xC8))->Num();
+			INT s2 = ((FArray*)(lod + 0xE0))->Num();
+			INT s3 = ((FArray*)(lod + 0xF8))->Num();
+			total += s0 * 8 + s1 * 0xC + s2 * 8 + (s3 + 8) * 0xC;
+		}
+	}
+	// Sum per-LOD index/vertex arrays
+	FArray* lodArr2 = (FArray*)((BYTE*)this + 0x1AC);
+	INT numLods2 = lodArr2->Num();
+	for (INT j = 0; j < numLods2; j++) {
+		BYTE* lod = (BYTE*)(*(INT*)lodArr2) + j * 0x11C;
+		INT n0 = ((FArray*)(lod))->Num();
+		INT n1 = ((FArray*)(lod + 0xC))->Num();
+		INT n2 = ((FArray*)(lod + 0x1C))->Num();
+		INT n3 = ((FArray*)(lod + 0x28))->Num();
+		INT n4 = ((FArray*)(lod + 0x98))->Num();
+		INT n5 = ((FArray*)(lod + 0x38))->Num();
+		INT n6 = ((FArray*)(lod + 0x54))->Num();
+		INT n7 = ((FArray*)(lod + 0x8C))->Num();
+		total += n7 * 0x20 + n0 * 4 + n1 * 0x10 + n2 * 0x14 + n3 * 0x14 + 0xBC + n4 * 2 + n5 * 2 + n6 * 2;
+	}
+	// Animation and extra arrays
+	INT a0 = ((FArray*)((BYTE*)this + 0x2B8))->Num();
+	INT a1 = ((FArray*)((BYTE*)this + 0x2D0))->Num();
+	INT a2 = ((FArray*)((BYTE*)this + 0x2DC))->Num();
+	INT a3 = ((FArray*)((BYTE*)this + 0x2E8))->Num();
+	return total + (a3 + 3) * 0x30 + a0 * 0x30 + a1 * 4 + a2 * 4;
+}
+
+void USkeletalMesh::Destroy()
+{
+	// Retail: 0x1042f5d0. Just calls UObject::Destroy (no custom cleanup beyond base class).
+	UObject::Destroy();
+}
+
+FBox USkeletalMesh::GetCollisionBoundingBox(const AActor* Owner) const
+{
+	// Retail: 0x12f6e0. Delegates to UPrimitive::GetCollisionBoundingBox.
+	return UPrimitive::GetCollisionBoundingBox(Owner);
+}
+
+FBox USkeletalMesh::GetRenderBoundingBox(const AActor* Owner)
+{
+	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
+	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
+}
+
+FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
+{
+	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
+	return MeshGetInstance(Owner)->GetRenderBoundingSphere(Owner);
+}
+
+
+// --- USkeletalMesh ---
+void USkeletalMesh::ReconstructRawMesh()
+{
+}
+
+int USkeletalMesh::RenderPreProcess()
+{
+	return 0;
+}
+
+UClass * USkeletalMesh::MeshGetInstanceClass()
+{
+	return USkeletalMeshInstance::StaticClass();
+}
+
+void USkeletalMesh::PostLoad()
+{
+	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version at +0x5C < 2,
+	// call ReconstructRawMesh(). If LOD models array (this+0x1AC) is empty,
+	// auto-generate 4 LOD levels.
+	// Divergence: LOD version check and auto-generation skipped;
+	// LOD data is expected to already be in the package file.
+	UObject::PostLoad();
+}
+
+

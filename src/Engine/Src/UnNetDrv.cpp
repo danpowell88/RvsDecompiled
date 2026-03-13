@@ -121,3 +121,77 @@ int UDemoRecDriver::InitListen(FNetworkNotify *,FURL &,FString &)
 	return 0;
 }
 
+
+// =============================================================================
+// UNetConnection (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UNetConnection
+// =============================================================================
+
+UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
+INT UNetConnection::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+void UNetConnection::Serialize( const TCHAR* Data, EName Event ) {}
+void UNetConnection::Destroy() { Super::Destroy(); }
+void UNetConnection::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UNetConnection::ReadInput( FLOAT DeltaSeconds ) {}
+void UNetConnection::InitOut() {}
+void UNetConnection::AssertValid() {}
+void UNetConnection::SendAck( INT PacketId, INT RemotePacketId ) {}
+void UNetConnection::FlushNet() {}
+void UNetConnection::Tick() {}
+INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
+void UNetConnection::HandleClientPlayer( APlayerController* PC ) {}
+UNetDriver* UNetConnection::GetDriver() { return Driver; }
+void UNetConnection::PreSend( INT SizeBits )
+{
+	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
+	FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
+	INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
+	// If adding SizeBits + 1 bit would overflow, flush first.
+	if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
+		FlushNet();
+	// If Out is empty, write packet header (OutPacketId at 0xEA8).
+	if (Out.GetNumBits() == 0)
+	{
+		Out.WriteInt(*(DWORD*)((BYTE*)this + 0xEA8), 0x4000);
+		if (Out.GetNumBits() > 16)
+			appFailAssert("Out.GetNumBits()<=MAX_PACKET_HEADER_BITS", ".\\UnConn.cpp", 0x2A4);
+	}
+	// Final overflow check.
+	if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
+		appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
+}
+void UNetConnection::PurgeAcks() {}
+void UNetConnection::ReceiveFile( INT PackageIndex ) {}
+void UNetConnection::ReceivedNak( INT NakPacketId ) {}
+void UNetConnection::ReceivedPacket( FBitReader& Reader ) {}
+void UNetConnection::ReceivedRawPacket( void* Data, INT Count ) {}
+void UNetConnection::SendPackageMap() {}
+INT UNetConnection::SendRawBunch( FOutBunch& Bunch, INT InPacketId ) { return 0; }
+void UNetConnection::SetActorDirty( AActor* Actor ) {}
+void UNetConnection::SlowAssertValid() {}
+
+// =============================================================================
+
+// =============================================================================
+// UNetDriver (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UNetDriver
+// ---------------------------------------------------------------------------
+UBOOL UNetDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
+{
+	return 0;
+}
+
+void UNetDriver::LowLevelDestroy()
+{
+}
+
+FString UNetDriver::LowLevelGetNetworkNumber()
+{
+	return FString();
+}
+
+// ---------------------------------------------------------------------------

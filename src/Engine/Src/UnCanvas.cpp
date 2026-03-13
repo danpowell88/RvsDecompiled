@@ -251,3 +251,26 @@ FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 	return *this;
 }
 
+
+// =============================================================================
+// UCanvas (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UCanvas
+// ---------------------------------------------------------------------------
+void UCanvas::Destroy()
+{
+	Super::Destroy();
+}
+
+void UCanvas::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+}
+
+UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
+{
+	return 0;
+}
+
+// ---------------------------------------------------------------------------

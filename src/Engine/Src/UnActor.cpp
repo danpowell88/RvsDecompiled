@@ -3887,3 +3887,99 @@ void AActor::DbgVectorReset( INT VectorIndex )
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+
+// =============================================================================
+// ABrush (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// ABrush
+// =============================================================================
+
+void ABrush::PostLoad() { Super::PostLoad(); }
+void ABrush::PostEditChange() { Super::PostEditChange(); }
+FCoords ABrush::ToLocal() const
+{
+	// Retail (112b, RVA 0x7B40):
+	// Builds sv = {|TempScale.Scale.Z|, |TempScale.SheerRate|, |TempScale.SheerAxis as FLOAT|}
+	// then computes: UnitCoords / sv / (FRotator reinterpret)Location / (FVector reinterpret)Rotation
+	FVector sv(
+		Abs<FLOAT>(TempScale.Scale.Z),
+		Abs<FLOAT>(TempScale.SheerRate),
+		Abs<FLOAT>(*(FLOAT*)&TempScale.SheerAxis)
+	);
+	return GMath.UnitCoords
+		/ sv
+		/ *(FRotator*)&Location
+		/ *(FVector*)&Rotation;
+}
+FCoords ABrush::ToWorld() const
+{
+	// Retail (112b, RVA 0x7BC0):
+	// Symmetric inverse: UnitCoords * (FVector reinterpret)Rotation * (FRotator reinterpret)Location * sv
+	FVector sv(
+		Abs<FLOAT>(TempScale.Scale.Z),
+		Abs<FLOAT>(TempScale.SheerRate),
+		Abs<FLOAT>(*(FLOAT*)&TempScale.SheerAxis)
+	);
+	return GMath.UnitCoords
+		* *(FVector*)&Rotation
+		* *(FRotator*)&Location
+		* sv;
+}
+UPrimitive* ABrush::GetPrimitive()
+{
+	// Retail (27b, RVA 0x78E20): check Brush/UModel primitive field, then
+	// fall through to the same nested StaticMeshInstance-like chain at +0x328.
+	UPrimitive* p;
+	if ((p = *(UPrimitive**)((BYTE*)this + 0x178)) != NULL) return p; // Brush/UModel
+	void* c = *(void**)((BYTE*)this + 0x328);
+	if (!c) return NULL;
+	p = *(UPrimitive**)((BYTE*)c + 0x44);
+	if (!p) return NULL;
+	return *(UPrimitive**)((BYTE*)p + 0x40);
+}
+void ABrush::CheckForErrors() { Super::CheckForErrors(); }
+void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
+void ABrush::InitPosRotScale() {}
+FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
+FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
+FCoords ABrush::OldToLocal() const
+{
+	// Retail (168b, RVA 0x77D0):
+	// Like ToLocal but with two hidden FScale fields (at +0x3B0 and +0x3C4, init'd to GMath.UnitScale):
+	// UnitCoords / sv / scale3b0 / (FRotator reinterpret)Location / scale3c4 / (FVector reinterpret)Rotation
+	FVector sv(
+		Abs<FLOAT>(TempScale.Scale.Z),
+		Abs<FLOAT>(TempScale.SheerRate),
+		Abs<FLOAT>(*(FLOAT*)&TempScale.SheerAxis)
+	);
+	const FScale& s3b0 = *(FScale*)((BYTE*)this + 0x3B0);
+	const FScale& s3c4 = *(FScale*)((BYTE*)this + 0x3C4);
+	return GMath.UnitCoords
+		/ sv
+		/ s3b0
+		/ *(FRotator*)&Location
+		/ s3c4
+		/ *(FVector*)&Rotation;
+}
+FCoords ABrush::OldToWorld() const
+{
+	// Retail (168b, RVA 0x7880):
+	// Symmetric inverse of OldToLocal:
+	// UnitCoords * (FVector reinterpret)Rotation * scale3c4 * (FRotator reinterpret)Location * scale3b0 * sv
+	FVector sv(
+		Abs<FLOAT>(TempScale.Scale.Z),
+		Abs<FLOAT>(TempScale.SheerRate),
+		Abs<FLOAT>(*(FLOAT*)&TempScale.SheerAxis)
+	);
+	const FScale& s3b0 = *(FScale*)((BYTE*)this + 0x3B0);
+	const FScale& s3c4 = *(FScale*)((BYTE*)this + 0x3C4);
+	return GMath.UnitCoords
+		* *(FVector*)&Rotation
+		* s3c4
+		* *(FRotator*)&Location
+		* s3b0
+		* sv;
+}
+
+// =============================================================================

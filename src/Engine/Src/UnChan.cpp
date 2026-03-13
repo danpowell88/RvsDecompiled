@@ -180,3 +180,58 @@ void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 	UChannel::Init(Conn, ChIndex, InType);
 }
 
+
+// =============================================================================
+// UChannel (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UChannel
+// =============================================================================
+
+void UChannel::Destroy() { Super::Destroy(); }
+void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
+{
+	ChIndex = InChIndex;
+	Connection = InConnection;
+	OpenedLocally = InOpenedLocally;
+	OpenPacketId = INDEX_NONE;
+	// NegotiatedVer copies from the connection's negotiated protocol version.
+	// UNetConnection::NegotiatedVer is within _ConnPad (not yet decoded from Ghidra).
+	// Default to 0 (minimum version) until the field offset is confirmed.
+	NegotiatedVer = 0;
+}
+void UChannel::SetClosingFlag() { Closing = 1; }
+void UChannel::Close() {}
+FString UChannel::Describe() { return FString(); }
+void UChannel::ReceivedNak( INT NakPacketId ) {}
+void UChannel::Tick() {}
+void UChannel::AssertInSequenced() {}
+INT CDECL UChannel::IsKnownChannelType( INT Type ) { return 0; }
+INT UChannel::IsNetReady( INT Saturate ) { return 1; }
+INT UChannel::MaxSendBytes() { return 0; }
+void UChannel::ReceivedAcks() {}
+void UChannel::ReceivedRawBunch( FInBunch& Bunch ) {}
+INT UChannel::ReceivedSequencedBunch( FInBunch& Bunch ) { return 0; }
+INT UChannel::RouteDestroy() { return 0; }
+
+// =============================================================================
+
+// =============================================================================
+// UChannel virtuals (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UChannel
+// ---------------------------------------------------------------------------
+void UChannel::StaticConstructor()
+{
+}
+
+void UChannel::ReceivedBunch(FInBunch& Bunch)
+{
+}
+
+void UChannel::Serialize(const TCHAR* Name, EName Type)
+{
+}
+
+// ---------------------------------------------------------------------------

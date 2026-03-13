@@ -135,3 +135,41 @@ ENGINE_API AR6eviLTesting*			GEvilTest				= NULL;
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+
+// =============================================================================
+// UGameEngine (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UGameEngine
+// =============================================================================
+
+INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
+void UGameEngine::Destroy() { Super::Destroy(); }
+void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
+void UGameEngine::UpdateConnectingMessage() {}
+void UGameEngine::Init() {}
+void UGameEngine::Exit() {}
+void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize ) {}
+void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
+void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
+void UGameEngine::MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
+void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
+void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
+void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
+INT UGameEngine::ChallengeResponse( INT Challenge ) {
+	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
+	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
+	return ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE;
+}
+FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
+void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
+INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error ) { return 0; }
+ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error ) { return NULL; }
+void UGameEngine::SaveGame( INT Position ) {}
+void UGameEngine::CancelPending() {}
+void UGameEngine::PaintProgress( const FURL& URL ) {}
+void UGameEngine::NotifyLevelChange() {}
+void UGameEngine::FixUpLevel() {}
+
+// =============================================================================

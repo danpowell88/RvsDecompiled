@@ -688,3 +688,34 @@ FString USubActionTrigger::GetStatString()
 	return FString();
 }
 
+
+// =============================================================================
+// ASceneManager (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// ASceneManager
+// =============================================================================
+
+void ASceneManager::PostEditChange() { Super::PostEditChange(); }
+INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
+void ASceneManager::PostBeginPlay() {}
+void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
+FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
+
+// =============================================================================
+
+// ASceneManager extra methods (from EngineClassImpl.cpp)
+
+void AReplicationInfo::CloseVideo(UCanvas* Canvas)
+{
+}
+void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
+	// Retail: 42b. Stores raw time at this+0x3D0, clears reset counter at this+0x448,
+	// then calls RefreshSubActions with time normalized by TotalSceneTime at this+0x3CC.
+	*(FLOAT*)((BYTE*)this + 0x3D0) = NewTime;
+	*(INT*)((BYTE*)this + 0x448) = 0;
+	RefreshSubActions( NewTime / *(FLOAT*)((BYTE*)this + 0x3CC) );
+}
+void ASceneManager::SetSceneStartTime() {}
+
+// =============================================================================

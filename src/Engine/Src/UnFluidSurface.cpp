@@ -105,3 +105,24 @@ FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 	return FSphere();
 }
 
+
+// =============================================================================
+// AFluidSurfaceInfo (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// AFluidSurfaceInfo
+// =============================================================================
+
+void AFluidSurfaceInfo::PostLoad() { Super::PostLoad(); }
+void AFluidSurfaceInfo::Destroy() { Super::Destroy(); }
+void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
+INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
+void AFluidSurfaceInfo::PostEditMove() {}
+void AFluidSurfaceInfo::Spawned() {}
+UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
+void AFluidSurfaceInfo::Init() {}
+void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
+void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
+void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
+
+// =============================================================================

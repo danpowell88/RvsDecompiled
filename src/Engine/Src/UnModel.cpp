@@ -92,3 +92,44 @@ void UPolys::Serialize(FArchive & Ar)
 	}
 }
 
+
+// =============================================================================
+// UModel (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UModel
+// =============================================================================
+
+UModel::UModel( ABrush* Owner, INT InRootOutside ) {}
+void UModel::PostLoad() { Super::PostLoad(); }
+void UModel::Destroy() { Super::Destroy(); }
+void UModel::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+INT UModel::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags ) { return 0; }
+INT UModel::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags ) { return 0; }
+FBox UModel::GetRenderBoundingBox( const AActor* Owner ) { return FBox(); }
+FBox UModel::GetCollisionBoundingBox( const AActor* Owner ) const { return FBox(); }
+void UModel::Illuminate( AActor* Owner, INT bExtra ) {}
+FVector UModel::GetEncroachExtent( AActor* Owner ) { return FVector(0,0,0); }
+FVector UModel::GetEncroachCenter( AActor* Owner ) { return FVector(0,0,0); }
+INT UModel::UseCylinderCollision( const AActor* Owner ) { return 0; }
+TArray<INT> UModel::BoxLeaves( FBox Box ) { return TArray<INT>(); }
+void UModel::BuildBound() {}
+void UModel::BuildRenderData() {}
+void UModel::ClearRenderData( URenderDevice* RenDev ) {}
+void UModel::CompressLightmaps() {}
+INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FVector Extent, TArray<INT>& Result, FLOAT VisRadius ) { return 0; }
+void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys ) {}
+BYTE UModel::FastLineCheck( FVector Start, FVector End ) { return 0; }
+FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const { return 0.0f; }
+void UModel::Modify( INT DoTransArrays ) {}
+void UModel::ModifyAllSurfs( INT SetBits ) {}
+void UModel::ModifySelectedSurfs( INT SetBits ) {}
+void UModel::ModifySurf( INT iSurf, INT SetBits ) {}
+FPointRegion UModel::PointRegion( AZoneInfo* Zone, FVector Location ) const { return FPointRegion(); }
+INT UModel::PotentiallyVisible( INT iLeaf0, INT iLeaf1 ) { return 0; }
+void UModel::PrecomputeSphereFilter( const FPlane& Sphere ) {}
+INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End ) { return 0; }
+void UModel::ShrinkModel() {}
+void UModel::Transform( ABrush* Brush ) {}
+
+// =============================================================================

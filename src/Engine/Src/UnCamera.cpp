@@ -1395,3 +1395,66 @@ FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
 // ??1FRebuildTools@@QAE@XZ
 FRebuildTools::~FRebuildTools() {}
 
+
+// =============================================================================
+// UViewport (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UViewport
+// =============================================================================
+
+INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
+void UViewport::Destroy() { Super::Destroy(); }
+void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
+INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
+void UViewport::Unlock() {}
+void UViewport::Present() {}
+INT UViewport::SetDrag( INT NewDrag ) { return 0; }
+void* UViewport::GetServer() { return NULL; }
+void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
+void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
+UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
+void UViewport::InitInput() {}
+INT UViewport::IsOrtho()
+{
+	// Retail (34b, RVA 0x12A60): load state ptr at +0x34, check RendMap at +0x504
+	// for ortho modes 0x0D, 0x0E, 0x0F.
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	INT rm = *(INT*)((BYTE*)st + 0x504);
+	return (rm == 0x0D || rm == 0x0E || rm == 0x0F) ? 1 : 0;
+}
+INT UViewport::IsPerspective()
+{
+	// Retail (74b, RVA 0x12A00): same state ptr; RendMap 1-7 or 0x1E → perspective.
+	// RendMap == 0x10 only if [state+0x4FC] is non-null.
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	INT rm = *(INT*)((BYTE*)st + 0x504);
+	if (rm >= 1 && rm <= 7) return 1;
+	if (rm == 0x1E) return 1;
+	if (rm == 0x10) return *(void**)((BYTE*)st + 0x4FC) != NULL ? 1 : 0;
+	return 0;
+}
+INT UViewport::IsRealtime()
+{
+	// Retail (26b, RVA 0x12A90): state ptr at +0x34; flags at +0x4F8 bits 11,14.
+	void* st = *(void**)((BYTE*)this + 0x34);
+	if (!st) return 0;
+	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
+}
+INT UViewport::IsWire() { return 0; }
+void UViewport::ScreenShot() {}
+BYTE* UViewport::_Screen( INT X, INT Y )
+{
+	// Retail (31b, RVA 0x129D0): return FrameBuffer + (Pitch * Y + X) * BytesPerPixel
+	// Pitch at [this+0x160], BytesPerPixel at [this+0xCC], FrameBuffer at [this+0x15C]
+	INT Pitch         = *(INT*)((BYTE*)this + 0x160);
+	INT BytesPerPixel = *(INT*)((BYTE*)this + 0xCC);
+	BYTE* FrameBuffer = *(BYTE**)((BYTE*)this + 0x15C);
+	return FrameBuffer + (Pitch * Y + X) * BytesPerPixel;
+}
+
+// =============================================================================

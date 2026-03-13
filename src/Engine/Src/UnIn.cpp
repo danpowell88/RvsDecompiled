@@ -25,3 +25,34 @@ void UInputPlanning::StaticInitInput()
 {
 }
 
+
+// =============================================================================
+// UInput (moved from EngineClassImpl.cpp)
+// =============================================================================
+
+// UInput
+// =============================================================================
+
+INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UInput::Init( UViewport* InViewport ) {}
+void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
+void UInput::ResetInput() {}
+BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
+void UInput::SetKey( const TCHAR* KeyName ) {}
+FString UInput::GetActionKey( BYTE Key ) { return FString(); }
+BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
+FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
+void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
+BYTE UInput::KeyDown( INT Key )
+{
+	BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
+	if (Key < 0)
+		return KeyDownMap[0];
+	if (Key > 0xFD)
+		Key = 0xFE;
+	return KeyDownMap[Key];
+}
+void UInput::StaticConstructor() {}
+
+// =============================================================================
