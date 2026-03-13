@@ -162,6 +162,7 @@ float SND_fn_fGetPosSoundRequest(long reqId);
 void* SND_fn_hGenerateSoundEventPlay(void* evHandle, long actorId, long micro);
 void* SND_fn_hGenerateSoundEventStop(void* evHandle, long actorId);
 void* SND_fn_hGetLastSoundEventOfSoundObjectType(long actorId, int slot);
+void  SND_fn_vSynchroSound(void);
 }
 
 /*----------------------------------------------------------------------------

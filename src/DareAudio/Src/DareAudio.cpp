@@ -275,6 +275,23 @@ return 1;
 
 void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
 {
+	guard(UDareAudioSubsystem::Update);
+	// Ghidra 0x6000 (77): guard frame, m_bInitialized check, then:
+	//   if (!GIsEditor && SceneNode) { FCoords from view matrix; UpdateAmbientSounds }
+	//   SND_fn_vSynchroSound(); UpdateSoundList();
+	// FMatrix::Coords() is a non-inline Ravenshield Core addition; use the equivalent
+	// inline FCoordsFromFMatrix to avoid a Core.dll link dependency.
+	if (m_bInitialized)
+	{
+		if (!GIsEditor && SceneNode != NULL)
+		{
+			FCoords Coords = FCoordsFromFMatrix(*(FMatrix*)((BYTE*)SceneNode + 0x10));
+			UpdateAmbientSounds(Coords);
+		}
+		SND_fn_vSynchroSound();
+		UpdateSoundList();
+	}
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
@@ -283,6 +300,16 @@ Sound registration.
 
 void UDareAudioSubsystem::RegisterSound(USound* Sound)
 {
+	guard(UDareAudioSubsystem::RegisterSound);
+	// Ghidra 0x1ff0 (44): guard frame; create FName("DareGen", FNAME_Add);
+	// compare INT at Sound+0x48 to the FName's index; if match, call
+	// vtable[200/4=50](Sound, 2).  Identified as AddAndFindBankInSound(Sound, LBS_Map).
+	FName DareGen(TEXT("DareGen"), FNAME_Add);
+	if (*(INT*)((BYTE*)Sound + 0x48) == *(INT*)&DareGen)
+	{
+		AddAndFindBankInSound(Sound, LBS_Map);
+	}
+	unguard;
 }
 
 void UDareAudioSubsystem::UnregisterSound(USound* Sound)
