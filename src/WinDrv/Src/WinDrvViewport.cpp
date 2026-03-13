@@ -11,10 +11,17 @@
 	  - Property registration in StaticConstructor is omitted because
 	    UBoolProperty construction references non-exported UProperty vtable
 	    entries from the retail Core.dll that no longer exist.
+	  - ViewportWndProc: retail uses WWindowsViewportWindow (this+0x204) to store
+	    the HWND, checks HoldCount (this+0x214) for fast-path, walks the client
+	    viewport list, and has full editor-mode (GIsEditor) branches. Our version
+	    uses GViewportHWnd directly, omits editor paths, and simplifies device
+	    acquisition. Input is driven by DirectInput polling in UpdateInput().
 =============================================================================*/
 
 #include "WinDrvPrivate.h"
 
+// ImmAssociateContext — used by ViewportWndProc to disable IME on the game window.
+#pragma comment(lib, "imm32.lib")
 IMPLEMENT_CLASS(UWindowsViewport)
 
 /*-----------------------------------------------------------------------------
@@ -539,9 +546,104 @@ INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOA
 LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	guard(UWindowsViewport::ViewportWndProc);
-	// Dispatch to the default Win32 handler.
-	if( GViewportHWnd )
-		return DefWindowProcW( GViewportHWnd, Message, wParam, lParam );
+	// DIVERGENCE: Retail uses WWindowsViewportWindow (stored at this+0x204) to obtain the
+	// real HWND, and checks HoldCount (this+0x214) to fast-path to DefWindowProc when the
+	// viewport is held (e.g. during dialog display). It also walks the UWindowsClient's
+	// viewport list to validate "this" before processing. We use GViewportHWnd directly,
+	// omit editor-mode (GIsEditor) code paths entirely, and skip the HoldCount check.
+	// Input is primarily handled by DirectInput polling in UpdateInput(); this proc only
+	// manages device acquisition state.
+
+	switch (Message)
+	{
+	case WM_ERASEBKGND:
+		// Retail returns 0 to suppress background erasure (avoids flicker).
+		return 0;
+
+	case WM_CREATE:
+		// Retail: MakeCurrent(this), disable IME, SetFocus.
+		// DIVERGENCE: no GetOuterUClient()->MakeCurrent() call (vtable+0x8c path).
+		if (GViewportHWnd)
+		{
+			ImmAssociateContext(GViewportHWnd, (HIMC)0); // disable IME for gameplay
+			SetFocus(GViewportHWnd);
+		}
+		return 0;
+
+	case WM_DESTROY:
+		// Retail: EndFullscreen if fullscreen, then reparents, calls Close, logs.
+		if (BlitFlags & BLIT_Fullscreen)
+			EndFullscreen();
+		return 0;
+
+	case WM_SIZE:
+		// Retail: calls a vtable repaint function, optionally sets IsRealtime flag.
+		// We update SizeX/SizeY so the render device uses the new dimensions.
+		if (wParam != SIZE_MINIMIZED && lParam != 0)
+		{
+			SizeX = LOWORD(lParam);
+			SizeY = HIWORD(lParam);
+		}
+		return 0;
+
+	case WM_ACTIVATE:
+		// Retail: on WA_INACTIVE calls CloseWindow (vtable+0x74), then DefWindowProc.
+		// DIVERGENCE: we only unacquire devices on deactivation to avoid destroying
+		// the window. Acquiring back happens on WM_SETFOCUS.
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			if (Mouse)    Mouse->Unacquire();
+			if (Joystick) Joystick->Unacquire();
+		}
+		break; // fall through to DefWindowProc
+
+	case WM_SETFOCUS:
+		// Retail: ResetInput (vtable+0x9c), UInput::Flush (Input+0x7c),
+		//         Mouse->Acquire, Joystick->Acquire, MakeCurrent(this),
+		//         ImmAssociateContext to disable IME.
+		// DIVERGENCE: vtable-indirected calls are omitted; we do the device work.
+		if (Mouse)    Mouse->Acquire();
+		if (Joystick) Joystick->Acquire();
+		if (GViewportHWnd)
+			ImmAssociateContext(GViewportHWnd, (HIMC)0);
+		return 0;
+
+	case WM_KILLFOCUS:
+		// Retail: Joystick->Unacquire if focus went to another process, release
+		//         capture (vtable+0x9c), call CloseCapture (vtable+0x74),
+		//         UInput::Reset if non-editor, MakeCurrent(NULL).
+		// DIVERGENCE: we release all pointer devices simply.
+		if (Mouse)    Mouse->Unacquire();
+		if (Joystick) Joystick->Unacquire();
+		ClipCursor(NULL);
+		ReleaseCapture();
+		return 0;
+
+	case WM_PAINT:
+		// Retail: if render-target flags are set (BLIT_Fullscreen | BLIT_DirtyWindow etc.)
+		//         ValidateRect+return 0; otherwise return 1.
+		if (GViewportHWnd)
+			ValidateRect(GViewportHWnd, NULL);
+		return 1;
+
+	case WM_ENTERMENULOOP: // 0x211
+		// Retail: unacquire mouse/joystick while a menu is open.
+		if (Mouse)    Mouse->Unacquire();
+		if (Joystick) Joystick->Unacquire();
+		return 0;
+
+	case WM_EXITMENULOOP: // 0x212
+		// Retail: re-acquire mouse/joystick after the menu closes.
+		if (Mouse)    Mouse->Acquire();
+		if (Joystick) Joystick->Acquire();
+		return 0;
+
+	default:
+		break;
+	}
+
+	if (GViewportHWnd)
+		return DefWindowProcW(GViewportHWnd, Message, wParam, lParam);
 	return 0;
 	unguard;
 }
