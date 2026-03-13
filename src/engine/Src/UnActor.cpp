@@ -2765,7 +2765,13 @@ void AActor::NotifyAnimEnd( INT Channel )
 void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 {
 	guard(AActor::UpdateAnimation);
-	// TODO: Update mesh animation state.
+	// Retail 0x10370bd0: if Mesh, call MeshGetInstance then tail-jump to MeshInstance->UpdateAnimation.
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+			MeshInstance->UpdateAnimation( DeltaSeconds );
+	}
 	unguard;
 }
 
@@ -2791,11 +2797,16 @@ void AActor::StartAnimPoll()
 INT AActor::CheckAnimFinished( INT Channel )
 {
 	guard(AActor::CheckAnimFinished);
-	// Retail 0x10420AB0: if MeshInstance is NULL, return 1 (no mesh = animation trivially done).
-	// Full mesh instance animation poll for non-null case deferred.
-	if( !MeshInstance )
+	// Retail 0x10420AB0.
+	// Returns 1 (done) when: no mesh, not animating, or animation is looping (never ends).
+	// Returns 0 (keep polling) only when animating a non-looping sequence.
+	if( !Mesh )
 		return 1;
-	// TODO: poll MeshInstance for animation finish on Channel
+	Mesh->MeshGetInstance( this );
+	if( !IsAnimating( Channel ) )
+		return 1;
+	if( MeshInstance && MeshInstance->IsAnimLooping( Channel ) )
+		return 1;
 	return 0;
 	unguard;
 }
@@ -2842,7 +2853,14 @@ void AActor::ReplicateAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT T
 void AActor::AnimBlendParams( INT Channel, FLOAT BlendAlpha, FLOAT InTime, FLOAT OutTime, FName BoneName )
 {
 	guard(AActor::AnimBlendParams);
-	// TODO: Configure animation blend parameters.
+	// Retail 0x103798D0: IsA(USkeletalMesh) check, then MeshGetInstance, then SetBlendParams.
+	if( Mesh && Mesh->IsA( USkeletalMesh::StaticClass() ) )
+	{
+		Mesh->MeshGetInstance( this );
+		USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance );
+		if( MI )
+			MI->SetBlendParams( Channel, BlendAlpha, InTime, OutTime, BoneName, INDEX_NONE );
+	}
 	unguard;
 }
 
@@ -2911,16 +2929,38 @@ void AActor::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 INT AActor::AttachToBone( AActor* Attachment, FName BoneName )
 {
 	guard(AActor::AttachToBone);
-	// TODO: Attach actor to skeletal mesh bone.
-	return 0;
+	// Retail 0x10379020.
+	// Validates mesh is skeletal, finds the bone index via MatchRefBone, stores
+	// AttachmentBone on the attachment, then SetBase to anchor it.
+	if( !Mesh || !Mesh->IsA( USkeletalMesh::StaticClass() ) )
+		return 0;
+	Mesh->MeshGetInstance( this );
+	USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance );
+	if( !MI )
+		return 0;
+	INT BoneIdx = MI->MatchRefBone( BoneName );
+	if( BoneIdx <= -1 )
+		return 0;
+	if( !Attachment )
+		return 0;
+	Attachment->AttachmentBone = BoneName;
+	Attachment->SetBase( this, FVector(0,0,1), 1 );
+	return 1;
 	unguard;
 }
 
 INT AActor::DetachFromBone( AActor* Attachment )
 {
 	guard(AActor::DetachFromBone);
-	// TODO: Detach actor from skeletal mesh bone.
-	return 0;
+	// Retail 0x10379160.
+	// Calls SetBase(NULL) on the attachment then clears its AttachmentBone.
+	if( !Mesh || !Mesh->IsA( USkeletalMesh::StaticClass() ) )
+		return 0;
+	if( !Attachment )
+		return 0;
+	Attachment->SetBase( NULL, FVector(0,0,1), 1 );
+	Attachment->AttachmentBone = NAME_None;
+	return 1;
 	unguard;
 }
 
