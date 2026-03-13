@@ -457,7 +457,13 @@ void AActor::execIsTweening( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execIsTweening);
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
-	*(DWORD*)Result = 0; // TODO: IsTweening( Channel );
+	*(DWORD*)Result = 0;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+			*(DWORD*)Result = MeshInstance->IsAnimTweening( Channel ) ? 1 : 0;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execIsTweening );
@@ -506,13 +512,20 @@ void AActor::execGetAnimParams( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_REF(OutAnimFrame);
 	P_GET_FLOAT_REF(OutAnimRate);
 	P_FINISH;
-	// TODO: if( Mesh ) Mesh->GetAnimParams( this, Channel, *OutSeqName, *OutAnimFrame, *OutAnimRate );
-	// else
+	if( Mesh )
 	{
-		*OutSeqName   = NAME_None;
-		*OutAnimFrame = 0.f;
-		*OutAnimRate  = 0.f;
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+		{
+			*OutSeqName   = MeshInstance->GetActiveAnimSequence( Channel );
+			*OutAnimFrame = MeshInstance->GetActiveAnimFrame( Channel );
+			*OutAnimRate  = MeshInstance->GetActiveAnimRate( Channel );
+			return;
+		}
 	}
+	*OutSeqName   = NAME_None;
+	*OutAnimFrame = 0.f;
+	*OutAnimRate  = 0.f;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetAnimParams );
@@ -527,7 +540,11 @@ void AActor::execAnimBlendParams( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME_OPTX(BoneName,NAME_None);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->AnimBlendParams( this, Stage, BlendAlpha, InTime, OutTime, BoneName );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetBlendParams( Stage, BlendAlpha, InTime, OutTime, BoneName, INDEX_NONE );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendParams );
@@ -540,7 +557,11 @@ void AActor::execAnimBlendToAlpha( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT(TimeInterval);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->AnimBlendToAlpha( this, Stage, TargetAlpha, TimeInterval );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->BlendToAlpha( Stage, TargetAlpha, TimeInterval );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendToAlpha );
@@ -550,7 +571,13 @@ void AActor::execGetAnimBlendAlpha( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execGetAnimBlendAlpha);
 	P_GET_INT(Stage);
 	P_FINISH;
-	*(FLOAT*)Result = 0.f; // TODO: Mesh ? Mesh->GetAnimBlendAlpha( this, Stage ) : 0.f;
+	*(FLOAT*)Result = 0.f;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			*(FLOAT*)Result = MI->GetBlendAlpha( Stage );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2208, execGetAnimBlendAlpha );
@@ -561,7 +588,18 @@ void AActor::execAnimIsInGroup( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Channel,0);
 	P_GET_NAME(Group);
 	P_FINISH;
-	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->AnimIsInGroup( this, Channel, Group ) : 0;
+	*(DWORD*)Result = 0;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+		{
+			FName seqName = MeshInstance->GetActiveAnimSequence( Channel );
+			void* seqObj  = MeshInstance->GetAnimNamed( seqName );
+			if( seqObj )
+				*(DWORD*)Result = MeshInstance->AnimIsInGroup( seqObj, Group ) ? 1 : 0;
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimIsInGroup );
@@ -573,7 +611,11 @@ void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->FreezeAnimAt( this, Time, Channel );
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+			MeshInstance->FreezeAnimAt( Time, Channel );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execFreezeAnimAt );
@@ -593,6 +635,12 @@ void AActor::execEnableChannelNotify( FFrame& Stack, RESULT_DECL )
 	P_GET_INT(Channel);
 	P_GET_INT(Switch);
 	P_FINISH;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->EnableChannelNotify( Channel, Switch );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execEnableChannelNotify );
@@ -602,6 +650,12 @@ void AActor::execClearChannel( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execClearChannel);
 	P_GET_INT(Channel);
 	P_FINISH;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+			MeshInstance->ClearChannel( Channel );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1805, execClearChannel );
@@ -626,7 +680,11 @@ void AActor::execLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT_OPTX(UMesh,NewMesh,NULL);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->LinkSkelAnim( Anim, NewMesh );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetSkelAnim( Anim, Cast<USkeletalMesh>( NewMesh ) );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLinkSkelAnim );
@@ -636,7 +694,11 @@ void AActor::execUnLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execUnLinkSkelAnim);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->LinkSkelAnim( NULL, NULL );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetSkelAnim( NULL, NULL );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2210, execUnLinkSkelAnim );
@@ -646,6 +708,12 @@ void AActor::execWasSkeletonUpdated( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execWasSkeletonUpdated);
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			*(DWORD*)Result = MI->WasSkeletonUpdated() ? 1 : 0;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1501, execWasSkeletonUpdated );
