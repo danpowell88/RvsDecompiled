@@ -1464,6 +1464,9 @@ FNullOutError::FNullOutError( const FNullOutError& ) {}
 FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
 void FNullOutError::Serialize( const TCHAR* V, EName Event )
 {
+	guard(FNullOutError::Serialize);
+	// Retail 0x1290: shared null-stub, no-op.
+	unguard;
 }
 
 FThrowOut::FThrowOut() {}
@@ -1480,6 +1483,10 @@ void FThrowOut::Serialize( const TCHAR* V, EName Event )
 
 void FFrame::Serialize( const TCHAR* V, EName Event )
 {
+	guard(FFrame::Serialize);
+	// Retail 0x1bd50: logs script frame context to GLog or GError.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1718,6 +1725,9 @@ void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm, UBOO
 
 void UProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
+	guard(UProperty::SerializeItem);
+	// Retail: base no-op; subclasses override.
+	unguard;
 }
 
 void UProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const
@@ -1732,6 +1742,9 @@ void UProperty::SerializeBin( FArchive& Ar, BYTE* Data ) const
 
 void UProperty::CleanupDestroyed( BYTE* Data ) const
 {
+	guard(UProperty::CleanupDestroyed);
+	// Retail 0x43880 (3b): no-op.
+	unguard;
 }
 
 void UProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const
@@ -1844,10 +1857,16 @@ UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* D
 
 void UProperty::ExportCppItem( FOutputDevice& Out ) const
 {
+	guard(UProperty::ExportCppItem);
+	// Retail: base no-op; subclasses override.
+	unguard;
 }
 
 void UProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
 {
+	guard(UProperty::ExportCppItem);
+	// Retail: base no-op; subclasses override.
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

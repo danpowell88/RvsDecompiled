@@ -35,6 +35,9 @@ AActor * ULodMeshInstance::GetActor()
 
 void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
+	guard(ULodMeshInstance::GetFrame);
+	// Retail 0x14730: shared null-stub, no-op.
+	unguard;
 }
 
 UMaterial * ULodMeshInstance::GetMaterial(int,AActor *)
@@ -49,6 +52,9 @@ UMesh * ULodMeshInstance::GetMesh()
 
 void ULodMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
+	guard(ULodMeshInstance::GetMeshVerts);
+	// Retail 0x14770: shared null-stub, no-op.
+	unguard;
 }
 
 INT ULodMeshInstance::GetStatus()
@@ -70,6 +76,9 @@ int UMeshInstance::UpdateAnimation(float)
 
 void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
+	guard(UMeshInstance::Render);
+	// Retail 0x14770: shared null-stub, no-op.
+	unguard;
 }
 
 void UMeshInstance::SetActor(AActor *)
@@ -94,6 +103,9 @@ void UMeshInstance::SetScale(FVector)
 
 void UMeshInstance::SetStatus(int)
 {
+	guard(UMeshInstance::SetStatus);
+	// Retail 0x1651d0: no-op.
+	unguard;
 }
 
 int UMeshInstance::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
@@ -221,6 +233,9 @@ FBox UMeshInstance::GetCollisionBoundingBox(const AActor* Owner)
 
 void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
+	guard(UMeshInstance::GetFrame);
+	// Retail 0x14730: shared null-stub, no-op.
+	unguard;
 }
 
 UMaterial * UMeshInstance::GetMaterial(int,AActor *)
@@ -778,6 +793,10 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 
 void USkeletalMeshInstance::BuildPivotsList()
 {
+	guard(USkeletalMeshInstance::BuildPivotsList);
+	// Retail 0x1361a0: builds bone pivot list from skeleton data.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 void USkeletalMeshInstance::ClearSkelAnims()
@@ -823,6 +842,10 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
+	guard(USkeletalMeshInstance::DrawCollisionCylinders);
+	// Retail 0x10436390 (933b): draws debug cylinders for bone collision shapes.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
@@ -1190,6 +1213,10 @@ int USkeletalMeshInstance::UpdateAnimation(float)
 
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
+	guard(USkeletalMeshInstance::Render);
+	// Retail 0x174f70: full skeletal mesh rendering pipeline.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 void USkeletalMeshInstance::Serialize(FArchive& Ar)
@@ -1263,6 +1290,10 @@ int USkeletalMeshInstance::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVe
 
 void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
+	guard(USkeletalMeshInstance::MeshSkinVertsCallback);
+	// Retail 0x13da50 (~36b): calls vtable[0x8c/4] with skin params, then FUN_10438ce0.
+	// Divergence: stub pending FUN_10438ce0 identification.
+	unguard;
 }
 
 int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
@@ -1847,6 +1878,10 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
+	guard(USkeletalMeshInstance::GetFrame);
+	// Retail 0x10439f40 (10776b): Ghidra decompilation failed (encoding error).
+	// Divergence: stub pending decompilation.
+	unguard;
 }
 
 UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
@@ -1864,6 +1899,10 @@ UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
+	guard(USkeletalMeshInstance::GetMeshVerts);
+	// Retail 0x13d8e0: extracts transformed vertex positions via FUN_10438ce0.
+	// Divergence: stub pending FUN_10438ce0 identification.
+	unguard;
 }
 
 FBox USkeletalMeshInstance::GetRenderBoundingBox(const AActor*)
@@ -1955,6 +1994,10 @@ int USkeletalMeshInstance::WasSkeletonUpdated()
 
 void USkeletalMeshInstance::MeshBuildBounds()
 {
+	guard(USkeletalMeshInstance::MeshBuildBounds);
+	// Retail 0x141f40: computes bounding box/sphere by iterating bone vertices.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 FMatrix USkeletalMeshInstance::MeshToWorld()
@@ -2003,10 +2046,19 @@ int UVertMeshInstance::UpdateAnimation(float)
 
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
+	guard(UVertMeshInstance::Render);
+	// Retail 0x174f70: full vertex mesh rendering pipeline.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 void UVertMeshInstance::Serialize(FArchive &)
 {
+	guard(UVertMeshInstance::Serialize);
+	// Retail 0x174730: calls ULodMeshInstance::Serialize then serialises per-frame
+	// animation state (TArrays at +0x80, +0x8c) for non-persistent archives.
+	// Divergence: stub pending FUN_10321a80 identification.
+	unguard;
 }
 
 void UVertMeshInstance::SetAnimFrame(int, float Frame)
@@ -2015,8 +2067,27 @@ void UVertMeshInstance::SetAnimFrame(int, float Frame)
 	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
 }
 
-void UVertMeshInstance::SetScale(FVector)
+void UVertMeshInstance::SetScale(FVector Scale)
 {
+	guard(UVertMeshInstance::SetScale);
+	// Retail 0x173500: writes Scale into mesh+0x7C and computes a uniform draw-scale
+	// at mesh+0xDC = max(|X|,|Y|,|Z|) * mesh[0x54] * (1/128).
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	GetMeshFn GetMesh_fn = *(GetMeshFn*)((*(BYTE**)this) + 0x8C);
+	BYTE* Mesh = GetMesh_fn(this);
+	if (Mesh)
+	{
+		*(FLOAT*)(Mesh + 0x7C) = Scale.X;
+		*(FLOAT*)(Mesh + 0x80) = Scale.Y;
+		*(FLOAT*)(Mesh + 0x84) = Scale.Z;
+		FLOAT maxScale = Abs(Scale.Z);
+		FLOAT absY     = Abs(Scale.Y);
+		if (maxScale < absY) maxScale = absY;
+		FLOAT absX = Abs(Scale.X);
+		if (absX < maxScale) absX = maxScale;
+		*(FLOAT*)(Mesh + 0xDC) = absX * *(FLOAT*)(Mesh + 0x54) * 0.0078125f;
+	}
+	unguard;
 }
 
 int UVertMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
@@ -2176,6 +2247,10 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
+	guard(UVertMeshInstance::GetFrame);
+	// Retail 0x10473c20 (2457b): transforms vertex mesh frames.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
@@ -2194,6 +2269,10 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
+	guard(UVertMeshInstance::GetMeshVerts);
+	// Retail: transforms and returns vertex mesh world-space positions.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 FBox UVertMeshInstance::GetRenderBoundingBox(const AActor* Owner)
@@ -2250,6 +2329,10 @@ int UVertMeshInstance::IsAnimTweening(int)
 // --- UVertMeshInstance ---
 void UVertMeshInstance::MeshBuildBounds()
 {
+	guard(UVertMeshInstance::MeshBuildBounds);
+	// Retail 0x174850: computes bounding box/sphere over all vertex mesh frames.
+	// Divergence: stub, pending full implementation.
+	unguard;
 }
 
 FMatrix UVertMeshInstance::MeshToWorld()
