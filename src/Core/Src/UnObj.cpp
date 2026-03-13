@@ -1183,13 +1183,37 @@ void UObject::CollectGarbage( DWORD KeepFlags )
 INT UObject::IsReferenced( UObject*& Res, DWORD KeepFlags, INT IgnoreReference )
 {
 	guard(UObject::IsReferenced);
-	return 0;
+	// Mark all objects as garbage candidates, then re-mark reachables.
+	// If Res is still tagged after the sweep it has no strong references.
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+		if( GObjObjects(i) )
+			GObjObjects(i)->SetFlags( RF_TagGarbage );
+	for( INT i=0; i<GObjRoot.Num(); i++ )
+		if( GObjRoot(i) )
+			GObjRoot(i)->ClearFlags( RF_TagGarbage );
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+	{
+		UObject* Obj = GObjObjects(i);
+		if( Obj && (Obj->GetFlags() & KeepFlags) )
+			Obj->ClearFlags( RF_TagGarbage );
+	}
+	UBOOL bReferenced = !(Res->GetFlags() & RF_TagGarbage);
+	// Clean up tags we set.
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+		if( GObjObjects(i) )
+			GObjObjects(i)->ClearFlags( RF_TagGarbage );
+	return bReferenced;
 	unguard;
 }
 
 INT UObject::AttemptDelete( UObject*& Res, DWORD KeepFlags, INT IgnoreReference )
 {
 	guard(UObject::AttemptDelete);
+	if( !(Res->GetFlags() & RF_Native) && !IsReferenced(Res, KeepFlags, IgnoreReference) )
+	{
+		PurgeGarbage();
+		return 1;
+	}
 	return 0;
 	unguard;
 }
@@ -1219,6 +1243,16 @@ void UObject::SerializeRootSet( FArchive& Ar, DWORD KeepFlags, DWORD RequiredFla
 void UObject::BindPackage( UPackage* Package )
 {
 	guard(UObject::BindPackage);
+	if( Package && !Package->DllHandle && !Package->Outer && !Package->AttemptedBind )
+	{
+		TCHAR Path[256];
+		appStrcpy( Path, appBaseDir() );
+		appStrcat( Path, Package->GetName() );
+		appStrupr( Path );
+		Package->AttemptedBind = 1;
+		GObjNoRegister = 0;
+		Package->DllHandle = appGetDllHandle( Path );
+	}
 	unguard;
 }
 
@@ -1313,6 +1347,14 @@ ULinkerLoad* UObject::GetPackageLinker( UObject* InOuter, const TCHAR* Filename,
 void UObject::ResetLoaders( UObject* Pkg, INT DynamicOnly, INT ForceLazyLoad )
 {
 	guard(UObject::ResetLoaders);
+	for( INT i=GObjLoaders.Num()-1; i>=0; i-- )
+	{
+		ULinkerLoad* Linker = (ULinkerLoad*)GObjLoaders(i);
+		if( !Pkg || Linker->LinkerRoot == Pkg )
+		{
+			Linker->DetachAllLazyLoaders( ForceLazyLoad );
+		}
+	}
 	unguard;
 }
 
@@ -1336,18 +1378,49 @@ void UObject::ProcessRegistrants()
 void UObject::GetRegistryObjects( TArray<FRegistryObjectInfo>& Results, UClass* InClass, UClass* InMetaClass, INT InIterateFlags )
 {
 	guard(UObject::GetRegistryObjects);
+	CacheDrivers( InIterateFlags != 0 );
+	for( INT i=0; i<GObjDrivers.Num(); i++ )
+	{
+		FRegistryObjectInfo& Info = GObjDrivers(i);
+		if( InClass && InMetaClass )
+		{
+			// Filter by meta-class: the description encodes the class name.
+			if( appStricmp(*Info.MetaClass, InMetaClass->GetPathName()) == 0 )
+				Results.AddItem( Info );
+		}
+		else
+		{
+			Results.AddItem( Info );
+		}
+	}
 	unguard;
 }
 
 void UObject::GetPreferences( TArray<FPreferencesInfo>& Results, const TCHAR* Category, INT InIterateFlags )
 {
 	guard(UObject::GetPreferences);
+	CacheDrivers( InIterateFlags != 0 );
+	for( INT i=0; i<GObjPreferences.Num(); i++ )
+	{
+		FPreferencesInfo& Info = GObjPreferences(i);
+		if( !Category || *Category == TEXT('\0') || appStricmp(*Info.Caption, Category) == 0 )
+			Results.AddItem( Info );
+	}
 	unguard;
 }
 
 void UObject::GlobalSetProperty( const TCHAR* Value, UClass* InClass, UProperty* Property, INT Offset, INT Immediate )
 {
 	guard(UObject::GlobalSetProperty);
+	for( FObjectIterator It; It; ++It )
+	{
+		if( It->IsA(InClass) )
+		{
+			Property->ImportText( Value, (BYTE*)*It + Offset, 0 );
+			if( Immediate )
+				It->PostEditChange();
+		}
+	}
 	unguard;
 }
 
@@ -1395,12 +1468,42 @@ void UObject::ExitProperties( BYTE* Data, UClass* Class )
 void UObject::ExportProperties( FOutputDevice& Out, UClass* ObjectClass, BYTE* Object, INT Indent, UClass* DiffClass, BYTE* Diff )
 {
 	guard(UObject::ExportProperties);
+	if( !ObjectClass || !Object )
+		return;
+	TCHAR ValueStr[4096];
+	for( TFieldIterator<UProperty> It(ObjectClass); It; ++It )
+	{
+		UProperty* Property = *It;
+		for( INT Idx=0; Idx<Property->ArrayDim; Idx++ )
+		{
+			BYTE* DiffPtr = (Diff && DiffClass) ? Diff + Property->Offset + Idx * Property->ElementSize : NULL;
+			ValueStr[0] = 0;
+			if( Property->ExportText( Idx, ValueStr, Object, DiffPtr, 0 ) )
+			{
+				Out.Logf( TEXT("%s%s=%s"), appSpc(Indent), Property->GetName(), ValueStr );
+			}
+		}
+	}
 	unguard;
 }
 
 void UObject::InitClassDefaultObject( UClass* InClass, INT SetOuter )
 {
 	guard(UObject::InitClassDefaultObject);
+	// Zero the UObject header area.
+	appMemzero( this, sizeof(UObject) );
+	// Restore the vtable pointer from InClass (vtable lives at offset 0).
+	*(void**)this = *(void**)InClass;
+	Class         = InClass;
+	Index         = INDEX_NONE;
+	if( SetOuter )
+		Outer = InClass->GetOuter();
+
+	// Initialise properties using the super class defaults if available.
+	UClass* SuperClass = (UClass*)InClass->SuperField;
+	BYTE* SuperDefaults = SuperClass ? &SuperClass->Defaults(0) : NULL;
+	INT   SuperSize     = SuperClass ? SuperClass->GetPropertiesSize() : 0;
+	InitProperties( (BYTE*)this, InClass->GetPropertiesSize(), InClass, SuperDefaults, SuperSize, this, NULL );
 	unguard;
 }
 
@@ -1435,6 +1538,27 @@ UFunction* UObject::FindFunctionChecked( FName FuncName, INT Global )
 UField* UObject::FindObjectField( FName FieldName, INT Global )
 {
 	guard(UObject::FindObjectField);
+	INT HashIndex = FieldName.GetIndex() & (UField::HASH_COUNT - 1);
+
+	// Search current state first (unless Global flag is set).
+	if( !Global && StateFrame && StateFrame->StateNode != (UState*)GetClass() )
+	{
+		UState* State = StateFrame->StateNode;
+		for( UField* F = State->VfHash[HashIndex]; F; F = F->HashNext )
+			if( F->GetFName() == FieldName )
+				return F;
+	}
+
+	// Walk the class hierarchy.
+	for( UStruct* Struct = GetClass(); Struct; Struct = (UStruct*)Struct->SuperField )
+	{
+		if( Struct->IsA(UState::StaticClass()) )
+		{
+			for( UField* F = ((UState*)Struct)->VfHash[HashIndex]; F; F = F->HashNext )
+				if( F->GetFName() == FieldName )
+					return F;
+		}
+	}
 	return NULL;
 	unguard;
 }
@@ -1442,6 +1566,18 @@ UField* UObject::FindObjectField( FName FieldName, INT Global )
 UState* UObject::FindState( FName StateName )
 {
 	guard(UObject::FindState);
+	INT HashIndex = StateName.GetIndex() & (UField::HASH_COUNT - 1);
+	for( UStruct* Struct = GetClass(); Struct; Struct = (UStruct*)Struct->SuperField )
+	{
+		if( Struct->IsA(UState::StaticClass()) )
+		{
+			for( UField* F = ((UState*)Struct)->VfHash[HashIndex]; F; F = F->HashNext )
+			{
+				if( F->GetFName() == StateName && F->IsA(UState::StaticClass()) )
+					return (UState*)F;
+			}
+		}
+	}
 	return NULL;
 	unguard;
 }
@@ -1506,30 +1642,101 @@ INT UObject::FindStructProperty( FString PropertyName, UStruct** Value )
 void UObject::LoadConfig( INT Immediate, UClass* InClass, const TCHAR* Filename )
 {
 	guard(UObject::LoadConfig);
+	UClass* ConfigClass = InClass ? InClass : GetClass();
+	const TCHAR* Section = *ConfigClass->ClassConfigName;
+	for( TFieldIterator<UProperty> It(ConfigClass); It; ++It )
+	{
+		UProperty* Property = *It;
+		if( !(Property->PropertyFlags & CPF_Config) )
+			continue;
+		TCHAR Buffer[1024]; Buffer[0] = 0;
+		if( GConfig->GetString(Section, Property->GetName(), Buffer, ARRAY_COUNT(Buffer), Filename) )
+		{
+			Property->ImportText( Buffer, (BYTE*)this + Property->Offset, 0 );
+		}
+	}
 	unguard;
 }
 
 void UObject::SaveConfig( DWORD Flags, const TCHAR* Filename )
 {
 	guard(UObject::SaveConfig);
+	UClass* ConfigClass = GetClass();
+	const TCHAR* Section = *ConfigClass->ClassConfigName;
+	TCHAR ValueStr[4096];
+	for( TFieldIterator<UProperty> It(ConfigClass); It; ++It )
+	{
+		UProperty* Property = *It;
+		if( !(Property->PropertyFlags & CPF_Config) )
+			continue;
+		ValueStr[0] = 0;
+		Property->ExportText( 0, ValueStr, (BYTE*)this, NULL, PPF_Delimited );
+		GConfig->SetString( Section, Property->GetName(), ValueStr, Filename );
+	}
 	unguard;
 }
 
 void UObject::ResetConfig( UClass* InClass, const TCHAR* Section, INT StartIndex )
 {
 	guard(UObject::ResetConfig);
+	if( !InClass )
+		return;
+	UObject* Defaults = InClass->GetDefaultObject();
+	if( !Defaults )
+		return;
+	// Re-apply config defaults to every live instance of InClass.
+	for( FObjectIterator It; It; ++It )
+	{
+		if( !It->IsA(InClass) )
+			continue;
+		for( TFieldIterator<UProperty> PropIt(InClass); PropIt; ++PropIt )
+		{
+			UProperty* Property = *PropIt;
+			if( !(Property->PropertyFlags & CPF_Config) )
+				continue;
+			for( INT Idx=0; Idx<Property->ArrayDim; Idx++ )
+			{
+				Property->CopySingleValue(
+					(BYTE*)*It      + Property->Offset + Idx * Property->ElementSize,
+					(BYTE*)Defaults + Property->Offset + Idx * Property->ElementSize );
+			}
+		}
+	}
 	unguard;
 }
 
 void UObject::LoadLocalized()
 {
 	guard(UObject::LoadLocalized);
+	UClass* LocClass = GetClass();
+	const TCHAR* PackageName = LocClass->GetOuter() ? LocClass->GetOuter()->GetName() : TEXT("Core");
+	const TCHAR* SectionName = LocClass->GetName();
+	for( TFieldIterator<UProperty> It(LocClass); It; ++It )
+	{
+		UProperty* Property = *It;
+		if( !(Property->PropertyFlags & CPF_Localized) )
+			continue;
+		const TCHAR* Localized = Localize( SectionName, Property->GetName(), PackageName, NULL, 1 );
+		if( Localized && *Localized )
+			Property->ImportText( Localized, (BYTE*)this + Property->Offset, PPF_Localized );
+	}
 	unguard;
 }
 
 void UObject::ParseParms( const TCHAR* Parms )
 {
 	guard(UObject::ParseParms);
+	if( !Parms )
+		return;
+	for( TFieldIterator<UProperty> It(GetClass()); It; ++It )
+	{
+		UProperty* Property = *It;
+		if( !(Property->PropertyFlags & CPF_Parm) )
+			continue;
+		TCHAR Buffer[256]; Buffer[0] = 0;
+		if( Parse(Parms, Property->GetName(), Buffer, ARRAY_COUNT(Buffer)) )
+			Property->ImportText( Buffer, (BYTE*)this + Property->Offset, 0 );
+	}
 	unguard;
 }
 
