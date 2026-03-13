@@ -29,10 +29,14 @@ int AEmitter::Tick(float,ELevelTick)
 
 void AEmitter::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
+	guard(AEmitter::Render);
+	unguard;
 }
 
 void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
+	guard(AEmitter::RenderEditorInfo);
+	unguard;
 }
 
 void AEmitter::Kill()
@@ -84,16 +88,22 @@ int AEmitter::CheckForProjectors()
 
 void AEmitter::Initialize()
 {
+	guard(AEmitter::Initialize);
+	unguard;
 }
 
 
 // --- UBeamEmitter ---
 void UBeamEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
+	guard(UBeamEmitter::SpawnParticle);
+	unguard;
 }
 
 void UBeamEmitter::UpdateActorHitList()
 {
+	guard(UBeamEmitter::UpdateActorHitList);
+	unguard;
 }
 
 int UBeamEmitter::UpdateParticles(float)
@@ -108,6 +118,8 @@ int UBeamEmitter::RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynam
 
 void UBeamEmitter::Scale(float)
 {
+	guard(UBeamEmitter::Scale);
+	unguard;
 }
 
 void UBeamEmitter::PostEditChange()
@@ -133,6 +145,8 @@ void UBeamEmitter::CleanUp()
 
 void UBeamEmitter::Initialize(int)
 {
+	guard(UBeamEmitter::Initialize);
+	unguard;
 }
 
 
@@ -160,16 +174,22 @@ void UMeshEmitter::PostEditChange()
 
 void UMeshEmitter::Initialize(int)
 {
+	guard(UMeshEmitter::Initialize);
+	unguard;
 }
 
 
 // --- UParticleEmitter ---
 void UParticleEmitter::SpawnIndividualParticles(int)
 {
+	guard(UParticleEmitter::SpawnIndividualParticles);
+	unguard;
 }
 
 void UParticleEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
+	guard(UParticleEmitter::SpawnParticle);
+	unguard;
 }
 
 float UParticleEmitter::SpawnParticles(float,float,float)
@@ -201,6 +221,8 @@ void UParticleEmitter::Reset()
 
 void UParticleEmitter::Scale(float)
 {
+	guard(UParticleEmitter::Scale);
+	unguard;
 }
 
 void UParticleEmitter::PostEditChange()
@@ -255,16 +277,22 @@ void UParticleEmitter::Destroy()
 
 void UParticleEmitter::HandleActorForce(AActor *,float)
 {
+	guard(UParticleEmitter::HandleActorForce);
+	unguard;
 }
 
 void UParticleEmitter::Initialize(int)
 {
+	guard(UParticleEmitter::Initialize);
+	unguard;
 }
 
 
 // --- USparkEmitter ---
 void USparkEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
+	guard(USparkEmitter::SpawnParticle);
+	unguard;
 }
 
 int USparkEmitter::UpdateParticles(float)
@@ -299,6 +327,8 @@ void USparkEmitter::CleanUp()
 
 void USparkEmitter::Initialize(int)
 {
+	guard(USparkEmitter::Initialize);
+	unguard;
 }
 
 
@@ -338,5 +368,7 @@ int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex *,FLevelSceneNode *)
 
 void USpriteEmitter::Initialize(int)
 {
+	guard(USpriteEmitter::Initialize);
+	unguard;
 }
 

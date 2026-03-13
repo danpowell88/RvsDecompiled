@@ -25,10 +25,14 @@ FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 
 FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
 {
+	guard(FCanvasUtil::FCanvasUtil);
+	unguard;
 }
 
 FCanvasUtil::~FCanvasUtil()
 {
+	guard(FCanvasUtil::~FCanvasUtil);
+	unguard;
 }
 
 FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
@@ -41,23 +45,42 @@ FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 }
 
 // (merged from earlier occurrence)
-void FCanvasUtil::BeginPrimitive(EPrimitiveType,UMaterial *)
+void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 {
+	guard(FCanvasUtil::BeginPrimitive);
+	// Ghidra 0x115b90: flush and reset if primitive type or material changed
+	if (*(EPrimitiveType*)(Pad + 0) != PrimType || *(UMaterial**)(Pad + 4) != Mat)
+	{
+		Flush();
+		*(EPrimitiveType*)(Pad + 0) = PrimType;
+		*(UMaterial**)(Pad + 4) = Mat;
+	}
+	unguard;
 }
 void FCanvasUtil::DrawLine(float,float,float,float,FColor)
 {
+	guard(FCanvasUtil::DrawLine);
+	unguard;
 }
 void FCanvasUtil::DrawPoint(float,float,float,float,float,FColor)
 {
+	guard(FCanvasUtil::DrawPoint);
+	unguard;
 }
 void FCanvasUtil::DrawTile(float,float,float,float,float,float,float,float,float,UMaterial *,FColor)
 {
+	guard(FCanvasUtil::DrawTile);
+	unguard;
 }
 void FCanvasUtil::DrawTileRotated(float,float,float,float,float,float,float,float,float,UMaterial *,FColor,float)
 {
+	guard(FCanvasUtil::DrawTileRotated);
+	unguard;
 }
 void FCanvasUtil::Flush()
 {
+	guard(FCanvasUtil::Flush);
+	unguard;
 }
 unsigned __int64 FCanvasUtil::GetCacheId()
 {
@@ -73,6 +96,8 @@ int FCanvasUtil::GetComponents(FVertexComponent* C)
 }
 void FCanvasUtil::GetRawStreamData(void * *,int)
 {
+	guard(FCanvasUtil::GetRawStreamData);
+	unguard;
 }
 int FCanvasUtil::GetRevision()
 {
@@ -98,6 +123,8 @@ int FCanvasUtil::GetStride()
 // --- UCanvas ---
 void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
 {
+	guard(UCanvas::WrappedPrint);
+	unguard;
 }
 
 void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
@@ -292,6 +319,8 @@ void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT
 }
 void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,float,float,FPlane,FPlane,float)
 {
+	guard(UCanvas::DrawTile);
+	unguard;
 }
 
 

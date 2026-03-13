@@ -1562,6 +1562,8 @@ INT APawn::PickWallAdjust(FVector WallHitNormal)
 
 void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 {
+	guard(APawn::SpiderstepUp);
+	unguard;
 }
 
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
@@ -1863,18 +1865,26 @@ INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 
 void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 {
+	guard(APawn::physFlying);
+	unguard;
 }
 
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
+	guard(APawn::physSpider);
+	unguard;
 }
 
 void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 {
+	guard(APawn::physSwimming);
+	unguard;
 }
 
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
+	guard(APawn::physWalking);
+	unguard;
 }
 
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
@@ -1886,6 +1896,8 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
+	guard(APawn::rotateToward);
+	unguard;
 }
 
 void APawn::setMoveTimer(FLOAT DeltaTime)
@@ -1940,6 +1952,8 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
+	guard(APawn::startSwimming);
+	unguard;
 }
 
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
@@ -2001,6 +2015,8 @@ INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 
 void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 {
+	guard(AController::AdjustFromWall);
+	unguard;
 }
 
 void AController::StartAnimPoll()
@@ -2068,6 +2084,8 @@ AActor* AController::GetViewTarget()
 
 void AController::SetAdjustLocation( FVector NewLoc )
 {
+	guard(AController::SetAdjustLocation);
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
@@ -2076,6 +2094,8 @@ void AController::SetAdjustLocation( FVector NewLoc )
 
 void AController::ShowSelf()
 {
+	guard(AController::ShowSelf);
+	unguard;
 }
 
 DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
@@ -2096,6 +2116,8 @@ AActor* AController::SetPath( INT bInitialPath )
 
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
+	guard(AController::SetRouteCache);
+	unguard;
 }
 
 DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )

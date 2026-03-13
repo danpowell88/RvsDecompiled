@@ -19,30 +19,44 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UClient ---
 void UClient::StaticConstructor()
 {
+	guard(UClient::StaticConstructor);
+	unguard;
 }
 
 void UClient::UpdateGamma()
 {
+	guard(UClient::UpdateGamma);
+	unguard;
 }
 
 void UClient::UpdateGraphicOptions()
 {
+	guard(UClient::UpdateGraphicOptions);
+	unguard;
 }
 
 void UClient::RestoreGamma()
 {
+	guard(UClient::RestoreGamma);
+	unguard;
 }
 
 void UClient::Serialize(FArchive &)
 {
+	guard(UClient::Serialize);
+	unguard;
 }
 
 void UClient::PostEditChange()
 {
+	guard(UClient::PostEditChange);
+	unguard;
 }
 
 void UClient::Destroy()
 {
+	guard(UClient::Destroy);
+	unguard;
 }
 
 int UClient::Exec(const TCHAR*,FOutputDevice &)
@@ -52,10 +66,17 @@ int UClient::Exec(const TCHAR*,FOutputDevice &)
 
 void UClient::Flush(int)
 {
+	guard(UClient::Flush);
+	unguard;
 }
 
-void UClient::Init(UEngine *)
+void UClient::Init(UEngine* Engine)
 {
+	guard(UClient::Init);
+	// Ghidra 0x86f20: store engine reference and call StaticConstructor
+	*(UEngine**)((BYTE*)this + 0x2c) = Engine;
+	StaticConstructor();
+	unguard;
 }
 
 
@@ -70,6 +91,8 @@ void UPlayer::Serialize(FArchive &Ar)
 
 void UPlayer::Destroy()
 {
+	guard(UPlayer::Destroy);
+	unguard;
 }
 
 int UPlayer::Exec(const TCHAR*,FOutputDevice &)
