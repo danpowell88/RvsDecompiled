@@ -19,6 +19,17 @@
 
 #include "EnginePrivate.h"
 
+// STDbgLine: debug line entry — 28 bytes matching binary layout (Ghidra 0x71250)
+struct STDbgLine
+{
+    FVector Start;  // 0x00
+    FVector End;    // 0x0c
+    FColor  Color;  // 0x18
+};
+
+extern ENGINE_API STDbgLine* GDbgLine;
+extern ENGINE_API INT        GDbgLineIndex;
+
 /*-----------------------------------------------------------------------------
 	Class registration.
 -----------------------------------------------------------------------------*/
@@ -2335,6 +2346,7 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 
 void AActor::SetGameType( FString GameType )
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 
@@ -2458,14 +2470,17 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 
 void AActor::PreNetReceive()
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 void AActor::PostNetReceive()
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 void AActor::PostNetReceiveLocation()
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 INT AActor::PlayerControlled()
@@ -3029,10 +3044,12 @@ INT AActor::DetachFromBone( AActor* Attachment )
 
 void AActor::AttachProjector( AProjector* Proj )
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 void AActor::DetachProjector( AProjector* Proj )
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewBlockPlayers )
@@ -3067,10 +3084,12 @@ FLOAT AActor::WorldLightRadius() const
 
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::SetZone( INT bTest, INT bForceRefresh )
@@ -3579,39 +3598,54 @@ void AActor::PutOnGround()
 
 struct _McdModel* AActor::getKModel() const
 {
-	return NULL;
+    if( !KParams ) return NULL;
+    return *( struct _McdModel** )( (BYTE*)KParams + 0x48 );
 }
 
 void AActor::physKarma( FLOAT DeltaTime )
 {
+    guard(AActor::physKarma);
+    physKarma_internal( DeltaTime );
+    unguard;
+    // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
 }
 
 void AActor::physKarma_internal( FLOAT DeltaTime )
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::physKarmaRagDoll( FLOAT DeltaTime )
 {
+    guard(AActor::physKarmaRagDoll);
+    physKarmaRagDoll_internal( DeltaTime );
+    unguard;
+    // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
 }
 
 void AActor::physKarmaRagDoll_internal( FLOAT DeltaTime )
 {
+    // STUB: too complex (1600 bytes in Ghidra)
 }
 
 void AActor::preKarmaStep( FLOAT DeltaTime )
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::postKarmaStep()
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::preKarmaStep_skeletal( FLOAT DeltaTime )
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::postKarmaStep_skeletal()
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
@@ -3657,6 +3691,7 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 
 void AActor::CheckForErrors()
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 void AActor::AddMyMarker( AActor* S )
@@ -3695,14 +3730,22 @@ FLOAT AActor::LifeFraction()
 
 INT AActor::IsJoinedTo( const AActor* Other ) const
 {
-	return 0;
+    for( const AActor* A = this; A; A = A->Base )
+    {
+        if( A == Other )
+            return 1;
+        if( A && Other && A->JoinedTag != 0 && A->JoinedTag == Other->JoinedTag )
+            return 1;
+    }
+    return 0;
 }
 
 INT AActor::TestCanSeeMe( APlayerController* Viewer )
 {
-	guard(AActor::TestCanSeeMe);
-	return 0;
-	unguard;
+    guard(AActor::TestCanSeeMe);
+    // STUB: too complex (complex, needs APlayerController field layout)
+    return 0;
+    unguard;
 }
 
 void AActor::UpdateRelativeRotation()
@@ -3835,6 +3878,7 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 
 void AActor::SaveServerOptions( FString FileName )
 {
+    // STUB: too complex (complex, Ghidra)
 }
 
 BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
@@ -3855,12 +3899,16 @@ INT AActor::IsAvailableInGameType( FString GameType )
 
 INT AActor::NativeNonUbiMatchMaking()
 {
-	return 0;
+    guard(AActor::NativeNonUbiMatchMaking);
+    return ParseParam( appCmdLine(), TEXT("Ip=") );
+    unguard;
 }
 
 INT AActor::NativeNonUbiMatchMakingHost()
 {
-	return 0;
+    guard(AActor::NativeNonUbiMatchMakingHost);
+    return ParseParam( appCmdLine(), TEXT("Host") );
+    unguard;
 }
 
 INT AActor::NativeStartedByGSClient()
@@ -3870,18 +3918,27 @@ INT AActor::NativeStartedByGSClient()
 
 void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
 {
+    if( ++GDbgLineIndex > 99 )
+        GDbgLineIndex = 0;
+    GDbgLine[ GDbgLineIndex ].Start = Start;
+    GDbgLine[ GDbgLineIndex ].End   = End;
+    GDbgLine[ GDbgLineIndex ].Color = Color;
 }
 
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
+    // STUB: too complex (uses binary-specific global caching)
 }
 
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
+    // STUB: too complex (>150 lines in Ghidra)
 }
 
 void AActor::DbgVectorReset( INT VectorIndex )
 {
+    if( VectorIndex < m_dbgVectorInfo.Num() )
+        m_dbgVectorInfo( VectorIndex ).m_bDisplay = 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -3940,7 +3997,18 @@ UPrimitive* ABrush::GetPrimitive()
 }
 void ABrush::CheckForErrors() { Super::CheckForErrors(); }
 void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
-void ABrush::InitPosRotScale() {}
+void ABrush::InitPosRotScale()
+{
+    guard(ABrush::InitPosRotScale);
+    check(Brush);
+    *(FScale*)((BYTE*)this + 0x3b0) = GMath.UnitScale;
+    *(FScale*)((BYTE*)this + 0x3c4) = GMath.UnitScale;
+    Location  = FVector(0,0,0);
+    Rotation  = FRotator(0,0,0);
+    // PrePivot — hidden at raw offset 0x2c8 due to gap in EngineClasses.h reconstruction
+    *(FVector*)((BYTE*)this + 0x2c8) = FVector(0,0,0);
+    unguard;
+}
 FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
 FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
 FCoords ABrush::OldToLocal() const
