@@ -46,10 +46,22 @@ void USound::PostLoad()
 
 void USound::PS2Convert()
 {
+	guard(USound::PS2Convert);
+	// Retail 0x7ef80: calls FUN_1037efde() (PS2-format helper).
+	typedef void (__cdecl *PS2Fn)();
+	((PS2Fn)0x1037efde)();
+	unguard;
 }
 
-USound::USound(const TCHAR*,int)
+USound::USound(const TCHAR* InName, INT InFlags)
 {
+	guard(USound::USound);
+	// Retail 0x21220: named-sound constructor (170 bytes).
+	// Initialises FSoundData vtable at +0x2c, FArray at +0x38,
+	// FName at +0x48, FStrings at +0x4c/+0x70; copies InName to +0x4c,
+	// stores InFlags|4 at +0x64, clears +0x60, sets +0x5c = 1.0f.
+	// Divergence: fields not declared in stripped header; raw init omitted.
+	unguard;
 }
 
 // (merged from earlier occurrence)
@@ -98,7 +110,26 @@ void UI3DL2Listener::PostEditChange()
 
 
 // --- USoundGen ---
-void USoundGen::Serialize(FArchive &)
+void USoundGen::Serialize(FArchive &Ar)
 {
+	guard(USoundGen::Serialize);
+	// Retail 0x80100: USound::Serialize, then serializes five 4-byte fields
+	// at +0xa0..+0xb0 via FUN_10301310, an array at +0xb4 via FUN_1037fbd0,
+	// and an FString at +0xc0.
+	USound::Serialize(Ar);
+	// Five scalar fields (type unknown — raw offset access).
+	typedef void (__cdecl *ScalarSerFn)(FArchive*, void*);
+	ScalarSerFn scalarSer = reinterpret_cast<ScalarSerFn>(0x10301310);
+	scalarSer(&Ar, reinterpret_cast<BYTE*>(this) + 0xa0);
+	scalarSer(&Ar, reinterpret_cast<BYTE*>(this) + 0xa4);
+	scalarSer(&Ar, reinterpret_cast<BYTE*>(this) + 0xa8);
+	scalarSer(&Ar, reinterpret_cast<BYTE*>(this) + 0xac);
+	scalarSer(&Ar, reinterpret_cast<BYTE*>(this) + 0xb0);
+	// Array/struct field at +0xb4 (FUN_1037fbd0).
+	typedef void (__cdecl *ArrSerFn)(FArchive*, void*);
+	reinterpret_cast<ArrSerFn>(0x1037fbd0)(&Ar, reinterpret_cast<BYTE*>(this) + 0xb4);
+	// FString at +0xc0.
+	Ar << *reinterpret_cast<FString*>(reinterpret_cast<BYTE*>(this) + 0xc0);
+	unguard;
 }
 

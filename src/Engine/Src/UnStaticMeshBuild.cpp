@@ -17,22 +17,42 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UStaticMesh ---
 void UStaticMesh::StaticConstructor()
 {
+	guard(UStaticMesh::StaticConstructor);
+	// Retail: complex property registration via IMPLEMENT_CLASS (FUN_10449d30).
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 void UStaticMesh::PostEditChange()
 {
+	guard(UStaticMesh::PostEditChange);
+	// Retail: rebuilds the static mesh collision/render data.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 void UStaticMesh::PostLoad()
 {
+	guard(UStaticMesh::PostLoad);
+	// Retail: fixes up triangle normals and builds render data.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 // (merged from earlier occurrence)
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
+	guard(UStaticMesh::TriangleSphereQuery);
+	// Retail: iterates collision triangles and tests against the sphere.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 void UStaticMesh::Build()
 {
+	guard(UStaticMesh::Build);
+	// Retail: builds geometry/collision data for the static mesh.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 UMaterial * UStaticMesh::GetSkin(AActor *,int)
 {
@@ -92,19 +112,37 @@ FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 }
 void UStaticMesh::Illuminate(AActor *,int)
 {
+	guard(UStaticMesh::Illuminate);
+	// Retail: computes per-vertex lighting for the static mesh.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 
 // --- UStaticMeshInstance ---
-void UStaticMeshInstance::Serialize(FArchive &)
+void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
+	guard(UStaticMeshInstance::Serialize);
+	// Retail 0x149bb0: UObject::Serialize, then version-conditional
+	// color-stream / index-buffer serialization.
+	// Divergence: only base class call; full format not reconstructed.
+	UObject::Serialize(Ar);
+	unguard;
 }
 
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
+	guard(UStaticMeshInstance::AttachProjectorClipped);
+	// Retail: attaches a projector, clipping its triangles against the mesh.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 {
+	guard(UStaticMeshInstance::DetachProjectorClipped);
+	// Retail: removes the projector from the per-instance projector list.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 

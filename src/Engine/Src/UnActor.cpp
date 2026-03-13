@@ -2537,6 +2537,9 @@ INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 
 void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
 {
+	guard(AActor::UpdateColBox);
+	// Retail 0x14770: shared empty-virtual stub; no-op implementation.
+	unguard;
 }
 
 FCoords AActor::ToLocal() const
@@ -3698,6 +3701,9 @@ void AActor::CheckForErrors()
 
 void AActor::AddMyMarker( AActor* S )
 {
+	guard(AActor::AddMyMarker);
+	// Retail: shared empty-virtual stub; no-op implementation.
+	unguard;
 }
 
 UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const

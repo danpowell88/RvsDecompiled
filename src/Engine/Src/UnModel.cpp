@@ -32,10 +32,18 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UModel ---
 void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
 {
+	guard(UModel::Render);
+	// Retail: renders the BSP model via the render interface.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 void UModel::AttachProjector(int,FProjectorRenderInfo *,FPlane *)
 {
+	guard(UModel::AttachProjector);
+	// Retail: attaches a projector to the BSP model.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 

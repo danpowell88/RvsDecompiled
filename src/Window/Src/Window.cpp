@@ -47,6 +47,10 @@ void UWindowManager::Destroy()
 
 void UWindowManager::Tick(FLOAT DeltaTime)
 {
+	guard(UWindowManager::Tick);
+	// Retail: advances the window manager's state each frame.
+	// Divergence: not fully reconstructed from Ghidra.
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
