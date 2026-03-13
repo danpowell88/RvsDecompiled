@@ -18,7 +18,9 @@ void UR6ModGSInfo::InitMODCDKey()
 
 void UR6ModGSInfo::execNativeInitModInfo(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ModGSInfo::execNativeInitModInfo);
 	P_FINISH;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

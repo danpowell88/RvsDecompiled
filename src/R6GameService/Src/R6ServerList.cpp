@@ -67,47 +67,70 @@ void UR6ServerList::eventGetLobbyAndGroupID(INT &iLobbyID, INT &iGroupID)
 
 void UR6ServerList::execGetDisplayListSize(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execGetDisplayListSize);
 	P_FINISH;
+	unguard;
 }
 
 void UR6ServerList::execNativeGetMaxPlayers(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeGetMaxPlayers);
 	P_FINISH;
+	*(INT*)Result = 16;
+	unguard;
 }
 
 void UR6ServerList::execNativeGetMilliSeconds(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeGetMilliSeconds);
 	P_FINISH;
+	*(INT*)Result = (INT)GetTickCount();
+	unguard;
 }
 
 void UR6ServerList::execNativeGetOwnSvrPort(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeGetOwnSvrPort);
 	P_FINISH;
+	unguard;
 }
 
 void UR6ServerList::execNativeGetPingTime(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeGetPingTime);
+	P_GET_STR(szServerIP);
 	P_FINISH;
+	unguard;
 }
 
 void UR6ServerList::execNativeGetPingTimeOut(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeGetPingTimeOut);
 	P_FINISH;
+	*(INT*)Result = 1000;
+	unguard;
 }
 
 void UR6ServerList::execNativeInitFavorites(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeInitFavorites);
 	P_FINISH;
+	InitFavorites();
+	unguard;
 }
 
 void UR6ServerList::execNativeUpdateFavorites(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execNativeUpdateFavorites);
 	P_FINISH;
+	unguard;
 }
 
 void UR6ServerList::execSortServers(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6ServerList::execSortServers);
 	P_FINISH;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

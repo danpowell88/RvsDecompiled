@@ -658,117 +658,175 @@ FString UR6GSServers::eventTempGetPBConnectStatus(APlayerController *pPC)
 
 void UR6GSServers::execEnterCDKey(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execEnterCDKey);
+	P_GET_STR(CDKey);
 	P_FINISH;
+	EnterCDKey(CDKey);
+	unguard;
 }
 
 void UR6GSServers::execGetMaxUbiServerNameSize(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execGetMaxUbiServerNameSize);
 	P_FINISH;
+	*(INT*)Result = 32;
+	unguard;
 }
 
 void UR6GSServers::execHandleAnyLobbyConnectionFail(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execHandleAnyLobbyConnectionFail);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execInitGSCDKey(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execInitGSCDKey);
 	P_FINISH;
+	*(INT*)Result = InitGSCDKey();
+	unguard;
 }
 
 void UR6GSServers::execInitialize(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execInitialize);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execInitializeMSClient(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execInitializeMSClient);
 	P_FINISH;
+	*(INT*)Result = InitializeMSClient();
+	unguard;
 }
 
 void UR6GSServers::execIsRefreshServersInProgress(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execIsRefreshServersInProgress);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeGetMSClientInitialized(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeGetMSClientInitialized);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeGetSeconds(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeGetSeconds);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeIsGSReadyToChangeMod(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeIsGSReadyToChangeMod);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeIsRouterDisconnect(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeIsRouterDisconnect);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeIsWaitingForGSInit(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeIsWaitingForGSInit);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeLogOutServer(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeLogOutServer);
+	P_GET_INT(n);
 	P_FINISH;
+	LogOutServer();
+	unguard;
 }
 
 void UR6GSServers::execNativeMSCLientJoinServer(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeMSCLientJoinServer);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeMSClientReqAltInfo(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeMSClientReqAltInfo);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeProcessIcmpPing(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeProcessIcmpPing);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeSetMatchResult(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeSetMatchResult);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execNativeUpdateServer(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execNativeUpdateServer);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execRefreshOneServer(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execRefreshOneServer);
+	P_GET_INT(iServerIndex);
 	P_FINISH;
+	RefreshOneServer(iServerIndex);
+	unguard;
 }
 
 void UR6GSServers::execRefreshServers(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execRefreshServers);
 	P_FINISH;
+	RefreshServers();
+	unguard;
 }
 
 void UR6GSServers::execSetLastServerQueried(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execSetLastServerQueried);
+	P_GET_STR(szServer);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execStopRefreshServers(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execStopRefreshServers);
 	P_FINISH;
+	unguard;
 }
 
 void UR6GSServers::execUnInitializeMSClient(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6GSServers::execUnInitializeMSClient);
 	P_FINISH;
+	*(INT*)Result = UnInitMSClient();
+	unguard;
 }
 
 void UR6GSServers::registerCDKeySDKCallbacks(UR6GSServers *, void *, void *)

@@ -27,6 +27,8 @@
 	Engine / Core / R6 headers.
 ----------------------------------------------------------------------------*/
 
+#include <windows.h>
+
 #pragma pack(push, 4)
 
 #include "Engine.h"
