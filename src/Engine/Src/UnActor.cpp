@@ -3599,15 +3599,17 @@ void AActor::PutOnGround()
 struct _McdModel* AActor::getKModel() const
 {
     if( !KParams ) return NULL;
+    // DIVERGENCE: UKarmaParamsCollision exposes no named field for the MCD model pointer;
+    // raw offset +0x48 confirmed by Ghidra (matches UObject base of 0x2C + 4 pointers).
     return *( struct _McdModel** )( (BYTE*)KParams + 0x48 );
 }
 
 void AActor::physKarma( FLOAT DeltaTime )
 {
+    // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
     guard(AActor::physKarma);
     physKarma_internal( DeltaTime );
     unguard;
-    // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
 }
 
 void AActor::physKarma_internal( FLOAT DeltaTime )
@@ -3617,10 +3619,10 @@ void AActor::physKarma_internal( FLOAT DeltaTime )
 
 void AActor::physKarmaRagDoll( FLOAT DeltaTime )
 {
+    // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
     guard(AActor::physKarmaRagDoll);
     physKarmaRagDoll_internal( DeltaTime );
     unguard;
-    // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
 }
 
 void AActor::physKarmaRagDoll_internal( FLOAT DeltaTime )
