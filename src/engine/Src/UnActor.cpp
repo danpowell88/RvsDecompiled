@@ -770,7 +770,16 @@ void AActor::execGetBoneCoords( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME(BoneName);
 	P_GET_UBOOL_OPTX(bDontCallGetFrame,0);
 	P_FINISH;
-	*(FCoords*)Result = GMath.UnitCoords; // TODO: Mesh ? Mesh->GetBoneCoords( this, BoneName ) : GMath.UnitCoords;
+	*(FCoords*)Result = GMath.UnitCoords;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+		{
+			INT bi = MI->MatchRefBone( BoneName );
+			*(FCoords*)Result = MI->GetBoneCoords( (DWORD)Max(bi, 0), bi >= 0 ? bDontCallGetFrame : 0 );
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneCoords );
@@ -781,7 +790,13 @@ void AActor::execGetBoneRotation( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME(BoneName);
 	P_GET_INT_OPTX(Space,0);
 	P_FINISH;
-	*(FRotator*)Result = FRotator(0,0,0); // TODO: Mesh ? Mesh->GetBoneRotation( this, BoneName, Space ) : FRotator(0,0,0);
+	*(FRotator*)Result = FRotator(0,0,0);
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			*(FRotator*)Result = MI->GetBoneRotation( BoneName, Space );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneRotation );
@@ -796,7 +811,11 @@ void AActor::execSetBoneRotation( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(InTime,0.f);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->SetBoneRotation( this, BoneName, BoneTurn, Space, Alpha );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetBoneRotation( BoneName, BoneTurn, Space, Alpha, InTime );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneRotation );
@@ -809,8 +828,13 @@ void AActor::execSetBoneDirection( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(Alpha,1.f);
 	P_GET_INT_OPTX(Space,0);
 	P_FINISH;
+	// Note: Space param not forwarded; stub takes (FName,FRotator,FVector,FLOAT).
 	if( Mesh )
-		; // TODO: Mesh->SetBoneDirection( this, BoneName, Dir, Alpha, Space );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetBoneDirection( BoneName, Dir, FVector(0,0,0), Alpha );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneDirection );
@@ -823,7 +847,11 @@ void AActor::execSetBoneLocation( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(Alpha,1.f);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->SetBoneLocation( this, BoneName, BoneTrans, Alpha );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetBoneLocation( BoneName, BoneTrans, Alpha );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneLocation );
@@ -836,7 +864,11 @@ void AActor::execSetBoneScale( FFrame& Stack, RESULT_DECL )
 	P_GET_NAME_OPTX(BoneName,NAME_None);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->SetBoneScale( this, Slot, BoneScale, BoneName );
+	{
+		Mesh->MeshGetInstance( this );
+		if( USkeletalMeshInstance* MI = Cast<USkeletalMeshInstance>( MeshInstance ) )
+			MI->SetBoneScale( Slot, BoneScale, BoneName );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneScale );
@@ -856,7 +888,7 @@ void AActor::execAttachToBone( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT(AActor,Attachment);
 	P_GET_NAME(BoneName);
 	P_FINISH;
-	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->AttachToBone( this, Attachment, BoneName ) : 0;
+	*(DWORD*)Result = AttachToBone( Attachment, BoneName ) ? 1 : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAttachToBone );
@@ -866,7 +898,7 @@ void AActor::execDetachFromBone( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execDetachFromBone);
 	P_GET_OBJECT(AActor,Attachment);
 	P_FINISH;
-	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->DetachFromBone( this, Attachment ) : 0;
+	*(DWORD*)Result = DetachFromBone( Attachment ) ? 1 : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDetachFromBone );
