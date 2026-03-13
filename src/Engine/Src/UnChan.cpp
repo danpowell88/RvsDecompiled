@@ -1,6 +1,6 @@
 /*=============================================================================
-	UnChan.cpp: Network channel implementations (UChannel hierarchy)
-	Reconstructed for Ravenshield decompilation project.
+UnChan.cpp: Network channel implementations (UChannel hierarchy)
+Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
@@ -16,168 +16,208 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-// (merged from earlier occurrence)
-int UChannel::SendBunch(FOutBunch *,int)
+INT UChannel::SendBunch(FOutBunch*, INT)
 {
-	return 0;
+guard(UChannel::SendBunch);
+return 0;
+unguard;
 }
 
 
 // --- UFileChannel ---
 void UFileChannel::StaticConstructor()
 {
+guard(UFileChannel::StaticConstructor);
+*(INT*)((BYTE*)this + 0x48) = 3;  // ChType = CHTYPE_File
+unguard;
 }
 
 void UFileChannel::Tick()
 {
+guard(UFileChannel::Tick);
+// Divergence: 453-byte file-sending tick not implemented.
+unguard;
 }
 
-// (merged from earlier occurrence)
-void UFileChannel::ReceivedBunch(FInBunch &)
+void UFileChannel::ReceivedBunch(FInBunch&)
 {
+guard(UFileChannel::ReceivedBunch);
+// Divergence: 1243-byte receive handler not implemented.
+unguard;
 }
+
 FString UFileChannel::Describe()
 {
-	return FString();
+return FString();
 }
+
 void UFileChannel::Destroy()
 {
-	// Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
-	// If InType (+0x3C) and download at +0x68 exist, flush/delete download.
-	// Then assert Channels[ChIndex]==this, UChannel::Destroy.
-	check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
-	if (RouteDestroy() == 0)
-	{
-		void** sendFile = (void**)((BYTE*)this + 0x6C);
-		if (*sendFile)
-		{
-			INT vt = *(INT*)*sendFile;
-			typedef void (__thiscall *DtorFn)(void*, INT);
-			((DtorFn)(*(INT*)(vt + 0)))(*sendFile, 1);
-			*sendFile = NULL;
-		}
-		INT inType = *(INT*)((BYTE*)this + 0x3C);
-		void** dld = (void**)((BYTE*)this + 0x68);
-		if (inType && *dld)
-		{
-			INT vt = *(INT*)*dld;
-			typedef void (__thiscall *TickFn)(void*);
-			((TickFn)(*(INT*)(vt + 0x78)))(*dld);
-			if (*dld)
-			{
-				vt = *(INT*)*dld;
-				typedef void (__thiscall *DtorFn2)(void*, INT);
-				((DtorFn2)(*(INT*)(vt + 0xC)))(*dld, 1);
-			}
-		}
-		UChannel::Destroy();
-	}
+// Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
+// If InType (+0x3C) and download at +0x68 exist, flush/delete download.
+// Then assert Channels[ChIndex]==this, UChannel::Destroy.
+check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
+if (RouteDestroy() == 0)
+{
+void** sendFile = (void**)((BYTE*)this + 0x6C);
+if (*sendFile)
+{
+INT vt = *(INT*)*sendFile;
+typedef void (__thiscall *DtorFn)(void*, INT);
+((DtorFn)(*(INT*)(vt + 0)))(*sendFile, 1);
+*sendFile = NULL;
 }
+INT inType = *(INT*)((BYTE*)this + 0x3C);
+void** dld = (void**)((BYTE*)this + 0x68);
+if (inType && *dld)
+{
+INT vt = *(INT*)*dld;
+typedef void (__thiscall *TickFn)(void*);
+((TickFn)(*(INT*)(vt + 0x78)))(*dld);
+if (*dld)
+{
+vt = *(INT*)*dld;
+typedef void (__thiscall *DtorFn2)(void*, INT);
+((DtorFn2)(*(INT*)(vt + 0xC)))(*dld, 1);
+}
+}
+UChannel::Destroy();
+}
+}
+
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
-	// Retail: 0x180f30. Just delegates to UChannel::Init.
-	UChannel::Init(Conn, ChIndex, InType);
+// Retail: 0x180f30. Just delegates to UChannel::Init.
+UChannel::Init(Conn, ChIndex, InType);
 }
 
 
 // --- UActorChannel ---
 void UActorChannel::StaticConstructor()
 {
+guard(UActorChannel::StaticConstructor);
+*(INT*)((BYTE*)this + 0x48) = 2;  // ChType = CHTYPE_Actor
+unguard;
 }
 
 void UActorChannel::Tick()
 {
+guard(UActorChannel::Tick);
+UChannel::Tick();
+unguard;
 }
 
-void UActorChannel::ReceivedBunch(FInBunch &)
+void UActorChannel::ReceivedBunch(FInBunch&)
 {
+guard(UActorChannel::ReceivedBunch);
+// Divergence: complex actor replication receive not implemented.
+unguard;
 }
 
-void UActorChannel::ReceivedNak(int)
+void UActorChannel::ReceivedNak(int NakPacketId)
 {
+guard(UActorChannel::ReceivedNak);
+UChannel::ReceivedNak(NakPacketId);
+// Divergence: actor replication NAK handling (FUN_10481dd0) not implemented.
+unguard;
 }
 
 void UActorChannel::ReplicateActor()
 {
+guard(UActorChannel::ReplicateActor);
+// Divergence: complex actor replication not implemented.
+unguard;
 }
 
-void UActorChannel::SetChannelActor(AActor *)
+void UActorChannel::SetChannelActor(AActor*)
 {
+guard(UActorChannel::SetChannelActor);
+// Divergence: actor channel setup not implemented.
+unguard;
 }
 
 void UActorChannel::SetClosingFlag()
 {
-	// Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
-	// replication state, then call UChannel::SetClosingFlag.
-	// Divergence: FUN_10481e90 (replication flush) not implemented; just delegate.
-	UChannel::SetClosingFlag();
+// Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
+// replication state, then call UChannel::SetClosingFlag.
+// Divergence: FUN_10481e90 (replication flush) not implemented; just delegate.
+UChannel::SetClosingFlag();
 }
 
 void UActorChannel::Close()
 {
-	// Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
-	UChannel::Close();
-	*(INT*)((BYTE*)this + 0x6C) = 0;
+// Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
+UChannel::Close();
+*(INT*)((BYTE*)this + 0x6C) = 0;
 }
 
 FString UActorChannel::Describe()
 {
-	return FString();
+return FString();
 }
 
 void UActorChannel::Destroy()
 {
 }
 
-AActor * UActorChannel::GetActor()
+AActor* UActorChannel::GetActor()
 {
-	// Ghidra (4B): Actor at offset 0x6C
-	return *(AActor**)((BYTE*)this + 0x6C);
+// Ghidra (4B): Actor at offset 0x6C
+return *(AActor**)((BYTE*)this + 0x6C);
 }
 
 void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
-	// Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
-	// Chain: this+0x2C=Conn, Conn+0x7C=Level, Level+0x40=LevelInfo, then vtable[3]()
-	// returns game time stored at this+0x68; also copies Level+0x48 (seq nr 8b) to this+0x74.
-	// Divergence: replication tracking fields zeroed instead of copying from level state.
-	UChannel::Init(Conn, ChIndex, InType);
-	*(INT*)((BYTE*)this + 0x68) = 0;
-	*(INT*)((BYTE*)this + 0x6C) = 0;   // Actor ptr — set later by SetChannelActor
-	appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
+// Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
+// Chain: this+0x2C=Conn, Conn+0x7C=Level, Level+0x40=LevelInfo, then vtable[3]()
+// returns game time stored at this+0x68; also copies Level+0x48 (seq nr 8b) to this+0x74.
+// Divergence: replication tracking fields zeroed instead of copying from level state.
+UChannel::Init(Conn, ChIndex, InType);
+*(INT*)((BYTE*)this + 0x68) = 0;
+*(INT*)((BYTE*)this + 0x6C) = 0;   // Actor ptr -- set later by SetChannelActor
+appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 }
 
 
 // --- UControlChannel ---
 void UControlChannel::StaticConstructor()
 {
+guard(UControlChannel::StaticConstructor);
+*(INT*)((BYTE*)this + 0x48) = 1;  // ChType = CHTYPE_Control
+unguard;
 }
 
-void UControlChannel::ReceivedBunch(FInBunch &)
+void UControlChannel::ReceivedBunch(FInBunch&)
 {
+guard(UControlChannel::ReceivedBunch);
+// Divergence: complex control message handling not implemented.
+unguard;
 }
 
-void UControlChannel::Serialize(const TCHAR*,EName)
+void UControlChannel::Serialize(const TCHAR*, EName)
 {
+guard(UControlChannel::Serialize);
+// Divergence: complex control serialization not implemented.
+unguard;
 }
 
 FString UControlChannel::Describe()
 {
-	return FString();
+return FString();
 }
 
 void UControlChannel::Destroy()
 {
-	// Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.
-	// If returns 0: assert Channels[ChIndex]==this, call UChannel::Destroy.
-	check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
-	if (RouteDestroy() == 0)
-		UChannel::Destroy();
+// Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.
+// If returns 0: assert Channels[ChIndex]==this, call UChannel::Destroy.
+check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
+if (RouteDestroy() == 0)
+UChannel::Destroy();
 }
 
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
-	UChannel::Init(Conn, ChIndex, InType);
+UChannel::Init(Conn, ChIndex, InType);
 }
 
 
@@ -189,30 +229,119 @@ void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 // =============================================================================
 
 void UChannel::Destroy() { Super::Destroy(); }
+
 void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
 {
-	ChIndex = InChIndex;
-	Connection = InConnection;
-	OpenedLocally = InOpenedLocally;
-	OpenPacketId = INDEX_NONE;
-	// NegotiatedVer copies from the connection's negotiated protocol version.
-	// UNetConnection::NegotiatedVer is within _ConnPad (not yet decoded from Ghidra).
-	// Default to 0 (minimum version) until the field offset is confirmed.
-	NegotiatedVer = 0;
+ChIndex = InChIndex;
+Connection = InConnection;
+OpenedLocally = InOpenedLocally;
+OpenPacketId = INDEX_NONE;
+// NegotiatedVer copies from the connection's negotiated protocol version.
+// UNetConnection::NegotiatedVer is within _ConnPad (not yet decoded from Ghidra).
+// Default to 0 (minimum version) until the field offset is confirmed.
+NegotiatedVer = 0;
 }
+
 void UChannel::SetClosingFlag() { Closing = 1; }
-void UChannel::Close() {}
-FString UChannel::Describe() { return FString(); }
-void UChannel::ReceivedNak( INT NakPacketId ) {}
-void UChannel::Tick() {}
-void UChannel::AssertInSequenced() {}
-INT CDECL UChannel::IsKnownChannelType( INT Type ) { return 0; }
+
+void UChannel::Close()
+{
+guard(UChannel::Close);
+// Divergence: 252-byte close bunch creation not implemented.
+unguard;
+}
+
+FString UChannel::Describe()
+{
+guard(UChannel::Describe);
+return FString();
+unguard;
+}
+
+void UChannel::ReceivedNak(INT NakPacketId)
+{
+guard(UChannel::ReceivedNak);
+for (FOutBunch* Out = *(FOutBunch**)((BYTE*)this + 0x5C); Out; Out = *(FOutBunch**)((BYTE*)Out + 0x54))
+{
+if (*(INT*)((BYTE*)Out + 0x74) == NakPacketId && *(INT*)((BYTE*)Out + 0x64) == 0)
+{
+if (!*(BYTE*)((BYTE*)Out + 0x7A))
+appFailAssert("Out->bReliable", ".\\UnChan.cpp", 0x203);
+debugf(NAME_DevNet, TEXT("Resending bunch"));
+Connection->SendRawBunch(*Out, 0);
+}
+}
+unguard;
+}
+
+void UChannel::Tick()
+{
+guard(UChannel::Tick);
+// Divergence: 247-byte resend timer logic not implemented.
+unguard;
+}
+
+void UChannel::AssertInSequenced()
+{
+guard(UChannel::AssertInSequenced);
+for (INT cur = *(INT*)((BYTE*)this + 0x58); cur && *(INT*)(cur + 0x58); cur = *(INT*)(cur + 0x58))
+{
+if (*(INT*)(*(INT*)(cur + 0x58) + 0x68) <= *(INT*)(cur + 0x68))
+appFailAssert("In->Next->ChSequence>In->ChSequence", ".\\UnChan.cpp", 0x108);
+}
+unguard;
+}
+
+INT CDECL UChannel::IsKnownChannelType(INT Type)
+{
+if (Type >= 0 && Type < 8 && UChannel::ChannelClasses[Type])
+return 1;
+return 0;
+}
+
 INT UChannel::IsNetReady( INT Saturate ) { return 1; }
-INT UChannel::MaxSendBytes() { return 0; }
-void UChannel::ReceivedAcks() {}
-void UChannel::ReceivedRawBunch( FInBunch& Bunch ) {}
-INT UChannel::ReceivedSequencedBunch( FInBunch& Bunch ) { return 0; }
-INT UChannel::RouteDestroy() { return 0; }
+
+INT UChannel::MaxSendBytes()
+{
+guard(UChannel::MaxSendBytes);
+INT* conn = *(INT**)((BYTE*)this + 0x2C);
+FBitWriter& ConnOut = *(FBitWriter*)((BYTE*)conn + 0x250);
+INT numBits = ConnOut.GetNumBits();
+INT maxBits = *(INT*)((BYTE*)conn + 0xD0) * 8;
+INT headerBits = (numBits != 0) ? 0 : 16;
+INT available = maxBits - headerBits - numBits - 0x41;
+INT bytes = (available + (available >> 31 & 7)) >> 3;
+return bytes < 1 ? 0 : bytes;
+unguard;
+}
+
+void UChannel::ReceivedAcks()
+{
+guard(UChannel::ReceivedAcks);
+// Divergence: 244-byte acked-bunch cleanup not implemented.
+unguard;
+}
+
+void UChannel::ReceivedRawBunch(FInBunch& Bunch)
+{
+guard(UChannel::ReceivedRawBunch);
+// Divergence: complex raw bunch routing not implemented.
+unguard;
+}
+
+INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
+{
+guard(UChannel::ReceivedSequencedBunch);
+return 0;
+unguard;
+}
+
+INT UChannel::RouteDestroy()
+{
+guard(UChannel::RouteDestroy);
+return 0;
+unguard;
+}
 
 // =============================================================================
 
@@ -224,14 +353,20 @@ INT UChannel::RouteDestroy() { return 0; }
 // ---------------------------------------------------------------------------
 void UChannel::StaticConstructor()
 {
+guard(UChannel::StaticConstructor);
+unguard;
 }
 
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
+guard(UChannel::ReceivedBunch);
+unguard;
 }
 
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
+guard(UChannel::Serialize);
+unguard;
 }
 
 // ---------------------------------------------------------------------------

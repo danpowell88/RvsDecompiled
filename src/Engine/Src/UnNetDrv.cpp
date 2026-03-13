@@ -1,6 +1,6 @@
 /*=============================================================================
-	UnNetDrv.cpp: Network driver (UNetDriver, UDemoRecDriver)
-	Reconstructed for Ravenshield decompilation project.
+UnNetDrv.cpp: Network driver (UNetDriver, UDemoRecDriver)
+Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
@@ -17,108 +17,201 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UNetDriver ---
 void UNetDriver::StaticConstructor()
 {
+guard(UNetDriver::StaticConstructor);
+unguard;
 }
 
 void UNetDriver::TickFlush()
 {
-	// Retail: 0x18b820, ordinal 4877. Calls TickFlush on ServerConnection (this+0x3C)
-	// if present, then calls TickFlush on each connection in the ClientConnections
-	// TArray at this+0x30 via vtable slot 0x84/4 (= TickFlush virtual).
-	// vtable[0x84/4] = vtable[33] = TickFlush.
-	typedef void (__thiscall* TickFlushFn)(void*);
-	INT* serverConn = *(INT**)((BYTE*)this + 0x3C);
-	if (serverConn)
-		((TickFlushFn)(*(void**)(*serverConn + 0x84)))(serverConn);
-	TArray<INT>& Clients = *(TArray<INT>*)((BYTE*)this + 0x30);
-	for (INT i = 0; i < Clients.Num(); i++)
-	{
-		INT* conn = (INT*)Clients(i);
-		((TickFlushFn)(*(void**)(*conn + 0x84)))(conn);
-	}
+// Retail: 0x18b820, ordinal 4877. Calls TickFlush on ServerConnection (this+0x3C)
+// if present, then calls TickFlush on each connection in the ClientConnections
+// TArray at this+0x30 via vtable slot 0x84/4 (= TickFlush virtual).
+// vtable[0x84/4] = vtable[33] = TickFlush.
+typedef void (__thiscall* TickFlushFn)(void*);
+INT* serverConn = *(INT**)((BYTE*)this + 0x3C);
+if (serverConn)
+((TickFlushFn)(*(void**)(*serverConn + 0x84)))(serverConn);
+TArray<INT>& Clients = *(TArray<INT>*)((BYTE*)this + 0x30);
+for (INT i = 0; i < Clients.Num(); i++)
+{
+INT* conn = (INT*)Clients(i);
+((TickFlushFn)(*(void**)(*conn + 0x84)))(conn);
+}
 }
 
-// (merged from earlier occurrence)
-void UNetDriver::TickDispatch(float)
+void UNetDriver::TickDispatch(float DeltaSeconds)
 {
+guard(UNetDriver::TickDispatch);
+*(double*)((BYTE*)this + 0x48) += (double)DeltaSeconds;
+*(INT*)((BYTE*)this + 0x88) = 0;
+*(INT*)((BYTE*)this + 0x84) = 0;
+if (*(INT*)((BYTE*)this + 0x3C) == 0)
+{
+INT cnt = *(INT*)((BYTE*)this + 0x34);
+for (INT i = cnt - 1; i >= 0; i--)
+{
+INT* conn = *(INT**)(*(INT*)((BYTE*)this + 0x30) + i * 4);
+if (conn && *(INT*)((BYTE*)conn + 0x80) == 1)
+{
+typedef void (__thiscall* DestroyFn)(void*, INT);
+((DestroyFn)(*(void**)(*conn + 0x0C)))(conn, 1);
 }
+}
+}
+unguard;
+}
+
 void UNetDriver::Serialize(FArchive &Ar)
 {
-	guard(UNetDriver::Serialize);
-	// Ghidra 0x1048C210: UObject::Serialize, then a conditional-transact helper (RVA 0x18BFA0)
-	// that returns a filtered archive, then serializes fields at +0x3C,+0x44,+0x7C,+0x80.
-	UObject::Serialize(Ar);
-	// NOTE: Divergence — object-ref fields (+0x3C ServerConnection, +0x44, +0x7C, +0x80) not serialized;
-	// full implementation requires transactor helper identification.
-	unguard;
+guard(UNetDriver::Serialize);
+// Ghidra 0x1048C210: UObject::Serialize, then a conditional-transact helper (RVA 0x18BFA0)
+// that returns a filtered archive, then serializes fields at +0x3C,+0x44,+0x7C,+0x80.
+UObject::Serialize(Ar);
+// NOTE: Divergence -- object-ref fields (+0x3C ServerConnection, +0x44, +0x7C, +0x80) not serialized;
+// full implementation requires transactor helper identification.
+unguard;
 }
+
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
-	// Ghidra 0x18c2d0: for each client connection, if actor has open channel
-	// (ServerConnection or ClientConnections TArray at +0x30), close it.
-	// Divergence: actor channel tracking via FUN_103b7b70 not implemented.
-	(void)Actor;
+guard(UNetDriver::NotifyActorDestroyed);
+// Ghidra 0x18c2d0: for each client connection, if actor has open channel
+// (ServerConnection or ClientConnections TArray at +0x30), close it.
+// Divergence: actor channel tracking via FUN_103b7b70 not implemented.
+(void)Actor;
+unguard;
 }
+
 void UNetDriver::AssertValid()
 {
+guard(UNetDriver::AssertValid);
+unguard;
 }
+
 void UNetDriver::Destroy()
 {
-}
-int UNetDriver::InitConnect(FNetworkNotify *,FURL &,FString &)
+guard(UNetDriver::Destroy);
+typedef void (__thiscall* VtableDestroy)(void*, INT);
+typedef void (__thiscall* VtableLLD)(void*);
+INT* serverConn = *(INT**)((BYTE*)this + 0x3C);
+if (serverConn)
+((VtableDestroy)(*(void**)(*serverConn + 0x0C)))(serverConn, 1);
+while (*(INT*)((BYTE*)this + 0x34) != 0)
 {
-	return 0;
+INT* conn = *(INT**)(*(INT*)((BYTE*)this + 0x30));
+if (conn)
+((VtableDestroy)(*(void**)(*conn + 0x0C)))(conn, 1);
+else
+break;
 }
-int UNetDriver::InitListen(FNetworkNotify *,FURL &,FString &)
+((VtableLLD)(*(void**)(*(INT*)this + 0x68)))(this);
+INT* masterConn = *(INT**)((BYTE*)this + 0x44);
+if (masterConn)
+((VtableDestroy)(*(void**)(*masterConn + 0x0C)))(masterConn, 1);
+Super::Destroy();
+unguard;
+}
+
+int UNetDriver::InitConnect(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
-	return 0;
+guard(UNetDriver::InitConnect);
+*(FNetworkNotify**)((BYTE*)this + 0x40) = Notify;
+return 1;
+unguard;
+}
+
+int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
+{
+guard(UNetDriver::InitListen);
+*(FNetworkNotify**)((BYTE*)this + 0x40) = Notify;
+return 1;
+unguard;
 }
 
 
 // --- UDemoRecDriver ---
-void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection *)
+void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*)
 {
+guard(UDemoRecDriver::SpawnDemoRecSpectator);
+unguard;
 }
 
 void UDemoRecDriver::StaticConstructor()
 {
+guard(UDemoRecDriver::StaticConstructor);
+unguard;
 }
 
 void UDemoRecDriver::TickDispatch(float)
 {
+guard(UDemoRecDriver::TickDispatch);
+// Divergence: complex demo playback not implemented.
+unguard;
 }
 
 void UDemoRecDriver::LowLevelDestroy()
 {
+guard(UDemoRecDriver::LowLevelDestroy);
+debugf(NAME_DevNet, TEXT("UDemoRecDriver LowLevelDestroy"));
+INT* demoFile = *(INT**)((BYTE*)this + 0xb4);
+if (demoFile)
+{
+typedef void (__thiscall* VDtor)(void*);
+((VDtor)(*(void**)*demoFile))(demoFile);
+*(INT*)((BYTE*)this + 0xb4) = 0;
+}
+unguard;
 }
 
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
-	return FString();
+return FString();
 }
 
-int UDemoRecDriver::Exec(const TCHAR*,FOutputDevice &)
+int UDemoRecDriver::Exec(const TCHAR*, FOutputDevice&)
 {
-	return 0;
+guard(UDemoRecDriver::Exec);
+return 0;
+unguard;
 }
 
-ULevel * UDemoRecDriver::GetLevel()
+ULevel* UDemoRecDriver::GetLevel()
 {
-	return NULL;
+guard(UDemoRecDriver::GetLevel);
+FNetworkNotify* notify = *(FNetworkNotify**)((BYTE*)this + 0x40);
+if (!notify)
+appFailAssert("Notify", ".\\UnDemoRec.cpp", 0x161);
+ULevel* lev = notify->NotifyGetLevel();
+if (!lev)
+appFailAssert("Notify->NotifyGetLevel()", ".\\UnDemoRec.cpp", 0x161);
+return lev;
+unguard;
 }
 
-int UDemoRecDriver::InitBase(int,FNetworkNotify *,FURL &,FString &)
+int UDemoRecDriver::InitBase(int, FNetworkNotify*, FURL& InURL, FString&)
 {
-	return 0;
+guard(UDemoRecDriver::InitBase);
+// Copy FURL.Map (offset 0x1C within FURL) to DemoFileName at this+0x9C.
+*(FString*)((BYTE*)this + 0x9C) = *(FString*)((BYTE*)&InURL + 0x1C);
+*(double*)((BYTE*)this + 0x48) = 0.0;
+*(INT*)((BYTE*)this + 0xCC) = 0;
+*(INT*)((BYTE*)this + 0xC4) = 0;
+return 1;
+unguard;
 }
 
-int UDemoRecDriver::InitConnect(FNetworkNotify *,FURL &,FString &)
+int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
 {
-	return 0;
+guard(UDemoRecDriver::InitConnect);
+return 0;
+unguard;
 }
 
-int UDemoRecDriver::InitListen(FNetworkNotify *,FURL &,FString &)
+int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
-	return 0;
+guard(UDemoRecDriver::InitListen);
+return 0;
+unguard;
 }
 
 
@@ -130,47 +223,208 @@ int UDemoRecDriver::InitListen(FNetworkNotify *,FURL &,FString &)
 // =============================================================================
 
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
-INT UNetConnection::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-void UNetConnection::Serialize( const TCHAR* Data, EName Event ) {}
+
+INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
+{
+guard(UNetConnection::Exec);
+return 0;
+unguard;
+}
+
+void UNetConnection::Serialize(const TCHAR* Data, EName Event)
+{
+guard(UNetConnection::Serialize);
+// Ghidra 0x184540: get associated output object at this+0xe84.
+// If non-null and not closing (field+0x34==0), call Serialize via vtable[0] at +0x68.
+INT* logObj = *(INT**)((BYTE*)this + 0xe84);
+if (logObj && *(INT*)((BYTE*)logObj + 0x34) == 0)
+{
+typedef void (__thiscall* SerFn)(void*, const TCHAR*, EName);
+void* fdOut = (void*)((BYTE*)logObj + 0x68);
+SerFn fn = *(SerFn*)*(void**)fdOut;
+fn(fdOut, Data, Event);
+}
+unguard;
+}
+
 void UNetConnection::Destroy() { Super::Destroy(); }
-void UNetConnection::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
-void UNetConnection::ReadInput( FLOAT DeltaSeconds ) {}
-void UNetConnection::InitOut() {}
-void UNetConnection::AssertValid() {}
-void UNetConnection::SendAck( INT PacketId, INT RemotePacketId ) {}
-void UNetConnection::FlushNet() {}
-void UNetConnection::Tick() {}
+
+void UNetConnection::Serialize(FArchive& Ar)
+{
+guard(UNetConnection::Serialize);
+Super::Serialize(Ar);
+// PackageMap at +0xC8; channel objects at +0xeb0 (0x50f entries); download at +0x4ba8.
+Ar << *(UObject**)((BYTE*)this + 0xC8);
+for (INT i = 0; i < 0x50f; i++)
+Ar << *(UObject**)((BYTE*)this + i * 4 + 0xeb0);
+Ar << *(UObject**)((BYTE*)this + 0x4ba8);
+unguard;
+}
+
+void UNetConnection::ReadInput(FLOAT DeltaSeconds)
+{
+guard(UNetConnection::ReadInput);
+unguard;
+}
+
+void UNetConnection::InitOut()
+{
+guard(UNetConnection::InitOut);
+FBitWriter TempWriter(*(INT*)((BYTE*)this + 0xD0) << 3);
+*(FBitWriter*)((BYTE*)this + 0x250) = TempWriter;
+unguard;
+}
+
+void UNetConnection::AssertValid()
+{
+guard(UNetConnection::AssertValid);
+INT ProtVer = *(INT*)((BYTE*)this + 0xCC);
+if (ProtVer < 1)
+appFailAssert("ProtocolVersion>=MIN_PROTOCOL_VERSION", ".\\UnConn.cpp", 0x93);
+if (ProtVer > 1)
+appFailAssert("ProtocolVersion<=MAX_PROTOCOL_VERSION", ".\\UnConn.cpp", 0x94);
+INT State = *(INT*)((BYTE*)this + 0x80);
+if (State != 1 && State != 2 && State != 3)
+appFailAssert("State==USOCK_Closed || State==USOCK_Pending || State==USOCK_Open", ".\\UnConn.cpp", 0x95);
+unguard;
+}
+
+void UNetConnection::SendAck(INT PacketId, INT RemotePacketId)
+{
+guard(UNetConnection::SendAck);
+if (*(INT*)((BYTE*)this + 0xD8) == 0)
+{
+if (RemotePacketId != 0)
+{
+PurgeAcks();
+TArray<INT>& AckPending = *(TArray<INT>*)((BYTE*)this + 0x4b64);
+INT idx = AckPending.Add(1);
+AckPending(idx) = PacketId;
+}
+BYTE bits = appCeilLogTwo(0x4000);
+PreSend((INT)bits + 1);
+FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
+Out.WriteBit(1);
+Out.WriteInt(PacketId, 0x4000);
+*(INT*)((BYTE*)this + 0x130) = 0;
+PostSend();
+}
+unguard;
+}
+
+void UNetConnection::FlushNet()
+{
+guard(UNetConnection::FlushNet);
+// Divergence: 1146-byte function -- complex packet assembly not implemented.
+unguard;
+}
+
+void UNetConnection::Tick()
+{
+guard(UNetConnection::Tick);
+// Divergence: 1628-byte function -- complex tick not implemented.
+unguard;
+}
+
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
-void UNetConnection::HandleClientPlayer( APlayerController* PC ) {}
+
+void UNetConnection::HandleClientPlayer(APlayerController* PC)
+{
+guard(UNetConnection::HandleClientPlayer);
+unguard;
+}
+
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
+
 void UNetConnection::PreSend( INT SizeBits )
 {
-	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
-	FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
-	INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
-	// If adding SizeBits + 1 bit would overflow, flush first.
-	if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
-		FlushNet();
-	// If Out is empty, write packet header (OutPacketId at 0xEA8).
-	if (Out.GetNumBits() == 0)
-	{
-		Out.WriteInt(*(DWORD*)((BYTE*)this + 0xEA8), 0x4000);
-		if (Out.GetNumBits() > 16)
-			appFailAssert("Out.GetNumBits()<=MAX_PACKET_HEADER_BITS", ".\\UnConn.cpp", 0x2A4);
-	}
-	// Final overflow check.
-	if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
-		appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
+// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
+FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
+INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
+// If adding SizeBits + 1 bit would overflow, flush first.
+if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
+FlushNet();
+// If Out is empty, write packet header (OutPacketId at 0xEA8).
+if (Out.GetNumBits() == 0)
+{
+Out.WriteInt(*(DWORD*)((BYTE*)this + 0xEA8), 0x4000);
+if (Out.GetNumBits() > 16)
+appFailAssert("Out.GetNumBits()<=MAX_PACKET_HEADER_BITS", ".\\UnConn.cpp", 0x2A4);
 }
-void UNetConnection::PurgeAcks() {}
-void UNetConnection::ReceiveFile( INT PackageIndex ) {}
-void UNetConnection::ReceivedNak( INT NakPacketId ) {}
-void UNetConnection::ReceivedPacket( FBitReader& Reader ) {}
-void UNetConnection::ReceivedRawPacket( void* Data, INT Count ) {}
-void UNetConnection::SendPackageMap() {}
-INT UNetConnection::SendRawBunch( FOutBunch& Bunch, INT InPacketId ) { return 0; }
-void UNetConnection::SetActorDirty( AActor* Actor ) {}
-void UNetConnection::SlowAssertValid() {}
+// Final overflow check.
+if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
+appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
+}
+
+void UNetConnection::PurgeAcks()
+{
+guard(UNetConnection::PurgeAcks);
+TArray<INT>& AckQueue = *(TArray<INT>*)((BYTE*)this + 0x4b70);
+for (INT i = 0; i < AckQueue.Num(); i++)
+SendAck(AckQueue(i), 0);
+AckQueue.Empty();
+unguard;
+}
+
+void UNetConnection::ReceiveFile(INT PackageIndex)
+{
+guard(UNetConnection::ReceiveFile);
+unguard;
+}
+
+void UNetConnection::ReceivedNak(INT NakPacketId)
+{
+guard(UNetConnection::ReceivedNak);
+TArray<UChannel*>& DirtyChans = *(TArray<UChannel*>*)((BYTE*)this + 0x4b7c);
+for (INT i = DirtyChans.Num() - 1; i >= 0; i--)
+{
+UChannel* ch = DirtyChans(i);
+ch->ReceivedNak(NakPacketId);
+if (ch->OpenPacketId == NakPacketId)
+ch->ReceivedAcks();
+}
+unguard;
+}
+
+void UNetConnection::ReceivedPacket(FBitReader& Reader)
+{
+guard(UNetConnection::ReceivedPacket);
+// Divergence: very complex packet processing not implemented.
+unguard;
+}
+
+void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
+{
+guard(UNetConnection::ReceivedRawPacket);
+unguard;
+}
+
+void UNetConnection::SendPackageMap()
+{
+guard(UNetConnection::SendPackageMap);
+unguard;
+}
+
+INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
+{
+guard(UNetConnection::SendRawBunch);
+return 0;
+unguard;
+}
+
+void UNetConnection::SetActorDirty(AActor* Actor)
+{
+guard(UNetConnection::SetActorDirty);
+// Divergence: FUN_103b7b70 (actor channel lookup) not reimplemented.
+(void)Actor;
+unguard;
+}
+
+void UNetConnection::SlowAssertValid()
+{
+guard(UNetConnection::SlowAssertValid);
+unguard;
+}
 
 // =============================================================================
 
@@ -182,16 +436,20 @@ void UNetConnection::SlowAssertValid() {}
 // ---------------------------------------------------------------------------
 UBOOL UNetDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
-	return 0;
+guard(UNetDriver::Exec);
+return 0;
+unguard;
 }
 
 void UNetDriver::LowLevelDestroy()
 {
+guard(UNetDriver::LowLevelDestroy);
+unguard;
 }
 
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
-	return FString();
+return FString();
 }
 
 // ---------------------------------------------------------------------------
