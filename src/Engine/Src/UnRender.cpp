@@ -249,7 +249,17 @@ void UCanvas::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
 	P_FINISH;
-	// TODO: Real implementation uses FLineBatcher (Ghidra 0x89b10), not RenDev->Draw3DLine.
+	// Retail (0x89b10): creates FLineBatcher with RI at Viewport+0x164,
+	// calls DrawLine, then destructs the batcher.
+	if( Viewport )
+	{
+		FRenderInterface* RI = *(FRenderInterface**)((BYTE*)Viewport + 0x164);
+		if( RI )
+		{
+			FLineBatcher Batcher( RI, 1, 0 );
+			Batcher.DrawLine( Start, End, Color );
+		}
+	}
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDraw3DLine );
@@ -404,8 +414,22 @@ void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
 	P_FINISH;
-	// TODO: Real implementation uses FLineBatcher (Ghidra 0x12d710), not RenDev->Draw3DLine.
-	// Accesses player viewport through this+0x3E8 -> +0x5B4 chain.
+	// Retail (0x12d710): gets viewport via Player+0x5B4, checks IsA(UViewport),
+	// creates FLineBatcher with RI at Viewport+0x164, draws, destructs.
+	// DIVERGENCE: Player->Viewport accessed via raw offset 0x5B4 (not in public headers).
+	if( Player )
+	{
+		UViewport* VP = *(UViewport**)((BYTE*)Player + 0x5B4);
+		if( VP && VP->IsA( UViewport::StaticClass() ) )
+		{
+			FRenderInterface* RI = *(FRenderInterface**)((BYTE*)VP + 0x164);
+			if( RI )
+			{
+				FLineBatcher Batcher( RI, 1, 0 );
+				Batcher.DrawLine( Start, End, Color );
+			}
+		}
+	}
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
