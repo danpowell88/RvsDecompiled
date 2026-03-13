@@ -397,6 +397,7 @@ int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2,
 // --- AR6EngineWeapon ---
 int AR6EngineWeapon::GetHeartBeatStatus()
 {
+	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
 	return 0;
 }
 
@@ -476,6 +477,7 @@ void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 
 int UR6AbstractGameManager::StartLogInProcedure()
 {
+	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
 	return 0;
 }
 
@@ -523,6 +525,7 @@ void UR6AbstractGameManager::GameServiceTick(UConsole *)
 
 int UR6AbstractGameManager::GetGSCreateUbiServer()
 {
+	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
 	return 0;
 }
 
@@ -548,6 +551,7 @@ void UR6AbstractPlanningInfo::AddPoint(AActor *)
 
 AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 {
+	// Verified from Ghidra: shared stub at 0x114310 — just returns NULL.
 	return NULL;
 }
 
