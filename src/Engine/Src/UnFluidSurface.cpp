@@ -17,6 +17,10 @@ inline void  operator delete(void*, void*) noexcept {}
 // Forward declaration for the DrawSprite free function (defined in EngineStubs.cpp)
 void DrawSprite(AActor* Actor, FVector Pos, UMaterial* Sprite, FLevelSceneNode* SceneNode, FRenderInterface* RI);
 
+// FLineExtentBoxIntersection is defined in CoreStubs.cpp and exported from Core.dll but
+// not declared in any project header — forward-declare it here.
+extern CORE_API INT FLineExtentBoxIntersection(const FBox& Box, const FVector& Start, const FVector& End, const FVector& Extent, FVector& HitLocation, FVector& HitNormal, FLOAT& HitTime);
+
 // FUN_103db080: removes an oscillator pointer (passed as &ptr) from the target
 // fluid surface's oscillator TArray at surface+0x47c.
 static void RemoveOscillatorFromList(void* oscPtr)
@@ -162,9 +166,11 @@ void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 	// TODO: full implementation (complex hex-offset and normal-from-heights logic).
 }
 
-int AFluidSurfaceInfo::GetClampedBitmap(int,int)
+int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)
 {
-	return 0;
+	// Ghidra 0x1ca90: bit-array lookup — (xSize * Y + X) into the clamp bitmap at this+0x404.
+	INT idx = *(INT*)((BYTE*)this + 0x39c) * Y + X; // xSize * Y + X
+	return (INT)((*(DWORD*)(*(INT*)((BYTE*)this + 0x404) + (idx >> 5) * 4) & (1u << ((BYTE)idx & 0x1f))) != 0);
 }
 
 void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
@@ -285,14 +291,84 @@ void UFluidSurfacePrimitive::Serialize(FArchive& Ar)
 	UPrimitive::Serialize(Ar);
 }
 
-int UFluidSurfacePrimitive::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
-	return 0;
+	// Ghidra 0x98d90: fluid surface line-check against AABB or flat plane.
+	guard(UFluidSurfacePrimitive::LineCheck);
+
+	AFluidSurfaceInfo* FluidInfo = (AFluidSurfaceInfo*)*(INT*)((BYTE*)this + 0x58);
+
+	if (Extent == FVector(0,0,0))
+	{
+		// Thin ray vs flat Z-plane at fluid surface Z
+		FLOAT SurfaceZ = *(FLOAT*)((BYTE*)FluidInfo + 0x23c); // Actor.Location.Z
+		FLOAT dz = End.Z - Start.Z;
+		if (dz != 0.0f)
+		{
+			FLOAT t = (SurfaceZ - Start.Z) / dz;
+			if (t >= 0.0f && t <= 1.0f)
+			{
+				FVector HitLoc(Start.X + (End.X - Start.X) * t, Start.Y + (End.Y - Start.Y) * t, SurfaceZ);
+				// Bounds check: FluidInfo bounding box at +0x448
+				FLOAT MinX = *(FLOAT*)((BYTE*)FluidInfo + 0x448);
+				FLOAT MaxX = *(FLOAT*)((BYTE*)FluidInfo + 0x454);
+				FLOAT MinY = *(FLOAT*)((BYTE*)FluidInfo + 0x44c);
+				FLOAT MaxY = *(FLOAT*)((BYTE*)FluidInfo + 0x458);
+				if (HitLoc.X >= MinX && HitLoc.X <= MaxX && HitLoc.Y >= MinY && HitLoc.Y <= MaxY)
+				{
+					Result.Actor    = (AActor*)FluidInfo;
+					Result.Location = HitLoc;
+					Result.Normal   = FVector(0,0,1);
+					Result.Time     = t;
+					INT nMats = ((FArray*)((BYTE*)FluidInfo + 0x1e0))->Num();
+					*(DWORD*)((BYTE*)&Result + 0x2c) = (nMats >= 1) ? **(DWORD**)(*(INT*)((BYTE*)FluidInfo + 0x1e0)) : 0;
+					return 0;
+				}
+			}
+		}
+	}
+	else
+	{
+		// Extent line check vs bounding box
+		FVector HitNormal, HitLoc;
+		FLOAT   HitTime;
+		if (FLineExtentBoxIntersection(*(FBox*)((BYTE*)FluidInfo + 0x448), Start, End, Extent, HitLoc, HitNormal, HitTime))
+		{
+			Result.Actor    = (AActor*)FluidInfo;
+			Result.Location = HitLoc;
+			Result.Normal   = HitNormal;
+			Result.Time     = HitTime;
+			INT nMats = ((FArray*)((BYTE*)FluidInfo + 0x1e0))->Num();
+			*(DWORD*)((BYTE*)&Result + 0x2c) = (nMats >= 1) ? **(DWORD**)(*(INT*)((BYTE*)FluidInfo + 0x1e0)) : 0;
+			return 0;
+		}
+	}
+
+	unguard;
+	return 1;
 }
 
-int UFluidSurfacePrimitive::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
+int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
 {
-	return 0;
+	// Ghidra 0x98560: point-vs-AABB overlap test using fluid surface bounding box.
+	AFluidSurfaceInfo* FluidInfo = (AFluidSurfaceInfo*)*(INT*)((BYTE*)this + 0x58);
+
+	guard(UFluidSurfacePrimitive::PointCheck);
+
+	FBox TestBox(FVector(Point.X - Extent.X, Point.Y - Extent.Y, Point.Z - Extent.Z),
+	             FVector(Point.X + Extent.X, Point.Y + Extent.Y, Point.Z + Extent.Z));
+	FBox* FluidBBox = (FBox*)((BYTE*)FluidInfo + 0x448);
+
+	if (FluidBBox->Intersect(TestBox))
+	{
+		Result.Actor = (AActor*)FluidInfo;
+		*(FVector*)((BYTE*)&Result + 0x14) = FVector(0.f, 0.f, 1.f);  // Normal = up
+		*(FVector*)((BYTE*)&Result + 0x08) = Point;
+		return 0;
+	}
+
+	unguard;
+	return 1;
 }
 
 FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const

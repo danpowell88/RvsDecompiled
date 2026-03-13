@@ -234,18 +234,68 @@ void AProjector::Detach(int Flush)
 
 UPrimitive * AProjector::GetPrimitive()
 {
-	return NULL;
+	// Ghidra 0xfaca0: lazily constructs a singleton UProjectorPrimitive (DAT_10780140).
+	if (!GProjectorPrimitive)
+	{
+		guard(AProjector::GetPrimitive);
+		GProjectorPrimitive = ConstructObject<UProjectorPrimitive>(UProjectorPrimitive::StaticClass());
+		unguard;
+	}
+	return GProjectorPrimitive;
 }
 
 
 // --- UProjectorPrimitive ---
-int UProjectorPrimitive::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+int UProjectorPrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
+	// Ghidra 0xfa470: projector frustum line-check against 6 clip planes.
+	if (!Actor)
+		return 1;
+
+	guard(UProjectorPrimitive::LineCheck);
+
+	// If Actor isn't an AProjector, treat it as null (retail code masks it to 0)
+	BYTE* Proj = Actor->IsA(AProjector::StaticClass()) ? (BYTE*)Actor : NULL;
+
+	// 6 clip planes stored at Projector+0x3b0..+0x408 (FPlane[6], 16 bytes each).
+	// Check each plane: if Start and End are both on negative side, line misses frustum.
+	for (INT i = 0; i < 6; i++)
+	{
+		FPlane& Plane = *(FPlane*)(Proj + 0x3b0 + i * 0x10);
+		if (Plane.PlaneDot(Start) < 0.0f && Plane.PlaneDot(End) < 0.0f)
+			return 1;
+	}
+
+	// Line intersects all planes — fill result
+	Result.Actor    = Actor;
+	Result.Location = Start;
+	Result.Normal   = (End - Start).SafeNormal();
+	Result.Time     = 0.0f;
+
+	unguard;
 	return 0;
 }
 
-int UProjectorPrimitive::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
+int UProjectorPrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
 {
+	// Ghidra 0xfa360: projector frustum point-check (no SEH frame).
+	BYTE* Proj = (Actor && Actor->IsA(AProjector::StaticClass())) ? (BYTE*)Actor : NULL;
+
+	FPlane* Plane = (FPlane*)(Proj + 0x3b0); // 6 frustum planes at Projector+0x3b0
+	for (INT i = 0; i < 6; i++, Plane = (FPlane*)((BYTE*)Plane + 0x10))
+	{
+		FLOAT extX = Plane->X * Extent.X; if (extX < 0.f) extX = -extX;
+		FLOAT extY = Plane->Y * Extent.Y; if (extY < 0.f) extY = -extY;
+		FLOAT extZ = Plane->Z * Extent.Z; if (extZ < 0.f) extZ = -extZ;
+		if (Plane->PlaneDot(Point) < -(extX + extY + extZ))
+			return 1; // outside this plane — miss
+	}
+
+	// All 6 planes passed — point is inside frustum
+	Result.Actor = Actor;
+	// Normal = projector forward direction (FRotator at Actor+0x240)
+	*(FVector*)((BYTE*)&Result + 0x14) = ((FRotator*)(Proj + 0x240))->Vector();
+	*(FVector*)((BYTE*)&Result + 0x08) = Point;
 	return 0;
 }
 
