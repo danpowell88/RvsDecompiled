@@ -44,16 +44,32 @@ void CBoneDescData::m_vProcessLbpLine(int,int,FString &)
 {
 }
 
-CBoneDescData::CBoneDescData(CBoneDescData const &)
+CBoneDescData::CBoneDescData(CBoneDescData const & Other)
 {
+	// Ghidra 0x2b030, 93B. Copy 2 DWORDs, deep-copy TArray<FString>, copy FString, copy DWORD.
+	*(DWORD*)((BYTE*)this + 0x00) = *(const DWORD*)((const BYTE*)&Other + 0x00);
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	new((BYTE*)this + 0x08) TArray<FString>(*(const TArray<FString>*)((const BYTE*)&Other + 0x08));
+	new((BYTE*)this + 0x14) FString(*(const FString*)((const BYTE*)&Other + 0x14));
+	*(DWORD*)((BYTE*)this + 0x20) = *(const DWORD*)((const BYTE*)&Other + 0x20);
 }
 
 CBoneDescData::CBoneDescData()
 {
+	// Ghidra 0x55b30, 93B. Init TArray<FString> at +0x08, FString at +0x14, zero the rest.
+	*(DWORD*)((BYTE*)this + 0x00) = 0;
+	*(DWORD*)((BYTE*)this + 0x04) = 0;
+	new((BYTE*)this + 0x08) TArray<FString>();
+	new((BYTE*)this + 0x14) FString();
+	*(DWORD*)((BYTE*)this + 0x20) = 0;
 }
 
 CBoneDescData::~CBoneDescData()
 {
+	// Destroy TArray<FString> at +0x08 and FString at +0x14.
+	typedef TArray<FString> TFStringArray;
+	((TFStringArray*)((BYTE*)this + 0x08))->~TFStringArray();
+	((FString*)((BYTE*)this + 0x14))->~FString();
 }
 
 CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)

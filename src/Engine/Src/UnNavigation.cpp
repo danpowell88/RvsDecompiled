@@ -7,6 +7,9 @@ void AJumpDest::SetupForcedPath(APawn *,UReachSpec *)
 
 void AJumpDest::ClearPaths()
 {
+	// Ghidra 0xd69e0, 24B. Call base, then zero the path-count field at +0x3E8.
+	ANavigationPoint::ClearPaths();
+	*(DWORD*)((BYTE*)this + 0x3E8) = 0; // NumPaths / jump-destination counter
 }
 
 

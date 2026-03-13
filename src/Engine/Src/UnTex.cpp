@@ -121,12 +121,36 @@ void UTexture::Tick(float)
 }
 void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
+	// DIVERGENCE: retail (~150+ B) does per-pixel blending. Skipped — too complex.
 }
-void UTexture::Clear(DWORD)
+void UTexture::Clear(DWORD ClearFlags)
 {
+	// Ghidra 0x16a570, 58B with SEH. If bit 1 of ClearFlags is set, zero each mip's DataArray.
+	if (ClearFlags & 2)
+	{
+		INT Count = Mips.Num();
+		for (INT i = 0; i < Count; i++)
+		{
+			FMipmap* Mip = (FMipmap*)(*(INT*)((BYTE*)this + 0xBC) + i * 0x28);
+			Mip->Clear();
+		}
+	}
 }
-void UTexture::Clear(FColor)
+void UTexture::Clear(FColor InColor)
 {
+	// Ghidra 0x169470, 108B. TEXF_RGBA8 (5) only: fill all pixels with InColor.
+	// this+0x58=Format, this+0x60=USize, this+0x64=VSize, this+0xBC=Mips TArray.
+	if (Format == TEXF_RGBA8)
+	{
+		INT Total = USize * VSize;
+		if (Total > 0)
+		{
+			DWORD ColorDW = *(DWORD*)&InColor;
+			DWORD* Pixels = *(DWORD**)(*(INT*)((BYTE*)this + 0xBC) + 0x1C);
+			for (INT i = 0; i < Total; i++)
+				Pixels[i] = ColorDW;
+		}
+	}
 }
 void UTexture::ConstantTimeTick()
 {
@@ -155,6 +179,7 @@ void UTexture::Init(int,int)
 // --- FDXTCompressionOptions ---
 FDXTCompressionOptions::FDXTCompressionOptions()
 {
+	// Ghidra 0x203248: shares entry with FMipmapBase::FMipmapBase() and others — body is empty.
 }
 
 FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionOptions& Other)
@@ -166,24 +191,78 @@ FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionO
 
 
 // --- FMipmap ---
-FMipmap::FMipmap(FMipmap const &)
+FMipmap::FMipmap(FMipmap const & Other)
 {
+	// Ghidra 0x27730, 90B. Copy FMipmapBase (+0x00..+0x0F), deep-copy DataArray,
+	// copy SavedAr/SavedPos; retail sets TLazyArray vtable at +0x10.
+	appMemcpy((BYTE*)this, (const BYTE*)&Other, 0x10); // FMipmapBase fields
+	*(TArray<BYTE>*)((BYTE*)this + 0x1C) = *(const TArray<BYTE>*)((const BYTE*)&Other + 0x1C);
+	// DIVERGENCE: vtable at +0x10 not set to TLazyArray vtable.
+	*(DWORD*)((BYTE*)this + 0x10) = 0;
+	*(DWORD*)((BYTE*)this + 0x14) = *(const DWORD*)((const BYTE*)&Other + 0x14); // SavedAr
+	*(DWORD*)((BYTE*)this + 0x18) = *(const DWORD*)((const BYTE*)&Other + 0x18); // SavedPos
 }
 
-FMipmap::FMipmap(BYTE,BYTE)
+FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 {
+	// Ghidra 0x20a10, 89B. Computes W=1<<UBits, H=1<<VBits, allocates W*H bytes.
+	INT W = 1 << (InUBits & 0x1F);
+	INT H = 1 << (InVBits & 0x1F);
+	*(DWORD*)((BYTE*)this + 0x00) = 0;
+	*(INT*)  ((BYTE*)this + 0x04) = W;
+	*(INT*)  ((BYTE*)this + 0x08) = H;
+	*(BYTE*) ((BYTE*)this + 0x0C) = InUBits;
+	*(BYTE*) ((BYTE*)this + 0x0D) = InVBits;
+	*(BYTE*) ((BYTE*)this + 0x0E) = 0; // padding
+	*(BYTE*) ((BYTE*)this + 0x0F) = 0;
+	*(DWORD*)((BYTE*)this + 0x10) = 0; // vtable (DIVERGENCE: retail sets TLazyArray vtable)
+	*(DWORD*)((BYTE*)this + 0x14) = 0;
+	*(DWORD*)((BYTE*)this + 0x18) = 0;
+	INT Count = W * H;
+	BYTE* Data = Count > 0 ? (BYTE*)appMalloc(Count, TEXT("FMipmap")) : NULL;
+	*(BYTE**)((BYTE*)this + 0x1C) = Data;
+	*(INT*)  ((BYTE*)this + 0x20) = Count;
+	*(INT*)  ((BYTE*)this + 0x24) = Count;
 }
 
-FMipmap::FMipmap(BYTE,BYTE,int)
+FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 {
+	// Ghidra 0x20a70, 88B. Like (BYTE,BYTE) but uses explicit byte count instead of W*H.
+	*(BYTE*) ((BYTE*)this + 0x0C) = InUBits;
+	*(INT*)  ((BYTE*)this + 0x04) = 1 << (InUBits & 0x1F);
+	*(BYTE*) ((BYTE*)this + 0x0D) = InVBits;
+	*(DWORD*)((BYTE*)this + 0x00) = 0;
+	*(INT*)  ((BYTE*)this + 0x08) = 1 << (InVBits & 0x1F);
+	*(BYTE*) ((BYTE*)this + 0x0E) = 0; // padding
+	*(BYTE*) ((BYTE*)this + 0x0F) = 0;
+	*(DWORD*)((BYTE*)this + 0x10) = 0; // vtable (DIVERGENCE)
+	*(DWORD*)((BYTE*)this + 0x14) = 0;
+	*(DWORD*)((BYTE*)this + 0x18) = 0;
+	BYTE* Data = InCount > 0 ? (BYTE*)appMalloc(InCount, TEXT("FMipmap")) : NULL;
+	*(BYTE**)((BYTE*)this + 0x1C) = Data;
+	*(INT*)  ((BYTE*)this + 0x20) = InCount;
+	*(INT*)  ((BYTE*)this + 0x24) = InCount;
 }
 
 FMipmap::FMipmap()
 {
+	// Ghidra 0x209e0: calls FArray::FArray(this+0x1c,0,1), zeros SavedAr/Pos, sets vtable.
+	// DIVERGENCE: vtable at +0x10 not set to TLazyArray vtable.
+	appMemzero((BYTE*)this, 0x28);
 }
 
 FMipmap::~FMipmap()
 {
+	// Ghidra 0x20ad0: calls TLazyArray<BYTE>::~TLazyArray(this+0x10).
+	// DIVERGENCE: free DataArray directly to avoid memory leak.
+	BYTE* Data = *(BYTE**)((BYTE*)this + 0x1C);
+	if (Data)
+	{
+		appFree(Data);
+		*(BYTE**)((BYTE*)this + 0x1C) = NULL;
+		*(INT*)((BYTE*)this + 0x20) = 0;
+		*(INT*)((BYTE*)this + 0x24) = 0;
+	}
 }
 
 FMipmap& FMipmap::operator=(const FMipmap& Other)
@@ -199,16 +278,29 @@ FMipmap& FMipmap::operator=(const FMipmap& Other)
 
 void FMipmap::Clear()
 {
+	// Ghidra 0x18e10, ~40B. Zeroes all bytes in DataArray (at +0x1C).
+	BYTE* Data = *(BYTE**)((BYTE*)this + 0x1C);
+	INT   Num  = *(INT*) ((BYTE*)this + 0x20);
+	if (Data && Num > 0)
+		appMemzero(Data, Num);
 }
 
 
 // --- FMipmapBase ---
-FMipmapBase::FMipmapBase(BYTE,BYTE)
+FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 {
+	// Ghidra 0x4260, 49B.
+	*(DWORD*)((BYTE*)this + 0x00) = 0;
+	*(BYTE*) ((BYTE*)this + 0x0C) = InUBits;
+	*(INT*)  ((BYTE*)this + 0x04) = 1 << (InUBits & 0x1F);
+	*(BYTE*) ((BYTE*)this + 0x0D) = InVBits;
+	*(INT*)  ((BYTE*)this + 0x08) = 1 << (InVBits & 0x1F);
 }
 
 FMipmapBase::FMipmapBase()
 {
+	// Ghidra 0x203248: merged entry — body is empty (zero-initialisation from callsite).
+	appMemzero((BYTE*)this, sizeof(_Data));
 }
 
 FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)

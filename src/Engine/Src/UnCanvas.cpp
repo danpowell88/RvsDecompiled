@@ -100,12 +100,21 @@ void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TC
 {
 }
 
-void UCanvas::WrappedPrintf(UFont *,int,const TCHAR*,...)
+void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 {
+	// Ghidra 0x8b500, 128B. Format varargs then call WrappedPrint with STY_Normal.
+	TCHAR Buffer[4097];
+	appGetVarArgs(Buffer, ARRAY_COUNT(Buffer), Fmt);
+	INT XL = 0, YL = 0;
+	WrappedPrint(STY_Normal, XL, YL, Font, bCenter, Buffer);
 }
 
-void UCanvas::WrappedStrLenf(UFont *,int &,int &,const TCHAR*,...)
+void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...)
 {
+	// Ghidra 0x8b450, 122B. Format varargs then call WrappedPrint with STY_None to measure.
+	TCHAR Buffer[4097];
+	appGetVarArgs(Buffer, ARRAY_COUNT(Buffer), Fmt);
+	WrappedPrint(STY_None, XL, YL, Font, 0, Buffer);
 }
 
 // (merged from earlier occurrence)
@@ -195,15 +204,58 @@ void UCanvas::SetStretch(float stretchX, float stretchY)
 	m_fStretchX = stretchX;
 	m_fStretchY = stretchY;
 }
-void UCanvas::DrawTileClipped(UMaterial *,float,float,float,float,float,float)
+void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL)
 {
+	// Ghidra 0x88f10, ~200B. Clip tile to current canvas bounds, then call DrawTile.
+	if (XL <= 0.0f || YL <= 0.0f)
+		return;
+	// Clip left edge
+	if (CurX < 0.0f)
+	{
+		FLOAT Adj = (CurX / XL) * UL;
+		U  -= Adj;
+		UL += Adj;
+		XL += CurX;
+		CurX = 0.0f;
+	}
+	// Clip top edge
+	if (CurY < 0.0f)
+	{
+		FLOAT Adj = (VL / YL) * CurY;
+		V  -= Adj;
+		VL += Adj;
+		YL += CurY;
+		CurY = 0.0f;
+	}
+	// Clip right edge (ClipX is the canvas clip width, OrgX is the canvas origin)
+	FLOAT MaxX = ClipX - CurX;
+	if (MaxX < XL)
+	{
+		UL = ((MaxX - XL) / XL + 1.0f) * UL;
+		XL = MaxX;
+	}
+	// Clip bottom edge
+	FLOAT MaxY = ClipY - CurY;
+	if (MaxY < YL)
+	{
+		VL = ((MaxY - YL) / YL + 1.0f) * VL;
+		YL = MaxY;
+	}
+	if (Style != STY_None)
+		DrawTile(Material, OrgX + CurX, OrgY + CurY, XL, YL, U, V, UL, VL, Z,
+		         DrawColor.Plane(), FPlane(0,0,0,0), 0.0f);
+	// Advance cursor: SpaceX + current CurX + drawn width
+	CurX  = SpaceX + CurX + XL;
+	CurYL = Max(CurYL, YL);
 }
 int UCanvas::_DrawString(UFont *,int,int,const TCHAR*,FPlane,int,int,int)
 {
 	return 0;
 }
-void UCanvas::WrappedDrawString(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
+void UCanvas::WrappedDrawString(ERenderStyle InStyle, INT& XL, INT& YL, UFont* Font, INT bCenter, const TCHAR* Text)
 {
+	// Ghidra 0x8cac0, 11B. Simply forwards to WrappedPrint.
+	WrappedPrint(InStyle, XL, YL, Font, bCenter, Text);
 }
 void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
 {
@@ -218,11 +270,25 @@ void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
   CurX      = 0.0f;
   CurY      = 0.0f;
 }
-void UCanvas::DrawIcon(UMaterial *,float,float,float,float,float,FPlane,FPlane)
+void UCanvas::DrawIcon(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XSize, FLOAT YSize, FLOAT ZDepth, FPlane Color, FPlane AlphaScale)
 {
+	// Ghidra 0x880f0, 170B. Get material UV dimensions, then call DrawTile.
+	if (!Material) return;
+	INT MatUSize = Material->MaterialUSize();
+	INT MatVSize = Material->MaterialVSize();
+	DrawTile(Material, X, Y, XSize, YSize, 0.0f, 0.0f,
+	         (FLOAT)MatUSize, (FLOAT)MatVSize, ZDepth, Color, AlphaScale, 0.0f);
 }
-void UCanvas::DrawPattern(UMaterial *,float,float,float,float,float,float,float,float,FPlane,FPlane)
+void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT TileU, FLOAT TileV, FLOAT TileZ, FPlane Color, FPlane AlphaScale)
 {
+	// Ghidra 0x87ff0. Tile the material across the surface using Scale and UV offsets.
+	if (!Material) return;
+	INT MatUSize = Material->MaterialUSize();
+	INT MatVSize = Material->MaterialVSize();
+	DrawTile(Material, X, Y, XL, YL,
+	         (X - TileU) * Scale + (FLOAT)MatUSize,
+	         (Y - TileV) * Scale + (FLOAT)MatVSize,
+	         XL * Scale, YL * Scale, TileZ, Color, AlphaScale, 0.0f);
 }
 void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,float,float,FPlane,FPlane,float)
 {
