@@ -23,65 +23,9 @@ FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
 
 
 // --- UReachSpec ---
-int UReachSpec::findBestReachable(AScout *Scout)
+int UReachSpec::findBestReachable(AScout *)
 {
-	// Ghidra 0xfcdb0: test reachability at multiple scout collision sizes;
-	// fills Distance/CollisionRadius/CollisionHeight if a path exists.
-	guard(UReachSpec::findBestReachable);
-
-	// Three candidate (radius, height) pairs to try
-	FLOAT radii[3]   = {40.f, 40.f, 40.f};
-	FLOAT heights[3] = {28.f, 40.f, 85.f};
-
-	// Use the smallest pair first
-	Scout->SetCollisionSize(radii[0], heights[0]);
-	if (!PlaceScout(Scout))
-		return 0;
-
-	*(DWORD*)((BYTE*)Scout + 0x660) = 0; // reset scout flag (Ghidra: param_1+0x660)
-
-	// TODO: resolve FUN_1050557c (used to pack radius/height/distance into reach spec fields)
-	// typedef DWORD (*FUN_1050557c_t)();
-	// Raw vtable line-checks toward End node (0xcc = LineCheck vtable slot on level driver)
-	ANavigationPoint* StartNode = Start; // this+0x48
-	ANavigationPoint* EndNode   = End;   // this+0x4c
-	{
-		// Using actorReachable as proxy for the reach test
-		INT iVar1 = Scout->actorReachable(EndNode, 1, 1);
-		if (!iVar1)
-			return 0;
-
-		// TODO: resolve FUN_1050557c — sets Distance/CollisionRadius/CollisionHeight
-		// For now, compute distance directly:
-		FVector delta(
-			*(FLOAT*)((BYTE*)EndNode + 0x234) - *(FLOAT*)((BYTE*)StartNode + 0x234),
-			*(FLOAT*)((BYTE*)EndNode + 0x238) - *(FLOAT*)((BYTE*)StartNode + 0x238),
-			*(FLOAT*)((BYTE*)EndNode + 0x23c) - *(FLOAT*)((BYTE*)StartNode + 0x23c)
-		);
-		*(INT*)((BYTE*)this + 0x30) = appRound(delta.Size()); // Distance
-		*(INT*)((BYTE*)this + 0x3c) = appRound(radii[0]);    // CollisionRadius (from retail)
-		*(INT*)((BYTE*)this + 0x40) = appRound(heights[0]);  // CollisionHeight
-
-		// Try progressively larger collision sizes
-		for (INT i = 1; i < 3; i++)
-		{
-			Scout->SetCollisionSize(radii[i], heights[i]);
-			if (!PlaceScout(Scout))
-				break;
-			INT ok = Scout->actorReachable(EndNode, 1, 1);
-			if (!ok)
-				break;
-			*(INT*)((BYTE*)this + 0x34) = appRound(radii[i]);
-			*(INT*)((BYTE*)this + 0x38) = appRound(heights[i]);
-		}
-
-		*(INT*)((BYTE*)this + 0x30) = appRound(delta.Size()); // final Distance
-		if (reachFlags & 4)
-			*(INT*)((BYTE*)this + 0x30) = appRound(delta.Size()); // Ghidra repeats for flag 4
-	}
-
-	unguard;
-	return 1;
+	return 0;
 }
 
 int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
@@ -95,38 +39,9 @@ int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
   return 1;
 }
 
-int UReachSpec::defineFor(ANavigationPoint *Pt1, ANavigationPoint *Pt2, APawn *Scout)
+int UReachSpec::defineFor(ANavigationPoint *,ANavigationPoint *,APawn *)
 {
-	// Ghidra 0xfd140: record start/end nav-points, call InitForPathing, then findBestReachable.
-	// Declare result before guard so it remains in scope after unguard.
-	INT result = 0;
-
-	guard(UReachSpec::defineFor);
-
-	Start = Pt1; // this+0x48
-	End   = Pt2; // this+0x4c
-
-	// Validate Scout is an AScout (retail uses IsA check, masks to NULL if not)
-	AScout* ActualScout = NULL;
-	if (Scout && Scout->IsA(AScout::StaticClass()))
-		ActualScout = (AScout*)Scout;
-
-	if (ActualScout)
-		ActualScout->InitForPathing();
-
-	// PrePath virtual call (vtable offset 0x178 on ANavigationPoint)
-	typedef void (__thiscall* NavVFn)(void*);
-	((NavVFn)(*(DWORD*)(*(DWORD*)(BYTE*)Pt1 + 0x178)))((void*)Pt1); // Start->PrePath()
-	((NavVFn)(*(DWORD*)(*(DWORD*)(BYTE*)Pt2 + 0x178)))((void*)Pt2); // End->PrePath()
-
-	result = findBestReachable(ActualScout);
-
-	// PostPath virtual call (vtable offset 0x17c)
-	((NavVFn)(*(DWORD*)(*(DWORD*)(BYTE*)Pt1 + 0x17c)))((void*)Pt1); // Start->PostPath()
-	((NavVFn)(*(DWORD*)(*(DWORD*)(BYTE*)Pt2 + 0x17c)))((void*)Pt2); // End->PostPath()
-
-	unguard;
-	return result;
+	return 0;
 }
 
 FPlane UReachSpec::PathColor()
@@ -176,78 +91,9 @@ FPlane UReachSpec::PathColor()
 	return FPlane(r, g, b, 0.0f);
 }
 
-int UReachSpec::PlaceScout(AScout *Scout)
+int UReachSpec::PlaceScout(AScout *)
 {
-	// Ghidra 0xfca40: teleport Scout to the Start node's location (with optional ladder/ledge offset).
-	guard(UReachSpec::PlaceScout);
-
-	// 12-slot check result initialised to Time=1.0 (miss), Item=-1
-	DWORD CheckBuf[12] = {0,0,0,0,0,0,0,0,0,0x3f800000,0xffffffff,0};
-
-	ANavigationPoint* StartNode = Start; // this+0x48
-	// vtable offsets on Scout for TeleportTo (0x9c) and MoveSmooth (0x98)
-	typedef INT  (__thiscall* TeleportFn)(void*, DWORD, DWORD, DWORD, INT, INT, INT, INT);
-	typedef void (__thiscall* MoveSmFn  )(void*, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, void*, INT, INT, INT, INT, INT);
-
-	TeleportFn fTeleport   = (TeleportFn  )(*(DWORD*)(*(DWORD*)(BYTE*)Scout + 0x9c));
-	MoveSmFn   fMoveSmooth = (MoveSmFn    )(*(DWORD*)(*(DWORD*)(BYTE*)Scout + 0x98));
-
-	// If Start is on a ledge/ladder (bSpecialMove or IsA ALadder)
-	if (*(INT*)((BYTE*)StartNode + 0x15c) != 0 ||
-	    StartNode->IsA(ALadder::StaticClass()))
-	{
-		FLOAT scoutH  = *(FLOAT*)((BYTE*)Scout    + 0xfc); // CollisionHeight
-		FLOAT startH  = *(FLOAT*)((BYTE*)StartNode + 0xfc);
-		FLOAT zOff = scoutH - startH;
-		if (zOff < 0.f) zOff = 0.f;
-		FLOAT placeZ = *(FLOAT*)((BYTE*)StartNode + 0x23c) + zOff;
-		// TeleportTo at offset position
-		INT ok = fTeleport(Scout,
-			*(DWORD*)((BYTE*)StartNode + 0x234), // X
-			*(DWORD*)((BYTE*)StartNode + 0x238), // Y
-			*(DWORD*)&placeZ,                    // Z
-			0, 0, 0, 0);
-		if (ok)
-		{
-			// MoveSmooth drop by -CollisionHeight
-			FLOAT dropZ = -scoutH;
-			fMoveSmooth(Scout,
-				0x80000000, 0x80000000, *(DWORD*)&dropZ,
-				*(DWORD*)((BYTE*)Scout + 0x240),
-				*(DWORD*)((BYTE*)Scout + 0x244),
-				*(DWORD*)((BYTE*)Scout + 0x248),
-				CheckBuf, 0, 0, 0, 0, 0);
-			goto PlaceScout_done;
-		}
-	}
-
-	// Fallback: TeleportTo at Start->Location
-	{
-		INT ok = fTeleport(Scout,
-			*(DWORD*)((BYTE*)StartNode + 0x234),
-			*(DWORD*)((BYTE*)StartNode + 0x238),
-			*(DWORD*)((BYTE*)StartNode + 0x23c),
-			0, 0, 0, 0);
-		if (!ok)
-			return 0;
-	}
-
-PlaceScout_done:
-	// If scout flies and the region isn't blocked, drop
-	if (*(BYTE*)((BYTE*)Scout + 0x2c * sizeof(int)) == 1) // bFly at param_1[0x2c] (DWORD-indexed)
-	{
-		// Retail: check region flag at *(Scout->XLevel->RegionTable + ...) + 0x410) & 0x40
-		// For simplicity, skip drop for flying scouts (retail only drops if not water/no-grav zone)
-		FLOAT dropH = -(*(FLOAT*)((BYTE*)StartNode + 0xfc));
-		fMoveSmooth(Scout, 0, 0, *(DWORD*)&dropH,
-			*(DWORD*)((BYTE*)Scout + 0x240),
-			*(DWORD*)((BYTE*)Scout + 0x244),
-			*(DWORD*)((BYTE*)Scout + 0x248),
-			CheckBuf, 0, 0, 0, 0, 0);
-	}
-
-	unguard;
-	return 1;
+	return 0;
 }
 
 int UReachSpec::operator==(UReachSpec const & other)

@@ -275,12 +275,9 @@ void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, 
 	CurX  = SpaceX + CurX + XL;
 	CurYL = Max(CurYL, YL);
 }
-int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane Color, int CR, int RenderStyle, int DrawExtraLine)
+int UCanvas::_DrawString(UFont *,int,int,const TCHAR*,FPlane,int,int,int)
 {
-	// Ghidra 0x8b130: delegates to FUN_1038ac40 (internal DrawString worker).
-	// TODO: resolve FUN_1038ac40
-	typedef int (__thiscall* DrawStrFn)(UCanvas*, UFont*, int, int, const TCHAR*, FPlane, int, int, int);
-	return ((DrawStrFn)0x1038ac40)(this, Font, XL, YL, Text, Color, CR, RenderStyle, DrawExtraLine);
+	return 0;
 }
 void UCanvas::WrappedDrawString(ERenderStyle InStyle, INT& XL, INT& YL, UFont* Font, INT bCenter, const TCHAR* Text)
 {

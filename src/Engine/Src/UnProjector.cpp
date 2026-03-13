@@ -234,93 +234,19 @@ void AProjector::Detach(int Flush)
 
 UPrimitive * AProjector::GetPrimitive()
 {
-	// Ghidra 0xfaca0: lazily constructs a singleton UProjectorPrimitive (DAT_10780140).
-	if (!GProjectorPrimitive)
-	{
-		guard(AProjector::GetPrimitive);
-		GProjectorPrimitive = ConstructObject<UProjectorPrimitive>(UProjectorPrimitive::StaticClass());
-		unguard;
-	}
-	return GProjectorPrimitive;
+	return NULL;
 }
 
 
 // --- UProjectorPrimitive ---
-int UProjectorPrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
+int UProjectorPrimitive::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
-	// Ghidra 0xfa470: projector frustum line-check against 6 clip planes.
-	// Early-out (before SEH frame) if no actor
-	if (!Actor)
-		return 1;
-
-	guard(UProjectorPrimitive::LineCheck);
-
-	// If Actor isn't an AProjector, treat it as null (retail code masks it to 0)
-	BYTE* Proj = Actor->IsA(AProjector::StaticClass()) ? (BYTE*)Actor : NULL;
-
-	// 6 clip planes stored at Projector+0x3b0..+0x408 (FPlane[6], 16 bytes each)
-	FPlane ClipPlanes[6];
-	for (INT i = 0; i < 6; i++)
-	{
-		// TODO: resolve FUN_103fa310 — scales extent onto plane normal for expanded-box line check
-		// typedef float (*FUN_103fa310_t)(float*, float*);
-		// FLOAT scale = ((FUN_103fa310_t)0x103fa310)((float*)(Proj + 0x3b0 + i*0x10), (float*)&Extent);
-		// Build expanded plane: origin = plane_ref - normal*scale
-		// For now store raw projector plane (partial implementation pending FUN_103fa310 resolution)
-		*(FPlane*)((BYTE*)ClipPlanes + i * 0x10) = *(FPlane*)(Proj + 0x3b0 + i * 0x10);
-	}
-
-	// Check each plane — if Start and End are both on negative side, line exits frustum (miss)
-	for (INT i = 0; i < 6; i++)
-	{
-		FLOAT dotStart = ClipPlanes[i].PlaneDot(Start);
-		FLOAT dotEnd   = ClipPlanes[i].PlaneDot(End);
-		if (dotStart < 0.0f && dotEnd < 0.0f)
-			return 1;
-	}
-
-	// Line intersects all planes — fill result
-	Result.Actor     = Actor;
-	Result.Location  = Start;
-	FVector Dir = End - Start;
-	Result.Normal = Dir.SafeNormal();
-	Result.Time  = 0.0f;
-
-	unguard;
 	return 0;
 }
 
-int UProjectorPrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
+int UProjectorPrimitive::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
-	// Ghidra 0xfa360: projector frustum point-check (no SEH frame).
-	// If Actor isn't an AProjector, treat as null (retail masks to 0)
-	BYTE* Proj = (Actor && Actor->IsA(AProjector::StaticClass())) ? (BYTE*)Actor : NULL;
-
-	INT i = 0;
-	FPlane* Plane = (FPlane*)(Proj + 0x3b0); // 6 frustum planes
-	while (true)
-	{
-		FLOAT extX = Plane->X * Extent.X; if (extX < 0.f) extX = -extX;
-		FLOAT extY = Plane->Y * Extent.Y; if (extY < 0.f) extY = -extY;
-		FLOAT extZ = Plane->Z * Extent.Z; if (extZ < 0.f) extZ = -extZ;
-		FLOAT d = Plane->PlaneDot(Point);
-		if (d < -(extZ + extY + extX))
-			break; // outside this plane → miss
-		i++;
-		Plane = (FPlane*)((BYTE*)Plane + 0x10);
-		if (i > 5)
-		{
-			// All 6 planes passed — point is inside frustum
-			Result.Actor = Actor;
-			// Normal = projector forward (FRotator at Actor+0x240)
-			FVector Fwd = ((FRotator*)(Proj + 0x240))->Vector();
-			*(FVector*)((BYTE*)&Result + 0x14) = Fwd;
-			*(FLOAT*)((BYTE*)&Result + 8)  = extZ;
-			*(FVector*)((BYTE*)&Result + 0xc) = Point;
-			return 0;
-		}
-	}
-	return 1;
+	return 0;
 }
 
 void UProjectorPrimitive::Destroy()
