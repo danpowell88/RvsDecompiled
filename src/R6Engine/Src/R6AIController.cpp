@@ -316,6 +316,7 @@ void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 	P_GET_BYTE(ePace);
 	P_GET_OBJECT(AActor, aTarget);
 	P_FINISH;
+	// TODO: calls FindPath/FindPathToward then FollowPath (complex inline — see Ghidra)
 }
 
 void AR6AIController::execGotoOpenDoorState(FFrame& Stack, RESULT_DECL)
@@ -336,6 +337,8 @@ void AR6AIController::execMoveToPosition(FFrame& Stack, RESULT_DECL)
 	P_GET_STRUCT(FVector, VPosition);
 	P_GET_STRUCT(FRotator, rOrientation);
 	P_FINISH;
+	// TODO: sets Destination, calls Pawn->setMoveTimer and AR6Pawn::moveToPosition,
+	// then sets LatentAction = 601 (0x259) to begin PollMoveToPosition (see Ghidra)
 }
 
 void AR6AIController::execNeedToOpenDoor(FFrame& Stack, RESULT_DECL)
@@ -354,17 +357,27 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
-	// Poll — no bytecode params; called by VM during latent waits
+	// Poll — no bytecode params; called by VM during latent waits.
+	// TODO: checks MoveTimer, calls vtable move, advances route cache via
+	// SetDestinationToNextInCache, handles door-type waypoints (complex — see Ghidra)
 }
 
 void AR6AIController::execPollFollowPathBlocked(FFrame& Stack, RESULT_DECL)
 {
-	// Poll — no bytecode params
+	// Poll function — no bytecode params; called by VM each tick while latent wait is active.
+	// If we have a pawn and there's a next cached waypoint, keep following (LatentAction = 602 = 0x25a).
+	// Otherwise the path is exhausted or the pawn is gone, so clear the latent action.
+	if (Pawn != NULL && SetDestinationToNextInCache())
+		GetStateFrame()->LatentAction = 602; // EPOLL_FollowPathBlocked
+	else
+		GetStateFrame()->LatentAction = 0;
 }
 
 void AR6AIController::execPollMoveToPosition(FFrame& Stack, RESULT_DECL)
 {
-	// Poll — no bytecode params
+	// Poll — no bytecode params; called by VM during latent waits.
+	// TODO: calls AR6Pawn::moveToPosition each tick and clears LatentAction when
+	// the pawn arrives or the pawn pointer becomes NULL (see Ghidra)
 }
 
 /*-----------------------------------------------------------------------------

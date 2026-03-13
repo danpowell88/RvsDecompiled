@@ -778,6 +778,7 @@ void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 	P_GET_NAME(nBoneName);
 	P_GET_UBOOL(bLeftFoot);
 	P_FINISH;
+	// TODO: decal/trace footstep effect — complex inline sound/decal logic (see Ghidra)
 }
 
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
@@ -841,6 +842,7 @@ void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 	P_GET_STRUCT(FRotator, rHitDirection);
 	P_GET_INT(iHitBone);
 	P_FINISH;
+	// TODO: drives hit-reaction bone rotation via USkeletalMeshInstance::SetBoneRotation (see Ghidra)
 }
 
 void AR6Pawn::execPawnCanBeHurtFrom(FFrame& Stack, RESULT_DECL)
@@ -894,6 +896,7 @@ void AR6Pawn::execPlayVoices(FFrame& Stack, RESULT_DECL)
 	P_GET_UBOOL(bWaitToFinishSound);
 	P_GET_FLOAT(fTime);
 	P_FINISH;
+	// TODO: routes voice through player controller sound priority system (see Ghidra)
 }
 
 void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
@@ -908,6 +911,7 @@ void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 	P_GET_BYTE(ID);
 	P_GET_UBOOL(bDoNotPlayLocallySound);
 	P_FINISH;
+	// TODO: calls SetAudioInfo then replicates sound to all player controllers (see Ghidra)
 }
 
 void AR6Pawn::execSetAudioInfo(FFrame& Stack, RESULT_DECL)
@@ -944,6 +948,7 @@ void AR6Pawn::execToggleHeatProperties(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(UTexture, pMaskTexture);
 	P_GET_OBJECT(UTexture, pAddTexture);
 	P_FINISH;
+	// TODO: applies/removes thermal-vision viewport texture properties (see Ghidra)
 }
 
 void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
@@ -952,6 +957,7 @@ void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(UTexture, pMaskTexture);
 	P_GET_OBJECT(UTexture, pAddTexture);
 	P_FINISH;
+	// TODO: sets GNightVisionActive and applies night-vision viewport textures (see Ghidra)
 }
 
 void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
@@ -960,6 +966,7 @@ void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(UTexture, pMaskTexture);
 	P_GET_OBJECT(UTexture, pAddTexture);
 	P_FINISH;
+	// TODO: applies/removes weapon-scope viewport overlay textures (see Ghidra)
 }
 
 void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)

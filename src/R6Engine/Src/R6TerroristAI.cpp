@@ -86,6 +86,7 @@ void AR6TerroristAI::execCallBackupForAttack(FFrame& Stack, RESULT_DECL)
 	P_GET_STRUCT(FVector, vDestination);
 	P_GET_BYTE(ePace);
 	P_FINISH;
+	// TODO: iterates nearby terrorists, calls path finding and eventGotoPointAndAttack (see Ghidra)
 }
 
 void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
@@ -93,6 +94,7 @@ void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 	P_GET_STRUCT(FVector, vDestination);
 	P_GET_BYTE(ePace);
 	P_FINISH;
+	// TODO: iterates terrorist list, calls eventGotoPointAndSearch on each (see Ghidra)
 }
 
 void AR6TerroristAI::execCallVisibleTerrorist(FFrame& Stack, RESULT_DECL)

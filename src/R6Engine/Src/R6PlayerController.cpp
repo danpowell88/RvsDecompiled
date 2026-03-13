@@ -246,6 +246,8 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 	P_GET_UBOOL(bWaitToFinishSound);
 	P_GET_FLOAT(fTime);
 	P_FINISH;
+	// TODO: manages m_PlayVoicesPriority list, allocates FstSoundPriorityPtr,
+	// routes through SelectActorForSound and per-slot stop/play logic (see Ghidra)
 }
 
 void AR6PlayerController::execUpdateCircumstantialAction(FFrame& Stack, RESULT_DECL)
