@@ -91,6 +91,7 @@ FVector UPrimitive::GetEncroachCenter( AActor* Owner )
 // Engine globals — UT432 base.
 ENGINE_API FMemStack		GEngineMem;
 ENGINE_API FMemCache		GCache;
+ENGINE_API UEngine*			GEngine = NULL;
 
 // Engine statistics.
 ENGINE_API FEngineStats		GEngineStats;

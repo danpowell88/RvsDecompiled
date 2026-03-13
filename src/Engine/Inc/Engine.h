@@ -30,6 +30,7 @@
 
 ENGINE_API extern class FMemStack	GEngineMem;
 ENGINE_API extern class FMemCache	GCache;
+ENGINE_API extern class UEngine*	GEngine;
 
 /*-----------------------------------------------------------------------------
 	Engine public includes.
