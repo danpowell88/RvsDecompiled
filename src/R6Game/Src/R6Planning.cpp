@@ -1,37 +1,15 @@
 /*=============================================================================
-	R6Planning.cpp
-	AR6PlanningCtrl, UR6PlanningInfo — mission planning system.
+	R6Planning.cpp — UR6PlanningInfo
 =============================================================================*/
 
 #include "R6GamePrivate.h"
 
-IMPLEMENT_CLASS(AR6PlanningCtrl)
 IMPLEMENT_CLASS(UR6PlanningInfo)
 
-IMPLEMENT_FUNCTION(AR6PlanningCtrl, -1, execGetClickResult)
-IMPLEMENT_FUNCTION(AR6PlanningCtrl, -1, execGetXYPoint)
-IMPLEMENT_FUNCTION(AR6PlanningCtrl, -1, execPlanningTrace)
 IMPLEMENT_FUNCTION(UR6PlanningInfo, -1, execAddToTeam)
 IMPLEMENT_FUNCTION(UR6PlanningInfo, -1, execDeletePoint)
 IMPLEMENT_FUNCTION(UR6PlanningInfo, -1, execFindPathToNextPoint)
 IMPLEMENT_FUNCTION(UR6PlanningInfo, -1, execInsertToTeam)
-
-// --- AR6PlanningCtrl ---
-
-void AR6PlanningCtrl::execGetClickResult(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-void AR6PlanningCtrl::execGetXYPoint(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-void AR6PlanningCtrl::execPlanningTrace(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
 
 // --- UR6PlanningInfo ---
 

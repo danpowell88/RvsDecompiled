@@ -1,20 +1,14 @@
 /*=============================================================================
 	R6AbstractGameService.cpp
-	UR6AbstractGameService, UR6AbstractEviLPatchService — abstract game
-	service base classes for master server, CD key, and lobby management.
 =============================================================================*/
 
 #include "R6AbstractPrivate.h"
 
-IMPLEMENT_CLASS(UR6AbstractEviLPatchService)
 IMPLEMENT_CLASS(UR6AbstractGameService)
 
-IMPLEMENT_FUNCTION(UR6AbstractEviLPatchService, -1, execGetState)
 IMPLEMENT_FUNCTION(UR6AbstractGameService, -1, execNativeSubmitMatchResult)
 
-/*-----------------------------------------------------------------------------
-	UR6AbstractGameService
------------------------------------------------------------------------------*/
+// --- UR6AbstractGameService ---
 
 void UR6AbstractGameService::Created() {}
 void UR6AbstractGameService::DisconnectAllCDKeyPlayers() {}
@@ -60,28 +54,6 @@ FString UR6AbstractGameService::GetAuthID(INT) { return TEXT(""); }
 void UR6AbstractGameService::execNativeSubmitMatchResult(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
-}
-
-/*-----------------------------------------------------------------------------
-	UR6AbstractEviLPatchService
------------------------------------------------------------------------------*/
-
-// Global callback pointer stored by SetFunctionPtr, read by execGetState.
-// Ghidra: DAT_10010df0 — static storage, not a class member.
-static DWORD (CDECL* GEviLPatchCallback)(void) = NULL;
-
-void UR6AbstractEviLPatchService::SetFunctionPtr(DWORD (CDECL* Func)(void))
-{
-	GEviLPatchCallback = Func;
-}
-
-void UR6AbstractEviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-	if (GEviLPatchCallback != NULL)
-		*(DWORD*)Result = GEviLPatchCallback();
-	else
-		*(DWORD*)Result = 0;
 }
 
 /*-----------------------------------------------------------------------------

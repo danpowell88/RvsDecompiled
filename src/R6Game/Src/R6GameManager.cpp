@@ -1,53 +1,10 @@
 /*=============================================================================
 	R6GameManager.cpp
-	UR6GameManager, UR6MissionRoster, UR6Operative, UR6PlayerCampaign,
-	UR6PlayerCustomMission, UR6FileManagerCampaign, UR6FileManagerPlanning.
 =============================================================================*/
 
 #include "R6GamePrivate.h"
 
-IMPLEMENT_CLASS(UR6FileManagerCampaign)
-IMPLEMENT_CLASS(UR6FileManagerPlanning)
 IMPLEMENT_CLASS(UR6GameManager)
-IMPLEMENT_CLASS(UR6MissionRoster)
-IMPLEMENT_CLASS(UR6Operative)
-IMPLEMENT_CLASS(UR6PlayerCampaign)
-IMPLEMENT_CLASS(UR6PlayerCustomMission)
-
-IMPLEMENT_FUNCTION(UR6FileManagerCampaign, -1, execLoadCampaign)
-IMPLEMENT_FUNCTION(UR6FileManagerCampaign, -1, execSaveCampaign)
-IMPLEMENT_FUNCTION(UR6FileManagerPlanning, -1, execGetNumberOfFiles)
-IMPLEMENT_FUNCTION(UR6FileManagerPlanning, -1, execLoadPlanning)
-IMPLEMENT_FUNCTION(UR6FileManagerPlanning, -1, execSavePlanning)
-
-// --- UR6FileManagerCampaign ---
-
-void UR6FileManagerCampaign::execLoadCampaign(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-void UR6FileManagerCampaign::execSaveCampaign(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-// --- UR6FileManagerPlanning ---
-
-void UR6FileManagerPlanning::execGetNumberOfFiles(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-void UR6FileManagerPlanning::execLoadPlanning(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-void UR6FileManagerPlanning::execSavePlanning(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
 
 // --- UR6GameManager ---
 
@@ -114,18 +71,6 @@ void UR6GameManager::StartPreJoinProcedure(INT)
 }
 
 void UR6GameManager::UnInitialize()
-{
-}
-
-// --- UR6MissionRoster ---
-
-void UR6MissionRoster::TransferFile(FArchive &)
-{
-}
-
-// --- UR6Operative ---
-
-void UR6Operative::TransferFile(FArchive &)
 {
 }
 

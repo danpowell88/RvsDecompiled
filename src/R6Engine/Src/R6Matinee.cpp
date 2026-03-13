@@ -1,41 +1,10 @@
 /*=============================================================================
-	R6Matinee.cpp
-	UR6MatineeAttach, UR6PlayAnim, UR6SubActionAnimSequence,
-	UR6SubActionLookAt, AR6MatineeRainbow, AR6MatineeTerrorist,
-	AR6MatineeHostage — R6 matinee/cutscene extensions.
+	R6Matinee.cpp — UR6SubActionAnimSequence
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
 
-IMPLEMENT_CLASS(AR6MatineeHostage)
-IMPLEMENT_CLASS(AR6MatineeRainbow)
-IMPLEMENT_CLASS(AR6MatineeTerrorist)
-IMPLEMENT_CLASS(UR6MatineeAttach)
-IMPLEMENT_CLASS(UR6PlayAnim)
 IMPLEMENT_CLASS(UR6SubActionAnimSequence)
-IMPLEMENT_CLASS(UR6SubActionLookAt)
-
-IMPLEMENT_FUNCTION(UR6MatineeAttach, -1, execGetBoneInformation)
-IMPLEMENT_FUNCTION(UR6MatineeAttach, -1, execTestLocation)
-
-// --- UR6MatineeAttach ---
-
-void UR6MatineeAttach::execGetBoneInformation(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-void UR6MatineeAttach::execTestLocation(FFrame& Stack, RESULT_DECL)
-{
-	P_FINISH;
-}
-
-// --- UR6PlayAnim ---
-
-void UR6PlayAnim::eventAnimFinished()
-{
-	ProcessEvent(FindFunctionChecked(R6ENGINE_AnimFinished), NULL);
-}
 
 // --- UR6SubActionAnimSequence ---
 
@@ -151,26 +120,6 @@ void UR6SubActionAnimSequence::eventSequenceChanged()
 void UR6SubActionAnimSequence::eventSequenceFinished()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SequenceFinished), NULL);
-}
-
-// --- UR6SubActionLookAt ---
-
-FString UR6SubActionLookAt::GetStatString()
-{
-	FString Result = UMatSubAction::GetStatString();
-	Result += TEXT("LookAt\n");
-	return Result;
-}
-
-INT UR6SubActionLookAt::Update(FLOAT DeltaTime, ASceneManager* SceneManager)
-{
-	if (!UMatSubAction::Update(DeltaTime, SceneManager))
-		return 0;
-	if (IsRunning() && m_AffectedPawn)
-	{
-		m_AffectedPawn->PawnTrackActor(m_TargetActor, m_bAim);
-	}
-	return 1;
 }
 
 /*-----------------------------------------------------------------------------

@@ -1,14 +1,10 @@
 /*=============================================================================
-	R6Replication.cpp
-	AR6GameReplicationInfo, AR6SoundReplicationInfo,
-	AR6TeamMemberReplicationInfo — network replication info actors.
+	R6SoundReplicationInfo.cpp
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
 
-IMPLEMENT_CLASS(AR6GameReplicationInfo)
 IMPLEMENT_CLASS(AR6SoundReplicationInfo)
-IMPLEMENT_CLASS(AR6TeamMemberReplicationInfo)
 
 IMPLEMENT_FUNCTION(AR6SoundReplicationInfo, -1, execPlayLocalWeaponSound)
 IMPLEMENT_FUNCTION(AR6SoundReplicationInfo, -1, execPlayWeaponSound)
@@ -19,18 +15,6 @@ static BYTE GSoundRepInfo_OldCurrentWeapon;
 static BYTE GSoundRepInfo_OldNewWeaponSound;
 static BYTE GSoundRepInfo_OldNewPawnState;
 static FVector GSoundRepInfo_OldLocation;
-
-// --- AR6GameReplicationInfo ---
-
-FLOAT AR6GameReplicationInfo::eventGetRoundTime()
-{
-	struct {
-		FLOAT ReturnValue;
-	} Parms;
-	Parms.ReturnValue = 0.f;
-	ProcessEvent(FindFunctionChecked(R6ENGINE_GetRoundTime), &Parms);
-	return Parms.ReturnValue;
-}
 
 // --- AR6SoundReplicationInfo ---
 
@@ -149,47 +133,6 @@ void AR6SoundReplicationInfo::execStopWeaponSound(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	StopWeaponSound();
-}
-
-// --- AR6TeamMemberReplicationInfo ---
-
-INT AR6TeamMemberReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*, FVector)
-{
-	guard(AR6TeamMemberReplicationInfo::IsNetRelevantFor);
-
-	// Check viewer's pawn directly
-	APawn* ViewPawn = Viewer->Pawn;
-	if (ViewPawn != NULL)
-		return IsRelevantToTeamMember(ViewPawn);
-
-	// Fallback: check cached view target in APlayerController hidden native data
-	// APlayerController+0x5B8 holds a ViewTarget actor pointer
-	AActor* ViewTarget = *(AActor**)((BYTE*)Viewer + 0x5B8);
-	if (ViewTarget != NULL)
-	{
-		// Original calls vtable[0x68/4] which returns APawn* (GetPlayerPawn)
-		ViewPawn = ViewTarget->GetPlayerPawn();
-		if (ViewPawn != NULL)
-			return IsRelevantToTeamMember(ViewPawn);
-	}
-
-	return 0;
-
-	unguard;
-}
-
-INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn* Other)
-{
-	guard(AR6TeamMemberReplicationInfo::IsRelevantToTeamMember);
-	if (Other && Other->Controller)
-		return Instigator->IsFriend(Other) ? 1 : 0;
-	return 0;
-	unguard;
-}
-
-void AR6TeamMemberReplicationInfo::TickSpecial(FLOAT DeltaTime)
-{
-	AActor::TickSpecial(DeltaTime);
 }
 
 /*-----------------------------------------------------------------------------

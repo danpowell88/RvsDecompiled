@@ -1,12 +1,10 @@
 /*=============================================================================
 	R6Hostage.cpp
-	AR6Hostage — hostage pawn events.
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
 
 IMPLEMENT_CLASS(AR6Hostage)
-IMPLEMENT_CLASS(AR6HostageAI)
 
 // --- AR6Hostage ---
 

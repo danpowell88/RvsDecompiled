@@ -1,12 +1,10 @@
 /*=============================================================================
 	R6Rainbow.cpp
-	AR6Rainbow, AR6RainbowTeam — rainbow operative pawn and team manager.
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
 
 IMPLEMENT_CLASS(AR6Rainbow)
-IMPLEMENT_CLASS(AR6RainbowTeam)
 
 // --- AR6Rainbow ---
 
@@ -23,22 +21,6 @@ void AR6Rainbow::UpdateAiming()
 	}
 
 	unguard;
-}
-
-// --- AR6RainbowTeam ---
-
-void AR6RainbowTeam::eventRequestFormationChange(BYTE A)
-{
-	struct { BYTE A; } Parms;
-	Parms.A = A;
-	ProcessEvent(FindFunctionChecked(R6ENGINE_RequestFormationChange), &Parms);
-}
-
-void AR6RainbowTeam::eventUpdateTeamFormation(BYTE A)
-{
-	struct { BYTE A; } Parms;
-	Parms.A = A;
-	ProcessEvent(FindFunctionChecked(R6ENGINE_UpdateTeamFormation), &Parms);
 }
 
 /*-----------------------------------------------------------------------------

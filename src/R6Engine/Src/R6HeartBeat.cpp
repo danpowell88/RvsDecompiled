@@ -1,13 +1,10 @@
 /*=============================================================================
-	R6HeartBeat.cpp
-	AR6FalseHeartBeat, AR6GenericHB, AR6SAHeartBeatJammer — heartbeat sensor.
+	R6HeartBeat.cpp — AR6FalseHeartBeat
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
 
 IMPLEMENT_CLASS(AR6FalseHeartBeat)
-IMPLEMENT_CLASS(AR6GenericHB)
-IMPLEMENT_CLASS(AR6SAHeartBeatJammer)
 
 // --- AR6FalseHeartBeat ---
 

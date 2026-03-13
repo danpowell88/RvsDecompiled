@@ -1,12 +1,10 @@
 /*=============================================================================
 	R6GameInfo.cpp
-	AR6GameInfo, AR6MultiPlayerGameInfo — R6 game info and score submission.
 =============================================================================*/
 
 #include "R6GamePrivate.h"
 
 IMPLEMENT_CLASS(AR6GameInfo)
-IMPLEMENT_CLASS(AR6MultiPlayerGameInfo)
 
 IMPLEMENT_FUNCTION(AR6GameInfo, -1, execGetSystemUserName)
 IMPLEMENT_FUNCTION(AR6GameInfo, -1, execInitScoreSubmission)

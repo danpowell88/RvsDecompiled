@@ -1,13 +1,10 @@
 /*=============================================================================
-	R6Bullet.cpp: Bullet, grenade, and grenade-weapon classes.
-	Reconstructed for Ravenshield decompilation project.
+	R6Bullet.cpp
 =============================================================================*/
 
 #include "R6WeaponsPrivate.h"
 
 IMPLEMENT_CLASS(AR6Bullet)
-IMPLEMENT_CLASS(AR6Grenade)
-IMPLEMENT_CLASS(AR6GrenadeWeapon)
 
 IMPLEMENT_FUNCTION(AR6Bullet, -1, execBulletGoesThroughSurface)
 
@@ -45,13 +42,6 @@ void AR6Bullet::execBulletGoesThroughSurface(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT_REF(UClass, ExitEffects);
 	P_FINISH;
 	*(BYTE*)Result = 0;
-}
-
-// --- AR6Grenade ---
-
-void AR6Grenade::PostNetReceive()
-{
-	Super::PostNetReceive();
 }
 
 /*-----------------------------------------------------------------------------
