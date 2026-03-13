@@ -1566,6 +1566,60 @@ void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 {
+	guard(APawn::StartNewSerpentine);
+	// Retail 0xe5b60: compute right-perpendicular to Dir in XY, orient away from
+	// Start, then set SerpentineTime/Dist based on bAdvancedTactics.
+
+	// Right-perp to Dir in XY: (Dir.Y, -Dir.X, Dir.Z)
+	FVector perp(Dir.Y, -Dir.X, Dir.Z);
+
+	// If already on positive side of perp relative to Start, flip
+	if ((perp | (Location - Start)) > 0.f)
+		perp = -perp;
+
+	SerpentineDir = perp;
+
+	// DIVERGENCE: Ghidra has no null guard; added for safety
+	if (!Controller || !Controller->CurrentPath)
+	{
+		SerpentineTime = 9999.f;
+		SerpentineDist = 0.f;
+		return;
+	}
+
+	if (Controller->bAdvancedTactics)
+	{
+		FLOAT r = appFrand();
+		if (r >= 0.2f)
+		{
+			// 80% case: zero timer, compute distance from path/pawn radius ratio
+			SerpentineTime = 0.f;
+			FLOAT factor = (CollisionRadius * 4.f) / (FLOAT)Controller->CurrentPath->CollisionRadius;
+			if (factor > 1.0f) factor = 1.0f;
+			FLOAT r2 = appFrand();
+			factor = (1.0f - factor) * r2 + factor;
+			FLOAT room = (FLOAT)Controller->CurrentPath->CollisionRadius - CollisionRadius;
+			if (room < 0.f) room = 0.f;
+			SerpentineDist = room * factor;
+		}
+		else
+		{
+			// 20% case: short random timer (second rand call per Ghidra)
+			SerpentineTime = appFrand() * 0.4f + 0.1f;
+		}
+		return;
+	}
+
+	// Non-advanced tactics: long wait, random distance, 40% chance of direction flip
+	SerpentineTime = 9999.f;
+	SerpentineDist = appFrand();
+	if (appFrand() < 0.4f)
+		SerpentineDir = -SerpentineDir;
+
+	FLOAT room = (FLOAT)Controller->CurrentPath->CollisionRadius - CollisionRadius;
+	if (room < 0.f) room = 0.f;
+	SerpentineDist *= room;
+	unguard;
 }
 
 FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJumpZ)
@@ -1991,6 +2045,18 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
+	guard(AController::CheckHearSound);
+	// Retail 0x12cc70: fire eventAIHearSound if Pawn valid and sound is within range.
+	if (!Pawn)
+		return;
+	if (!IsProbing(ENGINE_AIHearSound))
+		return;
+	FVector OutNoiseLoc;
+	// DIVERGENCE: Ghidra passes Pawn->Location as first FVector arg to CanHearSound,
+	// indicating it is the listener location (not the sound origin).
+	if (CanHearSound(Pawn->Location, SoundMaker, Volume, OutNoiseLoc))
+		eventAIHearSound(SoundMaker, SoundId, Sound, Pawn->Location, SoundLoc * Volume, (DWORD)Flags);
+	unguard;
 }
 
 AActor* AController::GetViewTarget()
