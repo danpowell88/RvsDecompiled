@@ -35,9 +35,47 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- CBoneDescData ---
-int CBoneDescData::fn_bInitFromLbpFile(const TCHAR*)
+int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
-	return 0;
+	guard(CBoneDescData::fn_bInitFromLbpFile);
+	FString fileStr;
+	if (!appLoadFileToString(fileStr, param_1, GFileManager))
+	{
+		GError->Logf(TEXT(""));
+		return 0;
+	}
+	TArray<FString> lines;
+	fileStr.ParseIntoArray(TEXT("\n"), &lines);
+	*(INT*)((BYTE*)this + 0) = appAtoi(*lines(0));
+	for (INT i = 0; i < *(INT*)((BYTE*)this + 0); i++)
+	{
+		((TArray<FString>*)((BYTE*)this + 8))->AddZeroed(1);
+		// TODO: FUN_1031efc0 -- deep copy FString array element
+	}
+	*(INT*)((BYTE*)this + 4) = appAtoi(*lines(*(INT*)((BYTE*)this + 0) + 4));
+	INT frameCount = *(INT*)((BYTE*)this + 4);
+	if (frameCount != 0)
+	{
+		BYTE** arr = (BYTE**)GMalloc->Malloc(frameCount * 4, TEXT("BoneDesc"));
+		*(void**)((BYTE*)this + 0x20) = arr;
+		INT boneCount = *(INT*)((BYTE*)this + 0);
+		for (INT fi = 0; fi < frameCount; fi++)
+		{
+			BYTE* pFVar5 = (BYTE*)GMalloc->Malloc(boneCount * 0x1c, TEXT("BoneFrame"));
+			arr[fi] = pFVar5;
+		}
+	}
+	for (INT frame = 0; frame < *(INT*)((BYTE*)this + 4); frame++)
+	{
+		for (INT bone = 0; bone < *(INT*)((BYTE*)this + 0); bone++)
+		{
+			INT lineIdx = *(INT*)((BYTE*)this + 0) * (frame + 1) + 5 + bone;
+			m_vProcessLbpLine(frame, bone, lines(lineIdx));
+		}
+	}
+	GLog->Logf(TEXT(""));
+	return 1;
+	unguard;
 }
 
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
@@ -105,14 +143,50 @@ CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 
 
 // --- CCompressedLipDescData ---
-int CCompressedLipDescData::fn_bInitFromMemory(BYTE*)
+int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 {
-	return 0;
+	if (param_1 == NULL) return 0;
+	INT iVar1 = m_bReadCompressedFileFromMemory(param_1);
+	GLog->Logf(TEXT(""));
+	return iVar1;
 }
 
-int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE*)
+int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 {
-	return 0;
+	guard(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
+	appMemcpy((BYTE*)this + 8,    param_1,        4);
+	appMemcpy((BYTE*)this + 0,    param_1 + 4,    4);
+	appMemcpy((BYTE*)this + 4,    param_1 + 8,    4);
+	appMemcpy((BYTE*)this + 0xc,  param_1 + 0xc,  4);
+	appMemcpy((BYTE*)this + 0x10, param_1 + 0x10, 4);
+	appMemcpy((BYTE*)this + 0x1c, param_1 + 0x14, 4);
+	appMemcpy((BYTE*)this + 0x18, param_1 + 0x18, 4);
+	BYTE* puVar6 = param_1 + 0x1c;
+	INT count = *(INT*)((BYTE*)this + 0x18);
+	void* arr = GMalloc->Malloc(count << 4, TEXT("CompressedLip"));
+	*(void**)((BYTE*)this + 0x20) = arr;
+	INT iVar4 = 0;
+	for (INT iVar7 = 0; iVar7 < count; iVar7++)
+	{
+		FLOAT fVal; appMemcpy(&fVal, puVar6, 4); puVar6 += 4;
+		*(FLOAT*)((BYTE*)arr + iVar4) = fVal;
+		SWORD sVal; appMemcpy(&sVal, puVar6, 4); puVar6 += 4;
+		*(SWORD*)((BYTE*)arr + iVar4 + 4) = sVal;
+		_WORD count2 = *(_WORD*)((BYTE*)arr + iVar4 + 4);
+		if (count2 != 0)
+		{
+			void* subArr = GMalloc->Malloc((DWORD)count2 << 1, TEXT("CompressedLip"));
+			*(void**)((BYTE*)arr + iVar4 + 0xc) = subArr;
+			for (INT iVar5 = 0; iVar5 < (INT)(DWORD)count2; iVar5++)
+			{
+				_WORD wVal; appMemcpy(&wVal, puVar6, 2); puVar6 += 2;
+				*(_WORD*)((BYTE*)subArr + iVar5 * 2) = wVal;
+			}
+		}
+		iVar4 += 0x10;
+	}
+	return 1;
+	unguard;
 }
 
 CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDescData& Other)
@@ -132,9 +206,11 @@ void ULodMesh::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 }
 
-int ULodMesh::MemFootprint(int)
+int ULodMesh::MemFootprint(int param_1)
 {
+	guard(ULodMesh::MemFootprint);
 	return 0;
+	unguard;
 }
 
 UClass * ULodMesh::MeshGetInstanceClass()
@@ -311,7 +387,59 @@ void UMeshAnimation::InitForDigestion()
 // --- UVertMesh ---
 int UVertMesh::RenderPreProcess()
 {
-	return 0;
+	guard(UVertMesh::RenderPreProcess);
+	INT iVar2 = ((FArray*)((BYTE*)this + 400))->Num();
+	if (iVar2 != 0) return 0;
+
+	((FArray*)((BYTE*)this + 0x14c))->Empty(0x20, 0);
+	FArray* this_00 = (FArray*)((BYTE*)this + 0xc4);
+	iVar2 = this_00->Num();
+	FArray* this_01 = (FArray*)((BYTE*)this + 0x14c);
+	this_01->Add(iVar2, 0x20);
+	*(INT*)((BYTE*)this + 0x160) += 1;
+
+	iVar2 = 0;
+	while (true)
+	{
+		INT iVar3 = this_00->Num();
+		if (iVar3 <= iVar2) break;
+		BYTE* dst = (BYTE*)((BYTE*)*(INT*)this_01 + iVar2 * 0x20);
+		BYTE* src = (BYTE*)((BYTE*)*(INT*)this_00 + iVar2 * 0xc);
+		*(DWORD*)(dst + 0x18) = *(DWORD*)(src + 4);
+		*(DWORD*)(dst + 0x1c) = *(DWORD*)(src + 8);
+		iVar2++;
+	}
+
+	_WORD* puVar4 = NULL;
+	iVar2 = 0;
+	while (true)
+	{
+		INT iVar3 = ((FArray*)((BYTE*)this + 0xac))->Num();
+		if (iVar3 <= iVar2) break;
+		DWORD uVar1 = *(DWORD*)((BYTE*)*(INT*)((BYTE*)this + 0xac) + 4 + iVar2 * 8);
+		if ((puVar4 == NULL) || ((uVar1 >> 0x10) != (DWORD)*puVar4))
+		{
+			INT newIdx = ((FArray*)((BYTE*)this + 400))->Add(1, 0x5c);
+			BYTE* newEntry = (BYTE*)((BYTE*)*(INT*)((BYTE*)this + 400) + newIdx * 0x5c);
+			if (newEntry == NULL)
+				puVar4 = NULL;
+			else
+			{
+				puVar4 = (_WORD*)newEntry;
+				_WORD uStack_22 = (_WORD)(uVar1 >> 0x10);
+				puVar4[7] = (_WORD)iVar2;
+				*puVar4 = uStack_22;
+				puVar4[2] = 0;
+				iVar3 = ((FArray*)((BYTE*)this + 0xc4))->Num();
+				puVar4[3] = (SWORD)(iVar3 - 1);
+				puVar4[8] = 0;
+			}
+		}
+		if (puVar4) puVar4[8]++;
+		iVar2++;
+	}
+	return 1;
+	unguard;
 }
 
 void UVertMesh::Serialize(FArchive& Ar)
@@ -370,14 +498,46 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 	boneDesc->fn_bInitFromLbpFile(*FileName);
 }
 
-int USkeletalMesh::SetAttachAlias(FName,FName,FCoords &)
+int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
-	return 0;
+	guard(USkeletalMesh::SetAttachAlias);
+	FName none(NAME_None);
+	if (param_2 == none) return 0;
+	if (param_3 == none) return 0;
+
+	FArray* nameArr = (FArray*)((BYTE*)this + 0x2d0);
+	INT iVar1_before = nameArr->Num();
+	INT iVar2 = nameArr->Add(1, 4); // TODO: FUN_10437fb0 -- find/insert name
+	INT iVar1_after = nameArr->Num();
+
+	if (iVar1_before == iVar1_after)
+	{
+		if (((FArray*)((BYTE*)this + 0x2e8))->Num() != nameArr->Num()) return 1;
+		if (((FArray*)((BYTE*)this + 0x2dc))->Num() != nameArr->Num()) return 1;
+		*(DWORD*)((BYTE*)*(INT*)((BYTE*)this + 0x2dc) + iVar2 * 4) = *(DWORD*)&param_3;
+		DWORD* src = (DWORD*)&param_4;
+		DWORD* dst = (DWORD*)((BYTE*)*(INT*)((BYTE*)this + 0x2e8) + iVar2 * 0x30);
+		for (INT iVar3 = 0xc; iVar3 != 0; iVar3--) { *dst = *src; src++; dst++; }
+	}
+	else
+	{
+		INT iVar1 = ((FArray*)((BYTE*)this + 0x2dc))->Add(1, 4);
+		*(DWORD*)((BYTE*)*(INT*)((BYTE*)this + 0x2dc) + iVar1 * 4) = *(DWORD*)&param_3;
+		iVar2 = ((FArray*)((BYTE*)this + 0x2e8))->Add(1, 0x30);
+		DWORD* src = (DWORD*)&param_4;
+		DWORD* dst = (DWORD*)((BYTE*)*(INT*)((BYTE*)this + 0x2e8) + iVar2 * 0x30);
+		for (INT iVar3 = 0xc; iVar3 != 0; iVar3--) { *dst = *src; src++; dst++; }
+	}
+	return 1;
+	unguard;
 }
 
-int USkeletalMesh::SetAttachmentLocation(AActor *,AActor *)
+int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
+	guard(USkeletalMesh::SetAttachmentLocation);
+	// TODO: get bone transform from SkeletalMeshInstance and apply to param_3
 	return 0;
+	unguard;
 }
 
 int USkeletalMesh::LODFootprint(int param_1, int param_2)
@@ -501,9 +661,14 @@ int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 	return Actor->Physics != PHYS_KarmaRagDoll;
 }
 
-int USkeletalMesh::R6LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
-	return 0;
+	guard(USkeletalMesh::R6LineCheck);
+	if ((param_6 & 0x10000) == 0 || (*(DWORD*)((BYTE*)param_2 + 0xa8) & 0x2000) == 0)
+		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
+	// TODO: skeletal hit detection via SkeletalMeshInstance bone pivots
+	return 1;
+	unguard;
 }
 
 void USkeletalMesh::Serialize(FArchive& Ar)
@@ -514,9 +679,14 @@ void USkeletalMesh::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 }
 
-int USkeletalMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
-	return 0;
+	guard(USkeletalMesh::LineCheck);
+	if (*(BYTE*)((BYTE*)param_2 + 0x2c) != 0x0e) // PHYS_KarmaRagDoll = 14
+		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
+	// TODO: Karma ragdoll line check
+	return 1;
+	unguard;
 }
 
 int USkeletalMesh::MemFootprint(int param_1)
@@ -611,7 +781,9 @@ void USkeletalMesh::ReconstructRawMesh()
 
 int USkeletalMesh::RenderPreProcess()
 {
-	return 0;
+	guard(USkeletalMesh::RenderPreProcess);
+	return 1;
+	unguard;
 }
 
 UClass * USkeletalMesh::MeshGetInstanceClass()
