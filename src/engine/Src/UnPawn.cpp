@@ -1021,9 +1021,49 @@ void APawn::TickSimulated( FLOAT DeltaTime )
 void APawn::TickSpecial( FLOAT DeltaTime )
 {
 	guard(APawn::TickSpecial);
-	// Pawn-specific per-frame housekeeping.
-	// Animation, posture and status-effect updates live in derived classes (AR6Pawn etc.).
-	AActor::TickSimulated( DeltaTime );
+	// Tick down the flash-bang visual effect timer.
+	if( m_fFlashBangVisualEffectTime > 0.0f )
+		m_fFlashBangVisualEffectTime -= DeltaTime;
+
+	// Tick down the last-communication timer (skip if Level signals pause/solo mode).
+	if( *(BYTE*)((BYTE*)Level + 0x425) != 1 )
+	{
+		if( m_fLastCommunicationTime > 0.0f )
+			m_fLastCommunicationTime -= DeltaTime;
+	}
+
+	// Update movement animation when the pawn is not interpolating and has a mesh.
+	if( !bInterpolating && (bPhysicsAnimUpdate) && Mesh )
+		UpdateMovementAnimation( DeltaTime );
+
+	// Sync weapon location to pawn location and notify network.
+	AR6EngineWeapon* Weapon = EngineWeapon;
+	if( Weapon && !m_bDroppedWeapon )
+	{
+		if( Weapon->bCollideActors )
+		{
+			// Dirty the owning net driver so the weapon position gets replicated.
+			BYTE* ctrl = *(BYTE**)((BYTE*)this + 0x328);
+			if( ctrl )
+			{
+				void* conn = *(void**)(ctrl + 0xf0);
+				if( conn )
+					(*(void(__cdecl**)(void*, AR6EngineWeapon*))((*(BYTE**)conn) + 0xc))(conn, Weapon);
+			}
+		}
+		// Copy pawn world location to weapon so it tracks correctly.
+		Weapon->Location = Location;
+		if( Weapon->bCollideActors )
+		{
+			BYTE* ctrl = *(BYTE**)((BYTE*)this + 0x328);
+			if( ctrl )
+			{
+				void* conn = *(void**)(ctrl + 0xf0);
+				if( conn )
+					(*(void(__cdecl**)(void*, AR6EngineWeapon*))((*(BYTE**)conn) + 8))(conn, Weapon);
+			}
+		}
+	}
 	unguard;
 }
 

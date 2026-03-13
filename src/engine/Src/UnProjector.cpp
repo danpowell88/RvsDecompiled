@@ -24,13 +24,10 @@ int AProjector::ShouldTrace(AActor * Other, DWORD TraceFlags)
 
 void AProjector::TickSpecial(float DeltaTime)
 {
-	// Retail: 17b. If lifecycle state byte at this+0x2C == 5, call vtable[100] (offset 0x190).
-	if (*(BYTE*)((BYTE*)this + 0x2C) == 5)
-	{
-		void** vtbl = *(void***)this;
-		typedef void (__thiscall *FnType)(AProjector*);
-		((FnType)vtbl[100])(this);
-	}
+	// When the projector uses rotating physics, recalculate its projection matrix.
+	// Retail: cmp [this+0x2c(Physics)], 5; jne skip; call vtable[0x190/4=100]=CalcMatrix
+	if (Physics == PHYS_Rotating)
+		CalcMatrix();
 }
 
 void AProjector::UpdateParticleMaterial(UParticleMaterial *,int)
