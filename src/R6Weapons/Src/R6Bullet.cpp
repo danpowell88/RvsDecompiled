@@ -22,12 +22,14 @@ INT AR6Bullet::ShouldTrace(AActor* Other, DWORD TraceFlags)
 
 FLOAT AR6Bullet::RangeConversion(FLOAT fRange)
 {
-	return 0.f;
+	// Ghidra 0x1110: (fRange * m_fRangeConversionConst + 1.0) * fRange
+	return (fRange * m_fRangeConversionConst + 1.0f) * fRange;
 }
 
 FLOAT AR6Bullet::StunLoss(FLOAT fRange)
 {
-	return 0.f;
+	// Ghidra 0x1130: fRange * m_fRangeConversionConst * fRange
+	return fRange * m_fRangeConversionConst * fRange;
 }
 
 void AR6Bullet::execBulletGoesThroughSurface(FFrame& Stack, RESULT_DECL)
