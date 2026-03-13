@@ -1,5 +1,5 @@
 ---
-title: "60. Fire Simulation from the Ground Up"
+title: "72. Fire Simulation from the Ground Up"
 authors: [default]
 tags: [fire, decompilation, ghidra, algorithms, procedural]
 ---

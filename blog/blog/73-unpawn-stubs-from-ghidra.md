@@ -1,5 +1,5 @@
 ---
-title: "70. Reading Ghidra's Mind: Implementing Pawn Movement Stubs"
+title: "73. Reading Ghidra's Mind: Implementing Pawn Movement Stubs"
 date: 2026-03-13T22:11
 authors: [default]
 tags: [engine, pawn, ai, navigation, ghidra]
