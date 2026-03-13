@@ -33,6 +33,18 @@ void ATerrainInfo::ResetMove()
 
 void ATerrainInfo::PostEditChange()
 {
+	// Ghidra 0x164960: update terrain arrays, rebuild sectors, recalculate coords.
+	// Divergence: two unknown function calls (FUN_10352020, FUN_1032ecd0) omitted.
+	AActor::PostEditChange();
+	INT* levelInfo = *(INT**)((BYTE*)this + 0x144);
+	if (levelInfo)
+	{
+		ULevel* level = *(ULevel**)((BYTE*)levelInfo + 0x328);
+		if (level) level->UpdateTerrainArrays();
+	}
+	SetupSectors();
+	CalcCoords();
+	Update(0.0f, 0, 0, 0, 0, 0);
 }
 
 void ATerrainInfo::PostLoad()
@@ -155,6 +167,35 @@ int ATerrainInfo::PointCheck(FCheckResult &,FVector,FVector,int)
 }
 void ATerrainInfo::CalcCoords()
 {
+	// Ghidra 0x156780: build heightmap-to-world FCoords at this+0x1300,
+	// optionally divide by heightmap center, then store inverse at this+0x1330.
+	FLOAT TSX = *(FLOAT*)((BYTE*)this + 0x39c);
+	FLOAT TSY = *(FLOAT*)((BYTE*)this + 0x3a0);
+	FLOAT TSZ = *(FLOAT*)((BYTE*)this + 0x3a4);
+
+	FVector Origin(
+		-(*(FLOAT*)((BYTE*)this + 0x234) / TSX),
+		(-1.0f / TSY) * *(FLOAT*)((BYTE*)this + 0x238),
+		(*(FLOAT*)((BYTE*)this + 0x23c) / TSZ) * -256.0f
+	);
+	FVector XAxis(TSX,          0.0f,               0.0f);
+	FVector YAxis(0.0f,         TSY,                0.0f);
+	FVector ZAxis(0.0f,         0.0f,               TSZ * 0.00390625f); // 1/256
+
+	FCoords* HeightmapToWorld = (FCoords*)((BYTE*)this + 0x1300);
+	*HeightmapToWorld = FCoords(Origin, XAxis, YAxis, ZAxis);
+
+	if (*(INT*)((BYTE*)this + 0x398)) // heightmap texture present
+	{
+		FVector Center(
+			(FLOAT)(*(INT*)((BYTE*)this + 0x12e0) / 2),
+			(FLOAT)(*(INT*)((BYTE*)this + 0x12e4) / 2),
+			32767.0f
+		);
+		*HeightmapToWorld /= Center;
+	}
+
+	*(FCoords*)((BYTE*)this + 0x1330) = HeightmapToWorld->Inverse();
 }
 void ATerrainInfo::CalcLayerTexCoords()
 {
@@ -374,8 +415,31 @@ void FTerrainTools::SetAdjust(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x60) = Value;
 }
 
-void FTerrainTools::SetCurrentBrush(int)
+void FTerrainTools::SetCurrentBrush(int BrushID)
 {
+	// Ghidra 0x1665d0: if a current terrain info is set, clear its selection list.
+	// Then search the brush list (at Pad[0x48], stride 0x68) for BrushID match
+	// at element+0x1c; store the found element pointer and the BrushID.
+	// Divergence: falls through to appFailAssert if not found (retained from retail).
+	INT* terrainInfo = *(INT**)&Pad[0x7c];
+	if (terrainInfo)
+	{
+		for (INT i = 0; i < *(INT*)((BYTE*)terrainInfo + 0x1364); i++) {}
+		((FArray*)((BYTE*)terrainInfo + 0x1360))->Empty(0x14, 0);
+	}
+
+	FArray* brushList = (FArray*)&Pad[0x48];
+	for (INT i = 0; i < brushList->Num(); i++)
+	{
+		BYTE* entry = *(BYTE**)brushList + i * 0x68;
+		if (*(INT*)(entry + 0x1c) == BrushID)
+		{
+			*(BYTE**)&Pad[0x54] = entry;
+			*(INT*)&Pad[0x3c]   = BrushID;
+			return;
+		}
+	}
+	appFailAssert("0", ".\\UnTerrainTools.cpp", 0x372);
 }
 
 void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)

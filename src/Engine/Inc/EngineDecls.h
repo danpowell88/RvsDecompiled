@@ -1,6 +1,33 @@
 // EngineDecls.h - Class declarations for Engine stubs without headers
 #pragma once
 
+// FRange / FRangeVector — ranged value types defined in Core but needed here.
+// CORE_API ensures calls resolve to the Core.dll exports at link time.
+#ifndef _INC_FRANGE
+#define _INC_FRANGE
+class CORE_API FRange
+{
+public:
+	FLOAT Min;
+	FLOAT Max;
+	FRange();
+	FRange( FLOAT InVal );
+	FRange( FLOAT InMin, FLOAT InMax );
+	FLOAT GetRand() const;
+	FLOAT GetSRand() const;
+};
+class CORE_API FRangeVector
+{
+public:
+	FRange X;
+	FRange Y;
+	FRange Z;
+	FRangeVector();
+	FVector GetRand() const;
+	FVector GetSRand() const;
+};
+#endif
+
 // Raw 32-byte vertex element for FSkinVertexStream / FAnimMeshVertexStream.
 // Both streams use TArray<FStreamVert32> where element size = 32 bytes
 // (confirmed by GetStreamData: FArray::Num * 32 bytes).

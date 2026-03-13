@@ -37,10 +37,44 @@ void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicAct
 
 void AEmitter::Kill()
 {
+	// Ghidra 0xdf3b0, 178b: iterate emitter list at this+0x398, clear flags and reset per-emitter counters.
+	FArray* emitters = (FArray*)((BYTE*)this + 0x398);
+	for (INT i = 0; i < emitters->Num(); i++)
+	{
+		BYTE* em = *(BYTE**)(*(BYTE**)emitters + i * 4);
+		if (em)
+		{
+			*(DWORD*)(em + 100) &= ~0x200u;  // clear bit 9 (SkipDestroy)
+			*(DWORD*)(em + 0x7c) = 0;
+			*(DWORD*)(em + 0x78) = 0;
+			*(DWORD*)(em + 100) &= ~0x800u;  // clear bit 11
+			*(DWORD*)(em + 100) &= ~0x400u;  // clear bit 10
+			*(DWORD*)(em + 0x2d8) = 1;
+		}
+	}
+	*(DWORD*)((BYTE*)this + 0x394) &= ~0x200u;
 }
 
 void AEmitter::PostScriptDestroyed()
 {
+	// Ghidra 0xdf300, 113b: if spawn flag set at bit 2 of this+0x3c8,
+	// iterate emitter list and call vtable[3](1) on each, then null the slot.
+	if (*(BYTE*)((BYTE*)this + 0x3c8) & 4)
+	{
+		FArray* emitters = (FArray*)((BYTE*)this + 0x398);
+		for (INT i = 0; i < emitters->Num(); i++)
+		{
+			BYTE** slot = (BYTE**)(*(BYTE**)emitters + i * 4);
+			BYTE* em = *slot;
+			if (em)
+			{
+				void** vtbl = *(void***)em;
+				typedef void(__thiscall* DestroyFn)(BYTE*, INT);
+				((DestroyFn)vtbl[3])(em, 1);
+			}
+			*slot = nullptr;
+		}
+	}
 }
 
 int AEmitter::CheckForProjectors()
@@ -78,10 +112,23 @@ void UBeamEmitter::Scale(float)
 
 void UBeamEmitter::PostEditChange()
 {
+	// Ghidra 0x80850: call parent, then CleanUp (vtbl[26]) and Initialize(MaxParticles) (vtbl[25]).
+	UParticleEmitter::PostEditChange();
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall* NoArgFn)(UBeamEmitter*);
+	typedef void(__thiscall* InitFn)(UBeamEmitter*, INT);
+	((NoArgFn)vtbl[26])(this);
+	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
 void UBeamEmitter::CleanUp()
 {
+	// Ghidra 0x80af0, ~100b: empty beam/noise arrays then delegate to parent.
+	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x3e4); i++) {}
+	((FArray*)((BYTE*)this + 0x3e0))->Empty(0x10, 0);
+	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x3f0); i++) {}
+	((FArray*)((BYTE*)this + 0x3ec))->Empty(0xc, 0);
+	UParticleEmitter::CleanUp();
 }
 
 void UBeamEmitter::Initialize(int)
@@ -102,6 +149,13 @@ int UMeshEmitter::RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FDynam
 
 void UMeshEmitter::PostEditChange()
 {
+	// Ghidra 0xcabc0: same pattern as UBeamEmitter::PostEditChange.
+	UParticleEmitter::PostEditChange();
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall* NoArgFn)(UMeshEmitter*);
+	typedef void(__thiscall* InitFn)(UMeshEmitter*, INT);
+	((NoArgFn)vtbl[26])(this);
+	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
 void UMeshEmitter::Initialize(int)
@@ -135,6 +189,14 @@ int UParticleEmitter::RenderParticles(FDynamicActor *,FLevelSceneNode *,TList<FD
 
 void UParticleEmitter::Reset()
 {
+	// Ghidra 0xdcb10: clear state flags, zero counters, seed initial delay/warm-up timers.
+	*(DWORD*)((BYTE*)this + 0x2dc) &= ~0x18u;  // clear bits 3-4
+	*(DWORD*)((BYTE*)this + 0x2c4) = 0;
+	*(DWORD*)((BYTE*)this + 0x2c0) = 0;
+	*(DWORD*)((BYTE*)this + 0x2c8) = 0;
+	*(DWORD*)((BYTE*)this + 0x2f4) = 0;
+	*(FLOAT*)((BYTE*)this + 0x2e8) = ((FRange*)((BYTE*)this + 0x250))->GetRand();
+	*(FLOAT*)((BYTE*)this + 0x2ec) = ((FRange*)((BYTE*)this + 0x168))->GetRand();
 }
 
 void UParticleEmitter::Scale(float)
@@ -143,18 +205,52 @@ void UParticleEmitter::Scale(float)
 
 void UParticleEmitter::PostEditChange()
 {
+	// Ghidra 0xdcf30: re-initialize if particle count changed or dirty bit set;
+	// then normalize any actor-force vectors.
+	INT numParticles = ((FArray*)((BYTE*)this + 0x2f8))->Num();
+	if (numParticles != *(INT*)((BYTE*)this + 0x3C) || (*(DWORD*)((BYTE*)this + 100) & 0x100))
+	{
+		void** vtbl = *(void***)this;
+		typedef void(__thiscall* NoArgFn)(UParticleEmitter*);
+		typedef void(__thiscall* InitFn)(UParticleEmitter*, INT);
+		((NoArgFn)vtbl[26])(this);
+		((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
+	}
+	if (*(BYTE*)((BYTE*)this + 100) & 2)
+	{
+		FArray* forces = (FArray*)((BYTE*)this + 0x94);
+		BYTE* data = *(BYTE**)forces;
+		for (INT i = 0; i < forces->Num(); i++)
+			((FVector*)(data + i * 0x10))->Normalize();
+	}
 }
 
 void UParticleEmitter::PostLoad()
 {
+	// Ghidra 0xdca10: call super, then Initialize(MaxParticles) via vtable[25].
+	UObject::PostLoad();
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall* InitFn)(UParticleEmitter*, INT);
+	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
 void UParticleEmitter::CleanUp()
 {
+	// Ghidra 0xdd0e0: empty loop over active particles, then free array and clear counters.
+	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x2fc); i++) {}
+	((FArray*)((BYTE*)this + 0x2f8))->Empty(0x8c, 0);
+	*(DWORD*)((BYTE*)this + 0x2c4) = 0;
+	*(DWORD*)((BYTE*)this + 0x2c0) = 0;
+	*(DWORD*)((BYTE*)this + 0x2dc) &= ~1u;  // clear initialized bit
 }
 
 void UParticleEmitter::Destroy()
 {
+	// Ghidra 0xdca90: CleanUp via vtable[26], then super Destroy.
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall* NoArgFn)(UParticleEmitter*);
+	((NoArgFn)vtbl[26])(this);
+	UObject::Destroy();
 }
 
 void UParticleEmitter::HandleActorForce(AActor *,float)
@@ -195,6 +291,10 @@ void USparkEmitter::PostEditChange()
 
 void USparkEmitter::CleanUp()
 {
+	// Ghidra 0x143460: call parent CleanUp, then empty spark line array.
+	UParticleEmitter::CleanUp();
+	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x36c); i++) {}
+	((FArray*)((BYTE*)this + 0x368))->Empty(0x20, 0);
 }
 
 void USparkEmitter::Initialize(int)
@@ -227,6 +327,8 @@ void USpriteEmitter::PostEditChange()
 
 void USpriteEmitter::CleanUp()
 {
+	// Ghidra 0x143ed0: delegate to parent only.
+	UParticleEmitter::CleanUp();
 }
 
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex *,FLevelSceneNode *)
