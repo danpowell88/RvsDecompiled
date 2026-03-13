@@ -112,6 +112,9 @@ FTags& FTags::operator=(const FTags& Other)
 
 void FTags::Init()
 {
+	guard(FTags::Init);
+	*(FString*)((BYTE*)this + 0x30) = FString(TEXT("")); // Ghidra: FString at +0x30 = empty
+	unguard;
 }
 
 

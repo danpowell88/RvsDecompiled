@@ -158,6 +158,51 @@ return FString();
 
 void UActorChannel::Destroy()
 {
+	guard(UActorChannel::Destroy);
+	check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
+	if (!UChannel::RouteDestroy())
+	{
+		// Assert Channels[ChIndex] == this
+		BYTE* conn    = *(BYTE**)((BYTE*)this + 0x2C); // Connection
+		INT   chIndex = *(INT*)((BYTE*)this + 0x38);   // ChIndex
+		check(*(UActorChannel**)(conn + 0xeb0 + chIndex * 4) == this);
+
+		// Call virtual reset function at vtable slot 0x1a (offset 0x68) on this
+		typedef void (__thiscall* VFunc26)(void*);
+		((VFunc26)(*(DWORD*)((BYTE*)*(DWORD**)this + 0x68)))(this);
+
+		// Free replication property buffer
+		FArray* repData = (FArray*)((BYTE*)this + 0x94);
+		INT num = repData->Num();
+		if (num != 0)
+		{
+			check(*(INT*)((BYTE*)this + 0x70) != 0); // ActorClass != NULL
+			UObject::ExitProperties(*(BYTE**)((BYTE*)this + 0x94), *(UClass**)((BYTE*)this + 0x70));
+		}
+
+		// Determine client vs server via Connection->field_0x7c->field_0x3c
+		BYTE* drv = *(BYTE**)(conn + 0x7C); // Connection->field_0x7c (Driver)
+		if (*(INT*)(drv + 0x3C) == 0)
+		{
+			// Client side: optionally clean up actor ref at +0x6c
+			if (*(INT*)((BYTE*)this + 0x6C) != 0 && *(INT*)((BYTE*)this + 0x30) == 0)
+			{
+				// TODO: FUN_103db080((BYTE*)this + 0x6c) - cleanup actor ref
+			}
+		}
+		else
+		{
+			// Server side: validate actor/level/connection
+			UObject* actor = *(UObject**)((BYTE*)this + 0x6C);
+			if (actor != NULL)
+				check(actor->IsValid());
+			check(*(INT*)((BYTE*)this + 0x68) != 0);
+			check((*(UObject**)((BYTE*)this + 0x68))->IsValid());
+			check(*(INT*)((BYTE*)this + 0x2C) != 0);
+			check((*(UObject**)((BYTE*)this + 0x2C))->IsValid());
+		}
+	}
+	unguard;
 }
 
 AActor* UActorChannel::GetActor()

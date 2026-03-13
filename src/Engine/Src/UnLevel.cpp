@@ -48,6 +48,13 @@ void ULevelBase::Serialize( FArchive& Ar )
 
 void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds )
 {
+	guard(ULevelBase::NotifyProgress);
+	// Ghidra 0xbf0d0: call Engine->vtable[0xb0] (slot 44) = NotifyProgress
+	typedef void (__thiscall* FNotifyProgressFn)(void*, const TCHAR*, const TCHAR*, FLOAT);
+	void* pEng = (void*)Engine;
+	FNotifyProgressFn fn = *(FNotifyProgressFn*)((BYTE*)*(DWORD**)pEng + 0xb0);
+	fn(pEng, Str1, Str2, Seconds);
+	unguard;
 }
 
 /*=============================================================================
@@ -1124,10 +1131,27 @@ FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner )
 
 // FNetworkNotify interface.
 EAcceptConnection ULevel::NotifyAcceptingConnection() { return ACCEPTC_Reject; }
-void ULevel::NotifyAcceptedConnection( UNetConnection* Connection ) {}
+void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
+{
+	guard(ULevel::NotifyAcceptedConnection);
+	if( !NetDriver )
+		appFailAssert("NetDriver!=NULL",".\\UnLevel.cpp",0x348);
+	if( *(UNetConnection**)((BYTE*)NetDriver + 0x3c) != NULL )
+		appFailAssert("NetDriver->ServerConnection==NULL",".\\UnLevel.cpp",0x349);
+	// TODO: Call Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68),
+	//       then log to DevNet via GLog. See Ghidra 0xbf2a0.
+	unguard;
+}
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
 ULevel* ULevel::NotifyGetLevel() { return this; }
-void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text ) {}
+void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
+{
+	guard(ULevel::NotifyReceivedText);
+	// TODO: Full network command dispatch (HELLO/NETSPEED/HAVE/JOIN/FILEREQ/WELCOME/
+	//       UPGRADE/FAILURE etc.) — 3802 bytes of network protocol handling in retail.
+	//       See Ghidra 0xc1d30 ?NotifyReceivedText@ULevel@@UAEXPAVUNetConnection@@PBG@Z
+	unguard;
+}
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 {
 	// Retail (18b, RVA 0xBF590): returns 1 if [this+0x14]->field@+0x3C is NULL, else 0.
@@ -1137,7 +1161,12 @@ INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 	if (!driver) return 1; // safety: not present in retail, but avoids NULL deref
 	return (*(DWORD*)((BYTE*)driver + 0x3C) == 0) ? 1 : 0;
 }
-void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced ) {}
+void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced )
+{
+	guard(ULevel::NotifyReceivedFile);
+	GError->Logf(TEXT("")); // Ghidra 0xbf500: FOutputDevice::Logf(GError, ...)
+	unguard;
+}
 
 // Non-virtual methods.
 ABrush* ULevel::Brush() { return (Actors.Num()>=2 && Actors(1)) ? (ABrush*)Actors(1) : NULL; }

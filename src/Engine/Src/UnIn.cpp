@@ -23,6 +23,12 @@ const TCHAR* UInputPlanning::StaticConfigName()
 
 void UInputPlanning::StaticInitInput()
 {
+	guard(UInputPlanning::StaticInitInput);
+	// TODO: Full UInput property schema registration (Alias struct + properties).
+	// Ghidra 0xb47c0 ?StaticInitInput@UInput@@SAXXZ — builds Alias UStruct with
+	// FName "Alias" and FString "Command" properties, then registers "Aliases"
+	// array property on UInput. Called once at engine startup.
+	unguard;
 }
 
 

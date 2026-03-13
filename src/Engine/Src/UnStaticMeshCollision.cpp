@@ -65,6 +65,13 @@ FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& O
 // --- FStaticMeshSection ---
 FStaticMeshSection::FStaticMeshSection()
 {
+	*(DWORD*)((BYTE*)this + 0x00) = 0;       // +0x00
+	*(DWORD*)((BYTE*)this + 0x04) = 0;       // +0x04
+	*(_WORD*)((BYTE*)this  + 0x10) = 0;      // +0x10
+	*(_WORD*)((BYTE*)this  + 0x0e) = 0;      // +0x0e
+	*(_WORD*)((BYTE*)this  + 0x08) = 0;      // +0x08
+	*(_WORD*)((BYTE*)this  + 0x0c) = 0xffff; // +0x0c = -1
+	*(_WORD*)((BYTE*)this  + 0x0a) = 0xffff; // +0x0a = -1
 }
 
 FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Other)

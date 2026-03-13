@@ -62,7 +62,31 @@ _WORD UFont::RemapChar(_WORD Char)
 	return Char; // divergence: remap table lookup not implemented
 }
 
-void UFont::Serialize(FArchive &)
+void UFont::Serialize(FArchive& Ar)
 {
+	guard(UFont::Serialize);
+	Super::Serialize(Ar);
+	UBOOL SavedLazyLoad = GLazyLoad;
+	GLazyLoad = 1; // Ghidra: force eager load during font serialize
+	// TODO: FUN_1039c090(Ar, this+0x30) — serialize Pages TArray (operator<< for font pages)
+	Ar.ByteOrderSerialize((BYTE*)this + 0x2c, 4); // CharactersPerPage at +0x2c
+	check(!(*(DWORD*)((BYTE*)this+0x2c) & (*(DWORD*)((BYTE*)this+0x2c)-1))); // must be power of 2
+	if (!GLazyLoad)
+	{
+		// TODO: iterate Pages TArray at +0x30, trigger texture loads for each page
+	}
+	GLazyLoad = SavedLazyLoad;
+	if (Ar.Ver() < 0x45)
+	{
+		*(DWORD*)((BYTE*)this + 0x50) = 0; // zero DropShadowX for pre-v69 data
+		return;
+	}
+	// TODO: FUN_1039be10(Ar, this+0x3c) — serialize additional font fields at +0x3c
+	if (Ar.IsLoading())
+	{
+		// TODO: FUN_1031f260() — post-load font fixup
+	}
+	Ar.ByteOrderSerialize((BYTE*)this + 0x50, 4); // DropShadowX at +0x50
+	unguard;
 }
 

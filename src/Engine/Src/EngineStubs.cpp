@@ -3843,6 +3843,8 @@ UClass** UChannel::ChannelClasses = NULL;
 // ============================================================================
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
+	guard(UDemoRecConnection::UDemoRecConnection);
+	unguard;
 }
 void UDemoRecConnection::StaticConstructor() {}
 FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }

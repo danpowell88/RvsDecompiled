@@ -322,6 +322,15 @@ FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePrevie
 // --- UMatAction ---
 void UMatAction::PostEditChange()
 {
+	guard(UMatAction::PostEditChange);
+	UObject::PostEditChange();
+	{
+		extern ENGINE_API FMatineeTools GMatineeTools;
+		ASceneManager* SM = GMatineeTools.GetCurrent(); // Ghidra: DAT_1061b7e8
+		if (SM)
+			SM->PreparePath();
+	}
+	unguard;
 }
 
 void UMatAction::PostLoad()
@@ -381,6 +390,15 @@ int UMatSubAction::Update(float Pct, ASceneManager*)
 
 void UMatSubAction::PostEditChange()
 {
+	guard(UMatSubAction::PostEditChange);
+	UObject::PostEditChange();
+	{
+		extern ENGINE_API FMatineeTools GMatineeTools;
+		ASceneManager* SM = GMatineeTools.GetCurrent(); // Ghidra: DAT_1061b7e8
+		if (SM)
+			SM->PreparePath();
+	}
+	unguard;
 }
 
 void UMatSubAction::PreBeginPreview()
