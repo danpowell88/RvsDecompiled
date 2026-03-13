@@ -18,17 +18,17 @@ void UR6AbstractGameService::ServerRoundFinish() {}
 void UR6AbstractGameService::SubmitMatchResult() {}
 void UR6AbstractGameService::UnInitializeGSClientSPW() {}
 
-INT UR6AbstractGameService::GetGroupID()              { return 0; }
-INT UR6AbstractGameService::GetLobbyID()              { return 0; }
-INT UR6AbstractGameService::GetLoggedInUbiDotCom()    { return 0; }
-INT UR6AbstractGameService::GetRegServerInitialized() { return 0; }
-INT UR6AbstractGameService::GetServerRegistered()     { return 0; }
-INT UR6AbstractGameService::InitGSCDKey()             { return 0; }
-INT UR6AbstractGameService::InitGSClient()            { return 0; }
-INT UR6AbstractGameService::IsMSClientIsInRequest()   { return 0; }
-INT UR6AbstractGameService::IsServerJoined()          { return 0; }
-INT UR6AbstractGameService::MSCLientLeaveServer()     { return 0; }
-INT UR6AbstractGameService::SetGSClientComInterface() { return 0; }
+INT UR6AbstractGameService::GetGroupID()              { return 0; } // retail: empty
+INT UR6AbstractGameService::GetLobbyID()              { return 0; } // retail: empty
+INT UR6AbstractGameService::GetLoggedInUbiDotCom()    { return 0; } // retail: empty
+INT UR6AbstractGameService::GetRegServerInitialized() { return 0; } // retail: empty
+INT UR6AbstractGameService::GetServerRegistered()     { return 0; } // retail: empty
+INT UR6AbstractGameService::InitGSCDKey()             { return 0; } // retail: empty
+INT UR6AbstractGameService::InitGSClient()            { return 0; } // retail: empty
+INT UR6AbstractGameService::IsMSClientIsInRequest()   { return 0; } // retail: empty
+INT UR6AbstractGameService::IsServerJoined()          { return 0; } // retail: empty
+INT UR6AbstractGameService::MSCLientLeaveServer()     { return 0; } // retail: empty
+INT UR6AbstractGameService::SetGSClientComInterface() { return 0; } // retail: empty
 
 void UR6AbstractGameService::GSClientPostMessage(BYTE) {}
 void UR6AbstractGameService::ProcessIsLobbyDisconnect(FLOAT*) {}
@@ -41,8 +41,8 @@ void UR6AbstractGameService::SetGameServiceRequestState(BYTE) {}
 void UR6AbstractGameService::SetLoginRegServer(BYTE) {}
 void UR6AbstractGameService::SetOwnSvrPort(INT) {}
 void UR6AbstractGameService::SetRegServerLoginRequest(BYTE) {}
-BYTE UR6AbstractGameService::GetGSGameState()     { return 0; }
-BYTE UR6AbstractGameService::GetLoginRegServer()  { return 0; }
+BYTE UR6AbstractGameService::GetGSGameState()     { return 0; } // retail: empty
+BYTE UR6AbstractGameService::GetLoginRegServer()  { return 0; } // retail: empty
 
 void UR6AbstractGameService::CDKeyDisconnecUser(FString) {}
 void UR6AbstractGameService::GameServiceManager(INT, INT, INT, INT) {}

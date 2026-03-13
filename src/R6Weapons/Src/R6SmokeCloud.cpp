@@ -10,6 +10,7 @@ IMPLEMENT_CLASS(AR6SmokeCloud)
 
 INT AR6SmokeCloud::IsBlockedBy(AActor const* Other) const
 {
+	// retail: empty — smoke clouds are never blocked.
 	return 0;
 }
 

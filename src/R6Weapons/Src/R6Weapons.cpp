@@ -12,6 +12,15 @@
 IMPLEMENT_PACKAGE(R6Weapons)
 
 /*-----------------------------------------------------------------------------
+	Pre/PostNetReceive delta-detection globals.
+	DAT_1000cb08 / DAT_1000cb10 / DAT_1000cb14 in the retail binary.
+	Shared with AR6DemolitionsGadget::PreNetReceive/PostNetReceive.
+-----------------------------------------------------------------------------*/
+DWORD g_net_old_nbBullets = 0;
+DWORD g_net_old_bit6      = 0;
+DWORD g_net_old_bit7      = 0;
+
+/*-----------------------------------------------------------------------------
 	FName event/callback tokens.
 -----------------------------------------------------------------------------*/
 
@@ -36,17 +45,41 @@ void AR6Weapons::ProcessState(FLOAT DeltaTime)
 
 INT AR6Weapons::IsBlockedBy(AActor const* Other) const
 {
+	// Ghidra 0x3c30: if Other has bTrailerSameRotation (bit 17 of flags DWORD at +0xa8), don't block.
+	// DIVERGENCE: bTrailerSameRotation is the reconstructed name for 0xa8 & 0x20000 in this engine layout;
+	// the actual R6 usage is as a "pass-through" collision flag.
+	if (Other->bTrailerSameRotation)
+		return 0;
 	return Super::IsBlockedBy(Other);
 }
 
 void AR6Weapons::PreNetReceive()
 {
 	Super::PreNetReceive();
+	// Snapshot bullet-count byte for PostNetReceive change-detection (Ghidra: DAT_1000cb08 = this[0x396]).
+	g_net_old_nbBullets = *(BYTE*)((BYTE*)this + 0x396);
 }
 
 void AR6Weapons::PostNetReceive()
 {
 	Super::PostNetReceive();
+
+	// Fire HideAttachment event when bullet count transitions to zero.
+	BYTE curNbBullets = *(BYTE*)((BYTE*)this + 0x396);
+	if (g_net_old_nbBullets != curNbBullets && curNbBullets == 0)
+		eventHideAttachment();
+
+	// Bipod deploy sync: detect change in the bipod state bits and propagate.
+	// Ghidra 0x4c30: reads bitfield DWORD at this+0x3a0, checks if bits 1 and 2 differ,
+	// then conditionally toggles bit 3 and fires eventDeployWeaponBipod.
+	// DIVERGENCE: raw bit arithmetic preserved from Ghidra; field names at 0x3a0 unknown.
+	DWORD uFlags = *(DWORD*)((BYTE*)this + 0x3a0);
+	if (((uFlags >> 1 ^ uFlags) & 4) != 0)
+	{
+		uFlags = (uFlags * 2 ^ uFlags) & 8 ^ uFlags;
+		*(DWORD*)((BYTE*)this + 0x3a0) = uFlags;
+		AR6EngineWeapon::eventDeployWeaponBipod((uFlags >> 3) & 1);
+	}
 }
 
 void AR6Weapons::TickAuthoritative(FLOAT DeltaTime)
@@ -56,6 +89,7 @@ void AR6Weapons::TickAuthoritative(FLOAT DeltaTime)
 
 INT AR6Weapons::GetHeartBeatStatus()
 {
+	// retail: empty — base class always returns 0; AR6HBSGadget overrides.
 	return 0;
 }
 

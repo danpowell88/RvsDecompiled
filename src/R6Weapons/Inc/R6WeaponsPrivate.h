@@ -59,4 +59,13 @@
 
 #pragma pack(pop)
 
+/*----------------------------------------------------------------------------
+	Pre/PostNetReceive replication delta-detection globals.
+	Shared between AR6Weapons and AR6DemolitionsGadget within the same DLL.
+	Mirror of DAT_1000cb08 / DAT_1000cb10 / DAT_1000cb14 in the retail binary.
+----------------------------------------------------------------------------*/
+extern DWORD g_net_old_nbBullets;  // DAT_1000cb08: bullet count snapshot
+extern DWORD g_net_old_bit6;       // DAT_1000cb10: gadget bitfield bit 6 snapshot
+extern DWORD g_net_old_bit7;       // DAT_1000cb14: gadget bitfield bit 7 snapshot
+
 #endif
