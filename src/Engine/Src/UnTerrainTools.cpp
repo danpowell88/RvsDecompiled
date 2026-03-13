@@ -17,14 +17,20 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UTerrainBrush ---
 void UTerrainBrush::MouseButtonDown(UViewport *)
 {
+	guard(UTerrainBrush::MouseButtonDown);
+	unguard;
 }
 
 void UTerrainBrush::MouseButtonUp(UViewport *)
 {
+	guard(UTerrainBrush::MouseButtonUp);
+	unguard;
 }
 
 void UTerrainBrush::MouseMove(float,float)
 {
+	guard(UTerrainBrush::MouseMove);
+	unguard;
 }
 
 UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
@@ -65,10 +71,14 @@ int UTerrainBrush::BeginPainting(UTexture * *,ATerrainInfo * *)
 
 void UTerrainBrush::EndPainting(UTexture *,ATerrainInfo *)
 {
+	guard(UTerrainBrush::EndPainting);
+	unguard;
 }
 
 void UTerrainBrush::Execute(int)
 {
+	guard(UTerrainBrush::Execute);
+	unguard;
 }
 
 FBox UTerrainBrush::GetRect()
@@ -107,6 +117,8 @@ UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Othe
 
 void UTerrainBrushColor::Execute(int)
 {
+	guard(UTerrainBrushColor::Execute);
+	unguard;
 }
 
 
@@ -140,6 +152,8 @@ UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeT
 
 void UTerrainBrushEdgeTurn::Execute(int)
 {
+	guard(UTerrainBrushEdgeTurn::Execute);
+	unguard;
 }
 
 FBox UTerrainBrushEdgeTurn::GetRect()
@@ -178,6 +192,8 @@ UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten
 
 void UTerrainBrushFlatten::Execute(int)
 {
+	guard(UTerrainBrushFlatten::Execute);
+	unguard;
 }
 
 
@@ -211,6 +227,8 @@ UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Othe
 
 void UTerrainBrushNoise::Execute(int)
 {
+	guard(UTerrainBrushNoise::Execute);
+	unguard;
 }
 
 
@@ -244,12 +262,16 @@ UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Othe
 
 void UTerrainBrushPaint::Execute(int)
 {
+	guard(UTerrainBrushPaint::Execute);
+	unguard;
 }
 
 
 // --- UTerrainBrushPlanningPaint ---
 void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 {
+	guard(UTerrainBrushPlanningPaint::MouseButtonDown);
+	unguard;
 }
 
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPaint const &Other)
@@ -281,16 +303,22 @@ UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrain
 
 void UTerrainBrushPlanningPaint::Execute(int)
 {
+	guard(UTerrainBrushPlanningPaint::Execute);
+	unguard;
 }
 
 
 // --- UTerrainBrushSelect ---
 void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 {
+	guard(UTerrainBrushSelect::MouseButtonDown);
+	unguard;
 }
 
 void UTerrainBrushSelect::MouseMove(float,float)
 {
+	guard(UTerrainBrushSelect::MouseMove);
+	unguard;
 }
 
 UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
@@ -322,6 +350,8 @@ UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& O
 
 void UTerrainBrushSelect::Execute(int)
 {
+	guard(UTerrainBrushSelect::Execute);
+	unguard;
 }
 
 FBox UTerrainBrushSelect::GetRect()
@@ -360,12 +390,16 @@ UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& O
 
 void UTerrainBrushSmooth::Execute(int)
 {
+	guard(UTerrainBrushSmooth::Execute);
+	unguard;
 }
 
 
 // --- UTerrainBrushTexPan ---
 void UTerrainBrushTexPan::MouseMove(float,float)
 {
+	guard(UTerrainBrushTexPan::MouseMove);
+	unguard;
 }
 
 UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
@@ -399,6 +433,8 @@ UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& O
 // --- UTerrainBrushTexRotate ---
 void UTerrainBrushTexRotate::MouseMove(float,float)
 {
+	guard(UTerrainBrushTexRotate::MouseMove);
+	unguard;
 }
 
 UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Other)
@@ -432,6 +468,8 @@ UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTex
 // --- UTerrainBrushTexScale ---
 void UTerrainBrushTexScale::MouseMove(float,float)
 {
+	guard(UTerrainBrushTexScale::MouseMove);
+	unguard;
 }
 
 UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
@@ -521,6 +559,8 @@ UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushV
 
 void UTerrainBrushVisibility::Execute(int)
 {
+	guard(UTerrainBrushVisibility::Execute);
+	unguard;
 }
 
 FBox UTerrainBrushVisibility::GetRect()

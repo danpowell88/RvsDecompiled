@@ -17,18 +17,26 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- ATerrainInfo ---
 void ATerrainInfo::SetupSectors()
 {
+	guard(ATerrainInfo::SetupSectors);
+	unguard;
 }
 
 void ATerrainInfo::SoftDeselect()
 {
+	guard(ATerrainInfo::SoftDeselect);
+	unguard;
 }
 
 void ATerrainInfo::UpdateFromSelectedVertices()
 {
+	guard(ATerrainInfo::UpdateFromSelectedVertices);
+	unguard;
 }
 
 void ATerrainInfo::ResetMove()
 {
+	guard(ATerrainInfo::ResetMove);
+	unguard;
 }
 
 void ATerrainInfo::PostEditChange()
@@ -49,27 +57,51 @@ void ATerrainInfo::PostEditChange()
 
 void ATerrainInfo::PostLoad()
 {
+	guard(ATerrainInfo::PostLoad);
+	unguard;
 }
 
 void ATerrainInfo::PrecomputeLayerWeights()
 {
+	guard(ATerrainInfo::PrecomputeLayerWeights);
+	unguard;
 }
 
 // (merged from earlier occurrence)
 void ATerrainInfo::SoftSelect(float,float)
 {
+	guard(ATerrainInfo::SoftSelect);
+	unguard;
 }
-void ATerrainInfo::Update(float,int,int,int,int,int)
+void ATerrainInfo::Update(float Dt, int X1, int Y1, int X2, int Y2, int Flags)
 {
+	guard(ATerrainInfo::Update);
+	// Ghidra 0x161140: default X2/Y2 to full terrain dimensions, then dispatch to sub-steps.
+	if (X2 == 0) X2 = *(INT*)((BYTE*)this + 0x12E0);
+	if (Y2 == 0) Y2 = *(INT*)((BYTE*)this + 0x12E4);
+	if (!GIsEditor)
+		PrecomputeLayerWeights();
+	CalcLayerTexCoords();
+	UpdateVertices(Dt, X1, Y1, X2, Y2);
+	UpdateTriangles(X1, Y1, X2, Y2, Flags);
+	if (!GIsEditor)
+		CombineLayerWeights();
+	unguard;
 }
 void ATerrainInfo::UpdateDecorations(int)
 {
+	guard(ATerrainInfo::UpdateDecorations);
+	unguard;
 }
 void ATerrainInfo::UpdateTriangles(int,int,int,int,int)
 {
+	guard(ATerrainInfo::UpdateTriangles);
+	unguard;
 }
 void ATerrainInfo::UpdateVertices(float,int,int,int,int)
 {
+	guard(ATerrainInfo::UpdateVertices);
+	unguard;
 }
 FVector ATerrainInfo::WorldToHeightmap(FVector In)
 {
@@ -78,9 +110,13 @@ FVector ATerrainInfo::WorldToHeightmap(FVector In)
 }
 void ATerrainInfo::Render(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
 {
+	guard(ATerrainInfo::Render);
+	unguard;
 }
 void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
 {
+	guard(ATerrainInfo::RenderDecorations);
+	unguard;
 }
 int ATerrainInfo::SelectVertex(FVector)
 {
@@ -92,6 +128,8 @@ int ATerrainInfo::SelectVertexX(int,int)
 }
 void ATerrainInfo::SelectVerticesInBox(FBox &)
 {
+	guard(ATerrainInfo::SelectVerticesInBox);
+	unguard;
 }
 void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 {
@@ -119,6 +157,8 @@ void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 }
 void ATerrainInfo::SetLayerAlpha(float,float,int,BYTE,UTexture *)
 {
+	guard(ATerrainInfo::SetLayerAlpha);
+	unguard;
 }
 void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 {
@@ -149,6 +189,8 @@ void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 }
 void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 {
+	guard(ATerrainInfo::SetTextureColor);
+	unguard;
 }
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
@@ -160,6 +202,8 @@ int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVect
 }
 void ATerrainInfo::MoveVertices(float)
 {
+	guard(ATerrainInfo::MoveVertices);
+	unguard;
 }
 int ATerrainInfo::PointCheck(FCheckResult &,FVector,FVector,int)
 {
@@ -199,15 +243,29 @@ void ATerrainInfo::CalcCoords()
 }
 void ATerrainInfo::CalcLayerTexCoords()
 {
+	guard(ATerrainInfo::CalcLayerTexCoords);
+	unguard;
 }
 void ATerrainInfo::CheckComputeDataOnLoad()
 {
+	guard(ATerrainInfo::CheckComputeDataOnLoad);
+	// Ghidra 0x1615a0: if dirty flag (this+0x12B8) is set, rebuild and clear it.
+	if (*(INT*)((BYTE*)this + 0x12B8) != 0)
+	{
+		Update(0.0f, 0, 0, 0, 0, 0);
+		*(INT*)((BYTE*)this + 0x12B8) = 0;
+	}
+	unguard;
 }
 void ATerrainInfo::CombineLayerWeights()
 {
+	guard(ATerrainInfo::CombineLayerWeights);
+	unguard;
 }
 void ATerrainInfo::ConvertHeightmapFormat()
 {
+	guard(ATerrainInfo::ConvertHeightmapFormat);
+	unguard;
 }
 int ATerrainInfo::GetClosestVertex(FVector &,FVector *,int *,int *)
 {
@@ -393,10 +451,18 @@ UPrimitive * ATerrainInfo::GetPrimitive()
 // --- FTerrainMaterialLayer ---
 FTerrainMaterialLayer::FTerrainMaterialLayer()
 {
+	guard(FTerrainMaterialLayer::FTerrainMaterialLayer);
+	// Ghidra 0x97f0: FMatrix member at +8 is default-constructed.
+	new ((BYTE*)this + 8) FMatrix();
+	unguard;
 }
 
 FTerrainMaterialLayer::~FTerrainMaterialLayer()
 {
+	guard(FTerrainMaterialLayer::~FTerrainMaterialLayer);
+	// Ghidra 0x9800: destroy FMatrix member at +8.
+	((FMatrix*)((BYTE*)this + 8))->~FMatrix();
+	unguard;
 }
 
 FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLayer& Other)
@@ -493,18 +559,26 @@ void FTerrainTools::SetStrength(int Value)
 
 FTerrainTools::FTerrainTools(FTerrainTools const &)
 {
+	guard(FTerrainTools::FTerrainTools);
+	unguard;
 }
 
 FTerrainTools::~FTerrainTools()
 {
+	guard(FTerrainTools::~FTerrainTools);
+	unguard;
 }
 
 void FTerrainTools::AdjustAlignedActors()
 {
+	guard(FTerrainTools::AdjustAlignedActors);
+	unguard;
 }
 
 void FTerrainTools::FindActorsToAlign()
 {
+	guard(FTerrainTools::FindActorsToAlign);
+	unguard;
 }
 
 int FTerrainTools::GetAdjust()
@@ -583,6 +657,8 @@ int FTerrainTools::GetStrength()
 
 void FTerrainTools::Init()
 {
+	guard(FTerrainTools::Init);
+	unguard;
 }
 
 

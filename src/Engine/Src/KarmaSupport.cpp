@@ -27,6 +27,8 @@ void AKActor::Spawned()
 // --- AKConeLimit ---
 void AKConeLimit::KUpdateConstraintParams()
 {
+	guard(AKConeLimit::KUpdateConstraintParams);
+	unguard;
 }
 
 
@@ -44,30 +46,44 @@ _McdModel * AKConstraint::getKModel() const
 
 void AKConstraint::physKarma(float)
 {
+	guard(AKConstraint::physKarma);
+	unguard;
 }
 
 void AKConstraint::postKarmaStep()
 {
+	guard(AKConstraint::postKarmaStep);
+	unguard;
 }
 
 void AKConstraint::preKarmaStep(float)
 {
+	guard(AKConstraint::preKarmaStep);
+	unguard;
 }
 
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
+	guard(AKConstraint::RenderEditorSelected);
+	unguard;
 }
 
 void AKConstraint::KUpdateConstraintParams()
 {
+	guard(AKConstraint::KUpdateConstraintParams);
+	unguard;
 }
 
 void AKConstraint::PostEditChange()
 {
+	guard(AKConstraint::PostEditChange);
+	unguard;
 }
 
 void AKConstraint::PostEditMove()
 {
+	guard(AKConstraint::PostEditMove);
+	unguard;
 }
 
 void AKConstraint::CheckForErrors()
@@ -114,10 +130,14 @@ int AKConstraint::CheckOwnerUpdated()
 // --- AKHinge ---
 void AKHinge::preKarmaStep(float)
 {
+	guard(AKHinge::preKarmaStep);
+	unguard;
 }
 
 void AKHinge::KUpdateConstraintParams()
 {
+	guard(AKHinge::KUpdateConstraintParams);
+	unguard;
 }
 
 
@@ -202,6 +222,8 @@ FKBoxElem::FKBoxElem()
 
 FKBoxElem::~FKBoxElem()
 {
+	guard(FKBoxElem::~FKBoxElem);
+	unguard;
 }
 
 FKBoxElem& FKBoxElem::operator=(const FKBoxElem& Other)
@@ -254,10 +276,14 @@ FKCylinderElem::FKCylinderElem(float InRadius, float InLength)
 
 FKCylinderElem::FKCylinderElem()
 {
+	guard(FKCylinderElem::FKCylinderElem);
+	unguard;
 }
 
 FKCylinderElem::~FKCylinderElem()
 {
+	guard(FKCylinderElem::~FKCylinderElem);
+	unguard;
 }
 
 FKCylinderElem& FKCylinderElem::operator=(const FKCylinderElem& Other)
@@ -275,10 +301,14 @@ FKSphereElem::FKSphereElem(float InRadius)
 
 FKSphereElem::FKSphereElem()
 {
+	guard(FKSphereElem::FKSphereElem);
+	unguard;
 }
 
 FKSphereElem::~FKSphereElem()
 {
+	guard(FKSphereElem::~FKSphereElem);
+	unguard;
 }
 
 FKSphereElem& FKSphereElem::operator=(const FKSphereElem& Other)
@@ -308,11 +338,15 @@ void UKMeshProps::Serialize(FArchive& Ar)
 
 void UKMeshProps::Draw(FRenderInterface *,int)
 {
+	guard(UKMeshProps::Draw);
+	unguard;
 }
 
 
 // --- UKarmaParams ---
 void UKarmaParams::PostEditChange()
 {
+	guard(UKarmaParams::PostEditChange);
+	unguard;
 }
 
