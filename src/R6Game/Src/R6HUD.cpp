@@ -21,22 +21,32 @@ void AR6HUD::Destroy()
 
 void AR6HUD::DisplayOtherTeamInfo(FCanvasUtil &, UCanvas *, INT, AR6RainbowTeam *, FColor &, INT)
 {
+	guard(AR6HUD::DisplayOtherTeamInfo);
+	unguard;
 }
 
 void AR6HUD::DrawCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanvasUtil *, UCanvas *)
 {
+	guard(AR6HUD::DrawCharacterInfo);
+	unguard;
 }
 
 void AR6HUD::DrawInGameMap(FCameraSceneNode *, UViewport *)
 {
+	guard(AR6HUD::DrawInGameMap);
+	unguard;
 }
 
 void AR6HUD::DrawRadar(FCameraSceneNode *, UViewport *)
 {
+	guard(AR6HUD::DrawRadar);
+	unguard;
 }
 
 void AR6HUD::DrawSingleCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanvasUtil *, UCanvas *)
 {
+	guard(AR6HUD::DrawSingleCharacterInfo);
+	unguard;
 }
 
 void AR6HUD::Serialize(FArchive& Ar)
@@ -55,10 +65,14 @@ void AR6HUD::Serialize(FArchive& Ar)
 
 void AR6HUD::Spawned()
 {
+	guard(AR6HUD::Spawned);
+	unguard;
 }
 
 void AR6HUD::UpdateHUDColors(FColor)
 {
+	guard(AR6HUD::UpdateHUDColors);
+	unguard;
 }
 
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)

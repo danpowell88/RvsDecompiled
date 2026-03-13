@@ -107,10 +107,14 @@ found:
 
 void UR6GameManager::GSClientManager(UConsole *)
 {
+	guard(UR6GameManager::GSClientManager);
+	unguard;
 }
 
 void UR6GameManager::GameServiceTick(UConsole *)
 {
+	guard(UR6GameManager::GameServiceTick);
+	unguard;
 }
 
 INT UR6GameManager::GetGSCreateUbiServer()
@@ -120,22 +124,32 @@ INT UR6GameManager::GetGSCreateUbiServer()
 
 void UR6GameManager::InitializeGSClient()
 {
+	guard(UR6GameManager::InitializeGSClient);
+	unguard;
 }
 
 void UR6GameManager::InitializeGameService(UConsole *)
 {
+	guard(UR6GameManager::InitializeGameService);
+	unguard;
 }
 
 void UR6GameManager::LaunchListenSrv(FString, FString)
 {
+	guard(UR6GameManager::LaunchListenSrv);
+	unguard;
 }
 
 void UR6GameManager::MSClientManager(UConsole *)
 {
+	guard(UR6GameManager::MSClientManager);
+	unguard;
 }
 
 void UR6GameManager::MinimizeAndPauseMusic(UConsole *)
 {
+	guard(UR6GameManager::MinimizeAndPauseMusic);
+	unguard;
 }
 
 void UR6GameManager::SetGSCreateUbiServer(INT Param)
@@ -145,6 +159,8 @@ void UR6GameManager::SetGSCreateUbiServer(INT Param)
 
 void UR6GameManager::StartJoinServer(FString, FString, INT)
 {
+	guard(UR6GameManager::StartJoinServer);
+	unguard;
 }
 
 INT UR6GameManager::StartLogInProcedure()
