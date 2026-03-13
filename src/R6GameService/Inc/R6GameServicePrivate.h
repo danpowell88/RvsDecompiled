@@ -25,8 +25,12 @@
 
 /*----------------------------------------------------------------------------
 	Engine / Core / R6 headers.
+	Winsock2 must come before windows.h to avoid winsock.h vs winsock2.h
+	redefinition conflicts (same pattern as IpDrvPrivate.h).
 ----------------------------------------------------------------------------*/
 
+#include <winsock2.h>
+#pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
 
 #pragma pack(push, 4)

@@ -31,6 +31,79 @@ IMPLEMENT_FUNCTION(UR6GSServers, -1, execSetLastServerQueried)
 IMPLEMENT_FUNCTION(UR6GSServers, -1, execStopRefreshServers)
 IMPLEMENT_FUNCTION(UR6GSServers, -1, execUnInitializeMSClient)
 
+/*=============================================================================
+	Module-level GameSpy / Ubi.com state globals.
+	All correspond to static .data-section variables in the original binary
+	(zero-initialised at load time).  Addresses from Ghidra export.
+	Names are derived from usage context; see individual function bodies.
+=============================================================================*/
+
+// GS client / networking init state
+static INT  GsClientInitialized  = 0; // DAT_10091e60 read by InitGSCDKey/InitializeMSClient/InitializeRegServer
+static INT  GsLogDebug           = 0; // DAT_10091e70 debug-log gate (read-only in almost all fns)
+
+// MS (Master-Server) client state
+static INT  GsServerJoined       = 0; // DAT_10091c00 IsServerJoined(); cleared by MSCLientLeaveServer/UnInitMSClient
+static INT  GsMSClientState      = 0; // DAT_10091be4 cleared by MSCLientLeaveServer/UnInitMSClient
+static INT  GsMSClientInRequest  = 0; // DAT_10091c14 IsMSClientIsInRequest(); set to 1 by InitializeMSClient
+static INT  GsMSClientConnHandle = 0; // DAT_10091c1c passed to FUN_100323c0 in MSCLientLeaveServer
+static INT  GsMSClientConnParam  = 0; // DAT_10091bec passed to FUN_100323c0 in MSCLientLeaveServer
+
+// Ubi.com login / session state
+static INT  GsLoggedInUbi        = 0; // DAT_10091e68 GetLoggedInUbiDotCom(); set/cleared by InitializeMSClient/UnInitMSClient
+static INT  GsUbiState1          = 0; // DAT_10091e64 cleared by UnInitMSClient
+static INT  GsUbiLobbyState      = 0; // DAT_10091e6c cleared by UnInitMSClient
+
+// GS game / server state
+static BYTE GsGameState          = 0; // DAT_100939d4 GetGSGameState() / SetGSGameState()
+static BYTE GsLoginRegServer     = 0; // DAT_10093afc GetLoginRegServer(); set by InitializeRegServer
+static INT  GsRegServerInit      = 0; // DAT_10093b08 GetRegServerInitialized(); set by InitializeRegServer
+static INT  GsServerRegistered   = 0; // DAT_100939ec GetServerRegistered()
+static INT  GsQueryState         = 0; // DAT_10091d30 read in ReceiveServer
+static INT  GsMSClientAlt        = 0; // DAT_10091d38 cleared by UnInitMSClient
+static FLOAT GsTimestamp         = 0; // DAT_10091d40 rdtsc-derived timestamp in ReceiveServer
+
+// COM / GSClient handle
+static INT  GsComInitialized     = 0; // DAT_100939d8 SetGSClientComInterface initialised guard
+static void* GsComInterface      = NULL; // DAT_10092ea4 QueryInterface result (IUnknown*)
+static void* GsClientHandle      = NULL; // DAT_10091e5c GS client opaque handle
+
+// CDKey state
+static INT  GsCDKeyInitialized   = 0; // DAT_100933d0 set to 0 by InitGSCDKey
+static INT  GsCDKeyAuthFlag      = 0; // DAT_10093410 checked by InitGSCDKey after InitCDKey
+static INT  GsCDKeyConnected     = 0; // DAT_100933cc checked by InitGSCDKey after InitCDKey
+static void* GsCDKeyHandle       = NULL; // DAT_100933d8 RS CDKey API handle (FUN_10023270 arg)
+static void* GsModCDKeyHandle    = NULL; // DAT_100933dc mod CDKey API handle
+static BYTE  GsCDKeyProductType  = 0;   // DAT_10091c04 product-type byte in CDKeyValidateUser
+static char* GsCDKeyBuffer       = NULL; // DAT_10091c28 pointer to CDKey name string
+
+// Alternate-info / receive-server buffers (written by GameSpy callbacks)
+static INT*  GsAltInfoData       = NULL; // DAT_100923c4 alternate server info buffer (array of INT)
+static INT   GsAltInfoCount      = 0;   // DAT_100923c8 0 < this checked by ReceiveAltInfo
+static INT   GsReceiveServerCount = 0;  // DAT_100923ec server-receive pending count
+
+// Registration server state
+static INT   GsRegServerCount    = 0;   // DAT_100923a0 reg server candidate count
+static char* GsRegServerList     = NULL; // DAT_1009239c reg server array (entries of 0x108 bytes)
+static INT   GsRegServerIndex    = 0;   // DAT_10091d28 rolling index into GsRegServerList
+static INT   GsRegServerState    = 0;   // DAT_10093b24 reg server login FSM state
+
+// Mod name used by IsAuthIDSuccess ("R6RSCUSTOM" check)
+static FString GsCustomModName;          // DAT_10092e64 (FString, default empty)
+static void*   GsAuthLogDev      = NULL; // DAT_10092e6c secondary log device for auth-ID debug
+
+// PlayerIsInIDList array
+static INT   GsIDListCount       = 0;   // DAT_10092e9c
+static void* GsIDListArray       = NULL; // DAT_10092e98
+
+// Mod CDKey name FString (used in CDKeyValidateUser when bCheckModKey != 0)
+static FString GsModCDKeyName;           // DAT_100923ac (FString, default empty)
+
+// COM CLSIDs/IIDs are hardcoded in the original binary's .rdata section.
+// Actual bytes are not yet recovered; GetActiveObject will fail anyway (GameSpy defunct).
+static BYTE GsComCLSID[16] = {0}; // DAT_10073074
+static BYTE GsComIID[16]   = {0}; // DAT_10072ff8
+
 // --- UR6GSServers ---
 
 void UR6GSServers::AddPlayerToIDList(FString, FString, FString, INT)
@@ -45,9 +118,63 @@ void UR6GSServers::CDKeyDisconnecUser(FString)
 	unguard;
 }
 
-INT UR6GSServers::CDKeyValidateUser(FString, INT, INT)
+INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 {
-	return 0;
+	INT iResult = 0;
+	guard(UR6GSServers::CDKeyValidateUser);
+
+	// Copy CDKey API product name from global buffer into local stack buffer.
+	char szKeyName[220]; // local_dc (0xdc bytes) — CDKey API name string
+	char szCDKeyHex[88]; // local_58 — ANSI hex representation of the CD key
+	BYTE aucKey[20];     // local_30 — binary decoded CD key (0x28 / 2 = 20 bytes)
+	BYTE ucProductType;  // local_5a
+
+	{ const char* src = GsCDKeyBuffer; char* dst = szKeyName; if (src) while ((*dst++ = *src++)) {} else szKeyName[0] = '\0'; }
+	ucProductType = GsCDKeyProductType; // DAT_10091c04
+
+	// Convert FString CD key to ANSI hex string then decode byte pairs.
+	const TCHAR* pWide = *szCDKey;
+	const char*  pAnsi = appToAnsi(pWide);
+	{ const char* src = pAnsi; char* dst = szCDKeyHex; while ((*dst++ = *src++)) {} }
+
+	for (INT uVar9 = 0; uVar9 < 0x28; uVar9 += 2)
+	{
+		// TODO: FUN_10005760 — hex nibble to byte; two calls per iteration.
+		// BYTE hi = FUN_10005760(szCDKeyHex + uVar9);
+		// BYTE lo = FUN_10005760(szCDKeyHex + uVar9 + 1);
+		BYTE hi = 0; // FUN_10005760 stub
+		BYTE lo = 0; // FUN_10005760 stub
+		aucKey[uVar9 / 2] = (BYTE)(hi * '\x10' + lo);
+	}
+
+	BYTE ucKeyType = 3;
+	if (bMod != 0)
+		ucKeyType = 6;
+
+	const char* pszGameName;
+	void*       pCDKeyHandle;
+	if (bCheckModKey == 0)
+	{
+		pszGameName  = "RAVENSHIELD";
+		pCDKeyHandle = GsCDKeyHandle; // DAT_100933d8
+	}
+	else
+	{
+		// Mod CDKey path: get mod name from global FString.
+		const TCHAR* pWideMod = *GsModCDKeyName; // DAT_100923ac
+		pszGameName  = appToAnsi(pWideMod);
+		pCDKeyHandle = GsModCDKeyHandle; // DAT_100933dc
+	}
+
+	// TODO: FUN_10023270 — GameSpy CDKey validation API (defunct).
+	// iResult = FUN_10023270(pCDKeyHandle, szKeyName, aucKey, pszGameName, ucKeyType);
+	iResult = 0;
+
+	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+
+	(void)ucProductType; // used by original but not yet wired; suppress unused warning
+	return iResult;
+	unguard;
 }
 
 void UR6GSServers::CancelGSCDKeyActID()
@@ -117,7 +244,8 @@ FString UR6GSServers::GetAuthID(INT)
 
 BYTE UR6GSServers::GetGSGameState()
 {
-	return 0;
+	// 0x10f00  52  ?GetGSGameState@UR6GSServers@@UAEEXZ — size 6 bytes, no SEH frame.
+	return GsGameState;
 }
 
 FString UR6GSServers::GetGlobalIdFromPlayerIDList(FString)
@@ -127,22 +255,26 @@ FString UR6GSServers::GetGlobalIdFromPlayerIDList(FString)
 
 INT UR6GSServers::GetLoggedInUbiDotCom()
 {
-	return 0;
+	// 0x6870  56  ?GetLoggedInUbiDotCom@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
+	return GsLoggedInUbi;
 }
 
 BYTE UR6GSServers::GetLoginRegServer()
 {
-	return 0;
+	// 0x12610  57  ?GetLoginRegServer@UR6GSServers@@UAEEXZ — size 6 bytes, no SEH frame.
+	return GsLoginRegServer;
 }
 
 INT UR6GSServers::GetRegServerInitialized()
 {
-	return 0;
+	// 0x11fc0  59  ?GetRegServerInitialized@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
+	return GsRegServerInit;
 }
 
 INT UR6GSServers::GetServerRegistered()
 {
-	return 0;
+	// 0x123a0  60  ?GetServerRegistered@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
+	return GsServerRegistered;
 }
 
 void UR6GSServers::Init(FString)
@@ -159,12 +291,53 @@ void UR6GSServers::InitCDKey(INT, INT)
 
 INT UR6GSServers::InitGSCDKey()
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::InitGSCDKey);
+
+	// TODO: UObject::FindFunctionChecked() + vtable[4] call:
+	//   (**(code **)(*(int *)this + 0x10))();
+
+	GsCDKeyInitialized = 0; // DAT_100933d0 = 0
+
+	if (GsClientInitialized == 0) // DAT_10091e60
+	{
+		FString szIP = eventGetLocallyBoundIpAddr();
+		Init(szIP);
+	}
+
+	// Pass CDKey port numbers from class fields (this+0x184 = m_iRSCDKeyPort, this+0x188 = m_iModCDKeyPort).
+	InitCDKey(m_iRSCDKeyPort, m_iModCDKeyPort); // this+0x184, this+0x188
+
+	if (GsCDKeyAuthFlag != 0 && GsCDKeyConnected != 0) // DAT_10093410, DAT_100933cc
+		retval = 1;
+
+	return retval;
+	unguard;
 }
 
 INT UR6GSServers::InitGSClient()
 {
-	return 0;
+	INT bStep1OK = 0;
+	guard(UR6GSServers::InitGSClient);
+
+	// TODO: FUN_10018650(0) — GS client init step 1; returns HRESULT-like int.
+	// INT iVar1 = FUN_10018650(0);
+	INT iVar1 = -1; // stub: GameSpy defunct (would return S_OK on success)
+	bStep1OK = (INT)(-1 < iVar1); // 1 if iVar1 >= 0
+
+	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step1=%d"), bStep1OK);
+
+	if (bStep1OK)
+	{
+		// TODO: FUN_100188e0() — GS client init step 2; returns HRESULT-like int.
+		// iVar1 = FUN_100188e0();
+		iVar1 = -1; // stub: GameSpy defunct
+		bStep1OK = (INT)(-1 < iVar1);
+		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step2=%d"), bStep1OK);
+	}
+
+	return bStep1OK;
+	unguard;
 }
 
 void UR6GSServers::InitMSClient()
@@ -181,27 +354,144 @@ void UR6GSServers::InitProcessUpdateUbiServer(AGameInfo *, ALevelInfo *)
 
 INT UR6GSServers::InitializeMSClient()
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::InitializeMSClient);
+
+	// Initialise favourites list inherited from UR6ServerList.
+	((UR6ServerList*)this)->InitFavorites();
+
+	if (GsClientInitialized == 0) // DAT_10091e60
+	{
+		FString szIP = eventGetLocallyBoundIpAddr();
+		Init(szIP);
+
+		if (GsClientInitialized == 0)
+		{
+			// Notify game manager: login failed.
+			// TODO: UR6AbstractGameManager::eventGMProcessMsg(GR6GameManager, TEXT("LOGIN_FAIL_DEFAULT"));
+			retval = GsClientInitialized; // 0
+			return retval;
+			// unguard; (unreachable but needed — see unguard at end)
+		}
+	}
+
+	GsMSClientInRequest = 1; // DAT_10091c14 = 1
+	retval = GsClientInitialized; // DAT_10091e60
+
+	return retval;
+	unguard;
 }
 
 INT UR6GSServers::InitializeRegServer()
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::InitializeRegServer);
+
+	if (GsClientInitialized == 0) // DAT_10091e60
+	{
+		FString szIP = eventGetLocallyBoundIpAddr();
+		Init(szIP);
+	}
+
+	if (GsClientInitialized == 0) // still 0 after Init?
+	{
+		return retval; // 0
+	}
+
+	BOOL bGotLobby = FALSE;
+
+	if (GsRegServerInit == 0) // DAT_10093b08
+	{
+		// TODO: FUN_1002f220() — try to connect to registration server.
+		// UINT uVar2 = FUN_1002f220();
+		UINT uVar2 = 0; // stub: GameSpy defunct
+
+		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+
+		if ((uVar2 & 0xff) != 0)
+		{
+			// TODO: FUN_100136d0() — initialise reg server.
+			// FUN_100136d0();
+
+			for (INT i = 0; i < GsRegServerCount; i++) // DAT_100923a0
+			{
+				if (bGotLobby)
+					break;
+				char* pEntry = GsRegServerList + GsRegServerIndex * 0x108; // DAT_1009239c, stride 0x108
+				// TODO: FUN_1002f290(pEntry, *(USHORT*)(pEntry+0x104)) — get lobby.
+				// bGotLobby = FUN_1002f290(pEntry, *(USHORT*)(pEntry + 0x104));
+				bGotLobby = FALSE; // stub
+				GsRegServerIndex++;
+				if (GsRegServerCount <= GsRegServerIndex)
+					GsRegServerIndex = 0;
+				// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+			}
+
+			if (bGotLobby)
+				GsRegServerInit = 1; // DAT_10093b08 = 1
+		}
+
+		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+	}
+	else
+	{
+		bGotLobby = TRUE;
+	}
+
+	// Ghidra's LAB_1001395b path.
+	if (GsClientInitialized != 0 && bGotLobby)
+	{
+		GsLoginRegServer = 1; // DAT_10093afc = 1
+		retval = 1;
+	}
+	else
+	{
+		GsLoginRegServer = 1; // DAT_10093afc = 1 (set on both paths in Ghidra)
+		retval = 0;
+	}
+
+	return retval;
+	unguard;
 }
 
 INT UR6GSServers::IsAuthIDSuccess()
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::IsAuthIDSuccess);
+
+	if (GsLogDebug != 0) // DAT_10091e70
+	{
+		// TODO: GLog->Logf(TEXT("IsAuthIDSuccess: isRavenShield=%d ..."), ...);
+	}
+
+	// Always succeeds for the base RavenShield game.
+	DWORD bIsRavenShield = GModMgr->eventIsRavenShield();
+	if (bIsRavenShield == 0)
+	{
+		// Non-RavenShield mod: also succeed if mod name is "R6RSCUSTOM".
+		const TCHAR* pModName = *GsCustomModName; // DAT_10092e64
+		INT cmp = appStricmp(pModName, TEXT("R6RSCUSTOM"));
+		if (cmp != 0)
+		{
+			return retval; // 0
+		}
+	}
+
+	retval = 1;
+	return retval;
+	unguard;
 }
 
 INT UR6GSServers::IsMSClientIsInRequest()
 {
-	return 0;
+	// 0x6860  77  ?IsMSClientIsInRequest@UR6GSServers@@UAEHXZ — size 14 bytes, no SEH frame.
+	return (INT)(GsMSClientInRequest != 0);
 }
 
 INT UR6GSServers::IsServerJoined()
 {
-	return 0;
+	// 0x7520  78  ?IsServerJoined@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
+	return GsServerJoined;
 }
 
 void UR6GSServers::LogGSVersion()
@@ -224,7 +514,27 @@ void UR6GSServers::MSCLientJoinServer(INT, INT, FString)
 
 INT UR6GSServers::MSCLientLeaveServer()
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::MSCLientLeaveServer);
+
+	// TODO: FUN_100323c0(GsMSClientConnHandle, GsMSClientConnParam) — GameSpy leave server.
+	// UINT uVar1 = FUN_100323c0(GsMSClientConnHandle, GsMSClientConnParam);
+	UINT uVar1 = 0; // stub: GameSpy defunct
+
+	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer result=%d"), uVar1 & 0xff);
+
+	if ((uVar1 & 0xff) == 0)
+	{
+		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer: failed"));
+		return retval; // 0
+	}
+
+	GsServerJoined  = 0; // DAT_10091c00 = 0
+	GsMSClientState = 0; // DAT_10091be4 = 0
+
+	retval = (INT)(uVar1 & 0xff);
+	return retval;
+	unguard;
 }
 
 void UR6GSServers::MSClientServerConnected(INT, INT)
@@ -245,9 +555,55 @@ void UR6GSServers::NativeCDKeyPlayerStatusReply(FString, BYTE, INT)
 	unguard;
 }
 
-INT UR6GSServers::OnSameSubNet(FString)
+INT UR6GSServers::OnSameSubNet(FString szIPAddr)
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::OnSameSubNet);
+
+	// Convert remote IP to network byte order.
+	const TCHAR* pWide   = *szIPAddr;
+	const char*  pAnsi   = appToAnsi(pWide);
+	DWORD remoteIP = inet_addr(pAnsi);
+
+	// Create a temporary UDP socket to query local interface list.
+	SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	// Buffer for up to 20 INTERFACE_INFO entries (Ghidra: 0x5f0 = 1520 bytes,
+	// each entry is 0x4c = 76 bytes per Ghidra stride calculation).
+	BYTE  ifaceBuffer[0x5f0];
+	DWORD bytesReturned = 0;
+
+	// SIO_GET_INTERFACE_LIST = 0x4004747f
+	INT result = WSAIoctl(s, 0x4004747f, NULL, 0,
+	                      ifaceBuffer, sizeof(ifaceBuffer),
+	                      &bytesReturned, NULL, NULL);
+
+	if (result == SOCKET_ERROR)
+	{
+		// Ghidra: local_8 = -1 (exception filter path), then FString dtor + return 0.
+		closesocket(s);
+		return retval; // 0
+	}
+
+	// Each INTERFACE_INFO entry is 0x4c bytes.
+	// IP address is at entry+0x08 (iiAddress.sin_addr), netmask at entry+0x38 (iiNetmask.sin_addr).
+	// These offsets match Ghidra's a_Stack_610[i*0x13].S_un_b and a_Stack_5e0[i*0x13].S_un_b
+	// where 0x13 * sizeof(DWORD) = 76 = 0x4c.
+	DWORD numIfaces = bytesReturned / 0x4c;
+	BOOL  bNotSameSubnet = TRUE;
+
+	for (DWORD i = 0; bNotSameSubnet && i < numIfaces; i++)
+	{
+		DWORD ifaceIP   = *(DWORD*)(ifaceBuffer + i * 0x4c + 0x08); // iiAddress.sin_addr
+		DWORD ifaceMask = *(DWORD*)(ifaceBuffer + i * 0x4c + 0x38); // iiNetmask.sin_addr
+		bNotSameSubnet = ((ifaceMask & ifaceIP) != (ifaceIP & remoteIP));
+	}
+
+	closesocket(s);
+
+	retval = (INT)(!bNotSameSubnet);
+	return retval;
+	unguard;
 }
 
 void UR6GSServers::PingRequest(FString, FString)
@@ -256,9 +612,44 @@ void UR6GSServers::PingRequest(FString, FString)
 	unguard;
 }
 
-INT UR6GSServers::PlayerIsInIDList(FString, FString, INT)
+INT UR6GSServers::PlayerIsInIDList(FString szPlayerName, FString szGlobalID, INT bModList)
 {
-	return 0;
+	INT iFound = 0;
+	guard(UR6GSServers::PlayerIsInIDList);
+
+	INT i = 0;
+
+	if (bModList == 0)
+	{
+		// Regular (RS CDKey) list: name at entry+0x0c, global-ID at entry+0x00.
+		while (i < GsIDListCount && iFound == 0) // DAT_10092e9c
+		{
+			BYTE* pEntry = (BYTE*)GsIDListArray + i * 0x30; // DAT_10092e98, stride 0x30
+			if (szPlayerName == *(FString*)(pEntry + 0x0c) &&
+			    szGlobalID   == *(FString*)(pEntry + 0x00))
+			{
+				iFound = 1;
+			}
+			i++;
+		}
+	}
+	else
+	{
+		// Mod CDKey list: name at entry+0x18, global-ID at entry+0x00.
+		while (i < GsIDListCount && iFound == 0)
+		{
+			BYTE* pEntry = (BYTE*)GsIDListArray + i * 0x30;
+			if (szPlayerName == *(FString*)(pEntry + 0x18) &&
+			    szGlobalID   == *(FString*)(pEntry + 0x00))
+			{
+				iFound = 1;
+			}
+			i++;
+		}
+	}
+
+	return iFound;
+	unguard;
 }
 
 void UR6GSServers::PollCallbacks(INT, INT, INT, INT)
@@ -395,12 +786,83 @@ void UR6GSServers::ProcessUbiComJoinServer(INT, INT, FString, FLOAT *)
 
 INT UR6GSServers::ReceiveAltInfo()
 {
-	return 0;
+	INT iResult = 0;
+	guard(UR6GSServers::ReceiveAltInfo);
+
+	INT  iSrvIdx  = -1;
+	BOOL bFound   = FALSE;
+
+	if (GsAltInfoCount > 0) // DAT_100923c8
+	{
+		// Search m_GameServerList for the entry matching the alt-info response.
+		// this+0x5c = TArray<FstGameServer>.Data, this+0x60 = TArray<FstGameServer>.Num
+		// Each FstGameServer entry is 0xdc bytes.
+		INT iNum = *(INT*)((BYTE*)this + 0x60);
+		for (INT i = 0; i < iNum; i++)
+		{
+			if (bFound)
+				break;
+			INT* pEntry = (INT*)( *(INT*)((BYTE*)this + 0x5c) + i * 0xdc );
+			if (pEntry[0] == GsAltInfoData[0] && pEntry[1] == GsAltInfoData[1])
+			{
+				bFound  = TRUE;
+				iSrvIdx = i;
+			}
+		}
+
+		if (bFound && GsAltInfoData[3] > 0)
+		{
+			iResult = 1;
+			INT iOffset = iSrvIdx * 0xdc;
+			BYTE* pBase = (BYTE*)( *(INT*)((BYTE*)this + 0x5c) );
+
+			// TODO: FUN_10018b30(GsClientHandle, (BYTE*)GsAltInfoData[2]) — begin alt-info read.
+			// TODO: FUN_10018ea0(GsClientHandle, 0x6f, pVal) — read field 0x6f (iGroupID?)
+			// TODO: FUN_10018ea0(GsClientHandle, 0x70, pVal) — read field 0x70
+			// TODO: FUN_10018ea0(GsClientHandle, 0x71, pVal) — read field 0x71
+			// TODO: FUN_10018ea0(GsClientHandle, 0x72, pVal) — read flag field
+			// TODO: FUN_10018ea0(GsClientHandle, 0x73, pVal) — read flag field
+			// TODO: FUN_10018ea0(GsClientHandle, 0x74, pVal) — read flag field
+			// TODO: FUN_10018ea0(GsClientHandle, 0x75, pVal) — read flag field (...)
+			// (All GameSpy API calls; see Ghidra 0xb8d0 for full field set)
+			(void)pBase; (void)iOffset; // suppress unused-variable warnings
+		}
+	}
+
+	return iResult;
+	unguard;
 }
 
 INT UR6GSServers::ReceiveServer()
 {
-	return 0;
+	INT bHaveServers = 0;
+	guard(UR6GSServers::ReceiveServer);
+
+	// local_38 in Ghidra: 1 if servers pending, 0 otherwise.
+	bHaveServers = (INT)(0 < GsReceiveServerCount); // DAT_100923ec
+	INT iProcessed = 0;
+
+	if (bHaveServers)
+	{
+		// Record rdtsc-derived timestamp (Ghidra uses rdtsc + GSecondsPerCycle for timing).
+		// TODO: GsTimestamp = (float)(rdtsc_lo + rdtsc_hi * 4.2949673e9) * GSecondsPerCycle + 16777216.0f;
+	}
+
+	// Process up to 2 pending server entries per call (Ghidra: loop limit = 2).
+	while (TRUE)
+	{
+		if (iProcessed >= 2 || GsReceiveServerCount <= iProcessed)
+			break;
+
+		// TODO: full server-data parsing via FUN_ GameSpy helpers (Ghidra: 0xad20).
+		// Each server query checks GsQueryState, reads FstGameServer fields, etc.
+		// Omitted here; see Ghidra export at address 0x1000ad20 for full body.
+
+		iProcessed++;
+	}
+
+	return bHaveServers;
+	unguard;
 }
 
 void UR6GSServers::ReceiveValidation()
@@ -501,7 +963,39 @@ void UR6GSServers::ServerRoundStart(INT)
 
 INT UR6GSServers::SetGSClientComInterface()
 {
-	return 0;
+	INT bOK = 0;
+	guard(UR6GSServers::SetGSClientComInterface);
+
+	if (GsComInitialized != 0) // DAT_100939d8
+	{
+		return 1;
+	}
+
+	GsComInitialized = 1; // DAT_100939d8 = 1
+
+	// Try to obtain the live GameSpy COM object (defunct since 2014; will fail).
+	IUnknown* pInterface = NULL;
+	HRESULT hr = GetActiveObject((const CLSID&)GsComCLSID, NULL, &pInterface); // DAT_10073074
+	if (FAILED(hr))
+	{
+		// TODO: GLog->Logf(TEXT("SetGSClientComInterface: GetActiveObject failed 0x%08x"), hr);
+	}
+
+	bOK = (INT)SUCCEEDED(hr);
+
+	if (pInterface != NULL)
+	{
+		// QueryInterface for the specific GameSpy interface.
+		hr = pInterface->QueryInterface((const IID&)GsComIID, (void**)&GsComInterface); // DAT_10072ff8
+		if (FAILED(hr))
+		{
+			// TODO: GLog->Logf(TEXT("SetGSClientComInterface: QueryInterface failed 0x%08x"), hr);
+			bOK = 0;
+		}
+	}
+
+	return bOK;
+	unguard;
 }
 
 void UR6GSServers::SetGSGameState(BYTE)
@@ -542,7 +1036,29 @@ void UR6GSServers::UnInitCDKey()
 
 INT UR6GSServers::UnInitMSClient()
 {
-	return 0;
+	INT retval = 0;
+	guard(UR6GSServers::UnInitMSClient);
+
+	GsUbiLobbyState = 0; // DAT_10091e6c = 0  (set BEFORE ExceptionList guard in Ghidra)
+
+	// Clear m_bLoggedInUbiDotCom (bit 7 of bitfield DWORD at this+0x194).
+	*(UINT*)((BYTE*)this + 0x194) &= 0xffffff7f; // ~(1 << 7) = clear m_bLoggedInUbiDotCom
+
+	GsServerJoined  = 0; // DAT_10091c00 = 0
+	GsMSClientState = 0; // DAT_10091be4 = 0
+	GsQueryState    = 0; // DAT_10091d30 = 0
+	GsMSClientAlt   = 0; // DAT_10091d38 = 0
+	GsLoggedInUbi   = 0; // DAT_10091e68 = 0
+	GsUbiState1     = 0; // DAT_10091e64 = 0
+
+	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("UnInitMSClient"));
+
+	// TODO: UINT uVar1 = FUN_10032300() — GameSpy MS client close; returns status byte.
+	UINT uVar1 = 0; // stub: GameSpy defunct
+
+	retval = (INT)(uVar1 & 0xff);
+	return retval;
+	unguard;
 }
 
 void UR6GSServers::UnInitRegServer()

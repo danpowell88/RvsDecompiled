@@ -16,6 +16,11 @@ IMPLEMENT_FUNCTION(UR6ServerList, -1, execNativeInitFavorites)
 IMPLEMENT_FUNCTION(UR6ServerList, -1, execNativeUpdateFavorites)
 IMPLEMENT_FUNCTION(UR6ServerList, -1, execSortServers)
 
+// Module-level globals used by UR6ServerList methods.
+// Addresses from Ghidra; zero-initialized in original binary's .data section.
+static INT GsGroupID  = 0; // DAT_10093b18 — GetGroupID()
+static INT GsLobbyID  = 0; // DAT_10093b34 — GetLobbyID()
+
 // --- UR6ServerList ---
 
 void UR6ServerList::FillSvrContainer()
@@ -26,12 +31,14 @@ void UR6ServerList::FillSvrContainer()
 
 INT UR6ServerList::GetGroupID()
 {
-	return 0;
+	// 0x125e0  54  ?GetGroupID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
+	return GsGroupID;
 }
 
 INT UR6ServerList::GetLobbyID()
 {
-	return 0;
+	// 0x125d0  55  ?GetLobbyID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
+	return GsLobbyID;
 }
 
 void UR6ServerList::InitFavorites()
