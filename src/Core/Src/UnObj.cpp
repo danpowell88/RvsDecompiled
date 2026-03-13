@@ -44,6 +44,8 @@ FScriptDelegate::FScriptDelegate()
 
 FScriptDelegate& FScriptDelegate::operator=( const FScriptDelegate& Other )
 {
+	Object       = Other.Object;
+	FunctionName = Other.FunctionName;
 	return *this;
 }
 
@@ -82,7 +84,10 @@ UObject::UObject( ENativeConstructor, UClass* InClass, const TCHAR* InName, cons
 ,	DName		( 0 )
 {
 	guard(UObject::UObject_ENativeConstructor);
-	// Not yet registered; will be registered by ProcessRegistrants.
+	Class = InClass;
+	// Store raw string pointers temporarily in Name/Outer; Register() converts them later.
+	*(const TCHAR**)&Name = InName;
+	Outer = (UObject*)InPackageName;
 	unguard;
 }
 
@@ -96,6 +101,9 @@ UObject::UObject( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackag
 ,	DName		( 0 )
 {
 	guard(UObject::UObject_EStaticConstructor);
+	// Store raw string pointers temporarily in Name/Outer; Register() converts them later.
+	*(const TCHAR**)&Name = InName;
+	Outer = (UObject*)InPackageName;
 	unguard;
 }
 
@@ -170,6 +178,30 @@ void UObject::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 void UObject::ProcessDelegate( FName DelegateName, FScriptDelegate* Delegate, void* Parms, void* Result )
 {
 	guard(UObject::ProcessDelegate);
+	UObject*   DelegateObject = this;
+	UFunction* Func           = NULL;
+
+	if( Delegate && Delegate->Object )
+	{
+		if( !Delegate->Object->IsValid() )
+		{
+			// Delegate object is no longer valid; clear the binding.
+			Delegate->Object       = NULL;
+			Delegate->FunctionName = NAME_None;
+		}
+		else
+		{
+			// Valid delegate: call the bound function on the bound object.
+			Func           = Delegate->Object->FindFunctionChecked( Delegate->FunctionName, 0 );
+			DelegateObject = Delegate->Object;
+		}
+	}
+
+	// Fall back to calling DelegateName on this object if no valid binding.
+	if( !Func )
+		Func = FindFunctionChecked( DelegateName, 0 );
+
+	DelegateObject->ProcessEvent( Func, Parms, Result );
 	unguard;
 }
 
@@ -186,6 +218,8 @@ INT UObject::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* St
 void UObject::Modify()
 {
 	guard(UObject::Modify);
+	if( GUndo && (ObjectFlags & RF_Transactional) )
+		GUndo->SaveObject( this );
 	unguard;
 }
 
@@ -257,6 +291,86 @@ INT UObject::IsPendingKill()
 EGotoState UObject::GotoState( FName NewState )
 {
 	guard(UObject::GotoState);
+	if( !StateFrame )
+		return GOTOSTATE_NotFound;
+
+	// DIVERGENCE: binary has LatentAction at StateFrame+0x28, our struct has it at +0x24
+	StateFrame->LatentAction = 0;
+
+	// Remember the current state name (NAME_None means we're at the class/default level).
+	FName PrevStateName = (StateFrame->StateNode == (UState*)GetClass())
+		? NAME_None
+		: StateFrame->StateNode->GetFName();
+
+	// Locate the destination state node.
+	UState* NewStateNode = NULL;
+	if( NewState == NAME_Auto )
+	{
+		// Find the first state marked as the automatic (default) state.
+		for( TFieldIterator<UState> It(GetClass()); It; ++It )
+		{
+			if( (*It)->StateFlags & STATE_Auto )
+			{
+				NewStateNode = *It;
+				break;
+			}
+		}
+	}
+	else
+	{
+		NewStateNode = FindState( NewState );
+	}
+
+	// If no matching state, transition to the base class (no state).
+	if( !NewStateNode )
+	{
+		NewStateNode = (UState*)GetClass();
+		NewState     = NAME_None;
+	}
+	else if( NewState == NAME_Auto )
+	{
+		NewState = NewStateNode->GetFName();
+	}
+
+	// Call EndState when leaving a named state, guarded against re-entrancy.
+	// RF_InEndState (0x2000) marks that we are already inside a GotoState chain.
+	// RF_StateChanged (0x1000) is used to detect preemption by a nested GotoState.
+	if( PrevStateName != NAME_None
+		&& NewState    != PrevStateName
+		&& StateFrame->ProbeMask
+		&& !(ObjectFlags & RF_InEndState) )
+	{
+		// Enter the chain: clear RF_StateChanged, set RF_InEndState.
+		ObjectFlags = (ObjectFlags & ~RF_StateChanged) | RF_InEndState;
+		eventEndState();
+		DWORD PostEndStateFlags = ObjectFlags;
+		ObjectFlags = PostEndStateFlags & ~RF_InEndState; // leave the chain
+
+		// If RF_StateChanged was set during EndState a nested GotoState preempted us.
+		if( PostEndStateFlags & RF_StateChanged )
+			return GOTOSTATE_Preempted;
+	}
+
+	// Apply the new state.
+	StateFrame->Node      = NewStateNode;
+	StateFrame->StateNode = NewStateNode;
+	StateFrame->Code      = NULL;
+	StateFrame->ProbeMask = (GetClass()->ProbeMask | NewStateNode->ProbeMask) & NewStateNode->IgnoreMask;
+
+	if( NewState != NAME_None )
+	{
+		if( NewState != PrevStateName && StateFrame->ProbeMask )
+		{
+			// Call BeginState; preemption detection uses the same RF_StateChanged flag.
+			ObjectFlags &= ~RF_StateChanged;
+			eventBeginState();
+			if( ObjectFlags & RF_StateChanged )
+				return GOTOSTATE_Preempted;
+		}
+		ObjectFlags |= RF_StateChanged;
+		return GOTOSTATE_Success;
+	}
+
 	return GOTOSTATE_NotFound;
 	unguard;
 }
@@ -264,6 +378,31 @@ EGotoState UObject::GotoState( FName NewState )
 INT UObject::GotoLabel( FName Label )
 {
 	guard(UObject::GotoLabel);
+	if( StateFrame )
+	{
+		// DIVERGENCE: binary has LatentAction at StateFrame+0x28, our struct has it at +0x24
+		StateFrame->LatentAction = 0;
+		if( Label != NAME_None )
+		{
+			for( UState* StateNode = StateFrame->StateNode; StateNode; StateNode = StateNode->GetSuperState() )
+			{
+				if( StateNode->LabelTableOffset != 0xffff )
+				{
+					for( FLabelEntry* Entry = (FLabelEntry*)&StateNode->Script(StateNode->LabelTableOffset);
+						 Entry->Name != NAME_None; Entry++ )
+					{
+						if( Entry->Name == Label )
+						{
+							StateFrame->Node = StateNode;
+							StateFrame->Code = &StateNode->Script(Entry->iCode);
+							return 1;
+						}
+					}
+				}
+			}
+		}
+		StateFrame->Code = NULL;
+	}
 	return 0;
 	unguard;
 }
@@ -287,6 +426,7 @@ void UObject::ShutdownAfterError()
 void UObject::PostEditChange()
 {
 	guard(UObject::PostEditChange);
+	Modify();
 	unguard;
 }
 
@@ -312,19 +452,70 @@ void UObject::CallFunction( FFrame& Stack, void* const Result, UFunction* Functi
 INT UObject::ScriptConsoleExec( const TCHAR* Str, FOutputDevice& Ar, UObject* Executor )
 {
 	guard(UObject::ScriptConsoleExec);
-	return 0;
+	if( !GIsScriptable )
+		return 0;
+
+	// Parse the function name.
+	TCHAR FuncName[64];
+	const TCHAR* TempStr = Str;
+	if( !ParseToken( TempStr, FuncName, ARRAY_COUNT(FuncName), 1 ) )
+		return 0;
+
+	FName FuncFName( FuncName, FNAME_Find );
+	if( FuncFName == NAME_None )
+		return 0;
+
+	UFunction* Func = FindFunction( FuncFName, 0 );
+	if( !Func || !(Func->FunctionFlags & FUNC_Exec) )
+		return 0;
+
+	// Allocate and zero-fill the parameter block.
+	BYTE* ParmBuf = NULL;
+	if( Func->ParmsSize > 0 )
+	{
+		ParmBuf = (BYTE*)appAlloca( Func->ParmsSize );
+		appMemzero( ParmBuf, Func->ParmsSize );
+	}
+
+	// Parse each non-return parameter from the remaining string.
+	for( TFieldIterator<UProperty> It(Func);
+		 It && (It->PropertyFlags & (CPF_Parm|CPF_ReturnParm)) == CPF_Parm;
+		 ++It )
+	{
+		UProperty* Property = *It;
+		TCHAR ParamStr[256];
+		if( ParseToken( TempStr, ParamStr, ARRAY_COUNT(ParamStr), 1 ) )
+			Property->ImportText( ParamStr, ParmBuf + Property->Offset, 0 );
+		else if( Property->PropertyFlags & CPF_OptionalParm )
+			break;
+	}
+
+	ProcessEvent( Func, ParmBuf, NULL );
+	return 1;
 	unguard;
 }
 
 void UObject::Register()
 {
 	guard(UObject::Register);
+	check(GObjInitialized);
+	// The ENativeConstructor/EStaticConstructor temporarily stores raw string pointers
+	// in the Name and Outer fields before the name table is available.
+	const TCHAR* NameStr    = *(const TCHAR**)&Name;
+	const TCHAR* PackageStr = (const TCHAR*)Outer;
+	if( NameStr )
+	{
+		Outer        = CreatePackage( NULL, PackageStr );
+		Name         = FName( NameStr, FNAME_Add );
+		_LinkerIndex = INDEX_NONE;
+	}
 	unguard;
 }
 
 void UObject::LanguageChange()
 {
 	guard(UObject::LanguageChange);
+	LoadLocalized();
 	unguard;
 }
 
@@ -579,6 +770,11 @@ void UObject::StaticExit()
 void UObject::StaticTick()
 {
 	guard(UObject::StaticTick);
+	check(GObjBeginLoadCount == 0);
+	if( GNativeDuplicate )
+		GError->Logf( TEXT("Duplicate native function registered: index %i"), GNativeDuplicate );
+	if( GCastDuplicate )
+		GError->Logf( TEXT("Duplicate native cast registered: index %i"), GCastDuplicate );
 	unguard;
 }
 
@@ -599,6 +795,70 @@ void UObject::StaticShutdownAfterError()
 INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(UObject::StaticExec);
+
+	const TCHAR* Str = Cmd;
+	if( ParseCommand(&Str, TEXT("OBJ")) )
+	{
+		if( ParseCommand(&Str, TEXT("GC")) || ParseCommand(&Str, TEXT("GARBAGE")) )
+		{
+			// Force a full garbage collect.
+			CollectGarbage( RF_Native );
+			Ar.Log( TEXT("Garbage collected.") );
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("LIST")) )
+		{
+			// List all objects of an optional class.
+			TCHAR ClassName[64]; ClassName[0] = 0;
+			Parse( Str, TEXT("CLASS="), ClassName, ARRAY_COUNT(ClassName) );
+			UClass* FilterClass = ClassName[0] ? (UClass*)StaticFindObject(UClass::StaticClass(), ANY_PACKAGE, ClassName, 0) : NULL;
+			INT Count = 0;
+			for( FObjectIterator It; It; ++It )
+			{
+				if( !FilterClass || It->IsA(FilterClass) )
+				{
+					Ar.Logf( TEXT("%s"), It->GetFullName() );
+					Count++;
+				}
+			}
+			Ar.Logf( TEXT("%i object(s)"), Count );
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("DUMP")) )
+		{
+			TCHAR ObjName[256]; ObjName[0] = 0;
+			Parse( Str, TEXT("NAME="), ObjName, ARRAY_COUNT(ObjName) );
+			if( ObjName[0] )
+			{
+				UObject* Obj = StaticFindObject( NULL, ANY_PACKAGE, ObjName, 0 );
+				if( Obj )
+					ExportProperties( Ar, Obj->GetClass(), (BYTE*)Obj, 0, NULL, NULL );
+			}
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("HASH")) )
+		{
+			// Dump hash bucket statistics.
+			INT MaxChain = 0, Total = 0;
+			for( INT i=0; i<ARRAY_COUNT(GObjHash); i++ )
+			{
+				INT Chain = 0;
+				for( UObject* H=GObjHash[i]; H; H=H->HashNext )
+					Chain++;
+				if( Chain > MaxChain ) MaxChain = Chain;
+				Total += Chain;
+			}
+			Ar.Logf( TEXT("Hash: %i objects, max chain %i"), Total, MaxChain );
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("LINKERS")) )
+		{
+			Ar.Logf( TEXT("Linkers: %i"), GObjLoaders.Num() );
+			for( INT i=0; i<GObjLoaders.Num(); i++ )
+				Ar.Logf( TEXT("  %s"), GObjLoaders(i)->GetFullName() );
+			return 1;
+		}
+	}
 	return 0;
 	unguard;
 }

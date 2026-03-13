@@ -91,6 +91,10 @@
 // GShift — bit-mask lookup table for FBitReader/FBitWriter (UnBits.cpp).
 extern BYTE GShift[8];
 
+// Duplicate native/cast registration counters (defined in Core.cpp).
+extern CORE_API INT GNativeDuplicate;
+extern CORE_API INT GCastDuplicate;
+
 // CPU feature flags (defined in Core.cpp, used in UnFile.cpp).
 extern CORE_API UBOOL GIsMMX;
 extern CORE_API UBOOL GIsPentiumPro;
