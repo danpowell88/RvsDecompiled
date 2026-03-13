@@ -125,6 +125,8 @@ FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 
 FVector AR6DeploymentZone::FindRandomPointInArea()
 {
+	// STUB: too complex — retail tries up to 5 times to find a valid pawn-sized spawn
+	// point using unknown helpers (FUN_10042934) for random coordinates inside the zone.
 	return FVector(0,0,0);
 }
 
@@ -252,12 +254,16 @@ INT AR6DeploymentZone::HaveTerrorist()
 	return 0;
 }
 
-void AR6DeploymentZone::InitHostageAI(FR6CharTemplate *, AR6Hostage *)
+void AR6DeploymentZone::InitHostageAI(FR6CharTemplate * Template, AR6Hostage * Hostage)
 {
+	// STUB: too complex — sets hostage AI parameters (faction, patrol mode, zone ref)
+	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
-void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate *, AR6Terrorist *)
+void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate * Template, AR6Terrorist * Terrorist)
 {
+	// STUB: too complex — sets terrorist AI parameters (skin, stance, group ID, zone ref)
+	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
 INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
@@ -304,10 +310,16 @@ void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode *, FRenderInterface *, 
 
 void AR6DeploymentZone::SpawnAHostage()
 {
+	// STUB: too complex — picks a template by weighted random, resolves a hostage class
+	// via UClass lookup (FUN_1003efe0), spawns and places the actor, calls InitHostageAI,
+	// fires a script event, and adds the result to m_aHostage.
 }
 
 void AR6DeploymentZone::SpawnATerrorist()
 {
+	// STUB: too complex — picks a template by weighted random, resolves a terrorist class
+	// via UClass lookup (FUN_1003efe0), spawns and places the actor, calls InitTerroristAI,
+	// fires a script event, and adds the result to m_aTerrorist.
 }
 
 void AR6DeploymentZone::Spawned()
@@ -352,7 +364,34 @@ void AR6DeploymentZone::execGetClosestHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
 	P_FINISH;
-	*(UObject**)Result = NULL;
+
+	if (!HaveHostage())
+	{
+		*(UObject**)Result = NULL;
+		return;
+	}
+
+	AR6Hostage* ClosestHostage = NULL;
+	FLOAT BestDist2 = 0.0f;
+
+	for (INT i = 0; i < m_HostageZoneToCheck.Num(); i++)
+	{
+		AR6DeploymentZone* Zone = m_HostageZoneToCheck(i);
+		for (INT j = 0; j < Zone->m_aHostage.Num(); j++)
+		{
+			AR6Hostage* Hostage = Zone->m_aHostage(j);
+			FLOAT Dx = Hostage->Location.X - vPoint.X;
+			FLOAT Dy = Hostage->Location.Y - vPoint.Y;
+			FLOAT Dist2 = Dx * Dx + Dy * Dy;
+			if (ClosestHostage == NULL || Dist2 < BestDist2)
+			{
+				ClosestHostage = Hostage;
+				BestDist2 = Dist2;
+			}
+		}
+	}
+
+	*(UObject**)Result = ClosestHostage;
 }
 
 void AR6DeploymentZone::execHaveHostage(FFrame& Stack, RESULT_DECL)

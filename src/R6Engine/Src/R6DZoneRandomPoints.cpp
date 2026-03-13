@@ -55,9 +55,29 @@ void AR6DZoneRandomPoints::DeleteANode(INT iIndex)
 	unguard;
 }
 
-FVector AR6DZoneRandomPoints::FindClosestPointTo(FVector const &)
+FVector AR6DZoneRandomPoints::FindClosestPointTo(FVector const & Point)
 {
-	return FVector(0,0,0);
+	guard(AR6DZoneRandomPoints::FindClosestPointTo);
+
+	if (m_aNode.Num() == 0)
+		return FVector(0,0,0);
+
+	AR6DZoneRandomPointNode* Best = m_aNode(0);
+	FLOAT BestDist2 = (Best->Location - Point).SizeSquared();
+
+	for (INT i = 1; i < m_aNode.Num(); i++)
+	{
+		FLOAT Dist2 = (m_aNode(i)->Location - Point).SizeSquared();
+		if (Dist2 < BestDist2)
+		{
+			Best = m_aNode(i);
+			BestDist2 = Dist2;
+		}
+	}
+
+	return Best->Location;
+
+	unguard;
 }
 
 FVector AR6DZoneRandomPoints::FindRandomPointInArea()
