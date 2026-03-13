@@ -1,6 +1,6 @@
 ---
-slug: 70-engine-stubs-floatrotators-scenenodes-octree
-title: "70. Float Rotators, Scene Nodes, and Octree Debug Methods"
+slug: 71-engine-stubs-floatrotators-scenenodes-octree
+title: "71. Float Rotators, Scene Nodes, and Octree Debug Methods"
 authors: [rvs-team]
 tags: [decompilation, engine, math, networking]
 ---
