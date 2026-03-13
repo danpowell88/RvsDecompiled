@@ -14,17 +14,40 @@ void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 
 	if (param_1 != NULL && param_1->IsA(AR6ClimbableObject::StaticClass()))
 	{
-		// Set collision height based on climb height type
-		if (((BYTE*)this)[0x394] == 0x1)
-			*(FLOAT*)((BYTE*)this + 0xfc) = 32.0f;   // 0x42000000
-		else
-			*(FLOAT*)((BYTE*)this + 0xfc) = 48.0f;   // 0x42400000
+		// Set CollisionHeight: 32.0f for low climb (m_eClimbHeight == 1), 48.0f otherwise
+		CollisionHeight = (m_eClimbHeight == 1) ? 32.0f : 48.0f;
 
-		// TODO: Full implementation spawns two R6ClimbablePoint actors:
-		// 1. m_climbablePoint above the object at Location + (0,0,CollisionHeight+DefaultCH)
-		// 2. m_insideClimbablePoint offset backwards along flat rotation direction
-		// Uses SpawnActor via vtable dispatch at (*(code**)(*(int*)(this+0x328)+0xa8))().
-		// Both spawned points have m_climbableObj set to this.
+		// Get the R6ClimbablePoint class default actor to read its CollisionHeight
+		AActor* DefaultActor = AR6ClimbablePoint::StaticClass()->GetDefaultActor();
+
+		// Spawn the outer climbable point elevated above this object
+		FVector outerLoc(Location.X, Location.Y,
+			Location.Z + CollisionHeight + DefaultActor->CollisionHeight);
+		m_climbablePoint = (AR6ClimbablePoint*)XLevel->SpawnActor(
+			AR6ClimbablePoint::StaticClass(), NAME_None, outerLoc, Rotation);
+
+		if (m_climbablePoint)
+		{
+			m_climbablePoint->m_climbableObj = this;
+
+			// Spawn the inner climbable point offset backwards along the flat rotation direction
+			FRotator flatRot(0, Rotation.Yaw, Rotation.Roll);
+			FVector dir = flatRot.Vector();
+			FLOAT offset = -(CollisionRadius + 30.0f);
+			FVector innerLoc = Location + dir * offset;
+
+			m_insideClimbablePoint = (AR6ClimbablePoint*)XLevel->SpawnActor(
+				AR6ClimbablePoint::StaticClass(), NAME_None, innerLoc, Rotation);
+
+			if (m_insideClimbablePoint)
+			{
+				m_insideClimbablePoint->m_climbableObj = this;
+				return;  // success path — function-level unguard runs at end
+			}
+		}
+
+		// DIVERGENCE: retail error log args are in data sections; log a generic message
+		GLog->Logf(TEXT("%s: failed to spawn climbable point markers"), GetName());
 	}
 
 	unguard;
