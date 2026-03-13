@@ -79,6 +79,9 @@ CORE_API INT appIsDebuggerPresent()
 
 CORE_API INT appIsPBInstalled()
 {
+	// Check for pb\pbsv.dll via GFileManager — returns 1 if present.
+	if( GFileManager && GFileManager->FileSize( TEXT("pb\\pbsv.dll") ) >= 0 )
+		return 1;
 	return 0;
 }
 
@@ -93,12 +96,92 @@ CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
 
 CORE_API FString appGetGMTRef()
 {
-	return FString(TEXT(""));
+	// Compute the local UTC offset as a "+HH:MM" / "-HH:MM" string.
+	TIME_ZONE_INFORMATION TZI;
+	DWORD dwRet = GetTimeZoneInformation( &TZI );
+	INT BiasMinutes = TZI.Bias;
+	if( dwRet == TIME_ZONE_ID_DAYLIGHT )
+		BiasMinutes += TZI.DaylightBias;
+	else if( dwRet == TIME_ZONE_ID_STANDARD )
+		BiasMinutes += TZI.StandardBias;
+	// Bias is minutes WEST of UTC; negate to get offset EAST.
+	INT OffsetMinutes = -BiasMinutes;
+	TCHAR Buf[32];
+	appSprintf( Buf, TEXT("%+03d:%02d"), OffsetMinutes / 60, Abs(OffsetMinutes % 60) );
+	return FString( Buf );
 }
 
 CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD* Data, FFileManager* FileManager )
 {
-	return 0;
+	guard(appCreateBitmap);
+	if( !FileManager || !Data || Width <= 0 || Height <= 0 )
+		return 0;
+
+	// Find an unused filename: Pattern%05i.bmp
+	static INT BitmapIndex = 0;
+	TCHAR Filename[256];
+	if( BitmapIndex == -1 )
+	{
+		for( INT i = 0; i < 65536; i++ )
+		{
+			appSprintf( Filename, TEXT("%s%05i.bmp"), Pattern, i );
+			if( FileManager->FileSize( Filename ) < 0 )
+				break;
+		}
+	}
+	else
+	{
+		appSprintf( Filename, TEXT("%s%05i.bmp"), Pattern, BitmapIndex );
+		BitmapIndex++;
+	}
+
+	// Open file writer.
+	FArchive* Ar = FileManager->CreateFileWriter( Filename, 0, GNull );
+	if( !Ar )
+		return 0;
+
+	// BMP file header (14 bytes).
+	INT PixelDataSize = Width * Height * 3;
+	INT FileSize      = 0x36 + PixelDataSize;
+	WORD  bfType      = 0x4D42; // 'BM'
+	DWORD bfSize      = FileSize;
+	WORD  bfReserved1 = 0;
+	WORD  bfReserved2 = 0;
+	DWORD bfOffBits   = 0x36;
+	*Ar << bfType << bfSize << bfReserved1 << bfReserved2 << bfOffBits;
+
+	// BMP info header (40 bytes).
+	DWORD biSize          = 40;
+	INT   biWidth         = Width;
+	INT   biHeight        = Height;
+	WORD  biPlanes        = 1;
+	WORD  biBitCount      = 24;
+	DWORD biCompression   = 0;
+	DWORD biSizeImage     = PixelDataSize;
+	DWORD biXPelsPerMeter = 0;
+	DWORD biYPelsPerMeter = 0;
+	DWORD biClrUsed       = 0;
+	DWORD biClrImportant  = 0;
+	*Ar << biSize << biWidth << biHeight << biPlanes << biBitCount
+	    << biCompression << biSizeImage
+	    << biXPelsPerMeter << biYPelsPerMeter << biClrUsed << biClrImportant;
+
+	// Write pixel data bottom-up (BMP convention), 24-bit RGB from 32-bit BGRA input.
+	for( INT y = Height - 1; y >= 0; y-- )
+	{
+		for( INT x = 0; x < Width; x++ )
+		{
+			DWORD Pixel = Data[ y * Width + x ];
+			BYTE R = (BYTE)(Pixel >> 16);
+			BYTE G = (BYTE)(Pixel >>  8);
+			BYTE B = (BYTE)(Pixel      );
+			*Ar << B << G << R;
+		}
+	}
+
+	delete Ar;
+	return 1;
+	unguard;
 }
 
 CORE_API TCHAR* appCharUpper( TCHAR* Str )
@@ -439,14 +522,34 @@ CORE_API INT IsRavenShieldCDInDrive()
 
 CORE_API void EdClearLoadErrors()
 {
+	GEdLoadErrors.Empty();
 }
 
 CORE_API void VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... )
 {
+	TCHAR TempStr[4096];
+	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
+	new(GEdLoadErrors) FEdLoadError( Type, TempStr );
 }
 
 CORE_API BYTE GRegisterCast( INT CastCode, const Native& Func )
 {
+	// On first call, initialise all cast slots to execUndefined.
+	static INT Initialized = 0;
+	if( !Initialized )
+	{
+		for( INT i = 0; i < 256; i++ )
+			GCasts[i] = &UObject::execUndefined;
+		Initialized = 1;
+	}
+
+	if( CastCode != -1 )
+	{
+		if( (DWORD)CastCode > 255 || GCasts[CastCode] != &UObject::execUndefined )
+			GCastDuplicate = CastCode;
+		else
+			GCasts[CastCode] = Func;
+	}
 	return 0;
 }
 
@@ -693,7 +796,61 @@ FMatrix::~FMatrix()
 FMatrix FMatrix::Inverse()
 {
 	FMatrix Result;
-	Result.SetIdentity();
+	FLOAT Det = Determinant();
+	if( !appIsNan((DOUBLE)Det) && Det != 0.0f )
+	{
+		FLOAT s = 1.0f / Det;
+
+		// Cofactors for rows 0 and 1 (reusing intermediate 2x2 minors).
+		FLOAT a2 = M(3,3)*M(2,2) - M(2,3)*M(3,2);
+		FLOAT a1 = M(3,3)*M(1,2) - M(1,3)*M(3,2);
+		FLOAT a4 = M(2,3)*M(1,2) - M(1,3)*M(2,2);
+		Result.M(0,0) = ( a4*M(3,1) + a2*M(1,1) - a1*M(2,1) ) * s;
+
+		FLOAT a3 = M(3,3)*M(0,2) - M(3,2)*M(0,3);
+		FLOAT a5 = M(2,3)*M(0,2) - M(0,3)*M(2,2);
+		Result.M(0,1) = -( a5*M(3,1) + a2*M(0,1) - a3*M(2,1) ) * s;
+
+		FLOAT a6 = M(1,3)*M(0,2) - M(1,2)*M(0,3);
+		Result.M(0,2) =  ( a6*M(3,1) + a1*M(0,1) - a3*M(1,1) ) * s;
+		Result.M(0,3) = -( a6*M(2,1) + a4*M(0,1) - a5*M(1,1) ) * s;
+
+		Result.M(1,0) = -( a4*M(3,0) + a2*M(1,0) - a1*M(2,0) ) * s;
+		Result.M(1,1) =  ( a5*M(3,0) + a2*M(0,0) - a3*M(2,0) ) * s;
+		Result.M(1,2) = -( a6*M(3,0) + a1*M(0,0) - a3*M(1,0) ) * s;
+		Result.M(1,3) =  ( a6*M(2,0) + a4*M(0,0) - a5*M(1,0) ) * s;
+
+		// Cofactors for rows 2 and 3 (reusing different 2x2 minors).
+		FLOAT b2 = M(3,3)*M(2,1) - M(2,3)*M(3,1);
+		FLOAT b1 = M(3,3)*M(1,1) - M(1,3)*M(3,1);
+		FLOAT b4 = M(2,3)*M(1,1) - M(1,3)*M(2,1);
+		Result.M(2,0) =  ( b4*M(3,0) + b2*M(1,0) - b1*M(2,0) ) * s;
+
+		FLOAT b3 = M(3,3)*M(0,1) - M(3,1)*M(0,3);
+		FLOAT b5 = M(2,3)*M(0,1) - M(2,1)*M(0,3);
+		Result.M(2,1) = -( b5*M(3,0) + b2*M(0,0) - b3*M(2,0) ) * s;
+
+		FLOAT b2r = M(1,3)*M(0,1) - M(1,1)*M(0,3);
+		Result.M(2,2) =  ( b2r*M(3,0) + b1*M(0,0) - b3*M(1,0) ) * s;
+		Result.M(2,3) = -( b2r*M(2,0) + b4*M(0,0) - b5*M(1,0) ) * s;
+
+		FLOAT c2 = M(3,2)*M(2,1) - M(3,1)*M(2,2);
+		FLOAT c1 = M(1,1)*M(3,2) - M(1,2)*M(3,1);
+		FLOAT c4 = M(1,1)*M(2,2) - M(1,2)*M(2,1);
+		Result.M(3,0) = -( c4*M(3,0) + c2*M(1,0) - c1*M(2,0) ) * s;
+
+		FLOAT c3 = M(3,2)*M(0,1) - M(3,1)*M(0,2);
+		FLOAT c5 = M(0,1)*M(2,2) - M(2,1)*M(0,2);
+		Result.M(3,1) =  ( c5*M(3,0) + c2*M(0,0) - c3*M(2,0) ) * s;
+
+		FLOAT c2r = M(1,2)*M(0,1) - M(1,1)*M(0,2);
+		Result.M(3,2) = -( c2r*M(3,0) + c1*M(0,0) - c3*M(1,0) ) * s;
+		Result.M(3,3) =  ( c2r*M(2,0) + c4*M(0,0) - c5*M(1,0) ) * s;
+	}
+	else
+	{
+		Result = Identity;
+	}
 	return Result;
 }
 
@@ -708,8 +865,30 @@ FMatrix FMatrix::Transpose()
 
 FMatrix FMatrix::TransposeAdjoint() const
 {
+	// Cofactor matrix of the upper-left 3x3 submatrix, stored transposed.
+	// The W row/column of the result are [0,0,0,1] for homogeneous transforms.
+	// DIVERGENCE: Ghidra analysis places 1.0f at M(3,1) rather than M(3,3),
+	// which is believed to be a Ghidra stack-layout analysis artifact.
 	FMatrix TA;
-	appMemzero( &TA, sizeof(TA) );
+	TA.M(0,0) = M(1,1)*M(2,2) - M(2,1)*M(1,2);
+	TA.M(0,1) = M(2,0)*M(1,2) - M(1,0)*M(2,2);
+	TA.M(0,2) = M(2,1)*M(1,0) - M(2,0)*M(1,1);
+	TA.M(0,3) = 0.0f;
+
+	TA.M(1,0) = M(2,1)*M(0,2) - M(0,1)*M(2,2);
+	TA.M(1,1) = M(0,0)*M(2,2) - M(2,0)*M(0,2);
+	TA.M(1,2) = M(2,0)*M(0,1) - M(2,1)*M(0,0);
+	TA.M(1,3) = 0.0f;
+
+	TA.M(2,0) = M(0,1)*M(1,2) - M(0,2)*M(1,1);
+	TA.M(2,1) = M(1,0)*M(0,2) - M(0,0)*M(1,2);
+	TA.M(2,2) = M(1,1)*M(0,0) - M(1,0)*M(0,1);
+	TA.M(2,3) = 0.0f;
+
+	TA.M(3,0) = 0.0f;
+	TA.M(3,1) = 0.0f;
+	TA.M(3,2) = 0.0f;
+	TA.M(3,3) = 1.0f;
 	return TA;
 }
 
