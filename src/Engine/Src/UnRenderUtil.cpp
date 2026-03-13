@@ -314,10 +314,12 @@ FLightMap& FLightMap::operator=(const FLightMap& Other)
 // (merged from earlier occurrence)
 unsigned __int64 FLightMap::GetCacheId()
 {
+	// Ghidra 0x4750: genuine stub; returns 0.
 	return 0;
 }
 int FLightMap::GetFirstMip()
 {
+	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
 ETextureFormat FLightMap::GetFormat()
@@ -334,6 +336,7 @@ int FLightMap::GetNumMips()
 }
 void * FLightMap::GetRawTextureData(int)
 {
+	// Ghidra 0x4720: shared stub; returns NULL.
 	return NULL;
 }
 int FLightMap::GetRevision()
@@ -355,6 +358,7 @@ ETexClampMode FLightMap::GetUClamp()
 }
 UTexture * FLightMap::GetUTexture()
 {
+	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
 ETexClampMode FLightMap::GetVClamp()
@@ -435,6 +439,7 @@ FTexture * FLightMapTexture::GetChild(int Index, int* OutWidth, int* OutHeight)
 }
 int FLightMapTexture::GetFirstMip()
 {
+	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
 ETextureFormat FLightMapTexture::GetFormat()
@@ -1023,6 +1028,7 @@ ETexClampMode FStaticLightMapTexture::GetUClamp()
 }
 UTexture * FStaticLightMapTexture::GetUTexture()
 {
+	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
 ETexClampMode FStaticLightMapTexture::GetVClamp()

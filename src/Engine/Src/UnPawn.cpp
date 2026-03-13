@@ -1998,11 +1998,13 @@ INT* AController::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Ret
 
 AActor* AController::GetTeamManager()
 {
+	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
 
 INT AController::LocalPlayerController()
 {
+	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
 
@@ -2049,6 +2051,7 @@ INT AController::CheckAnimFinished( INT Channel )
 
 INT AController::AcceptNearbyPath( AActor* Goal )
 {
+	// Ghidra 0x4720: shared stub; returns 0.
 	return 0;
 }
 

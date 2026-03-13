@@ -212,6 +212,7 @@ void UObject::ProcessState( FLOAT DeltaSeconds )
 
 INT UObject::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
+	// Ghidra 0x1bd40: genuine stub; returns 0.
 	return 0;
 }
 
@@ -280,11 +281,13 @@ void UObject::Serialize( FArchive& Ar )
 
 INT UObject::IsPendingDelete()
 {
+	// Ghidra 0x1da0: shared stub; returns 0.
 	return 0;
 }
 
 INT UObject::IsPendingKill()
 {
+	// Ghidra 0x1da0: shared stub; returns 0.
 	return 0;
 }
 
@@ -544,11 +547,13 @@ DWORD STDCALL UObject::QueryInterface( const FGuid& RefIID, void** InterfacePtr 
 
 DWORD STDCALL UObject::AddRef()
 {
+	// Ghidra 0x38a90: genuine stub; returns 0.
 	return 0;
 }
 
 DWORD STDCALL UObject::Release()
 {
+	// Ghidra 0x38aa0: genuine stub; returns 0.
 	return 0;
 }
 

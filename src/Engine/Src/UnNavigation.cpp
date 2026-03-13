@@ -609,6 +609,7 @@ int AScout::findStart(FVector)
 
 int AScout::HurtByVolume(AActor *)
 {
+	// Ghidra 0x4720: shared stub; returns 0.
 	return 0;
 }
 
