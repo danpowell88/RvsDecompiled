@@ -937,14 +937,20 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execInitialize );
 // ---------------------------------------------------------------------------
 void AReplicationInfo::StaticConstructor()
 {
+	guard(AReplicationInfo::StaticConstructor);
+	unguard;
 }
 
 void AReplicationInfo::StartVideo(UCanvas* Canvas, INT X, INT Y, INT Z)
 {
+	guard(AReplicationInfo::StartVideo);
+	unguard;
 }
 
 void AReplicationInfo::StopVideo(UCanvas* Canvas)
 {
+	guard(AReplicationInfo::StopVideo);
+	unguard;
 }
 
 INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
@@ -954,6 +960,8 @@ INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
 
 void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
+	guard(AReplicationInfo::ChangeDrawingSurface);
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

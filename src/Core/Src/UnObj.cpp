@@ -1798,6 +1798,8 @@ void UObject::CheckDanglingRefs( UObject* Obj )
 
 void UObject::StaticConstructor()
 {
+	guard(UObject::StaticConstructor);
+	unguard;
 }
 
 void UObject::InternalConstructor( void* X )

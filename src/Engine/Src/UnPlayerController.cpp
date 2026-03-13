@@ -2,6 +2,9 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 
+static INT  s_prevViewTarget = 0;
+static BYTE s_prevViewState  = 0;
+
 // --- APlayerController ---
 void APlayerController::SpecialDestroy()
 {
@@ -26,8 +29,14 @@ int APlayerController::Tick(float,ELevelTick)
 	return 0;
 }
 
-void APlayerController::R6PBKickPlayer(FString)
+void APlayerController::R6PBKickPlayer(FString KickMsg)
 {
+	guard(APlayerController::R6PBKickPlayer);
+	// Ghidra 0x91550: log the kicker's name, fire client event, then destroy
+	GLog->Logf(TEXT("%s"), GetFullName());
+	eventClientPBKickedOutMessage(KickMsg);
+	SpecialDestroy();
+	unguard;
 }
 
 void APlayerController::SetPlayer(UPlayer* InPlayer)
@@ -61,14 +70,36 @@ int APlayerController::LocalPlayerController()
 
 void APlayerController::PostNetReceive()
 {
+	guard(APlayerController::PostNetReceive);
+	// Ghidra 0x7de60: update client if view target changed since PreNetReceive
+	AActor::PostNetReceive();
+	if ((*(DWORD*)((BYTE*)this + 0x524) & 0x4000) &&
+		(s_prevViewTarget != *(INT*)((BYTE*)this + 0x5b8) ||
+		 s_prevViewState  != *(BYTE*)((BYTE*)this + 0x4f7)))
+	{
+		eventClientSetNewViewTarget();
+	}
+	unguard;
 }
 
 void APlayerController::PreNetReceive()
 {
+	guard(APlayerController::PreNetReceive);
+	// Ghidra 0x785d0: save view target state before net updates
+	AActor::PreNetReceive();
+	s_prevViewState  = *(BYTE*)((BYTE*)this + 0x4f7);
+	s_prevViewTarget = *(INT*)((BYTE*)this + 0x5b8);
+	unguard;
 }
 
-void APlayerController::CheckHearSound(AActor *,int,USound *,FVector,float,int)
+void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags)
 {
+	guard(APlayerController::CheckHearSound);
+	// Ghidra 0x127760: vtable[0x18c] pre-hook, then dispatch ClientHearSound event
+	typedef void (__thiscall* tPreHook)(APlayerController*);
+	((tPreHook*)((BYTE*)(*(void**)this) + 0x18c))[0](this);
+	eventClientHearSound(SoundMaker, Sound, (BYTE)Volume);
+	unguard;
 }
 
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
