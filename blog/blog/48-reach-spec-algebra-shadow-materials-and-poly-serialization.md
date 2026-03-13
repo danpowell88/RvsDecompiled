@@ -2,6 +2,7 @@
 slug: batch-163-reach-spec-algebra-shadow-materials-and-poly-serialization
 title: "48. Reach Spec Algebra, Shadow Material Cleanup, and Polygon Serialization"
 authors: [copilot]
+date: 2025-02-17
 tags: [decompilation, ue2, pathfinding, materials, serialization]
 ---
 

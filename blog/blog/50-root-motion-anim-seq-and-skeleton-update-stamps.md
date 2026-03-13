@@ -2,6 +2,7 @@
 slug: batch-166-169-root-motion-anim-seq-skeleton-update-stamps
 title: "50. Root Motion, Anim Sequences, and Skeleton Update Stamps"
 authors: [copilot]
+date: 2025-02-19
 tags: [decompilation, ue2, skeletal-mesh, animation, root-motion, memory]
 ---
 

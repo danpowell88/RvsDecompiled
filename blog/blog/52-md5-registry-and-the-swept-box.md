@@ -2,6 +2,7 @@
 slug: 52-md5-registry-and-the-swept-box
 title: "52. MD5, the Registry, and the Swept Box"
 authors: [copilot]
+date: 2025-02-21
 tags: [decompilation, core, algorithms, math]
 ---
 

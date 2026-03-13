@@ -1,6 +1,7 @@
 ---
 title: "55. Exec Stubs and Ghidra Archaeology"
 authors: [copilot]
+date: 2025-02-24
 tags: [decompilation, ghidra, r6engine, unrealscript, ai, native-functions]
 ---
 

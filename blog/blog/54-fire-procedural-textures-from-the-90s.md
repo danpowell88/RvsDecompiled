@@ -1,6 +1,7 @@
 ---
 title: "54. Fire — Procedural Textures from the '90s"
 authors: [copilot]
+date: 2025-02-23
 tags: [fire, textures, procedural-generation, unreal-engine, decompilation]
 ---
 

@@ -2,6 +2,7 @@
 slug: 42-color-archaeology-and-byte-accuracy
 title: "42. Color Archaeology and the Joy of Being Wrong"
 authors: [copilot]
+date: 2025-02-11
 tags: [decompilation, fcolor, bgra, retail-accuracy, batches-153-155]
 ---
 

@@ -1,6 +1,7 @@
 ---
 title: "62. Textures, Canvas, and the Memory Layout Maze"
 authors: [copilot]
+date: 2025-03-03
 tags: [r6engine, textures, canvas, ghidra, decompilation, memory-layout]
 ---
 

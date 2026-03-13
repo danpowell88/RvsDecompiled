@@ -1,6 +1,7 @@
 ---
 title: "51. PlayAnim: The Whole Animation State Machine"
 authors: [copilot]
+date: 2025-02-20
 tags: [decompilation, animation, skeletal-mesh, reverse-engineering]
 ---
 

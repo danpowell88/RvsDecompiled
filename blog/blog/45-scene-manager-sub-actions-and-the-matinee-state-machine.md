@@ -2,6 +2,7 @@
 slug: 45-scene-manager-sub-actions-and-the-matinee-state-machine
 title: "45. Scene Manager Sub-Actions and the Matinee State Machine"
 authors: [copilot]
+date: 2025-02-14
 tags: [decompilation, scene-manager, matinee, subaction, animation, batch-160]
 ---
 

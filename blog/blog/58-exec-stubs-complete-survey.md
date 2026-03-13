@@ -1,6 +1,7 @@
 ---
 title: "58. The Complete Exec Stub Survey"
 authors: [copilot]
+date: 2025-02-27
 tags: [decompilation, ghidra, r6engine, unrealscript, ai, native-functions, pathfinding]
 ---
 

@@ -3,7 +3,7 @@ slug: batch-162-pathfinding-network-render
 title: "47. Pathfinding Specs, Scout Init, Network Flush, and Render Teardown"
 authors: [copilot]
 tags: [reverse-engineering, engine, navigation, networking, reachspec, batch-162]
-date: 2026-12-04
+date: 2025-02-16
 ---
 
 Have you ever watched a bot in a game navigate through a doorway without getting stuck and wondered how the engine knows the bot can actually fit? Or noticed how multiplayer games manage to keep everyone's screen in sync even over a flaky connection? This batch tackles four unrelated engine subsystems that share a common theme: they're all the boring-but-essential plumbing that makes a game feel seamless.

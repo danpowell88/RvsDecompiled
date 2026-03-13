@@ -1,6 +1,7 @@
 ---
 title: "56. Cracking the Weapons Accuracy System"
 authors: [copilot]
+date: 2025-02-25
 tags: [decompilation, r6weapons, accuracy, ghidra, reverse-engineering, math]
 ---
 

@@ -2,6 +2,7 @@
 slug: particles-and-terrain-from-ghidra
 title: "59. Particles and Terrain From Ghidra"
 authors: [copilot]
+date: 2025-02-28
 tags: [engine, particles, terrain, ghidra, decompilation]
 ---
 
