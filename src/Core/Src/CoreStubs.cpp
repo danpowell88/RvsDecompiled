@@ -1902,25 +1902,40 @@ void UObject::LoadLocalized( INT Flags, UClass* Class )
 
 // RVS: ResetConfig 3-param version is now defined in UnObj.cpp directly.
 
-void UObject::SetKey( UClass* Class, const TCHAR* Section )
+void UObject::SetKey( UClass* InClass, const TCHAR* Key )
 {
 	guard(UObject::SetKey);
-	// Import properties from config for the given section.
-	// Iterates the class properties and calls ImportText for each one
-	// that has a matching key=value entry in the config section.
-	if( !Class || !Section || !GConfig )
-		return;
-	for( TFieldIterator<UProperty> It(Class); It; ++It )
+	TCHAR TokenBuf[258];
+	const TCHAR* P = Key;
+	if( ParseToken( P, TokenBuf, ARRAY_COUNT(TokenBuf), 0 ) )
 	{
-		UProperty* Prop = *It;
-		if( !(Prop->PropertyFlags & CPF_Config) )
-			continue;
-		TCHAR Value[4096];
-		if( GConfig->GetString( Section, Prop->GetName(), Value, ARRAY_COUNT(Value) ) )
+		while( *P == TEXT(' ') )
+			P++;
+		if( appStrlen(P) > 0 )
 		{
-			const TCHAR* Buf = Value;
-		Prop->ImportText( Buf, (BYTE*)Class->GetDefaultObject() + Prop->Offset, PPF_Localized );
+			TCHAR SectionBuf[32000];
+			UBOOL bFound = GConfig->GetSection( InClass->GetPathName(), SectionBuf, 32000, *InClass->ClassConfigName );
+			if( bFound )
+			{
+				for( TCHAR* Entry = SectionBuf; *Entry; Entry += appStrlen(Entry) + 1 )
+				{
+					TCHAR* Eq = appStrstr( Entry, TEXT("=") );
+					if( Eq )
+					{
+						*Eq = TEXT('\0');
+						if( appStricmp( Eq+1, P ) == 0 )
+						{
+							UProperty* Prop = FindField<UProperty>( InClass, Entry );
+							if( Prop )
+								GlobalSetProperty( TEXT(""), InClass, Prop, Prop->Offset, 1 );
+						}
+					}
+				}
+			}
 		}
+		UProperty* Prop = FindField<UProperty>( InClass, TokenBuf );
+		if( Prop )
+			GlobalSetProperty( P, InClass, Prop, Prop->Offset, 1 );
 	}
 	unguard;
 }
