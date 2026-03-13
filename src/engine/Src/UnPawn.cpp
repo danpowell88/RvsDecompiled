@@ -1818,6 +1818,7 @@ void AController::StartAnimPoll()
 	// Mirrors AActor::StartAnimPoll but operates on Pawn's mesh/MeshInstance
 	// while using the controller's own LatentFloat and GetStateFrame().
 	// MeshGetInstance is called with 'this' (controller) as the actor context.
+	// The keep-polling check uses Pawn->IsAnimating (AActor::IsAnimating).
 	if( !Pawn )
 		return;
 	if( !Pawn->Mesh )
@@ -1825,16 +1826,11 @@ void AController::StartAnimPoll()
 	Pawn->Mesh->MeshGetInstance( this );
 	UMeshInstance* mi = Pawn->MeshInstance;
 	INT fi = appRound( LatentFloat );
-	if( mi->IsAnimating( fi ) )
-		mi->IsAnimPastLastFrame( fi );
-	if( Pawn->DrawType == DT_Mesh && Pawn->Mesh )
-	{
-		Pawn->Mesh->MeshGetInstance( this );
-		mi = Pawn->MeshInstance;
-		if( (INT)mi->AnimGetNotifyCount( reinterpret_cast<void*>(fi) ) )
-			if( !mi->IsAnimLooping( fi ) )
-				GetStateFrame()->LatentAction = EPOLL_FinishAnim;
-	}
+	if( mi->IsAnimating( fi ) )       // UMeshInstance::IsAnimating, vtable[0xe8]
+		mi->IsAnimPastLastFrame( fi ); // vtable[0xf0]
+	if( Pawn->IsAnimating( fi ) )     // AActor::IsAnimating on Pawn
+		if( !mi->IsAnimLooping( fi ) ) // vtable[0xec]
+			GetStateFrame()->LatentAction = EPOLL_FinishAnim;
 }
 
 INT AController::CheckAnimFinished( INT Channel )

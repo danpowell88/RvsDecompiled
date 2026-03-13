@@ -2654,31 +2654,21 @@ void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 void AActor::StartAnimPoll()
 {
 	// Retail RVA 0x120930.
-	// Ensures MeshInstance is current, then queries animation state through
-	// UMeshInstance virtuals at vtable offsets 0xe8 (IsAnimating), 0xf0
-	// (vtable[60] — per-frame anim action), and the DrawType==DT_Mesh helper
-	// at 0x10370b90 which calls AnimGetNotifyCount.  If that returns non-zero
-	// and vtable[0xec] (IsAnimLooping) is false, signals FinishAnim completion.
-	// NOTE: UMeshInstance virtual order in our header may differ from retail
-	// vtable — all base implementations are stubs returning 0, so behaviour
-	// is functionally correct. Verify ordering when USkeletalMeshInstance is
-	// implemented.
+	// The helper at 0x10370b90 called for the keep-polling check is
+	// AActor::IsAnimating itself.  The vtable[0xe8/0xf0] calls dispatch
+	// through UMeshInstance (all stubs that return 0 in the base class).
 	if( !Mesh )
 		return;
 	Mesh->MeshGetInstance( this );
 	UMeshInstance* mi = MeshInstance;
 	INT fi = appRound( LatentFloat );
-	if( mi->IsAnimating( fi ) )
-		mi->IsAnimPastLastFrame( fi );
-	if( DrawType == DT_Mesh && Mesh )
-	{
-		Mesh->MeshGetInstance( this );
-		mi = MeshInstance;
-		if( (INT)mi->AnimGetNotifyCount( reinterpret_cast<void*>(fi) ) )
-			if( !mi->IsAnimLooping( fi ) )
-				GetStateFrame()->LatentAction = EPOLL_FinishAnim;
-	}
+	if( mi->IsAnimating( fi ) )       // UMeshInstance::IsAnimating, vtable[0xe8]
+		mi->IsAnimPastLastFrame( fi ); // vtable[0xf0]
+	if( IsAnimating( fi ) )           // AActor::IsAnimating — DT_Mesh/AnimGetNotifyCount check
+		if( !mi->IsAnimLooping( fi ) ) // vtable[0xec]
+			GetStateFrame()->LatentAction = EPOLL_FinishAnim;
 }
+
 
 INT AActor::CheckAnimFinished( INT Channel )
 {
@@ -2694,7 +2684,16 @@ INT AActor::CheckAnimFinished( INT Channel )
 
 INT AActor::IsAnimating( INT Channel ) const
 {
-	return 0;
+	// Retail RVA 0x70B90.
+	// For DT_Mesh actors: ensures MeshInstance is current via MeshGetInstance
+	// then returns UMeshInstance::AnimGetNotifyCount(Channel-as-void*).
+	// All other draw types return 0.
+	if( DrawType != DT_Mesh )
+		return 0;
+	if( !Mesh )
+		return 0;
+	Mesh->MeshGetInstance( this );
+	return MeshInstance ? MeshInstance->AnimGetNotifyCount( reinterpret_cast<void*>(Channel) ) : 0;
 }
 
 void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bOverride, INT bRestart )
