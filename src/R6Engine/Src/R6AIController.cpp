@@ -316,7 +316,38 @@ void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 	P_GET_BYTE(ePace);
 	P_GET_OBJECT(AActor, aTarget);
 	P_FINISH;
-	// TODO: calls FindPath/FindPathToward then FollowPath (complex inline — see Ghidra)
+
+	// DIVERGENCE: retail calls XLevel vtable[39] on vDestination before FindPath.
+	// Exact semantics of this navigation helper are unknown; call is omitted.
+	// When a target actor is given, path toward it using a zero origin;
+	// otherwise path toward vDestination using the controller as anchor.
+	FVector dest(0.f, 0.f, 0.f);
+	AActor* pathGoal = aTarget ? aTarget : (AActor*)this;
+	if (!aTarget)
+		dest = vDestination;
+
+	AActor* found = FindPath(dest, pathGoal, 0);
+	MoveTarget = found;
+
+	if (!found)
+	{
+		GetStateFrame()->LatentAction = 0;
+		m_eMoveToResult = 2;
+		return;
+	}
+
+	// Scan RouteCache for first empty or self-referential slot.
+	INT i;
+	for (i = 0; i <= 15; i++)
+	{
+		if (RouteCache[i] == NULL || RouteCache[i] == (AActor*)this)
+			break;
+	}
+	// DIVERGENCE: Ghidra sets sentinel value 1 at the found slot before calling FollowPath.
+	if (i <= 15)
+		RouteCache[i] = (AActor*)1;
+
+	FollowPath((enum eMovementPace)ePace, NAME_None, 0);
 }
 
 void AR6AIController::execGotoOpenDoorState(FFrame& Stack, RESULT_DECL)
@@ -337,8 +368,33 @@ void AR6AIController::execMoveToPosition(FFrame& Stack, RESULT_DECL)
 	P_GET_STRUCT(FVector, VPosition);
 	P_GET_STRUCT(FRotator, rOrientation);
 	P_FINISH;
-	// TODO: sets Destination, calls Pawn->setMoveTimer and AR6Pawn::moveToPosition,
-	// then sets LatentAction = 601 (0x259) to begin PollMoveToPosition (see Ghidra)
+
+	m_eMoveToResult = 0;
+
+	if (!Pawn)
+	{
+		m_eMoveToResult = 2;
+		return;
+	}
+
+	FVector delta = VPosition - Pawn->Location;
+	FLOAT dist = delta.Size();
+	MoveTarget = NULL;
+	Focus = NULL;
+
+	// DIVERGENCE: clear unknown bitfield (bit 0x2000) at Pawn+0x3E0.
+	*(DWORD*)((BYTE*)Pawn + 0x3E0) &= ~0x2000;
+	// DIVERGENCE: copy unknown speed/state field from Pawn+0x3F8 to Pawn+0x3F4.
+	*(INT*)((BYTE*)Pawn + 0x3F4) = *(INT*)((BYTE*)Pawn + 0x3F8);
+
+	Pawn->setMoveTimer(dist);
+	GetStateFrame()->LatentAction = 0x259;  // execPollMoveToPosition (601)
+
+	Destination = VPosition;
+	FocalPoint = Destination + rOrientation.Vector() * 200.0f;
+	bAdjusting = 0;
+
+	((AR6Pawn*)Pawn)->moveToPosition(Destination);
 }
 
 void AR6AIController::execNeedToOpenDoor(FFrame& Stack, RESULT_DECL)
@@ -352,7 +408,24 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, pActor);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+
+	if (Pawn != NULL)
+	{
+		FLOAT dX = Destination.X - pActor->Location.X;
+		FLOAT dY = Destination.Y - pActor->Location.Y;
+		FLOAT r = pActor->CollisionRadius;
+		if (4.0f * r * r <= dX * dX + dY * dY)
+		{
+			*(INT*)Result = ((AR6Pawn*)Pawn)->PickActorAdjust(pActor);
+			return;
+		}
+		*(INT*)Result = 0;
+		INT latent = GetStateFrame()->LatentAction;
+		if (latent == 0x25A || latent == 0x25B)  // PollFollowPath or PollFollowPathBlocked
+			GetStateFrame()->LatentAction = 0x25B;
+		else
+			GetStateFrame()->LatentAction = 0;
+	}
 }
 
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
@@ -375,9 +448,26 @@ void AR6AIController::execPollFollowPathBlocked(FFrame& Stack, RESULT_DECL)
 
 void AR6AIController::execPollMoveToPosition(FFrame& Stack, RESULT_DECL)
 {
-	// Poll — no bytecode params; called by VM during latent waits.
-	// TODO: calls AR6Pawn::moveToPosition each tick and clears LatentAction when
-	// the pawn arrives or the pawn pointer becomes NULL (see Ghidra)
+	if (!Pawn)
+	{
+		m_eMoveToResult = 2;
+		GetStateFrame()->LatentAction = 0;
+		return;
+	}
+
+	INT bSkipMainMove = 0;
+	if (bAdjusting)
+	{
+		bAdjusting = (((AR6Pawn*)Pawn)->moveToPosition(AdjustLoc) == 0) ? 1 : 0;
+		bSkipMainMove = bAdjusting;
+	}
+	if (!bSkipMainMove)
+	{
+		if (((AR6Pawn*)Pawn)->moveToPosition(Destination))
+			GetStateFrame()->LatentAction = 0;
+	}
+	if (GetStateFrame()->LatentAction == 0 && m_eMoveToResult == 0)
+		m_eMoveToResult = 2;
 }
 
 /*-----------------------------------------------------------------------------
