@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnActCol.cpp: Actor collision and reach specs (UReachSpec)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -116,7 +116,7 @@ UReachSpec * UReachSpec::operator+(UReachSpec const & other) const
 	// then sets: CollisionRadius/Height = min of both, reachFlags = OR of both,
 	// Distance = sum of both, MaxLandingVelocity = max of both.
 	UReachSpec* result = (UReachSpec*)UObject::StaticConstructObject(
-		StaticClass(), GetOuter(), NAME_None, 0, NULL, GError, (INT)0);
+		StaticClass(), GetOuter(), NAME_None, 0, NULL, GError, NULL);
 	if (!result) return NULL;
 	result->CollisionRadius  = (CollisionRadius  < other.CollisionRadius)  ? CollisionRadius  : other.CollisionRadius;
 	result->CollisionHeight  = (CollisionHeight  < other.CollisionHeight)  ? CollisionHeight  : other.CollisionHeight;
