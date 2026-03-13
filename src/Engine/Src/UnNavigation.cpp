@@ -19,9 +19,9 @@ void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 	vel[0] = 0.0f;
 	vel[1] = 0.0f;
 	vel[2] = 474.0f;  // 0x43e70000 — default Z velocity
-	*(FLOAT*)((BYTE*)Scout + 0x43C) = 9999.0f;  // Scout MaxStepHeight
+	*(FLOAT*)((BYTE*)Scout + 0x43C) = 10000.0f;  // Scout MaxStepHeight (0x461C4000)
 	Scout->SetCollisionSize(40.0f, 85.0f);
-	if (XLevel->FarMoveActor(Scout, Spec->End->Location, 0, 0, 0, 0))
+	if (XLevel->FarMoveActor(Scout, Spec->Start->Location, 0, 0, 0, 0))  // move to Start, not End
 	{
 		FVector jv = Scout->SuggestJumpVelocity(Location, 600.0f, 0.0f);
 		vel = (FLOAT*)((BYTE*)this + count * 0xC + 0x40C);
@@ -44,14 +44,113 @@ void AJumpDest::ClearPaths()
 
 
 // --- AJumpPad ---
-void AJumpPad::addReachSpecs(APawn *,int)
+void AJumpPad::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
+	guard(AJumpPad::addReachSpecs);
+	// Retail 0xd8520
+	ANavigationPoint::addReachSpecs(Scout, bOnlyChanged);
+	*(FLOAT*)((BYTE*)Scout + 0x43C) = 10000.0f;  // MaxStepHeight = big value
+	Scout->SetCollisionSize(40.0f, 85.0f);
+
+	TArray<UReachSpec*>* pathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+	if (pathList->Num() > 0 && XLevel->FarMoveActor(Scout, Location, 0, 0, 0, 0))
+	{
+		ANavigationPoint* dest = (*pathList)(0)->End;
+		*(ANavigationPoint**)((BYTE*)this + 0x3E8) = dest;  // JumpDest
+
+		FVector jv = Scout->SuggestJumpVelocity(dest->Location, 600.0f, 0.0f);
+		*(FLOAT*)((BYTE*)this + 0x3EC) = jv.X;  // JumpVelocity.X
+		*(FLOAT*)((BYTE*)this + 0x3F0) = jv.Y;  // JumpVelocity.Y
+		*(FLOAT*)((BYTE*)this + 0x3F4) = jv.Z;  // JumpVelocity.Z
+
+		// Scale X/Y components by dist2D/tFlight; Z gets 210 added
+		FLOAT dx = Location.X - dest->Location.X;
+		FLOAT dy = Location.Y - dest->Location.Y;
+		FLOAT dist2D = appSqrt(dx*dx + dy*dy);
+		FLOAT tFlight = 420.0f / (Level->TimeDilation * -0.5f);
+		FLOAT scale = dist2D / tFlight;
+		*(FLOAT*)((BYTE*)this + 0x3EC) = jv.X * scale;
+		*(FLOAT*)((BYTE*)this + 0x3F0) = jv.Y * scale;
+		*(FLOAT*)((BYTE*)this + 0x3F4) = jv.Z + 210.0f;
+	}
+	else
+	{
+		GWarn->Logf(TEXT("No forced destination for this jumppad!"));
+		*(FLOAT*)((BYTE*)this + 0x3EC) = 0.0f;
+		*(FLOAT*)((BYTE*)this + 0x3F0) = 0.0f;
+		*(FLOAT*)((BYTE*)this + 0x3F4) = 1260.0f;  // 0x449D8000
+	}
+
+	*(FLOAT*)((BYTE*)Scout + 0x43C) = 424.0f;  // restore MaxStepHeight (0x43D20000)
+	unguard;
 }
 
 
 // --- ALadder ---
-void ALadder::addReachSpecs(APawn *,int)
+void ALadder::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
+	guard(ALadder::addReachSpecs);
+	// Retail 0xd7b00
+
+	UObject* outer = XLevel->GetOuter();
+	UReachSpec* spec = (UReachSpec*)UObject::StaticConstructObject(UReachSpec::StaticClass(), outer, NAME_None, 0, NULL, GError, 0);
+
+	// Toggle bit 0x800 (bOnlyLift) in bitfield at +0x3A4 based on bOnlyChanged:
+	// if fully rebuilding (bOnlyChanged==0) always set; if partial, keep existing value
+	DWORD uVar1 = *(DWORD*)((BYTE*)this + 0x3A4);
+	INT iVar3 = ((uVar1 & 0x800) == 0 && bOnlyChanged != 0) ? 0 : 1;
+	*(DWORD*)((BYTE*)this + 0x3A4) = ((DWORD)(iVar3 << 11) ^ uVar1) & 0x800u ^ uVar1;
+
+	ALadderVolume* myLadder = *(ALadderVolume**)((BYTE*)this + 0x3E8);
+	if (myLadder)
+	{
+		for (INT i = 0; i < XLevel->Actors.Num(); i++)
+		{
+			AActor* actor = XLevel->Actors(i);
+			if (!actor) continue;
+			if (!actor->IsA(ALadder::StaticClass())) continue;
+			if (actor == this) continue;
+
+			ALadder* otherLadder = (ALadder*)actor;
+			// Only connect ladders that share the same LadderVolume
+			if (*(ALadderVolume**)((BYTE*)otherLadder + 0x3E8) != myLadder) continue;
+			// At least one endpoint must have bOnlyLift set
+			DWORD thisFlags  = *(DWORD*)((BYTE*)this        + 0x3A4);
+			DWORD otherFlags = *(DWORD*)((BYTE*)otherLadder + 0x3A4);
+			if (!(thisFlags & 0x800) && !(otherFlags & 0x800)) continue;
+
+			spec->Init();
+			spec->CollisionRadius = 40;
+			spec->CollisionHeight = 85;
+			spec->reachFlags      = 64;   // R_LADDER
+			spec->Start           = this;
+			spec->End             = otherLadder;
+			FVector delta         = Location - otherLadder->Location;
+			spec->Distance        = appRound(delta.Size());
+
+			TArray<UReachSpec*>* pl = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+			INT idx = pl->Add(1);
+			(*pl)(idx) = spec;
+
+			// Allocate a fresh spec for the next connection
+			outer = XLevel->GetOuter();
+			spec  = (UReachSpec*)UObject::StaticConstructObject(UReachSpec::StaticClass(), outer, NAME_None, 0, NULL, GError, 0);
+		}
+	}
+
+	ANavigationPoint::addReachSpecs(Scout, bOnlyChanged);
+
+	// Prune specs that represent a downward jump (falling off the ladder)
+	TArray<UReachSpec*>* pathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+	for (INT i = 0; i < pathList->Num(); i++)
+	{
+		UReachSpec* s = (*pathList)(i);
+		if (!s) continue;
+		if (!(s->reachFlags & 8)) continue;  // only R_JUMP specs
+		if (s->End->Location.Z < s->Start->Location.Z - s->Start->CollisionHeight)
+			s->bPruned = 1;
+	}
+	unguard;
 }
 
 int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
@@ -81,16 +180,70 @@ void ALadder::ClearPaths()
 
 void ALadder::InitForPathFinding()
 {
+	guard(ALadder::InitForPathFinding);
+	// Retail 0xd81f0
+
+	*(ALadderVolume**)((BYTE*)this + 0x3E8) = NULL;  // MyLadder = NULL
+
+	for (INT i = 0; i < XLevel->Actors.Num(); i++)
+	{
+		AActor* actor = XLevel->Actors(i);
+		if (!actor) continue;
+		if (!actor->IsA(ALadderVolume::StaticClass())) continue;
+
+		ALadderVolume* volume = (ALadderVolume*)actor;
+		// Check if this ladder's base or top is inside the volume
+		if (volume->Encompasses(Location) ||
+		    volume->Encompasses(FVector(Location.X, Location.Y, Location.Z - CollisionHeight)))
+		{
+			*(ALadderVolume**)((BYTE*)this + 0x3E8) = volume;
+			break;
+		}
+	}
+
+	ALadderVolume* myLadder = *(ALadderVolume**)((BYTE*)this + 0x3E8);
+	if (myLadder)
+	{
+		// Prepend this ladder to the volume's linked list
+		*(ALadder**)((BYTE*)this     + 0x3EC) = *(ALadder**)((BYTE*)myLadder + 0x47C);  // NextLadder = head
+		*(ALadder**)((BYTE*)myLadder + 0x47C) = this;                                    // head = this
+	}
+	else
+	{
+		GWarn->Logf(TEXT("Ladder is not in a LadderVolume"));
+	}
+	unguard;
 }
 
 
 // --- ALadderVolume ---
-void ALadderVolume::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
+void ALadderVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(ALadderVolume::RenderEditorInfo);
+	// Retail 0x10d250
+	AActor::RenderEditorInfo(SceneNode, RI, DA);
+
+	// colorSrc is an object pointer stored as INT at levelOuter+0x2C
+	UObject* levelOuter = *(UObject**)((BYTE*)SceneNode + 4);
+	levelOuter = levelOuter->GetOuter();
+	BYTE* colorSrc = (BYTE*)(DWORD)(*(INT*)((BYTE*)levelOuter + 0x2C));
+
+	FLineBatcher batcher(RI, 1, 0);
+	FVector center = FindCenter();
+	batcher.DrawDirectionalArrow(
+		center,
+		FRotator(*(INT*)((BYTE*)this + 0x48C), *(INT*)((BYTE*)this + 0x490), *(INT*)((BYTE*)this + 0x494)),
+		*(FColor*)(colorSrc + 0xF4),
+		*(FLOAT*)((BYTE*)this + 0xE0)
+	);
+	unguard;
 }
 
-void ALadderVolume::AddMyMarker(AActor *)
+void ALadderVolume::AddMyMarker(AActor* Actor)
 {
+	guard(ALadderVolume::AddMyMarker);
+	// Not present in Ghidra exports; intentionally empty
+	unguard;
 }
 
 FVector ALadderVolume::FindCenter()
@@ -105,18 +258,257 @@ FVector ALadderVolume::FindTop(FVector)
 
 
 // --- ALiftCenter ---
-void ALiftCenter::addReachSpecs(APawn *,int)
+void ALiftCenter::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
+	guard(ALiftCenter::addReachSpecs);
+	// Retail 0xd75f0
+
+	// Toggle bit 0x800 (bOnlyLift) based on bOnlyChanged (same logic as ALadder)
+	DWORD uVar10 = *(DWORD*)((BYTE*)this + 0x3A4);
+	INT  iVar4  = ((uVar10 & 0x800) == 0 && bOnlyChanged != 0) ? 0 : 1;
+	*(DWORD*)((BYTE*)this + 0x3A4) = ((DWORD)(iVar4 << 11) ^ uVar10) & 0x800u ^ uVar10;
+
+	// Resolve MyLift from the Base actor (AActor::Base at +0x15C)
+	AActor* baseActor = *(AActor**)((BYTE*)this + 0x15C);
+	if (baseActor && baseActor->IsA(AMover::StaticClass()))
+		*(AActor**)((BYTE*)this + 0x3EC) = baseActor;
+	else
+		*(AActor**)((BYTE*)this + 0x3EC) = NULL;
+
+	if (*(AActor**)((BYTE*)this + 0x3EC) == NULL)
+	{
+		FindBase();
+		baseActor = *(AActor**)((BYTE*)this + 0x15C);
+		if (baseActor && baseActor->IsA(AMover::StaticClass()))
+			*(AActor**)((BYTE*)this + 0x3EC) = baseActor;
+		else
+			*(AActor**)((BYTE*)this + 0x3EC) = NULL;
+
+		if (*(AActor**)((BYTE*)this + 0x3EC) == NULL)
+		{
+			GWarn->Logf(TEXT("ALiftCenter has no mover!"));
+			// Intentionally fall through to spec building (no mover case)
+		}
+	}
+
+	AMover* MyLift = *(AMover**)((BYTE*)this + 0x3EC);
+	if (MyLift)
+	{
+		// Warn if mover still has the class-default tag
+		AActor* defaultActor = AMover::StaticClass()->GetDefaultActor();
+		if (MyLift->Tag == defaultActor->Tag)
+			GWarn->Logf(TEXT("LiftCenter mover has default tag!"));
+	}
+
+	// Build reach specs connecting this LiftCenter to all matching LiftExits
+	UObject* outer = XLevel->GetOuter();
+	UReachSpec* spec = (UReachSpec*)UObject::StaticConstructObject(UReachSpec::StaticClass(), outer, NAME_None, 0, NULL, GError, 0);
+
+	INT foundExit = 0;
+	for (INT i = 0; i < XLevel->Actors.Num(); i++)
+	{
+		AActor* actor = XLevel->Actors(i);
+		if (!actor) continue;
+		if (!actor->IsA(ALiftExit::StaticClass())) continue;
+
+		// LiftTag matching: ALiftExit::LiftTag at +0x3F0, ALiftCenter::LiftTag at +0x3F4
+		FName exitLiftTag = *(FName*)((BYTE*)actor + 0x3F0);
+		FName thisLiftTag = *(FName*)((BYTE*)this  + 0x3F4);
+		if (!(exitLiftTag == thisLiftTag)) continue;
+
+		// At least one of center/exit must have bOnlyLift set
+		DWORD exitFlags = *(DWORD*)((BYTE*)actor + 0x3A4);
+		DWORD thisFlags = *(DWORD*)((BYTE*)this  + 0x3A4);
+		if (!(thisFlags & 0x800) && !(exitFlags & 0x800)) continue;
+
+		foundExit++;
+		// Share our mover reference with the exit
+		*(AMover**)((BYTE*)actor + 0x3EC) = MyLift;
+
+		// Center -> Exit spec
+		spec->Init();
+		spec->CollisionRadius = 40;
+		spec->CollisionHeight = 85;
+		spec->reachFlags      = 32;   // REACHSPEC_LIFT
+		spec->Start           = this;
+		spec->End             = (ANavigationPoint*)actor;
+		spec->Distance        = 500;
+		TArray<UReachSpec*>* pathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+		INT idx = pathList->Add(1);
+		(*pathList)(idx) = spec;
+
+		outer = XLevel->GetOuter();
+		spec  = (UReachSpec*)UObject::StaticConstructObject(UReachSpec::StaticClass(), outer, NAME_None, 0, NULL, GError, 0);
+
+		// Exit -> Center spec
+		spec->Init();
+		spec->CollisionRadius = 40;
+		spec->CollisionHeight = 85;
+		spec->reachFlags      = 32;
+		spec->Start           = (ANavigationPoint*)actor;
+		spec->End             = this;
+		spec->Distance        = 500;
+		TArray<UReachSpec*>* exitPathList = (TArray<UReachSpec*>*)((BYTE*)actor + 0x3D8);
+		idx = exitPathList->Add(1);
+		(*exitPathList)(idx) = spec;
+
+		outer = XLevel->GetOuter();
+		spec  = (UReachSpec*)UObject::StaticConstructObject(UReachSpec::StaticClass(), outer, NAME_None, 0, NULL, GError, 0);
+
+		// Determine which mover keyframe the exit aligns with
+		BYTE keyIndex = *(BYTE*)((BYTE*)actor + 0x3E8);
+		if (keyIndex != 0xFF)
+		{
+			*(BYTE*)((BYTE*)actor + 0x3E9) = keyIndex;
+			continue;
+		}
+
+		// No pre-stored key: find the best keyframe via proximity + line check
+		MyLift = *(AMover**)((BYTE*)this + 0x3EC);
+		if (!MyLift) continue;
+
+		INT   bestKey  = -1;
+		FLOAT bestDist = 1.0e6f;
+		BYTE  numKeys  = *(BYTE*)((BYTE*)MyLift + 0x399);
+		for (INT k = 0; k < (INT)numKeys; k++)
+		{
+			FLOAT* kp = (FLOAT*)((BYTE*)MyLift + 0x430 + k * 0xC);
+			// World position of this keyframe = mover base + LiftOffset + keyframe delta
+			FLOAT wx = kp[0] + MyLift->Location.X + *(FLOAT*)((BYTE*)this + 0x3FC);
+			FLOAT wy = kp[1] + MyLift->Location.Y + *(FLOAT*)((BYTE*)this + 0x400);
+			FLOAT wz = kp[2] + MyLift->Location.Z + *(FLOAT*)((BYTE*)this + 0x404);
+
+			FLOAT dz = wz - actor->Location.Z;
+			if (dz < 0.0f) dz = -dz;
+			if (dz >= 33.0f) continue;  // too far vertically
+
+			FLOAT dx2 = wx - actor->Location.X;
+			FLOAT dy2 = wy - actor->Location.Y;
+			FLOAT d2D = appSqrt(dx2*dx2 + dy2*dy2);
+			if (d2D >= bestDist) continue;
+
+			// Verify line of sight between exit and candidate key position
+			FCheckResult hit(1.0f);
+			FVector extent(CollisionRadius, CollisionRadius, 0.0f);
+			FVector endPos(wx, wy, wz);
+			XLevel->SingleLineCheck(hit, actor, endPos, actor->Location, 0x86, extent);
+			if (hit.Time == 1.0f)  // no obstruction
+			{
+				bestKey  = k;
+				bestDist = d2D;
+			}
+		}
+
+		if (bestKey >= 0)
+			*(BYTE*)((BYTE*)actor + 0x3E9) = (BYTE)bestKey;
+		else
+			GWarn->Logf(TEXT("LiftCenter: could not find valid keyframe for LiftExit!"));
+	}
+
+	if (foundExit == 0)
+		GWarn->Logf(TEXT("No LiftExit found for this LiftCenter!"));
+	unguard;
 }
 
 void ALiftCenter::FindBase()
 {
+	guard(ALiftCenter::FindBase);
+	// Retail 0xd8780 — editor-only; sets MyLift from actors whose Tag matches LiftTag
+	if (!GIsEditor) return;
+
+	FName thisLiftTag = *(FName*)((BYTE*)this + 0x3F4);
+	if (thisLiftTag == FName(NAME_None)) return;
+
+	for (INT i = 0; i < XLevel->Actors.Num(); i++)
+	{
+		AActor* actor = XLevel->Actors(i);
+		if (!actor) continue;
+		if (!(actor->Tag == thisLiftTag)) continue;
+
+		AMover* mover = actor->IsA(AMover::StaticClass()) ? (AMover*)actor : NULL;
+		*(AMover**)((BYTE*)this + 0x3EC) = mover;  // MyLift
+		if (mover)
+		{
+			*(ALiftCenter**)((BYTE*)mover + 0x3FC) = this;  // mover->LiftCenter = this
+			SetBase(mover, FVector(0.0f, 0.0f, 1.0f), 1);
+			mover = *(AMover**)((BYTE*)this + 0x3EC);  // reload in case SetBase changed it
+			// Cache our offset from the mover's current position
+			*(FLOAT*)((BYTE*)this + 0x3FC) = Location.X - mover->Location.X;
+			*(FLOAT*)((BYTE*)this + 0x400) = Location.Y - mover->Location.Y;
+			*(FLOAT*)((BYTE*)this + 0x404) = Location.Z - mover->Location.Z;
+			return;
+		}
+	}
+	unguard;
 }
 
 
 // --- ALineOfSightTrigger ---
-void ALineOfSightTrigger::TickAuthoritative(float)
+void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 {
+	guard(ALineOfSightTrigger::TickAuthoritative);
+	// Retail 0xc4670
+	AActor::TickAuthoritative(DeltaTime);
+
+	DWORD  flags        = *(DWORD*)((BYTE*)this + 0x398);
+	UBOOL bEnabled     = (flags & 1) != 0;
+	UBOOL bTriggered   = (flags & 2) != 0;
+	AActor* triggerActor = *(AActor**)((BYTE*)this + 0x3A8);
+	FLOAT sightRange   = *(FLOAT*)((BYTE*)this + 0x39C);
+	FLOAT lastSightTime = *(FLOAT*)((BYTE*)this + 0x3A0);
+	FLOAT sightDot     = *(FLOAT*)((BYTE*)this + 0x3A4);
+
+	if (bEnabled && !bTriggered && triggerActor &&
+	    lastSightTime <= *(FLOAT*)((BYTE*)triggerActor + 0xB4))
+	{
+		for (AController* controller = Level->ControllerList; controller; controller = controller->nextController)
+		{
+			if (!controller->LocalPlayerController()) continue;
+
+			APlayerController* playerController = (APlayerController*)controller;
+			APawn* pawn = controller->Pawn;
+			if (!pawn) continue;
+
+			// Distance check: pawn must be within sightRange of triggerActor
+			FLOAT dx = pawn->Location.X - triggerActor->Location.X;
+			FLOAT dy = pawn->Location.Y - triggerActor->Location.Y;
+			FLOAT dz = pawn->Location.Z - triggerActor->Location.Z;
+			if (dx*dx + dy*dy + dz*dz >= sightRange * sightRange) continue;
+
+			// Direction FROM pawn TO triggerActor, normalised
+			FVector dir(
+				triggerActor->Location.X - pawn->Location.X,
+				triggerActor->Location.Y - pawn->Location.Y,
+				triggerActor->Location.Z - pawn->Location.Z
+			);
+			dir = dir.SafeNormal();
+
+			// Controller view direction from raw rotation fields
+			FVector viewDir = FRotator(
+				*(INT*)((BYTE*)playerController + 0x240),
+				*(INT*)((BYTE*)playerController + 0x244),
+				*(INT*)((BYTE*)playerController + 0x248)
+			).Vector();
+
+			// Dot product must exceed sightDot threshold
+			FLOAT dotVal = dir.X * viewDir.X + dir.Y * viewDir.Y + dir.Z * viewDir.Z;
+			if (sightDot >= dotVal) continue;
+
+			// Line-of-sight check from triggerActor to the player's view pawn
+			APawn* viewPawn = *(APawn**)((BYTE*)playerController + 0x5B8);
+			if (!viewPawn) continue;
+
+			FCheckResult hit(1.0f);
+			INT traced = XLevel->SingleLineCheck(hit, this, triggerActor->Location, viewPawn->Location, 0x86, FVector(0, 0, 0));
+			if (traced == 0)  // 0 = no obstruction
+				eventPlayerSeesMe(playerController);
+			break;
+		}
+	}
+
+	// Always refresh the last-sight timestamp
+	*(FLOAT*)((BYTE*)this + 0x3A0) = Level->TimeSeconds;
+	unguard;
 }
 
 
@@ -136,15 +528,49 @@ int APathNode::ReviewPath(APawn *)
 	return 0;
 }
 
-void APathNode::CheckSymmetry(ANavigationPoint *)
+void APathNode::CheckSymmetry(ANavigationPoint* param_1)
 {
+	guard(APathNode::CheckSymmetry);
+	// Retail 0xd64b0
+
+	// If there is already a spec in our PathList pointing to param_1, symmetry is fine
+	TArray<UReachSpec*>* pathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+	for (INT i = 0; i < pathList->Num(); i++)
+	{
+		UReachSpec* spec = (*pathList)(i);
+		if (spec->End == param_1) return;
+	}
+
+	// No return path found — measure straight-line distance
+	FLOAT dx   = Location.X - param_1->Location.X;
+	FLOAT dy   = Location.Y - param_1->Location.Y;
+	FLOAT dz   = Location.Z - param_1->Location.Z;
+	FLOAT dist = appSqrt(dx*dx + dy*dy + dz*dz);
+
+	// Reset visitedWeight so pathfinding starts fresh
+	for (ANavigationPoint* nav = Level->NavigationPointList; nav; nav = nav->nextNavigationPoint)
+		nav->visitedWeight = 0;
+
+	// If param_1 is not reachable from here within a generous budget, warn
+	if (!ANavigationPoint::CanReach(param_1, dist * 1.8f))
+		GWarn->Logf(TEXT("Should be JumpDest for %s!"), *FString(GetName()));
+	unguard;
 }
 
 
 
 // --- APlayerStart ---
-void APlayerStart::addReachSpecs(APawn *,int)
+void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
+	guard(APlayerStart::addReachSpecs);
+	// Retail 0xd7f50
+	ANavigationPoint::addReachSpecs(Scout, bOnlyChanged);
+	Scout->SetCollisionSize(40.0f, 85.0f);
+	// bTest=1: only checks whether the position is useable, does not actually move Scout
+	INT result = XLevel->FarMoveActor(Scout, Location, 1, 0, 0, 0);
+	if (result == 0)
+		GWarn->Logf(TEXT("PlayerStart is not useable"));
+	unguard;
 }
 
 
