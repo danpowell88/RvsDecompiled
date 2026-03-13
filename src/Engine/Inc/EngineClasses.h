@@ -4985,6 +4985,7 @@ public:
 	DWORD eventIsRavenShield();
 	void eventSetCurrentMod(const FString&, class ALevelInfo*, DWORD, class UConsole*, class ULevel*);
 };
+ENGINE_API extern UR6ModMgr* GModMgr;
 
 class ENGINE_API UR6ServerInfo : public UObject
 {
@@ -4999,6 +5000,7 @@ class ENGINE_API UR6GameOptions : public UObject
 public:
 	DECLARE_CLASS(UR6GameOptions,UObject,0,Engine)
 };
+ENGINE_API extern UR6GameOptions* GGameOptions;
 
 class ENGINE_API UGlobalTempObjects : public UObject
 {

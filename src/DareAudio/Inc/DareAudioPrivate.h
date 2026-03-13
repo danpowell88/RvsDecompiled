@@ -96,6 +96,75 @@ class FSceneNode;
 class FCoords;
 
 /*----------------------------------------------------------------------------
+	DARE Sound Engine API declarations.
+	Three groups by calling convention:
+	  1. C++ name-mangled (no extern "C")
+	  2. __stdcall with extern "C"
+	  3. __cdecl  with extern "C"
+	Stubs live in SNDDSound3DDLL_ret.lib; cdecl stubs have no declared params
+	but cdecl caller-cleans-stack so calling with args works regardless.
+----------------------------------------------------------------------------*/
+
+// Group 1 -- C++ name-mangled exports
+enum _SND_tdeHTRFType { SND_HRTF_NONE = 0 };
+void SND_fn_vDisableHardwareAcceleration(int bDisable);
+void SND_fn_vSetHRTFOption(_SND_tdeHTRFType eType);
+
+// Group 2 -- __stdcall exports (extern "C", decorated _Name@N)
+extern "C" {
+int   __stdcall SND_fn_eInitSxd(const char* p0);
+void  __stdcall SND_fn_vDesInitSxd(void);
+long  __stdcall SND_fn_lCreateMicroSxd(long dummy);
+void  __stdcall SND_fn_vDestroyMicroSxd(long handle);
+void  __stdcall SND_fn_vSetMicroParamSxd(long handle, void* param);
+void  __stdcall SND_fn_vSetMasterDirectory(const char* dir);
+void  __stdcall SND_fn_vSetCurrentLangDirectory(const char* dir);
+void  __stdcall SND_fn_vSetCurrentLanguage(const char* lang);
+int   __stdcall SND_fn_bLoadMap(const char* mapName);
+int   __stdcall SND_fn_bLoadBank(const char* bankName);
+int   __stdcall SND_fn_bUnLoadBank(const char* bankName);
+int   __stdcall SND_fn_bGetMasterDirectory(char* buf, int size);
+void* __stdcall SND_fn_hGetSoundEventHandleFromSectionName(const char* name);
+}
+
+// Group 3 -- __cdecl exports (extern "C", undecorated names)
+// Stubs have no params but cdecl linking is by undecorated name only.
+extern "C" {
+int   SND_fn_eInitSound(void);
+void  SND_fn_vDesInitSound(void);
+long  SND_fn_lCreateSoundMicro(void);
+void  SND_fn_vDestroySoundMicro(long handle);
+long  SND_fn_lAddSoundObjectType(int slotId, void* pos, void* speed, void* sw, void* ml, void* ro);
+long  SND_fn_lAddSoundVolumeLine(int id, int unused, int unused2);
+void  SND_fn_vSetSoundVolumeLine(long lineHandle, float vol);
+float SND_fn_fGetSoundVolumeLine(long lineHandle);
+void  SND_fn_vChangeVolumeSoundObjectType(int slotId, float vol);
+void  SND_fn_vChangeVolumeAllSoundObjectTypes(float vol);
+void  SND_fn_vChangeVolumeAllSoundObjectTypesButOne(int slotId, float vol);
+void  SND_fn_vChangeVolumeSoundObject(long actorId, int slotId, float vol);
+float SND_fn_fGetVolumeSoundObjectType(int slotId);
+void  SND_fn_vResetVolumeSoundObjectType(int slotId);
+void  SND_fn_vKillAllSoundObjectTypes(void);
+void  SND_fn_vKillAllSoundObjectTypesButOne(int slotId);
+void  SND_fn_vKillSoundObject(long actorId, int slotId);
+void  SND_fn_vKillSoundObjectWithFade(long actorId, int slotId, float fadeTime);
+void  SND_fn_vSetRetSoundObjectType(long handle, void* pos, void* speed, void* sw);
+void  SND_fn_vSetRetSoundMicros(void* pos, void* speed, void* normal, void* tangent);
+void  SND_fn_vSetRetInfoSoundObjectType(long handle, void* info, void* ml);
+void  SND_fn_vSetRetRollOffSoundObjectType(long handle, void* ro);
+void  SND_fn_vSetRetSoundChannelType(long handle, void* coef);
+long  SND_fn_lSendSoundRequest(void* evHandle, long actorId, long microHandle, long typeHandle, int flags);
+int   SND_fn_bIsSoundRequestPlaying(long reqId);
+long  SND_fn_lGetLatestPlayingSoundRequest(long actorId, void* evHandle, int slot);
+void  SND_fn_vKillSoundChannel(long reqId, float fadeTime);
+float SND_fn_fGetLengthSoundEvent(void* evHandle);
+float SND_fn_fGetPosSoundRequest(long reqId);
+void* SND_fn_hGenerateSoundEventPlay(void* evHandle, long actorId, long micro);
+void* SND_fn_hGenerateSoundEventStop(void* evHandle, long actorId);
+void* SND_fn_hGetLastSoundEventOfSoundObjectType(long actorId, int slot);
+}
+
+/*----------------------------------------------------------------------------
 	DareAudio classes.
 ----------------------------------------------------------------------------*/
 

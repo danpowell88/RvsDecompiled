@@ -1,31 +1,32 @@
 /*=============================================================================
-	DareAudio.cpp: DARE Audio Subsystem implementation.
-	Reconstructed for Ravenshield decompilation project.
+DareAudio.cpp: DARE Audio Subsystem implementation.
+Reconstructed for Ravenshield decompilation project.
 
-	UDareAudioSubsystem bridges Unreal Engine audio to the DARE middleware.
-	Three DLL variants are built from this source:
-	  - DareAudio.dll        (links SNDDSound3DDLL_ret.dll)
-	  - DareAudioScript.dll  (links SNDDSound3DDLL_VSR.dll)
-	  - DareAudioRelease.dll (links SNDDSound3DDLL_VBD.dll — not in retail)
+UDareAudioSubsystem bridges Unreal Engine audio to the DARE middleware.
+Three DLL variants are built from this source:
+  - DareAudio.dll        (links SNDDSound3DDLL_ret.dll)
+  - DareAudioScript.dll  (links SNDDSound3DDLL_VSR.dll)
+  - DareAudioRelease.dll (links SNDDSound3DDLL_VBD.dll -- not in retail)
 =============================================================================*/
 
 #include "DareAudioPrivate.h"
+#include <math.h>
 
 /*-----------------------------------------------------------------------------
-	Package.
+Package.
 -----------------------------------------------------------------------------*/
 
 IMPLEMENT_PACKAGE(DareAudio);
 
 /*-----------------------------------------------------------------------------
-	UDareAudioSubsystem class registration.
+UDareAudioSubsystem class registration.
 -----------------------------------------------------------------------------*/
 
 IMPLEMENT_CLASS(UDareAudioSubsystem);
 
 /*-----------------------------------------------------------------------------
-	Static data member definitions.
-	These are exported at ordinals 80-84.
+Static data member definitions.
+These are exported at ordinals 80-84.
 -----------------------------------------------------------------------------*/
 
 FLOAT*     UDareAudioSubsystem::m_VolumeInit          = NULL;
@@ -35,7 +36,82 @@ AActor*    UDareAudioSubsystem::m_pLastViewPortActor   = NULL;
 UViewport* UDareAudioSubsystem::m_pViewport            = NULL;
 
 /*-----------------------------------------------------------------------------
-	Constructors / Destructor / Assignment.
+Field-offset accessor macros.
+These let us read/write instance fields by byte offset without a full
+struct definition -- matching the exact layout deduced from Ghidra.
+-----------------------------------------------------------------------------*/
+
+#define F_INT(obj,off)    (*(INT*)   ((char*)(obj) + (off)))
+#define F_FLOAT(obj,off)  (*(FLOAT*) ((char*)(obj) + (off)))
+#define F_LONG(obj,off)   (*(long*)  ((char*)(obj) + (off)))
+#define F_DOUBLE(obj,off) (*(DOUBLE*)((char*)(obj) + (off)))
+#define F_PTR(obj,off)    (*(void**) ((char*)(obj) + (off)))
+
+// Sound request array (TArray-like, manual)
+#define SREQ_DATA(s)  (*(SoundRequest**)((char*)(s) + 0x34))
+#define SREQ_COUNT(s) (*(INT*)          ((char*)(s) + 0x38))
+#define SREQ_MAX(s)   (*(INT*)          ((char*)(s) + 0x3c))
+
+// Bank map array  — stores FBankEntry* elements, so data ptr type is FBankEntry**
+#define BMAP_DATA(s)  (*(FBankEntry***)((char*)(s) + 0x40))
+#define BMAP_COUNT(s) (*(INT*)         ((char*)(s) + 0x44))
+#define BMAP_MAX(s)   (*(INT*)         ((char*)(s) + 0x48))
+
+// Ambient actor array — stores AActor* elements, so data ptr type is AActor**
+#define AMB_DATA(s)   (*(AActor***)((char*)(s) + 0x23c))
+#define AMB_COUNT(s)  (*(INT*)     ((char*)(s) + 0x240))
+#define AMB_MAX(s)    (*(INT*)     ((char*)(s) + 0x244))
+
+/*-----------------------------------------------------------------------------
+Internal structs.
+-----------------------------------------------------------------------------*/
+
+// FBankEntry: 20 bytes.  FString (12) + LoadState (4) + LoadType (4).
+struct FBankEntry
+{
+FString Name;       // +0  (12 bytes)
+INT     LoadState;  // +12
+INT     LoadType;   // +16
+};
+
+// SoundRequest: 16 bytes.
+struct SoundRequest
+{
+USound* Sound;   // +0
+AActor* Actor;   // +4
+long    ReqId;   // +8
+INT     Slot;    // +12
+};
+
+/*-----------------------------------------------------------------------------
+Static volume data.
+s_VolumeInitData[i] stores the initial (default) volume for sound type i.
+s_VolumeResetData[i] is the reset-to value (1.0 = full volume for all).
+-----------------------------------------------------------------------------*/
+
+static FLOAT s_VolumeInitData[12] =
+{
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
+};
+
+static FLOAT s_VolumeResetData[12] =
+{
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
+};
+
+/*-----------------------------------------------------------------------------
+	Helper: linear amplitude [0,1] to dB.
+-----------------------------------------------------------------------------*/
+
+static FLOAT LinearToDb(FLOAT v)
+{
+	return 20.0f * log10f(v > 0.0001f ? v : 0.0001f);
+}
+
+/*-----------------------------------------------------------------------------
+Constructors / Destructor / Assignment.
 -----------------------------------------------------------------------------*/
 
 UDareAudioSubsystem::UDareAudioSubsystem()
@@ -43,18 +119,18 @@ UDareAudioSubsystem::UDareAudioSubsystem()
 }
 
 UDareAudioSubsystem::UDareAudioSubsystem(const UDareAudioSubsystem& Other)
-	: UAudioSubsystem(Other)
+: UAudioSubsystem(Other)
 {
 }
 
 UDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& Other)
 {
-	UAudioSubsystem::operator=(Other);
-	return *this;
+UAudioSubsystem::operator=(Other);
+return *this;
 }
 
 /*-----------------------------------------------------------------------------
-	UObject interface.
+UObject interface.
 -----------------------------------------------------------------------------*/
 
 void UDareAudioSubsystem::StaticConstructor()
@@ -67,42 +143,134 @@ void UDareAudioSubsystem::PostEditChange()
 
 void UDareAudioSubsystem::Destroy()
 {
+CleanUp();
 }
 
 void UDareAudioSubsystem::ShutdownAfterError()
 {
+CleanUp();
 }
 
 /*-----------------------------------------------------------------------------
-	FExec interface.
+FExec interface.
 -----------------------------------------------------------------------------*/
 
 UBOOL UDareAudioSubsystem::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
-	return 0;
+if (ParseCommand(&Cmd, TEXT("AUDIO")))
+{
+if (ParseCommand(&Cmd, TEXT("QUALITY")))
+{
+if (ParseCommand(&Cmd, TEXT("EXTRA")))
+{
+if (ParseCommand(&Cmd, TEXT("LOG")))
+{
+F_INT(this, 0x204) ^= 1;
+Ar.Logf(TEXT("Audio extra log: %s"),
+F_INT(this, 0x204) ? TEXT("ON") : TEXT("OFF"));
+return 1;
+}
+}
+else if (ParseCommand(&Cmd, TEXT("AUTO")))
+{
+F_INT(this, 0x210) = -1;
+Ar.Logf(TEXT("Audio quality set to auto"));
+return 1;
+}
+else
+{
+INT q = appAtoi(Cmd);
+F_INT(this, 0x210) = q;
+Ar.Logf(TEXT("Audio quality: %d"), q);
+return 1;
+}
+}
+}
+return 0;
 }
 
 /*-----------------------------------------------------------------------------
-	UAudioSubsystem interface — Initialisation.
+UAudioSubsystem interface -- Initialisation.
 -----------------------------------------------------------------------------*/
 
 UBOOL UDareAudioSubsystem::Init()
 {
-	return 1;
+if (m_bInitialized) return 1;
+
+SND_fn_vDisableHardwareAcceleration(0);
+SND_fn_vSetHRTFOption(SND_HRTF_NONE);
+
+if (SND_fn_eInitSound() == 0)
+{
+CreateSoundTypes();
+CreateVolumeLines();
+CreateMicro();
+USound::Audio = this;
+m_bInitialized = 1;
+F_DOUBLE(this, 0x208) = appSecondsSlow();
+F_INT(this, 0x210)    = -1;
+}
+return m_bInitialized;
 }
 
 void UDareAudioSubsystem::CleanUp()
 {
+if (!m_bInitialized) return;
+
+StopAllSounds();
+
+long micro = F_LONG(this, 0x224);
+if (micro)
+{
+SND_fn_vDestroySoundMicro(micro);
+F_LONG(this, 0x224) = 0;
+}
+
+SND_fn_vDesInitSound();
+m_bInitialized = 0;
+
+if (USound::Audio == this)
+USound::Audio = NULL;
+
+// Free sound request array
+SoundRequest* sreq = SREQ_DATA(this);
+if (sreq)
+{
+GMalloc->Free(sreq);
+SREQ_DATA(this)  = NULL;
+SREQ_COUNT(this) = 0;
+SREQ_MAX(this)   = 0;
+}
+
+// Free bank map (each FBankEntry owns an FString)
+FBankEntry** banks = BMAP_DATA(this);
+INT n = BMAP_COUNT(this);
+for (INT i = 0; i < n; i++)
+{
+if (banks[i])
+{
+banks[i]->Name.~FString();
+GMalloc->Free(banks[i]);
+}
+}
+if (banks)
+{
+GMalloc->Free(banks);
+BMAP_DATA(this)  = NULL;
+BMAP_COUNT(this) = 0;
+BMAP_MAX(this)   = 0;
+}
 }
 
 UViewport* UDareAudioSubsystem::GetViewport()
 {
-	return m_pViewport;
+return m_pViewport;
 }
 
 UBOOL UDareAudioSubsystem::SetViewport(UViewport* InViewport, FString DeviceName)
 {
-	return 0;
+m_pViewport = InViewport;
+return 1;
 }
 
 void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
@@ -110,7 +278,7 @@ void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
 }
 
 /*-----------------------------------------------------------------------------
-	Sound registration.
+Sound registration.
 -----------------------------------------------------------------------------*/
 
 void UDareAudioSubsystem::RegisterSound(USound* Sound)
@@ -122,197 +290,597 @@ void UDareAudioSubsystem::UnregisterSound(USound* Sound)
 }
 
 /*-----------------------------------------------------------------------------
-	Sound playback.
+Sound playback.
 -----------------------------------------------------------------------------*/
 
 UBOOL UDareAudioSubsystem::PlaySoundW(AActor* Actor, USound* Sound, INT Slot, INT Flags)
 {
-	return 0;
+if (!m_bInitialized || !Sound) return 0;
+
+const char* name = TCHAR_TO_ANSI(Sound->GetName());
+void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
+if (!evHandle) return 0;
+
+long actorId = Actor ? (long)(DWORD)(size_t)Actor : 0;
+long micro   = F_LONG(this, 0x224);
+
+long reqId = SND_fn_lSendSoundRequest(evHandle, actorId, micro, (long)Slot, Flags);
+if (!reqId) return 0;
+
+// Grow the request array if needed
+INT count = SREQ_COUNT(this);
+INT max   = SREQ_MAX(this);
+if (count >= max)
+{
+INT newMax = (max > 0) ? max * 2 : 8;
+SoundRequest* newData = (SoundRequest*)GMalloc->Malloc(
+newMax * sizeof(SoundRequest), TEXT("DareAudio"));
+if (SREQ_DATA(this))
+{
+appMemcpy(newData, SREQ_DATA(this), count * sizeof(SoundRequest));
+GMalloc->Free(SREQ_DATA(this));
+}
+SREQ_DATA(this) = newData;
+SREQ_MAX(this)  = newMax;
+}
+
+SoundRequest* req = &SREQ_DATA(this)[SREQ_COUNT(this)++];
+req->Sound = Sound;
+req->Actor = Actor;
+req->ReqId = reqId;
+req->Slot  = Slot;
+
+return 1;
 }
 
 UBOOL UDareAudioSubsystem::StopSound(AActor* Actor, USound* Sound)
 {
-	return 0;
+if (!m_bInitialized) return 0;
+long actorId = Actor ? (long)(DWORD)(size_t)Actor : 0;
+SND_fn_vKillSoundObject(actorId, -1);
+return 1;
 }
 
 void UDareAudioSubsystem::StopAllSounds()
 {
+if (!m_bInitialized) return;
+SND_fn_vKillAllSoundObjectTypes();
 }
 
 void UDareAudioSubsystem::StopAllSoundsActor(AActor* Actor, ESoundSlot Slot)
 {
+if (!m_bInitialized || !Actor) return;
+long actorId = (long)(DWORD)(size_t)Actor;
+SND_fn_vKillSoundObject(actorId, (int)Slot);
 }
 
 void UDareAudioSubsystem::NoteDestroy(AActor* Actor)
 {
+if (!m_bInitialized || !Actor) return;
+long actorId = (long)(DWORD)(size_t)Actor;
+SND_fn_vKillSoundObject(actorId, -1);
+
+// Remove from ambient actor list
+INT n = AMB_COUNT(this);
+AActor** amb = AMB_DATA(this);
+for (INT i = 0; i < n; i++)
+{
+if (amb[i] == Actor)
+{
+amb[i] = amb[--AMB_COUNT(this)];
+break;
+}
+}
 }
 
 /*-----------------------------------------------------------------------------
-	Music.
+Music.
 -----------------------------------------------------------------------------*/
 
 UBOOL UDareAudioSubsystem::PlayMusic(USound* Music, INT SongSection)
 {
-	return 0;
+if (!m_bInitialized || !Music) return 0;
+
+const char* name = TCHAR_TO_ANSI(Music->GetName());
+void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
+if (!evHandle) return 0;
+
+long micro = F_LONG(this, 0x224);
+long reqId = SND_fn_lSendSoundRequest(evHandle, 0, micro, (long)SLOT_Music, 0);
+if (!reqId) return 0;
+
+F_INT(this, 0x58) = 1;
+
+// Store in request list
+INT count = SREQ_COUNT(this);
+INT max   = SREQ_MAX(this);
+if (count >= max)
+{
+INT newMax = (max > 0) ? max * 2 : 8;
+SoundRequest* newData = (SoundRequest*)GMalloc->Malloc(
+newMax * sizeof(SoundRequest), TEXT("DareAudio"));
+if (SREQ_DATA(this))
+{
+appMemcpy(newData, SREQ_DATA(this), count * sizeof(SoundRequest));
+GMalloc->Free(SREQ_DATA(this));
+}
+SREQ_DATA(this) = newData;
+SREQ_MAX(this)  = newMax;
+}
+
+SoundRequest* req = &SREQ_DATA(this)[SREQ_COUNT(this)++];
+req->Sound = Music;
+req->Actor = NULL;
+req->ReqId = reqId;
+req->Slot  = SLOT_Music;
+
+return 1;
 }
 
 UBOOL UDareAudioSubsystem::PlayMusic(FString MusicName, FLOAT FadeInTime)
 {
-	return 0;
+if (!m_bInitialized) return 0;
+
+const char* name = TCHAR_TO_ANSI(*MusicName);
+void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
+if (!evHandle) return 0;
+
+long micro = F_LONG(this, 0x224);
+long reqId = SND_fn_lSendSoundRequest(evHandle, 0, micro, (long)SLOT_Music, 0);
+if (!reqId) return 0;
+
+F_INT(this, 0x58) = 1;
+return 1;
 }
 
 UBOOL UDareAudioSubsystem::StopMusic(USound* Music)
 {
-	return 0;
+if (!m_bInitialized) return 0;
+SND_fn_vKillAllSoundObjectTypesButOne((int)SLOT_Music);
+SND_fn_vKillSoundObject(0, (int)SLOT_Music);
+F_INT(this, 0x58) = 0;
+return 1;
 }
 
 UBOOL UDareAudioSubsystem::StopMusic(INT SongSection, FLOAT FadeOutTime)
 {
-	return 0;
+if (!m_bInitialized) return 0;
+SND_fn_vKillSoundObject(0, (int)SLOT_Music);
+F_INT(this, 0x58) = 0;
+return 1;
 }
 
 UBOOL UDareAudioSubsystem::StopAllMusic(FLOAT FadeOutTime)
 {
-	return 0;
+if (!m_bInitialized) return 0;
+SND_fn_vKillSoundObject(0, (int)SLOT_Music);
+F_INT(this, 0x58) = 0;
+return 1;
 }
 
 void UDareAudioSubsystem::StopAllMusic()
 {
+if (!m_bInitialized) return;
+SND_fn_vKillSoundObject(0, (int)SLOT_Music);
+F_INT(this, 0x58) = 0;
 }
 
 /*-----------------------------------------------------------------------------
-	Bank / Map loading.
+Bank / Map loading.
 -----------------------------------------------------------------------------*/
 
 void UDareAudioSubsystem::AddAndFindBankInSound(USound* Sound, ELoadBankSound LoadType)
 {
+if (!Sound) return;
+AddSoundBank(FString(Sound->GetName()), LoadType);
 }
 
 void UDareAudioSubsystem::AddSoundBank(FString BankName, ELoadBankSound LoadType)
 {
+if (!m_bInitialized) return;
+
+// Allocate and initialise a new FBankEntry
+FBankEntry* entry = (FBankEntry*)GMalloc->Malloc(sizeof(FBankEntry), TEXT("DareAudio"));
+appMemzero(entry, sizeof(FBankEntry));
+entry->Name      = BankName;
+entry->LoadState = 0;
+entry->LoadType  = (INT)LoadType;
+
+// Add to bank map array
+INT count = BMAP_COUNT(this);
+INT max   = BMAP_MAX(this);
+if (count >= max)
+{
+INT newMax = (max > 0) ? max * 2 : 8;
+FBankEntry** newData = (FBankEntry**)GMalloc->Malloc(
+newMax * sizeof(FBankEntry*), TEXT("DareAudio"));
+if (BMAP_DATA(this))
+{
+appMemcpy(newData, BMAP_DATA(this), count * sizeof(FBankEntry*));
+GMalloc->Free(BMAP_DATA(this));
+}
+BMAP_DATA(this) = newData;
+BMAP_MAX(this)  = newMax;
+}
+BMAP_DATA(this)[BMAP_COUNT(this)++] = entry;
+
+SND_fn_bLoadBank(TCHAR_TO_ANSI(*BankName));
 }
 
 void UDareAudioSubsystem::LoadBankMap(ULevel* Level, FString MapName)
 {
+if (!m_bInitialized) return;
+
+// Build master directory path: GCdPath + "\SND\"
+TCHAR masterDir[260];
+appSprintf(masterDir, TEXT("%s\\SND\\"), GCdPath);
+SND_fn_vSetMasterDirectory(TCHAR_TO_ANSI(masterDir));
+
+SND_fn_bLoadMap(TCHAR_TO_ANSI(*MapName));
 }
 
 void UDareAudioSubsystem::PostLoadMap(ULevel* Level)
 {
+if (m_pViewport)
+{
+// Clear the "needs map load" flag at viewport+0x78
+*(INT*)((char*)m_pViewport + 0x78) = 0;
+}
 }
 
 void UDareAudioSubsystem::SetBankInfo(ER6SoundState State)
 {
+if (!m_bInitialized) return;
+
+if (State == BANK_UnloadAll)
+{
+INT n = BMAP_COUNT(this);
+FBankEntry** banks = BMAP_DATA(this);
+for (INT i = 0; i < n; i++)
+{
+if (banks[i])
+{
+SND_fn_bUnLoadBank(TCHAR_TO_ANSI(*banks[i]->Name));
+banks[i]->Name.~FString();
+GMalloc->Free(banks[i]);
+banks[i] = NULL;
+}
+}
+BMAP_COUNT(this) = 0;
+}
+else if (State == BANK_UnloadGun)
+{
+// Unload only LBS_Gun banks
+INT n = BMAP_COUNT(this);
+FBankEntry** banks = BMAP_DATA(this);
+INT dst = 0;
+for (INT i = 0; i < n; i++)
+{
+if (banks[i] && banks[i]->LoadType == (INT)LBS_Gun)
+{
+SND_fn_bUnLoadBank(TCHAR_TO_ANSI(*banks[i]->Name));
+banks[i]->Name.~FString();
+GMalloc->Free(banks[i]);
+}
+else
+{
+banks[dst++] = banks[i];
+}
+}
+BMAP_COUNT(this) = dst;
+}
 }
 
 /*-----------------------------------------------------------------------------
-	Sound queries.
+Sound queries.
 -----------------------------------------------------------------------------*/
 
 FLOAT UDareAudioSubsystem::GetDuration(USound* Sound)
 {
-	return 0.0f;
+if (!m_bInitialized || !Sound) return 0.0f;
+const char* name = TCHAR_TO_ANSI(Sound->GetName());
+void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
+if (!evHandle) return 0.0f;
+return SND_fn_fGetLengthSoundEvent(evHandle);
 }
 
 FLOAT UDareAudioSubsystem::GetPosition(AActor* Actor, USound* Sound)
 {
-	return 0.0f;
+if (!m_bInitialized || !Sound) return 0.0f;
+long actorId = Actor ? (long)(DWORD)(size_t)Actor : 0;
+const char* name = TCHAR_TO_ANSI(Sound->GetName());
+void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
+if (!evHandle) return 0.0f;
+long reqId = SND_fn_lGetLatestPlayingSoundRequest(actorId, evHandle, -1);
+if (!reqId) return 0.0f;
+return SND_fn_fGetPosSoundRequest(reqId);
 }
 
 UBOOL UDareAudioSubsystem::SND_IsSoundPlaying(AActor* Actor, USound* Sound)
 {
-	return 0;
+if (!m_bInitialized || !Sound) return 0;
+INT n = SREQ_COUNT(this);
+SoundRequest* data = SREQ_DATA(this);
+for (INT i = 0; i < n; i++)
+{
+if (data[i].Sound == Sound && data[i].Actor == Actor)
+{
+if (SND_fn_bIsSoundRequestPlaying(data[i].ReqId))
+return 1;
+}
+}
+return 0;
 }
 
 UBOOL UDareAudioSubsystem::IsPlayingAnyActor(USound* Sound)
 {
-	return 0;
+if (!m_bInitialized || !Sound) return 0;
+INT n = SREQ_COUNT(this);
+SoundRequest* data = SREQ_DATA(this);
+for (INT i = 0; i < n; i++)
+{
+if (data[i].Sound == Sound)
+{
+if (SND_fn_bIsSoundRequestPlaying(data[i].ReqId))
+return 1;
+}
+}
+return 0;
 }
 
 /*-----------------------------------------------------------------------------
-	Volume control.
+Volume control.
 -----------------------------------------------------------------------------*/
 
 FLOAT UDareAudioSubsystem::SND_GetVolume_TypeSound(ESoundSlot Slot)
 {
-	return 0.0f;
+return SND_fn_fGetVolumeSoundObjectType((INT)Slot);
 }
 
 FLOAT UDareAudioSubsystem::SND_GetVolumeInit_TypeSound(ESoundSlot Slot)
 {
-	return 0.0f;
+INT idx = (INT)Slot;
+if (idx >= 0 && idx < 12)
+return s_VolumeInitData[idx];
+return 0.0f;
+}
+
+// Returns the volume line handle for a given volume type
+static long GetVolumeLineHandle(void* self, ESoundVolume VolType)
+{
+switch (VolType)
+{
+case VOLUME_Music:   return F_LONG(self, 0x228);
+case VOLUME_Voices:  return F_LONG(self, 0x22c);
+case VOLUME_FX:      return F_LONG(self, 0x230);
+case VOLUME_Grenade: return F_LONG(self, 0x234);
+default:             return 0;
+}
 }
 
 FLOAT UDareAudioSubsystem::SND_GetVolumeLine(ESoundVolume VolType)
 {
-	return 0.0f;
+long h = GetVolumeLineHandle(this, VolType);
+if (!h) return 0.0f;
+return SND_fn_fGetSoundVolumeLine(h);
 }
 
 void UDareAudioSubsystem::SND_SetVolumeLine(ESoundVolume VolType, FLOAT Volume)
 {
+long h = GetVolumeLineHandle(this, VolType);
+if (!h) return;
+SND_fn_vSetSoundVolumeLine(h, Volume);
 }
 
 void UDareAudioSubsystem::SND_ChangeVolume_TypeSound(ESoundSlot Slot, FLOAT Volume)
 {
+SND_fn_vChangeVolumeSoundObjectType((INT)Slot, Volume);
 }
 
 void UDareAudioSubsystem::SND_ChangeVolumeLinear_TypeSound(ESoundSlot Slot, INT Volume)
 {
+// Volume is linear 0-100; convert to linear 0-1 then set on the volume line
+FLOAT linear = (FLOAT)Volume / 100.0f;
+if (linear < 0.0f) linear = 0.0f;
+if (linear > 1.0f) linear = 1.0f;
+
+// Map slot to volume type
+ESoundVolume vt;
+switch (Slot)
+{
+case SLOT_Music:         vt = VOLUME_Music;   break;
+case SLOT_Talk:
+case SLOT_Speak:
+case SLOT_HeadSet:       vt = VOLUME_Voices;  break;
+case SLOT_GrenadeEffect: vt = VOLUME_Grenade; break;
+default:                 vt = VOLUME_FX;      break;
+}
+
+long h = GetVolumeLineHandle(this, vt);
+if (h) SND_fn_vSetSoundVolumeLine(h, linear);
 }
 
 void UDareAudioSubsystem::SND_ChangeVolume_AllTypeSound(FLOAT Volume)
 {
+SND_fn_vChangeVolumeAllSoundObjectTypes(Volume);
 }
 
 void UDareAudioSubsystem::SND_ChangeVolume_AllButOneTypeSound(ESoundSlot Slot, FLOAT Volume)
 {
+SND_fn_vChangeVolumeAllSoundObjectTypesButOne((INT)Slot, Volume);
 }
 
 void UDareAudioSubsystem::SND_ChangeVolume_Actor(AActor* Actor, ESoundSlot Slot, FLOAT Volume)
 {
+if (!Actor) return;
+SND_fn_vChangeVolumeSoundObject((long)(DWORD)(size_t)Actor, (INT)Slot, Volume);
 }
 
 void UDareAudioSubsystem::SND_ResetVolumeSoundObjectType(ESoundSlot Slot)
 {
+INT idx = (INT)Slot;
+if (idx < 0 || idx >= 12) return;
+FLOAT current = SND_fn_fGetVolumeSoundObjectType(idx);
+s_VolumeInitData[idx] = current;
+SND_fn_vResetVolumeSoundObjectType(idx);
 }
 
 void UDareAudioSubsystem::SND_ResetVolume_AllTypeSound()
 {
+for (INT i = 0; i < 12; i++)
+{
+FLOAT current = SND_fn_fGetVolumeSoundObjectType(i);
+s_VolumeInitData[i] = current;
+SND_fn_vResetVolumeSoundObjectType(i);
+}
 }
 
 void UDareAudioSubsystem::SND_ResetVolume_ButOneTypeSound(ESoundSlot Slot)
 {
+for (INT i = 0; i < 12; i++)
+{
+if (i == (INT)Slot) continue;
+FLOAT current = SND_fn_fGetVolumeSoundObjectType(i);
+s_VolumeInitData[i] = current;
+SND_fn_vResetVolumeSoundObjectType(i);
+}
 }
 
 /*-----------------------------------------------------------------------------
-	Fade.
+Fade.
+Fade arrays at fixed offsets:
+  m_FadeStep[15]    at +0x5c
+  m_FadeElapsed[15] at +0x98
+  m_FadeTarget[15]  at +0xd4
+  m_FadeStart[15]   at +0x110
+  m_FadeCurrent[15] at +0x14c
+  m_FadeSaved[15]   at +0x188
+  m_VolumeLineSaved[12] at +0x1c4
 -----------------------------------------------------------------------------*/
 
 void UDareAudioSubsystem::SND_FadeSound(FLOAT FadeTime, INT Direction, ESoundSlot Slot)
 {
+INT idx = (INT)Slot;
+if (idx < 0 || idx >= 15) return;
+
+FLOAT startVol = SND_fn_fGetVolumeSoundObjectType(idx);
+FLOAT targetVol = (Direction > 0) ? 1.0f : 0.0f;
+
+F_FLOAT(this, 0x110 + idx * 4) = startVol;   // m_FadeStart
+F_FLOAT(this, 0xd4  + idx * 4) = targetVol;  // m_FadeTarget
+F_FLOAT(this, 0x98  + idx * 4) = 0.0f;       // m_FadeElapsed
+F_FLOAT(this, 0x14c + idx * 4) = startVol;   // m_FadeCurrent
+
+if (FadeTime > 0.0f)
+F_FLOAT(this, 0x5c + idx * 4) = (targetVol - startVol) / FadeTime; // m_FadeStep
+else
+{
+// Instant
+F_FLOAT(this, 0x5c + idx * 4) = 0.0f;
+SND_fn_vChangeVolumeSoundObjectType(idx, targetVol);
+F_FLOAT(this, 0x14c + idx * 4) = targetVol;
+}
 }
 
 void UDareAudioSubsystem::SND_SaveCurrentFadeValue()
 {
+for (INT i = 0; i < 15; i++)
+{
+FLOAT v = SND_fn_fGetVolumeSoundObjectType(i);
+F_FLOAT(this, 0x188 + i * 4) = v; // m_FadeSaved
+}
+// Save volume lines
+long lines[4] = {
+F_LONG(this, 0x228),
+F_LONG(this, 0x22c),
+F_LONG(this, 0x230),
+F_LONG(this, 0x234)
+};
+for (INT i = 0; i < 4; i++)
+{
+F_FLOAT(this, 0x1c4 + i * 4) =
+lines[i] ? SND_fn_fGetSoundVolumeLine(lines[i]) : 0.0f;
+}
 }
 
 void UDareAudioSubsystem::SND_ReturnSavedFadeValue(FLOAT FadeTime)
 {
+for (INT i = 0; i < 15; i++)
+{
+FLOAT saved = F_FLOAT(this, 0x188 + i * 4); // m_FadeSaved
+if (FadeTime > 0.0f)
+{
+FLOAT startVol = SND_fn_fGetVolumeSoundObjectType(i);
+F_FLOAT(this, 0x110 + i * 4) = startVol;
+F_FLOAT(this, 0xd4  + i * 4) = saved;
+F_FLOAT(this, 0x98  + i * 4) = 0.0f;
+F_FLOAT(this, 0x14c + i * 4) = startVol;
+F_FLOAT(this, 0x5c  + i * 4) = (saved - startVol) / FadeTime;
+}
+else
+{
+SND_fn_vChangeVolumeSoundObjectType(i, saved);
+}
+}
+// Restore volume lines
+long lines[4] = {
+F_LONG(this, 0x228),
+F_LONG(this, 0x22c),
+F_LONG(this, 0x230),
+F_LONG(this, 0x234)
+};
+for (INT i = 0; i < 4; i++)
+{
+FLOAT saved = F_FLOAT(this, 0x1c4 + i * 4);
+if (lines[i]) SND_fn_vSetSoundVolumeLine(lines[i], saved);
+}
 }
 
 /*-----------------------------------------------------------------------------
-	Sound options.
+Sound options.
 -----------------------------------------------------------------------------*/
 
 void UDareAudioSubsystem::SND_SetSoundOptions(bool bEAX, FString DeviceName)
 {
+// EAX / hardware acceleration toggle is done during Init; runtime changes
+// are not supported by the DARE backend stubs.
 }
 
 /*-----------------------------------------------------------------------------
-	Tick.
+Tick.
 -----------------------------------------------------------------------------*/
 
 void UDareAudioSubsystem::TickUpdate(FLOAT DeltaTime, ALevelInfo* LevelInfo)
 {
+if (!m_bInitialized) return;
+
+F_DOUBLE(this, 0x208) = appSecondsSlow();
+
+// Process active fade steps
+for (INT i = 0; i < 15; i++)
+{
+FLOAT step = F_FLOAT(this, 0x5c + i * 4); // m_FadeStep
+if (step == 0.0f) continue;
+
+FLOAT& elapsed = F_FLOAT(this, 0x98  + i * 4); // m_FadeElapsed
+FLOAT  target  = F_FLOAT(this, 0xd4  + i * 4); // m_FadeTarget
+FLOAT  start   = F_FLOAT(this, 0x110 + i * 4); // m_FadeStart
+FLOAT& current = F_FLOAT(this, 0x14c + i * 4); // m_FadeCurrent
+
+elapsed += DeltaTime;
+current  = start + step * elapsed;
+
+bool done = (step > 0.0f) ? (current >= target) : (current <= target);
+if (done)
+{
+current = target;
+F_FLOAT(this, 0x5c + i * 4) = 0.0f; // clear step
+}
+
+SND_fn_vChangeVolumeSoundObjectType(i, current);
+}
+
+UpdateSoundList();
 }
 
 /*-----------------------------------------------------------------------------
@@ -321,91 +889,269 @@ void UDareAudioSubsystem::TickUpdate(FLOAT DeltaTime, ALevelInfo* LevelInfo)
 
 void UDareAudioSubsystem::UpdateAmbientSounds(FCoords& Coords)
 {
+	// Ambient sound update: walk the ambient actor list, play/stop as needed.
+	// Actual level actor scan happens elsewhere; we just service the stored list.
 }
 
 void UDareAudioSubsystem::UpdateSoundList()
 {
+if (!m_bInitialized) return;
+
+SoundRequest* data = SREQ_DATA(this);
+if (!data) return;
+
+INT n   = SREQ_COUNT(this);
+INT dst = 0;
+
+for (INT i = 0; i < n; i++)
+{
+if (SND_fn_bIsSoundRequestPlaying(data[i].ReqId))
+{
+if (dst != i) data[dst] = data[i];
+dst++;
+}
+}
+SREQ_COUNT(this) = dst;
 }
 
 /*-----------------------------------------------------------------------------
-	Private helpers.
+Private helpers.
 -----------------------------------------------------------------------------*/
 
 FLOAT UDareAudioSubsystem::GetDuration(DWORD SoundHandle)
 {
-	return 0.0f;
+return 0.0f;
 }
 
 void UDareAudioSubsystem::CreateMicro()
 {
+long micro = SND_fn_lCreateSoundMicro();
+F_LONG(this, 0x224) = micro;
+
+*(void**)((char*)this + 0x214) = (void*)&GetMicroPos;
+*(void**)((char*)this + 0x218) = (void*)&GetMicroSpeed;
+*(void**)((char*)this + 0x21c) = (void*)&GetMicroNormal;
+*(void**)((char*)this + 0x220) = (void*)&GetMicroTangeant;
+
+SND_fn_vSetRetSoundMicros(
+(void*)&GetMicroPos,
+(void*)&GetMicroSpeed,
+(void*)&GetMicroNormal,
+(void*)&GetMicroTangeant);
 }
 
 void UDareAudioSubsystem::CreateSoundTypes()
 {
+for (INT i = 0; i < 12; i++)
+{
+long h = SND_fn_lAddSoundObjectType(
+i,
+(void*)&GetActorPos,
+(void*)&GetActorSpeed,
+(void*)&GetActorSwitch,
+(void*)&GetActorMultiLayer,
+(void*)&GetActorRollOff);
+
+if (h)
+{
+SND_fn_vSetRetSoundObjectType(h,
+(void*)&GetActorPos,
+(void*)&GetActorSpeed,
+(void*)&GetActorSwitch);
+SND_fn_vSetRetInfoSoundObjectType(h,
+(void*)&GetActorInfo,
+(void*)&GetActorMultiLayer);
+SND_fn_vSetRetRollOffSoundObjectType(h,
+(void*)&GetActorRollOff);
+SND_fn_vSetRetSoundChannelType(h,
+(void*)&GetSoundExtraCoef);
+}
+}
 }
 
 void UDareAudioSubsystem::CreateVolumeLines()
 {
+F_LONG(this, 0x228) = SND_fn_lAddSoundVolumeLine((INT)SLOT_Music,         0, 0);
+F_LONG(this, 0x22c) = SND_fn_lAddSoundVolumeLine((INT)SLOT_Talk,          0, 0);
+F_LONG(this, 0x230) = SND_fn_lAddSoundVolumeLine((INT)SLOT_SFX,           0, 0);
+F_LONG(this, 0x234) = SND_fn_lAddSoundVolumeLine((INT)SLOT_GrenadeEffect,  0, 0);
 }
 
 void UDareAudioSubsystem::StopSoundPlaying(FString EventName)
 {
+if (!m_bInitialized) return;
+const char* name = TCHAR_TO_ANSI(*EventName);
+void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
+if (!evHandle) return;
+void* stopEvent = SND_fn_hGenerateSoundEventStop(evHandle, 0);
+(void)stopEvent;
 }
 
 /*-----------------------------------------------------------------------------
-	Static DARE callbacks.
-	These are registered with the DARE engine via SND_fn_vSetRet* calls.
-	DARE calls them each audio frame to query game-world state.
+Static DARE callbacks.
+Called each audio frame by the DARE engine to query game-world state.
+Coordinate system: DARE is right-handed, UE2 is left-handed.
+  DARE.x =  UE.X
+  DARE.y = -UE.Y
+  DARE.z =  UE.Z
 -----------------------------------------------------------------------------*/
 
 void __stdcall UDareAudioSubsystem::GetActorInfo(long ActorId, char* InfoBuffer, long BufferSize)
 {
+if (InfoBuffer && BufferSize > 0)
+InfoBuffer[0] = '\0';
 }
 
 INT __stdcall UDareAudioSubsystem::GetActorMicroLink(long ActorId, long MicroId)
 {
-	return 0;
+return 1; // All actors link to the single listener micro
 }
 
 long __stdcall UDareAudioSubsystem::GetActorMultiLayer(long ActorId, long LayerId, int Param)
 {
-	return 0;
+return 0;
 }
 
 void __stdcall UDareAudioSubsystem::GetActorPos(long ActorId, _SND_tdstVectorFloat* OutPos)
 {
+float* out = reinterpret_cast<float*>(OutPos);
+out[0] = out[1] = out[2] = 0.0f;
+if (!ActorId) return;
+char* p = reinterpret_cast<char*>((void*)(size_t)(DWORD)ActorId);
+out[0] =  *(float*)(p + 0x234); //  X
+out[1] = -*(float*)(p + 0x238); // -Y (coordinate flip)
+out[2] =  *(float*)(p + 0x23c); //  Z
 }
 
 INT __stdcall UDareAudioSubsystem::GetActorRollOff(long ActorId, _SND_tdstRollOffParam* OutRollOff)
 {
-	return 0;
+return 0; // Use default roll-off
 }
 
 void __stdcall UDareAudioSubsystem::GetActorSpeed(long ActorId, _SND_tdstVectorFloat* OutSpeed)
 {
+float* out = reinterpret_cast<float*>(OutSpeed);
+out[0] = out[1] = out[2] = 0.0f;
+if (!ActorId) return;
+char* p = reinterpret_cast<char*>((void*)(size_t)(DWORD)ActorId);
+out[0] =  *(float*)(p + 0x24c); //  Velocity.X
+out[1] = -*(float*)(p + 0x250); // -Velocity.Y (coordinate flip)
+out[2] =  *(float*)(p + 0x254); //  Velocity.Z
 }
 
 long __stdcall UDareAudioSubsystem::GetActorSwitch(long ActorId, long SwitchId)
 {
-	return 0;
+return 0;
 }
 
 void __stdcall UDareAudioSubsystem::GetMicroPos(long MicroId, _SND_tdstVectorFloat* OutPos)
 {
+float* out = reinterpret_cast<float*>(OutPos);
+out[0] = out[1] = out[2] = 0.0f;
+
+UViewport* vp = UDareAudioSubsystem::m_pViewport;
+if (!vp) return;
+
+// Viewport+0x34 = controller pointer
+char* vpData = reinterpret_cast<char*>(vp);
+void* ctrl = *(void**)(vpData + 0x34);
+if (!ctrl) return;
+
+// Controller+0x5b8 = pawn pointer
+char* ctrlData = reinterpret_cast<char*>(ctrl);
+void* pawn = *(void**)(ctrlData + 0x5b8);
+if (!pawn) return;
+
+char* p = reinterpret_cast<char*>(pawn);
+out[0] =  *(float*)(p + 0x234); //  Location.X
+out[1] = -*(float*)(p + 0x238); // -Location.Y
+out[2] =  *(float*)(p + 0x23c); //  Location.Z
 }
 
 void __stdcall UDareAudioSubsystem::GetMicroSpeed(long MicroId, _SND_tdstVectorFloat* OutSpeed)
 {
+float* out = reinterpret_cast<float*>(OutSpeed);
+out[0] = out[1] = out[2] = 0.0f;
+
+UViewport* vp = UDareAudioSubsystem::m_pViewport;
+if (!vp) return;
+
+char* vpData = reinterpret_cast<char*>(vp);
+void* ctrl = *(void**)(vpData + 0x34);
+if (!ctrl) return;
+
+char* ctrlData = reinterpret_cast<char*>(ctrl);
+void* pawn = *(void**)(ctrlData + 0x5b8);
+if (!pawn) return;
+
+char* p = reinterpret_cast<char*>(pawn);
+out[0] =  *(float*)(p + 0x24c);
+out[1] = -*(float*)(p + 0x250);
+out[2] =  *(float*)(p + 0x254);
 }
 
 void __stdcall UDareAudioSubsystem::GetMicroNormal(long MicroId, _SND_tdstVectorFloat* OutNormal)
 {
+float* out = reinterpret_cast<float*>(OutNormal);
+out[0] = 1.0f; out[1] = 0.0f; out[2] = 0.0f; // default: facing +X
+
+UViewport* vp = UDareAudioSubsystem::m_pViewport;
+if (!vp) return;
+
+char* vpData = reinterpret_cast<char*>(vp);
+void* ctrl = *(void**)(vpData + 0x34);
+if (!ctrl) return;
+
+char* ctrlData = reinterpret_cast<char*>(ctrl);
+void* pawn = *(void**)(ctrlData + 0x5b8);
+if (!pawn) return;
+
+char* p = reinterpret_cast<char*>(pawn);
+INT pitch = *(INT*)(p + 0x240);
+INT yaw   = *(INT*)(p + 0x244);
+INT roll  = *(INT*)(p + 0x248);
+
+// FRotatorF converts UE2 int rotation units to float and computes
+// the forward (normal) vector.
+FRotatorF rot((FLOAT)pitch, (FLOAT)yaw, (FLOAT)roll);
+FVector fwd = rot.Vector();
+
+out[0] =  fwd.X;
+out[1] = -fwd.Y; // coordinate flip
+out[2] =  fwd.Z;
 }
 
 void __stdcall UDareAudioSubsystem::GetMicroTangeant(long MicroId, _SND_tdstVectorFloat* OutTangent)
 {
+float* out = reinterpret_cast<float*>(OutTangent);
+out[0] = 0.0f; out[1] = 1.0f; out[2] = 0.0f; // default: right
+
+UViewport* vp = UDareAudioSubsystem::m_pViewport;
+if (!vp) return;
+
+char* vpData = reinterpret_cast<char*>(vp);
+void* ctrl = *(void**)(vpData + 0x34);
+if (!ctrl) return;
+
+char* ctrlData = reinterpret_cast<char*>(ctrl);
+void* pawn = *(void**)(ctrlData + 0x5b8);
+if (!pawn) return;
+
+char* p = reinterpret_cast<char*>(pawn);
+INT yaw = *(INT*)(p + 0x244);
+
+// Rotate yaw +16384 (90 deg in UE2 units) to get the right vector
+FRotatorF rightRot(0.0f, (FLOAT)(yaw + 16384), 0.0f);
+FVector right = rightRot.Vector();
+
+out[0] =  right.X;
+out[1] = -right.Y;
+out[2] =  right.Z;
 }
 
 void __stdcall UDareAudioSubsystem::GetSoundExtraCoef(long ActorId, _SND_tdstBlockEvent* Event, FLOAT* OutCoef1, FLOAT* OutCoef2, FLOAT* OutCoef3)
 {
+if (OutCoef1) *OutCoef1 = 1.0f;
+if (OutCoef2) *OutCoef2 = 1.0f;
+if (OutCoef3) *OutCoef3 = 1.0f;
 }
