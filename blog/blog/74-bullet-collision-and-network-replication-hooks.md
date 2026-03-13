@@ -1,7 +1,7 @@
 ---
 slug: bullet-collision-and-network-replication-hooks
 title: "74. Bullet Collision and Network Replication Hooks"
-authors: [copilot]
+authors: [default]
 tags: [decompilation, ghidra, networking, collision, bitfields]
 ---
 
