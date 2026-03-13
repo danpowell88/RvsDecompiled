@@ -83,18 +83,100 @@ void AR6TerroristAI::eventGotoStateEngageByThreat(FVector A)
 
 void AR6TerroristAI::execCallBackupForAttack(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6TerroristAI::execCallBackupForAttack);
 	P_GET_STRUCT(FVector, vDestination);
 	P_GET_BYTE(ePace);
 	P_FINISH;
-	// TODO: iterates nearby terrorists, calls path finding and eventGotoPointAndAttack (see Ghidra)
+
+	if (m_iTerroristInGroup == 0)
+		return;
+
+	// Direction components from the possessed pawn to the destination.
+	FLOAT dY = vDestination.Y - Pawn->Location.Y;
+	FLOAT dX = vDestination.X - Pawn->Location.X;
+
+	// Two perpendicular flanking positions around the destination.
+	// NOTE: Z = vDestination.Z * 401.0f faithfully reproduces the original arithmetic
+	// (vDestination.Z * 400.0f + vDestination.Z) from the Ghidra decompilation.
+	FLOAT zComp = vDestination.Z * 400.0f + vDestination.Z;
+	FVector pos1(vDestination.X + dY * 400.0f, vDestination.Y - dX * 400.0f, zComp);
+	FVector pos2(vDestination.X - dY * 400.0f, vDestination.Y + dX * 400.0f, zComp);
+
+	// Trace from destination toward each flanking position.
+	// A clear trace (Time == 1.0f, no obstacle) means the attacker will have LOS to the target.
+	// Additionally, the terrorist's deployment zone must have space for a pawn there.
+	FCheckResult Hit1(1.0f);
+	XLevel->SingleLineCheck(Hit1, Enemy, pos1, vDestination, 0x286, FVector(0,0,0));
+	UBOOL bPos1Valid = (Hit1.Time == 1.0f) && m_pawn->m_DZone != NULL && m_pawn->m_DZone->HavePlaceForPawnAt(pos1);
+
+	FCheckResult Hit2(1.0f);
+	XLevel->SingleLineCheck(Hit2, Enemy, pos2, vDestination, 0x286, FVector(0,0,0));
+	UBOOL bPos2Valid = (Hit2.Time == 1.0f) && m_pawn->m_DZone != NULL && m_pawn->m_DZone->HavePlaceForPawnAt(pos2);
+
+	// Probability thresholds: rand in [0,threshDest) → destination,
+	// [threshDest,threshPos1) → pos1, [threshPos1,100) → pos2.
+	INT threshDest = 0;
+	INT threshPos1 = 0;
+	if (!bPos1Valid && !bPos2Valid)
+	{
+		threshDest = 100;
+	}
+	else if (!bPos1Valid)
+	{
+		threshDest = 66;                 // 66% destination, 34% pos2
+	}
+	else if (bPos2Valid)
+	{
+		threshDest = 50; threshPos1 = 75; // 50% dest, 25% pos1, 25% pos2
+	}
+	else
+	{
+		threshDest = 66; threshPos1 = 100; // 66% dest, 34% pos1
+	}
+
+	for (INT i = 0; i < m_iTerroristInGroup; i++)
+	{
+		AR6TerroristAI* pTerrorist = m_listAvailableBackup(i);
+		if (!pTerrorist->m_bCantInterruptIO)
+		{
+			pTerrorist->m_iCurrentGroupID = m_iCurrentGroupID;
+			pTerrorist->m_TerroristLeader = this;
+
+			INT r = appRand() % 100;
+			FVector attackPos;
+			if (r < threshDest)
+				attackPos = vDestination;
+			else if (r < threshPos1)
+				attackPos = pos1;
+			else
+				attackPos = pos2;
+
+			pTerrorist->eventGotoPointToAttack(attackPos, Enemy);
+		}
+	}
+
+	unguard;
 }
 
 void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6TerroristAI::execCallBackupForInvestigation);
 	P_GET_STRUCT(FVector, vDestination);
 	P_GET_BYTE(ePace);
 	P_FINISH;
-	// TODO: iterates terrorist list, calls eventGotoPointAndSearch on each (see Ghidra)
+
+	for (INT i = 0; i < m_iTerroristInGroup; i++)
+	{
+		AR6TerroristAI* pTerrorist = m_listAvailableBackup(i);
+		if (!pTerrorist->m_bCantInterruptIO)
+		{
+			pTerrorist->m_iCurrentGroupID = m_iCurrentGroupID;
+			pTerrorist->m_TerroristLeader = this;
+			pTerrorist->eventGotoPointAndSearch(vDestination, ePace, 0, 30.0f, 2);
+		}
+	}
+
+	unguard;
 }
 
 void AR6TerroristAI::execCallVisibleTerrorist(FFrame& Stack, RESULT_DECL)
