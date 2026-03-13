@@ -23,6 +23,11 @@ UExporter::UExporter()
 void UExporter::StaticConstructor()
 {
 	guard(UExporter::StaticConstructor);
+	// Ghidra offset 0x11240: register TArray<FString> Formats as a reflected property.
+	UArrayProperty* A = new(GetClass(), TEXT("Formats"), RF_Public)
+		UArrayProperty(CPP_PROPERTY(Formats), TEXT(""), 0);
+	A->Inner = new(A, TEXT("StrProperty0"), RF_Public)
+		UStrProperty(EC_CppProperty, 0, TEXT(""), 0);
 	unguard;
 }
 
@@ -148,6 +153,17 @@ UFactory::UFactory()
 void UFactory::StaticConstructor()
 {
 	guard(UFactory::StaticConstructor);
+	// Ghidra offset 0x12310: register config string properties and Formats array.
+	new(GetClass(), TEXT("Description"), RF_Public)
+		UStrProperty(CPP_PROPERTY(Description), TEXT("Config"), CPF_Config);
+	new(GetClass(), TEXT("InContextCommand"), RF_Public)
+		UStrProperty(CPP_PROPERTY(InContextCommand), TEXT("Config"), CPF_Config);
+	new(GetClass(), TEXT("OutOfContextCommand"), RF_Public)
+		UStrProperty(CPP_PROPERTY(OutOfContextCommand), TEXT("Config"), CPF_Config);
+	UArrayProperty* A = new(GetClass(), TEXT("Formats"), RF_Public)
+		UArrayProperty(CPP_PROPERTY(Formats), TEXT("Config"), CPF_Config);
+	A->Inner = new(A, TEXT("StrProperty0"), RF_Public)
+		UStrProperty(EC_CppProperty, 0, TEXT("Config"), CPF_Config);
 	unguard;
 }
 
