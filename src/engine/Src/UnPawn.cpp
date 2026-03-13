@@ -1387,6 +1387,35 @@ void APawn::ClearSerpentine()
 
 void APawn::Crouch(INT bClientSimulation)
 {
+	guard(APawn::Crouch);
+	// Retail 0xE5DE0 (376b): resize collision to CrouchHeight/CrouchRadius, fire eventStartCrouch.
+	// APawn bitfield INT at this+0x3E0: bit5=bIsCrouched(0x20), bit8=m_bWantsToProne(0x100).
+	DWORD& flags = *(DWORD*)((BYTE*)this + 0x3E0);
+
+	// Early exit if already at crouch dimensions.
+	if (CollisionHeight == CrouchHeight && CollisionRadius == CrouchRadius)
+		return;
+	// Early exit if m_bWantsToProne (bit 8 in APawn bitflags at this+0x3E0) is set.
+	if (flags & 0x100)
+		return;
+
+	FLOAT oldHeight = CollisionHeight;
+	SetCollisionSize(CrouchRadius, CrouchHeight);
+
+	// Z pivot = heightDelta + current PrePivot.Z (retail: fadd [this+0x2D0] = PrePivot.Z).
+	FLOAT heightAdjust = (oldHeight - CrouchHeight) + PrePivot.Z;
+	SetPrePivot(FVector(0.f, 0.f, heightAdjust));
+
+	// Divergence: retail syncs new position via ctrl (this+0x328) net-channel vtable call.
+
+	if (bClientSimulation)
+		return;
+
+	// Set bIsCrouched (bit 5 = 0x20) and AActor net-relevance flag (bit30 at this+0xA0).
+	flags |= 0x20;
+	*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000;
+	eventStartCrouch(heightAdjust);
+	unguard;
 }
 
 ETestMoveResult APawn::FindBestJump(FVector Dest)
@@ -1458,6 +1487,40 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 
 void APawn::UnCrouch(INT bClientSimulation)
 {
+	guard(APawn::UnCrouch);
+	// Retail 0xE5F90 (565b): restore collision to class-default dimensions, fire eventEndCrouch.
+	// APawn bitfield INT at this+0x3E0: bit5=bIsCrouched(0x20), bit8=m_bWantsToProne(0x100).
+	// BYTE at this+0x39C (= APawn+8 = m_ePeekingMode) checked for value 2.
+	DWORD& flags = *(DWORD*)((BYTE*)this + 0x3E0);
+	if (flags & 0x100) return;                            // m_bWantsToProne set
+	if (*(BYTE*)((BYTE*)this + 0x39C) == 2) return;      // m_ePeekingMode == 2
+
+	// Get uncrouched dimensions from class default object.
+	UClass* cls = GetClass();
+	APawn* deflt = cls ? (APawn*)cls->GetDefaultObject() : NULL;
+	if (!deflt) return;
+	FLOAT defaultHeight = deflt->CollisionHeight;
+	FLOAT defaultRadius = deflt->CollisionRadius;
+	FLOAT heightDelta = defaultHeight - CollisionHeight;
+
+	// Retail: SetCollisionSize to default FIRST, then optionally revert if blocked.
+	SetCollisionSize(defaultRadius, defaultHeight);
+
+	if (!bClientSimulation)
+	{
+		// Divergence: retail does a collision check via ctrl (this+0x328) net-channel vtable[7];
+		// that check may revert to crouch and set bTryToUncrouch (bit 4 = 0x10 in flags).
+		// Simplified: we always succeed. If blocked in server play this may cause visual glitch.
+
+		// Sync position via ctrl network channel (divergence: omitted).
+
+		// Restore PrePivot to initial standing offset.
+		SetPrePivot(FVector(0.f, 0.f, m_fPrePivotPawnInitialOffset));
+		*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000;
+		flags &= ~0x20u;  // clear bIsCrouched
+		eventEndCrouch(heightDelta);
+	}
+	unguard;
 }
 
 INT APawn::ValidAnchor()
