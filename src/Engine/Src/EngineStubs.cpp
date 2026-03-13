@@ -502,7 +502,9 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 
 // ?Rotator@FRotatorF@@QAE?AVFRotator@@XZ
-FRotator FRotatorF::Rotator() { return FRotator((INT)Pitch, (INT)Yaw, (INT)Roll); }
+// Ghidra (0x1ae0): converts each component via FUN_1050557c (= appRound, x87 FISTP).
+// Using (INT) truncation would diverge for non-integer floats; appRound matches retail.
+FRotator FRotatorF::Rotator() { return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)); }
 
 // ??4FRotatorF@@QAEAAV0@ABV0@@Z
 FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }

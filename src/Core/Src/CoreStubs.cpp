@@ -1400,18 +1400,48 @@ INT UObject::ResolveName( UObject*& InPackage, const TCHAR*& InName, INT Create,
 void UObject::CacheDrivers( INT bForceRefresh )
 {
 	guard(UObject::CacheDrivers);
+	// GObjDrivers/GObjPreferences are populated here from config.
+	// Full implementation requires iterating GConfig sections for "Driver=" and
+	// "Preferences=" entries and building FRegistryObjectInfo/FPreferencesInfo entries.
+	// Stub: no-op — subsystems that depend on this (editor tools) will see empty lists.
 	unguard;
 }
 
 void UObject::PurgeGarbage()
 {
 	guard(UObject::PurgeGarbage);
+	debugf( NAME_Log, TEXT("Purging garbage") );
+	// Destroy all objects still tagged as garbage (tagged by IsReferenced / CollectGarbage).
+	// DIVERGENCE: binary also garbage-collects FName entries; we skip that here.
+	INT NumDestroyed = 0;
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+	{
+		UObject* Obj = GObjObjects(i);
+		if( Obj && (Obj->GetFlags() & RF_TagGarbage) && !(Obj->GetFlags() & RF_Native) )
+		{
+			Obj->ConditionalDestroy();
+			NumDestroyed++;
+		}
+	}
+	// Clear any residual tags so objects are not double-destroyed.
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+		if( GObjObjects(i) )
+			GObjObjects(i)->ClearFlags( RF_TagGarbage );
+	debugf( NAME_Log, TEXT("Garbage: purged %i object(s)"), NumDestroyed );
 	unguard;
 }
 
 void UObject::SafeLoadError( DWORD LoadFlags, const TCHAR* Error, const TCHAR* Fmt, ... )
 {
 	guard(UObject::SafeLoadError);
+	TCHAR TempStr[4096];
+	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
+	if( LoadFlags & LOAD_Throw )
+		appThrowf( TEXT("%s"), TempStr );
+	else if( LoadFlags & LOAD_NoWarn )
+		debugf( NAME_Log, TEXT("%s"), TempStr );
+	else
+		GWarn->Logf( TEXT("%s"), TempStr );
 	unguard;
 }
 

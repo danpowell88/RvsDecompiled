@@ -1197,12 +1197,9 @@ INT UObject::IsReferenced( UObject*& Res, DWORD KeepFlags, INT IgnoreReference )
 		if( Obj && (Obj->GetFlags() & KeepFlags) )
 			Obj->ClearFlags( RF_TagGarbage );
 	}
-	UBOOL bReferenced = !(Res->GetFlags() & RF_TagGarbage);
-	// Clean up tags we set.
-	for( INT i=0; i<GObjObjects.Num(); i++ )
-		if( GObjObjects(i) )
-			GObjObjects(i)->ClearFlags( RF_TagGarbage );
-	return bReferenced;
+	// Intentionally leave RF_TagGarbage set on unreferenced objects so that
+	// the subsequent PurgeGarbage() call knows what to destroy.
+	return !(Res->GetFlags() & RF_TagGarbage);
 	unguard;
 }
 
