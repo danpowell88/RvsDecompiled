@@ -374,8 +374,7 @@ void AActor::execPlayAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(bBackward,0);
 	P_GET_UBOOL_OPTX(bForceAnimRate,0);
 	P_FINISH;
-	if( Mesh )
-		; // TODO: Mesh->PlayAnim( this, Channel, Sequence, Rate, TweenTime, 0, bBackward, bForceAnimRate );
+	PlayAnim( Channel, Sequence, Rate, TweenTime, 0, bBackward, bForceAnimRate );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 259, execPlayAnim );
@@ -390,8 +389,7 @@ void AActor::execLoopAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(bBackward,0);
 	P_GET_UBOOL_OPTX(bForceAnimRate,0);
 	P_FINISH;
-	if( Mesh )
-		; // TODO: Mesh->PlayAnim( this, Channel, Sequence, Rate, TweenTime, 1, bBackward, bForceAnimRate );
+	PlayAnim( Channel, Sequence, Rate, TweenTime, 1, bBackward, bForceAnimRate );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 260, execLoopAnim );
@@ -403,8 +401,7 @@ void AActor::execTweenAnim( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(Time,1.f);
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
-	if( Mesh )
-		; // TODO: Mesh->TweenAnim( this, Channel, Sequence, Time );
+	PlayAnim( Channel, Sequence, 0.0f, Time, 0, 0, 0 );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 294, execTweenAnim );
@@ -414,8 +411,9 @@ void AActor::execFinishAnim( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execFinishAnim);
 	P_GET_INT_OPTX(Channel,0);
 	P_FINISH;
+	LatentFloat = (FLOAT)Channel;
 	GetStateFrame()->LatentAction = EPOLL_FinishAnim;
-	// TODO: LatentInt = Channel;
+	StartAnimPoll();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 261, execFinishAnim );
@@ -423,7 +421,7 @@ IMPLEMENT_FUNCTION( AActor, 261, execFinishAnim );
 void AActor::execPollFinishAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollFinishAnim);
-	if( !IsAnimating( 0 ) ) // TODO: IsAnimating( LatentInt )
+	if( !IsAnimating( appRound( LatentFloat ) ) )
 		GetStateFrame()->LatentAction = 0;
 	unguard;
 }
@@ -435,7 +433,11 @@ void AActor::execStopAnimating( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(ClearAllButBase,0);
 	P_FINISH;
 	if( Mesh )
-		; // TODO: Mesh->StopAnimating( this, ClearAllButBase );
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+			MeshInstance->StopAnimating( ClearAllButBase );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAnimating );
@@ -465,7 +467,13 @@ void AActor::execHasAnim( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execHasAnim);
 	P_GET_NAME(Sequence);
 	P_FINISH;
-	*(DWORD*)Result = 0; // TODO: Mesh ? Mesh->HasAnim( Sequence ) : 0;
+	*(UBOOL*)Result = 0;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+			*(UBOOL*)Result = (MeshInstance->GetAnimNamed( Sequence ) != NULL) ? 1 : 0;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 263, execHasAnim );
@@ -475,7 +483,17 @@ void AActor::execGetAnimGroup( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execGetAnimGroup);
 	P_GET_NAME(Sequence);
 	P_FINISH;
-	*(FName*)Result = NAME_None; // TODO: Mesh ? Mesh->GetAnimGroup( Sequence ) : NAME_None;
+	*(FName*)Result = NAME_None;
+	if( Mesh )
+	{
+		Mesh->MeshGetInstance( this );
+		if( MeshInstance )
+		{
+			void* seqObj = MeshInstance->GetAnimNamed( Sequence );
+			if( seqObj )
+				*(FName*)Result = MeshInstance->AnimGetGroup( seqObj );
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1500, execGetAnimGroup );
@@ -2699,7 +2717,11 @@ INT AActor::IsAnimating( INT Channel ) const
 void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bOverride, INT bRestart )
 {
 	guard(AActor::PlayAnim);
-	// TODO: Start animation playback on specified channel.
+	if( !Mesh )
+		return;
+	Mesh->MeshGetInstance( this );
+	if( MeshInstance )
+		MeshInstance->PlayAnim( Channel, SequenceName, Rate, TweenTime, bLooping, bOverride, bRestart );
 	unguard;
 }
 
