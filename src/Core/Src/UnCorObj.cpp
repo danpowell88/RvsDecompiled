@@ -17,6 +17,12 @@ UPackage::UPackage()
 ,	AttemptedBind( 0 )
 ,	PackageFlags ( 0 )
 {
+	guard(UPackage::UPackage);
+	// Ghidra 0x1013b0a0: after member-init, register with the object system
+	// and zero the unknown DWORD at +0x38 (before DllHandle at +0x3C).
+	UObject::BindPackage( this );
+	*(DWORD*)((BYTE*)this + 0x38) = 0;	// unknown field before DllHandle
+	unguard;
 }
 
 void UPackage::Destroy()
@@ -85,6 +91,9 @@ UTextBuffer::UTextBuffer( const TCHAR* InText )
 ,	Top  ( 0 )
 ,	Text ( InText )
 {
+	guard(UTextBuffer::UTextBuffer);
+	// Ghidra 0x1013aee0: has SEH frame; init list handles all member setup.
+	unguard;
 }
 
 void UTextBuffer::Serialize( FArchive& Ar )
@@ -117,10 +126,19 @@ UCommandlet::UCommandlet()
 ,	ShowErrorCount( 0 )
 ,	ShowBanner    ( 1 )
 {
+	guard(UCommandlet::UCommandlet);
+	// Ghidra 0x1013af70: has SEH frame; compiler calls _eh_vector_constructor_iterator_
+	// for FStringNoInit arrays at +0x5C and +0x11C (member init handled by compiler).
+	unguard;
 }
 
 UCommandlet::~UCommandlet()
 {
+	guard(UCommandlet::~UCommandlet);
+	// Ghidra 0x1010bf20: explicitly calls ConditionalDestroy; compiler handles
+	// member FString destructors and the UObject base destructor.
+	ConditionalDestroy();
+	unguard;
 }
 
 INT UCommandlet::Main( const TCHAR* Parms )
@@ -162,6 +180,8 @@ USystem::USystem()
 ,	CachePath     ( TEXT("..\\Cache") )
 ,	CacheExt      ( TEXT(".uxx") )
 {
+	// Ghidra 0x1014ba90: no SEH frame; compiler default-constructs Paths/Suppress
+	// TArrays (offsets +0x5C, +0x60, +0x64 zeroed directly in compiled output).
 }
 
 void USystem::StaticConstructor()
@@ -240,6 +260,9 @@ UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 :	UField( InSuperConst )
 ,	Value( InValue )
 {
+	guard(UConst::UConst);
+	// Ghidra 0x10116c40: has SEH frame; init list handles UField base and Value FString.
+	unguard;
 }
 
 void UConst::Serialize( FArchive& Ar )

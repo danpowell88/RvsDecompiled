@@ -25,42 +25,208 @@ int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 	return 0;
 }
 
-void UGameEngine::LoadRandomMenuBackgroundImage(FString)
+void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 {
+	guard(UGameEngine::LoadRandomMenuBackgroundImage);
+	// Ghidra 0x10510f15: find two generic background textures; if both exist,
+	// enumerate *.tga files from Path, pick one at random, then call ReplaceTexture
+	// via vtable[0xD0] (index 52).  File enumeration uses GFileManager vtable[0x2C].
+	UTexture* Tex0 = (UTexture*)UObject::StaticFindObject(
+		UTexture::StaticClass(), (UObject*)0xffffffff,
+		TEXT("R6MenuBG.Backgrounds.GenericMainMenu0"), 0);
+	UTexture* Tex1 = (UTexture*)UObject::StaticFindObject(
+		UTexture::StaticClass(), (UObject*)0xffffffff,
+		TEXT("R6MenuBG.Backgrounds.GenericMainMenu1"), 0);
+	if (Tex0 && Tex1)
+	{
+		// TODO: FUN_1038a4f0 — identity unknown; used to retrieve the just-found texture.
+		// TODO: FUN_103217e0, FUN_103a2bba — identity unknown; called after ReplaceTexture.
+		// Enumerate Path/*.tga, pick appRand() % count, build full path, call vtable[0xD0].
+	}
+	unguard;
 }
 
-void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode *,UViewport *)
+void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewport* Viewport)
 {
+	guard(UGameEngine::PostRenderFullScreenEffects);
+	// Ghidra 0x103a5c00: creates FCanvasUtil from Viewport+0x164 (FRenderInterface*),
+	// lazily constructs two UFinalBlend materials cached in global statics
+	// (DAT_10671748 and DAT_10671744), adjusts blend flags, then runs full-screen passes.
+	// TODO: FUN_10385b30 — identity unknown; UFinalBlend construction deferred.
+	unguard;
 }
 
-void UGameEngine::AddLinkerToMasterMap(UNetDriver *,APawn *)
+void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 {
+	guard(UGameEngine::AddLinkerToMasterMap);
+	// Ghidra 0x103e0000: for APawn, look up its linker (or outer's linker), then add
+	// to the master map and flag the entry with 0x4000.
+	if (!Pawn)
+		return;
+	ULinkerLoad* Linker = Pawn->GetLinker();
+	if (!Linker)
+	{
+		UObject* Outer = Pawn->GetOuter();
+		if (!Outer)
+			return;
+		Linker = Outer->GetLinker();
+		if (!Linker)
+			return;
+	}
+	// Add linker via MasterMap vtable[0x78] (AddLinker); returns channel index.
+	void*  MapObj  = *(void**)((BYTE*)NetDriver + 0x44);
+	void** MapVtbl = *(void***)MapObj;
+	typedef int (__thiscall *tAddLinker)(void*, ULinkerLoad*);
+	int iIdx = ((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
+	// Mark the entry at iIdx*0x44+0x40 with flag 0x4000 (mutable/relevant).
+	BYTE* pEntries = *(BYTE**)((BYTE*)MapObj + 0x2C);
+	*(DWORD*)(pEntries + iIdx * 0x44 + 0x40) |= 0x4000;
+	unguard;
 }
 
-void UGameEngine::AddLinkerToMasterMap(UNetDriver *,UMaterial *)
+void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 {
+	guard(UGameEngine::AddLinkerToMasterMap);
+	// Ghidra 0x103e0000 (UMaterial overload): resolve outer's linker, add to master map.
+	if (!Mat)
+		return;
+	UObject* Outer = Mat->GetOuter();
+	if (!Outer)
+	{
+		// NOTE: Divergence — Ghidra calls GetFullName/GetName then Logf; exact format unknown.
+		GLog->Logf(Mat->GetFullName());
+		return;
+	}
+	ULinkerLoad* Linker = Outer->GetLinker();
+	if (!Linker)
+	{
+		Linker = UObject::GetPackageLinker(Outer, NULL, LOAD_Forgiving, NULL, NULL);
+		if (!Linker)
+		{
+			UObject* OuterOuter = Mat->GetOuter()->GetOuter();
+			if (OuterOuter)
+			{
+				Linker = UObject::GetPackageLinker(OuterOuter, NULL, LOAD_Forgiving, NULL, NULL);
+				if (!Linker)
+					return;
+			}
+			// if OuterOuter==NULL, Linker stays NULL — original code falls through (byte-accurate).
+		}
+	}
+	void*  MapObj  = *(void**)((BYTE*)NetDriver + 0x44);
+	void** MapVtbl = *(void***)MapObj;
+	typedef void (__thiscall *tAddLinker)(void*, ULinkerLoad*);
+	((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
+	unguard;
 }
 
-void UGameEngine::AddLinkerToMasterMap(UNetDriver *,UMesh *)
+void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 {
+	guard(UGameEngine::AddLinkerToMasterMap);
+	// Ghidra: identical logic to the UMaterial overload, different parameter type.
+	if (!Mesh)
+		return;
+	UObject* Outer = Mesh->GetOuter();
+	if (!Outer)
+	{
+		GLog->Logf(Mesh->GetFullName());
+		return;
+	}
+	ULinkerLoad* Linker = Outer->GetLinker();
+	if (!Linker)
+	{
+		Linker = UObject::GetPackageLinker(Outer, NULL, LOAD_Forgiving, NULL, NULL);
+		if (!Linker)
+		{
+			UObject* OuterOuter = Mesh->GetOuter()->GetOuter();
+			if (OuterOuter)
+			{
+				Linker = UObject::GetPackageLinker(OuterOuter, NULL, LOAD_Forgiving, NULL, NULL);
+				if (!Linker)
+					return;
+			}
+		}
+	}
+	void*  MapObj  = *(void**)((BYTE*)NetDriver + 0x44);
+	void** MapVtbl = *(void***)MapObj;
+	typedef void (__thiscall *tAddLinker)(void*, ULinkerLoad*);
+	((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
+	unguard;
 }
 
-void UGameEngine::AddLinkerToMasterMap(UNetDriver *,UStaticMesh *)
+void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 {
+	guard(UGameEngine::AddLinkerToMasterMap);
+	// Ghidra: identical logic to the UMesh overload, different parameter type.
+	if (!Mesh)
+		return;
+	UObject* Outer = Mesh->GetOuter();
+	if (!Outer)
+	{
+		GLog->Logf(Mesh->GetFullName());
+		return;
+	}
+	ULinkerLoad* Linker = Outer->GetLinker();
+	if (!Linker)
+	{
+		Linker = UObject::GetPackageLinker(Outer, NULL, LOAD_Forgiving, NULL, NULL);
+		if (!Linker)
+		{
+			UObject* OuterOuter = Mesh->GetOuter()->GetOuter();
+			if (OuterOuter)
+			{
+				Linker = UObject::GetPackageLinker(OuterOuter, NULL, LOAD_Forgiving, NULL, NULL);
+				if (!Linker)
+					return;
+			}
+		}
+	}
+	void*  MapObj  = *(void**)((BYTE*)NetDriver + 0x44);
+	void** MapVtbl = *(void***)MapObj;
+	typedef void (__thiscall *tAddLinker)(void*, ULinkerLoad*);
+	((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
+	unguard;
 }
 
-void UGameEngine::DisplayGameVideo(eGameVideoType)
+void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 {
+	guard(UGameEngine::DisplayGameVideo);
+	// Ghidra 0x103a2d80: get first viewport from Client, close fullscreen mode,
+	// build .bik filename from VideoType (0=Logos, 1=RS_Intro, 2=RS_Outro,
+	// 3=map_Intro, 4=map_Outro), then play via GModMgr.
+	// NOTE: Divergence — GModMgr and UR6ModMgr not declared in this TU; video
+	// playback and GModMgr dispatch omitted.
+	unguard;
 }
 
-void UGameEngine::InitializeMissionDescription(FString &)
+void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 {
+	guard(UGameEngine::InitializeMissionDescription);
+	// Ghidra 0x103a0f20: calls GModMgr.IsRavenShield(), builds map INI path
+	// ("..\\MODS\\<mod>\\MAPS\\<map>.INI"), resets GR6MissionDescription, calls
+	// UR6MissionDescription::eventInit.  Falls back to mods list then "..\\MAPS\\".
+	// NOTE: Divergence — GModMgr, GR6MissionDescription and UR6MissionDescription
+	// not declared in this TU; full implementation deferred.
+	unguard;
 }
 
 
 // --- UEngine ---
 void UEngine::StaticConstructor()
 {
+	guard(UEngine::StaticConstructor);
+	// Ghidra 0x10393060 (UEngine::StaticConstructor):
+	// Register two config properties and create the ArmPatches cache directory.
+	new(GetClass(), TEXT("CacheSizeMegs"), RF_Public)
+		UIntProperty(EC_CppProperty, 0x84, TEXT("Settings"), CPF_Config);
+	new(GetClass(), TEXT("UseSound"), RF_Public)
+		UBoolProperty(EC_CppProperty, 0x88, TEXT("Settings"), CPF_Config);
+	*(DWORD*)((BYTE*)this + 0x8C) = 0;  // unknown DWORD, zeroed at class registration
+	// Ghidra shows two GFileManager->vtable[9] calls; the first has no explicit args
+	// (likely a no-op or mis-decoded by Ghidra); only the meaningful mkdir is kept.
+	GFileManager->MakeDirectory(TEXT("..\\ArmPatches\\Cache"), false);
+	// TODO: FUN_103949aa — identity unknown.
+	unguard;
 }
 
 int UEngine::ReplaceTexture(FString,UTexture *)

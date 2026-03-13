@@ -40,8 +40,28 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR*)
 	return 0;
 }
 
-void CBoneDescData::m_vProcessLbpLine(int,int,FString &)
+void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
+	guard(CBoneDescData::m_vProcessLbpLine);
+	TArray<FString> tokens;
+	// DAT_1052ec38: separator TCHAR* (TODO: unknown at compile time; assumed space for LBP format)
+	str.ParseIntoArray(TEXT(" "), &tokens);
+	INT stride = param2 * 0x1C;
+	BYTE* base = *(BYTE**)(*(INT*)((BYTE*)this + 0x20) + param1 * 4);
+	*(float*)(base + stride + 0x00) =  appAtof(*tokens(16)); // X
+	*(float*)(base + stride + 0x04) = -appAtof(*tokens(17)); // -Y (axis flip per Ghidra)
+	*(float*)(base + stride + 0x08) =  appAtof(*tokens(18)); // Z
+	// FQuat stored as [Y, Z, W, X] = [fStack_1c, fStack_18, fStack_14, fStack_10]
+	float fX = -appAtof(*tokens(34)); // fStack_10 (negated)
+	float fY =  appAtof(*tokens(35)); // fStack_1c
+	float fZ = -appAtof(*tokens(36)); // fStack_18 (negated)
+	float fW =  appAtof(*tokens(39)); // fStack_14
+	float* pfQuat = (float*)(base + stride + 0x0C);
+	pfQuat[0] = fY; // *pfVar1
+	pfQuat[1] = fZ; // pfVar1[1]
+	pfQuat[2] = fW; // pfVar1[2]
+	pfQuat[3] = fX; // pfVar1[3]
+	unguard;
 }
 
 CBoneDescData::CBoneDescData(CBoneDescData const & Other)
@@ -275,6 +295,16 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 
 void UMeshAnimation::InitForDigestion()
 {
+	guard(UMeshAnimation::InitForDigestion);
+	if (*(INT*)((BYTE*)this + 0x54) == 0)
+	{
+		void* p = appMalloc(0x2C, TEXT("Digest"));
+		// TODO: FUN_1032b9b0 — placement-new constructor called on allocated block (skipped)
+		*(void**)((BYTE*)this + 0x54) = p;
+		appMemzero(p, 0x2C); // loop: 11 DWORDs zeroed = 0x2C bytes
+		*(DWORD*)((BYTE*)p + 0x28) = 0x3f800000; // 1.0f
+	}
+	unguard;
 }
 
 
@@ -284,8 +314,24 @@ int UVertMesh::RenderPreProcess()
 	return 0;
 }
 
-void UVertMesh::Serialize(FArchive &)
+void UVertMesh::Serialize(FArchive& Ar)
 {
+	guard(UVertMesh::Serialize);
+	ULodMesh::Serialize(Ar);
+	// TODO: FUN_10323030 (lazy-loader sub-archive for +0x14C) feeds ByteOrderSerialize(+0x160)
+	// TODO: FUN_103c7240, FUN_10438000, FUN_1043f770, FUN_1032d5f0 (TArray serializers at
+	//       +0xF4, +0x10C, +0x118, +0x100), FUN_103cd010, FUN_10474600 (+0x124, +0x130)
+	Ar.ByteOrderSerialize((BYTE*)this + 0x13C, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x140, 4);
+	if (!Ar.IsPersistent())
+	{
+		// TODO: FUN_1043fc30 (FAnimMeshVertexStream TArray serializer) after each index buffer
+		Ar.ByteOrderSerialize((BYTE*)this + 0x170, 4);
+		Ar.ByteOrderSerialize((BYTE*)this + 0x19C, 4);
+		Ar.ByteOrderSerialize((BYTE*)this + 0x1C8, 4);
+		Ar.ByteOrderSerialize((BYTE*)this + 0x1F4, 4); // 500 = 0x1F4
+	}
+	unguard;
 }
 
 UClass * UVertMesh::MeshGetInstanceClass()
@@ -365,10 +411,20 @@ int USkeletalMesh::LODFootprint(int param_1, int param_2)
 
 void USkeletalMesh::NormalizeInfluences(int)
 {
+	guard(USkeletalMesh::NormalizeInfluences);
+	// Ghidra 0x1651d0: shared empty-stub address — function body is empty.
+	unguard;
 }
 
-void USkeletalMesh::CalculateNormals(TArray<FVector> &,int)
+void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 {
+	guard(USkeletalMesh::CalculateNormals);
+	// Ghidra 0x1441e0: complex per-triangle normal accumulation.
+	// Reads faces (this+0xAC, stride 8), verts (this+0x1B8), bone weights.
+	// TODO: full implementation — depends on multiple unidentified data arrays
+	//       and inline arithmetic not yet decompilable without stride constants.
+	(void)Normals; (void)param2;
+	unguard;
 }
 
 void USkeletalMesh::ClearAttachAliases()
@@ -383,14 +439,59 @@ void USkeletalMesh::ClearAttachAliases()
 
 void USkeletalMesh::FlipFaces()
 {
+	guard(USkeletalMesh::FlipFaces);
+	// Ghidra 0x140780: swap first two uint16 vertex indices in each face entry.
+	// Faces TArray at this+0xAC; each face is 8 bytes (3 x uint16 + padding).
+	FArray* facesArr = (FArray*)((BYTE*)this + 0xAC);
+	INT i = 0;
+	while (true)
+	{
+		if (facesArr->Num() <= i) break;
+		BYTE* face = (BYTE*)(*(INT*)facesArr) + i * 8;
+		_WORD tmp          = *(_WORD*)(face + 0);
+		*(_WORD*)(face + 0) = *(_WORD*)(face + 2);
+		*(_WORD*)(face + 2) = tmp;
+		i++;
+	}
+	unguard;
 }
 
-void USkeletalMesh::GenerateLodModel(int,float,float,int,int)
+void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int param4, int param5)
 {
+	guard(USkeletalMesh::GenerateLodModel);
+	// Ghidra 0x142d40: validates param1 in [0,8], then calls many FUN_ helpers
+	// to compute LOD vertex/face streams from the full-resolution mesh.
+	// TODO: FUN_ helpers for progressive mesh reduction not yet identified.
+	if (param1 >= 0 && param1 < 9)
+	{
+		(void)param2; (void)param3; (void)param4; (void)param5;
+		// TODO: implement full LOD generation — requires unidentified FUN_ helpers
+	}
+	unguard;
 }
 
-void USkeletalMesh::InsertLodModel(int,USkeletalMesh *,float,int)
+void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float param3, int param4)
 {
+	guard(USkeletalMesh::InsertLodModel);
+	// Ghidra 0x142970: inserts LOD model from param2 at slot param1 in LOD array.
+	// TODO: array element copy helpers (FUN_1043f4c0 and vtable stream-copy calls)
+	//       not yet identified — full copy of param2's stream data skipped.
+	if (param1 >= 0 && param1 < 9)
+	{
+		FArray* lodArr = (FArray*)((BYTE*)this + 0x1AC);
+		// Extend LOD array until it has at least param1+1 entries (stride 0x11C)
+		while (lodArr->Num() <= param1)
+		{
+			INT idx = lodArr->Add(1, 0x11C);
+			if (idx * 0x11C + *(INT*)lodArr != 0)
+			{
+				// TODO: FUN_1043f4c0 — LOD entry constructor (unidentified)
+			}
+		}
+		(void)param2; (void)param3; (void)param4;
+		// TODO: copy stream data from param2 into LOD slot at param1
+	}
+	unguard;
 }
 
 int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
@@ -497,6 +598,15 @@ FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 // --- USkeletalMesh ---
 void USkeletalMesh::ReconstructRawMesh()
 {
+	guard(USkeletalMesh::ReconstructRawMesh);
+	// Ghidra 0x141820: empties render streams via vtable calls, then reconstructs
+	// raw vertex/face arrays from LOD data.  All stream-clear vtable calls (+0xF4,
+	// +0x13C, +0x124, +0x10C, +0x154, +0x16C, +0x184) and the per-LOD copy loops
+	// require unidentified helpers — TODO.
+	// The two export loops (for iVar4 iterating 0..*(this+0x104) and ..*(this+0x134))
+	// are no-ops in Ghidra (empty bodies), so they are omitted here.
+	// FArray::Empty calls on +0x100 and +0x118 are skipped (also in the TODO block).
+	unguard;
 }
 
 int USkeletalMesh::RenderPreProcess()

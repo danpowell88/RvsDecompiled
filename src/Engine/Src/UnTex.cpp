@@ -21,6 +21,12 @@ inline void  operator delete(void*, void*) noexcept {}
 
 void UMaterial::ClearFallbacks()
 {
+	guard(UMaterial::ClearFallbacks);
+	// Ghidra 0xc97f0: static function — iterates GObjObjects via FUN_10318850
+	// (unknown object-iterator advance), clears UseFallback (bit 0) and Validated
+	// (bit 1) flags at UObject+0x34 for every loaded object.
+	// TODO: FUN_10318850 (GObj iterator advance) not yet identified — full loop skipped.
+	unguard;
 }
 
 // (merged from earlier occurrence)
@@ -67,9 +73,45 @@ ETextureFormat UTexture::ConvertDXT()
 }
 void UTexture::CreateColorRange()
 {
+	guard(UTexture::CreateColorRange);
+	// Ghidra 0x16a400: scan all mip texels through Palette to find per-channel max.
+	// If no Palette, set MaxColor = 0xFFFFFFFF (all-white); otherwise scan.
+	if (*(INT*)((BYTE*)this + 0x70) == 0) // Palette == NULL
+	{
+		*(DWORD*)((BYTE*)this + 0x78) = 0xFFFFFFFF; // MaxColor = white
+	}
+	else
+	{
+		*(DWORD*)((BYTE*)this + 0x78) = 0; // MaxColor = 0
+		BYTE* palData = *(BYTE**)(*(INT*)((BYTE*)this + 0x70) + 0x2C); // Palette->Colors.Data
+		INT mipCount = ((FArray*)((BYTE*)this + 0xBC))->Num();
+		for (INT mip = 0; mip < mipCount; mip++)
+		{
+			// Mips TArray: each element is 0x28 bytes; DataArray at element+0x1C
+			BYTE* mipData = *(BYTE**)(*(INT*)((BYTE*)this + 0xBC) + 0x1C + mip * 0x28);
+			INT   mipLen  = ((FArray*)(*(INT*)((BYTE*)this + 0xBC) + 0x1C + mip * 0x28))->Num();
+			for (INT px = 0; px < mipLen; px++)
+			{
+				// Each texel is a palette index; look up in palette (4 bytes per color)
+				BYTE* col = palData + (DWORD)mipData[px] * 4;
+				if (col[2] > *(BYTE*)((BYTE*)this + 0x7A)) *(BYTE*)((BYTE*)this + 0x7A) = col[2]; // B
+				if (col[1] > *(BYTE*)((BYTE*)this + 0x79)) *(BYTE*)((BYTE*)this + 0x79) = col[1]; // G
+				if (col[0] > *(BYTE*)((BYTE*)this + 0x78)) *(BYTE*)((BYTE*)this + 0x78) = col[0]; // R
+				if (col[3] > *(BYTE*)((BYTE*)this + 0x7B)) *(BYTE*)((BYTE*)this + 0x7B) = col[3]; // A
+			}
+		}
+	}
+	unguard;
 }
-void UTexture::CreateMips(int,int)
+void UTexture::CreateMips(int param1, int param2)
 {
+	guard(UTexture::CreateMips);
+	// Ghidra 0x16bac0 (2741 bytes): complex per-format mip chain generation.
+	// Handles P8, RGBA8, RGBA16, DXT1/3/5 and box/kaiser filtering.
+	// TODO: full implementation — requires many inline color-conversion helpers
+	//       and format-dispatch blocks not yet decompilable.
+	(void)param1; (void)param2;
+	unguard;
 }
 int UTexture::Decompress(ETextureFormat)
 {
@@ -116,8 +158,49 @@ FColor UTexture::GetTexel(float,float,float,float)
 {
 	return FColor(0,0,0,0);
 }
-void UTexture::Tick(float)
+void UTexture::Tick(float DeltaSeconds)
 {
+	guard(UTexture::Tick);
+	// Ghidra 0x1692a0: advance animation sequence via vtable[46]=ConstantTimeTick,
+	// then gate on frame rate using MinFrameRate/MaxFrameRate accumulators.
+	void** vtbl = *(void***)this;
+	typedef void(__thiscall *TVFn)(UTexture*);
+	// vtable +0xB8 (index 46) = ConstantTimeTick
+	((TVFn)vtbl[0xB8/4])(this);
+	float maxFPS = *(float*)((BYTE*)this + 0xB4); // MaxFrameRate
+	if (maxFPS != 0.0f)
+	{
+		// Non-zero MaxFrameRate: just advance once and return
+		// vtable +0xA8 (index 42) = Prime / animation advance
+		((TVFn)vtbl[0xA8/4])(this);
+		return;
+	}
+	// Clamp MaxFrameRate to [0.1, 100]
+	float fMax = maxFPS;
+	if (fMax < 0.1f) fMax = 0.1f;
+	else if (fMax >= 100.0f) fMax = 100.0f;
+	// Clamp MinFrameRate to [0.1, 100]
+	float fMin = *(float*)((BYTE*)this + 0xB0); // MinFrameRate
+	if (fMin < 0.1f) fMin = 0.1f;
+	else if (fMin >= 100.0f) fMin = 100.0f;
+	float invMin   = 1.0f / fMin;
+	float accum    = DeltaSeconds + *(float*)((BYTE*)this + 0xB8); // Accumulator
+	*(float*)((BYTE*)this + 0xB8) = accum;
+	if (accum >= 1.0f / fMax)
+	{
+		if (accum < invMin)
+		{
+			((TVFn)vtbl[0xA8/4])(this);
+			*(DWORD*)((BYTE*)this + 0xB8) = 0; // reset
+			return;
+		}
+		((TVFn)vtbl[0xA8/4])(this);
+		float newAccum = accum - invMin;
+		*(float*)((BYTE*)this + 0xB8) = newAccum;
+		if (invMin < newAccum)
+			*(float*)((BYTE*)this + 0xB8) = invMin;
+	}
+	unguard;
 }
 void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
@@ -171,8 +254,39 @@ FBaseTexture * UTexture::GetRenderInterface()
 {
 	return reinterpret_cast<FBaseTexture*>(RenderInterface);
 }
-void UTexture::Init(int,int)
+void UTexture::Init(int InUSize, int InVSize)
 {
+	guard(UTexture::Init);
+	// Ghidra 0x16b920: assert power-of-two, set USize/VSize/UClamp/VClamp/UBits/VBits,
+	// then add one FMipmap to the Mips array sized for the chosen format.
+	if ((*(DWORD*)((BYTE*)this + 0x60) & (*(DWORD*)((BYTE*)this + 0x60) - 1)) != 0)
+		appFailAssert("!(USize & (USize-1))", ".\\UnTex.cpp", 0x174);
+	if ((*(DWORD*)((BYTE*)this + 0x64) & (*(DWORD*)((BYTE*)this + 0x64) - 1)) != 0)
+		appFailAssert("!(VSize & (VSize-1))", ".\\UnTex.cpp", 0x175);
+	*(INT*)((BYTE*)this + 0x68) = InUSize; // UClamp
+	*(INT*)((BYTE*)this + 0x60) = InUSize; // USize
+	*(INT*)((BYTE*)this + 0x6C) = InVSize; // VClamp
+	*(INT*)((BYTE*)this + 0x64) = InVSize; // VSize
+	*(BYTE*)((BYTE*)this + 0x5B) = (BYTE)appCeilLogTwo(InUSize);  // UBits
+	*(BYTE*)((BYTE*)this + 0x5C) = (BYTE)appCeilLogTwo(*(DWORD*)((BYTE*)this + 0x64)); // VBits
+	// TODO: FUN_1032e620(0) — unknown flush/mark-dirty helper, skipped
+	FArray* mipArr = (FArray*)((BYTE*)this + 0xBC);
+	BYTE fmt = *(BYTE*)((BYTE*)this + 0x58); // Format
+	INT idx = mipArr->Add(1, 0x28);
+	FMipmap* pMip = (FMipmap*)(*(INT*)mipArr + idx * 0x28);
+	if (pMip)
+	{
+		if (fmt == 0x5 || fmt == 0xA) // TEXF_RGBA8 or TEXF_RGBA16
+		{
+			INT byteCount = InVSize * InUSize * (fmt == 0x5 ? 4 : 2);
+			new(pMip) FMipmap(*(BYTE*)((BYTE*)this + 0x5B), *(BYTE*)((BYTE*)this + 0x5C), byteCount);
+		}
+		else
+		{
+			new(pMip) FMipmap(*(BYTE*)((BYTE*)this + 0x5B), *(BYTE*)((BYTE*)this + 0x5C));
+		}
+	}
+	unguard;
 }
 
 
@@ -345,6 +459,16 @@ FColor UConstantMaterial::GetColor(float)
 // --- UCubemap ---
 void UCubemap::Destroy()
 {
+	guard(UCubemap::Destroy);
+	// Ghidra 0x168e20: free the render interface buffer at +0xF0 via GMalloc, then super.
+	void** pBuf = (void**)((BYTE*)this + 0xF0);
+	if (*pBuf)
+	{
+		GMalloc->Free(*pBuf);	// vtable[2] = Free
+		*pBuf = NULL;
+	}
+	UTexture::Destroy();
+	unguard;
 }
 
 FBaseTexture * UCubemap::GetRenderInterface()
@@ -371,6 +495,22 @@ FColor UFadeColor::GetColor(float)
 // --- UMaterialSwitch ---
 void UMaterialSwitch::PostEditChange()
 {
+	guard(UMaterialSwitch::PostEditChange);
+	// Ghidra 0xc8920: call parent, then sync CurrentMaterial from Materials[CurrentIndex].
+	UModifier::PostEditChange();
+	INT idx = *(INT*)((BYTE*)this + 0x5C); // CurrentIndex
+	if (idx >= 0)
+	{
+		FArray* matArr = (FArray*)((BYTE*)this + 0x60); // Materials TArray
+		if (idx < matArr->Num())
+		{
+			*(DWORD*)((BYTE*)this + 0x58) = // CurrentMaterial
+				*(DWORD*)(*(INT*)matArr + idx * 4);
+			return;
+		}
+	}
+	*(DWORD*)((BYTE*)this + 0x58) = 0; // CurrentMaterial = NULL
+	unguard;
 }
 
 UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
@@ -411,6 +551,49 @@ BYTE UPalette::BestMatch(FColor,int)
 
 void UPalette::FixPalette()
 {
+	guard(UPalette::FixPalette);
+	// Ghidra 0x169770: remap a 256-entry BGRA palette to a specific Quake-style
+	// layout; set alpha channel indices from entry number + base offset.
+	DWORD* colData = *(DWORD**)((BYTE*)this + 0x2C); // Colors.Data
+	DWORD  tmp[0x100];
+	// Fill temp array with first colour entry
+	DWORD fill = colData[0];
+	for (INT i = 0; i < 0x100; i += 4)
+	{
+		tmp[i] = fill; tmp[i+1] = fill; tmp[i+2] = fill; tmp[i+3] = fill;
+	}
+	// Per Ghidra: for each of 8 rows, copy colour pairs into strided positions in tmp
+	for (INT row = 0; row < 8; row++)
+	{
+		INT iVar6 = (row == 0) ? 1 : (row << 5);
+		DWORD* puVar5 = colData + 2 + iVar6; // colData[2+iVar6]
+		DWORD* puVar7 = colData + 1 + iVar6; // colData[1+iVar6]
+		DWORD* puVar4 = tmp + row + 0x18;
+		for (INT j = 7; j != 0; j--)
+		{
+			puVar4[-8]  = puVar5[-2];
+			*puVar4     = *puVar7;
+			puVar4[8]   = *puVar5;
+			puVar4[0x10]= puVar5[1];
+			puVar7 += 4;
+			puVar5 += 4;
+			puVar4 += 0x20;
+		}
+	}
+	// Write back with alpha channel set to entry-index-based value
+	for (INT i = 0; i < 0x100; i += 4)
+	{
+		colData[i]   = tmp[i];
+		((BYTE*)colData)[i * 4 + 3]   = (BYTE)i + 0x10;
+		colData[i+1] = tmp[i+1];
+		((BYTE*)colData)[(i+1) * 4 + 3] = (BYTE)i + 0x11;
+		colData[i+2] = tmp[i+2];
+		((BYTE*)colData)[(i+2) * 4 + 3] = (BYTE)i + 0x12;
+		colData[i+3] = tmp[i+3];
+		((BYTE*)colData)[(i+3) * 4 + 3] = (BYTE)i + 0x13;
+	}
+	((BYTE*)colData)[3] = 0; // first entry alpha = 0
+	unguard;
 }
 
 
