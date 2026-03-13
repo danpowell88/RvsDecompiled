@@ -14,6 +14,9 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
 
+// DAT_10780140 in retail: the singleton UProjectorPrimitive instance.
+static UPrimitive* GProjectorPrimitive = NULL;
+
 // --- AProjector ---
 int AProjector::ShouldTrace(AActor * Other, DWORD TraceFlags)
 {
@@ -30,48 +33,202 @@ void AProjector::TickSpecial(float DeltaTime)
 		CalcMatrix();
 }
 
-void AProjector::UpdateParticleMaterial(UParticleMaterial *,int)
+void AProjector::UpdateParticleMaterial(UParticleMaterial* PM, int Index)
 {
+	// Retail: 0xfad80, 162b. Copy projector texture + matrix rows + flags into a
+	// per-particle-material slot at Index * 0x4c within the UParticleMaterial.
+	UObject* tex = *(UObject**)((BYTE*)this + 0x3a4);
+	if (!tex || !tex->IsA(UBitmapMaterial::StaticClass()))
+		tex = NULL;
+	*(UObject**)((BYTE*)PM + Index * 0x4c + 0x88) = tex;
+	// Copy 16 DWORDs (0x40 bytes) of matrix data from this+0x4d0
+	appMemcpy((BYTE*)PM + Index * 0x4c + 0x8c, (BYTE*)this + 0x4d0, 0x40);
+	*(DWORD*)((BYTE*)PM + Index * 0x4c + 0xcc) = (*(INT*)((BYTE*)this + 0x398) != 0) ? 1u : 0u;
+	*(DWORD*)((BYTE*)PM + Index * 0x4c + 0xd0) = (DWORD)*(BYTE*)((BYTE*)this + 0x395);
 }
 
-void AProjector::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
+void AProjector::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	// Retail: 0x10b970, 86b.
+	RenderWireframe(RI);
+	AActor::RenderEditorSelected(SceneNode, RI, DA);
 }
 
-void AProjector::RenderWireframe(FRenderInterface *)
+void AProjector::RenderWireframe(FRenderInterface* RI)
 {
+	// Retail: 0xf8ae0, 1200b. Draws the projector volume as a wireframe box.
+	// Push identity transform onto the render interface, then use FLineBatcher
+	// to draw the 12 edges of the projection box from the 8 corner points
+	// precomputed by CalcMatrix and stored at this+0x410 (4 far corners) and
+	// this+0x434 (4 near corners), each an FVector (12 bytes).
+
+	// Set identity matrix on the RI (vtable[0x34/4=13])
+	static DWORD identity[16] = {
+		0x3F800000,0,0,0,
+		0,0x3F800000,0,0,
+		0,0,0x3F800000,0,
+		0,0,0,0x3F800000
+	};
+	typedef void (__thiscall* SetMatFn)(FRenderInterface*, void*);
+	((SetMatFn)(*(void***)RI)[0x34/4])(RI, identity);
+
+	// Create a line batcher and draw the 12 edges
+	FLineBatcher lb(RI, 1, 0);
+	FColor col(255, 0, 0);
+
+	// Corner points at this+0x410 (far) and this+0x434 (near), 4 each (12 bytes = FVector)
+	FVector* farPts  = (FVector*)((BYTE*)this + 0x410);
+	FVector* nearPts = (FVector*)((BYTE*)this + 0x434);
+
+	// Far-plane edges (rectangle)
+	lb.DrawLine(farPts[0], farPts[1], col);
+	lb.DrawLine(farPts[1], farPts[2], col);
+	lb.DrawLine(farPts[2], farPts[3], col);
+	lb.DrawLine(farPts[3], farPts[0], col);
+
+	// Near-plane edges (rectangle)
+	lb.DrawLine(nearPts[0], nearPts[1], col);
+	lb.DrawLine(nearPts[1], nearPts[2], col);
+	lb.DrawLine(nearPts[2], nearPts[3], col);
+	lb.DrawLine(nearPts[3], nearPts[0], col);
+
+	// Connecting edges between near and far planes
+	lb.DrawLine(farPts[0], nearPts[0], col);
+	lb.DrawLine(farPts[1], nearPts[1], col);
+	lb.DrawLine(farPts[2], nearPts[2], col);
+	lb.DrawLine(farPts[3], nearPts[3], col);
 }
 
 void AProjector::PostEditChange()
 {
+	// Retail: 0x6020, 31b. Reattach on property change.
+	AActor::PostEditChange();
+	Detach(1);
+	Attach();
 }
 
 void AProjector::PostEditLoad()
 {
+	// Retail: 0x176d60 (shared empty stub)
 }
 
 void AProjector::PostEditMove()
 {
+	// Retail: 0x176d60 (shared empty stub)
 }
 
 void AProjector::Abandon()
 {
+	// Retail: 0xfb7f0, 103b. Decrement the render-info refcount and free when zero.
+	INT* renderInfo = *(INT**)((BYTE*)this + 0x48c);
+	if (renderInfo)
+	{
+		*renderInfo -= 1;
+		if (*renderInfo == 0)
+		{
+			typedef void (*FunType)();
+			((FunType)0x103719b0)();
+			GMalloc->Free((void*)renderInfo);
+		}
+		*(DWORD*)((BYTE*)this + 0x48c) = 0;
+	}
 }
 
 void AProjector::Attach()
 {
+	// Retail: 0xfb160, 1291b. Build the projection matrix then allocate and populate
+	// a FProjectorRenderInfo, and attach to terrain/BSP as appropriate.
+	// TODO: full terrain sector iteration and BSP ConvexVolumeMultiCheck loop.
+
+	// Recalculate projection matrix
+	CalcMatrix();
+
+	// In editor: snapshot this frame's direction vectors for preview display
+	if (GIsEditor)
+	{
+		*(DWORD*)((BYTE*)this + 0x510) = *(DWORD*)((BYTE*)this + 0x234);
+		*(DWORD*)((BYTE*)this + 0x514) = *(DWORD*)((BYTE*)this + 0x238);
+		*(DWORD*)((BYTE*)this + 0x518) = *(DWORD*)((BYTE*)this + 0x23c);
+		typedef void (__thiscall* Fn)(AProjector*, INT, INT);
+		((Fn)(*(void***)this)[0x10c/4])(this, 0, 0);
+	}
+
+	if (*(INT*)((BYTE*)this + 0x48c) == 0)
+	{
+		// Allocate and initialise a FProjectorRenderInfo (200 bytes)
+		void* mem = GMalloc->Malloc(200, TEXT("FProjectorRenderInfo"));
+		INT* piVar5;
+		if (!mem)
+		{
+			piVar5 = NULL;
+		}
+		else
+		{
+			typedef INT* (*InitFn)(AProjector*, INT);
+			piVar5 = ((InitFn)0x103f82f0)(this, 0);
+		}
+		*(INT**)((BYTE*)this + 0x48c) = piVar5;
+		if (piVar5)
+			*piVar5 += 1;
+
+		// Copy base colour tint vectors
+		INT ri = *(INT*)((BYTE*)this + 0x48c);
+		if (ri)
+		{
+			*(DWORD*)(ri + 0xb0) = *(DWORD*)((BYTE*)this + 0x240);
+			*(DWORD*)(ri + 0xb4) = *(DWORD*)((BYTE*)this + 0x244);
+			*(DWORD*)(ri + 0xb8) = *(DWORD*)((BYTE*)this + 0x248);
+			*(DWORD*)(ri + 0xbc) = *(DWORD*)((BYTE*)this + 0x234);
+			*(DWORD*)(ri + 0xc0) = *(DWORD*)((BYTE*)this + 0x238);
+			*(DWORD*)(ri + 0xc4) = *(DWORD*)((BYTE*)this + 0x23c);
+		}
+	}
+
+	// TODO: terrain attachment (bit 1 of this+0x3a0)
+	// TODO: BSP attachment  (bit 0 of this+0x3a0)
 }
 
 void AProjector::CalcMatrix()
 {
+	// Retail: 0xf8f90, 4699b. Builds the projection matrix and 8 corner points from
+	// the projector's position, rotation, FOV, and draw-distance properties.
+	// TODO: full matrix/corner computation (complex FCoords + float math).
 }
 
 void AProjector::Destroy()
 {
+	// Retail: 0x60a0, 21b.
+	Detach(1);
+	AActor::Destroy();
 }
 
-void AProjector::Detach(int)
+void AProjector::Detach(int Flush)
 {
+	// Retail: 0xfb6e0, 209b. Timestamp the render info with the current TSC-based
+	// time, optionally zero the geometry data, then decrement the refcount and free.
+	INT* renderInfo = *(INT**)((BYTE*)this + 0x48c);
+	if (!renderInfo)
+		return;
+
+	// Convert rdtsc to seconds and store as a "last used" timestamp at renderInfo+0xc
+	unsigned __int64 tsc = __rdtsc();
+	double hi = (double)(int)(tsc >> 32);
+	if ((signed __int64)tsc < 0) hi += 4294967296.0;
+	double lo = (double)(int)(tsc & 0xFFFFFFFF);
+	if ((int)(tsc & 0xFFFFFFFF) < 0) lo += 4294967296.0;
+	*(double*)((BYTE*)renderInfo + 0xc) = (lo + hi * 4294967296.0) * GSecondsPerCycle + 16777216.0;
+
+	if (Flush)
+		*(UINT64*)((BYTE*)renderInfo + 4) = 0;
+
+	*renderInfo -= 1;
+	if (*renderInfo == 0)
+	{
+		typedef void (*FunType)();
+		((FunType)0x103719b0)();
+		GMalloc->Free((void*)renderInfo);
+	}
+	*(DWORD*)((BYTE*)this + 0x48c) = 0;
 }
 
 UPrimitive * AProjector::GetPrimitive()
@@ -93,6 +250,9 @@ int UProjectorPrimitive::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWOR
 
 void UProjectorPrimitive::Destroy()
 {
+	// Retail: 0xf8270, 73b. Clear the singleton primitive global then chain to base.
+	GProjectorPrimitive = NULL;
+	UObject::Destroy();
 }
 
 FBox UProjectorPrimitive::GetCollisionBoundingBox(AActor const *) const
