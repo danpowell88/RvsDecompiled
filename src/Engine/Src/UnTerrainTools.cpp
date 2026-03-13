@@ -64,9 +64,38 @@ UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 	return *this;
 }
 
-int UTerrainBrush::BeginPainting(UTexture * *,ATerrainInfo * *)
+// Editor globals for the currently-active terrain painting session.
+static ATerrainInfo* GCurrentTerrainInfo  = NULL; // DAT_1061b794
+static UTexture*     GCurrentAlphaTexture = NULL; // DAT_1061b790
+
+int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 {
+	guard(UTerrainBrush::BeginPainting);
+
+	bool bVar3 = (GCurrentTerrainInfo != NULL);
+	*param_2 = GCurrentTerrainInfo;
+	UTexture* pUVar1 = GCurrentAlphaTexture;
+
+	if (bVar3)
+	{
+		*param_1 = GCurrentAlphaTexture;
+		if (pUVar1 != NULL)
+		{
+			// Lock alpha texture for painting if not already locked (bit 0x20 at +0x94)
+			if ((*(BYTE*)((BYTE*)pUVar1 + 0x94) & 0x20) == 0)
+			{
+				// Render device: vtable of render interface at pUVar1+0xbc, slot 0x10/4
+				typedef void (__thiscall *TLockTexture)(void*);
+			void* renderIface = *(void**)((BYTE*)pUVar1 + 0xbc);
+			((TLockTexture)*(DWORD*)(*(DWORD*)renderIface + 0x10))(renderIface);
+			}
+			return 1;
+		}
+	}
+
 	return 0;
+
+	unguard;
 }
 
 void UTerrainBrush::EndPainting(UTexture *,ATerrainInfo *)

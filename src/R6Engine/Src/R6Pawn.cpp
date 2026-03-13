@@ -5,8 +5,11 @@
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
+#include <math.h>
 
 IMPLEMENT_CLASS(AR6Pawn)
+
+static FLOAT FUN_10017320(FLOAT a, FLOAT b, FLOAT c) { return a < b ? b : (a > c ? c : a); }
 
 IMPLEMENT_FUNCTION(AR6Pawn, -1, execAdjustFluidCollisionCylinder)
 IMPLEMENT_FUNCTION(AR6Pawn, -1, execCheckCylinderTranslation)
@@ -1312,9 +1315,220 @@ void AR6Pawn::UpdateColBox(FVector& NewLocation, INT p1, INT p2, INT p3)
 	unguard;
 }
 
-FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT)
+FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 {
-	return 0.f;
+	guard(AR6Pawn::UpdateColBoxPeeking);
+
+	DWORD uVar1 = *(DWORD*)((BYTE*)this + 0x6c4) >> 0x1e & 1;
+
+	if ((uVar1 != 0) && ((*(DWORD*)((BYTE*)this + 0x6c4) & 0x2000000) == 0))
+		return 1000.0f;
+
+	if ((*(DWORD*)((BYTE*)this + 0x3e0) & 0x300) != 0)
+		return param_1;
+
+	if (*(INT*)((BYTE*)this + 0x180) == 0)
+		return param_1;
+
+	if (uVar1 != 0)
+		return param_1;
+
+	// Build a rotator from offsets 0x240/0x244/0x248; add 16000 to pitch (0x244)
+	DWORD local_54 = *(DWORD*)((BYTE*)this + 0x240);
+	INT   local_50 = *(INT*)((BYTE*)this + 0x244) + 16000;
+	DWORD local_4c = *(DWORD*)((BYTE*)this + 0x248);
+
+	FLOAT local_18 = 0.0f;
+	INT   local_20 = 1;
+
+	FLOAT local_1c = GetPeekingRatioNorm(param_1);
+
+	// FRotator::Vector on local_54/local_50/local_4c — layout: Pitch/Yaw/Roll
+	FVector rotVec = ((FRotator*)&local_54)->Vector();
+	FLOAT* pfVar2 = (FLOAT*)&rotVec;
+
+	FLOAT local_24 = local_1c * pfVar2[2] * 56.0f;
+	FLOAT local_28 = local_1c * pfVar2[1] * 56.0f;
+
+	FLOAT local_40 = local_24 + *(FLOAT*)((BYTE*)this + 0x23c);
+	FLOAT local_44 = local_28 + *(FLOAT*)((BYTE*)this + 0x238);
+	FLOAT fVar6    = local_1c * pfVar2[0] * 56.0f + *(FLOAT*)((BYTE*)this + 0x234);
+
+	FLOAT local_34 = (*(FLOAT*)((BYTE*)this + 0xfc) + *(FLOAT*)((BYTE*)this + 0x23c)) - 26.0f;
+
+	FLOAT local_48 = fVar6;
+	FLOAT local_3c = fVar6;
+	FLOAT local_38 = local_44;
+
+	// Disable upper colbox (0x184) if it exists, is enabled, and we're locally controlled or not a bot
+	if ((*(INT*)((BYTE*)this + 0x184) != 0) && ((*(BYTE*)(*(INT*)((BYTE*)this + 0x184) + 0x394) & 1) != 0))
+	{
+		INT iVar3 = IsLocallyControlled();
+		if (iVar3 != 0 || (*(char*)(*(INT*)((BYTE*)this + 0x144) + 0x425) != '\x03'))
+			(*(AR6ColBox**)((BYTE*)this + 0x184))->EnableCollision(0, 0, 0);
+	}
+
+	if ((*(BYTE*)(*(INT*)((BYTE*)this + 0x180) + 0x394) & 1) == 0)
+	{
+		// Colbox disabled — optionally re-enable for local player
+		INT iVar3 = IsLocallyControlled();
+		if ((iVar3 == 0) && (*(char*)(*(INT*)((BYTE*)this + 0x144) + 0x425) == '\x03'))
+			return param_1;
+
+		if ((*(INT*)((BYTE*)this + 0x784) == 0) || ((*(BYTE*)((BYTE*)this + 0x6c4) & 4) == 0))
+			(*(AR6ColBox**)((BYTE*)this + 0x180))->EnableCollision(1, 0, 0);
+
+		if (*(INT*)(*(AActor**)((BYTE*)this + 0x180) + 0x140) == 0)
+		{
+			GLog->Logf(TEXT("UpdateColBoxPeeking: colbox has no primitive"));
+			return param_1;
+		}
+
+		(*(AActor**)((BYTE*)this + 0x180))->SetCollisionSize(28.0f, 26.0f);
+		local_20 = 0;
+	}
+
+	INT iVar3 = *(INT*)((BYTE*)this + 0x180);
+	local_48 = *(FLOAT*)(iVar3 + 0x234);
+	local_44 = *(FLOAT*)(iVar3 + 0x238);
+	local_40 = *(FLOAT*)(iVar3 + 0x23c);
+
+	// vtable dispatch: XLevel->MoveActor (vtable slot 0x9c/4)
+	FLOAT* pfVar8 = &local_48;
+	INT iVar4;
+	{
+		INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+		typedef INT (__thiscall *TMoveActor)(void*, INT, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT, FLOAT*);
+		TMoveActor MoveActor = (TMoveActor)*(DWORD*)(*(DWORD*)pXLevel + 0x9c);
+		iVar4 = MoveActor(pXLevel, iVar3, fVar6, local_38, local_34, 0, 0, 1, 1, pfVar8);
+	}
+
+	iVar3 = *(INT*)((BYTE*)this + 0x180);
+
+	// Check if colbox position changed after move, or not in peek-crawl state (0x39c != 2)
+	if ((local_3c != *(FLOAT*)(iVar3 + 0x234) &&
+	     local_38 != *(FLOAT*)(iVar3 + 0x238) &&
+	     local_34 != *(FLOAT*)(iVar3 + 0x23c)) ||
+	    (*(BYTE*)((BYTE*)this + 0x39c) != 0x2))
+	{
+		if ((local_20 != 0) && (iVar4 == 0))
+		{
+			// Fallback: try moving to height-adjusted position
+			local_40 = (*(FLOAT*)((BYTE*)this + 0xfc) + *(FLOAT*)((BYTE*)this + 0x23c)) - 26.0f;
+			local_18 = 1.4013e-45f; // flag: fallback attempted
+			{
+				INT* pXLevel2 = *(INT**)((BYTE*)this + 0x328);
+				typedef INT (__thiscall *TMoveActor)(void*, INT, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
+				TMoveActor MoveActor2 = (TMoveActor)*(DWORD*)(*(DWORD*)pXLevel2 + 0x9c);
+				iVar4 = MoveActor2(pXLevel2, iVar3, local_48, local_44, local_40, 0, 0, 1, 1);
+			}
+		}
+
+		iVar3 = *(INT*)((BYTE*)this + 0x180);
+
+		// If any position component still matches requested, set fVar6 flag
+		if (local_3c == *(FLOAT*)(iVar3 + 0x234) ||
+		    local_38 == *(FLOAT*)(iVar3 + 0x238) ||
+		    local_34 == *(FLOAT*)(iVar3 + 0x23c))
+		{
+			fVar6 = 1.4013e-45f;
+		}
+
+		if (iVar4 == 0)
+		{
+			// Try lateral offset based on peek ratio and rotator
+			local_18 = *(FLOAT*)((BYTE*)this + 0xf8) - 28.0f;
+			if (local_1c < 0.0f)
+				local_18 = local_18 * -1.0f;
+
+			FLOAT* pfVar8b = &local_3c;
+			FVector rotVec2 = ((FRotator*)&local_54)->Vector();
+			pfVar2 = (FLOAT*)&rotVec2;
+
+			local_28 = local_18 * pfVar2[1];
+			local_38 = local_28 + *(FLOAT*)((BYTE*)this + 0x238);
+			local_3c = local_18 * pfVar2[0] + *(FLOAT*)((BYTE*)this + 0x234);
+			local_34 = (*(FLOAT*)((BYTE*)this + 0xfc) - 26.0f) + local_18 * pfVar2[2] + *(FLOAT*)((BYTE*)this + 0x23c);
+
+			{
+				INT* pXLevel3 = *(INT**)((BYTE*)this + 0x328);
+				typedef INT (__thiscall *TMoveActor)(void*, DWORD, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT, FLOAT*);
+				TMoveActor MoveActor3 = (TMoveActor)*(DWORD*)(*(DWORD*)pXLevel3 + 0x9c);
+				iVar3 = MoveActor3(pXLevel3, *(DWORD*)((BYTE*)this + 0x180), local_3c, local_38, local_34, 0, 0, 1, 1, pfVar8b);
+			}
+
+			if (iVar3 == 0)
+			{
+				// No room at all — push to standing position
+				local_34 = (*(FLOAT*)((BYTE*)this + 0xfc) - 26.0f) + *(FLOAT*)((BYTE*)this + 0x23c);
+				{
+					INT* pXLevel4 = *(INT**)((BYTE*)this + 0x328);
+					typedef void (__thiscall *TMoveActor)(void*, DWORD, DWORD, DWORD, FLOAT, INT, INT, INT, INT);
+					TMoveActor MoveActor4 = (TMoveActor)*(DWORD*)(*(DWORD*)pXLevel4 + 0x9c);
+					MoveActor4(pXLevel4, *(DWORD*)((BYTE*)this + 0x180),
+					           *(DWORD*)((BYTE*)this + 0x234),
+					           *(DWORD*)((BYTE*)this + 0x238),
+					           local_34, 0, 1, 1, 1);
+				}
+				return 1000.0f;
+			}
+
+			fVar6 = 1.4013e-45f;
+		}
+
+		iVar3 = *(INT*)((BYTE*)this + 0x180);
+
+		// If colbox actually moved, apply PrePivot offset via GetAxes + TransformVectorBy
+		if (local_48 == *(FLOAT*)(iVar3 + 0x234) ||
+		    local_44 == *(FLOAT*)(iVar3 + 0x238) ||
+		    local_40 == *(FLOAT*)(iVar3 + 0x23c))
+		{
+			FLOAT delta_x = *(FLOAT*)(iVar3 + 0x234) - *(FLOAT*)((BYTE*)this + 0x234);
+			FLOAT delta_y = *(FLOAT*)(iVar3 + 0x238) - *(FLOAT*)((BYTE*)this + 0x238);
+			FLOAT delta_z = *(FLOAT*)(iVar3 + 0x23c) - *(FLOAT*)((BYTE*)this + 0x23c);
+
+			BYTE local_84[48];
+			typedef void (__thiscall *TGetAxes)(void*, BYTE*);
+			((TGetAxes)*(DWORD*)(*(DWORD*)this + 0xa4))(this, local_84);
+
+			FLOAT delta[3] = { delta_x, delta_y, delta_z };
+			FVector xfResult = ((FVector*)delta)->TransformVectorBy(*(FCoords*)&local_3c);
+			DWORD* puVar5 = (DWORD*)&xfResult;
+
+			INT iVar3b = *(INT*)((BYTE*)this + 0x180);
+			*(DWORD*)(iVar3b + 0x264) = puVar5[0]; // PrePivot.X
+			*(DWORD*)(iVar3b + 0x268) = puVar5[1]; // PrePivot.Y
+			*(DWORD*)(iVar3b + 0x26c) = puVar5[2]; // PrePivot.Z
+		}
+
+		if (fVar6 == 0.0f)
+		{
+			*(FLOAT*)((BYTE*)this + 0x720) = param_1;
+			return param_1;
+		}
+
+		// Compute peek ratio from displacement between pawn and colbox
+		FLOAT d_z = *(FLOAT*)((BYTE*)this + 0x23c) - *(FLOAT*)((BYTE*)this + 0x23c);
+		FLOAT d_y = *(FLOAT*)((BYTE*)this + 0x238) - *(FLOAT*)(*(INT*)((BYTE*)this + 0x180) + 0x238);
+		FLOAT d_x = *(FLOAT*)((BYTE*)this + 0x234) - *(FLOAT*)(*(INT*)((BYTE*)this + 0x180) + 0x234);
+		fVar6 = ((FVector*)&d_x)->Size();
+
+		if (local_1c < 0.0f)
+			fVar6 = fVar6 * -1.0f;
+
+		// TODO: FUN_10017320 — clamp interpolation (fVar6*0.017857144*1000+1000, 0, 2000)
+		FLOAT fVar7 = (FLOAT)FUN_10017320(fVar6 * 0.017857144f * 1000.0f + 1000.0f, 0.0f, 2000.0f);
+
+		if (fabsf(*(FLOAT*)((BYTE*)this + 0x720) - fVar7) > 100.0f)
+		{
+			*(FLOAT*)((BYTE*)this + 0x720) = fVar7;
+			return *(FLOAT*)((BYTE*)this + 0x720);
+		}
+	}
+
+	return *(FLOAT*)((BYTE*)this + 0x720);
+
+	unguard;
 }
 
 void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)

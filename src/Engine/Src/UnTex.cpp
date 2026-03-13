@@ -13,6 +13,8 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
+static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
+static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
 
 // --- UMaterial ---
 
@@ -29,10 +31,116 @@ void UMaterial::ClearFallbacks()
 	unguard;
 }
 
-// (merged from earlier occurrence)
-UMaterial * UMaterial::ConvertPolyFlagsToMaterial(UMaterial *,DWORD)
+UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param_2)
 {
+	guard(UMaterial::ConvertPolyFlagsToMaterial);
+
+	UMaterial* this_00 = param_1;
+
+	if (param_1 != NULL)
+	{
+		INT iVar3 = param_1->IsA(UTexture::StaticClass());
+		if ((iVar3 != 0) && (*(INT*)((BYTE*)this_00 + 0x88) != 0))
+		{
+			DWORD uVar9   = param_2 & 0x1000;
+			TCHAR* pwVar10 = (uVar9 == 0) ? TEXT("") : TEXT("Const");
+			DWORD  uVar1  = uVar9;
+
+			FString local_40 = FString::Printf(TEXT("%s_%sShiny"), this_00->GetName(), pwVar10);
+			FString local_34(local_40);
+
+			if (uVar9 != 0)
+				local_34 += TEXT("_Alpha");
+
+			UObject* pUVar5 = UObject::StaticFindObject(
+			    UShader::StaticClass(), (UObject*)0xffffffff, *local_34, 0);
+
+			FString local_28;
+
+			if (pUVar5 == NULL)
+			{
+				local_28 = FString::Printf(TEXT("%s_EnvMapCoords"),
+				    (*(UObject**)((BYTE*)this_00 + 0x88))->GetName());
+
+				UObject* pUVar6 = UObject::StaticFindObject(
+				    UTexEnvMap::StaticClass(), (UObject*)0xffffffff, *local_28, 0);
+
+				if (pUVar6 == NULL)
+				{
+					FName fn6(*local_28, FNAME_Add);
+					UObject* pOuter6 = (*(UObject**)((BYTE*)this_00 + 0x88))->GetOuter();
+					pUVar6 = FUN_103c89f0(UTexEnvMap::StaticClass(), pOuter6, *(DWORD*)&fn6, 0x80004);
+
+					if (*(BYTE*)((BYTE*)this_00 + 0x8c) == 0)
+						*(BYTE*)((BYTE*)pUVar6 + 100) = 1;
+					else if (*(BYTE*)((BYTE*)this_00 + 0x8c) == 1)
+						*(BYTE*)((BYTE*)pUVar6 + 100) = 0;
+
+					*(DWORD*)((BYTE*)pUVar6 + 0x58) = *(DWORD*)((BYTE*)this_00 + 0x88);
+				}
+
+				FName fn40(*local_40, FNAME_Add);
+				UObject* pOuter = this_00->GetOuter();
+				pUVar5 = FUN_10386790(UShader::StaticClass(), pOuter, *(DWORD*)&fn40, 0x80004);
+
+				*(UMaterial**)((BYTE*)pUVar5 + 0x60) = this_00;
+				*(UObject**)  ((BYTE*)pUVar5 + 0x68) = pUVar6;
+				if (param_2 == 0)
+					*(UMaterial**)((BYTE*)pUVar5 + 0x6c) = this_00;
+				else
+					*(UMaterial**)((BYTE*)pUVar5 + 100) = this_00;
+			}
+
+			return (UMaterial*)pUVar5;
+		}
+	}
+
+	if ((param_2 & 0x400000) != 0)
+	{
+		TCHAR* pwVar10 = (param_2 & 0x100) ? TEXT("TwoSided") : TEXT("");
+
+		FString local_40b = FString::Printf(TEXT("%s_Unlit%s"), this_00->GetName(), pwVar10);
+
+		UObject* pUVar5 = UObject::StaticFindObject(
+		    UShader::StaticClass(), (UObject*)0xffffffff, *local_40b, 0);
+
+		if (pUVar5 == NULL)
+		{
+			FName fn40b(*local_40b, FNAME_Add);
+			UObject* pOuter = this_00->GetOuter();
+			pUVar5 = FUN_10386790(UShader::StaticClass(), pOuter, *(DWORD*)&fn40b, 0x80004);
+			*(DWORD*)((BYTE*)pUVar5 + 0x5c) ^= ((param_2 >> 8) ^ *(DWORD*)((BYTE*)pUVar5 + 0x5c)) & 1;
+			*(UMaterial**)((BYTE*)pUVar5 + 0x70) = this_00;
+		}
+
+		return (UMaterial*)pUVar5;
+	}
+
+	if ((param_2 & 0x1000) != 0)
+	{
+		TCHAR* pwVar10 = (param_2 & 0x100) ? TEXT("TwoSided") : TEXT("");
+
+		FString local_40c = FString::Printf(TEXT("%s_Alpha%s"), this_00->GetName(), pwVar10);
+
+		UObject* pUVar5 = UObject::StaticFindObject(
+		    UShader::StaticClass(), (UObject*)0xffffffff, *local_40c, 0);
+
+		if (pUVar5 == NULL)
+		{
+			FName fn40c(*local_40c, FNAME_Add);
+			UObject* pOuter = this_00->GetOuter();
+			pUVar5 = FUN_10386790(UShader::StaticClass(), pOuter, *(DWORD*)&fn40c, 0x80004);
+			*(DWORD*)((BYTE*)pUVar5 + 0x5c) ^= ((param_2 >> 8) ^ *(DWORD*)((BYTE*)pUVar5 + 0x5c)) & 1;
+			*(UMaterial**)((BYTE*)pUVar5 + 0x60) = this_00;
+			*(UMaterial**)((BYTE*)pUVar5 + 100)  = this_00;
+		}
+
+		return (UMaterial*)pUVar5;
+	}
+
 	return NULL;
+
+	unguard;
 }
 
 

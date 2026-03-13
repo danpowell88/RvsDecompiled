@@ -6,11 +6,67 @@
 
 IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
+// Stubs for unresolved R6Engine internal functions
+static INT*  FUN_10024530(INT) { return NULL; }
+static QWORD FUN_10042934()    { return 0; }
+static const FLOAT s_flt_1_0f = 1.0f;
+
 // --- UR6SubActionAnimSequence ---
 
-FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim *)
+FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
-	return 0.f;
+	guard(UR6SubActionAnimSequence::GetAnimDuration);
+
+	UR6PlayAnim* pUVar3 = param_1;
+	INT iVar4 = *(INT*)((BYTE*)this + 100);
+
+	if ((iVar4 != 0) && (param_1 != (UR6PlayAnim*)0) && (*(INT*)(iVar4 + 0x16c) != 0))
+	{
+		// Get mesh instance via vtable slot 0x88/4
+		{
+			void* actor = (void*)iVar4;
+			void* mesh  = *(void**)((BYTE*)actor + 0x16c);
+			typedef INT (__thiscall *TGetMeshInst)(void*, void*);
+			iVar4 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh + 0x88))(mesh, actor);
+		}
+
+		// TODO: FUN_10024530 — get anim controller from mesh instance
+		INT* piVar5 = (INT*)FUN_10024530(iVar4);
+		if (piVar5 != (INT*)0)
+		{
+			// GetAnimByName via vtable 0xb0/4, using anim sequence name at param_1+0x50
+			typedef DWORD (__thiscall *TGetAnimByName)(void*, DWORD);
+			DWORD uVar6 = ((TGetAnimByName)*(DWORD*)(*(DWORD*)piVar5 + 0xb0))(piVar5, *(DWORD*)((BYTE*)param_1 + 0x50));
+
+			// GetNumFrames (as float) via vtable 0xc4/4
+			typedef FLOAT (__thiscall *TGetNumFrames)(void*, DWORD);
+			FLOAT fVar7 = ((TGetNumFrames)*(DWORD*)(*(DWORD*)piVar5 + 0xc4))(piVar5, uVar6);
+			UR6PlayAnim* pUVar1 = (UR6PlayAnim*)(INT)fVar7;
+
+			// Release/deref via vtable 0xc0/4
+			typedef void (__thiscall *TReleaseAnim)(void*, DWORD);
+			((TReleaseAnim)*(DWORD*)(*(DWORD*)piVar5 + 0xc0))(piVar5, uVar6);
+
+			// TODO: FUN_10042934 — get frame count (returns ulonglong)
+			QWORD uVar8 = FUN_10042934();
+
+			FLOAT fVar2 = *(FLOAT*)((BYTE*)param_1 + 0x3c); // rate
+			param_1 = pUVar1;
+
+			// Fallback to 1.0f if denominator is zero
+			FLOAT fDenominator = fVar7;
+			if (fDenominator == 0.0f)
+				fDenominator = 1.0f;
+
+			*(INT*)((BYTE*)pUVar3 + 0x34) = (INT)uVar8;
+
+			return ((FLOAT)(INT)uVar8 / fDenominator) * (FLOAT)*(INT*)((BYTE*)pUVar3 + 0x2c) * fVar2;
+		}
+	}
+
+	return 0.0f;
+
+	unguard;
 }
 
 UR6PlayAnim * UR6SubActionAnimSequence::GetAnimation(FLOAT Time)
@@ -63,9 +119,34 @@ INT UR6SubActionAnimSequence::IncrementSequence()
 	return 0;
 }
 
-INT UR6SubActionAnimSequence::IsAnimAtFrame(INT, INT)
+INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 {
+	guard(UR6SubActionAnimSequence::IsAnimAtFrame);
+
+	// Get mesh instance via vtable slot 0x88/4
+	INT iVar2;
+	{
+		void* actor2 = (void*)*(INT*)((BYTE*)this + 100);
+		void* mesh2  = *(void**)((BYTE*)actor2 + 0x16c);
+		typedef INT (__thiscall *TGetMeshInst)(void*, void*);
+		iVar2 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh2 + 0x88))(mesh2, actor2);
+	}
+
+	// DIVERGENCE: skip class hierarchy verification (PrivateStaticClass_exref unresolved)
+	if (iVar2 != 0)
+		goto LAB_IsAnimAtFrameDone;
+	iVar2 = 0;
+
+LAB_IsAnimAtFrameDone:
+	// Array of anim track entries at iVar2+0x10c; each entry 0x74 bytes; frame start time at +0x10
+	FLOAT fVar1 = *(FLOAT*)(*(INT*)(iVar2 + 0x10c) + 0x10 + param_1 * 0x74);
+
+	if ((FLOAT)param_2 <= fVar1)
+		return 1;
+
 	return 0;
+
+	unguard;
 }
 
 INT UR6SubActionAnimSequence::LaunchSequence()
@@ -94,9 +175,49 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 	return 1;
 }
 
-FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim *, FLOAT)
+FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT param_2)
 {
-	return 0.f;
+	guard(UR6SubActionAnimSequence::PctToFrameNumber);
+
+	// Get mesh instance via vtable slot 0x88/4
+	INT* piVar3;
+	{
+		void* actor3 = (void*)*(INT*)((BYTE*)this + 100);
+		void* mesh3  = *(void**)((BYTE*)actor3 + 0x16c);
+		typedef INT* (__thiscall *TGetMeshInst)(void*, void*);
+		piVar3 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh3 + 0x88))(mesh3, actor3);
+	}
+
+	// DIVERGENCE: skip class hierarchy verification (PrivateStaticClass_exref unresolved)
+	if (piVar3 == (INT*)0)
+		piVar3 = (INT*)0; // stay NULL
+
+LAB_PctToFrameDone:
+	// Lookup anim by name, then release
+	typedef DWORD (__thiscall *TGetAnimByName2)(void*, DWORD);
+	DWORD uVar4 = ((TGetAnimByName2)*(DWORD*)(*(DWORD*)piVar3 + 0xb0))(piVar3, *(DWORD*)((BYTE*)param_1 + 0x50));
+	typedef void (__thiscall *TReleaseAnim2)(void*, DWORD);
+	((TReleaseAnim2)*(DWORD*)(*(DWORD*)piVar3 + 0xc0))(piVar3, uVar4);
+
+	// TODO: FUN_10042934 — get frame count
+	QWORD uVar7 = FUN_10042934();
+
+	FLOAT local_1c = 0.0f;
+	FLOAT fVar2    = 1.0f / (FLOAT)*(INT*)((BYTE*)param_1 + 0x2c); // 1/numFrames
+
+	if ((INT)uVar7 != 0)
+		local_1c = (FLOAT)(1 - (INT)(1 / (SQWORD)(INT)uVar7));
+
+	FLOAT fVar1 = 0.0f;
+	for (INT iVar6 = 0; iVar6 < *(INT*)((BYTE*)param_1 + 0x2c); iVar6++)
+	{
+		if (((FLOAT)iVar6 * fVar2 < param_2) && (param_2 < (FLOAT)(iVar6 + 1) * fVar2))
+			fVar1 = ((param_2 - (FLOAT)iVar6 * fVar2) / fVar2) * local_1c;
+	}
+
+	return fVar1;
+
+	unguard;
 }
 
 void UR6SubActionAnimSequence::PreBeginPreview()

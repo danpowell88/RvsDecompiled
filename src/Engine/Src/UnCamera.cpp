@@ -13,6 +13,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
+extern ENGINE_API UEngine* g_pEngine;
 
 // --- ACamera ---
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
@@ -102,6 +103,89 @@ void UViewport::LockOnActor(AActor *)
 
 int UViewport::MultiShot()
 {
+	// Ghidra 0x83d70: no SEH frame
+
+	// GFileManager->MakeDirectory (vtable slot 0x24/4)
+	typedef void (__thiscall *TMakeDir)(void*);
+	((TMakeDir)*(DWORD*)(*(DWORD*)GFileManager + 0x24))(GFileManager);
+
+	const TCHAR* MapName = **((FString*)((BYTE*)this + 0x1a8));
+	INT OldCounter = *(INT*)((BYTE*)this + 0x1b4);
+	*(INT*)((BYTE*)this + 0x1b4) = OldCounter + 1;
+
+	TCHAR filename[36];
+	appSprintf(filename, TEXT("..\\ScreenShot\\%s%05i.bmp"), MapName, OldCounter);
+
+	if (OldCounter + 1 < 0xffff)
+	{
+		// GFileManager->FileSize (vtable slot 0xc/4)
+		typedef INT (__thiscall *TFileSize)(void*, const TCHAR*);
+		INT fileSize = ((TFileSize)*(DWORD*)(*(DWORD*)GFileManager + 0xc))(GFileManager, filename);
+
+		if (fileSize < 0)
+		{
+			FMemMark Mark(GMem);
+			BYTE* pixelBuf = (BYTE*)GMem.PushBytes(*(INT*)((BYTE*)this + 0xa4) * *(INT*)((BYTE*)this + 0xa8) * 4, 8);
+
+			// ReadPixels via render device vtable slot 0x90/4
+			typedef void (__thiscall *TReadPixels)(void*, void*, BYTE*);
+			((TReadPixels)*(DWORD*)(**(DWORD**)((BYTE*)this + 0x8c) + 0x90))(*(void**)((BYTE*)this + 0x8c), this, pixelBuf);
+
+			// Create output file — vtable slot 8/4
+			typedef void* (__thiscall *TCreateFile)(void*, const TCHAR*, DWORD, FOutputDevice*);
+			void* fileAr = ((TCreateFile)*(DWORD*)(*(DWORD*)GFileManager + 8))(GFileManager, filename, 0, GNull);
+
+			if (fileAr != NULL)
+			{
+				typedef void (__thiscall *TSerialize)(void*, void*, INT);
+				TSerialize Serialize = (TSerialize)*(DWORD*)(*(DWORD*)fileAr + 4);
+
+				// BITMAPFILEHEADER (14 bytes)
+				struct BFH { _WORD bfType; DWORD bfSize; _WORD bfRes1; _WORD bfRes2; DWORD bfOffBits; } bfh;
+				bfh.bfType    = 0x4d42;
+				bfh.bfSize    = 0;
+				bfh.bfRes1    = 0;
+				bfh.bfRes2    = 0;
+				bfh.bfOffBits = 0x36;
+				Serialize(fileAr, &bfh, 14);
+
+				// BITMAPINFOHEADER (40 bytes)
+				struct BIH {
+					DWORD biSize; DWORD biWidth; DWORD biHeight;
+					_WORD biPlanes; _WORD biBitCount; DWORD biCompression;
+					DWORD biSizeImage; DWORD biXPPM; DWORD biYPPM;
+					DWORD biClrUsed; DWORD biClrImportant;
+				} bih;
+				bih.biSize        = 0x28;
+				bih.biWidth       = *(DWORD*)((BYTE*)this + 0xa4);
+				bih.biHeight      = *(DWORD*)((BYTE*)this + 0xa8);
+				bih.biPlanes      = 1;
+				bih.biBitCount    = 24;
+				bih.biCompression = 0;
+				bih.biSizeImage   = bih.biXPPM = bih.biYPPM = bih.biClrUsed = bih.biClrImportant = 0;
+				Serialize(fileAr, &bih, 40);
+
+				INT height = *(INT*)((BYTE*)this + 0xa8);
+				INT width  = *(INT*)((BYTE*)this + 0xa4);
+				while (--height >= 0)
+				{
+					for (INT x = 0; x < width; x++)
+						Serialize(fileAr, pixelBuf + (width * height + x) * 4, 3);
+				}
+
+				// Close file via vtable[0]
+				typedef void (__thiscall *TClose)(void*, INT);
+				((TClose)*(DWORD*)(*(DWORD*)fileAr))(fileAr, 1);
+			}
+
+			Mark.Pop();
+		}
+
+		return 1;
+	}
+
+	*(DWORD*)((BYTE*)this + 0x1b4) = 0;
+	*(DWORD*)((BYTE*)g_pEngine + 0x120) &= 0xffffbfff;
 	return 0;
 }
 

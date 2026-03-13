@@ -55,9 +55,95 @@ AActor * AR6PlayerController::GetTeamManager()
 	return m_TeamManager;
 }
 
-INT AR6PlayerController::PlayPriority(INT)
+INT AR6PlayerController::PlayPriority(INT param_1)
 {
-	return 0;
+	guard(AR6PlayerController::PlayPriority);
+
+	INT local_20 = *(INT*)((BYTE*)this + 0x328);
+	if (local_20 == 0)
+		return 0;
+
+	INT  local_34 = 0;
+	INT  local_30 = 0;
+	DWORD local_2c = 0;
+	INT  local_1c = 0;
+	INT  iVar5   = 0;
+
+	for (;;)
+	{
+		INT local_18 = iVar5;
+		if (*(INT*)((BYTE*)this + 0x904) <= iVar5)
+			break;
+
+		INT iVar3 = *(INT*)(*(INT*)((BYTE*)this + 0x900) + iVar5 * 4);
+		if ((iVar3 != 0) && (*(INT*)(iVar3 + 8) == param_1))
+		{
+			if (*(INT*)(iVar3 + 0x14) != 0)
+			{
+				iVar3 = ((FArray*)&local_34)->Add(1, 4);
+				*(INT*)(local_34 + iVar3 * 4) = iVar5;
+				local_1c = 1;
+				iVar5++;
+				continue;
+			}
+
+			// Skip if sound time hasn't elapsed
+			if (*(FLOAT*)(iVar3 + 0x10) < (FLOAT)*(double*)(local_20 + 0xd4))
+			{
+				// Check if any of the already-queued entries are still bIsPlaying
+				bool bVar2 = true;
+				for (INT i = 0; i < local_30; i++)
+				{
+					INT iVar1 = *(INT*)(local_34 + i * 4);
+					if ((-1 < iVar1) && (iVar1 < *(INT*)((BYTE*)this + 0x904)) &&
+					    (*(INT*)(*(INT*)(*(INT*)((BYTE*)this + 0x900) + iVar1 * 4) + 0x18) != 0))
+					{
+						bVar2 = false;
+						break;
+					}
+				}
+
+				iVar3 = **(INT**)(*(INT*)((BYTE*)this + 0x900) + iVar5 * 4);
+				if ((iVar3 == 0) ||
+				    (*(APawn**)(iVar3 + 0x3ac) == (APawn*)0) ||
+				    ((*(APawn**)(iVar3 + 0x3ac))->IsAlive() != 0))
+				{
+					if (bVar2)
+					{
+						AActor* pAVar4 = SelectActorForSound(
+						    (AR6SoundReplicationInfo*)**(DWORD**)(*(INT*)((BYTE*)this + 0x900) + iVar5 * 4));
+						iVar3 = *(INT*)(*(INT*)((BYTE*)this + 0x900) + iVar5 * 4);
+						// vtable: g_pEngine->AudioSystem->PlaySound
+						(*(void (__thiscall**)(AActor*, DWORD, BYTE, INT))
+						    (**(DWORD**)(*(DWORD*)g_pEngine + 0x48) + 0x84))
+						    (pAVar4, *(DWORD*)(iVar3 + 4), *(BYTE*)(iVar3 + 0xc), 0);
+						*(DWORD*)(*(INT*)((BYTE*)this + 0x900) + iVar5 * 4 + 0x14) = 1; // bIsPlaying
+						iVar3 = ((FArray*)&local_34)->Add(1, 4);
+						*(INT*)(local_34 + iVar3 * 4) = iVar5;
+						local_1c = 1;
+						break; // goto LAB_1004195b
+					}
+				}
+				else
+				{
+					StopAndRemoveVoices(local_18);
+					iVar5 = local_18;
+				}
+			}
+		}
+
+		iVar5++;
+	}
+
+	// Cleanup
+	local_30 = 0;
+	local_2c = 0;
+	// NOTE: FArray::Realloc is protected — free underlying buffer directly
+	if (*(void**)&local_34) { GMalloc->Free(*(void**)&local_34); *(void**)&local_34 = NULL; }
+
+	return local_1c;
+
+	unguard;
 }
 
 void AR6PlayerController::PlayVoicesPriority()

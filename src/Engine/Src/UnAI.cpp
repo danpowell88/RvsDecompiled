@@ -67,9 +67,18 @@ void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 
 
 // --- AAIMarker ---
-int AAIMarker::IsIdentifiedAs(FName)
+int AAIMarker::IsIdentifiedAs(FName Name)
 {
+	guard(AAIMarker::IsIdentifiedAs);
+	FName fn1 = this->GetFName();
+	if (Name == fn1) return 1;
+	if (*(UObject**)((BYTE*)this + 0x3E8) != NULL)
+	{
+		FName fn2 = (*(UObject**)((BYTE*)this + 0x3E8))->GetFName();
+		if (Name == fn2) return 1;
+	}
 	return 0;
+	unguard;
 }
 
 

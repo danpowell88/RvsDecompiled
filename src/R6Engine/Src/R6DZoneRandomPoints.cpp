@@ -198,7 +198,7 @@ NbCap:
 	unguard;
 }
 
-// Verified from Ghidra: shares function body at 0x193c0 with HurtByVolume — returns 0.
+// Verified from Ghidra: shares function body at 0x193c0 with HurtByVolume — empty shared stub.
 INT AR6DZoneRandomPoints::IsPointInZone(FVector const &)
 {
 	return 0;

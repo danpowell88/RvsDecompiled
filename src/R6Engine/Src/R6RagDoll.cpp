@@ -7,6 +7,9 @@
 
 IMPLEMENT_CLASS(AR6RagDoll)
 
+static INT  DAT_10074340  = 1; // physics stepping enabled flag
+static INT  _DAT_10075508 = 0; // physics step counter
+
 // --- AR6RagDoll ---
 
 void AR6RagDoll::AddImpulseToBone(INT BoneIndex, FVector Impulse)
@@ -283,9 +286,127 @@ void AR6RagDoll::SatisfyConstraints()
 	unguard;
 }
 
-INT AR6RagDoll::Tick(FLOAT, enum ELevelTick)
+INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 {
-	return 0;
+	guard(AR6RagDoll::Tick);
+
+	if (*(INT*)((BYTE*)this + 0x398) == 0)
+	{
+		// No pawn owner — call super Tick
+		AActor::Tick(param_1, param_2);
+	}
+	else if ((*(BYTE*)((BYTE*)this + 0xa2) & 1) == 0)
+	{
+		// Verify pawn mesh is USkeletalMesh
+		{
+			UObject* mesh = *(UObject**)((BYTE*)*(INT*)((BYTE*)this + 0x398) + 0x16c);
+			if (mesh != NULL && !mesh->IsA(USkeletalMesh::StaticClass()))
+				appFailAssert("m_pawnOwner->Mesh->IsA( USkeletalMesh::StaticClass() )",
+				              ".\\Src\\AR6RagDoll.cpp", 0x2b0);
+		}
+		if (*(FLOAT*)((BYTE*)this + 0xbc) <= 3.0f)
+		{
+			bool bVar2 = false;
+
+			*(FLOAT*)((BYTE*)this + 0xbc) = param_1 + *(FLOAT*)((BYTE*)this + 0xbc);
+			FLOAT fVar6 = param_1 + *(FLOAT*)((BYTE*)this + 0x394);
+
+			// Step physics in fixed 0.025-second increments
+			while (DAT_10074340 != 0 && (*(FLOAT*)((BYTE*)this + 0x394) = fVar6, 0.025f < *(FLOAT*)((BYTE*)this + 0x394)))
+			{
+				_DAT_10075508 = _DAT_10075508 + 1;
+				VerletIntegration(0.025f);
+				SatisfyConstraints();
+				CollisionDetection();
+				fVar6 = *(FLOAT*)((BYTE*)this + 0x394) - 0.025f;
+				bVar2 = true;
+			}
+
+			if (bVar2)
+			{
+				// Update bone positions from Verlet nodes
+				void* pawnOwner = *(void**)((BYTE*)this + 0x398);
+				void* pMesh = *(void**)((BYTE*)pawnOwner + 0x16c);
+				typedef USkeletalMeshInstance* (__thiscall *TGetMeshInst)(void*, void*);
+				USkeletalMeshInstance* local_18 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)pMesh + 0x88))(pMesh, pawnOwner);
+
+				BYTE local_38[12];
+				for (INT iVar4 = 1; iVar4 < 0x10; iVar4++)
+				{
+					FCoords* this_00 = (FCoords*)((BYTE*)this + iVar4 * 0x58 + 0x3a8);
+					FRotator orthoRot = this_00->OrthoRotation();
+					DWORD* puVar5 = (DWORD*)&orthoRot;
+
+					FLOAT local_28 = (FLOAT)puVar5[1];
+					DWORD uVar1    = puVar5[0];
+					FLOAT local_24 = (FLOAT)puVar5[2];
+
+					*(FLOAT*)((BYTE*)this_00 + 0x44) = *(FLOAT*)((BYTE*)this_00 + 0x44) + 15.0f;
+
+					{
+						FName boneName;
+						*(DWORD*)&boneName = *(DWORD*)((BYTE*)this_00 + 0x54);
+						FRotator boneRot;
+						*(DWORD*)&boneRot       = uVar1;
+						*(FLOAT*)((BYTE*)&boneRot + 4) = local_28;
+						*(FLOAT*)((BYTE*)&boneRot + 8) = local_24;
+						FVector bonePos;
+						*(DWORD*)&bonePos             = *(DWORD*)((BYTE*)this_00 + 0x3c);
+						*(DWORD*)((BYTE*)&bonePos + 4) = *(DWORD*)((BYTE*)this_00 + 0x40);
+						*(DWORD*)((BYTE*)&bonePos + 8) = *(DWORD*)((BYTE*)this_00 + 0x44);
+						local_18->SetBonePosition(boneName, boneRot, bonePos, 1.0f);
+						// DIVERGENCE: original passes extra buffer arg; dropped
+					}
+				}
+
+				// Check how far the ragdoll root has drifted from the pawn
+				INT iVar4b = *(INT*)((BYTE*)this + 0x398);
+				FLOAT local_24 = *(FLOAT*)((BYTE*)this + 0x3b0) - *(FLOAT*)(iVar4b + 0x23c);
+				FLOAT local_28 = *(FLOAT*)((BYTE*)this + 0x3ac) - *(FLOAT*)(iVar4b + 0x238);
+				FLOAT local_2c = *(FLOAT*)((BYTE*)this + 0x3a8) - *(FLOAT*)(iVar4b + 0x234);
+
+				FLOAT fVar6b = ((FVector*)&local_2c)->Size();
+
+				if ((5.0f < fVar6b) && (0.5f < *(FLOAT*)((BYTE*)this + 0xbc)))
+				{
+					// Snap pawn to ragdoll root position
+					iVar4b = *(INT*)((BYTE*)this + 0x398);
+					FLOAT save_x = *(FLOAT*)(iVar4b + 0x234);
+					FLOAT save_y = *(FLOAT*)(iVar4b + 0x238);
+					FLOAT save_z = *(FLOAT*)(iVar4b + 0x23c);
+
+				{
+					INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+					typedef INT (__thiscall *TMoveActor)(void*, INT, DWORD, DWORD, DWORD, INT, INT, INT, INT);
+					TMoveActor MoveActor = (TMoveActor)*(DWORD*)(*(DWORD*)pXLevel + 0x9c);
+					MoveActor(pXLevel, iVar4b,
+					          *(DWORD*)((BYTE*)this + 0x3a8),
+					          *(DWORD*)((BYTE*)this + 0x3ac),
+					          *(DWORD*)((BYTE*)this + 0x3b0),
+					          0, 0, 0, 0);
+				}
+
+					iVar4b = *(INT*)((BYTE*)this + 0x398);
+					FLOAT delta_z = save_z - *(FLOAT*)(iVar4b + 0x23c);
+					FLOAT delta_y = save_y - *(FLOAT*)(iVar4b + 0x238);
+					FLOAT delta_x = save_x - *(FLOAT*)(iVar4b + 0x234);
+
+					INT iVar3 = ((FVector*)&delta_x)->IsNearlyZero();
+					if (iVar3 == 0)
+						*(DWORD*)((BYTE*)this + 0xbc) = 0; // reset timer if actually moved
+				}
+			}
+		}
+		else
+		{
+			// Crawling — set bCrawling flag (bit 0x10000) at this+0xa0
+			*(DWORD*)((BYTE*)this + 0xa0) = *(DWORD*)((BYTE*)this + 0xa0) | 0x10000;
+		}
+	}
+
+	return 1;
+
+	unguard;
 }
 
 void AR6RagDoll::VerletIntegration(FLOAT dt)

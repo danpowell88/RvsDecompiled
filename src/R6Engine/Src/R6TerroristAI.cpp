@@ -5,6 +5,7 @@
 =============================================================================*/
 
 #include "R6EnginePrivate.h"
+#include <math.h>
 
 IMPLEMENT_CLASS(AR6TerroristAI)
 
@@ -41,9 +42,83 @@ INT AR6TerroristAI::CanHear(FVector Location, FLOAT Loudness, AActor* Source, en
 	return AR6AIController::CanHear(Location, Loudness, Source, NoiseType, PawnType);
 }
 
-INT AR6TerroristAI::HaveAClearShot(FVector, APawn *)
+INT AR6TerroristAI::HaveAClearShot(FVector vStart, APawn* param_5)
 {
-	return 0;
+	guard(AR6TerroristAI::HaveAClearShot);
+
+	// param_2/3/4 are the X/Y/Z components of vStart
+	FLOAT param_2 = vStart.X;
+	FLOAT param_3 = vStart.Y;
+	FLOAT param_4 = vStart.Z;
+
+	APawn* pAVar2;
+	if (param_5 == *(APawn**)((BYTE*)this + 0x400))
+		pAVar2 = (APawn*)((BYTE*)this + 0x498);
+	else
+		pAVar2 = (APawn*)((BYTE*)param_5 + 0x234);
+
+	FLOAT local_28 = *(FLOAT*)pAVar2;
+	FLOAT local_24 = *(FLOAT*)((BYTE*)pAVar2 + 4);
+	FLOAT local_20 = *(FLOAT*)((BYTE*)pAVar2 + 8);
+
+	// Check if inside a zone sphere that blocks line of sight
+	INT iVar3 = *(INT*)(*(INT*)((BYTE*)this + 0x5b0) + 0x228);
+	if ((*(BYTE*)(iVar3 + 0x398) & 1) != 0)
+	{
+		FLOAT fVar1 = *(FLOAT*)(iVar3 + 0x3a0) -
+		              (*(FLOAT*)(iVar3 + 0x3a0) - *(FLOAT*)(iVar3 + 0x39c)) * 0.1f;
+		FLOAT dist2 = (param_4 - local_20) * (param_4 - local_20) +
+		              (param_3 - local_24) * (param_3 - local_24) +
+		              (param_2 - local_28) * (param_2 - local_28);
+		if (fVar1 * fVar1 < dist2)
+			return 0;
+	}
+
+	// Set up trace result locals
+	DWORD local_58 = 0;
+	INT*  local_54 = (INT*)0;
+	DWORD local_50 = 0, local_4c = 0, local_48 = 0;
+	DWORD local_44 = 0, local_40 = 0, local_3c = 0;
+	DWORD local_38 = 0;
+	DWORD local_34 = 0x3f800000; // 1.0f
+	DWORD local_30 = 0xffffffff;
+	DWORD local_2c = 0;
+
+	// vtable dispatch: XLevel->TraceActors (vtable slot 0xcc/4)
+	{
+		INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+		typedef void (__thiscall *TTraceActors)(void*, DWORD*, DWORD, FLOAT*, FLOAT*, DWORD, DWORD, DWORD, DWORD);
+		((TTraceActors)*(DWORD*)(*(DWORD*)pXLevel + 0xcc))
+		    (pXLevel, &local_58, *(DWORD*)((BYTE*)this + 0x3d8),
+		     &local_28, &param_2, 0x4400bf, 0, 0, 0);
+	}
+
+	if ((local_54 != (INT*)0) &&
+	    (pAVar2 = (*(APawn* (__thiscall**)(void*))(*local_54 + 0x6c))(local_54), local_54 != (INT*)0) &&
+	    (pAVar2 != param_5))
+	{
+		if ((pAVar2 != (APawn*)0) &&
+		    ((*(APawn**)((BYTE*)this + 0x5b0))->IsFriend(pAVar2) == 0))
+		{
+			iVar3 = (*(APawn**)((BYTE*)this + 0x5b0))->IsNeutral(pAVar2);
+			if (iVar3 != 0)
+				return 1;
+
+			// Update acquired target
+			*(APawn**)((BYTE*)this + 0x400) = pAVar2;
+			*(APawn**)((BYTE*)this + 0x3e4) = pAVar2;
+			*(APawn**)((BYTE*)this + 0x404) = pAVar2;
+			*(FLOAT*)((BYTE*)this + 0x498) = local_28;
+			*(FLOAT*)((BYTE*)this + 0x49c) = local_24;
+			*(FLOAT*)((BYTE*)this + 0x4a0) = local_20;
+			return 1;
+		}
+		return 0;
+	}
+
+	return 1;
+
+	unguard;
 }
 
 void AR6TerroristAI::eventGotoPointAndSearch(FVector A, BYTE B, DWORD C, FLOAT D, BYTE E)
