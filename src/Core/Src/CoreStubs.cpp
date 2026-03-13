@@ -1373,12 +1373,14 @@ INT FEdge::operator==( const FEdge& Other ) const
 FArchiveCountMem::FArchiveCountMem( UObject* Src )
 : Num(0), Max(0)
 {
+	guard(FArchiveCountMem::FArchiveCountMem);
 	if( Src )
 		Src->Serialize( *this );
+	unguard;
 }
 
 FArchiveCountMem::FArchiveCountMem( const FArchiveCountMem& Other )
-: Num(Other.Num), Max(Other.Max)
+: FArchive(Other), Num(Other.Num), Max(Other.Max)
 {
 }
 
@@ -1419,8 +1421,8 @@ FArchiveDummySave::FArchiveDummySave()
 }
 
 FArchiveDummySave::FArchiveDummySave( const FArchiveDummySave& Other )
+: FArchive(Other)
 {
-	ArIsSaving = 1;
 }
 
 FArchiveDummySave::~FArchiveDummySave()
@@ -1704,7 +1706,22 @@ UObject& UObject::operator=( const UObject& Other )
 
 UCommandlet::UCommandlet( const UCommandlet& Other )
 : UObject( Other )
+, HelpCmd     ( Other.HelpCmd )
+, HelpOneLiner( Other.HelpOneLiner )
+, HelpUsage   ( Other.HelpUsage )
+, HelpWebLink ( Other.HelpWebLink )
 {
+	guard(UCommandlet::UCommandlet);
+	for( INT i = 0; i < ARRAY_COUNT(HelpParm); i++ ) HelpParm[i] = Other.HelpParm[i];
+	for( INT i = 0; i < ARRAY_COUNT(HelpDesc); i++ ) HelpDesc[i] = Other.HelpDesc[i];
+	LogToStdout    = Other.LogToStdout;
+	IsServer       = Other.IsServer;
+	IsClient       = Other.IsClient;
+	IsEditor       = Other.IsEditor;
+	LazyLoad       = Other.LazyLoad;
+	ShowErrorCount = Other.ShowErrorCount;
+	ShowBanner     = Other.ShowBanner;
+	unguard;
 }
 
 UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
