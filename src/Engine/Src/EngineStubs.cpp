@@ -1820,12 +1820,15 @@ void FCollisionHash::AddActor(AActor* Actor) {
 }
 
 // ?CheckActorLocations@FCollisionHash@@UAEXPAVULevel@@@Z
+// retail: empty (ordinal 2351 shares address 0x1651d0 with dozens of other no-op virtuals)
 void FCollisionHash::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionHash@@UAEXPAVAActor@@@Z
+// retail: empty (ordinal 2353 shares address 0x1651d0 — same shared no-op stub)
 void FCollisionHash::CheckActorNotReferenced(AActor * p0) {}
 
 // ?CheckIsEmpty@FCollisionHash@@UAEXXZ
+// retail: empty (ordinal 2383 shares address 0x176d60 — another shared no-op stub)
 void FCollisionHash::CheckIsEmpty() {}
 
 // ?RemoveActor@FCollisionHash@@UAEXPAVAActor@@@Z
@@ -1890,13 +1893,21 @@ void FCollisionOctree::AddActor(AActor* Actor)
 }
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
+// DIVERGENCE: stub; retail (0xdbec0) walks Level->Actors, tests geometry overlap per node.
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
+// retail: empty (ordinal 2354 shares address 0x1651d0 — shared no-op stub)
 void FCollisionOctree::CheckActorNotReferenced(AActor * p0) {}
 
 // ?CheckIsEmpty@FCollisionOctree@@UAEXXZ
-void FCollisionOctree::CheckIsEmpty() {}
+// Ghidra (0xdaf60): delegates straight to FOctreeNode::CheckIsEmpty on the root node.
+// Root FOctreeNode* is stored at Pad[0..3] (first field after vtable pointer).
+void FCollisionOctree::CheckIsEmpty()
+{
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (Root) Root->CheckIsEmpty();
+}
 
 // ?RemoveActor@FCollisionOctree@@UAEXPAVAActor@@@Z
 // Ghidra (0xdbd00): Removes actor from every octree node it appears in,
@@ -2145,12 +2156,56 @@ void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, 
 }
 
 // ?CheckActorNotReferenced@FOctreeNode@@QAEXPAVAActor@@@Z
-void FOctreeNode::CheckActorNotReferenced(AActor * p0) {}
+// Ghidra (0xd93c0): logs every actor in this node to GError, then recurses into
+// 8 children if present.  Exact format string unclear from decompiler output.
+// DIVERGENCE: format string approximated as TEXT("%s"); Ghidra shows Logf(GError, vtable_ptr)
+//             which is a decompiler artefact, not a literal vtable dereference.
+void FOctreeNode::CheckActorNotReferenced(AActor * /*Actor*/)
+{
+	// FOctreeNode layout (Ghidra-verified, 0x10 bytes per node):
+	//   offset 0x00: TArray<AActor*>::Data  (void*)
+	//   offset 0x04: TArray<AActor*>::Num   (INT)
+	//   offset 0x08: TArray<AActor*>::Max   (INT)
+	//   offset 0x0c: children block ptr     (FOctreeNode* block, 8 children × 0x10 bytes)
+	void* DataPtr         = *(void**)Pad;
+	INT   Count           = *(INT*)(Pad + 4);
+	for (INT i = 0; i < Count; i++)
+	{
+		AActor* A = ((AActor**)DataPtr)[i];
+		if (A) GError->Logf(TEXT("%s"), A->GetName());
+	}
+	void* ChildrenBase = *(void**)(Pad + 0xc);
+	if (ChildrenBase)
+	{
+		for (INT i = 0; i < 8; i++)
+			((FOctreeNode*)((BYTE*)ChildrenBase + i * 0x10))->CheckActorNotReferenced(NULL);
+	}
+}
 
 // ?CheckIsEmpty@FOctreeNode@@QAEXXZ
-void FOctreeNode::CheckIsEmpty() {}
+// Ghidra (0xd9300): logs every actor in this node to GLog, then recurses into
+// 8 children if present.
+// DIVERGENCE: format string approximated; see CheckActorNotReferenced note above.
+void FOctreeNode::CheckIsEmpty()
+{
+	void* DataPtr = *(void**)Pad;
+	INT   Count   = *(INT*)(Pad + 4);
+	for (INT i = 0; i < Count; i++)
+	{
+		AActor* A = ((AActor**)DataPtr)[i];
+		if (A) GLog->Logf(TEXT("%s"), A->GetName());
+	}
+	void* ChildrenBase = *(void**)(Pad + 0xc);
+	if (ChildrenBase)
+	{
+		for (INT i = 0; i < 8; i++)
+			((FOctreeNode*)((BYTE*)ChildrenBase + i * 0x10))->CheckIsEmpty();
+	}
+}
 
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
+// DIVERGENCE: stub; retail (0xdb6c0) draws the node's bounding box via GTempLineBatcher
+//             and recurses into children.  Requires FTempLineBatcher access.
 void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
@@ -3381,7 +3436,12 @@ HCoords::HCoords(FCameraSceneNode*) {}
 // ============================================================================
 // FInBunch
 // ============================================================================
+// DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
+//             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
+//             that reference allocated memory may alias incorrectly at runtime.
 FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
+// DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
+//             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
 FInBunch::FInBunch(UNetConnection*) : FBitReader() { appMemzero(Pad, sizeof(Pad)); }
 FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
@@ -3390,8 +3450,13 @@ FArchive& FInBunch::operator<<(FName& N) { return *this; }
 // ============================================================================
 // FOutBunch
 // ============================================================================
+// DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
 FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
+// DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
+//             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
 FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+// DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
+//             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
 FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
 FOutBunch::~FOutBunch() {}
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }

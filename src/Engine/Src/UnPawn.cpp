@@ -879,6 +879,17 @@ INT* APawn::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, I
 INT APawn::HurtByVolume( AActor* V )
 {
 	guard(APawn::HurtByVolume);
+	for ( INT i = 0; i < V->Touching.Num(); i++ )
+	{
+		AActor* A = V->Touching(i);
+		if ( !A ) continue;
+		if ( A->IsA(APhysicsVolume::StaticClass()) )
+		{
+			// DIVERGENCE: APhysicsVolume::bPainCausing (+0x410 bit 0) and DamagePerSec (+0x41c) not in header
+			if ( (*(BYTE*)((BYTE*)A + 0x410) & 1) && *(FLOAT*)((BYTE*)A + 0x41c) > 0.f )
+				return 1;
+		}
+	}
 	return 0;
 	unguard;
 }
@@ -960,7 +971,41 @@ DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::Reachable);
-	return 0;
+	INT bWasCrouching = 0;
+	INT result = 0;
+
+	if ( bCanCrouch && !bIsCrouched && !m_bIsProne )
+	{
+		bWasCrouching = 1;
+		Crouch(1);
+	}
+
+	// DIVERGENCE: APhysicsVolume::bWaterVolume not in header; raw offset +0x410 bit 6
+	if ( Region.Zone && (*(BYTE*)((BYTE*)Region.Zone + 0x410) & 0x40) )
+	{
+		result = swimReachable(Dest, 0, GoalActor);
+	}
+	else
+	{
+		if ( Region.Zone && Region.Zone->IsA(ALadderVolume::StaticClass()) )
+		{
+			result = ladderReachable(Dest, 0, GoalActor);
+		}
+		else
+		{
+			BYTE phys = Physics;
+			if ( phys == PHYS_Walking || phys == PHYS_Swimming
+			  || phys == PHYS_Ladder  || phys == PHYS_Falling )
+				result = walkReachable(Dest, 0, GoalActor);
+			else if ( phys == PHYS_Flying )
+				result = flyReachable(Dest, 0, GoalActor);
+		}
+	}
+
+	if ( bWasCrouching )
+		UnCrouch(1);
+
+	return result;
 	unguard;
 }
 
@@ -1461,6 +1506,18 @@ void APawn::Crouch(INT bClientSimulation)
 ETestMoveResult APawn::FindBestJump(FVector Dest)
 {
 	guard(APawn::FindBestJump);
+	FVector SavedLoc = Location;
+	FVector JumpVel = SuggestJumpVelocity(Dest, JumpZ, 0.f);
+	ETestMoveResult hit = jumpLanding(JumpVel, 1);
+	if ( hit == TESTMOVE_Stopped )
+		return TESTMOVE_Stopped;
+
+	// DIVERGENCE: Ghidra checks vtable IsWarpZone and bCanSwim/bWaterVolume; simplified
+	FVector vDest = Dest - Location;
+	FVector vSaved = Dest - SavedLoc;
+	if ( vSaved.Size2D() > vDest.Size2D() )
+		return (ETestMoveResult)1;
+
 	return TESTMOVE_Stopped;
 	unguard;
 }
@@ -1579,6 +1636,29 @@ INT APawn::ValidAnchor()
 
 void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 {
+	guard(APawn::ZeroMovementAlpha);
+	USkeletalMeshInstance* mi = NULL;
+	if ( MeshInstance && MeshInstance->IsA(USkeletalMeshInstance::StaticClass()) )
+		mi = (USkeletalMeshInstance*)MeshInstance;
+
+	UBOOL bAllZero = 1;
+	for ( INT i = bZeroX; i < bZeroY; i++ )
+	{
+		if ( mi && mi->GetBlendAlpha(i) > 0.f )
+		{
+			bAllZero = 0;
+			mi->UpdateBlendAlpha(i, 0.f, Alpha);
+		}
+	}
+	if ( bAllZero )
+	{
+		for ( INT i = bZeroX; i < bZeroY; i++ )
+		{
+			if ( mi ) mi->SetAnimRate(i, 0.f);
+			// DIVERGENCE: Ghidra vtable[0x100] on USkeletalMeshInstance not mapped
+		}
+	}
+	unguard;
 }
 
 ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), ANavigationPoint* Start, INT MaxPathLength, FLOAT* Weight)

@@ -14,6 +14,9 @@ IMPLEMENT_FUNCTION(AR6HUD, -1, execHudStep)
 
 void AR6HUD::Destroy()
 {
+	// Clear the object reference held by the HUD (offset 0x5AC)
+	*(void**)((BYTE*)this + 0x5ac) = NULL;
+	AActor::Destroy();
 }
 
 void AR6HUD::DisplayOtherTeamInfo(FCanvasUtil &, UCanvas *, INT, AR6RainbowTeam *, FColor &, INT)
@@ -36,8 +39,18 @@ void AR6HUD::DrawSingleCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanv
 {
 }
 
-void AR6HUD::Serialize(FArchive &)
+void AR6HUD::Serialize(FArchive& Ar)
 {
+	AActor::Serialize(Ar);
+	// Only serialize during non-load/non-save passes (e.g. GC object reference marking).
+	// Ghidra: if ArIsLoading==0 && ArIsSaving==0, call FArchive vtable+0x18 on &this[0x57c]
+	if ((*(INT*)((BYTE*)&Ar + 0x14) == 0) && (*(INT*)((BYTE*)&Ar + 0x18) == 0))
+	{
+		// vtable+0x18 = FArchive::operator<<(UObject*&)
+		typedef void (__thiscall* FArchiveSerObjFn)(FArchive*, UObject*&);
+		FArchiveSerObjFn fn = ((FArchiveSerObjFn*)*(void**)&Ar)[0x18 / sizeof(void*)];
+		fn(&Ar, *(UObject**)((BYTE*)this + 0x57c));
+	}
 }
 
 void AR6HUD::Spawned()
