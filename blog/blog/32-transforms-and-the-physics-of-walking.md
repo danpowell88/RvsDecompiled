@@ -6,7 +6,13 @@ tags: [decompilation, math, physics, ue2engine]
 date: 2025-02-01
 ---
 
-This post covers Batches 83 and 84: implementing the actor transform matrices, a cluster of utility collision functions, and the core APawn physics machinery that makes characters actually walk around.
+Every object in a 3D game has a position and orientation in the world. But how does the engine actually *know* where something is? How does it convert between "this point on the character's hand" and "this point in the game world"? And when a character walks forward, what's actually happening under the hood — what stops them falling through the floor or gliding through walls?
+
+This post covers the actor transform matrices, a cluster of utility collision functions, and the core `APawn` physics machinery that makes characters actually walk around.
+
+:::tip Coming from Unity or managed game frameworks?
+If you've used Unity's `Transform` component — `transform.position`, `transform.localToWorldMatrix` — that's exactly what we're rebuilding here, except there's no handy component API. In Unreal Engine 2, each actor builds its own 4×4 matrix from raw Euler angles and scale values, and the collision system uses simple cylinder-vs-cylinder checks rather than the physics engine abstractions you might be used to from Unity or Godot.
+:::
 
 <!-- truncate -->
 

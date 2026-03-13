@@ -6,7 +6,11 @@ tags: [decompilation, terrain, textures, reverse-engineering, x86, c++]
 date: 2025-02-06
 ---
 
-Batches 117 through 119 covered a range of functions that all share a common theme: they deal with *data management* — reading and writing tightly packed arrays, advancing linked lists, and dispatching lifecycle callbacks. Some of them were deceptively simple (three bytes!), others needed careful disassembly to decode packed nibble tricks. Let's walk through them.
+Game worlds need terrain — hills, valleys, flat ground that characters walk on. Under the surface, that terrain is stored as a grid of height values (a heightmap) with visibility and edge-split flags packed into bitmasks. This post digs into how those data structures work, plus the linked-list plumbing that manages texture lifecycle events behind the scenes.
+
+:::tip Coming from managed languages?
+If you've used a `BitArray` or `BitVector32` in C#, the terrain bit-packing here is the same idea — one bit per grid cell, packed 32 to an `int`. The difference is there's no wrapper class: it's raw shift-and-mask arithmetic on `DWORD` arrays. The linked-list texture management is similarly low-level — think a hand-rolled `LinkedList<T>` where nodes store raw pointers instead of references.
+:::
 
 <!-- truncate -->
 

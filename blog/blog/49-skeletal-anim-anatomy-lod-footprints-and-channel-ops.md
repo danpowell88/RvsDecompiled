@@ -1,19 +1,23 @@
 ---
 slug: batch-164-165-skeletal-anim-anatomy-lod-footprints-channel-ops
-title: "Batches 164–165: Skeletal Anim Anatomy, LOD Footprints, and Channel Ops"
+title: "49. Skeletal Anim Anatomy, LOD Footprints, and Channel Ops"
 authors: [dan]
 tags: [decompilation, ue2, skeletal-mesh, animation, memory]
 ---
 
-Batches 164 and 165 dive deep into the skeletal mesh animation subsystem — memory accounting, decal management, and the per-channel state machine that drives every weapon raise, crouch, and reload in Rainbow Six 3.
+When you watch a Rainbow Six operator raise their weapon, peek around a corner, and then crouch — all at the same time — you're seeing the animation *channel system* at work. The engine doesn't play one animation at a time; it runs multiple animations simultaneously on different parts of the body. Channel 0 might be handling the legs (walk cycle), channel 1 the torso (aiming), and channel 2 a weapon reload. Each channel is an independent playback slot with its own play rate, current frame, and looping state.
+
+These two batches dig into the guts of that system: how the engine tracks memory usage for 3D models, how bullet hole decals are organised, and the per-channel state machine that makes multi-part animation possible. There's a lot of low-level detail here, but we'll build up the context before diving in.
 
 <!-- truncate -->
 
-## Batch 164: AR6DecalGroup, LOD/MemFootprint, and Anim Queries
+## Batch 164: Decals, Memory Accounting, and Animation Queries
 
-### `AR6DecalManager::FindGroup` — Decal Dispatch Table
+### How Bullet Holes Work — AR6DecalManager::FindGroup
 
-Rainbow Six 3's decal system organises bullet holes and scorch marks into five groups (`eDecalType` 0–4).  The manager holds a raw pointer to each group at fixed offsets in its own body:
+Ever wondered what happens when you shoot a wall in a game? The engine can't modify the wall's texture — that would be absurdly expensive. Instead, it layers a small transparent image (a "decal") on top of the surface at the impact point. In Ravenshield, decals are grouped into five categories — different types of bullet impacts, explosion marks, etc. — and a `AR6DecalManager` keeps track of all of them.
+
+The `FindGroup` function is the dispatch table: given a decal type (an enum from 0 to 4), return the group object that manages that type:
 
 ```cpp
 AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
@@ -29,48 +33,36 @@ AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 }
 ```
 
-Classic enum-indexed pointer table.  No runtime lookup structures — just five consecutive `DWORD` slots in the manager at `+0x398`.
+No hash tables, no dynamic lookup — just five consecutive pointer slots at fixed offsets in the manager object. When there are only five things to look up, a simple switch statement beats any fancier data structure. This is a recurring pattern in game engines: favour simplicity and cache-friendliness over generality.
 
-### `USkeletalMesh::LODFootprint` — Per-LOD Memory Accounting
+### Why Track Memory? — LODFootprint and MemFootprint
 
-The engine needs to know how much GPU/CPU memory each LOD model occupies, both for streaming decisions and for diagnostic display.  The function tallies up every typed array inside an LOD struct (`stride = 0x11C` bytes, stored in `TArray` at `this+0x1AC`):
+Modern games manage enormous amounts of 3D data. A single character model might have thousands of vertices, bone weights, texture coordinates, and normal vectors. The engine needs to know *exactly* how much memory each model consumes so it can make streaming decisions (should we load this model yet?) and display diagnostic information for the artists.
 
-| Array offset in LOD element | Element size | Field |
+**LOD** (Level of Detail) is a technique where the engine keeps multiple versions of a model at different quality levels. When a character is far from the camera, the engine switches to a lower-detail version with fewer vertices — saving GPU work without the player noticing. Each LOD level has its own set of vertex buffers, index buffers, and weight tables.
+
+`USkeletalMesh::LODFootprint` computes the memory cost of a single LOD level by tallying up every typed array inside it:
+
+| Array offset in LOD | Element size | What it stores |
 |---|---|---|
-| `+0x00` | 4 | Index buffer (WORD pairs?) |
-| `+0x0C` | 16 | Vertex weights |
-| `+0x1C` | 20 | Vertex data |
-| `+0x28` | 20 | Influence data |
-| `+0x38` | 2 | Smooth indices |
-| `+0x54` | 2 | Raw vertex indices |
-| `+0x8C` | 32 | Tangent basis |
-| `+0x98` | 2 | Compressed indices |
+| `+0x00` | 4 bytes | Index buffer entries |
+| `+0x0C` | 16 bytes | Vertex weights (which bones influence each vertex) |
+| `+0x1C` | 20 bytes | Vertex positions and UVs |
+| `+0x28` | 20 bytes | Bone influence data |
+| `+0x38` | 2 bytes | Smooth vertex indices |
+| `+0x54` | 2 bytes | Raw vertex indices |
+| `+0x8C` | 32 bytes | Tangent basis vectors (for lighting) |
+| `+0x98` | 2 bytes | Compressed index buffer |
 
-When `param_2 == 0` (include render streams), four additional arrays are counted: vertex position (`+0xB0`), vertex UV (`+0xC8`), normal (`+0xE0`), and tangent (`+0xF8`).
+When the caller passes `param_2 == 0` (meaning "include render streams"), four additional arrays are counted: vertex positions, UVs, normals, and tangents in their GPU-ready format. The fixed overhead per LOD struct is `0xBC` bytes (188 bytes of structural bookkeeping), and the total is accumulated across all LOD levels.
 
-The base fixed cost per LOD struct is **0xBC bytes** (structural overhead), and the total is accumulated across all LODs.
+`USkeletalMesh::MemFootprint` builds on this by adding the mesh-wide arrays — the bone hierarchy, bone name map, attachment points, and collision data that exist once regardless of how many LOD levels the mesh has.
 
-### `USkeletalMesh::MemFootprint` — Full Mesh Footprint
+### Is Anything Playing? — The Animation Query Functions
 
-`MemFootprint` builds on `LODFootprint` logic by adding the mesh-global arrays:
+With the channel system in mind, the engine needs simple queries: "Is channel N currently playing an animation?" "Is it in the middle of a blend transition?" "How many total animation sequences are available?"
 
-| Offset | Element size | Field |
-|---|---|---|
-| `this+0x100` | 12 | Bone hierarchy |
-| `this+0x118` | 4 | Bone name map |
-| `this+0x130` | 12 | Attach point positions |
-| `this+0x148` | 12 | Attach point orientations |
-| `this+0x160` | 8 | Bone refs |
-| `this+0x178` | 2 | LOD mapping |
-| `this+0x190` | 2 | Bone-to-LOD table |
-
-Plus four extra animation/collision arrays at `+0x2B8`, `+0x2D0`, `+0x2DC`, `+0x2E8` rounded up to multiples of 48 bytes (`0x30`).
-
-### Anim Query Triad: `IsAnimating`, `IsAnimTweening`, `GetAnimCount`
-
-All three functions operate on the channel `TArray` at `this+0x10C` (stride 0x74 bytes per slot).
-
-**`IsAnimating(Channel)`** — Returns 1 if the channel has a non-`None` sequence name AND non-zero playback:
+**`IsAnimating(Channel)`** checks whether the given channel has a real animation assigned (not `NAME_None`) *and* is actually in motion:
 ```cpp
 FName seqName = *(FName*)(elem + 0x08);
 if (seqName == FName(NAME_None)) return 0;
@@ -80,49 +72,40 @@ if (*(FLOAT*)(elem + 0x10) < 0.0f) {
 return (*(FLOAT*)(elem + 0x0C) != 0.0f) ? 1 : 0;       // playing forward
 ```
 
-**`IsAnimTweening(Channel)`** — A subset of the above: frame `< 0` (negative = tween start) AND the vtable `IsAnimating` check confirms motion:
-```cpp
-if (*(FLOAT*)(elem + 0x10) >= 0.0f) return 0;
-// call vtbl[0xD8/4](this, Channel)
-```
+The negative frame check at offset `+0x10` is interesting: a negative "current frame" means the channel is in a *tween* (a smooth blend transition between two animations). During a tween, the play rate field at `+0x0C` doesn't apply — instead the tween amount at `+0x18` drives the interpolation.
 
-**`GetAnimCount()`** — Iterates `UMeshAnimation*` slots at `this+0xAC` (stride 0x18) and sums the sequence counts of each non-null animation object:
-```cpp
-FArray* arr = (FArray*)((BYTE*)this + 0xAC);
-for (INT i = 0; i < arr->Num(); i++) {
-    UMeshAnimation* anim = *(UMeshAnimation**)((BYTE*)(*(INT*)arr) + i*0x18);
-    if (anim) total += ((FArray*)((BYTE*)anim + 0x48))->Num();
-}
-```
+**`IsAnimTweening(Channel)`** is the more specific query: the channel is tweening if the frame is negative AND the broader `IsAnimating` check passes.
 
-### `USkeletalMeshInstance::StopAnimating` — Full Channel Flush
+**`GetAnimCount()`** iterates all registered animation objects and sums up the total number of sequences across all of them. This is used by the editor and debug UI to display how many animations are available for a given mesh.
 
-`StopAnimating(bClearAll)` zeros the playback state on every channel, and when `bClearAll` is set it also:
-- Empties both blend-shape arrays (`this+0x124`, `this+0x130`)
-- Optionally clears the morph weight array (`this+0x118`) — spared only for Pawn objects in a special state (magic constant `0xB14E` at owner `+0x3A4`)
-- Resets sequence names on channels 1+ to `NAME_None`
+### StopAnimating — The Emergency Brake
+
+`StopAnimating(bClearAll)` zeros the playback state on every channel. When `bClearAll` is set, it also:
+- Empties the blend-shape arrays (used for facial morphs and similar deformations)
+- Optionally clears the morph weight array — *unless* the owner is a Pawn in a specific state (checked via a magic constant `0xB14E` at offset `+0x3A4`), because killing a currently-morphing pawn mid-animation can cause visual glitches
+- Resets sequence names on channels 1+ to `NAME_None` (channel 0 keeps its name as a reference)
 
 ---
 
-## Batch 165: Base No-Ops and Channel State Machine
+## Batch 165: Virtual No-Ops and the Channel State Machine
 
-### `UMeshInstance` Base Virtual No-Ops
+### Why Do Empty Functions Exist?
 
-Five `UMeshInstance` virtuals compile to a single `ret N` instruction — three bytes.  They exist purely as base-class default implementations:
+Five `UMeshInstance` functions compile down to literally a single CPU instruction — `ret N` (return and pop N bytes off the stack). Three bytes of machine code each. They do *nothing*:
 
-| Function | Stack clean (N) |
+| Function | Stack cleanup |
 |---|---|
-| `ClearChannel(int)` | 4 |
-| `SetActor(AActor*)` | 4 |
-| `SetAnimFrame(int, float)` | 8 |
-| `SetMesh(UMesh*)` | 4 |
-| `SetScale(FVector)` | 12 |
+| `ClearChannel(int)` | 4 bytes |
+| `SetActor(AActor*)` | 4 bytes |
+| `SetAnimFrame(int, float)` | 8 bytes |
+| `SetMesh(UMesh*)` | 4 bytes |
+| `SetScale(FVector)` | 12 bytes |
 
-Subclasses (`USkeletalMeshInstance`, `UVertMeshInstance`) override all of these with real logic.
+These exist because `UMeshInstance` is a *base class*. In C++, when you have an inheritance hierarchy, the base class needs to declare virtual functions even if it has no meaningful implementation. Subclasses like `USkeletalMeshInstance` and `UVertMeshInstance` override all five with real logic. The base versions are "no-ops" — they're the default fallback that says "this mesh type doesn't support this operation." It's the C++ equivalent of a polite shrug.
 
-### `USkeletalMeshInstance::ValidateAnimChannel` — Demand-Growth Channel Array
+### ValidateAnimChannel — Growing the Channel Array on Demand
 
-The most interesting piece in this batch: `ValidateAnimChannel` ensures that the channel TArray can accommodate the requested channel index, growing it on demand:
+Here's the most interesting piece in this batch. When the game requests animation on channel 47 but the channel array only has 8 slots, what happens? The array needs to grow:
 
 ```cpp
 int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
@@ -135,13 +118,15 @@ int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 }
 ```
 
-The ceiling of 255 prevents unbounded growth — the channel index space is a byte.  Note that the function **always returns 1**, including for out-of-range inputs: callers treat the return value as "was the channel in a usable state?" not as "was the channel index valid?".
+The ceiling of 255 prevents unbounded growth — the channel index space is a single byte. Each channel slot is 116 bytes (`0x74`), which holds the sequence name, play rate, current frame, tween state, loop flags, and various internal bookkeeping.
 
-### `USkeletalMeshInstance::ClearChannel` — Slot Reset
+A subtle quirk: the function **always returns 1**, even for out-of-range inputs. Callers treat the return value as "is the channel in a usable state?" not as "was the channel index valid?" This is a minor design oddity — an out-of-range channel isn't usable, but the return value doesn't reflect that. In practice it doesn't matter because callers also bounds-check before using the channel.
 
-`ClearChannel(Channel)` resets all mutable fields in one animation channel slot back to their default states:
+### ClearChannel — Resetting a Single Slot
 
-| Offset | Field | Reset value |
+While `StopAnimating` is the nuclear option (reset everything), `ClearChannel(Channel)` surgically resets just one channel:
+
+| Offset in slot | Field | Reset value |
 |---|---|---|
 | `+0x08` | Sequence name | `NAME_None` |
 | `+0x0C` | Play rate | 0.0 |
@@ -152,30 +137,31 @@ The ceiling of 255 prevents unbounded growth — the channel index space is a by
 | `+0x5C` | (internal) | 0 |
 | `+0x60` | (internal) | 0 |
 
-Unlike `StopAnimating`, this targets a single channel rather than all channels.
+This is used when a single animation finishes and the channel needs to be ready for the next one, without disturbing the other channels that might still be playing.
 
-### `USkeletalMeshInstance::ForceAnimRate` — Rate Override
+### ForceAnimRate — The Raw Rate Override
 
-A lightweight sibling of `SetAnimRate`: writes the new rate directly into the channel element without any blend or transition logic:
+`ForceAnimRate` writes a new playback rate directly into a channel slot without any blend or transition logic:
 
 ```cpp
-// elem+0x0C = rate float
 *(FLOAT*)(elem + 0x0C) = Rate;
 ```
 
-The "Force" prefix distinguishes it from `SetAnimRate`, which the retail binary shows also handles tween state — whereas `ForceAnimRate` is a raw slot write.
+The "Force" prefix distinguishes it from `SetAnimRate` (coming in a later batch), which also handles tween state and rate scaling. `ForceAnimRate` is the "I know what I'm doing, just set it" version.
 
-### `SetBoneDirection / SetBoneLocation / SetBoneRotation` — Capacity Guards
+### Bone Transform Capacity Guards
 
-Three bone transform setters share the same structural pattern: check whether the respective bone override array is at maximum capacity (256 entries), return 0 if so.  The actual bone override push logic lives in the unimplemented Ghidra sections that reference complex FCoords manipulation — those are deferred to a future batch.
+Three bone transform setters — `SetBoneRotation`, `SetBoneLocation`, and `SetBoneDirection` — share a common pattern: before doing any work, check whether the bone override array is already at capacity (256 entries). If so, return 0 immediately. The actual bone manipulation logic (complex coordinate math) lives in deeper functions that will be covered in future batches.
 
 | Function | Override array offset |
 |---|---|
 | `SetBoneRotation`, `SetBoneLocation` | `this+0x124` |
 | `SetBoneDirection` | `this+0x130` |
 
+The 256-entry cap mirrors the 255-channel limit in `ValidateAnimChannel` — consistent bounds throughout the animation system.
+
 ---
 
 ## What's Next
 
-The channel state machine still has several missing pieces: `SetAnimRate` (164b, involves tween-rate logic), `SetAnimSequence` (241b), `BlendToAlpha` (130b), and `PlayAnim` (153b).  These involve more complex blend-tree state transitions and will form the core of Batch 166.
+The channel state machine still has several missing pieces: `SetAnimRate` (with tween-rate logic), `SetAnimSequence` (the full animation bind), `BlendToAlpha`, and `PlayAnim`. These involve more complex blend-tree state transitions and will form the core of the next batches.

@@ -6,9 +6,11 @@ tags: [decompilation, progress, engine, rendering, network]
 date: 2025-02-10
 ---
 
-## Batches 145–149: Teaching the Engine to See Itself
+Every game engine needs to answer basic questions about its own world: "What collision shape does this actor use?", "Am I running as a server or a client?", "What rendering mode is the viewport in?" These aren't glamorous features — they're the plumbing that bigger systems depend on. This post covers five batches of exactly that kind of work: the small query functions, polymorphic lookups, and state checks that let the rest of the engine do its job.
 
-We've hit another productive streak. Five more batches of decoding, each revealing a little more of how the Unreal engine organises its internal world. Let's walk through what we found.
+:::tip Coming from C# or web development?
+Many of these functions are the Unreal equivalent of property getters — `actor.GetCollisionShape()`, `level.IsServer`, `viewport.IsWireframeMode`. The difference is that in 2003 C++, there's no property syntax: each getter is a virtual method that reads fields at hard-coded byte offsets. The "4-path lookup" pattern for `GetPrimitive` is like a chain of `??` null-coalescing checks in C#: try Mesh, then StaticMesh, then AntiPortal, then a nested dereference through an instance pointer.
+:::
 
 <!-- truncate -->
 

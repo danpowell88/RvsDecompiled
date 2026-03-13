@@ -1,20 +1,24 @@
 ---
 slug: batch-162-pathfinding-network-render
-title: "Batch 162: Pathfinding Specs, Scout Init, Network Flush, and Render Teardown"
+title: "47. Pathfinding Specs, Scout Init, Network Flush, and Render Teardown"
 authors: [danpo]
 tags: [reverse-engineering, engine, navigation, networking, reachspec, batch-162]
 date: 2026-12-04
 ---
 
-Batch 162 brings together four distinct engine subsystems: navigation reach specs, bot scout initialisation, network connection flushing, and render buffer teardown. None of these were the biggest functions in the codebase, but each reveals a different low-level pattern in how the Rainbow Six 3 engine is structured.
+Have you ever watched a bot in a game navigate through a doorway without getting stuck and wondered how the engine knows the bot can actually fit? Or noticed how multiplayer games manage to keep everyone's screen in sync even over a flaky connection? This batch tackles four unrelated engine subsystems that share a common theme: they're all the boring-but-essential plumbing that makes a game feel seamless.
+
+We rebuilt the AI pathfinding "edge" type (how bots decide which corridors they can walk through), the ghost pawn that tests those corridors during level building, the per-frame network flush that keeps multiplayer data flowing, and the motion blur buffer cleanup code. None of these are glamorous, but without them the game would have bots stuck in walls, desynchronised multiplayer, and memory leaks.
 
 <!-- truncate -->
 
-## UReachSpec: The Navigation Edge Type
+## UReachSpec: How Bots Know Where They Can Walk
 
-`UReachSpec` represents a directed edge in the AI navigation graph. Each node (a `ANavigationPoint`) has a list of outbound reach specs describing how a bot can traverse from one point to another — and each spec carries exactly the constraints for that traversal: distance, collision radius, collision height, reach flags, and maximum landing velocity.
+Before any AI character can navigate a level, the engine needs a map of walkable connections. Imagine the level as a graph — nodes are "places you can stand" (navigation points), and edges are "ways to get between them." Each edge is a `UReachSpec`, and it carries everything the AI needs to decide whether a particular bot can traverse that connection: how wide the corridor is, how tall the ceiling is, special movement flags (can you swim? fly?), and how fast you'd be going if you fell off the end.
 
-### BotOnlyPath
+This is fundamentally different from how a human player navigates. Players just WASD their way around and rely on collision detection. Bots need to *plan ahead* — they need to know, before they start walking, that the path they're going to take won't leave them stuck halfway through a doorway that's too narrow for their collision cylinder.
+
+### BotOnlyPath — Is This Corridor Too Narrow for a Player?
 
 ```cpp
 int UReachSpec::BotOnlyPath() {
@@ -22,9 +26,9 @@ int UReachSpec::BotOnlyPath() {
 }
 ```
 
-Dead simple. A path is bot-only if its collision radius is less than 40 units. The retail constant `0x28 = 40`, which corresponds to the minimum human-sized player collision cylinder. If the corridor is narrower than that, bots can still navigate through it (they use a different path-width tolerance), but players cannot.
+Dead simple. A path is bot-only if its collision radius is less than 40 units (`0x28 = 40`). That number corresponds to the minimum human-sized player collision cylinder. If the corridor is narrower than that, bots can still navigate through it (they use a tighter path-width tolerance), but players cannot. Think of it as the difference between a ventilation shaft and a hallway — bots are fine in the vents, players need the hallway.
 
-### operator==
+### operator== — When Are Two Paths "The Same"?
 
 ```cpp
 int UReachSpec::operator==(UReachSpec const& other) {
@@ -37,9 +41,11 @@ int UReachSpec::operator==(UReachSpec const& other) {
 }
 ```
 
-The equality operator compares four fields directly, but `MaxLandingVelocity` is interestingly compared as a *threshold* — two specs are considered equivalent so long as they agree on whether the velocity is above or below `0x24F = 591`. This is a "soft landing" threshold: it doesn't matter exactly how fast you can land, only whether you can soft-land at all.
+Most fields are compared directly, but `MaxLandingVelocity` gets special treatment — it's compared as a *threshold* rather than an exact value. Two specs are considered equivalent as long as they agree on whether the landing velocity is above or below `0x24F = 591`. This is a "soft landing" threshold: the engine doesn't care about the exact speed, only whether you'd take fall damage or not. It's a nice example of gameplay-driven engineering — the AI doesn't need floating-point precision here, just a binary "safe to drop?" answer.
 
-### PathColor
+### PathColor — Debug Visualisation
+
+When a level designer is editing navigation in the Unreal Editor, they need to see what kind of path each connection is. `PathColor` assigns a colour to each reach spec type so the editor can draw them on screen:
 
 ```cpp
 FPlane UReachSpec::PathColor() {
@@ -53,17 +59,13 @@ FPlane UReachSpec::PathColor() {
 }
 ```
 
-This is a debug/editor visualisation function. Each reach-flag type gets its own colour in the path network editor view. The green case is a size check — wide, tall passages are shown green because they're easily navigable by anything. Red means a standard walking path.
+The colour scheme is practical: green means "wide open, anything can pass," red means "standard walking path," blue means "bots only," and black means the path has been disabled. The priority order matters too — a disabled path is always black regardless of other flags, and bot-only takes precedence over swim/fly. This is a debug tool, but it reveals the hierarchy of path types the engine cares about.
 
-The flag assignments are:
-- `0x80` — restricted to bots (blue, same hue as bot-only for humans)
-- `0x20` — swim paths
-- `0x40` — fly paths (used for birds, jets in mods)
-- `0x100` — pruned/disabled reach spec (black = invisible)
+## AScout: The Invisible Path-Testing Ghost
 
-## AScout::InitForPathing
+Here's a fun concept: when the Unreal Editor rebuilds navigation for a level, it doesn't just do geometry calculations. It actually spawns an invisible pawn — `AScout` — and *walks it around the level* testing collisions. If the scout can fit through a gap, the gap becomes a valid path. If it can't, no path is created.
 
-`AScout` is the engine's pathfinding helper actor — a ghost pawn spawned when the editor rebuilds the navigation graph. It walks the level testing collisions to determine valid reach specs. `InitForPathing` sets it up with the bot's physical constants before the path-tracing begins.
+`InitForPathing` sets up this ghost pawn with the physical capabilities of a standard human bot before the path-tracing walk begins:
 
 ```cpp
 void AScout::InitForPathing() {
@@ -76,16 +78,18 @@ void AScout::InitForPathing() {
 }
 ```
 
-The values are written as raw float bit patterns:
-- `0x43D20000` = 424.0f — maximum step height in unreal units
+The values are written as raw float bit patterns (a common pattern in decompiled code — the compiler stored these as integer constants for efficiency):
+- `0x43D20000` = 424.0f — maximum step height (how high a ledge you can walk up without jumping)
 - `0x44160000` = 600.0f — vertical jump velocity
 - `0x44138000` = 590.0f — horizontal ground movement speed
 
-The reach flag modification clears `0x20000` (a "special movement" flag) and sets `0x5C000` which encodes that the scout can crouch, walk, and jump — the standard repertoire for a human bot. These values represent the *worst-case* human constraints: if the scout can pass, any player-class bot can too.
+The reach flag modification clears `0x20000` (a "special movement" flag) and sets `0x5C000` which encodes that the scout can crouch, walk, and jump — the standard repertoire for a human bot. These represent the *worst-case* human constraints: if the scout can pass, any player-sized bot can too.
 
-## UNetDriver::TickFlush
+## UNetDriver::TickFlush — Keeping Multiplayer In Sync
 
-`TickFlush` is called once per frame to push any pending outbound data on all active network connections. The driver maintains both a `ServerConnection` (if we're a client) and a `ClientConnections` array (if we're a server).
+Every multiplayer game has to solve the same fundamental problem: multiple computers need to agree on what's happening in the game world, but they're connected by a network that introduces delay and packet loss. Unreal Engine 2 handles this with a networking layer where a `UNetDriver` manages connections to other machines.
+
+`TickFlush` is called once per frame and does exactly what the name suggests — it flushes (sends) any pending outbound data on every active network connection. The driver maintains both a `ServerConnection` (if we're a client connecting to a server) and a `ClientConnections` array (if we're a server hosting other players):
 
 ```cpp
 void UNetDriver::TickFlush() {
@@ -102,13 +106,13 @@ void UNetDriver::TickFlush() {
 }
 ```
 
-Both the server connection and each client connection store their `TickFlush` implementation through a vtable pointer at offset `0x84`. This is polymorphic dispatch — the same `UNetDriver` code works whether connections are TCP, UDP, or any other transport, because each `UNetConnection` subclass overrides `TickFlush` to handle its own flush logic.
+If you're not used to reading C++ vtable dispatch by hand, this pattern can look intimidating. Here's what's happening: each connection object has a *virtual function table* (vtable) — a hidden array of function pointers that the C++ compiler generates. The code grabs the vtable pointer from the object (`*conn`), looks up slot 0x84/4 = slot 33, casts it to a function pointer, and calls it. This is exactly what happens when you write `connection->TickFlush()` in normal C++ — the compiler generates this same vtable lookup behind the scenes.
 
-The pattern is: grab vtable from the object, fetch slot 0x84/4 (slot 33), cast to the right `__thiscall` function pointer, and dispatch. This is how the Unreal Engine 2 runtime does virtual dispatch on objects whose C++ class hierarchy isn't fully restored yet.
+The beauty of this design is polymorphism: the same `UNetDriver` code works whether connections are TCP, UDP, or any custom transport, because each `UNetConnection` subclass overrides `TickFlush` to handle its own protocol.
 
-## UMotionBlur::Destroy
+## UMotionBlur::Destroy — Cleaning Up GPU Buffers
 
-`UMotionBlur` is the motion blur render effect and holds two intermediate render buffers. On destruction they need to be freed explicitly.
+Motion blur is that streaky visual effect you see when the camera moves quickly. The engine implements it by keeping two intermediate render buffers — essentially scratch images that it uses to blend the current frame with the previous one. When the motion blur object is destroyed (level unload, settings change, etc.), those buffers need to be freed explicitly:
 
 ```cpp
 void UMotionBlur::Destroy() {
@@ -120,7 +124,7 @@ void UMotionBlur::Destroy() {
 }
 ```
 
-The base `UObject::Destroy` handles the usual cleanup (deregistration from the object system, GC rooting etc.), and then the two render buffers are freed. The buffers are raw heap allocations made with `appMalloc`, so they need `appFree` — not `delete`. This is consistent with all other render buffer cleanup in the engine.
+The base `UObject::Destroy` handles the usual cleanup (deregistration from Unreal's object system, garbage collection rooting, etc.), and then the two render buffers are freed. These are raw heap allocations made with `appMalloc` (Unreal's custom allocator), so they need `appFree` — not `delete`. This manual memory management is a recurring pattern in the engine's render code: GPU-related resources are allocated raw and freed explicitly, because they were created outside the normal C++ constructor/destructor lifecycle.
 
 ## UMeshAnimation Footprints (Placeholder)
 

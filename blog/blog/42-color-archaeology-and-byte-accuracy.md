@@ -5,7 +5,11 @@ authors: [danpo]
 tags: [decompilation, fcolor, bgra, retail-accuracy, batches-153-155]
 ---
 
-Sometimes the most interesting discoveries in decompilation aren't new features — they're realising your assumptions about *existing* code were quietly wrong. This week's sessions (batches 153–155) were full of those moments.
+Sometimes the most interesting discoveries in decompilation aren't new features — they're realising your assumptions about *existing* code were quietly wrong. This week we found that our colour struct had its bytes in the wrong order, that a brightness formula was weighted differently than the SDK claimed, and that three subtle off-by-one or default-value bugs had been hiding in plain sight. It's a good reminder that byte-level accuracy matters — and that the SDK headers aren't always the final word.
+
+:::tip Coming from C# or managed languages?
+In C#, `System.Drawing.Color` stores components as `A, R, G, B` and you never think about byte order — the runtime handles it. In Unreal Engine 2 targeting Direct3D, colours are stored in **BGRA** order (blue at byte 0, alpha at byte 3) so that loading all four bytes as a single 32-bit integer gives `0xAARRGGBB` in little-endian memory. Getting this wrong means every bit-shift operation extracts the wrong channel. This post is about finding and fixing exactly that kind of assumption.
+:::
 
 <!-- truncate -->
 
@@ -58,7 +62,7 @@ Where the weights are `R: 2/6 ≈ 0.333, G: 3/6 = 0.5, B: 1/6 ≈ 0.167`. The co
 
 The FPU load sequence (`FILD`, `FADD st0,st0`, `FILD`, `FMUL 3.0`, `FADDP`, `FIADD`, `FMUL 1/1536`) was a compact way to compute this without loading all three constants — instead the "double" trick handles the `2x` weight inline.
 
-There's a constant lookup table in the DLL's `.rdata` section. Our new [`tools/read_rdata.py`](../tools/read_rdata.py) now lets you look up floats at known retail addresses — handy for any future constants.
+There's a constant lookup table in the DLL's `.rdata` section. Our new `tools/read_rdata.py` now lets you look up floats at known retail addresses — handy for any future constants.
 
 ### FColor::operator FVector()
 

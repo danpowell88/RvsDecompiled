@@ -6,7 +6,11 @@ tags: [decompilation, geometry, math, x86, reverse-engineering, c++, meshes, pat
 date: 2025-02-07
 ---
 
-Batches 122 through 127 cover a lot of ground — literally. We fixed terrain coordinate transforms, collision bounding boxes, virtual render delegation, an inverted null check, and a coordinate system function that copies from a global identity matrix. Sounds random? There's actually a set of beautiful recurring patterns hiding in all of it.
+When a function needs to return a struct — a bounding box, a sphere, a coordinate frame — how does a 2003-era C++ compiler actually do it? And when a class hierarchy has five levels of virtual methods, how does the engine decide which implementation to call? This post uncovers a beautiful set of recurring patterns hiding in the geometry and rendering code: how MSVC 7.1 copies structs via a single x86 instruction, how bounding volumes flow through delegation chains, and how one inverted null check hid a bug in plain sight.
+
+:::tip Coming from C# or Java?
+Returning a struct by value in C++ is very different from returning an object in managed languages. In C#, returning a `struct` copies it to the caller's stack — the runtime handles the details. In unmanaged C++ (especially 2003-vintage), the caller passes a *hidden pointer* to a memory buffer, and the function fills it in using raw memory copy instructions. The `REP MOVSD` pattern you'll see below is the x86 equivalent of `Buffer.BlockCopy` — it copies N doublewords from one address to another in a single instruction.
+:::
 
 <!-- truncate -->
 
