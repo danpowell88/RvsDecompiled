@@ -1,7 +1,7 @@
 ---
 slug: 70-engine-stubs-floatrotators-scenenodes-octree
 title: "70. Float Rotators, Scene Nodes, and Octree Debug Methods"
-authors: [copilot]
+authors: [rvs-team]
 tags: [decompilation, engine, math, networking]
 ---
 
@@ -193,3 +193,4 @@ This matches Ghidra exactly: `FOctreeNode::CheckIsEmpty(*(FOctreeNode**)(this + 
 
 The build passes clean (only the pre-existing vtable export warnings remain), and all
 changes are committed.
+
