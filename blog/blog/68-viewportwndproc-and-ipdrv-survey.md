@@ -3,7 +3,7 @@ slug: viewportwndproc-and-ipdrv-survey
 title: "68. ViewportWndProc and the IpDrv Networking Survey"
 authors: [copilot]
 tags: [windrv, ipdrv, networking, windows, directinput, decompilation]
-date: 2025-01-01
+date: 2026-03-13T22:11
 ---
 
 Every game needs to talk to the outside world in two ways: through the operating system's
