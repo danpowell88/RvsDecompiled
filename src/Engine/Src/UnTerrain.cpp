@@ -120,11 +120,42 @@ void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisib
 }
 int ATerrainInfo::SelectVertex(FVector)
 {
+	guard(ATerrainInfo::SelectVertex);
+	// Ghidra 0x15cbf0, 4358 bytes: find closest heightmap vertex at the given world pos,
+	// then add it (and symmetry mirrors) to the selection list at this+0x1360.
+	// Uses external editor globals (DAT_1061b728/b738/b7a8/b71c/b76c/b7a0) for symmetry mode.
+	// TODO: external editor globals and FUN_1031fe20 unresolved — full impl deferred.
+	// DIVERGENCE: returns 0 (no selection made).
 	return 0;
+	unguard;
 }
-int ATerrainInfo::SelectVertexX(int,int)
+int ATerrainInfo::SelectVertexX(int X, int Y)
 {
-	return 0;
+	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
+	// If found: remove via FUN_1031fe20(i,1) and return 0.
+	// If not found: append new entry and return 1.
+	// Entry layout: [+0]=X, [+4]=Y, [+8]=heightmap_val, [+0xC]=strength(float), [+0x10]=0.
+	// TODO: FUN_1031fe20 (element removal) and editor strength globals unresolved.
+	FArray* list = (FArray*)((BYTE*)this + 0x1360);
+	INT count = list->Num();
+	INT off = 0;
+	for (INT i = 0; i < count; i++, off += 0x14)
+	{
+		BYTE* base = (BYTE*)*(INT*)list;
+		if (*(INT*)(base + off) == X && *(INT*)(base + off + 4) == Y)
+		{
+			// TODO: FUN_1031fe20(i, 1) — remove entry at index i from selection list
+			return 0;
+		}
+	}
+	INT idx = list->Add(1, 0x14) * 0x14;
+	BYTE* base = (BYTE*)*(INT*)list;
+	*(INT*) (base + idx)          = X;
+	*(INT*) (base + idx + 4)      = Y;
+	*(FLOAT*)(base + idx + 0x0c)  = 0.5f; // TODO: strength from editor globals / 100.0f
+	*(DWORD*)(base + idx + 0x08)  = (DWORD)GetHeightmap(X, Y);
+	*(INT*) (base + idx + 0x10)   = 0;
+	return 1;
 }
 void ATerrainInfo::SelectVerticesInBox(FBox &)
 {
@@ -194,20 +225,41 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 }
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
-	return 0;
+	guard(ATerrainInfo::LineCheck);
+	// Ghidra 0x15c3c0, 1445 bytes: ray-terrain intersection test across all heightmap sectors.
+	// TODO: FUN_1050557c (sector ray test), rdtsc perf counters, full sector iteration unresolved.
+	// DIVERGENCE: returns 1 (no hit) pending full implementation.
+	return 1;
+	unguard;
 }
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
-	return 0;
+	guard(ATerrainInfo::LineCheckWithQuad);
+	// Ghidra 0x15a480, 7911 bytes: per-quad ray intersection (called from LineCheck).
+	// Requires undeciphered sector/quad data structures and many unresolved FUN_ calls.
+	// DIVERGENCE: returns 1 (no hit) pending full implementation.
+	return 1;
+	unguard;
 }
 void ATerrainInfo::MoveVertices(float)
 {
 	guard(ATerrainInfo::MoveVertices);
 	unguard;
 }
-int ATerrainInfo::PointCheck(FCheckResult &,FVector,FVector,int)
+int ATerrainInfo::PointCheck(FCheckResult& Result, FVector Location, FVector Extent, int ExtraNodeFlags)
 {
-	return 0;
+	guard(ATerrainInfo::PointCheck);
+	// Ghidra 0x15c9a0, 235b: vertical line check from Location.Z-Extent.Z to Location.Z+Extent.Z.
+	// On hit, biases the float at Result+0x10 (likely Normal.X or a packed field) by +Extent.Z.
+	FVector Start(Location.X, Location.Y, Location.Z - Extent.Z);
+	FVector End(  Location.X, Location.Y, Location.Z + Extent.Z);
+	if (LineCheck(Result, Start, End, Extent, ExtraNodeFlags) == 0)
+	{
+		*(FLOAT*)((BYTE*)&Result + 0x10) += Extent.Z;
+		return 0;
+	}
+	return 1;
+	unguard;
 }
 void ATerrainInfo::CalcCoords()
 {
@@ -267,8 +319,30 @@ void ATerrainInfo::ConvertHeightmapFormat()
 	guard(ATerrainInfo::ConvertHeightmapFormat);
 	unguard;
 }
-int ATerrainInfo::GetClosestVertex(FVector &,FVector *,int *,int *)
+int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX, int* OutY)
 {
+	// Ghidra 0x157560, 167b: transform world pos by WorldToHeightmap FCoords at this+0x1330,
+	// round to integer indices, bounds-check, then snap InOutPos to the actual vertex world pos.
+	// Ghidra uses unaff_EBX for one rounded coord and local_c[0] for the other.
+	// param_4 (OutY): not assigned in Ghidra — possible decompiler artifact; left unchanged.
+	FVector htPos = InOutPos.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1330));
+	INT iX = appRound(htPos.X);
+	INT iY = appRound(htPos.Y);
+	if (OutPos != NULL) *(INT*)OutPos = iX;
+	if (OutX   != NULL) *OutX = iY;
+	// OutY (param_4): not assigned in Ghidra — DIVERGENCE: left unchanged by caller.
+	INT HeightmapX = *(INT*)((BYTE*)this + 0x12e0);
+	INT HeightmapY = *(INT*)((BYTE*)this + 0x12e4);
+	if (iX >= 0 && iY >= 0 && iX < HeightmapX && iY < HeightmapY)
+	{
+		// Vertex world-space position array at this+0x12d4 (3 DWORDs per vertex = FVector).
+		DWORD* vertData = *(DWORD**)((BYTE*)this + 0x12d4);
+		DWORD* entry    = vertData + (HeightmapX * iY + iX) * 3;
+		*(DWORD*)&InOutPos.X = entry[0];
+		*(DWORD*)&InOutPos.Y = entry[1];
+		*(DWORD*)&InOutPos.Z = entry[2];
+		return 1;
+	}
 	return 0;
 }
 int ATerrainInfo::GetEdgeTurnBitmap(int X, int Y)
@@ -377,9 +451,37 @@ int ATerrainInfo::GetQuadVisibilityBitmap(int X, int Y)
 	INT bit_mask = 1 << (idx & 31);
 	return (word & bit_mask) ? 1 : 0;
 }
-int ATerrainInfo::GetRenderCombinationNum(TArray<int> &,ETerrainRenderMethod)
+int ATerrainInfo::GetRenderCombinationNum(TArray<INT>& Layers, ETerrainRenderMethod Method)
 {
-	return 0;
+	guard(ATerrainInfo::GetRenderCombinationNum);
+	// Ghidra 0x15e8f0, 321b: search render combination cache at this+5000 (stride 0x14/entry).
+	// Entry layout: TArray<INT>[+0..+8], ETerrainRenderMethod[+0xC], INT[+0x10].
+	// Returns index of matching entry or appends a new one and returns its index.
+	FArray* cache = (FArray*)((BYTE*)this + 5000);
+	INT n = cache->Num();
+	for (INT i = 0; i < n; i++)
+	{
+		BYTE* ep        = (BYTE*)*(INT*)cache + i * 0x14;
+		TArray<INT>* eL = (TArray<INT>*)ep;
+		if (*(ETerrainRenderMethod*)(ep + 0x0c) == Method && eL->Num() == Layers.Num())
+		{
+			UBOOL ok = 1;
+			for (INT j = 0; j < Layers.Num(); j++)
+				if ((*eL)(j) != Layers(j)) { ok = 0; break; }
+			if (ok) return i;
+		}
+	}
+	INT idx = cache->Add(1, 0x14);
+	BYTE* ne        = (BYTE*)*(INT*)cache + idx * 0x14;
+	new ((TArray<INT>*)ne) TArray<INT>();
+	*(INT*)(ne + 0x10) = 0;
+	TArray<INT>* nL = (TArray<INT>*)ne;
+	nL->Add(Layers.Num());
+	for (INT j = 0; j < Layers.Num(); j++)
+		(*nL)(j) = Layers(j);
+	*(ETerrainRenderMethod*)(ne + 0x0c) = Method;
+	return idx;
+	unguard;
 }
 FBox ATerrainInfo::GetSelectedVerticesBounds()
 {
@@ -670,6 +772,24 @@ UMaterial * UTerrainMaterial::CheckFallback()
 
 int UTerrainMaterial::HasFallback()
 {
+	guard(UTerrainMaterial::HasFallback);
+	// Ghidra 0x15d6c0: if bit 0 of this+0x34 is clear, check TArray<UObject*> at this+0x60;
+	// if non-empty and first element IsA UShader, call HasFallback() on it via vtable[0x22].
+	// Returns 0 if flag set, array empty, not a UShader, or shader reports no fallback.
+	if ((*(BYTE*)((BYTE*)this + 0x34) & 1) == 0)
+	{
+		FArray* arr = (FArray*)((BYTE*)this + 0x60);
+		if (arr->Num() != 0)
+		{
+			UObject* first = *(UObject**)(*(INT*)arr);  // first element (Data[0])
+			if (first != NULL && first->IsA(UShader::StaticClass()))
+			{
+				typedef INT (__thiscall* HasFallbackFn)(UObject*);
+				return ((HasFallbackFn)(*(INT*)(*(INT*)first + 0x88)))(first);
+			}
+		}
+	}
 	return 0;
+	unguard;
 }
 

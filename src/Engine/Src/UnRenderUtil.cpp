@@ -759,7 +759,14 @@ int FRawColorStream::GetStride()
 // --- FRawIndexBuffer ---
 int FRawIndexBuffer::Stripify()
 {
-	return 0;
+	guard(FRawIndexBuffer::Stripify);
+	// Ghidra 0x116e70: calls FUN_1048d8b0 (NvTriStrip init) and FUN_1048d8c0 (generate strips),
+	// copies result back into TArray<_WORD> at this+4, bumps revision.
+	// TODO: FUN_1048d8b0/c0 (NvTriStrip library) unresolved.
+	// DIVERGENCE: strip generation skipped; revision bumped; returns Num()-2.
+	*(INT*)(Pad + 20) += 1;
+	return *(INT*)(Pad + 4) - 2;
+	unguard;
 }
 
 FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)

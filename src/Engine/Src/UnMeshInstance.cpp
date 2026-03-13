@@ -1,5 +1,19 @@
 #pragma optimize("", off)
 #include "EnginePrivate.h"
+
+// Ghidra labels 80-bit x87 float returns as FLOAT10; treat as double for compilation.
+#define FLOAT10 double
+
+// FCylinder full definition (mirrored from CorePrivate.h; methods are exported from Core.dll).
+class CORE_API FCylinder {
+public:
+    FLOAT Radius;
+    FLOAT Height;
+    FCylinder();
+    FCylinder& operator=(const FCylinder& Other);
+    INT LineCheck(const FVector& Start, const FVector& End, FVector& HitNormal) const;
+    INT LineIntersection(const FVector& Start, const FVector& End, FLOAT* const HitTime) const;
+};
 // --- ULodMeshInstance ---
 FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 {
@@ -66,12 +80,18 @@ INT ULodMeshInstance::GetStatus()
 // --- UMeshInstance ---
 int UMeshInstance::StopAnimating(int)
 {
+	guard(UMeshInstance::StopAnimating);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 int UMeshInstance::UpdateAnimation(float)
 {
+	guard(UMeshInstance::UpdateAnimation);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
@@ -108,24 +128,42 @@ void UMeshInstance::SetStatus(int)
 	unguard;
 }
 
-int UMeshInstance::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector Start,FVector Extent,DWORD ExtraNodeFlags,DWORD TraceFlags)
 {
-	return 0;
+	guard(UMeshInstance::LineCheck);
+	// Retail 0x14650: delegates to GetMesh()->vtbl[0x68/4].
+	typedef BYTE* (__thiscall *GetMeshFn)(UMeshInstance*);
+	BYTE* pMesh = (*(GetMeshFn*)((*(BYTE**)this) + 0x8C))(this);
+	typedef INT (__thiscall *MeshLineCheckFn)(BYTE*, FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+	return (*(MeshLineCheckFn*)((*(BYTE**)pMesh) + 0x68))(pMesh, Hit, Owner, End, Start, Extent, ExtraNodeFlags, TraceFlags);
+	unguard;
 }
 
 int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 {
+	guard(UMeshInstance::PlayAnim);
+	// Retail 0x14580: null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
-int UMeshInstance::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
+int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVector Extent,DWORD TraceFlags)
 {
-	return 0;
+	guard(UMeshInstance::PointCheck);
+	// Retail 0x145f0: delegates to GetMesh()->vtbl[0x64/4].
+	typedef BYTE* (__thiscall *GetMeshFn)(UMeshInstance*);
+	BYTE* pMesh = (*(GetMeshFn*)((*(BYTE**)this) + 0x8C))(this);
+	typedef INT (__thiscall *MeshPointCheckFn)(BYTE*, FCheckResult&, AActor*, FVector, FVector, DWORD);
+	return (*(MeshPointCheckFn*)((*(BYTE**)pMesh) + 0x64))(pMesh, Hit, Owner, Point, Extent, TraceFlags);
+	unguard;
 }
 
 int UMeshInstance::AnimForcePose(FName,float,float,int)
 {
+	guard(UMeshInstance::AnimForcePose);
+	// Retail 0x33a0: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 float UMeshInstance::AnimGetFrameCount(void *)
@@ -145,7 +183,10 @@ FName UMeshInstance::AnimGetName(void *)
 
 int UMeshInstance::AnimGetNotifyCount(void *)
 {
+	guard(UMeshInstance::AnimGetNotifyCount);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 UAnimNotify * UMeshInstance::AnimGetNotifyObject(void *,int)
@@ -172,12 +213,18 @@ float UMeshInstance::AnimGetRate(void *)
 
 int UMeshInstance::AnimIsInGroup(void *,FName)
 {
+	guard(UMeshInstance::AnimIsInGroup);
+	// Retail 0x6c990: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 int UMeshInstance::AnimStopLooping(int)
 {
+	guard(UMeshInstance::AnimStopLooping);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 void UMeshInstance::ClearChannel(int)
@@ -187,7 +234,10 @@ void UMeshInstance::ClearChannel(int)
 
 int UMeshInstance::FreezeAnimAt(float,int)
 {
+	guard(UMeshInstance::FreezeAnimAt);
+	// Retail 0x6c990: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 float UMeshInstance::GetActiveAnimFrame(int)
@@ -212,7 +262,10 @@ AActor * UMeshInstance::GetActor()
 
 int UMeshInstance::GetAnimCount()
 {
+	guard(UMeshInstance::GetAnimCount);
+	// Retail 0x114310: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 void * UMeshInstance::GetAnimIndexed(int)
@@ -262,27 +315,42 @@ FSphere UMeshInstance::GetRenderBoundingSphere(const AActor* Owner)
 
 int UMeshInstance::GetStatus()
 {
+	guard(UMeshInstance::GetStatus);
+	// Retail 0x114310: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 int UMeshInstance::IsAnimating(int)
 {
+	guard(UMeshInstance::IsAnimating);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 int UMeshInstance::IsAnimLooping(int)
 {
+	guard(UMeshInstance::IsAnimLooping);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 int UMeshInstance::IsAnimPastLastFrame(int)
 {
+	guard(UMeshInstance::IsAnimPastLastFrame);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 int UMeshInstance::IsAnimTweening(int)
 {
+	guard(UMeshInstance::IsAnimTweening);
+	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
+	unguard;
 }
 
 
@@ -943,9 +1011,57 @@ FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 	return FCoords();
 }
 
-int USkeletalMeshInstance::GetBoneCylinder(int,FCylinder &)
+int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
+	guard(USkeletalMeshInstance::GetBoneCylinder);
+	// Retail 0x133990, 387b. Computes a cylinder for the given bone segment.
+	// this+0x190: bone world-position cache (FVector array, stride 0x0C).
+	// this+0x19C: parent-bone index array (INT array, stride 4).
+	// m_fCylindersRadius[]: global per-bone radius table (TODO: populate from binary data).
+
+	// TODO: m_fCylindersRadius is a global float array in Engine.dll; actual data TBD.
+	// Until populated this check always fails and GetBoneCylinder returns 0.
+	static FLOAT m_fCylindersRadius[256] = {};
+
+	FLOAT* pBone   = (FLOAT*)(*(INT*)((BYTE*)this + 0x190) + BoneIndex * 0x0C);
+	FLOAT boneX = pBone[0];
+	FLOAT boneY = pBone[1];
+	FLOAT boneZ = pBone[2];
+
+	INT   parentIdx = *(INT*)((*(INT*)((BYTE*)this + 0x19C)) + BoneIndex * 4);
+	FLOAT* pParent  = (FLOAT*)(*(INT*)((BYTE*)this + 0x190) + parentIdx * 0x0C);
+
+	// Enter if radius is non-zero and non-NaN, and bone is not index 7
+	if (m_fCylindersRadius[BoneIndex] != 0.0f && BoneIndex != 7)
+	{
+		FLOAT dX = pParent[0] - boneX;
+		FLOAT dY = pParent[1] - boneY;
+		FLOAT dZ = pParent[2] - boneZ;
+
+		// Cylinder half-height = |delta| * 0.5
+		FVector delta(dX, dY, dZ);
+		*(FLOAT*)((BYTE*)&Cyl + 0x18) = delta.Size() * 0.5f;
+
+		// Cylinder centre = bone + delta * 0.5 (midpoint)
+		// Ghidra: FVector::operator*(delta, (float)local_4c) where scalar ≈ 0.5f (midpoint)
+		FVector mid = delta * 0.5f;
+		*(FLOAT*)((BYTE*)&Cyl + 0x00) = boneX + mid.X;
+		*(FLOAT*)((BYTE*)&Cyl + 0x04) = boneY + mid.Y;
+		*(FLOAT*)((BYTE*)&Cyl + 0x08) = boneZ + mid.Z;
+
+		// Cylinder axis = normalised delta
+		FVector norm = delta.SafeNormal();
+		*(FLOAT*)((BYTE*)&Cyl + 0x0C) = norm.X;
+		*(FLOAT*)((BYTE*)&Cyl + 0x10) = norm.Y;
+		*(FLOAT*)((BYTE*)&Cyl + 0x14) = norm.Z;
+
+		// Cylinder radius from global table
+		*(FLOAT*)((BYTE*)&Cyl + 0x1C) = m_fCylindersRadius[BoneIndex];
+
+		return 1;
+	}
 	return 0;
+	unguard;
 }
 
 FName USkeletalMeshInstance::GetBoneName(FName BoneName)
@@ -1206,9 +1322,229 @@ int USkeletalMeshInstance::StopAnimating(int bClearAll)
 	return 1;
 }
 
-int USkeletalMeshInstance::UpdateAnimation(float)
+int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 {
-	return 0;
+	guard(USkeletalMeshInstance::UpdateAnimation);
+	// Retail 0x132d10, ~580b. Per-frame animation channel tick.
+	// Advances frame counters, fires notifies, handles tweens, replicates channel 0.
+	// _DAT_10793ef8: global that caches the last animation delta time.
+	static FLOAT GLastAnimDelta = 0.0f; // Retail: _DAT_10793ef8 (Engine.dll data section)
+
+	BYTE* vtbl = *(BYTE**)this;
+
+	// vtbl[0x94/4](this, 1) — begin/lock animation update
+	typedef void (__thiscall *BeginUpdateFn)(USkeletalMeshInstance*, INT);
+	(*(BeginUpdateFn*)(vtbl + 0x94))(this, 1);
+
+	GLastAnimDelta = DeltaTime;
+	*(INT*)((BYTE*)this + 0x228) = 1;
+
+	// vtbl[0x98/4](this) — get dirty/status flags
+	typedef DWORD (__thiscall *GetFlagsFn)(USkeletalMeshInstance*);
+	DWORD flags = (*(GetFlagsFn*)(vtbl + 0x98))(this);
+
+	if ((flags & 2) == 0)
+	{
+		INT channelIdx = 0;
+		while (true)
+		{
+			INT numChannels = ((FArray*)((BYTE*)this + 0x10C))->Num();
+			if (numChannels <= channelIdx) break;
+
+			BYTE* elem    = (BYTE*)(*(INT*)((BYTE*)this + 0x10C)) + channelIdx * 0x74;
+			FLOAT remaining = DeltaTime;
+			INT   loopCount = 0;
+
+			if (*(INT*)(elem + 0x38) == 0)
+			{
+				// Normal frame advance
+				LAB_UpdateAnim_Normal:
+				while (*(INT*)(elem + 4) >= 0
+					&& (*(AActor**)((BYTE*)this + 0x5C))->IsAnimating(channelIdx)
+					&& remaining > 0.0f
+					&& ++loopCount < 5)
+				{
+					FLOAT prevFrame = *(FLOAT*)(elem + 0x10);
+
+					if (*(FLOAT*)(elem + 0x10) >= 0.0f)
+					{
+						// Compute effective rate
+						FLOAT rate;
+						if (*(FLOAT*)(elem + 0x0C) < 0.0f)
+						{
+							rate = ((FVector*)(*(INT*)((BYTE*)this + 0x5C) + 0x24C))->Size();
+							rate = -(rate * *(FLOAT*)(elem + 0x0C));
+							if (rate <= 0.3f) rate = 0.3f;
+						}
+						else
+						{
+							rate = *(FLOAT*)(elem + 0x0C);
+						}
+						*(FLOAT*)(elem + 0x10) += remaining * rate;
+
+						// Check for notify / end-of-animation
+						if ((*(INT*)(elem + 0x34) == 0)
+							|| (*(INT*)(*(INT*)((BYTE*)this + 0x5C) + 0x16C) == 0)
+							|| (*(INT*)(elem + 0x48) != 0)
+							|| (channelIdx != 0 && *(FLOAT*)(elem + 0x50) <= 0.5f))
+						{
+							// No notify: check end frame
+							LAB_UpdateAnim_CheckEnd:
+							if (*(FLOAT*)(elem + 0x10) >= *(FLOAT*)(elem + 0x14)) break;
+
+							FLOAT curFrame = *(FLOAT*)(elem + 0x10);
+							if (*(INT*)(elem + 0x30) == 0)
+							{
+								// Non-looping: clamp at end frame
+								FLOAT endFrame = *(FLOAT*)(elem + 0x14);
+								FLOAT prev     = *(FLOAT*)(elem + 0x10);
+								*(FLOAT*)(elem + 0x10) = endFrame;
+								*(INT*)((BYTE*)this + 0x14C) = channelIdx;
+								remaining = ((curFrame - endFrame) * remaining) / (prev - prevFrame);
+								if (*(INT*)(elem + 0x48) != 0 || *(FLOAT*)(elem + 0x0C) <= 0.0f)
+									*(INT*)(elem + 0x0C) = 0;
+								else
+								{
+									*(INT*)(elem + 0x0C) = 0;
+									// vtbl[0xD8/4](owner, channelIdx) — AnimEnd notify
+									typedef void (__thiscall *AnimEndFn)(AActor*, INT);
+									(*(AnimEndFn*)((*(BYTE**)(*(INT*)((BYTE*)this + 0x5C))) + 0xD8))(
+										*(AActor**)((BYTE*)this + 0x5C),
+										*(INT*)((BYTE*)this + 0x14C));
+								}
+							}
+							else
+							{
+								// Looping: wrap frame
+								if (curFrame >= 1.0f)
+								{
+									FLOAT prev2  = *(FLOAT*)(elem + 0x10);
+									FLOAT prev3  = *(FLOAT*)(elem + 0x10);
+									*(FLOAT*)(elem + 0x10) = 0.0f;
+									remaining = ((curFrame - 1.0f) * remaining) / (prev3 - prevFrame);
+								}
+								else
+								{
+									remaining = 0.0f;
+								}
+								if (prevFrame < *(FLOAT*)(elem + 0x14))
+								{
+									*(INT*)((BYTE*)this + 0x14C) = channelIdx;
+									if (*(INT*)(elem + 0x48) == 0)
+									{
+										typedef void (__thiscall *AnimEndFn2)(AActor*, INT);
+										(*(AnimEndFn2*)((*(BYTE**)(*(INT*)((BYTE*)this + 0x5C))) + 0xD8))(
+											*(AActor**)((BYTE*)this + 0x5C), channelIdx);
+									}
+								}
+							}
+						}
+						else
+						{
+							// Notify path: find the nearest notify in [prevFrame, curFrame]
+							INT   animObj   = (*(INT(__thiscall**)(USkeletalMeshInstance*, INT)*)(vtbl + 0xB0))(this, *(INT*)(elem + 8));
+							FLOAT bestDist  = 100000.0f;
+							INT   bestNotify = -1;
+							INT   notifyIdx  = 0;
+							INT   notifyCount;
+							while (notifyIdx < (notifyCount = (*(INT(__thiscall**)(USkeletalMeshInstance*, INT)*)(vtbl + 200))(this, animObj)))
+							{
+								FLOAT notifyTime = (FLOAT)(*(FLOAT10(__thiscall**)(USkeletalMeshInstance*, INT, INT)*)(vtbl + 0xCC))(this, animObj, notifyIdx);
+								if ((prevFrame >= notifyTime || *(FLOAT*)(elem + 0x10) < notifyTime)
+									|| (notifyTime -= prevFrame, bestNotify != -1 && notifyTime >= bestDist))
+								{
+									notifyIdx++;
+								}
+								else
+								{
+									bestNotify = notifyIdx++;
+									bestDist = notifyTime;
+								}
+							}
+							if (bestNotify < 0) goto LAB_UpdateAnim_CheckEnd;
+
+							FLOAT notifyAt = (FLOAT)(*(FLOAT10(__thiscall**)(USkeletalMeshInstance*, INT, INT)*)(vtbl + 0xCC))(this, animObj, bestNotify);
+							remaining = ((*(FLOAT*)(elem + 0x10) - notifyAt) * remaining) / (*(FLOAT*)(elem + 0x10) - prevFrame);
+							*(FLOAT*)(elem + 0x10) = (FLOAT)(*(FLOAT10(__thiscall**)(USkeletalMeshInstance*, INT, INT)*)(vtbl + 0xCC))(this, animObj, bestNotify);
+
+							typedef INT* (__thiscall *GetNotifyObjFn)(USkeletalMeshInstance*, INT, INT);
+						INT* notifyObj = (*(GetNotifyObjFn*)(vtbl + 0xD4))(this, animObj, bestNotify);
+							if (notifyObj)
+							{
+								*(INT*)((BYTE*)this + 0x148) = channelIdx;
+								// notifyObj->vtbl[100/4](this, owner)
+								typedef void (__thiscall *NotifyFn)(INT*, USkeletalMeshInstance*, INT);
+								(*(NotifyFn*)((*notifyObj) + 100))(notifyObj, this, *(INT*)((BYTE*)this + 0x5C));
+							}
+						}
+					}
+					else
+					{
+						// Tween-in: advance negative frame toward 0
+						FLOAT newFrame = remaining * *(FLOAT*)(elem + 0x18) + *(FLOAT*)(elem + 0x10);
+						*(FLOAT*)(elem + 0x10) = newFrame;
+						if (newFrame < 0.0f) break;
+						*(FLOAT*)(elem + 0x10) = 0.0f;
+						remaining = (remaining * newFrame) / (newFrame - prevFrame);
+						if (*(FLOAT*)(elem + 0x0C) != 0.0f)
+						{
+							*(INT*)((BYTE*)this + 0x14C) = channelIdx;
+							if (*(INT*)(elem + 0x48) == 0)
+							{
+								typedef void (__thiscall *AnimEndFn3)(AActor*, INT);
+								(*(AnimEndFn3*)((*(BYTE**)(*(INT*)((BYTE*)this + 0x5C))) + 0xD8))(
+									*(AActor**)((BYTE*)this + 0x5C), channelIdx);
+							}
+						}
+					}
+				}
+			}
+			else if (*(INT*)(elem + 4) >= 0)
+			{
+				// Tween-blend path
+				if (DeltaTime > 0.0f)
+				{
+					FLOAT t = DeltaTime / *(FLOAT*)(elem + 0x5C);
+					if (t > 1.0f) t = 1.0f;
+					*(FLOAT*)(elem + 0x50) = (*(FLOAT*)(elem + 0x60) - *(FLOAT*)(elem + 0x50)) * t + *(FLOAT*)(elem + 0x50);
+					FLOAT tw = *(FLOAT*)(elem + 0x5C) - DeltaTime;
+					if (tw < 0.0f) tw = 0.0f;
+					*(FLOAT*)(elem + 0x5C) = tw;
+					if (tw == 0.0f)
+						*(INT*)(elem + 0x38) = 0;
+				}
+				goto LAB_UpdateAnim_Normal;
+			}
+
+			if (channelIdx == 0)
+			{
+				(*(AActor**)((BYTE*)this + 0x5C))->ReplicateAnim(
+					*(INT*)(elem + 8),
+					*(FName*)(elem + 8),
+					*(FLOAT*)(elem + 0x0C),
+					*(FLOAT*)(elem + 0x10),
+					*(FLOAT*)(elem + 0x18),
+					*(FLOAT*)(elem + 0x14),
+					*(INT*)(elem + 0x30));
+			}
+			channelIdx++;
+		}
+	}
+
+	flags = (*(GetFlagsFn*)(vtbl + 0x98))(this);
+	if ((flags & 2) == 0)
+	{
+		(*(BeginUpdateFn*)(vtbl + 0x94))(this, 0);
+	}
+	else
+	{
+		// vtbl[0xC/4](this, 1) — SetStatus(1)
+		typedef void (__thiscall *SetStatusFn)(USkeletalMeshInstance*, INT);
+		(*(SetStatusFn*)(vtbl + 0x0C))(this, 1);
+	}
+
+	return 1;
+	unguard;
 }
 
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
@@ -1283,9 +1619,75 @@ void USkeletalMeshInstance::SetScale(FVector Scale)
 	if (*DrawScale < 0.0f) *DrawScale = -*DrawScale;
 }
 
-int USkeletalMeshInstance::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
-	return 0;
+	guard(USkeletalMeshInstance::LineCheck);
+	// Retail 0x133b50, 433b. Tests line against per-bone FCylinders; falls through to
+	// UMeshInstance::LineCheck on miss. Returns 0 on hit (fills Hit), 1 on clean pass.
+
+	if (Owner == NULL || *(BYTE*)((BYTE*)Owner + 0x2C) == 0x0E)
+	{
+		// No actor or wrong collision type: delegate to base
+		goto LAB_SkelLineCheck_Base;
+	}
+
+	{
+		FVector DirN;
+		FCylinder Cyl;
+
+		INT boneCount = ((FArray*)((BYTE*)this + 0x190))->Num();
+		INT boneIdx   = 1;
+
+		while (boneIdx < boneCount)
+		{
+			INT got = GetBoneCylinder(boneIdx, Cyl);
+			if (got != 0)
+			{
+				INT cylHit = Cyl.LineCheck(End, Start, DirN);
+				if (cylHit != 0)
+				{
+					// Store bone index as collision type, fill FCheckResult
+					*(BYTE*)((BYTE*)Owner + 0x35) = (BYTE)boneIdx;
+					*(FLOAT*)((BYTE*)&Hit + 8)    = DirN.X;
+					*(FLOAT*)((BYTE*)&Hit + 0x0C) = DirN.Y;
+					*(FLOAT*)((BYTE*)&Hit + 0x10) = DirN.Z;
+					*(AActor**)((BYTE*)&Hit + 4)  = Owner;
+					*(INT*)   ((BYTE*)&Hit + 0x20)= 0;
+					// Time = (Hit.X - Start.X) / (End.X - Start.X)
+					*(FLOAT*)((BYTE*)&Hit + 0x24) = (DirN.X - Start.X) / (End.X - Start.X);
+
+					FVector normal = DirN - (End * (*(FLOAT*)((BYTE*)&Hit + 0x24)));
+					FVector* normPtr = (FVector*)normal.GetNormalized();
+					*(FLOAT*)((BYTE*)&Hit + 0x14) = normPtr->X;
+					*(FLOAT*)((BYTE*)&Hit + 0x18) = normPtr->Y;
+					*(FLOAT*)((BYTE*)&Hit + 0x1C) = normPtr->Z;
+
+					return 0;
+				}
+			}
+			boneIdx++;
+		}
+
+		// Check head hit via dedicated trace
+		{
+			static FLOAT headExtent = 0.0f;  // _DAT_105f8f4c: head-trace extent (TODO: populate)
+			FVector* headPos = (FVector*)(*(INT*)((BYTE*)this + 0x190) + 0x54); // bone 7 position
+			INT headHit = TraceHeadHit(Hit, End, Start, DirN, headExtent);
+			if (headHit != 0)
+			{
+				*(BYTE*)((BYTE*)Owner + 0x35)   = 7;
+				*(AActor**)((BYTE*)&Hit + 4)    = Owner;
+				*(INT*)((BYTE*)&Hit + 0x20)     = 0;
+				*(FLOAT*)((BYTE*)&Hit + 0x24) = (*(FLOAT*)((BYTE*)&Hit + 8) - End.X) / (Start.X - End.X);
+				return 0;
+			}
+			return 1;
+		}
+	}
+
+	LAB_SkelLineCheck_Base:
+	return UMeshInstance::LineCheck(Hit, Owner, End, Start, Extent, ExtraNodeFlags, TraceFlags);
+	unguard;
 }
 
 void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
@@ -1566,9 +1968,67 @@ void USkeletalMeshInstance::ActualizeAnimLinkups()
 	}
 }
 
-int USkeletalMeshInstance::AnimForcePose(FName,float,float,int)
+int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
+	guard(USkeletalMeshInstance::AnimForcePose);
+	// Retail 0x132ac0, 381b. Force a specific anim frame on a channel.
+	// Uses ValidateAnimChannel, then finds the anim object via vtbl[0x12C/4],
+	// fires any notifies that would have triggered, and stores Frame/Rate into
+	// the channel element. FUN_10431d00 (anim-slot lookup) is TODO.
+
+	INT isValid = ValidateAnimChannel(Channel);
+	if (isValid != 0)
+	{
+		INT numChannels = FArray::Num((FArray*)((BYTE*)this + 0x10C));
+		if (Channel < numChannels && Channel >= 0)
+		{
+			// vtbl[0x12C/4](this) → returns anim package/object pointer
+			typedef INT* (__thiscall *GetAnimPkgFn)(USkeletalMeshInstance*);
+			INT* animPkg = (*(GetAnimPkgFn*)((*(BYTE**)this) + 0x12C))(this);
+			if (!animPkg) return 0;
+
+			// animPkg->vtbl[100/4](SeqName) → find sequence in package
+			typedef INT (__thiscall *FindSeqFn)(INT*, FName);
+			INT animSeq = (*(FindSeqFn*)((*(BYTE**)animPkg) + 100))(animPkg, SeqName);
+
+			if (animSeq != 0)
+			{
+				// Fire notifies that fall in (Frame-1 .. Frame] or (Frame .. Frame+rate]
+				// Ghidra uses unaff_EBX / unaff_ESI / unaff_retaddr for untracked regs.
+				// Divergence: untracked register values from AnimForcePose Ghidra output;
+				// notify loop logic preserved but register-sourced range values are lost.
+				INT notifyCount = (*(INT(__thiscall**)(USkeletalMeshInstance*, INT)*)(
+					(*(BYTE**)this) + 200))(this, animSeq);
+				for (INT ni = 0; ni < notifyCount; ni++)
+				{
+					FLOAT notifyTime = (FLOAT)(*(FLOAT10(__thiscall**)(USkeletalMeshInstance*, INT, INT)*)(
+						(*(BYTE**)this) + 0xCC))(this, animSeq, ni);
+					INT* notifyObj = (INT*)(*(INT*(__thiscall**)(USkeletalMeshInstance*, INT, INT)*)(
+						(*(BYTE**)this) + 0xD4))(this, animSeq, ni);
+					if (notifyObj)
+					{
+						// notifyObj->vtbl[100/4](this, owner)
+						typedef void (__thiscall *NotifyFn)(INT*, USkeletalMeshInstance*, INT);
+						(*(NotifyFn*)((*notifyObj) + 100))(notifyObj, this, *(INT*)((BYTE*)this + 0x5C));
+					}
+				}
+			}
+
+			INT   slotOffset  = Channel * 0x74;
+			INT   channelData = *(INT*)((BYTE*)this + 0x10C);
+			// TODO: FUN_10431d00(this+0xAC, animObj_EBX) — anim-slot lookup; omitted (unidentified).
+			// Retail stores the slot index at channelData+slotOffset+4.
+			*(FLOAT*)(channelData + slotOffset + 0x10) = Frame;
+			*(FLOAT*)(channelData + slotOffset + 8)    = Rate;
+
+			return 1;
+		}
+		// Channel out of range: warn via GLog
+		UObject::GetName((UObject*)this);
+		FOutputDevice::Logf(*(FOutputDevice**)GLog_exref, (const TCHAR*)*(FOutputDevice**)GLog_exref);
+	}
 	return 0;
+	unguard;
 }
 
 float USkeletalMeshInstance::AnimGetFrameCount(void* Channel)
@@ -2039,9 +2499,171 @@ int UVertMeshInstance::StopAnimating(INT Channel)
 	return 1;
 }
 
-int UVertMeshInstance::UpdateAnimation(float)
+int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 {
-	return 0;
+	guard(UVertMeshInstance::UpdateAnimation);
+	// Retail 0x172950, 947b. Per-frame vertex-mesh animation tick (single channel).
+	// Fields: this+0xB8=SeqName, this+0xBC=rate, this+0xC0=curFrame, this+0xC4=endFrame,
+	//         this+0xCC=tweenRate, this+0xDC=loopLast, this+0xE0=bLoop, this+0xE4=bNotify.
+
+	BYTE* vtbl = *(BYTE**)this;
+	typedef void (__thiscall *BeginUpdateFn)(UVertMeshInstance*, INT);
+	typedef UINT (__thiscall *GetFlagsFn)(UVertMeshInstance*);
+
+	(*(BeginUpdateFn*)(vtbl + 0x94))(this, 1);
+
+	INT loopCount = 0;
+	while (true)
+	{
+		INT isAnim = AActor::IsAnimating(*(AActor**)((BYTE*)this + 0x5C), 0);
+		if (!isAnim || DeltaTime <= 0.0f || ++loopCount > 4)
+			break;
+		UINT flags = (*(GetFlagsFn*)(vtbl + 0x98))(this);
+		if (flags & 2) break;
+
+		FLOAT prevFrame = *(FLOAT*)((BYTE*)this + 0xC0);
+
+		if (*(FLOAT*)((BYTE*)this + 0xC0) >= 0.0f)
+		{
+			// Normal frame advance
+			FLOAT rate;
+			if (*(FLOAT*)((BYTE*)this + 0xBC) < 0.0f)
+			{
+				rate = FVector::Size((FVector*)(*(INT*)((BYTE*)this + 0x5C) + 0x24C));
+				rate = -(rate * *(FLOAT*)((BYTE*)this + 0xBC));
+				if (rate <= 0.3f) rate = 0.3f;
+			}
+			else
+			{
+				rate = *(FLOAT*)((BYTE*)this + 0xBC);
+			}
+			*(FLOAT*)((BYTE*)this + 0xC0) += DeltaTime * rate;
+
+			// Check notify path
+			INT animSeq = 0;
+			if (*(INT*)((BYTE*)this + 0xE4) != 0
+				&& *(INT*)(*(INT*)((BYTE*)this + 0x5C) + 0x16C) != 0)
+			{
+				animSeq = (*(INT(__thiscall**)(UVertMeshInstance*, INT)*)(vtbl + 0xB0))(
+					this, *(INT*)((BYTE*)this + 0xB8));
+			}
+
+			if (animSeq == 0)
+			{
+				// No notify: check end frame
+				LAB_VertUpdateAnim_CheckEnd:
+				if (*(FLOAT*)((BYTE*)this + 0xC0) >= *(FLOAT*)((BYTE*)this + 0xC4)) break;
+
+				FLOAT curFrame = *(FLOAT*)((BYTE*)this + 0xC0);
+				if (*(INT*)((BYTE*)this + 0xE0) == 0)
+				{
+					// Non-looping: clamp
+					*(FLOAT*)((BYTE*)this + 0xBC) = 0.0f;
+					FLOAT endFrame = *(FLOAT*)((BYTE*)this + 0xC4);
+					FLOAT prev2    = *(FLOAT*)((BYTE*)this + 0xC0);
+					*(FLOAT*)((BYTE*)this + 0xC0) = endFrame;
+					DeltaTime = ((curFrame - endFrame) * DeltaTime) / (prev2 - prevFrame);
+					// owner->vtbl[0xD8/4](0) — AnimEnd
+					typedef void (__thiscall *AnimEndFn)(AActor*, INT);
+					(*(AnimEndFn*)((*(BYTE**)(*(INT*)((BYTE*)this + 0x5C))) + 0xD8))(
+						*(AActor**)((BYTE*)this + 0x5C), 0);
+				}
+				else
+				{
+					// Looping: wrap
+					if (curFrame >= 1.0f)
+					{
+						FLOAT fv1 = *(FLOAT*)((BYTE*)this + 0xC0);
+						FLOAT fv2 = *(FLOAT*)((BYTE*)this + 0xC0);
+						*(FLOAT*)((BYTE*)this + 0xC0) = 0.0f;
+						DeltaTime = ((curFrame - 1.0f) * DeltaTime) / (fv2 - prevFrame);
+					}
+					else
+					{
+						DeltaTime = 0.0f;
+					}
+					if (prevFrame < *(FLOAT*)((BYTE*)this + 0xC4))
+					{
+						typedef void (__thiscall *AnimEndFn2)(AActor*, INT);
+						(*(AnimEndFn2*)((*(BYTE**)(*(INT*)((BYTE*)this + 0x5C))) + 0xD8))(
+							*(AActor**)((BYTE*)this + 0x5C), 0);
+					}
+				}
+			}
+			else
+			{
+				// Notify path: find nearest notify in [prevFrame, curFrame]
+				FLOAT bestDist   = 100000.0f;
+				INT   bestNotify = -1;
+				INT   ni         = 0;
+				INT   notifyCount;
+				while (ni < (notifyCount = (*(INT(__thiscall**)(UVertMeshInstance*, INT)*)(vtbl + 200))(this, animSeq)))
+				{
+					FLOAT t = (FLOAT)(*(FLOAT10(__thiscall**)(UVertMeshInstance*, INT, INT)*)(vtbl + 0xCC))(this, animSeq, ni);
+					if ((prevFrame >= t || *(FLOAT*)((BYTE*)this + 0xC0) < t)
+						|| (t -= prevFrame, bestNotify != -1 && t >= bestDist))
+					{
+						ni++;
+					}
+					else
+					{
+						bestNotify = ni++;
+						bestDist = t;
+					}
+				}
+				if (bestNotify < 0) goto LAB_VertUpdateAnim_CheckEnd;
+
+				FLOAT notifyAt = (FLOAT)(*(FLOAT10(__thiscall**)(UVertMeshInstance*, INT, INT)*)(vtbl + 0xCC))(this, animSeq, bestNotify);
+				DeltaTime = ((*(FLOAT*)((BYTE*)this + 0xC0) - notifyAt) * DeltaTime) / (*(FLOAT*)((BYTE*)this + 0xC0) - prevFrame);
+				*(FLOAT*)((BYTE*)this + 0xC0) = (FLOAT)(*(FLOAT10(__thiscall**)(UVertMeshInstance*, INT, INT)*)(vtbl + 0xCC))(this, animSeq, bestNotify);
+
+				INT* notifyObj = (INT*)(*(INT*(__thiscall**)(UVertMeshInstance*, INT, INT)*)(vtbl + 0xD4))(this, animSeq, bestNotify);
+				if (notifyObj)
+				{
+					typedef void (__thiscall *NotifyFn)(INT*, UVertMeshInstance*, INT);
+					(*(NotifyFn*)((*notifyObj) + 100))(notifyObj, this, *(INT*)((BYTE*)this + 0x5C));
+				}
+			}
+		}
+		else
+		{
+			// Tween-in: advance negative frame
+			FLOAT newFrame = DeltaTime * *(FLOAT*)((BYTE*)this + 0xCC) + *(FLOAT*)((BYTE*)this + 0xC0);
+			*(FLOAT*)((BYTE*)this + 0xC0) = newFrame;
+			if (newFrame < 0.0f) break;
+			*(FLOAT*)((BYTE*)this + 0xC0) = 0.0f;
+			DeltaTime = (DeltaTime * newFrame) / (newFrame - prevFrame);
+			if (*(FLOAT*)((BYTE*)this + 0xBC) != 0.0f)
+			{
+				typedef void (__thiscall *AnimEndFn3)(AActor*, INT);
+				(*(AnimEndFn3*)((*(BYTE**)(*(INT*)((BYTE*)this + 0x5C))) + 0xD8))(
+					*(AActor**)((BYTE*)this + 0x5C), 0);
+			}
+		}
+	}
+
+	AActor::ReplicateAnim(
+		*(AActor**)((BYTE*)this + 0x5C),
+		0,
+		*(INT*)((BYTE*)this + 0xB8),
+		*(INT*)((BYTE*)this + 0xBC),
+		*(INT*)((BYTE*)this + 0xC0),
+		*(INT*)((BYTE*)this + 200),
+		*(INT*)((BYTE*)this + 0xC4),
+		*(INT*)((BYTE*)this + 0xE0));
+
+	UINT flags = (*(GetFlagsFn*)(vtbl + 0x98))(this);
+	if ((flags & 2) == 0)
+	{
+		(*(BeginUpdateFn*)(vtbl + 0x94))(this, 0);
+	}
+	else
+	{
+		typedef void (__thiscall *SetStatusFn)(UVertMeshInstance*, INT);
+		(*(SetStatusFn*)(vtbl + 0x0C))(this, 1);
+	}
+	return 1;
+	unguard;
 }
 
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
@@ -2090,14 +2712,215 @@ void UVertMeshInstance::SetScale(FVector Scale)
 	unguard;
 }
 
-int UVertMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
+int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
-	return 0;
+	guard(UVertMeshInstance::PlayAnim);
+	// Retail 0x172d40, ~580b. Single-channel vertex mesh animation control.
+	// this+0xB8=SeqName, +0xBC=rate, +0xC0=curFrame, +0xC4=endFrame,
+	// +0xCC=tweenRate/speedTween, +0xD0=nativeRate, +0xDC=loopLast, +0xE0=bLoop,
+	// +0xE4=bHasNotify, +0xC8=tween-in-rate (offset 200 decimal).
+
+	BYTE* vtbl = *(BYTE**)this;
+	typedef INT  (__thiscall *GetAnimNamedFn)(UVertMeshInstance*, FName);
+	typedef BYTE*(__thiscall *GetOwnerFn)(UVertMeshInstance*);
+	typedef FLOAT(__thiscall *GetFrameCountFn)(UVertMeshInstance*, INT);
+	typedef FLOAT(__thiscall *GetActiveRateFn)(UVertMeshInstance*, INT);
+	typedef INT  (__thiscall *IsLoopingFn)(UVertMeshInstance*, INT);
+
+	// Find animation sequence
+	INT seqObj = (*(GetAnimNamedFn*)(vtbl + 0xB0))(this, SeqName);
+	if (!seqObj)
+	{
+		UObject::GetName(*(UObject**)((BYTE*)this + 0x58));
+		FOutputDevice::Logf(*(FOutputDevice**)GLog_exref, (const TCHAR*)*(FOutputDevice**)GLog_exref);
+		return 0;
+	}
+
+	// Get owning actor
+	BYTE* owner = (*(GetOwnerFn*)(vtbl + 0x84))(this);
+	if (!owner) return 0;
+
+	if (bLooping == 0)
+	{
+		// One-shot / freeze-at-end path (param_6 == 0 in Ghidra)
+		if (Rate <= 0.0f)
+		{
+			if (Rate < 0.0f) return 0;  // negative rate: fail
+			// Rate == 0: freeze at start
+			FLOAT fc = (*(GetFrameCountFn*)(vtbl + 0xC0))(this, seqObj);
+			*(INT*)((BYTE*)this + 0xB8)  = *(INT*)&SeqName;
+			*(INT*)((BYTE*)this + 0xC4)  = 0;
+			*(INT*)((BYTE*)this + 0xE4)  = 0;
+			*(INT*)((BYTE*)this + 0xDC)  = 0;
+			*(INT*)((BYTE*)this + 0xE0)  = 0;
+			*(INT*)((BYTE*)this + 0xBC)  = 0;
+			*(INT*)((BYTE*)this + 0xCC)  = 0;
+			if (TweenTime > 0.0f)
+			{
+				*(FLOAT*)((BYTE*)this + 200) = 1.0f / (TweenTime * fc);
+				*(FLOAT*)((BYTE*)this + 0xC0) = -1.0f / fc;
+				return 1;
+			}
+			*(INT*)((BYTE*)this + 200)  = 0;
+			*(INT*)((BYTE*)this + 0xC0) = 0;
+			return 1;
+		}
+		// Rate > 0 with no looping: single-play with optional tween
+		FName noneName(NAME_None);
+		INT same = FName::StaticEq((FName*)((BYTE*)this + 0xB8), &noneName);
+		if (same) TweenTime = 0.0f;
+
+		FLOAT fc  = (*(GetFrameCountFn*)(vtbl + 0xC0))(this, seqObj);
+		FLOAT nr  = (*(GetActiveRateFn*)(vtbl + 0xC4))(this, seqObj);
+		FLOAT ifc = 1.0f / fc;
+		*(INT*)((BYTE*)this + 0xB8) = *(INT*)&SeqName;
+		FLOAT rateScale = ifc * nr;
+		*(FLOAT*)((BYTE*)this + 0xD0) = rateScale;
+		*(FLOAT*)((BYTE*)this + 0xBC) = rateScale * Rate;
+		*(FLOAT*)((BYTE*)this + 0xC4) = 1.0f - ifc;
+		INT isLoop = (*(IsLoopingFn*)(vtbl + 0xC8))(this, seqObj);
+		*(INT*)((BYTE*)this + 0xDC) = 0;
+		*(INT*)((BYTE*)this + 0xE0) = 1;
+		*(INT*)((BYTE*)this + 0xE4) = isLoop ? 1 : 0;
+
+		if (*(FLOAT*)((BYTE*)this + 0xC4) != 0.0f)
+		{
+			// Has end frame: setup single-shot
+			*(INT*)((BYTE*)this + 0xE4) = 0;
+			*(INT*)((BYTE*)this + 0xCC) = 0;
+			if (TweenTime <= 0.0f)
+			{
+				*(FLOAT*)((BYTE*)this + 200)  = 10.0f;
+				*(INT*)  ((BYTE*)this + 0xBC) = 0;
+				*(INT*)  ((BYTE*)this + 0xCC) = 0;
+				*(FLOAT*)((BYTE*)this + 0xC0) = -ifc;
+				return 1;
+			}
+			*(INT*)  ((BYTE*)this + 0xBC) = 0;
+			*(INT*)  ((BYTE*)this + 0xCC) = 0;
+			*(FLOAT*)((BYTE*)this + 200)  = 1.0f / TweenTime;
+			*(FLOAT*)((BYTE*)this + 0xC0) = -ifc;
+			return 1;
+		}
+
+		// endFrame == 0: continuous with tween
+		if (TweenTime > 0.0f)
+		{
+			*(FLOAT*)((BYTE*)this + 200)  = 1.0f / (fc * TweenTime);
+			*(FLOAT*)((BYTE*)this + 0xC0) = rateScale * -1.0f;
+			goto LAB_VertPlayAnim_End;
+		}
+		if (TweenTime == -1.0f)
+		{
+			*(DWORD*)((BYTE*)this + 0xC0) = 0x38d1b717u; // ~1e-4 tiny float
+			LAB_VertPlayAnim_ZeroTween:
+			*(INT*)((BYTE*)this + 200) = 0;
+			goto LAB_VertPlayAnim_End;
+		}
+		*(FLOAT*)((BYTE*)this + 0xC0) = rateScale * -1.0f;
+		if (*(FLOAT*)((BYTE*)this + 0xCC) > 0.0f)
+		{
+			LAB_VertPlayAnim_UseCC:
+			*(INT*)((BYTE*)this + 200) = *(INT*)((BYTE*)this + 0xCC);
+			goto LAB_VertPlayAnim_End;
+		}
+		if (*(FLOAT*)((BYTE*)this + 0xCC) < 0.0f)
+		{
+			FLOAT speed = FVector::Size((FVector*)(owner + 0x24C));
+			// FUN_103808e0 = TweenRate helper (TODO: unresolved)
+			*(FLOAT*)((BYTE*)this + 200) = 0.0f; // TODO: FUN_103808e0(rate*0.5, speed*cc*-1)
+			goto LAB_VertPlayAnim_End;
+		}
+		*(FLOAT*)((BYTE*)this + 200) = 1.0f / (fc * 0.025f);
+		LAB_VertPlayAnim_End:
+		*(INT*)((BYTE*)this + 0xCC) = *(INT*)((BYTE*)this + 0xBC);
+		return 1;
+	}
+	else
+	{
+		// Looping path (param_6 != 0)
+		FLOAT fc = (*(GetFrameCountFn*)(vtbl + 0xC0))(this, seqObj);
+		FLOAT nr = (*(GetActiveRateFn*)(vtbl + 0xC4))(this, seqObj);
+
+		// If same animation still playing, just update rate
+		INT same = FName::StaticEq((FName*)((BYTE*)this + 0xB8), &SeqName);
+		if (same && *(INT*)((BYTE*)this + 0xE0) != 0
+			&& AActor::IsAnimating(*(AActor**)owner, 0))
+		{
+			*(INT*)  ((BYTE*)this + 0xDC) = 0;
+			*(FLOAT*)((BYTE*)this + 0xD0) = nr / fc;
+			*(FLOAT*)((BYTE*)this + 0xBC) = (nr / fc) * Rate;
+			*(FLOAT*)((BYTE*)this + 0xCC) = *(FLOAT*)((BYTE*)this + 0xBC);
+			return 1;
+		}
+
+		FLOAT ifc  = 1.0f / fc;
+		*(INT*)((BYTE*)this + 0xB8) = *(INT*)&SeqName;
+		FLOAT rs   = ifc * nr;
+		*(FLOAT*)((BYTE*)this + 0xD0) = rs;
+		*(FLOAT*)((BYTE*)this + 0xBC) = rs * Rate;
+		*(FLOAT*)((BYTE*)this + 0xC4) = 1.0f - ifc;
+		INT isLoop = (*(IsLoopingFn*)(vtbl + 0xC8))(this, seqObj);
+		*(INT*)  ((BYTE*)this + 0xDC) = 0;
+		*(INT*)  ((BYTE*)this + 0xE0) = 1;
+		*(INT*)  ((BYTE*)this + 0xE4) = isLoop ? 1 : 0;
+
+		if (*(FLOAT*)((BYTE*)this + 0xC4) != 0.0f)
+		{
+			*(INT*)  ((BYTE*)this + 0xE4) = 0;
+			*(INT*)  ((BYTE*)this + 0xCC) = 0;
+			if (TweenTime <= 0.0f)
+				*(FLOAT*)((BYTE*)this + 200) = 10.0f;
+			else
+				*(FLOAT*)((BYTE*)this + 200) = 1.0f / TweenTime;
+			// Fall through to LAB_104730d8
+			*(INT*)  ((BYTE*)this + 0xBC) = 0;
+			*(FLOAT*)((BYTE*)this + 0xC0) = ifc * -1.0f;
+			goto LAB_VertPlayAnim_End;
+		}
+
+		if (TweenTime > 0.0f)
+		{
+			*(FLOAT*)((BYTE*)this + 200)  = 1.0f / (fc * TweenTime);
+			*(FLOAT*)((BYTE*)this + 0xC0) = ifc * -1.0f;
+			goto LAB_VertPlayAnim_End;
+		}
+		if (TweenTime == -1.0f)
+		{
+			*(DWORD*)((BYTE*)this + 0xC0) = 0x3a83126fu;
+			goto LAB_VertPlayAnim_ZeroTween;
+		}
+		*(FLOAT*)((BYTE*)this + 0xC0) = ifc * -1.0f;
+		if (*(FLOAT*)((BYTE*)this + 0xCC) > 0.0f)
+			goto LAB_VertPlayAnim_UseCC;
+		if (*(FLOAT*)((BYTE*)this + 0xCC) < 0.0f)
+		{
+			FLOAT speed = FVector::Size((FVector*)(owner + 0x24C));
+			// TODO: FUN_103808e0 TweenRate helper
+			*(FLOAT*)((BYTE*)this + 200) = 0.0f;
+			goto LAB_VertPlayAnim_End;
+		}
+		*(FLOAT*)((BYTE*)this + 200) = 1.0f / (fc * 0.025f);
+		goto LAB_VertPlayAnim_End;
+	}
+	unguard;
 }
 
-int UVertMeshInstance::AnimForcePose(FName,float,float,int)
+int UVertMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
-	return 0;
+	guard(UVertMeshInstance::AnimForcePose);
+	// Retail 0x1724f0, 60b. Forces a pose on the single vertex-mesh animation channel.
+	// Only channel 0 is valid; other channels log a warning and return 0.
+	if (Channel != 0)
+	{
+		UObject::GetName((UObject*)this);
+		FOutputDevice::Logf(*(FOutputDevice**)GLog_exref, (const TCHAR*)*(FOutputDevice**)GLog_exref);
+		return 0;
+	}
+	*(INT*)((BYTE*)this + 0xB8) = *(INT*)&SeqName;
+	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
+	return 1;
+	unguard;
 }
 
 float UVertMeshInstance::AnimGetFrameCount(void* Channel)

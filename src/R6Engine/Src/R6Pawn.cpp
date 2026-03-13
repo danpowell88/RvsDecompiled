@@ -141,14 +141,116 @@ FVector AR6Pawn::CheckForLedges(AActor *, FVector, FVector, FVector, INT &, INT 
 	return FVector(0,0,0);
 }
 
-INT AR6Pawn::CheckLineOfSight(AActor *, FVector &, INT, AActor *, FVector &, AActor *, FVector &)
+INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
+	AActor* param_4, FVector& param_5, AActor* param_6, FVector& param_7)
 {
-	return 0;
+	guard(AR6Pawn::CheckLineOfSight);
+	FCheckResult Hit(1.0f);
+	FVector local_vec(0,0,0);
+
+	// this+0x4ec = Controller, controller+0x400 = Enemy (AController::Enemy)
+	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
+	AActor* pEnemy = pCtrl ? (AActor*)*(INT*)((BYTE*)pCtrl + 0x400) : NULL;
+
+	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+	typedef void (__fastcall *FSingleLineFn)(void*, void*, FCheckResult*, AActor*, const FVector*, const FVector*, DWORD, const FVector&, const FVector&, const FVector&);
+	FSingleLineFn SingleLineCheck = *(FSingleLineFn*)((BYTE*)*pXLevel + 0xcc);
+
+	if (param_4 == pEnemy)
+	{
+		// param_4 is the current enemy — try head-level sight first
+		local_vec = GetHeadLocation(param_1);
+		param_7 = local_vec;
+		SingleLineCheck(pXLevel, 0, &Hit, this, &param_7, &param_2, 0x20286, FVector(0,0,0), FVector(0,0,0), FVector(0,0,0));
+		if (Hit.Actor != NULL)
+		{
+			if ((Hit.Actor != param_4) || (Hit.Actor != param_6))
+			{
+				// Try mid-section
+				local_vec = GetMidSectionLocation(param_1);
+				param_7 = local_vec;
+				Hit = FCheckResult(1.0f);
+				SingleLineCheck(pXLevel, 0, &Hit, this, &param_7, &param_2, 0x20286, FVector(0,0,0), FVector(0,0,0), FVector(0,0,0));
+			}
+			if (Hit.Actor != NULL && Hit.Actor != param_4 && Hit.Actor != param_6)
+				return 0;
+		}
+	}
+	else
+	{
+		// param_4 is not the current enemy — try mid-section
+		local_vec = GetMidSectionLocation(param_1);
+		param_7 = local_vec;
+		SingleLineCheck(pXLevel, 0, &Hit, this, &param_7, &param_2, 0x20286, FVector(0,0,0), FVector(0,0,0), FVector(0,0,0));
+		if (Hit.Actor != NULL && Hit.Actor != param_4 && Hit.Actor != param_6)
+		{
+			// Distance and size checks, then try multiple sight probe points
+			// TODO: full multi-probe sight logic from Ghidra
+			// dist_sq(param_5, param_1->Location) <= 6.4e7f check
+			// 4 probe points around param_5, SingleLineCheck each, return 1 if clear
+			return 0;
+		}
+	}
+	return 1;
+	unguard;
 }
 
-DWORD AR6Pawn::CheckSeePawn(AR6Pawn *, FVector &, INT)
+DWORD AR6Pawn::CheckSeePawn(AR6Pawn* param_1, FVector& param_2, INT param_3)
 {
+	guard(AR6Pawn::CheckSeePawn);
+	// this+0x4ec = Controller
+	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
+
+	// Distance check
+	FVector delta = param_2 - Location;
+	FLOAT distSq = delta.SizeSquared();
+
+	// this+0x4fc = sensor/gadget range object (heartbeat sensor or similar)
+	INT* pSensor = *(INT**)((BYTE*)this + 0x4fc);
+	// this+0x6c4 = flags bitfield
+	DWORD flags = *(DWORD*)((BYTE*)this + 0x6c4);
+
+	if (pSensor && *(FLOAT*)((BYTE*)pSensor + 0x3a8) >= 10.0f)
+	{
+		if (distSq > 1.12896e+09f) return 0;  // ~33600 units
+	}
+	else if (pSensor && (flags & 0x800) && *(FLOAT*)((BYTE*)pSensor + 0x3a8) >= 2.5f)
+	{
+		if (distSq > 5.0176e+08f) return 0;   // ~22400 units
+	}
+	else
+	{
+		if (distSq > 1.2544e+08f) return 0;   // ~11200 units
+	}
+
+	// Direction to target (safe normalize)
+	FVector dir = delta.SafeNormal();
+
+	// Get view direction
+	FRotator viewRot = GetViewRotation();
+	FVector forward = viewRot.Vector();
+
+	// this+0x404 = PeripheralVision (stored in controller)
+	FLOAT periph = pCtrl ? *(FLOAT*)((BYTE*)pCtrl + 0x3b8) : 0.0f;
+	FLOAT sightDot = (forward | dir) - periph;
+
+	if (sightDot >= 0.0f)
+	{
+		// this+0x6e8 = sight/fov scale factor
+		FLOAT fov = *(FLOAT*)((BYTE*)this + 0x6e8) * 0.5f + 0.75f;
+
+		// TODO: movement state and crouch adjustments to fov
+		// TODO: param_1 draw scale and lighting adjustments
+
+		// Size-weighted range check
+		FLOAT range = fov * *(FLOAT*)((BYTE*)this + 0x400);
+		if (distSq <= range * range)
+		{
+			return pCtrl ? ((AController*)pCtrl)->LineOfSightTo((AActor*)param_1, 1) : 0;
+		}
+	}
 	return 0;
+	unguard;
 }
 
 FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT TargetHeight, FLOAT OtherHeight)
@@ -319,7 +421,42 @@ BYTE AR6Pawn::GetAnimState()
 
 BYTE AR6Pawn::GetCurrentMaterial()
 {
-	return 0;
+	guard(AR6Pawn::GetCurrentMaterial);
+	// this+0x520 = m_pSoundVolume zone cache
+	INT* pZone = *(INT**)((BYTE*)this + 0x520);
+	if (pZone == NULL)
+		return 0;
+
+	// Walk the class hierarchy — look for AR6SoundVolume (PrivateStaticClass_exref).
+	// AR6SoundVolume is in R6Game.dll; we cannot reference it directly here.
+	// TODO: replace raw loop with AR6SoundVolume::StaticClass() once accessible.
+	// ClassPrivate at +0x24, superclass chain at +0x2c
+	UClass* pSVClass = NULL;  // TODO: AR6SoundVolume::StaticClass()
+
+walk_isA:
+	for (UClass* C = *(UClass**)((BYTE*)pZone + 0x24); C; C = *(UClass**)((BYTE*)C + 0x2c))
+	{
+		if (C == pSVClass)
+		{
+			// Walk Outer chain (+0x58) while still a sound volume
+		walk_outer:
+			pZone = *(INT**)((BYTE*)pZone + 0x58);
+			*(INT*)((BYTE*)this + 0x520) = (INT)pZone;
+			if (pZone == NULL) break;
+			for (UClass* C2 = *(UClass**)((BYTE*)pZone + 0x24); C2; C2 = *(UClass**)((BYTE*)C2 + 0x2c))
+			{
+				if (C2 == pSVClass)
+					goto walk_outer;
+			}
+			break;
+		}
+	}
+	pZone = *(INT**)((BYTE*)this + 0x520);
+	if (pZone == NULL)
+		return 0;
+	// Material byte at +0x4c in the final zone
+	return *(BYTE*)((BYTE*)pZone + 0x4c);
+	unguard;
 }
 
 void AR6Pawn::GetDefaultHeightAndRadius(FLOAT& OutHeight, FLOAT& OutCrouchHeight, FLOAT& OutRadius)
@@ -356,7 +493,66 @@ FVector AR6Pawn::GetMidSectionLocation(AActor *)
 
 enum eMovementDirection AR6Pawn::GetMovementDirection()
 {
-	return (enum eMovementDirection)0;
+	guard(AR6Pawn::GetMovementDirection);
+	// this+0x4ec = Controller
+	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
+
+	if (pCtrl != NULL)
+	{
+		// Check if controller IsA AR6PlayerController
+		// PrivateStaticClass for AR6PlayerController is accessible in R6Engine
+		if (((AController*)pCtrl)->IsA(AR6PlayerController::StaticClass()))
+		{
+			// Player path: transform velocity to local space using pawn's rotation
+			// GMath.UnitCoords is at +0x18 in FGlobalMath (confirmed from struct layout)
+			FCoords RotCoords = GMath.UnitCoords / Rotation;
+			FVector normVel = Velocity.SafeNormal();
+
+			// Forward dot: project normalized velocity onto pawn's X axis
+			FLOAT forwardDot = RotCoords.XAxis | normVel;
+
+			if (normVel.X != 0.0f || normVel.Y != 0.0f || normVel.Z != 0.0f)
+			{
+				if (forwardDot >= 0.25f)
+					return MOVEDIR_Forward;
+				if (forwardDot < -0.25f)
+					return MOVEDIR_Backward;
+				return MOVEDIR_Strafe;
+			}
+		}
+		else
+		{
+			// AI controller path
+			INT focusActor = *(INT*)((BYTE*)pCtrl + 0x3e4);
+			FLOAT focusX = focusActor ? *(FLOAT*)(focusActor + 0x234) : *(FLOAT*)((BYTE*)pCtrl + 0x48c);
+			FLOAT focusY = focusActor ? *(FLOAT*)(focusActor + 0x238) : *(FLOAT*)((BYTE*)pCtrl + 0x490);
+
+			// destination point (controller's MoveTarget location)
+			FLOAT destX = *(FLOAT*)((BYTE*)pCtrl + 0x488);
+			FLOAT destY = *(FLOAT*)((BYTE*)pCtrl + 0x48c);
+
+			// direction vectors from pawn location
+			FLOAT toDstX = destX - Location.X;
+			FLOAT toDstY = destY - Location.Y;
+			FLOAT toFocX = focusX - Location.X;
+			FLOAT toFocY = focusY - Location.Y;
+
+			FLOAT dstLen = appSqrt(toDstX*toDstX + toDstY*toDstY);
+			FLOAT focLen = appSqrt(toFocX*toFocX + toFocY*toFocY);
+			if (dstLen > 0.0f) { toDstX /= dstLen; toDstY /= dstLen; }
+			if (focLen > 0.0f) { toFocX /= focLen; toFocY /= focLen; }
+
+			FLOAT fDot = toDstX*toFocX + toDstY*toFocY;
+			if (fDot < 0.75f)
+			{
+				if (fDot < -0.75f)
+					return MOVEDIR_Backward;
+				return MOVEDIR_Strafe;
+			}
+		}
+	}
+	return MOVEDIR_Forward;
+	unguard;
 }
 
 FLOAT AR6Pawn::GetPeekingRatioNorm(FLOAT PeekingValue)
@@ -439,9 +635,46 @@ INT AR6Pawn::IsCrawling()
 	return 0;
 }
 
-INT AR6Pawn::IsOverLedge(AActor *, FVector, FLOAT)
+INT AR6Pawn::IsOverLedge(AActor* param_1, FVector ledgePoint, FLOAT ledgeRadius)
 {
-	return 0;
+	guard(AR6Pawn::IsOverLedge);
+	// param_1 is unused in Ghidra decompilation
+	// Save original velocity (this+0x258 = Velocity)
+	FVector savedVelocity = Velocity;
+
+	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
+	FLOAT savedCtrlVal = pCtrl ? *(FLOAT*)((BYTE*)pCtrl + 0x3bc) : 0.0f;
+
+	FVector normVel = Velocity.SafeNormal();
+
+	// gravity direction from XLevel (this+0x328 = XLevel)
+	// XLevel+0x458 = ZoneGravityAcceleration or WorldGravity
+	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+	FLOAT gravSign = (*(FLOAT*)((BYTE*)pXLevel + 0x458) > 0.0f) ? 1.0f : -1.0f;
+
+	// Call vtable slot 0x190/4 = 100: CheckForLedge (unlisted ULevel method)
+	// TODO: exact vtable index and full argument list
+	FVector resultLoc(0,0,0);
+	typedef void (__fastcall *FCheckLedgeFn)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT,
+		FLOAT, FLOAT, FLOAT, INT, INT, FLOAT, FLOAT*, FLOAT*, FLOAT);
+	FCheckLedgeFn checkFn = *(FCheckLedgeFn*)((BYTE*)*pXLevel + 0x190);
+	checkFn(pXLevel, 0, this, normVel.X, normVel.Y, normVel.Z,
+		ledgePoint.X, ledgePoint.Y, ledgePoint.Z, 0, 0, gravSign,
+		&resultLoc.X, &resultLoc.Y, ledgeRadius);
+
+	INT iVar3 = 0;
+	FVector velNorm2 = Velocity.SafeNormal();
+	if ((velNorm2.X != 0.0f || velNorm2.Y != 0.0f || velNorm2.Z != 0.0f) &&
+		(resultLoc.X != ledgePoint.X || resultLoc.Y != ledgePoint.Y || resultLoc.Z != ledgePoint.Z) &&
+		(ledgePoint.X != 0.0f || ledgePoint.Y != 0.0f || ledgePoint.Z != 0.0f))
+		iVar3 = 1;
+
+	// Restore
+	Velocity = savedVelocity;
+	if (pCtrl)
+		*(FLOAT*)((BYTE*)pCtrl + 0x3bc) = savedCtrlVal;
+	return iVar3;
+	unguard;
 }
 
 INT AR6Pawn::IsRelevantToPawnHeartBeat(APawn *)
@@ -536,9 +769,67 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-INT AR6Pawn::PickActorAdjust(AActor *)
+INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
+	guard(AR6Pawn::PickActorAdjust);
+	// this+0x4ec = Controller
+	if (Physics == PHYS_Swimming || Controller == NULL)
+		return 0;
+
+	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
+	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+
+	// Get direction to focus/focal point
+	// controller+0x3e4 = FocusActor, controller+0x488/0x48c/0x490 = FocalPoint
+	INT focusActor = *(INT*)((BYTE*)pCtrl + 0x3e4);
+	FLOAT focX = focusActor ? *(FLOAT*)(focusActor + 0x234) : *(FLOAT*)((BYTE*)pCtrl + 0x488);
+	FLOAT focY = focusActor ? *(FLOAT*)(focusActor + 0x238) : *(FLOAT*)((BYTE*)pCtrl + 0x48c);
+
+	FLOAT toDx = focX - Location.X;
+	FLOAT toDy = focY - Location.Y;
+	FLOAT len = appSqrt(toDx*toDx + toDy*toDy);
+	if (len > 0.0f) { toDx /= len; toDy /= len; }
+
+	// Perpendicular directions
+	FLOAT perpLX = -toDy,  perpLY =  toDx;  // left perp
+	FLOAT perpRX =  toDy,  perpRY = -toDx;  // right perp
+
+	// Lateral distance of param_1 from movement axis
+	FLOAT lateralDot = (*(FLOAT*)((BYTE*)param_1 + 0x234) - Location.X) * toDy +
+	                   (*(FLOAT*)((BYTE*)param_1 + 0x238) - Location.Y) * (-toDx);
+	FLOAT adjustDist = *(FLOAT*)((BYTE*)param_1 + 0x118) + CollisionRadius;  // +0x118 = CollisionRadius
+	FLOAT absLat = Abs(lateralDot);
+
+	if (absLat > adjustDist)
+		return 1;
+
+	FLOAT leftDist  = adjustDist - lateralDot;
+	FLOAT rightDist = adjustDist + lateralDot;
+
+	typedef void (__fastcall *FSingleLineFn)(void*, void*, FCheckResult*, AActor*, const FVector*, const FVector*, DWORD, const FVector&, const FVector&, const FVector&);
+	FSingleLineFn SingleLineCheck = *(FSingleLineFn*)((BYTE*)*pXLevel + 0xcc);
+
+	for (INT pass = 0; pass < 2; pass++)
+	{
+		FLOAT perpX = (pass == 0) ? perpLX : perpRX;
+		FLOAT perpY = (pass == 0) ? perpLY : perpRY;
+		FLOAT dist  = (pass == 0) ? leftDist : rightDist;
+		FVector tryDest(Location.X + perpX * dist, Location.Y + perpY * dist, Location.Z);
+		FCheckResult Hit(1.0f);
+		SingleLineCheck(pXLevel, 0, &Hit, this, &tryDest, &Location, 0x20286, FVector(0,0,0), FVector(0,0,0), FVector(0,0,0));
+		if (Hit.Time == 1.0f)
+		{
+			// controller+0x3a8 = flags; set bit 0x40 = has adjust dest
+			*(DWORD*)((BYTE*)pCtrl + 0x3a8) |= 0x40;
+			// controller+0x488 = AdjustLocation
+			*(FLOAT*)((BYTE*)pCtrl + 0x488) = tryDest.X;
+			*(FLOAT*)((BYTE*)pCtrl + 0x48c) = tryDest.Y;
+			*(FLOAT*)((BYTE*)pCtrl + 0x490) = tryDest.Z;
+			return 1;
+		}
+	}
 	return 0;
+	unguard;
 }
 
 void AR6Pawn::PostNetReceive()

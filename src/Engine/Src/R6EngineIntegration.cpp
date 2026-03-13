@@ -14,6 +14,11 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
 
+// GIsNightmare and GUseCullDistanceProjector are defined in Core.cpp but not
+// declared in any header included here.
+extern CORE_API UBOOL GIsNightmare;
+extern CORE_API UBOOL GUseCullDistanceProjector;
+
 // --- AR6AbstractCircumstantialActionQuery ---
 INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
@@ -42,9 +47,36 @@ void AR6ActionSpot::CheckForErrors()
 
 
 // --- AR6ColBox ---
-int AR6ColBox::ShouldTrace(AActor *,DWORD)
+int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 {
+	guard(AR6ColBox::ShouldTrace);
+	typedef INT (__fastcall *FShouldTraceFn)(void*, void*, AActor*, DWORD);
+	INT* pOwner;
+	FShouldTraceFn fn;
+
+	// this+0x15c = owner actor, this+0x394 = collision flags byte
+	if ((*(INT*)((BYTE*)this + 0x15c) != 0) && ((*(BYTE*)((BYTE*)this + 0x394) & 1) != 0))
+	{
+		// this+0x398 = activation radius; != 0 means active (NAN check => float != 0)
+		if (*(FLOAT*)((BYTE*)this + 0x398) != 0.0f)
+		{
+			if (param_1 == NULL) goto LAB_10476755;
+			if (*(AR6ColBox**)((BYTE*)param_1 + 0x184) == this)
+				return 0;
+			if ((*(INT*)((BYTE*)param_1 + 0x140) != 0) &&
+				(*(AR6ColBox**)(*(INT*)((BYTE*)param_1 + 0x140) + 0x184) == this))
+				return 0;
+		}
+		if ((param_1 == NULL) || (*(AR6ColBox**)((BYTE*)param_1 + 0x180) != this))
+		{
+		LAB_10476755:
+			pOwner = *(INT**)((BYTE*)this + 0x15c);
+			fn = *(FShouldTraceFn*)((BYTE*)*pOwner + 0xbc);
+			return fn(pOwner, 0, param_1, param_2);
+		}
+	}
 	return 0;
+	unguard;
 }
 
 void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
@@ -55,9 +87,32 @@ void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 	AActor::SetBase(NewBase, FloorNormal, bNotifyActor);
 }
 
-int AR6ColBox::CanStepUp(FVector)
+int AR6ColBox::CanStepUp(FVector vec)
 {
-	return 0;
+	guard(AR6ColBox::CanStepUp);
+	// FVector passed as 3 scalar args in Ghidra; only Z component (vec.Z) is used
+	// this+0x15c = owner actor, this+0x394 = collision flags, this+0x23c = CollisionHeight
+	INT* pOwner = *(INT**)((BYTE*)this + 0x15c);
+	if (((*(DWORD*)((BYTE*)this + 0x394) & 4) != 0) &&
+		(pOwner != NULL) &&
+		(*(INT*)((BYTE*)pOwner + 0x3a8) == 0) &&
+		((*(DWORD*)((BYTE*)this + 0x394) & 1) != 0))
+	{
+		FLOAT fVar1 = *(FLOAT*)((BYTE*)this + 0x23c);  // this CollisionHeight
+		FLOAT stepHeight = 25.0f;
+		FLOAT fVar2 = *(FLOAT*)((BYTE*)pOwner + 0x23c);  // owner CollisionHeight
+		UObject* pCol = *(UObject**)((BYTE*)pOwner + 0x15c);
+		if (pCol != NULL)
+		{
+			// TODO: ATerrainInfo::PrivateStaticClass reference
+			if (pCol->IsA(ATerrainInfo::StaticClass()))
+				stepHeight = 50.0f;
+		}
+		if (stepHeight <= (fVar1 - fVar2) + vec.Z)
+			return 0;
+	}
+	return 1;
+	unguard;
 }
 
 void AR6ColBox::EnableCollision(int,int,int)
@@ -89,19 +144,81 @@ void AR6ColBox::GetDestination(FVector &,FRotator &)
 	unguard;
 }
 
-float AR6ColBox::GetMaxStepUp(bool,float)
+float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 {
-	return 0.0f;
+	guard(AR6ColBox::GetMaxStepUp);
+	// this+0x15c = owner actor, this+0x394 = collision flags
+	INT* pOwner = *(INT**)((BYTE*)this + 0x15c);
+
+	if ((!param_1 &&
+		((*(DWORD*)((BYTE*)this + 0x394) & 4) == 0 ||
+		 (*(DWORD*)((BYTE*)this + 0x394) & 1) == 0)) ||
+		(pOwner == NULL) ||
+		(*(INT*)((BYTE*)pOwner + 0x3a8) != 0))
+	{
+		return 33.0f;
+	}
+
+	INT* pBase = *(INT**)((BYTE*)pOwner + 0x180);  // owner's Base (floor actor)
+	FLOAT fVar1 = *(FLOAT*)((BYTE*)pBase + 0x23c) - *(FLOAT*)((BYTE*)pOwner + 0x23c);
+	if (param_1)
+		fVar1 = param_2;  // override with explicit param
+
+	FLOAT stepHeight = 25.0f;
+	UObject* pCol = *(UObject**)((BYTE*)pOwner + 0x15c);
+	if (pCol != NULL)
+	{
+		// TODO: ATerrainInfo::PrivateStaticClass reference
+		if (pCol->IsA(ATerrainInfo::StaticClass()))
+			stepHeight = 50.0f;
+	}
+
+	// Ghidra: NAN check => fVar1 > 0.0f
+	if (fVar1 > 0.0f && stepHeight <= fVar1)
+		return 0.0f;
+
+	return stepHeight - fVar1;
+	unguard;
 }
 
 APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 {
+	guard(AR6ColBox::GetPawnOrColBoxOwner);
+	typedef APawn* (__fastcall *FGetPawnFn)(void*, void*);
+
+	// this+0x140 = owner/attached-actor, this+0x398 = activation radius
+	INT* piVar1 = *(INT**)((BYTE*)this + 0x140);
+
+	if (*(FLOAT*)((BYTE*)this + 0x398) != 0.0f)  // NAN check => float != 0
+	{
+		if (piVar1 != NULL)
+		{
+			FGetPawnFn fn = *(FGetPawnFn*)((BYTE*)*piVar1 + 0x6c);
+			return fn(piVar1, 0);
+		}
+	}
+	else if (piVar1 != NULL)
+	{
+		FGetPawnFn fn = *(FGetPawnFn*)((BYTE*)*piVar1 + 0x68);
+		return fn(piVar1, 0);
+	}
 	return NULL;
+	unguard;
 }
 
-int AR6ColBox::IsBlockedBy(AActor const *) const
+int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 {
+	guard(AR6ColBox::IsBlockedBy);
+	// this+0x15c = owner actor, this+0x394 = collision flags byte
+	if ((*(INT*)((BYTE*)this + 0x15c) != 0) && ((*(BYTE*)((BYTE*)this + 0x394) & 1) != 0))
+	{
+		typedef INT (__fastcall *FIsBlockedByFn)(void*, void*);
+		INT* pOwner = *(INT**)((BYTE*)this + 0x15c);
+		FIsBlockedByFn fn = *(FIsBlockedByFn*)((BYTE*)*pOwner + 0x70);
+		return fn(pOwner, 0);
+	}
 	return 0;
+	unguard;
 }
 
 
@@ -130,9 +247,75 @@ void AR6DecalGroup::ActivateGroup()
 	unguard;
 }
 
-int AR6DecalGroup::AddDecal(FVector *,FRotator *,UTexture *,int,float,float,float,float,int)
+int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, int param_4,
+	float param_5, float param_6, float param_7, float param_8, int param_9)
 {
+	guard(AR6DecalGroup::AddDecal);
+	// this+0x3a0 = group active flag, this+0x3a4 = decal actor array data ptr
+	// this+0x39c = current decal index, this+0x398 = group capacity
+	if (((*(BYTE*)((BYTE*)this + 0x3a0) & 1) != 0) && (param_3 != NULL))
+	{
+		AActor* this_00 = *(AActor**)(*(INT*)((BYTE*)this + 0x3a4) + *(INT*)((BYTE*)this + 0x39c) * 4);
+		// TODO: FUN_1050557c — sets decal data on this_00+0x39c
+		DWORD uVar2 = 0; // FUN_1050557c();
+		*(DWORD*)((BYTE*)this_00 + 0x39c) = uVar2;
+		if ((*(BYTE*)((BYTE*)this_00 + 0x51c) & 1) != 0)
+		{
+			*(DWORD*)((BYTE*)this_00 + 0xa0) = *(DWORD*)((BYTE*)this_00 + 0xa0) | 2;
+			typedef void (__fastcall *FVtFn)(void*, void*, INT);
+			typedef void (__fastcall *FVtFn0)(void*, void*);
+			(*(FVtFn*)((BYTE*)*(DWORD*)this_00 + 0x188))(this_00, 0, 1);
+			(*(FVtFn0*)((BYTE*)*(DWORD*)this_00 + 0x18c))(this_00, 0);
+		}
+		*(INT*)((BYTE*)this_00 + 0x398) = param_4;
+		// copy Location from param_1
+		*(FVector*)((BYTE*)this_00 + 0x234) = *param_1;
+		// copy Rotation from param_2
+		*(FRotator*)((BYTE*)this_00 + 0x240) = *param_2;
+		// clear dirty bit, set active bit
+		*(DWORD*)((BYTE*)this_00 + 0xa0) &= ~2u;
+		*(DWORD*)((BYTE*)this_00 + 0x51c) |= 1;
+		// set texture
+		*(UTexture**)((BYTE*)this_00 + 0x3a4) = param_3;
+		if (param_8 != 0.0f)
+			*(FLOAT*)((BYTE*)this_00 + 0xe8) = param_8;
+
+		// Handle by group type (this+0x394 = eDecalType)
+		BYTE groupType = *(BYTE*)((BYTE*)this + 0x394);
+		if (groupType == 3)
+		{
+			// TODO: blood decal extra processing (FName, scale)
+		}
+		if (groupType == 2)
+		{
+			// TODO: GIsNightmare check for nighttime scale
+			// float scale = (GIsNightmare != 0) ? 2.0f : 0.3f;
+			// AActor::SetDrawScale(this_00, scale);
+		}
+		if (groupType == 0)
+		{
+			// TODO: bullet decal life/randomness flags
+		}
+		// groupType == 1: TODO: smoke flag
+		*(DWORD*)((BYTE*)this_00 + 0x3a0) ^= (param_9 << 0x11 ^ *(DWORD*)((BYTE*)this_00 + 0x3a0)) & 0x20000;
+		typedef void (__fastcall *FVtFn0)(void*, void*);
+		(*(FVtFn0*)((BYTE*)*(DWORD*)this_00 + 0x184))(this_00, 0);
+		*(INT*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x14) = 0;
+		if (param_5 != 0.0f)
+		{
+			// TODO: FUN_10301000 — timer/time helper
+			// DOUBLE fVar5 = FUN_10301000();
+			// *(DOUBLE*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0xc) = (fVar5 + param_5) - param_6;
+			// *(FLOAT*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x14) = param_5;
+		}
+		INT iVar3 = *(INT*)((BYTE*)this + 0x39c);
+		*(INT*)((BYTE*)this + 0x39c) = iVar3 + 1;
+		if (*(INT*)((BYTE*)this + 0x398) <= iVar3 + 1)
+			*(INT*)((BYTE*)this + 0x39c) = 0;
+		return 1;
+	}
 	return 0;
+	unguard;
 }
 
 
@@ -143,9 +326,35 @@ void AR6DecalManager::Spawned()
 	unguard;
 }
 
-int AR6DecalManager::AddDecal(FVector *,FRotator *,UTexture *,eDecalType,int,float,float,float,float,int)
+int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, eDecalType param_4,
+	int param_5, float param_6, float param_7, float param_8, float param_9, int param_10)
 {
+	guard(AR6DecalManager::AddDecal);
+	DWORD uVar4 = 1;
+
+	if (param_4 == 1)
+	{
+		// Distance/angle culling for type-1 decals (bullets)
+		// TODO: viewport/camera access via GEngine->Client->Viewports[0]
+		// TODO: distance and angle culling with global counters DAT_1079dedc etc.
+		// Full Ghidra logic omitted — uses FArray::Num, viewport actor, FRotator::Vector,
+		// dot product against view forward, and FVector::SizeSquared culling.
+		// GUseCullDistanceProjector and GIsNightmare checks also occur here.
+	}
+
+	// this+0x394 = active flag
+	if ((*(BYTE*)((BYTE*)this + 0x394) & 1) != 0)
+	{
+		AR6DecalGroup* this_00 = FindGroup(param_4);
+		if (this_00 != NULL)
+		{
+			this_00->AddDecal(param_1, param_2, param_3, param_5,
+				param_6, param_7, param_8, param_9, param_10);
+			return uVar4;
+		}
+	}
 	return 0;
+	unguard;
 }
 
 AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
@@ -165,9 +374,30 @@ AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 
 
 // --- AR6DecalsBase ---
-int AR6DecalsBase::IsNetRelevantFor(APlayerController *,AActor *,FVector)
+int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2, FVector param_3)
 {
-	return 0;
+	guard(AR6DecalsBase::IsNetRelevantFor);
+	// param_1 + 0x3d8 = PlayerController's Pawn
+	INT* pPawn = (INT*)*(INT*)((BYTE*)param_1 + 0x3d8);
+	if (pPawn == NULL)
+		return 0;
+
+	// pawn's zone team byte
+	BYTE bVar1 = *(BYTE*)(*(INT*)((BYTE*)pPawn + 0x228) + 0x397);
+	// this zone team byte
+	DWORD uVar3 = (DWORD)*(BYTE*)(*(INT*)((BYTE*)this + 0x228) + 0x397);
+
+	if (uVar3 != (DWORD)bVar1)
+	{
+		DWORD uVar2 = 1u << (bVar1 & 0x1f);
+		// this+0x144 = Level (LevelInfo)
+		INT* pLevel = *(INT**)((BYTE*)this + 0x144);
+		if ((uVar2 & *(DWORD*)((BYTE*)pLevel + 0x650 + uVar3 * 8)) == 0 &&
+			((INT)uVar2 >> 0x1f & *(DWORD*)((BYTE*)pLevel + 0x654 + uVar3 * 8)) == 0)
+			return 0;
+	}
+	return 1;
+	unguard;
 }
 
 
@@ -330,9 +560,30 @@ AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 
 
 // --- UR6FileManager ---
-int UR6FileManager::FindFile(FString *)
+int UR6FileManager::FindFile(FString* param_1)
 {
+	guard(UR6FileManager::FindFile);
+	const TCHAR* puVar1 = *(*param_1);  // FString::operator* → raw TCHAR*
+	// GFileManager vtable slot 1 (offset +4) = CreateFileReader
+	typedef void* (__fastcall *FCreateReaderFn)(void*, void*, const TCHAR*, INT, INT);
+	INT* vtbl = *(INT**)GFileManager;
+	FCreateReaderFn createReader = *(FCreateReaderFn*)((BYTE*)vtbl + 4);
+	INT* piVar2 = (INT*)createReader(GFileManager, 0, puVar1, 0, 0);
+	if (piVar2 != NULL)
+	{
+		// vtable[0x4c/4 = 19]: close/release
+		typedef void (__fastcall *FCloseFn)(void*, void*);
+		INT* objVtbl = (INT*)*piVar2;
+		FCloseFn closeFn = *(FCloseFn*)((BYTE*)objVtbl + 0x4c);
+		closeFn(piVar2, 0);
+		// vtable[0]: destructor
+		typedef void (__fastcall *FDestructFn)(void*, void*, INT);
+		FDestructFn destructFn = *(FDestructFn*)objVtbl;
+		destructFn(piVar2, 0, 1);
+		return 1;
+	}
 	return 0;
+	unguard;
 }
 
 void UR6FileManager::GetFileName(int param_1, FString* param_2)
@@ -344,8 +595,14 @@ void UR6FileManager::GetFileName(int param_1, FString* param_2)
 	unguard;
 }
 
-int UR6FileManager::GetNbFile(FString *,FString *)
+int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 {
+	guard(UR6FileManager::GetNbFile);
+	// TODO: FUN_1031f060, FUN_103217e0, FUN_1031efc0 — string/path helpers
+	// Builds search pattern from param_1 (dir) + param_2 (ext, adds "*." if no wildcard)
+	// Calls GFileManager->FindFiles(pattern) to count files
+	// Returns count of matching files stored in this's TArray<FString> at +0x2c
 	return 0;
+	unguard;
 }
 

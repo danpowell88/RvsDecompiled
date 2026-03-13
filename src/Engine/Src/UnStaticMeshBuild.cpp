@@ -54,13 +54,37 @@ void UStaticMesh::Build()
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-UMaterial * UStaticMesh::GetSkin(AActor *,int)
+UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
-	return NULL;
+	// Ghidra 0x1c9f0, 69b: call Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
+	// If NULL, fall back to Materials TArray at this+0xfc (stride 0x0c; UMaterial* at +0).
+	// If still NULL: FUN_10317670 (default UMaterial CDO) unresolved — return NULL.
+	typedef UMaterial* (__thiscall* GetSkinFn)(AActor*, INT);
+	UMaterial* pSkin = ((GetSkinFn)(*(INT*)(*(INT*)Owner + 0xa0)))(Owner, SkinIndex);
+	if (pSkin == NULL)
+	{
+		BYTE* materialsData = (BYTE*)*(INT*)((BYTE*)this + 0xfc);
+		if (materialsData != NULL)
+			pSkin = *(UMaterial**)(materialsData + SkinIndex * 0x0c);
+	}
+	// TODO: if still NULL, use FUN_10317670(UMaterial CDO)+0x30 — unresolved.
+	return pSkin;
 }
-FTags * UStaticMesh::GetTag(FString)
+FTags * UStaticMesh::GetTag(FString Name)
 {
+	guard(UStaticMesh::GetTag);
+	// Ghidra 0x1478b0, 85b: linear search of TArray<FTags> at this+0x17c (stride 0x3c).
+	// Each FTags entry has FString TagString at +0x30. Returns pointer to entry or NULL.
+	FArray* tagArr = (FArray*)((BYTE*)this + 0x17c);
+	INT n = tagArr->Num();
+	for (INT i = 0; i < n; i++)
+	{
+		BYTE* entry = (BYTE*)*(INT*)tagArr + i * 0x3c;
+		if (*(FString*)(entry + 0x30) == Name)
+			return (FTags*)entry;
+	}
 	return NULL;
+	unguard;
 }
 void UStaticMesh::Serialize(FArchive& Ar)
 {
@@ -72,11 +96,21 @@ void UStaticMesh::Serialize(FArchive& Ar)
 }
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
-	return 0;
+	guard(UStaticMesh::LineCheck);
+	// Ghidra 0x44eb60, 931 bytes: full static mesh ray-triangle intersection (BVH/OPCODE).
+	// TODO: complex tree traversal — many unresolved FUN_ calls.
+	// DIVERGENCE: returns 1 (no hit) pending full implementation.
+	return 1;
+	unguard;
 }
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
-	return 0;
+	guard(UStaticMesh::PointCheck);
+	// Ghidra 0x44ef40, 403 bytes: point overlap test against static mesh collision geometry.
+	// TODO: OPCODE tree traversal — unresolved FUN_ calls.
+	// DIVERGENCE: returns 1 (no overlap) pending full implementation.
+	return 1;
+	unguard;
 }
 void UStaticMesh::Destroy()
 {

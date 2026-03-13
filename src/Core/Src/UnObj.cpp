@@ -537,6 +537,8 @@ void UObject::NetDirty( UProperty* Property )
 
 DWORD STDCALL UObject::QueryInterface( const FGuid& RefIID, void** InterfacePtr )
 {
+	// Ghidra 0x38a80: sets *InterfacePtr = NULL (E_NOINTERFACE), returns 0.
+	if (InterfacePtr) *InterfacePtr = NULL;
 	return 0;
 }
 

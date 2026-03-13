@@ -17,12 +17,23 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UGameEngine ---
 int UGameEngine::ReplaceTexture(FString,UTexture *)
 {
+	guard(UGameEngine::ReplaceTexture);
+	// Ghidra 0x9fc90: loads a BMP/TGA from disk, validates dimensions match UTexture,
+	// decodes pixel data (RGB24/RGBA32) and uploads to render surface.
+	// TODO: FUN_10316cb0 (render target upload), GFileManager vtable calls, BMP decode.
+	// DIVERGENCE: texture replacement deferred; returns 0.
 	return 0;
+	unguard;
 }
 
 int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
+	guard(UGameEngine::LoadBackgroundImage);
+	// Ghidra 0x9f730: load a background image file and decode into one or two UTextures.
+	// TODO: file I/O and texture decode via FUN_10316cb0, GFileManager vtable.
+	// DIVERGENCE: returns 0 (not loaded).
 	return 0;
+	unguard;
 }
 
 void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
@@ -276,7 +287,13 @@ void UEngine::LoadRandomMenuBackgroundImage(FString)
 
 int UEngine::CacheArmPatch(FGuid *,DWORD *)
 {
+	guard(UEngine::CacheArmPatch);
+	// Ghidra 0x1a5c0: validates ARM copy-protection patch — loads patch data,
+	// calls crypto verification. Very complex with many unresolved FUN_ calls.
+	// TODO: full ARM patch verification logic.
+	// DIVERGENCE: returns 0 (patch not cached/verified).
 	return 0;
+	unguard;
 }
 
 void UEngine::Destroy()
@@ -298,7 +315,12 @@ void UEngine::Destroy()
 
 int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 {
+	guard(UEngine::ExecServerProf);
+	// Ghidra 0x31b20: server profiling exec command handler.
+	// TODO: FUN_ calls for profiling data collection unresolved.
+	// DIVERGENCE: returns 0 (command not handled).
 	return 0;
+	unguard;
 }
 
 void UEngine::InitAudio()

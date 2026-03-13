@@ -523,9 +523,30 @@ void ANote::CheckForErrors()
 
 
 // --- APathNode ---
-int APathNode::ReviewPath(APawn *)
+int APathNode::ReviewPath(APawn* P)
 {
-	return 0;
+	guard(APathNode::ReviewPath);
+	// Ghidra 0xd6400, ~100b: for each spec in PathList (TArray<UReachSpec*> at this+0x3d8),
+	// read spec->End (ANavigationPoint* at spec+0x4c), then call the function pointer stored
+	// at End+0x1ac (as per Ghidra — likely vtable[0x6b] cached or a field fn ptr),
+	// passing this APathNode as argument. Then calls ANavigationPoint::ReviewPath. Returns 1.
+	TArray<UReachSpec*>* pathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3d8);
+	for (INT i = 0; i < pathList->Num(); i++)
+	{
+		UReachSpec* spec = (*pathList)(i);
+		if (spec != NULL)
+		{
+			INT endPtr = *(INT*)((BYTE*)spec + 0x4c);
+			if (endPtr != 0)
+			{
+				typedef void (__cdecl* ReviewFn)(APathNode*);
+				((ReviewFn)(*(INT*)(endPtr + 0x1ac)))(this);
+			}
+		}
+	}
+	ANavigationPoint::ReviewPath(P);
+	return 1;
+	unguard;
 }
 
 void APathNode::CheckSymmetry(ANavigationPoint* param_1)
@@ -577,7 +598,13 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 // --- AScout ---
 int AScout::findStart(FVector)
 {
+	guard(AScout::findStart);
+	// Ghidra 0xe0940: try to place scout at position via FarMoveActor (vtable[0x9c] on Level),
+	// then check walkability, adjust collision, search for valid start position.
+	// TODO: very complex — FarMoveActor, collision adjustments, many FUN_ calls unresolved.
+	// DIVERGENCE: returns 0 (no start found).
 	return 0;
+	unguard;
 }
 
 int AScout::HurtByVolume(AActor *)
