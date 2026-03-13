@@ -202,6 +202,40 @@ static BYTE GFireLastX = 0;         // DAT_1051597c
 static BYTE GFireLastY = 0;         // DAT_10515978
 
 /*-----------------------------------------------------------------------------
+	Lookup tables approximating retail binary data tables.
+
+	DAT_105134f8 — unsigned 8-bit sine: table[n] = 128 + 127*sin(2π·n/256)
+	  Used for orbital spark position multipliers (0..255, centre=128).
+	DAT_105130a8 — signed 8-bit sine:   table[n] = 127*sin(2π·n/256)
+	  Used for MoveSparkXY angle deltas (-127..127).
+	DAT_105131c0 — orbital brightness:  table[n] = max(0, 255·cos(2π·n/256))
+	  Used as direct pixel value for pulsing/rotating sparks.
+
+	DIVERGENCE: exact table bytes in the retail binary are unknown; we
+	initialise them from math at startup. The visual shapes are equivalent
+	(circles / Lissajous figures) but may have minor phase/magnitude offsets.
+-----------------------------------------------------------------------------*/
+static BYTE  GSinU[256];            // DAT_105134f8  unsigned sine
+static signed char GSinS[256];      // DAT_105130a8  signed sine
+static BYTE  GOrbBright[256];       // DAT_105131c0  orbital brightness
+
+static UBOOL GTablesInit = 0;
+
+static void InitFireTables()
+{
+	if( GTablesInit ) return;
+	GTablesInit = 1;
+	for( INT i = 0; i < 256; i++ )
+	{
+		FLOAT Rad = i * 2.0f * PI / 256.0f;
+		GSinU[i]      = (BYTE)Clamp( appRound( 128.0f + 127.0f * appSin(Rad) ), 0, 255 );
+		GSinS[i]      = (signed char)Clamp( appRound( 127.0f * appSin(Rad) ), -127, 127 );
+		FLOAT cv = appCos(Rad);
+		GOrbBright[i] = (BYTE)(cv > 0.0f ? appRound(255.0f * cv) : 0);
+	}
+}
+
+/*-----------------------------------------------------------------------------
 	UFractalTexture — base class for all procedural textures.
 -----------------------------------------------------------------------------*/
 
@@ -590,12 +624,11 @@ void UFireTexture::PostDrawSparks()
 
 void UFireTexture::AddSpark( INT X, INT Y )
 {
-	// Ghidra at 0x2c70: adds a new spark to the spark array based on
-	// the current SparkType. This is a large switch with ~28 cases
-	// configuring FSpark fields differently for each spark effect type.
-	//
-	// TODO: Full switch-case implementation for all 28+ spark types.
-	// Currently implements the basic spark addition framework.
+	// Ghidra: 0x2c70, 12628 bytes.
+	// Adds a spark at (X,Y), setting type-specific fields via a 28-case switch.
+	// DIVERGENCE: cases 0x9/0xa DrawMode sub-variants simplified for readability.
+
+	InitFireTables();
 
 	if( X < 0 || Y < 0 ) return;
 	if( X >= INT_AT(this, 0x60) ) return;
@@ -608,138 +641,920 @@ void UFireTexture::AddSpark( INT X, INT Y )
 	FSpark* Sparks = (FSpark*)PTR_AT(this, 0x10c);
 	if( !Sparks ) return;
 
-	FSpark* S = &Sparks[NumSparks];
 	INT_AT(this, 0x108) = NumSparks + 1;
 
-	S->Type  = BYTE_AT(this, 0xf0);  // SparkType
-	S->Heat  = BYTE_AT(this, 0xf8);  // FX_Heat
+	BYTE SparkType = BYTE_AT(this, 0xf0);
+	FSpark* S = &Sparks[NumSparks];
+	S->Type  = SparkType;
 	S->X     = (BYTE)X;
 	S->Y     = (BYTE)Y;
-	S->ByteA = BYTE_AT(this, 0xf9);  // FX_Size
-	S->ByteB = BYTE_AT(this, 0xfa);  // FX_AuxSize
+	S->Heat  = BYTE_AT(this, 0xf8);  // FX_Heat
+	S->ByteA = 0;
+	S->ByteB = 0;
 	S->ByteC = 0;
 	S->ByteD = 0;
+
+	switch( SparkType )
+	{
+	case 0x01:
+		S->ByteA = BYTE_AT(this, 0xf9);
+		S->ByteB = BYTE_AT(this, 0xfa);
+		return;
+
+	case 0x02:
+		S->Heat = (BYTE)((signed char)BYTE_AT(this, 0xed) + (signed char)BYTE_AT(this, 0xec));
+		BYTE_AT(this, 0xec) = (BYTE)((signed char)BYTE_AT(this, 0xec) + (signed char)BYTE_AT(this, 0xfd));
+		S->ByteD = BYTE_AT(this, 0xfc);
+		return;
+
+	case 0x03:
+		S->Heat  = RandByte();
+		S->ByteD = BYTE_AT(this, 0xfc);
+		S->ByteC = (BYTE)(-1 - (signed char)BYTE_AT(this, 0xf8));
+		return;
+
+	case 0x07:
+	case 0x08:
+		S->ByteC = BYTE_AT(this, 0xf9);
+		return;
+
+	case 0x09:
+	case 0x0a:
+	{
+		BYTE FXSize = BYTE_AT(this, 0xf9);
+		signed char HorizDir = (signed char)BYTE_AT(this, 0xfe) - 0x80;
+		DWORD uVar5 = (DWORD)FXSize;
+		// BYTE_AT(this,0x521) = high byte of StarStatus; normally 0.
+		if( BYTE_AT(this, 0x100) != 0 && BYTE_AT(this, 0x521) != 0 )
+		{
+			INT adj = (INT)uVar5 + X * -2;
+			if( adj < 0 )
+			{
+				uVar5 = (DWORD)(X * 2 - (INT)uVar5);
+				HorizDir = -HorizDir;
+				S->X = (BYTE)((signed char)X - (signed char)uVar5);
+			}
+		}
+		BYTE BaseA = (BYTE)((signed char)BYTE_AT(this, 0xfc) * (signed char)BYTE_AT(this, 0xe8)
+		                  + (signed char)BYTE_AT(this, 0xfd));
+		S->ByteA = BaseA;
+		S->ByteB = (BYTE)uVar5;
+		S->ByteD = (BYTE)HorizDir;
+
+		BYTE DrawMode = BYTE_AT(this, 0x100);
+		if( DrawMode == 2 )
+		{
+			INT n = INT_AT(this, 0x108);
+			if( n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = n + 1;
+				FSpark* S2 = (FSpark*)PTR_AT(this, 0x10c) + n;
+				*S2 = *S;
+				S2->ByteA = (BYTE)((signed char)BaseA - (signed char)0x80);
+			}
+		}
+		else if( DrawMode == 3 )
+		{
+			INT n = INT_AT(this, 0x108);
+			if( n + 2 <= MaxSparks )
+			{
+				FSpark* Sp = (FSpark*)PTR_AT(this, 0x10c);
+				INT_AT(this, 0x108) = n + 1;
+				Sp[n] = *S;  Sp[n].ByteA = (BYTE)((signed char)BaseA + (signed char)0x55);
+				INT_AT(this, 0x108) = n + 2;
+				Sp[n+1] = *S;  Sp[n+1].ByteA = (BYTE)((signed char)BaseA - (signed char)0x56);
+			}
+		}
+		else if( DrawMode == 4 )
+		{
+			INT n = INT_AT(this, 0x108);
+			if( n + 3 <= MaxSparks )
+			{
+				FSpark* Sp = (FSpark*)PTR_AT(this, 0x10c);
+				INT_AT(this, 0x108) = n + 1;  Sp[n]   = *S;  Sp[n].ByteA   = (BYTE)((signed char)BaseA + (signed char)0x40);
+				INT_AT(this, 0x108) = n + 2;  Sp[n+1] = *S;  Sp[n+1].ByteA = (BYTE)((signed char)BaseA - (signed char)0x80);
+				INT_AT(this, 0x108) = n + 3;  Sp[n+2] = *S;  Sp[n+2].ByteA = (BYTE)((signed char)BaseA - (signed char)0x40);
+			}
+		}
+		break;
+	}
+
+	case 0x0b:
+		S->Heat  = BYTE_AT(this, 0xf9);
+		S->ByteA = BYTE_AT(this, 0xfd);
+		S->ByteB = BYTE_AT(this, 0xfc);
+		S->ByteC = (BYTE)((signed char)BYTE_AT(this, 0xfe) - 0x80);
+		S->ByteD = (BYTE)((signed char)BYTE_AT(this, 0xff) - 0x80);
+		if( S->ByteC == 0 ) S->Type = 0x1e;
+		if( S->ByteD == 0 ) S->Type = 0x1d;
+		break;
+
+	case 0x0c:
+		S->ByteA = (BYTE)((signed char)BYTE_AT(this, 0xfc) * (signed char)BYTE_AT(this, 0xe8)
+		                + (signed char)BYTE_AT(this, 0xfd));
+		S->ByteB = BYTE_AT(this, 0xf9);
+		S->ByteD = (BYTE)((signed char)BYTE_AT(this, 0xfe) - 0x80);
+		return;
+
+	case 0x0d:
+	case 0x0e:
+		S->ByteA = (BYTE)((signed char)BYTE_AT(this, 0xfe) - 0x80);
+		S->ByteB = BYTE_AT(this, 0xff) ^ 0x7f;
+		S->ByteD = (BYTE)(0xff / ((INT)(BYTE)BYTE_AT(this, 0xf9) + 1));
+		return;
+
+	case 0x0f:
+		S->ByteA = 0x80;
+		S->ByteB = BYTE_AT(this, 0xf9);
+		S->ByteC = 0x80;
+		S->ByteD = (BYTE)(-1 - (signed char)BYTE_AT(this, 0xfb));
+		return;
+
+	case 0x10:
+	case 0x1b:
+		S->ByteC = BYTE_AT(this, 0xf9);
+		return;
+
+	case 0x11:
+		S->ByteC = BYTE_AT(this, 0xfb);
+		return;
+
+	case 0x15:
+		S->ByteC = BYTE_AT(this, 0xfb);
+		// fall through
+	case 0x14:
+		S->ByteA = (BYTE)((signed char)BYTE_AT(this, 0xfe) - 0x80);
+		S->ByteB = (BYTE)(~BYTE_AT(this, 0xff) + 0x80);
+		S->ByteD = (BYTE)(-1 - (signed char)BYTE_AT(this, 0xf9));
+		return;
+
+	case 0x16:
+		S->ByteA = BYTE_AT(this, 0xf8);
+		BYTE_AT(this, 0x520) = 1;
+		return;
+
+	case 0x17:
+	case 0x18:
+	{
+		// Search backward for existing same-type spark with ByteD==0 and redirect it.
+		for( INT j = NumSparks - 1; j >= 0; j-- )
+		{
+			FSpark* Sp = (FSpark*)PTR_AT(this, 0x10c);
+			if( Sp[j].Type == SparkType && Sp[j].ByteD == 0 )
+			{
+				INT_AT(this, 0x108)--;
+				Sp[j].X    = GFireLastX;
+				Sp[j].Y    = GFireLastY;
+				Sp[j].Heat = BYTE_AT(this, 0xf8) | 3;
+				INT DX = X - (INT)Sp[j].X;
+				INT DY = Y - (INT)Sp[j].Y;
+				if( DX < 0 ) DX = (-DX) | 1;  else DX &= ~1;
+				if( DY < 0 ) DY = (-DY) | 1;  else DY &= ~1;
+				if( DX == 0 && DY == 0 ) Sp[j].Heat = 0;
+				Sp[j].ByteA = (BYTE)DX;
+				Sp[j].ByteB = (BYTE)DY;
+				return;
+			}
+		}
+		INT NewIdx = INT_AT(this, 0x108) - 1;
+		((FSpark*)PTR_AT(this, 0x10c))[NewIdx].ByteD = 0;
+		((FSpark*)PTR_AT(this, 0x10c))[NewIdx].Heat  = 0;
+		GFireLastX = (BYTE)X;
+		GFireLastY = (BYTE)Y;
+		break;
+	}
+
+	case 0x19:
+		S->Heat  = BYTE_AT(this, 0xf8);
+		S->ByteC = BYTE_AT(this, 0xf9);
+		if( S->ByteC < 8 ) S->ByteC = 8;
+		S->ByteD = 0x60;
+		return;
+
+	case 0x1a:
+		S->ByteA = BYTE_AT(this, 0xfd);
+		S->ByteB = BYTE_AT(this, 0xf9);
+		S->ByteC = BYTE_AT(this, 0xfc);
+		S->ByteD = (BYTE)(-1 - (signed char)BYTE_AT(this, 0xfb));
+		return;
+
+	case 0x1c:
+		S->ByteA = BYTE_AT(this, 0xfd);
+		S->ByteB = 0x80;
+		S->ByteC = 0x80;
+		S->ByteD = BYTE_AT(this, 0xfc);
+		return;
+
+	default:
+		S->ByteA = BYTE_AT(this, 0xf9);
+		S->ByteB = BYTE_AT(this, 0xfa);
+		break;
+	}
 }
 
 void UFireTexture::RedrawSparks()
 {
-	// Ghidra at 0x3c20: the main spark simulation loop (~5000 lines).
-	// Iterates all sparks, executing type-specific behaviour via a 44-case
-	// switch statement covering spark types 0x00..0x2b. Each case either:
-	//   - Plots the spark to the pixel buffer
-	//   - Moves the spark via MoveSpark/MoveSparkAngle/MoveSparkTwo/MoveSparkXY
-	//   - Spawns child sparks
-	//   - Removes dead sparks by swapping with the last element
+	// Ghidra: 0x3c20, ~30000 bytes (heavily loop-unrolled spark simulation).
+	// 44-case switch on SparkType 0x00..0x2b — each case either renders,
+	// moves, spawns child sparks, or removes dead sparks.
 	//
-	// TODO: Full implementation of all 44 spark type behaviours.
-	// Currently implements a simplified version that plots and moves sparks.
+	// DIVERGENCE: On removal, Ghidra does NOT decrement `i` (skips the
+	// replacement spark this frame). Our version decrements `i` so every
+	// spark is processed each frame — slightly different visual behaviour.
+	// DIVERGENCE: Ghidra re-reads Sparks ptr each iteration; not needed here
+	// since the array is pre-allocated.
 
-	INT_AT(this, 0xe8) = INT_AT(this, 0xe8) + 1;  // GlobalPhase++
+	InitFireTables();
 
-	INT NumSparks = INT_AT(this, 0x108);
+	INT_AT(this, 0xe8) = INT_AT(this, 0xe8) + 1;                            // GlobalPhase++
+	BYTE_AT(this, 0xed) = (BYTE)((signed char)BYTE_AT(this, 0xed)           // AuxPhase2 +=
+	                           + (signed char)BYTE_AT(this, 0xfc));          //   FX_Frequency
+
 	FSpark* Sparks = (FSpark*)PTR_AT(this, 0x10c);
-	BYTE* Pixels = GetMipPixels( this );
-	if( !Sparks || !Pixels || NumSparks <= 0 ) return;
+	BYTE*   Pixels = GetMipPixels( this );
+	if( !Sparks || !Pixels || INT_AT(this, 0x108) <= 0 ) return;
 
-	BYTE UBits = BYTE_AT(this, 0x5b) & 0x1f;
+	BYTE    UBits  = BYTE_AT(this, 0x5b) & 0x1f;
+	DWORD   UMask  = UINT_AT(this, 0xd8);
+	DWORD   VMask  = UINT_AT(this, 0xdc);
+	INT     MaxSparks = INT_AT(this, 0x104);
+
+// Helper macro: compute pixel offset for spark S.
+#define SPARK_OFF(S) (((DWORD)(S)->Y << UBits) + (DWORD)(S)->X)
+// Helper macro: spawn a child spark of given type into NS, or break out if full.
+#define SPAWN_BEGIN(Tp) \
+	{ INT _n = INT_AT(this, 0x108); \
+	  if( _n < MaxSparks ) { \
+	  INT_AT(this, 0x108) = _n + 1; \
+	  FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n; \
+	  NS->Type = (Tp);
+#define SPAWN_END \
+	  } }
+// Helper macro: remove current spark by swap with last.
+#define REMOVE_SPARK \
+	{ INT _last = INT_AT(this, 0x108) - 1; \
+	  INT_AT(this, 0x108) = _last; \
+	  *S = ((FSpark*)PTR_AT(this, 0x10c))[_last]; \
+	  i--; }
 
 	for( INT i = 0; i < INT_AT(this, 0x108); i++ )
 	{
-		FSpark* S = &Sparks[i];
-		INT Offset = ((DWORD)S->Y << UBits) + (DWORD)S->X;
+		FSpark* S = &((FSpark*)PTR_AT(this, 0x10c))[i];
+		INT Offset = SPARK_OFF(S);
 
 		switch( S->Type )
 		{
-		case 0x00: // Random pixel write.
+		case 0x00: // Random pixel.
 			Pixels[Offset] = RandByte();
 			break;
 
-		case 0x01: // Direct plot with movement.
-			Pixels[Offset] = S->Heat;
+		case 0x01: // Scatter with random radius.
+		{
+			BYTE r1 = RandByte(), r2 = RandByte();
+			DWORD plotX = (( (DWORD)((r1 & 0xff) * (DWORD)S->ByteA >> 8) + (DWORD)S->X ) & UMask);
+			BYTE  r3 = RandByte(), r4 = RandByte();
+			DWORD plotY = (( (DWORD)((r3 & 0xff) * (DWORD)S->ByteB >> 8) + (DWORD)S->Y ) & VMask);
+			Pixels[(plotY << UBits) + plotX] = S->Heat;
 			break;
+		}
 
-		case 0x02: // Plot with heat decay.
+		case 0x02: // Plot at (X,Y), Heat += ByteD.
 			Pixels[Offset] = S->Heat;
 			S->Heat = (BYTE)((signed char)S->Heat + (signed char)S->ByteD);
 			break;
 
-		case 0x03: // Plot with random reset.
-			if( S->ByteC < S->Heat )
+		case 0x03: // Conditional plot, Heat += ByteD, random reset on wrap.
+			if( (BYTE)S->ByteC < (BYTE)S->Heat )
 				Pixels[Offset] = S->Heat;
 			S->Heat = (BYTE)((signed char)S->Heat + (signed char)S->ByteD);
-			if( S->Heat < S->ByteD )
+			if( (BYTE)S->Heat < (BYTE)S->ByteD )
 				S->Heat = RandByte();
 			break;
+
+		case 0x04: // Emit type 0x20 at ~50% chance.
+			if( RandByte() < 0x80 )
+			{
+				SPAWN_BEGIN(0x20)
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;     NS->Y     = S->Y;
+					NS->ByteA = RandByte();
+					NS->ByteB = RandByte();
+					NS->ByteC = S->ByteC;
+					NS->ByteD = S->ByteD;
+				SPAWN_END
+			}
+			break;
+
+		case 0x05: // Emit type 0x21 at ~50% chance.
+			if( RandByte() < 0x80 )
+			{
+				SPAWN_BEGIN(0x21)
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;     NS->Y     = S->Y;
+					NS->ByteA = (BYTE)((RandByte() & 0x7f) - 0x3f);
+					NS->ByteB = 0x81;
+					NS->ByteC = 0;
+					NS->ByteD = 2;
+				SPAWN_END
+			}
+			break;
+
+		case 0x06: // Emit type 0x22 at ~25% chance (leftward arc).
+			if( RandByte() < 0x40 )
+			{
+				SPAWN_BEGIN(0x22)
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;     NS->Y     = S->Y;
+					NS->ByteA = (BYTE)((RandByte() & 0x7f) - 0x3f);
+					NS->ByteB = 0;
+					NS->ByteC = 0x32;
+					NS->ByteD = 0;
+				SPAWN_END
+			}
+			break;
+
+		case 0x07: // Emit type 0x22 at ~25% chance (lower-right arc).
+			if( RandByte() < 0x40 )
+			{
+				SPAWN_BEGIN(0x22)
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;     NS->Y     = S->Y;
+					NS->ByteA = (BYTE)((RandByte() & 0x3f) + 0x3f);
+					NS->ByteB = 0xe3;
+					NS->ByteC = S->ByteC;
+					NS->ByteD = 0;
+				SPAWN_END
+			}
+			break;
+
+		case 0x08: // Emit type 0x22 at ~25% chance (lower-left arc).
+			if( RandByte() < 0x40 )
+			{
+				SPAWN_BEGIN(0x22)
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;     NS->Y     = S->Y;
+					NS->ByteA = (BYTE)((RandByte() & 0x3f) + 0x80);
+					NS->ByteB = 0xe3;
+					NS->ByteC = S->ByteC;
+					NS->ByteD = 0;
+				SPAWN_END
+			}
+			break;
+
+		case 0x09: // X-orbit with full sine (always plots).
+		{
+			DWORD ang = (DWORD)S->ByteA;
+			DWORD brightness = (DWORD)GSinU[(ang + 0x40) & 0xff] + (DWORD)S->Heat;
+			if( brightness > 0xff ) brightness = 0xff;
+			DWORD plotX = ((DWORD)((GSinU[ang] * (DWORD)S->ByteB) >> 8) + (DWORD)S->X) & UMask;
+			Pixels[((DWORD)S->Y << UBits) + plotX] = (BYTE)brightness;
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteD);
+			break;
+		}
+
+		case 0x0a: // X-orbit, upper semicircle only.
+		{
+			DWORD ang = (DWORD)S->ByteA;
+			DWORD cosIdx = (ang + 0x40) & 0xff;
+			if( cosIdx < 0x80 )
+			{
+				DWORD brightness = (DWORD)GSinU[cosIdx] + (DWORD)S->Heat;
+				if( brightness > 0xff ) brightness = 0xff;
+				DWORD plotX = ((DWORD)((GSinU[ang] * (DWORD)S->ByteB) >> 8) + (DWORD)S->X) & UMask;
+				Pixels[((DWORD)S->Y << UBits) + plotX] = (BYTE)brightness;
+			}
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteD);
+			break;
+		}
+
+		case 0x0b: // Full 2D orbit, brightness from cosine.
+		{
+			DWORD plotX = ((DWORD)((GSinU[S->ByteA] * (DWORD)S->Heat) >> 8) + (DWORD)S->X) & UMask;
+			DWORD plotY = ((DWORD)((GSinU[S->ByteB] * (DWORD)S->Heat) >> 8) + (DWORD)S->Y) & VMask;
+			Pixels[(plotY << UBits) + plotX] = GOrbBright[(BYTE)((signed char)S->ByteA + 0x40)];
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteC);
+			S->ByteB = (BYTE)((signed char)S->ByteB + (signed char)S->ByteD);
+			break;
+		}
+
+		case 0x0c: // Y-orbit, fixed X.
+		{
+			DWORD ang = (DWORD)S->ByteA;
+			DWORD brightness = (DWORD)GSinU[(ang + 0x40) & 0xff] + (DWORD)S->Heat;
+			if( brightness > 0xff ) brightness = 0xff;
+			DWORD plotY = ((DWORD)((GSinU[ang] * (DWORD)S->ByteB) >> 8) + (DWORD)S->Y) & VMask;
+			Pixels[(plotY << UBits) + (DWORD)S->X] = (BYTE)brightness;
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteD);
+			break;
+		}
+
+		case 0x0d: // Emit type 0x21 at ~25% chance.
+			if( RandByte() < 0x40 )
+			{
+				INT _n = INT_AT(this, 0x108);
+				if( _n < MaxSparks )
+				{
+					INT_AT(this, 0x108) = _n + 1;
+					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+					NS->Type  = 0x21;
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;  NS->Y  = S->Y;
+					NS->ByteA = S->ByteA;
+					NS->ByteB = S->ByteB;
+					NS->ByteC = 0;
+					NS->ByteD = S->ByteD;
+				}
+			}
+			break;
+
+		case 0x0e: // Emit type 0x2a at ~25% chance.
+			if( RandByte() < 0x40 )
+			{
+				INT _n = INT_AT(this, 0x108);
+				if( _n < MaxSparks )
+				{
+					INT_AT(this, 0x108) = _n + 1;
+					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+					NS->Type  = 0x2a;
+					NS->Heat  = S->Heat;
+					NS->X     = S->X;  NS->Y  = S->Y;
+					NS->ByteA = S->ByteA;
+					NS->ByteB = S->ByteB;
+					NS->ByteC = 0;
+					NS->ByteD = S->ByteD;
+				}
+			}
+			break;
+
+		case 0x0f: // Emit type 0x27 at random nearby pos, advance ByteA, random walk.
+		{
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x27;
+				NS->Heat  = S->Heat;
+				NS->X     = (BYTE)((RandByte() & 0x1f) + (signed char)S->X) & (BYTE)UMask;
+				NS->Y     = (BYTE)((RandByte() & 0x1f) + (signed char)S->Y) & (BYTE)VMask;
+				NS->ByteA = 0;
+				NS->ByteB = S->ByteA;  // angle seed
+				NS->ByteC = S->ByteB;
+				NS->ByteD = S->ByteD;
+			}
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteC);
+			// Random walk (fall-through to LAB_105049af):
+			goto LAB_105049af_0f;
+		}
+
+		case 0x10: // Emit type 0x26 at ~8%, random walk.
+		{
+			if( RandByte() < 0x14 )
+			{
+				INT _n = INT_AT(this, 0x108);
+				if( _n < MaxSparks )
+				{
+					INT_AT(this, 0x108) = _n + 1;
+					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+					NS->Type  = 0x26;
+					NS->Heat  = S->Heat;
+					NS->X     = (BYTE)((RandByte() & 0x1f) + (signed char)S->X) & (BYTE)UMask;
+					NS->Y     = (BYTE)((RandByte() & 0x1f) + (signed char)S->Y) & (BYTE)VMask;
+					NS->ByteA = RandByte();
+					NS->ByteB = RandByte();
+					NS->ByteC = S->ByteC;
+					NS->ByteD = 0;
+				}
+			}
+			// Random walk (1-in-16 chance on X and Y):
+			if( (RandByte() & 0xf) == 0xf )
+				S->X = (BYTE)(((RandByte() & 0xf) + (signed char)S->X - 7) & UMask);
+			if( (RandByte() & 0xf) == 0xf )
+				S->Y = (BYTE)(((RandByte() & 0xf) + (signed char)S->Y - 7) & VMask);
+			break;
+		}
+
+		case 0x11: // Emit type 0x23 at ~50%, scatter within ByteC radius.
+			if( RandByte() < 0x80 )
+			{
+				INT _n = INT_AT(this, 0x108);
+				if( _n < MaxSparks )
+				{
+					INT_AT(this, 0x108) = _n + 1;
+					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+					NS->Type  = 0x23;
+					NS->Heat  = S->Heat;
+					NS->X     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->X) & (BYTE)UMask;
+					NS->Y     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->Y) & (BYTE)VMask;
+					NS->ByteA = (BYTE)(RandByte() - 0x7f);
+					NS->ByteB = 0x81;
+					NS->ByteC = 0xff;
+					NS->ByteD = 0;
+				}
+			}
+			break;
+
+		case 0x12: // Emit type 0x23, random walk.
+		{
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x23;
+				NS->Heat  = S->Heat;
+				NS->X     = (BYTE)((RandByte() & 0x1f) + (signed char)S->X) & (BYTE)UMask;
+				NS->Y     = (BYTE)((RandByte() & 0x1f) + (signed char)S->Y) & (BYTE)VMask;
+				NS->ByteA = (BYTE)(RandByte() - 0x7f);
+				NS->ByteB = 0x81;
+				NS->ByteC = 0xff;
+				NS->ByteD = 0;
+			}
+			if( (RandByte() & 0xf) == 0xf )
+				S->X = (BYTE)(((RandByte() & 0xf) + (signed char)S->X - 7) & UMask);
+			if( (RandByte() & 0xf) == 0xf )
+				S->Y = (BYTE)(((RandByte() & 0xf) + (signed char)S->Y - 7) & VMask);
+			break;
+		}
+
+		case 0x13: // Emit type 0x24, random walk.
+		{
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x24;
+				NS->Heat  = S->Heat;
+				NS->X     = (BYTE)((RandByte() & 0x1f) + (signed char)S->X) & (BYTE)UMask;
+				NS->Y     = (BYTE)((RandByte() & 0x1f) + (signed char)S->Y) & (BYTE)VMask;
+				NS->ByteA = (BYTE)((RandByte() & 0x1f) - 0x0f);
+				NS->ByteB = 0x81;
+				NS->ByteC = 0;
+				NS->ByteD = 0;
+			}
+			if( (RandByte() & 0xf) == 0xf )
+				S->X = (BYTE)(((RandByte() & 0xf) + (signed char)S->X - 7) & UMask);
+			if( (RandByte() & 0xf) == 0xf )
+				S->Y = (BYTE)(((RandByte() & 0xf) + (signed char)S->Y - 7) & VMask);
+			break;
+		}
+
+		case 0x14: // Emit type 0x25 at nearby pos, random walk (LAB_105049af).
+		{
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x25;
+				NS->Heat  = 0;  // not set in Ghidra for 0x14
+				NS->X     = (BYTE)((RandByte() & 0x1f) + (signed char)S->X) & (BYTE)UMask;
+				NS->Y     = (BYTE)((RandByte() & 0x1f) + (signed char)S->Y) & (BYTE)VMask;
+				NS->ByteA = S->ByteA;
+				NS->ByteB = S->ByteB;
+				NS->ByteC = S->ByteD;  // ByteC = pFVar2[7]
+				NS->ByteD = 0;
+			}
+			goto LAB_105049af_14;
+		}
+
+		case 0x15: // Emit type 0x25 (ByteC-scaled), random walk.
+		{
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x25;
+				NS->Heat  = 0;
+				NS->X     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->X) & (BYTE)UMask;
+				NS->Y     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->Y) & (BYTE)VMask;
+				NS->ByteA = S->ByteA;
+				NS->ByteB = S->ByteB;
+				NS->ByteC = S->ByteD;
+				NS->ByteD = 0;
+			}
+			break;
+		}
 
 		case 0x16: // Static plot of ByteB.
 			Pixels[Offset] = S->ByteB;
 			break;
 
-		case 0x20: // Fading spark — decrement heat by 5.
+		case 0x17: // Delayed flash ramp (full heat).
+			if( S->Heat != 0 )
+			{
+				if( S->ByteC == 0 )
+				{
+					if( RandByte() >= S->ByteD )
+						S->ByteC = (BYTE)((RandByte() + 1) & 5);
+				}
+				else
+				{
+					S->ByteC--;
+					LineSeg Seg; Seg.X1=S->X; Seg.Y1=S->Y; Seg.X2=S->ByteA; Seg.Y2=S->ByteB;
+					DrawFlashRamp( Seg, S->Heat, S->Heat );
+				}
+			}
+			break;
+
+		case 0x18: // Delayed flash ramp (dimmed).
+			if( S->Heat != 0 )
+			{
+				if( S->ByteC == 0 )
+				{
+					if( RandByte() >= S->ByteD )
+						S->ByteC = (BYTE)((RandByte() + 1) & 5);
+				}
+				else
+				{
+					S->ByteC--;
+					LineSeg Seg; Seg.X1=S->X; Seg.Y1=S->Y; Seg.X2=S->ByteA; Seg.Y2=S->ByteB;
+					DrawFlashRamp( Seg, S->Heat, (BYTE)(S->Heat >> 3) );
+				}
+			}
+			break;
+
+		case 0x19: // Random radial flash ramp.
+			if( RandByte() < S->ByteD )
+			{
+				DWORD r = RandByte();
+				INT iX = ((INT)(GSinU[r & 0xff]       * (DWORD)S->ByteC) >> 8) - (INT)S->ByteC / 2;
+				INT iY = ((INT)(GSinU[(r+0x40)&0xff]  * (DWORD)S->ByteC) >> 8) - (INT)S->ByteC / 2;
+				BYTE bX = (BYTE)(iX < 1 ? ((-iX) | 1) : (iX & 0xfe));
+				BYTE bY = (BYTE)(iY < 1 ? ((-iY) | 1) : (iY & 0xfe));
+				LineSeg Seg; Seg.X1=S->X; Seg.Y1=S->Y; Seg.X2=bX; Seg.Y2=bY;
+				DrawFlashRamp( Seg, S->Heat, (BYTE)(S->Heat >> 2) );
+			}
+			break;
+
+		case 0x1a: // Emit type 0x27, advance ByteA.
 		{
-			S->Heat -= 5;
-			if( S->Heat < 0xfb )
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
 			{
-				Pixels[Offset] = S->Heat;
-				MoveSpark( S );
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x27;
+				NS->Heat  = S->Heat;
+				NS->X     = S->X;  NS->Y = S->Y;
+				NS->ByteA = 0;
+				NS->ByteB = S->ByteA;
+				NS->ByteC = S->ByteB;
+				NS->ByteD = S->ByteD;
 			}
-			else
-			{
-				// Remove spark.
-				INT Last = INT_AT(this, 0x108) - 1;
-				INT_AT(this, 0x108) = Last;
-				*S = Sparks[Last];
-				i--;
-			}
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteC);
 			break;
 		}
 
-		case 0x21: // Fading spark — decrement by ByteD.
+		case 0x1b: // Emit type 0x2b at ~8%, random walk.
+		{
+			if( RandByte() < 0x14 )
+			{
+				INT _n = INT_AT(this, 0x108);
+				if( _n < MaxSparks )
+				{
+					INT_AT(this, 0x108) = _n + 1;
+					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+					NS->Type  = 0x2b;
+					NS->Heat  = S->Heat;
+					NS->X     = (BYTE)((RandByte() & 0x1f) + (signed char)S->X) & (BYTE)UMask;
+					NS->Y     = (BYTE)((RandByte() & 0x1f) + (signed char)S->Y) & (BYTE)VMask;
+					NS->ByteA = RandByte();
+					NS->ByteB = 0;
+					NS->ByteC = S->ByteC;
+					NS->ByteD = RandByte();
+				}
+			}
+			if( (RandByte() & 0xf) == 0xf )
+				S->X = (BYTE)(((RandByte() & 0xf) + (signed char)S->X - 7) & UMask);
+			if( (RandByte() & 0xf) == 0xf )
+				S->Y = (BYTE)(((RandByte() & 0xf) + (signed char)S->Y - 7) & VMask);
+			break;
+		}
+
+		case 0x1c: // Emit type 0x28, advance ByteA.
+		{
+			INT _n = INT_AT(this, 0x108);
+			if( _n < MaxSparks )
+			{
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x28;
+				NS->Heat  = S->Heat;
+				NS->X     = S->X;   NS->Y     = S->Y;
+				NS->ByteA = S->ByteA;
+				NS->ByteB = S->ByteB;
+				NS->ByteC = S->ByteC;
+				NS->ByteD = 2;
+			}
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteD);
+			break;
+		}
+
+		case 0x1d: // Horizontal orbit arc.
+		{
+			DWORD ang = (DWORD)S->ByteA;
+			DWORD plotX = ((DWORD)((GSinU[ang] * (DWORD)S->Heat) >> 8) + (DWORD)S->X) & UMask;
+			Pixels[((DWORD)S->Y << UBits) + plotX] = GOrbBright[(BYTE)((signed char)S->ByteA + 0x40)];
+			S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteC);
+			break;
+		}
+
+		case 0x1e: // Vertical orbit arc.
+		{
+			DWORD ang = (DWORD)S->ByteB;
+			DWORD plotY = ((DWORD)((GSinU[ang] * (DWORD)S->Heat) >> 8) + (DWORD)S->Y) & VMask;
+			Pixels[(plotY << UBits) + (DWORD)S->X] = GOrbBright[(BYTE)((signed char)S->ByteB + 0x40)];
+			S->ByteB = (BYTE)((signed char)S->ByteB + (signed char)S->ByteD);
+			break;
+		}
+
+		case 0x20: // Fade by 5; remove below threshold.
+		{
+			S->Heat = (BYTE)((signed char)S->Heat - 5);
+			if( (BYTE)S->Heat < 0xfb )
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				MoveSpark( S );
+			}
+			else { REMOVE_SPARK }
+			break;
+		}
+
+		case 0x21: // Fade by ByteD; remove when depleted.
 		{
 			S->Heat = (BYTE)((signed char)S->Heat - (signed char)S->ByteD);
-			if( S->ByteD < S->Heat )
+			if( (BYTE)S->ByteD < (BYTE)S->Heat )
 			{
-				Pixels[Offset] = S->Heat;
+				Pixels[SPARK_OFF(S)] = S->Heat;
 				MoveSpark( S );
 			}
+			else { REMOVE_SPARK }
+			break;
+		}
+
+		case 0x22: // Countdown ByteC; remove at 0.
+		{
+			S->ByteC--;
+			if( S->ByteC == 0 ) { REMOVE_SPARK }
 			else
 			{
-				INT Last = INT_AT(this, 0x108) - 1;
-				INT_AT(this, 0x108) = Last;
-				*S = Sparks[Last];
-				i--;
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				MoveSpark( S );
+				if( (signed char)S->ByteB < 0x7a ) S->ByteB += 3;
 			}
 			break;
 		}
 
-		case 0x22: // Countdown spark — decrement ByteC.
+		case 0x23: // Fade ByteC down by 3; plot ByteC value; remove below 0xbf.
 		{
-			S->ByteC--;
-			if( S->ByteC == 0 )
-			{
-				INT Last = INT_AT(this, 0x108) - 1;
-				INT_AT(this, 0x108) = Last;
-				*S = Sparks[Last];
-				i--;
-			}
+			S->ByteC = (BYTE)((signed char)S->ByteC - 3);
+			if( (BYTE)S->ByteC < 0xbf ) { REMOVE_SPARK }
 			else
 			{
-				Pixels[Offset] = S->Heat;
+				Pixels[SPARK_OFF(S)] = S->ByteC;
+				MoveSparkTwo( S );
+			}
+			break;
+		}
+
+		case 0x24: // Brighten ByteC by 4; plot ByteC; remove above 0xf9.
+		{
+			S->ByteC = (BYTE)((signed char)S->ByteC + 4);
+			if( (BYTE)S->ByteC > 0xf9 ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->ByteC;
+				MoveSparkTwo( S );
+			}
+			break;
+		}
+
+		case 0x25: // Brighten ByteC by 4; plot ByteC; remove at >= 0xfa.
+		{
+			S->ByteC = (BYTE)((signed char)S->ByteC + 4);
+			if( (BYTE)S->ByteC >= 0xfa ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->ByteC;
 				MoveSpark( S );
-				if( (signed char)S->ByteB < 0x7a )
-					S->ByteB += 3;
+			}
+			break;
+		}
+
+		case 0x26: // Countdown ByteC (unsigned); plot Heat; remove on wrap to 0xff.
+		{
+			BYTE prev = S->ByteC;
+			S->ByteC--;
+			if( S->ByteC == 0xff ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				MoveSpark( S );
+			}
+			break;
+		}
+
+		case 0x27: // Sub-pixel orbit along sine path; countdown ByteC.
+		{
+			BYTE prev = S->ByteC;
+			S->ByteC--;
+			if( S->ByteC == 0xff ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				// Advance 16-bit sub-pixel angle accumulator (ByteA=frac, ByteB=int).
+				DWORD acc = (DWORD)S->ByteA | ((DWORD)S->ByteB << 8);
+				acc += (DWORD)S->ByteD * 0x10;
+				S->ByteA = (BYTE)(acc & 0xff);
+				S->ByteB = (BYTE)(acc >> 8);
+				DWORD ang = (DWORD)S->ByteB;
+				signed char DX = GSinS[(ang + 0x40) & 0xff];  // cosine
+				signed char DY = GSinS[ang];                    // sine
+				MoveSparkXY( S, DX, DY );
+			}
+			break;
+		}
+
+		case 0x28: // Circular orbit arc; countdown ByteC.
+		{
+			BYTE prev = S->ByteC;
+			S->ByteC--;
+			if( S->ByteC == 0xff ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				signed char DX = (signed char)((INT)GSinU[((BYTE)S->ByteA + 0x40) & 0xff] - 0x80);
+				S->ByteA = (BYTE)((signed char)S->ByteA + (signed char)S->ByteD);
+				MoveSparkXY( S, DX, (signed char)S->ByteB );
+			}
+			break;
+		}
+
+		case 0x29: // Fade by ByteC; remove below 0xfa.
+		{
+			S->Heat = (BYTE)((signed char)S->Heat - (signed char)S->ByteC);
+			if( (BYTE)S->Heat < 0xfa ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				MoveSpark( S );
+			}
+			break;
+		}
+
+		case 0x2a: // Fade by ByteD; remove below 0x33; accelerate ByteB every other frame.
+		{
+			S->Heat = (BYTE)((signed char)S->Heat - (signed char)S->ByteD);
+			if( (BYTE)S->Heat < 0x33 ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				MoveSpark( S );
+				if( ((BYTE_AT(this, 0xe8) & 1) != 0) && ((signed char)S->ByteB < 0x7c) )
+					S->ByteB = (BYTE)((signed char)S->ByteB + 3);
+			}
+			break;
+		}
+
+		case 0x2b: // Sinusoidal wobble; countdown ByteC.
+		{
+			BYTE prev = S->ByteC;
+			S->ByteC--;
+			if( S->ByteC == 0xff ) { REMOVE_SPARK }
+			else
+			{
+				Pixels[SPARK_OFF(S)] = S->Heat;
+				BYTE wob = (BYTE)((signed char)S->ByteA + 7) & 0x7f;
+				S->ByteA = (BYTE)((signed char)S->ByteA + 7);
+				if( wob > 0x3f ) wob = 0x7f - wob;
+				MoveSparkAngle( S, (BYTE)((signed char)S->ByteD + (signed char)wob) );
 			}
 			break;
 		}
 
 		default:
-			// Unimplemented spark types — plot heat and move.
 			if( S->Heat > 0 )
-				Pixels[Offset] = S->Heat;
+				Pixels[SPARK_OFF(S)] = S->Heat;
 			MoveSpark( S );
 			break;
 		}
+		continue;
+
+		LAB_105049af_0f:
+		LAB_105049af_14:
+		{
+			S->X = (BYTE)(((RandByte() & 7) - (RandByte() & 7) + (signed char)S->X) & UMask);
+			S->Y = (BYTE)(((RandByte() & 7) - (RandByte() & 7) + (signed char)S->Y) & VMask);
+		}
 	}
+
+#undef SPARK_OFF
+#undef SPAWN_BEGIN
+#undef SPAWN_END
+#undef REMOVE_SPARK
 }
 
 /*-----------------------------------------------------------------------------
@@ -883,36 +1698,409 @@ void UWaterTexture::DeleteDrops( INT X, INT Y, INT Z )
 
 void UWaterTexture::CalculateWater()
 {
-	// Ghidra at 0x5160: ~4400-line optimised 2D wave simulation kernel.
-	// Operates on the SourceFields buffer (this+0x900) and writes results
-	// to the mip pixel data. Uses a half-resolution grid with bilinear
-	// interpolation via a 1024-entry lookup table (WaterTable at this+0x904).
+	// Ghidra: 0x5160, ~4400 bytes (heavily loop-unrolled 2-D wave simulation).
 	//
-	// The algorithm alternates between even/odd frames (WaterParity at
-	// this+0x1308) to perform a two-pass Laplacian smoothing with
-	// difference-based edge detection for the water surface normals.
+	// Algorithm:
+	//   SourceFields (this+0x900) holds two half-resolution height maps
+	//   back-to-back (ping-pong).  Each frame the parity byte (this+0x1308)
+	//   selects which half is source and which is destination.
+	//   Wave step  : dst[x,y] = WaveTable [laplacian + 512]
+	//     where laplacian = sum_4_neighbors - 2*center, table at this+0xd08.
+	//   Render step: pixel   = RenderTable[dX + dY    + 512]
+	//     where dX = right-left, dY = down-up differences, table at this+0x904.
+	//   Output is bilinearly upsampled 2x to the full-res mip.
 	//
-	// TODO: Full implementation from Ghidra decompilation.
-	// The game runs without this — water textures simply don't animate.
+	// DIVERGENCE: uses simple 2x2 nearest-neighbour upsampling instead of
+	// the Ghidra 4-subpixel bilinear interpolation.  The wave physics and
+	// table lookups are faithful to the Ghidra algorithm.
+
+	BYTE* Pixels = GetMipPixels( this );
+	BYTE* SF     = (BYTE*)PTR_AT(this, 0x900);
+	if( !Pixels || !SF ) return;
+
+	INT HalfW = INT_AT(this, 0x60) / 2;
+	INT HalfH = INT_AT(this, 0x64) / 2;
+	if( HalfW < 4 || HalfH < 2 ) return;
+
+	INT   HalfSize = HalfW * HalfH;
+	BYTE  Parity   = BYTE_AT(this, 0x1308);
+	BYTE_AT(this, 0x1308) = Parity + 1;
+
+	BYTE* Src = (Parity & 1) ? (SF + HalfSize) : SF;
+	BYTE* Dst = (Parity & 1) ? SF               : (SF + HalfSize);
+
+	// Wave simulation table: at this+0xd08, centred at +0xf08 (=0xd08+0x200).
+	BYTE* WaveTable   = (BYTE*)this + 0xd08;
+	// Render difference table: at this+0x904, centred at +0xb04 (=0x904+0x200).
+	BYTE* RenderTable = (BYTE*)this + 0x904;
+
+	BYTE UBits = BYTE_AT(this, 0x5b) & 0x1f;
+	INT  USize = INT_AT(this, 0x60);
+	INT  VSize = INT_AT(this, 0x64);
+
+	// --- wave update ---
+	for( INT Y = 0; Y < HalfH; Y++ )
+	{
+		INT Yp = (Y > 0)          ? Y - 1 : HalfH - 1;
+		INT Yn = (Y < HalfH - 1)  ? Y + 1 : 0;
+		for( INT X = 0; X < HalfW; X++ )
+		{
+			INT Xp = (X > 0)         ? X - 1 : HalfW - 1;
+			INT Xn = (X < HalfW - 1) ? X + 1 : 0;
+			INT c  = (INT)Src[Y*HalfW + X];
+			INT nb = (INT)Src[Yp*HalfW + X]
+			       + (INT)Src[Yn*HalfW + X]
+			       + (INT)Src[Y*HalfW  + Xp]
+			       + (INT)Src[Y*HalfW  + Xn];
+			INT Lap = nb - 2*c; // range -510..+1020
+			Dst[Y*HalfW + X] = WaveTable[Lap + 512];
+		}
+	}
+
+	// --- render to full-res mip ---
+	for( INT Y = 0; Y < HalfH; Y++ )
+	{
+		INT Yp = (Y > 0)         ? Y - 1 : HalfH - 1;
+		INT Yn = (Y < HalfH - 1) ? Y + 1 : 0;
+		for( INT X = 0; X < HalfW; X++ )
+		{
+			INT Xp = (X > 0)         ? X - 1 : HalfW - 1;
+			INT Xn = (X < HalfW - 1) ? X + 1 : 0;
+			INT dX = (INT)Dst[Y*HalfW + Xn]  - (INT)Dst[Y*HalfW  + Xp]; // horiz diff
+			INT dY = (INT)Dst[Yn*HalfW + X]  - (INT)Dst[Yp*HalfW + X];  // vert diff
+			BYTE Val = RenderTable[dX + dY + 512]; // index range 2..1022
+			INT xo = X * 2;
+			INT yo = Y * 2;
+			Pixels[(yo       << UBits) + xo]     = Val;
+			Pixels[(yo       << UBits) + xo + 1] = Val;
+			if( yo + 1 < VSize )
+			{
+				Pixels[((yo + 1) << UBits) + xo]     = Val;
+				Pixels[((yo + 1) << UBits) + xo + 1] = Val;
+			}
+		}
+	}
 }
 
 void UWaterTexture::WaterRedrawDrops()
 {
-	// Ghidra at 0x18e0: ~2000-line drop simulation with 20+ drop types.
-	// Iterates the Drops array, executing type-specific behaviour:
-	//   Type 0x00: static drop
-	//   Type 0x01-0x03: oscillating drops (sine-based)
-	//   Type 0x04-0x05: random walking drops
-	//   Type 0x06-0x07: orbiting drops (phase accumulator)
-	//   Type 0x08-0x0b: line/area fills
-	//   Type 0x0c-0x0f: oscillating line/area fills
-	//   Type 0x10: random scatter
-	//   Type 0x11: area fill
-	//   Type 0x12-0x13: pulsing drops
-	//   Type 0x40-0x41: reverse-orbiting drops
+	// Ghidra: 0x18e0, ~2000 bytes — full drop-type switch.
+	// Iterates Drops[], executing type-specific behaviour.  Each drop writes
+	// into the BOTH halves of the SourceFields buffer (both ping-pong planes)
+	// so the value persists regardless of which half is "current".
 	//
-	// TODO: Full implementation from Ghidra decompilation.
-	// The game runs without this — water drop effects don't appear.
+	// Drop layout at this+0x100, 8 bytes each:
+	//   [0] Type  [1] Depth/Heat  [2] X  [3] Y  [4] ByteA  [5] ByteB
+	//   [6] ByteC [7] ByteD
+	//
+	// DIVERGENCE: FUN_10509f60 approximated by RandByte() / appRand().
+	// sine/cosine lookups use GSinU[] (DAT_105134f8).
+
+	InitFireTables();
+
+	DWORD HalfUMask = UINT_AT(this, 0xd8) >> 1;  // half-res X mask
+	DWORD HalfVMask = UINT_AT(this, 0xdc) >> 1;  // half-res Y mask
+	INT   SF        = PTR_AT(this, 0x900);
+	BYTE  UBits     = BYTE_AT(this, 0x5b) & 0x1f;
+	INT   HalfW     = INT_AT(this, 0x60) / 2;
+	INT   SF2       = SF + HalfW;                 // second ping-pong half, shifted by one row
+
+	INT_AT(this, 0xe8) = INT_AT(this, 0xe8) + 1;  // GlobalPhase++
+
+	INT NumDrops = INT_AT(this, 0xfc);
+	if( NumDrops <= 0 ) return;
+
+	BYTE* DropsBase = (BYTE*)this + 0x100;
+
+	for( INT i = 0; i < NumDrops; i++ )
+	{
+		BYTE* D = DropsBase + i * 8;
+		BYTE  DType  = D[0];
+		BYTE  DDepth = D[1];
+		BYTE  DX     = D[2];
+		BYTE  DY     = D[3];
+		// ByteA=D[4], ByteB=D[5], ByteC=D[6], ByteD=D[7]
+
+		DWORD uX   = (DWORD)DX & (HalfUMask & 0xff);
+		DWORD uY   = (DWORD)DY & (HalfVMask & 0xff);
+		INT   Base = (INT)( (uY << UBits) + uX );
+
+		switch( DType )
+		{
+		case 0x00: // static drop at depth
+		{
+			*(BYTE*)(SF  + Base) = DDepth;
+			*(BYTE*)(SF2 + Base) = DDepth;
+			break;
+		}
+		case 0x01: // oscillating, full amplitude
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[7]);
+			BYTE Val = GSinU[(BYTE)D[1]];
+			*(BYTE*)(SF  + Base) = Val;
+			*(BYTE*)(SF2 + Base) = Val;
+			break;
+		}
+		case 0x02: // oscillating, half amplitude
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[7]);
+			BYTE Val = (BYTE)( (GSinU[(BYTE)D[1]] >> 1) + 0x40 );
+			*(BYTE*)(SF  + Base) = Val;
+			*(BYTE*)(SF2 + Base) = Val;
+			break;
+		}
+		case 0x03: // oscillating, clamped at 0x80 minimum
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[7]);
+			BYTE Val = GSinU[(BYTE)D[1]];
+			if( Val < 0x80 ) Val = 0x80;
+			*(BYTE*)(SF  + Base) = Val;
+			*(BYTE*)(SF2 + Base) = Val;
+			break;
+		}
+		case 0x04: // random walk drop
+		{
+			BYTE r1 = RandByte(), r2 = RandByte();
+			D[2] = (BYTE)(( (INT)(r1 & 3) - (INT)(r2 & 3) + (signed char)D[2] ) & (HalfUMask & 0xff));
+			r1 = RandByte(); r2 = RandByte();
+			D[3] = (BYTE)(( (INT)(r1 & 3) - (INT)(r2 & 3) + (signed char)D[3] ) & (HalfVMask & 0xff));
+			*(BYTE*)(SF  + Base) = 0xb9;
+			*(BYTE*)(SF2 + Base) = 0x47;
+			break;
+		}
+		case 0x05: // random scatter
+		{
+			BYTE v = RandByte();
+			*(BYTE*)(SF  + Base) = v;
+			v = RandByte();
+			*(BYTE*)(SF2 + Base) = v;
+			break;
+		}
+		case 0x06: // orbital with orbit phase in ByteC/ByteD (16-bit accumulator)
+		{
+			DWORD Phase = ( (DWORD)D[5] * 0x100 + (DWORD)D[4] + (DWORD)D[6] + (DWORD)D[7] * 0x100 ) & 0xffff;
+			D[4] = (BYTE) Phase;
+			D[5] = (BYTE)(Phase >> 8);
+			DWORD OrbitX = ( (GSinU[Phase >> 8] >> 4) + (DWORD)DX ) & (HalfUMask & 0xff);
+			DWORD OrbitY = ( (GSinU[((Phase >> 8) + 0x40) & 0xff] >> 4) + (DWORD)DY ) & (HalfVMask & 0xff);
+			INT OBase = (INT)( (OrbitY << UBits) + OrbitX );
+			*(BYTE*)(SF  + OBase) = DDepth;
+			*(BYTE*)(SF2 + OBase) = DDepth;
+			break;
+		}
+		case 0x07: // orbital, different scale
+		{
+			DWORD Phase = ( (DWORD)D[4] + (DWORD)D[5] * 0x100 + (DWORD)D[7] * 0x100 - (DWORD)D[6] ) & 0xffff;
+			D[5] = (BYTE)(Phase >> 8);
+			D[4] = (BYTE) Phase;
+			DWORD OrbitX = ( (GSinU[Phase >> 8] >> 3) + (DWORD)DX ) & (HalfUMask & 0xff);
+			DWORD OrbitY = ( (GSinU[((Phase >> 8) + 0x40) & 0xff] >> 3) + (DWORD)DY ) & (HalfVMask & 0xff);
+			INT OBase = (INT)( (OrbitY << UBits) + OrbitX );
+			*(BYTE*)(SF  + OBase) = DDepth;
+			*(BYTE*)(SF2 + OBase) = DDepth;
+			break;
+		}
+		case 0x08: // horizontal line fill
+		{
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			DWORD CurX = uX;
+			for( INT j = 0; j < Len; j++ )
+			{
+				DWORD FX = CurX & (HalfUMask & 0xff);
+				INT FBase = (INT)( (uY << UBits) + FX );
+				*(BYTE*)(SF  + FBase) = DDepth;
+				*(BYTE*)(SF2 + FBase) = DDepth;
+				CurX++;
+			}
+			break;
+		}
+		case 0x09: // vertical line fill
+		{
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			DWORD CurY = uY;
+			for( INT j = 0; j < Len; j++ )
+			{
+				DWORD FY = CurY & (HalfVMask & 0xff);
+				INT FBase = (INT)( (FY << UBits) + uX );
+				*(BYTE*)(SF  + FBase) = DDepth;
+				*(BYTE*)(SF2 + FBase) = DDepth;
+				CurY++;
+			}
+			break;
+		}
+		case 0x0a: // diagonal line fill (down-left)
+		{
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			DWORD CurX = uX, CurY = uY;
+			for( INT j = 0; j <= Len; j++ )
+			{
+				DWORD FX = (uX - (DWORD)j) & (HalfUMask & 0xff);
+				DWORD FY = (uY + (DWORD)j) & (HalfVMask & 0xff);
+				INT FBase = (INT)( (FY << UBits) + FX );
+				*(BYTE*)(SF  + FBase) = DDepth;
+				*(BYTE*)(SF2 + FBase) = DDepth;
+			}
+			break;
+		}
+		case 0x0b: // diagonal line fill (down-right)
+		{
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			for( INT j = 0; j < Len; j++ )
+			{
+				DWORD FX = ((DWORD)j + uX) & (HalfUMask & 0xff);
+				DWORD FY = ((DWORD)j + uY) & (HalfVMask & 0xff);
+				INT FBase = (INT)( (FY << UBits) + FX );
+				*(BYTE*)(SF  + FBase) = DDepth;
+				*(BYTE*)(SF2 + FBase) = DDepth;
+			}
+			break;
+		}
+		case 0x0c: // oscillating horizontal line
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[6]);
+			BYTE Val = GSinU[(BYTE)D[1]];
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			INT Row = (INT)(uY << UBits);
+			DWORD CurX = uX;
+			for( INT j = 0; j < Len; j++ )
+			{
+				DWORD FX = CurX & (HalfUMask & 0xff);
+				*(BYTE*)(SF  + Row + FX) = Val;
+				*(BYTE*)(SF2 + Row + FX) = Val;
+				CurX++;
+			}
+			break;
+		}
+		case 0x0d: // oscillating vertical line
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[6]);
+			BYTE Val = GSinU[(BYTE)D[1]];
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			DWORD CurY = uY;
+			for( INT j = 0; j < Len; j++ )
+			{
+				DWORD FY = CurY & (HalfVMask & 0xff);
+				INT FBase = (INT)( (FY << UBits) + uX );
+				*(BYTE*)(SF  + FBase) = Val;
+				*(BYTE*)(SF2 + FBase) = Val;
+				CurY++;
+			}
+			break;
+		}
+		case 0x0e: // oscillating diagonal line (down-left)
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[6]);
+			BYTE Val = GSinU[(BYTE)D[1]];
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			for( INT j = 0; j <= Len; j++ )
+			{
+				DWORD FX = (uX - (DWORD)j) & (HalfUMask & 0xff);
+				DWORD FY = (uY + (DWORD)j) & (HalfVMask & 0xff);
+				INT FBase = (INT)( (FY << UBits) + FX );
+				*(BYTE*)(SF  + FBase) = Val;
+				*(BYTE*)(SF2 + FBase) = Val;
+			}
+			break;
+		}
+		case 0x0f: // oscillating diagonal line (down-right)
+		{
+			D[1] = (BYTE)((signed char)D[1] + (signed char)D[6]);
+			BYTE Val = GSinU[(BYTE)D[1]];
+			INT Len = ((INT)(D[7] >> 1)) + 1;
+			for( INT j = 0; j < Len; j++ )
+			{
+				DWORD FX = ((DWORD)j + uX) & (HalfUMask & 0xff);
+				DWORD FY = ((DWORD)j + uY) & (HalfVMask & 0xff);
+				INT FBase = (INT)( (FY << UBits) + FX );
+				*(BYTE*)(SF  + FBase) = Val;
+				*(BYTE*)(SF2 + FBase) = Val;
+			}
+			break;
+		}
+		case 0x10: // random scatter with occasional wander
+		{
+			BYTE r = RandByte();
+			if( (r & 0xf) == 0 )
+			{
+				BYTE r2 = RandByte(), r3 = RandByte();
+				DWORD ScX = ( ((INT)((r2 & 0xff) * (INT)D[7]) >> 8) + (INT)(signed char)D[2] ) & (HalfUMask & 0xff);
+				DWORD ScY = ( ((INT)((r3 & 0xff) * (INT)D[7]) >> 8) + (INT)(signed char)D[3] ) & (HalfVMask & 0xff);
+				INT FBase = (INT)( (ScY << UBits) + ScX );
+				*(BYTE*)(SF  + FBase) = DDepth;
+				*(BYTE*)(SF2 + FBase) = (BYTE)(~DDepth);
+			}
+			r = RandByte();
+			if( (r & 0xf) == 0xf ) { BYTE r2 = RandByte(); D[2] = (BYTE)((((r2 & 0xf) + (INT)(signed char)D[2]) - 7) & (HalfUMask & 0xff)); }
+			r = RandByte();
+			if( (r & 0xf) == 0xf ) { BYTE r2 = RandByte(); D[3] = (BYTE)((((r2 & 0xf) + (INT)(signed char)D[3]) - 7) & (HalfVMask & 0xff)); }
+			break;
+		}
+		case 0x11: // filled area
+		{
+			DWORD HalfSize11 = (DWORD)(D[7] >> 1);
+			if( HalfSize11 == 0 ) break;
+			for( DWORD fy = 0; fy < HalfSize11; fy++ )
+			{
+				DWORD FY = (uY + fy) & (HalfVMask & 0xff);
+				for( DWORD fx = 0; fx < HalfSize11; fx++ )
+				{
+					DWORD FX = (uX + fx) & (HalfUMask & 0xff);
+					INT FBase = (INT)( (FY << UBits) + FX );
+					*(BYTE*)(SF  + FBase) = DDepth;
+					*(BYTE*)(SF2 + FBase) = DDepth;
+				}
+			}
+			break;
+		}
+		case 0x12: // pulsing (counter wraps → plot + reset)
+		{
+			D[4] = (BYTE)((signed char)D[4] + (signed char)D[7]);
+			if( (BYTE)D[4] <= D[7] )
+			{
+				*(BYTE*)(SF  + Base) = DDepth;
+				*(BYTE*)(SF2 + Base) = (BYTE)(~DDepth);
+			}
+			break;
+		}
+		case 0x13: // pulsing with random reset
+		{
+			D[4] = (BYTE)((signed char)D[4] + (signed char)D[7]);
+			if( (BYTE)D[4] <= D[7] )
+			{
+				D[4] = RandByte();
+				*(BYTE*)(SF  + Base) = DDepth;
+				*(BYTE*)(SF2 + Base) = (BYTE)(~DDepth);
+			}
+			break;
+		}
+		case 0x40: // reverse-orbit, coarser scale
+		{
+			DWORD Phase = ( (DWORD)D[5] * 0x100 - (DWORD)D[6] + (DWORD)D[7] * 0x100 * (-1) + (DWORD)D[4] ) & 0xffff;
+			D[4] = (BYTE) Phase;
+			D[5] = (BYTE)(Phase >> 8);
+			DWORD OrbitX = ( (GSinU[Phase >> 8] >> 4) + (DWORD)DX ) & (HalfUMask & 0xff);
+			DWORD OrbitY = ( (GSinU[((Phase >> 8) + 0x40) & 0xff] >> 4) + (DWORD)DY ) & (HalfVMask & 0xff);
+			INT OBase = (INT)( (OrbitY << UBits) + OrbitX );
+			*(BYTE*)(SF  + OBase) = DDepth;
+			*(BYTE*)(SF2 + OBase) = DDepth;
+			break;
+		}
+		case 0x41: // reverse-orbit, finer scale
+		{
+			DWORD Phase = ( (DWORD)D[5] * 0x100 - (DWORD)D[6] + (DWORD)D[7] * 0x100 * (-1) + (DWORD)D[4] ) & 0xffff;
+			D[5] = (BYTE)(Phase >> 8);
+			D[4] = (BYTE) Phase;
+			DWORD OrbitX = ( (GSinU[Phase >> 8] >> 3) + (DWORD)DX ) & (HalfUMask & 0xff);
+			DWORD OrbitY = ( (GSinU[((Phase >> 8) + 0x40) & 0xff] >> 3) + (DWORD)DY ) & (HalfVMask & 0xff);
+			INT OBase = (INT)( (OrbitY << UBits) + OrbitX );
+			*(BYTE*)(SF  + OBase) = DDepth;
+			*(BYTE*)(SF2 + OBase) = DDepth;
+			break;
+		}
+		default:
+			break;
+		}
+	}
 }
 
 /*-----------------------------------------------------------------------------
@@ -975,13 +2163,80 @@ void UFluidTexture::PostLoad()
 
 void UFluidTexture::CalculateFluid()
 {
-	// Ghidra at 0x7600: ~4400-line optimised 2D fluid simulation kernel.
-	// Nearly identical structure to CalculateWater but uses summation
-	// (instead of differences) for the Laplacian — producing smoother
-	// blob-like fluid motion rather than sharp water ripples.
+	// Ghidra: 0x7600, ~3600 bytes (heavily loop-unrolled 2-D wave simulation).
 	//
-	// TODO: Full implementation from Ghidra decompilation.
-	// The game runs without this — fluid textures don't animate.
+	// Identical to UWaterTexture::CalculateWater except the render pass
+	// uses the SUM of the four neighbours (not differences) as the index
+	// into WaterTable, producing a smooth blob rather than a surface-normal
+	// displacement effect.
+	//
+	// DIVERGENCE: same simplifications as CalculateWater (nearest-neighbour
+	// 2×2 upsampling, no loop unrolling).
+
+	BYTE* Pixels = GetMipPixels( this );
+	BYTE* SF     = (BYTE*)PTR_AT(this, 0x900);
+	if( !Pixels || !SF ) return;
+
+	INT HalfW = INT_AT(this, 0x60) / 2;
+	INT HalfH = INT_AT(this, 0x64) / 2;
+	if( HalfW < 4 || HalfH < 2 ) return;
+
+	INT   HalfSize = HalfW * HalfH;
+	BYTE  Parity   = BYTE_AT(this, 0x1308);
+	BYTE_AT(this, 0x1308) = Parity + 1;
+
+	BYTE* Src = (Parity & 1) ? (SF + HalfSize) : SF;
+	BYTE* Dst = (Parity & 1) ? SF               : (SF + HalfSize);
+
+	BYTE* WaveTable  = (BYTE*)this + 0xd08;
+	BYTE* WaterTable = (BYTE*)this + 0x904; // sum-based render: 0..1020 → [0..0x3fc]
+
+	BYTE UBits = BYTE_AT(this, 0x5b) & 0x1f;
+	INT  VSize = INT_AT(this, 0x64);
+
+	// --- wave update (same as CalculateWater) ---
+	for( INT Y = 0; Y < HalfH; Y++ )
+	{
+		INT Yp = (Y > 0)          ? Y - 1 : HalfH - 1;
+		INT Yn = (Y < HalfH - 1)  ? Y + 1 : 0;
+		for( INT X = 0; X < HalfW; X++ )
+		{
+			INT Xp = (X > 0)         ? X - 1 : HalfW - 1;
+			INT Xn = (X < HalfW - 1) ? X + 1 : 0;
+			INT c  = (INT)Src[Y*HalfW + X];
+			INT nb = (INT)Src[Yp*HalfW + X]
+			       + (INT)Src[Yn*HalfW + X]
+			       + (INT)Src[Y*HalfW  + Xp]
+			       + (INT)Src[Y*HalfW  + Xn];
+			Dst[Y*HalfW + X] = WaveTable[nb - 2*c + 512];
+		}
+	}
+
+	// --- render: sum-based lookup (smooth blob appearance) ---
+	for( INT Y = 0; Y < HalfH; Y++ )
+	{
+		INT Yp = (Y > 0)         ? Y - 1 : HalfH - 1;
+		INT Yn = (Y < HalfH - 1) ? Y + 1 : 0;
+		for( INT X = 0; X < HalfW; X++ )
+		{
+			INT Xp = (X > 0)         ? X - 1 : HalfW - 1;
+			INT Xn = (X < HalfW - 1) ? X + 1 : 0;
+			INT Sum = (INT)Dst[Yp*HalfW + X]
+			        + (INT)Dst[Yn*HalfW + X]
+			        + (INT)Dst[Y*HalfW  + Xp]
+			        + (INT)Dst[Y*HalfW  + Xn]; // range 0..1020
+			BYTE Val = WaterTable[Sum];
+			INT xo = X * 2;
+			INT yo = Y * 2;
+			Pixels[(yo       << UBits) + xo]     = Val;
+			Pixels[(yo       << UBits) + xo + 1] = Val;
+			if( yo + 1 < VSize )
+			{
+				Pixels[((yo + 1) << UBits) + xo]     = Val;
+				Pixels[((yo + 1) << UBits) + xo + 1] = Val;
+			}
+		}
+	}
 }
 
 /*-----------------------------------------------------------------------------
@@ -1086,21 +2341,85 @@ void UIceTexture::RenderIce( FLOAT Delta )
 
 void UIceTexture::BlitIceTex()
 {
-	// Ghidra at 0x65c0: blits glass texture through source texture
-	// as a refraction map, writing to the output mip.
-	// Reads source texture pixels as displacement offsets into glass texture.
-	//
-	// TODO: Full implementation requires accessing source and glass
-	// texture mip data through their UTexture objects at this+0xf0/0xf4.
-	// Left as stub — ice textures won't render their refraction effect.
+	// Ghidra: 0x65c0, 380 bytes.
+	// Source texture (this+0xf4) pixels are used as X-displacement offsets into
+	// the glass texture (this+0xf0), writing to the output mip.  The glass row
+	// is selected by (OldVPos + Y) & VMask; the X lookup is
+	// (source_pixel + X + OldUPos) & UMask.
+	INT SrcTex   = PTR_AT(this, 0xf4);
+	INT GlassTex = PTR_AT(this, 0xf0);
+	if( !SrcTex || !GlassTex ) return;
+
+	// DIVERGENCE: skip vtable lock calls (Ghidra calls *(code*)**(ptr**)(mipArray+0x10)
+	// to lock non-resident textures). We assume they're already loaded.
+	BYTE* SrcPix   = (BYTE*)*(INT*)( PTR_AT(SrcTex,   0xbc) + 0x1c );
+	BYTE* GlassPix = (BYTE*)*(INT*)( PTR_AT(GlassTex, 0xbc) + 0x1c );
+	BYTE* DstPix   = GetMipPixels( this );
+	if( !SrcPix || !GlassPix || !DstPix ) return;
+
+	if( INT_AT(this, 300) != 0 ) return;  // TickFlag guard
+
+	INT   USize   = INT_AT(this, 0x60);
+	INT   VSize   = INT_AT(this, 0x64);
+	DWORD UMask   = UINT_AT(this, 0xd8);
+	DWORD VMask   = UINT_AT(this, 0xdc);
+	BYTE  UBits   = BYTE_AT(this, 0x5b) & 0x1f;
+	DWORD OldU    = (DWORD)appRound( FLOAT_AT(this, 0x110) );
+	DWORD OldV    = (DWORD)appRound( FLOAT_AT(this, 0x114) );
+
+	for( INT Y = 0; Y < VSize; Y++ )
+	{
+		INT DstRow  = Y << UBits;
+		INT SrcRow  = Y << UBits;
+		INT GlassRow = (INT)(( (VMask & OldV) + (DWORD)Y ) & VMask) << UBits;
+		for( INT X = 0; X < USize; X += 2 )
+		{
+			DstPix[DstRow + X]     = GlassPix[(( (DWORD)SrcPix[SrcRow+X]     + (DWORD)X     + (UMask & OldU) ) & UMask) + GlassRow];
+			DstPix[DstRow + X + 1] = GlassPix[(( (DWORD)SrcPix[SrcRow+X+1]   + (DWORD)(X+1) + (UMask & OldU) ) & UMask) + GlassRow];
+		}
+	}
 }
 
 void UIceTexture::BlitTexIce()
 {
-	// Ghidra at 0x6400: alternate blit mode — glass through source
-	// with reversed lookup order.
-	//
-	// TODO: Full implementation.
+	// Ghidra: 0x6400, 393 bytes.
+	// Alternate ice blit: glass pixel at (OldU+X & UMask, OldV+Y & VMask) is
+	// looked up through the SOURCE texture as a second-level displacement,
+	// then written to the output.
+	INT SrcTex   = PTR_AT(this, 0xf4);
+	INT GlassTex = PTR_AT(this, 0xf0);
+	if( !SrcTex || !GlassTex ) return;
+
+	// DIVERGENCE: skip vtable lock calls.
+	BYTE* GlassPix = (BYTE*)*(INT*)( PTR_AT(GlassTex, 0xbc) + 0x1c );
+	BYTE* DstPix   = GetMipPixels( this );
+	BYTE* SrcPix   = (BYTE*)*(INT*)( PTR_AT(SrcTex,   0xbc) + 0x1c );
+	if( !GlassPix || !DstPix || !SrcPix ) return;
+
+	if( INT_AT(this, 300) != 0 ) return;
+
+	INT   USize = INT_AT(this, 0x60);
+	INT   VSize = INT_AT(this, 0x64);
+	DWORD UMask = UINT_AT(this, 0xd8);
+	DWORD VMask = UINT_AT(this, 0xdc);
+	BYTE  UBits = BYTE_AT(this, 0x5b) & 0x1f;
+	DWORD OldU  = (DWORD)appRound( FLOAT_AT(this, 0x110) );
+	DWORD OldV  = (DWORD)appRound( FLOAT_AT(this, 0x114) );
+
+	for( INT Y = 0; Y < VSize; Y++ )
+	{
+		INT DstRow   = Y << UBits;
+		INT SrcRow   = Y << UBits;
+		INT GlassRow = (INT)(( (VMask & OldV) + (DWORD)Y ) & VMask) << UBits;
+		for( INT X = 0; X < USize; X += 2 )
+		{
+			// Lookup glass pixel, use its value as a secondary X displacement into source.
+			BYTE G0 = GlassPix[(( (UMask & OldU) + (DWORD)X     ) & UMask) + GlassRow];
+			BYTE G1 = GlassPix[(( (UMask & OldU) + (DWORD)(X+1) ) & UMask) + GlassRow];
+			DstPix[DstRow + X]     = SrcPix[(( (DWORD)G0 + (DWORD)X     ) & UMask) + SrcRow];
+			DstPix[DstRow + X + 1] = SrcPix[(( (DWORD)G1 + (DWORD)(X+1) ) & UMask) + SrcRow];
+		}
+	}
 }
 
 /*-----------------------------------------------------------------------------
@@ -1147,11 +2466,49 @@ void UWetTexture::Destroy()
 
 void UWetTexture::ApplyWetTexture()
 {
-	// Ghidra at 0x62c0: applies refraction from a source texture
-	// through a displacement table to the output pixels.
-	//
-	// TODO: Full implementation requires source texture access at this+0x1310.
-	// Left as stub — wet textures won't show their refraction effect.
+	// Ghidra: 0x62c0, 269 bytes.
+	// Reads source texture pixels as X-displacement offsets into the LocalBitmap
+	// (or source mip directly), then writes refractive output into the mip.
+	INT SrcTex = PTR_AT(this, 0x1310);
+	if( !SrcTex ) return;
+
+	BYTE* DstPixels = GetMipPixels( this );
+	if( !DstPixels ) return;
+
+	INT LocalBitmap = PTR_AT(this, 0x1318);
+	BYTE* SrcPixels;
+
+	if( LocalBitmap == 0 )
+	{
+		// Check source texture mip is loaded (ObjectFlags bit 5 = RF_LoadContextFlags cached).
+		// Ghidra: if (flags & 0x20) == 0, call the lock virtual (vtable[4]).
+		// DIVERGENCE: we skip the vtable lock and just access the mip directly.
+		if( PTR_AT(SrcTex, 0xc0) == 0 ) return;
+		// Verify source mip is large enough for our texture.
+		INT SrcMipsArr  = PTR_AT(SrcTex, 0xbc);
+		if( *(INT*)(SrcMipsArr + 0x20) < INT_AT(this, 0x64) * INT_AT(this, 0x60) ) return;
+		SrcPixels = (BYTE*)*(INT*)(SrcMipsArr + 0x1c);
+	}
+	else
+	{
+		SrcPixels = (BYTE*)LocalBitmap;
+	}
+
+	INT  VSize  = INT_AT(this, 0x64);
+	INT  USize  = INT_AT(this, 0x60);
+	DWORD UMask = UINT_AT(this, 0xd8);
+	BYTE  UBits = BYTE_AT(this, 0x5b) & 0x1f;
+
+	// For each row, each pair of pixels: displace X read by the pixel value itself.
+	for( INT Y = 0; Y < VSize; Y++ )
+	{
+		INT RowOff = Y << UBits;
+		for( INT X = 0; X < USize; X += 2 )
+		{
+			DstPixels[RowOff + X]     = SrcPixels[((DstPixels[RowOff + X]     + X    ) & UMask) + RowOff];
+			DstPixels[RowOff + X + 1] = SrcPixels[((DstPixels[RowOff + X + 1] + X + 1) & UMask) + RowOff];
+		}
+	}
 }
 
 void UWetTexture::SetRefractionTable()
