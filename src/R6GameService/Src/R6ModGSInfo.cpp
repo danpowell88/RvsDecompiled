@@ -12,6 +12,8 @@ IMPLEMENT_FUNCTION(UR6ModGSInfo, -1, execNativeInitModInfo)
 
 void UR6ModGSInfo::InitMODCDKey()
 {
+	guard(UR6ModGSInfo::InitMODCDKey);
+	unguard;
 }
 
 void UR6ModGSInfo::execNativeInitModInfo(FFrame& Stack, RESULT_DECL)

@@ -35,10 +35,14 @@ IMPLEMENT_FUNCTION(UR6GSServers, -1, execUnInitializeMSClient)
 
 void UR6GSServers::AddPlayerToIDList(FString, FString, FString, INT)
 {
+	guard(UR6GSServers::AddPlayerToIDList);
+	unguard;
 }
 
 void UR6GSServers::CDKeyDisconnecUser(FString)
 {
+	guard(UR6GSServers::CDKeyDisconnecUser);
+	unguard;
 }
 
 INT UR6GSServers::CDKeyValidateUser(FString, INT, INT)
@@ -48,42 +52,62 @@ INT UR6GSServers::CDKeyValidateUser(FString, INT, INT)
 
 void UR6GSServers::CancelGSCDKeyActID()
 {
+	guard(UR6GSServers::CancelGSCDKeyActID);
+	unguard;
 }
 
 void UR6GSServers::CancelGSCDKeyAuthID()
 {
+	guard(UR6GSServers::CancelGSCDKeyAuthID);
+	unguard;
 }
 
 void UR6GSServers::CopyActivationIDInByteArray(BYTE *, BYTE *)
 {
+	guard(UR6GSServers::CopyActivationIDInByteArray);
+	unguard;
 }
 
 void UR6GSServers::CreatedCDKey()
 {
+	guard(UR6GSServers::CreatedCDKey);
+	unguard;
 }
 
 void UR6GSServers::Destroy()
 {
+	guard(UR6GSServers::Destroy);
+	unguard;
 }
 
 void UR6GSServers::DisconnectAllCDKeyPlayers()
 {
+	guard(UR6GSServers::DisconnectAllCDKeyPlayers);
+	unguard;
 }
 
 void UR6GSServers::EnterCDKey(FString)
 {
+	guard(UR6GSServers::EnterCDKey);
+	unguard;
 }
 
 void UR6GSServers::GSClientPostMessage(BYTE)
 {
+	guard(UR6GSServers::GSClientPostMessage);
+	unguard;
 }
 
 void UR6GSServers::GSClientUpdateServerInfo()
 {
+	guard(UR6GSServers::GSClientUpdateServerInfo);
+	unguard;
 }
 
 void UR6GSServers::GameServiceManager(INT, INT, INT, INT)
 {
+	guard(UR6GSServers::GameServiceManager);
+	unguard;
 }
 
 FString UR6GSServers::GetAuthID(INT)
@@ -123,10 +147,14 @@ INT UR6GSServers::GetServerRegistered()
 
 void UR6GSServers::Init(FString)
 {
+	guard(UR6GSServers::Init);
+	unguard;
 }
 
 void UR6GSServers::InitCDKey(INT, INT)
 {
+	guard(UR6GSServers::InitCDKey);
+	unguard;
 }
 
 INT UR6GSServers::InitGSCDKey()
@@ -141,10 +169,14 @@ INT UR6GSServers::InitGSClient()
 
 void UR6GSServers::InitMSClient()
 {
+	guard(UR6GSServers::InitMSClient);
+	unguard;
 }
 
 void UR6GSServers::InitProcessUpdateUbiServer(AGameInfo *, ALevelInfo *)
 {
+	guard(UR6GSServers::InitProcessUpdateUbiServer);
+	unguard;
 }
 
 INT UR6GSServers::InitializeMSClient()
@@ -174,14 +206,20 @@ INT UR6GSServers::IsServerJoined()
 
 void UR6GSServers::LogGSVersion()
 {
+	guard(UR6GSServers::LogGSVersion);
+	unguard;
 }
 
 void UR6GSServers::LogOutServer()
 {
+	guard(UR6GSServers::LogOutServer);
+	unguard;
 }
 
 void UR6GSServers::MSCLientJoinServer(INT, INT, FString)
 {
+	guard(UR6GSServers::MSCLientJoinServer);
+	unguard;
 }
 
 INT UR6GSServers::MSCLientLeaveServer()
@@ -191,14 +229,20 @@ INT UR6GSServers::MSCLientLeaveServer()
 
 void UR6GSServers::MSClientServerConnected(INT, INT)
 {
+	guard(UR6GSServers::MSClientServerConnected);
+	unguard;
 }
 
 void UR6GSServers::MasterServerManager(AR6AbstractGameInfo *, ALevelInfo *)
 {
+	guard(UR6GSServers::MasterServerManager);
+	unguard;
 }
 
 void UR6GSServers::NativeCDKeyPlayerStatusReply(FString, BYTE, INT)
 {
+	guard(UR6GSServers::NativeCDKeyPlayerStatusReply);
+	unguard;
 }
 
 INT UR6GSServers::OnSameSubNet(FString)
@@ -208,6 +252,8 @@ INT UR6GSServers::OnSameSubNet(FString)
 
 void UR6GSServers::PingRequest(FString, FString)
 {
+	guard(UR6GSServers::PingRequest);
+	unguard;
 }
 
 INT UR6GSServers::PlayerIsInIDList(FString, FString, INT)
@@ -217,90 +263,134 @@ INT UR6GSServers::PlayerIsInIDList(FString, FString, INT)
 
 void UR6GSServers::PollCallbacks(INT, INT, INT, INT)
 {
+	guard(UR6GSServers::PollCallbacks);
+	unguard;
 }
 
 void UR6GSServers::PollClientCDKeyCallbacks(INT, INT, INT)
 {
+	guard(UR6GSServers::PollClientCDKeyCallbacks);
+	unguard;
 }
 
 void UR6GSServers::PollGSClientCallbacks(INT)
 {
+	guard(UR6GSServers::PollGSClientCallbacks);
+	unguard;
 }
 
 void UR6GSServers::PollMSClientCallbacks(INT)
 {
+	guard(UR6GSServers::PollMSClientCallbacks);
+	unguard;
 }
 
 void UR6GSServers::PollPingManager(INT)
 {
+	guard(UR6GSServers::PollPingManager);
+	unguard;
 }
 
 void UR6GSServers::PollRegServerCallbacks(INT)
 {
+	guard(UR6GSServers::PollRegServerCallbacks);
+	unguard;
 }
 
 void UR6GSServers::ProcessAuthIdRequest(AController *)
 {
+	guard(UR6GSServers::ProcessAuthIdRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessInternetSrv(AR6AbstractGameInfo *, ALevelInfo *)
 {
+	guard(UR6GSServers::ProcessInternetSrv);
+	unguard;
 }
 
 void UR6GSServers::ProcessIsLobbyDisconnect(FLOAT *)
 {
+	guard(UR6GSServers::ProcessIsLobbyDisconnect);
+	unguard;
 }
 
 void UR6GSServers::ProcessIsRouterDisconnect(FLOAT *)
 {
+	guard(UR6GSServers::ProcessIsRouterDisconnect);
+	unguard;
 }
 
 void UR6GSServers::ProcessJoinServer(FLOAT *)
 {
+	guard(UR6GSServers::ProcessJoinServer);
+	unguard;
 }
 
 void UR6GSServers::ProcessJoinServerRequest()
 {
+	guard(UR6GSServers::ProcessJoinServerRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessLoginMasterSrv(INT, FLOAT *)
 {
+	guard(UR6GSServers::ProcessLoginMasterSrv);
+	unguard;
 }
 
 void UR6GSServers::ProcessMSClientInitRequest()
 {
+	guard(UR6GSServers::ProcessMSClientInitRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessPC_CDKeyRequest(AR6AbstractGameInfo *, ALevelInfo *, APlayerController *, INT)
 {
+	guard(UR6GSServers::ProcessPC_CDKeyRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessRegServerGetLobbiesRequest()
 {
+	guard(UR6GSServers::ProcessRegServerGetLobbiesRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessRegServerLoginRequest()
 {
+	guard(UR6GSServers::ProcessRegServerLoginRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessRegServerLoginRouterRequest()
 {
+	guard(UR6GSServers::ProcessRegServerLoginRouterRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessRegServerRegOnLobbyRequest()
 {
+	guard(UR6GSServers::ProcessRegServerRegOnLobbyRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessRegServerUpdateRequest()
 {
+	guard(UR6GSServers::ProcessRegServerUpdateRequest);
+	unguard;
 }
 
 void UR6GSServers::ProcessSubmitMatchResultReply()
 {
+	guard(UR6GSServers::ProcessSubmitMatchResultReply);
+	unguard;
 }
 
 void UR6GSServers::ProcessUbiComJoinServer(INT, INT, FString, FLOAT *)
 {
+	guard(UR6GSServers::ProcessUbiComJoinServer);
+	unguard;
 }
 
 INT UR6GSServers::ReceiveAltInfo()
@@ -315,66 +405,98 @@ INT UR6GSServers::ReceiveServer()
 
 void UR6GSServers::ReceiveValidation()
 {
+	guard(UR6GSServers::ReceiveValidation);
+	unguard;
 }
 
 void UR6GSServers::RefreshOneServer(INT)
 {
+	guard(UR6GSServers::RefreshOneServer);
+	unguard;
 }
 
 void UR6GSServers::RefreshServers()
 {
+	guard(UR6GSServers::RefreshServers);
+	unguard;
 }
 
 void UR6GSServers::RegServerGetLobbies()
 {
+	guard(UR6GSServers::RegServerGetLobbies);
+	unguard;
 }
 
 void UR6GSServers::RegServerRouterLogin()
 {
+	guard(UR6GSServers::RegServerRouterLogin);
+	unguard;
 }
 
 void UR6GSServers::RegisterServer()
 {
+	guard(UR6GSServers::RegisterServer);
+	unguard;
 }
 
 void UR6GSServers::RequestActivation(FString, INT)
 {
+	guard(UR6GSServers::RequestActivation);
+	unguard;
 }
 
 void UR6GSServers::RequestAuthorization(INT)
 {
+	guard(UR6GSServers::RequestAuthorization);
+	unguard;
 }
 
 void UR6GSServers::RequestGSCDKeyActID()
 {
+	guard(UR6GSServers::RequestGSCDKeyActID);
+	unguard;
 }
 
 void UR6GSServers::RequestGSCDKeyAuthID()
 {
+	guard(UR6GSServers::RequestGSCDKeyAuthID);
+	unguard;
 }
 
 void UR6GSServers::RequestModCDKeyProcess(INT)
 {
+	guard(UR6GSServers::RequestModCDKeyProcess);
+	unguard;
 }
 
 void UR6GSServers::ResetAuthId()
 {
+	guard(UR6GSServers::ResetAuthId);
+	unguard;
 }
 
 void UR6GSServers::RouterDisconnect()
 {
+	guard(UR6GSServers::RouterDisconnect);
+	unguard;
 }
 
 void UR6GSServers::ServerLogin()
 {
+	guard(UR6GSServers::ServerLogin);
+	unguard;
 }
 
 void UR6GSServers::ServerRoundFinish()
 {
+	guard(UR6GSServers::ServerRoundFinish);
+	unguard;
 }
 
 void UR6GSServers::ServerRoundStart(INT)
 {
+	guard(UR6GSServers::ServerRoundStart);
+	unguard;
 }
 
 INT UR6GSServers::SetGSClientComInterface()
@@ -384,26 +506,38 @@ INT UR6GSServers::SetGSClientComInterface()
 
 void UR6GSServers::SetGSGameState(BYTE)
 {
+	guard(UR6GSServers::SetGSGameState);
+	unguard;
 }
 
 void UR6GSServers::SetGameServiceRequestState(BYTE)
 {
+	guard(UR6GSServers::SetGameServiceRequestState);
+	unguard;
 }
 
 void UR6GSServers::SetLoginRegServer(BYTE)
 {
+	guard(UR6GSServers::SetLoginRegServer);
+	unguard;
 }
 
 void UR6GSServers::SetRegServerLoginRequest(BYTE)
 {
+	guard(UR6GSServers::SetRegServerLoginRequest);
+	unguard;
 }
 
 void UR6GSServers::SubmitMatchResult()
 {
+	guard(UR6GSServers::SubmitMatchResult);
+	unguard;
 }
 
 void UR6GSServers::UnInitCDKey()
 {
+	guard(UR6GSServers::UnInitCDKey);
+	unguard;
 }
 
 INT UR6GSServers::UnInitMSClient()
@@ -413,10 +547,14 @@ INT UR6GSServers::UnInitMSClient()
 
 void UR6GSServers::UnInitRegServer()
 {
+	guard(UR6GSServers::UnInitRegServer);
+	unguard;
 }
 
 void UR6GSServers::UpdateServer()
 {
+	guard(UR6GSServers::UpdateServer);
+	unguard;
 }
 
 void UR6GSServers::eventEndOfRoundDataSent()
@@ -635,6 +773,8 @@ void UR6GSServers::execUnInitializeMSClient(FFrame& Stack, RESULT_DECL)
 
 void UR6GSServers::registerCDKeySDKCallbacks(UR6GSServers *, void *, void *)
 {
+	guard(UR6GSServers::registerCDKeySDKCallbacks);
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

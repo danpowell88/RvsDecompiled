@@ -17,6 +17,8 @@ IMPLEMENT_FUNCTION(UeviLPatchService, -1, execStartPatch)
 
 void UeviLPatchService::StartPatch()
 {
+	guard(UeviLPatchService::StartPatch);
+	unguard;
 }
 
 void UeviLPatchService::execAbortPatchService(FFrame& Stack, RESULT_DECL)
@@ -51,6 +53,8 @@ void UeviLPatchService::execStartPatch(FFrame& Stack, RESULT_DECL)
 
 void UeviLPatchService::FinalDestroy()
 {
+	guard(UeviLPatchService::FinalDestroy);
+	unguard;
 }
 
 DWORD UeviLPatchService::GetPatchServiceState()

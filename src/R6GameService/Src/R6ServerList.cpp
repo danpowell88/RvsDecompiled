@@ -20,6 +20,8 @@ IMPLEMENT_FUNCTION(UR6ServerList, -1, execSortServers)
 
 void UR6ServerList::FillSvrContainer()
 {
+	guard(UR6ServerList::FillSvrContainer);
+	unguard;
 }
 
 INT UR6ServerList::GetGroupID()
@@ -34,14 +36,20 @@ INT UR6ServerList::GetLobbyID()
 
 void UR6ServerList::InitFavorites()
 {
+	guard(UR6ServerList::InitFavorites);
+	unguard;
 }
 
 void UR6ServerList::ResetSvrContainer()
 {
+	guard(UR6ServerList::ResetSvrContainer);
+	unguard;
 }
 
 void UR6ServerList::SetOwnSvrPort(INT)
 {
+	guard(UR6ServerList::SetOwnSvrPort);
+	unguard;
 }
 
 void UR6ServerList::eventGetLobbyAndGroupID(INT &iLobbyID, INT &iGroupID)
