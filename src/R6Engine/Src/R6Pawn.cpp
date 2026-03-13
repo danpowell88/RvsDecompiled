@@ -42,9 +42,72 @@ static AR6SoundReplicationInfo* GR6Pawn_OldSoundRepInfo;
 
 // --- AR6Pawn ---
 
-INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT, INT)
+INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT Blend, INT bTest)
 {
-	return 0;
+	if (m_bIsProne)
+		return 1;
+
+	// Read default heights from the class default object.
+	APawn* Default = (APawn*)GetClass()->GetDefaultObject();
+	FLOAT DefHeight  = Default->CollisionHeight;
+	FLOAT DefRadius  = Default->CollisionRadius;
+	FLOAT DefCrouchH = Default->CrouchHeight;
+
+	// Lerp toward crouch height based on blend.
+	FLOAT TargetH = DefHeight - (DefHeight - DefCrouchH) * Blend;
+	if (TargetH == CollisionHeight)
+		return 1;
+
+	FLOAT SavedPrePivotZ = PrePivot.Z;
+	FLOAT DeltaH  = TargetH - CollisionHeight;  // > 0 = growing
+	FLOAT Headroom = DefHeight - TargetH;
+
+	INT bCanGrow = 1;
+	if (DeltaH > 0.0f)
+	{
+		// Check upward for room to grow.
+		// DIVERGENCE: XLevel vtable slot 0xCC/4 — unlisted ULevel sweep/check method;
+		// called via __fastcall to emulate __thiscall (ECX = XLevel).
+		FCheckResult Hit(1.0f);
+		FLOAT EndX = Location.X, EndY = Location.Y, EndZ = Location.Z + DeltaH;
+		typedef INT (__fastcall *FSweepFn)(void*, void*, FCheckResult*, AActor*, FLOAT*, FLOAT*, INT, FLOAT, FLOAT, FLOAT);
+		FSweepFn Sweep = *(FSweepFn*)((BYTE*)*(DWORD*)XLevel + 0xCC);
+		Sweep(XLevel, 0, &Hit, this, &EndX, &Location.X, 0x286, CollisionRadius, CollisionRadius, CollisionHeight);
+		if (Hit.Time != 1.0f)
+			bCanGrow = 0;
+	}
+
+	if (bTest == 0)
+	{
+		if (!bCanGrow)
+		{
+			m_fCrouchBlendRate = ComputeCrouchBlendRate(DefHeight, DefCrouchH);
+			if (Controller && Controller->IsA(AR6PlayerController::StaticClass()))
+				((AR6Pawn*)Controller)->eventSetCrouchBlend(m_fCrouchBlendRate);
+			return 0;
+		}
+	}
+	else if (!bCanGrow)
+	{
+		return 0;
+	}
+
+	FLOAT OldHeight = CollisionHeight;
+	SetCollisionSize(DefRadius, TargetH);
+	SetPrePivot(FVector(0.0f, 0.0f, Headroom + m_fPrePivotPawnInitialOffset));
+
+	// DIVERGENCE: XLevel vtable slot 0x9C/4 — unlisted ULevel move-actor method;
+	// moves pawn to Location + (0, 0, DeltaH); called via __fastcall to emulate __thiscall.
+	typedef INT (__fastcall *FMoveFn)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
+	FMoveFn Move = *(FMoveFn*)((BYTE*)*(DWORD*)XLevel + 0x9C);
+	INT MoveResult = Move(XLevel, 0, this, Location.X, Location.Y, Location.Z + DeltaH, 1, 0, 0, 0);
+
+	if (MoveResult != 0 && bTest == 0)
+		return MoveResult;
+
+	SetCollisionSize(CollisionRadius, OldHeight);
+	SetPrePivot(FVector(0.0f, 0.0f, SavedPrePivotZ));
+	return MoveResult;
 }
 
 FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT InPeeking, FLOAT InLimit)
@@ -302,11 +365,15 @@ INT AR6Pawn::IsOverLedge(AActor *, FVector, FLOAT)
 
 INT AR6Pawn::IsRelevantToPawnHeartBeat(APawn *)
 {
+	// DIVERGENCE: remains stub — depends on FUN_1001bc10/FUN_1001bc70/FUN_1001bc40,
+	// which are internal R6 gadget/sensor accessor functions not yet decompiled.
 	return 0;
 }
 
 INT AR6Pawn::IsRelevantToPawnHeatVision(APawn *)
 {
+	// DIVERGENCE: remains stub — depends on same unresolved gadget accessor functions
+	// (FUN_1001bc10, FUN_1001bc70, FUN_1001bc40) as IsRelevantToPawnHeartBeat.
 	return 0;
 }
 
@@ -1166,9 +1233,99 @@ void AR6Pawn::m_vInitNewLipSynch(USound *, USound *)
 {
 }
 
-INT AR6Pawn::moveToPosition(FVector const &)
+INT AR6Pawn::moveToPosition(FVector const& Target)
 {
-	return 0;
+	if (!Controller)
+		return 0;
+
+	if (Physics != PHYS_Walking)
+		return 0;
+
+	FLOAT DX = Target.X - Location.X;
+	FLOAT DY = Target.Y - Location.Y;
+	FLOAT DZ = 0.0f;
+
+	FLOAT Dist = FVector(DX, DY, DZ).Size();
+	FLOAT AbsDist = (Dist < 0.0f) ? -Dist : Dist;
+
+	if (AbsDist >= 10.0f)
+	{
+		if (Dist > 0.0f)
+		{
+			FLOAT InvDist = 1.0f / Dist;
+			DX *= InvDist;
+			DY *= InvDist;
+		}
+
+		FLOAT Accel = AccelRate;
+		Acceleration.X = Accel * DX;
+		Acceleration.Y = Accel * DY;
+		Acceleration.Z = Accel * DZ;
+
+		// DIVERGENCE: Controller float at raw offset 0x3BC — unlisted AController field
+		// (likely a speed/stall penalty counter); checked against 0 to gate velocity correction.
+		FLOAT CtrlField = *(FLOAT*)((BYTE*)Controller + 0x3BC);
+		if (CtrlField >= 0.0f)
+		{
+			FLOAT VelSize = Velocity.Size();
+			if (VelSize > 100.0f)
+			{
+				FLOAT InvVel = 1.0f / VelSize;
+				FLOAT VelNX = Velocity.X * InvVel;
+				FLOAT VelNY = Velocity.Y * InvVel;
+				FLOAT VelNZ = Velocity.Z * InvVel;
+
+				// Perpendicular correction: steer velocity direction toward target.
+				// DIVERGENCE: FUN_100015a0 in retail binary scales a vector (out = in * scale);
+				// inlined here as component multiply.
+				FLOAT DiffX = VelNX - DX, DiffY = VelNY - DY, DiffZ = VelNZ - DZ;
+				FLOAT Dot = VelNX * DX + VelNY * DY + VelNZ * DZ;
+				FLOAT CorrScale = (1.0f - Dot) * VelSize * 0.2f;
+				Acceleration.X -= DiffX * CorrScale;
+				Acceleration.Y -= DiffY * CorrScale;
+				Acceleration.Z -= DiffZ * CorrScale;
+
+				if (Dist < AvgPhysicsTime * VelSize * 1.4f)
+				{
+					if (!bReducedSpeed)
+					{
+						bReducedSpeed = 1;
+						DesiredSpeed *= 0.5f;
+					}
+					if (VelSize > 0.0f)
+					{
+						// DIVERGENCE: FUN_10024510 in retail binary = Min<FLOAT>(a, b); inlined here.
+						FLOAT Cap = 200.0f / VelSize;
+						if (DesiredSpeed > Cap)
+							DesiredSpeed = Cap;
+					}
+				}
+
+				if (VelSize == 0.0f)
+					return 0;
+
+				*(FLOAT*)((BYTE*)Controller + 0x3BC) -= 0.25f;
+				return 0;
+			}
+			// DIVERGENCE: Controller byte at raw offset 0x3A7 — unlisted AController field
+			// (likely an AI arrival/status byte); 2 = near-destination speed-limited.
+			*(BYTE*)((BYTE*)Controller + 0x3A7) = 2;
+		}
+		else
+		{
+			// Controller penalty counter < 0: cancel acceleration and signal arrival.
+			Acceleration = FVector(0.0f, 0.0f, 0.0f);
+			*(BYTE*)((BYTE*)Controller + 0x3A7) = 1;
+		}
+		return 1;
+	}
+	else
+	{
+		// Within 10 units of target: stop and signal arrival.
+		Acceleration = FVector(0.0f, 0.0f, 0.0f);
+		*(BYTE*)((BYTE*)Controller + 0x3A7) = 1;
+	}
+	return 1;
 }
 
 INT AR6Pawn::moveToward(FVector const& Dest, AActor* GoalActor)
