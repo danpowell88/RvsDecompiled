@@ -431,6 +431,41 @@ DWORD AR6Pawn::R6SeePawn(APawn *, INT)
 
 void AR6Pawn::ResetColBox()
 {
+	if (!m_collisionBox)
+		return;
+
+	m_collisionBox->RelativeLocation = FVector(0.0f, 0.0f, 0.0f);
+
+	if (m_collisionBox->Location.Z != Location.Z)
+	{
+		// DIVERGENCE: *(INT**)((BYTE*)XLevel + 0xF0) is an unlisted ULevel field — a
+		// collision-octree (or BSP-hash) query object. We call its vtable[2] and vtable[3]
+		// to remove the colbox before adjusting Location.Z, then re-add it after.
+		INT* pCollTree = *(INT**)((BYTE*)XLevel + 0xF0);
+
+		// DIVERGENCE: Actor bitfield DWORD at raw offset 0xA8, bit 0x800. This maps to
+		// bBlockActors (or a nearby collision flag) in AActor's packed bitfields. Guards
+		// whether the collision tree needs to be notified of the movement.
+		if ((*(DWORD*)((BYTE*)m_collisionBox + 0xA8) & 0x800) != 0 && pCollTree != NULL)
+		{
+			// Remove colbox from collision tree before repositioning (vtable entry 3).
+			typedef void (*FCollTreeFunc)(AR6ColBox*);
+			((FCollTreeFunc)(*(DWORD*)( (BYTE*)(*(DWORD*)pCollTree) + 0xC )))(m_collisionBox);
+		}
+
+		m_collisionBox->Location.Z = Location.Z;
+		m_collisionBox->RelativeLocation.Z = m_collisionBox->Location.Z - Location.Z;
+
+		if ((*(DWORD*)((BYTE*)m_collisionBox + 0xA8) & 0x800) != 0 && pCollTree != NULL)
+		{
+			// Re-add colbox to collision tree after repositioning (vtable entry 2).
+			typedef void (*FCollTreeFunc)(AR6ColBox*);
+			((FCollTreeFunc)(*(DWORD*)( (BYTE*)(*(DWORD*)pCollTree) + 0x8 )))(m_collisionBox);
+		}
+	}
+
+	m_rLFinger0          = FRotator(0, 0, 0);
+	m_fPrePivotLastUpdate = 0.0f;
 }
 
 INT AR6Pawn::SetAudioInfo()
@@ -493,8 +528,81 @@ void AR6Pawn::UpdatePawnTrackActor(INT BlendTime)
 		SetPawnLookDirection(RelRot, BlendTime);
 }
 
-void AR6Pawn::UpdatePeeking(FLOAT)
+void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 {
+	if (!m_collisionBox)
+		return;
+
+	if (!m_bWantsToProne && !m_bIsProne)
+	{
+		BYTE PeekingMode = m_ePeekingMode;
+
+		// Mode 0: no active peeking. If peeking has returned to centre (sentinel 1000.0f),
+		// disable the colbox collision so it no longer blocks actors.
+		if (PeekingMode == 0 && m_fPeeking == 1000.0f)
+		{
+			// DIVERGENCE: AR6ColBox flag at raw offset 0x394 — an unlisted field inside
+			// AR6ColBox that gates whether the colbox reset should proceed.
+			if ((*(BYTE*)((BYTE*)m_collisionBox + 0x394) & 1) == 0)
+				return;
+
+			// Skip on pure clients when not the owning client.
+			// NM_Client == 3 (ENetMode enum is not defined in project headers).
+			if (!APawn::IsLocallyControlled() && Level->NetMode == 3)
+				return;
+
+			m_collisionBox->EnableCollision(0, 0, 0);
+			return;
+		}
+
+		if (PeekingMode == 1 && !m_bPeekingReturnToCenter)
+		{
+			// Full peeking active with no pending return-to-centre: fall through to
+			// UpdateFullPeekingMode below.
+		}
+		else
+		{
+			if (PeekingMode != 2)
+				return;
+
+			// Fluid (analogue) peeking mode.
+			FLOAT OldPeeking  = m_fPeeking;
+			m_fPeeking        = m_fPeekingGoal;
+
+			AdjustFluidCollisionCylinder(m_fCrouchBlendRate, 0);
+
+			FLOAT Limit = GetMaxFluidPeeking(m_fCrouchBlendRate, (INT)m_bHBJammerOn);
+			Limit       = AdjustMaxFluidPeeking(m_fPeeking, Limit);
+			m_fPeeking  = Limit;
+
+			if (OldPeeking != Limit)
+			{
+				// Peeking value changed — update the colbox immediately.
+				m_fPeeking = UpdateColBoxPeeking(Limit);
+				return;
+			}
+
+			// Peeking value unchanged. Only continue (and update the colbox) when a
+			// flashbang visual effect is in progress; that can shift the apparent lean.
+			if (!m_bFlashBangVisualEffectRequested)
+				return;
+
+			// DIVERGENCE: Ghidra has an additional guard here — a velocity-against-zero
+			// check (Velocity.X vs 0) combined with an actor bitfield at raw offset 0xAC
+			// bit 1. The full condition was truncated in the Ghidra decompilation and is
+			// omitted; we proceed to UpdateColBoxPeeking unconditionally.
+			m_fPeeking = UpdateColBoxPeeking(Limit);
+			return;
+		}
+	}
+	else
+	{
+		// Prone or transitioning to prone. Only call UpdateFullPeekingMode in full-peek mode.
+		if (m_ePeekingMode != 1)
+			return;
+	}
+
+	UpdateFullPeekingMode(DeltaTime);
 }
 
 void AR6Pawn::WeaponFollow(INT, FLOAT)
@@ -531,8 +639,61 @@ INT AR6Pawn::actorReachableFromLocation(AActor *, FVector)
 	return 0;
 }
 
-void AR6Pawn::calcVelocity(FVector, FLOAT, FLOAT, FLOAT, INT, INT, INT)
+void AR6Pawn::calcVelocity(FVector Accel, FLOAT BrakingDecel, FLOAT Friction, FLOAT MaxSpeed, INT bFluid, INT bRestricted, INT bWaterJump)
 {
+	FLOAT OverrideSpeed = 0.0f;
+	eMovementDirection MoveDir = GetMovementDirection();
+
+	if (Physics == PHYS_Walking)
+	{
+		if (m_bIsProne)
+		{
+			OverrideSpeed = (MoveDir == MOVEDIR_Strafe) ? m_fProneStrafeSpeed : m_fProneSpeed;
+		}
+		else if (bIsCrouched)
+		{
+			if (bIsWalking)
+				OverrideSpeed = (MoveDir == MOVEDIR_Forward) ? m_fCrouchedWalkingSpeed : m_fCrouchedWalkingBackwardStrafeSpeed;
+			else
+				OverrideSpeed = (MoveDir == MOVEDIR_Forward) ? m_fCrouchedRunningSpeed : m_fCrouchedRunningBackwardStrafeSpeed;
+		}
+		else if (!bIsWalking)
+		{
+			if (m_fCrouchBlendRate > 0.0f)
+			{
+				if (MoveDir == MOVEDIR_Forward)
+					OverrideSpeed = (1.0f - m_fCrouchBlendRate) * (m_fRunningSpeed - m_fCrouchedRunningSpeed) + m_fCrouchedRunningSpeed;
+				else
+					OverrideSpeed = (1.0f - m_fCrouchBlendRate) * (m_fRunningBackwardStrafeSpeed - m_fCrouchedRunningBackwardStrafeSpeed) + m_fCrouchedRunningBackwardStrafeSpeed;
+			}
+			else
+			{
+				OverrideSpeed = (MoveDir == MOVEDIR_Forward) ? m_fRunningSpeed : m_fRunningBackwardStrafeSpeed;
+			}
+		}
+		else // bIsWalking, not crouched — blend walking speed toward crouched walking if transitioning
+		{
+			if (m_fCrouchBlendRate > 0.0f)
+			{
+				if (MoveDir == MOVEDIR_Forward)
+					OverrideSpeed = (1.0f - m_fCrouchBlendRate) * (m_fWalkingSpeed - m_fCrouchedWalkingSpeed) + m_fCrouchedWalkingSpeed;
+				else
+					OverrideSpeed = (1.0f - m_fCrouchBlendRate) * (m_fWalkingBackwardStrafeSpeed - m_fCrouchedWalkingBackwardStrafeSpeed) + m_fCrouchedWalkingBackwardStrafeSpeed;
+			}
+			else
+			{
+				OverrideSpeed = (MoveDir == MOVEDIR_Forward) ? m_fWalkingSpeed : m_fWalkingBackwardStrafeSpeed;
+			}
+		}
+	}
+
+	// DIVERGENCE: Ghidra shows the non-walking fallback loads param_6 (the binary's 2nd FLOAT,
+	// Friction in standard UE2 param order). Using MaxSpeed for semantic correctness — when no
+	// R6 stance speed applies, pass the caller's MaxSpeed through unchanged.
+	if (OverrideSpeed == 0.0f)
+		OverrideSpeed = MaxSpeed;
+
+	APawn::calcVelocity(Accel, BrakingDecel, Friction, OverrideSpeed, bFluid, bRestricted, bWaterJump);
 }
 
 void AR6Pawn::eventAdjustPawnForDiagonalStrafing()
