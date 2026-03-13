@@ -143,9 +143,17 @@ void ADoor::InitForPathFinding()
 	unguard;
 }
 
-int ADoor::IsIdentifiedAs(FName)
+int ADoor::IsIdentifiedAs(FName Name)
 {
+	guard(ADoor::IsIdentifiedAs);
+	// Ghidra 0xd5d60: compare Name against own name, then against linked mover (this+0x3ec).
+	if (Name == GetFName())
+		return 1;
+	UObject* mover = *(UObject**)((BYTE*)this + 0x3ec); // linked mover actor field
+	if (mover != NULL && Name == mover->GetFName())
+		return 1;
 	return 0;
+	unguard;
 }
 
 

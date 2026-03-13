@@ -955,7 +955,10 @@ void AReplicationInfo::StopVideo(UCanvas* Canvas)
 
 INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
 {
+	guard(AReplicationInfo::OpenVideo);
+	// Ghidra 0x114310: shared zero-return vtable stub.
 	return 0;
+	unguard;
 }
 
 void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)

@@ -51,8 +51,9 @@ FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 	return *this;
 }
 
-int FStatGraphLine::operator==(FStatGraphLine const &) const
+int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 {
-	return 0;
+	// Ghidra 0x16930: pointer equality comparison only.
+	return this == &Other;
 }
 

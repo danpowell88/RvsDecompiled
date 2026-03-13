@@ -126,7 +126,13 @@ BYTE UMaterial::RequiredUVStreams()
 
 UMaterial* UMaterial::CheckFallback()
 {
-	return NULL;
+	guard(UMaterial::CheckFallback);
+	// Ghidra 0xc78d0: if FallbackMaterial set and bit 0 of flags byte at 0x34 is set,
+	// chain to FallbackMaterial->CheckFallback() via vtable[0x21].
+	if (FallbackMaterial != NULL && (*(BYTE*)((BYTE*)this + 0x34) & 1) != 0)
+		return FallbackMaterial->CheckFallback();
+	return this;
+	unguard;
 }
 
 UBOOL UMaterial::HasFallback()
@@ -283,7 +289,19 @@ BYTE UShader::RequiredUVStreams()
 
 UMaterial* UShader::CheckFallback()
 {
-	return NULL;
+	guard(UShader::CheckFallback);
+	// Ghidra 0xc7b50: if HasFallback bit set (byte 0x34 & 1),
+	// try FallbackMaterial then Diffuse (via vtable[0x21] = CheckFallback).
+	if (*(BYTE*)((BYTE*)this + 0x34) & 1)
+	{
+		if (FallbackMaterial != NULL)
+			return FallbackMaterial->CheckFallback();
+		if (Diffuse != NULL)
+			return Diffuse->CheckFallback();
+		return NULL;
+	}
+	return this;
+	unguard;
 }
 
 UBOOL UShader::HasFallback()
@@ -389,7 +407,10 @@ INT UCombiner::MaterialVSize()
 
 UBOOL UCombiner::IsTransparent()
 {
+	guard(UCombiner::IsTransparent);
+	// Ghidra 0x114310: shared zero-return vtable stub.
 	return 0;
+	unguard;
 }
 
 UBOOL UCombiner::RequiresSorting()

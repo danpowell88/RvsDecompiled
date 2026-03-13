@@ -10,6 +10,8 @@
 #include "CorePrivate.h"
 #include <math.h>
 #include <float.h>
+#include <sys/stat.h>
+#include <time.h>
 
 /*-----------------------------------------------------------------------------
 	__FUNC_NAME__ external linkage workaround.
@@ -441,7 +443,34 @@ CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, 
 
 CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 {
-	return 0;
+	// Ghidra 0x149b40 (206 bytes): stat the file and compute age in whole days.
+	// FUN_1014e410 converts difftime seconds (on FPU) to days (/ 86400).
+	struct _stat buf;
+	int result;
+	if( GUnicodeOS )
+	{
+		result = _wstat( (const wchar_t*)Filename, &buf );
+	}
+	else
+	{
+		char path[MAX_PATH];
+		INT i = 0;
+		const TCHAR* src = Filename;
+		if( src )
+		{
+			while( *src ) path[i++] = (char)*src++;
+			path[i] = 0;
+		}
+		else path[0] = 0;
+		result = _stat( path, &buf );
+	}
+	if( result != 0 )
+		return 0;
+	time_t now;
+	time( &now );
+	double secs = difftime( now, buf.st_mtime );
+	// TODO: FUN_1014e410 — converts FPU difftime result to days (secs / 86400)
+	return (INT)(secs / 86400.0);
 }
 
 CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
@@ -476,7 +505,24 @@ CORE_API INT GetFROTATOR( const TCHAR* Stream, FRotator& Value, INT bScaled )
 
 CORE_API INT ParseObject( const TCHAR* Stream, const TCHAR* Match, UClass* Class, UObject*& DestRes, UObject* InParent )
 {
-	return 0;
+	guard(ParseObject);
+	// Ghidra Core 0x2fa20 (178 bytes): parse a token then look it up as a UObject.
+	TCHAR TempStr[256];
+	if( !Parse( Stream, Match, TempStr, 0x40 ) )
+		return 0;
+	if( appStricmp( TempStr, TEXT("NONE") ) == 0 )
+	{
+		DestRes = NULL;
+	}
+	else
+	{
+		UObject* Found = UObject::StaticFindObject( Class, InParent, TempStr, 0 );
+		if( !Found )
+			return 0;
+		DestRes = Found;
+	}
+	return 1;
+	unguard;
 }
 
 CORE_API INT RegGet( FString Key, FString Name, FString& Value )

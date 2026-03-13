@@ -41,7 +41,10 @@ MdtBaseConstraint * AKConstraint::getKConstraint() const
 
 _McdModel * AKConstraint::getKModel() const
 {
+	guard(AKConstraint::getKModel);
+	// Ghidra 0x114310: shared zero-return vtable stub.
 	return NULL;
+	unguard;
 }
 
 void AKConstraint::physKarma(float)

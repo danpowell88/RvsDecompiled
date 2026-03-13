@@ -28,7 +28,10 @@ void UBinaryFileDownload::Tick()
 
 int UBinaryFileDownload::TrySkipFile()
 {
+	guard(UBinaryFileDownload::TrySkipFile);
+	// Ghidra 0x114310: shared zero-return vtable stub.
 	return 0;
+	unguard;
 }
 
 // (merged from earlier occurrence)
@@ -102,7 +105,24 @@ void UChannelDownload::StaticConstructor()
 
 int UChannelDownload::TrySkipFile()
 {
+	guard(UChannelDownload::TrySkipFile);
+	// Ghidra 0x188fb0: if channel exists and base TrySkipFile succeeds,
+	// send a "SKIP" bunch over the channel and return 1.
+	UChannel* ch = *(UChannel**)((BYTE*)this + 0x458);
+	if (ch != NULL)
+	{
+		if (UDownload::TrySkipFile())
+		{
+			FOutBunch Bunch(ch, 1);
+			FString SkipStr(TEXT("SKIP"));
+			(FArchive&)Bunch << SkipStr;
+			*((_WORD*)((BYTE*)&Bunch + 0x2a)) = 1; // bClose flag at bunch+0x2a
+			ch->SendBunch(&Bunch, 0);
+			return 1;
+		}
+	}
 	return 0;
+	unguard;
 }
 
 void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex, const TCHAR* Data, int DataSize)

@@ -68,9 +68,59 @@ void AVolume::SetVolumes()
 {
 }
 
-int AVolume::ShouldTrace(AActor *,DWORD)
+int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
+	guard(AVolume::ShouldTrace);
+	// Ghidra 0x71530: collision trace permission check for volumes.
+	if ((TraceFlags & 0x2000) == 0)
+	{
+		if (TraceFlags & 0x20000)
+		{
+			// TRACE_Volumes: return !bHidden (inverted bit 0 of ushort at 0xaa)
+			return ~(DWORD)*(_WORD*)((BYTE*)this + 0xaa) & 1;
+		}
+		if ( (!(TraceFlags & 0x40000) || !(*(DWORD*)((BYTE*)this + 0xa8) & 0x40000)) &&
+		     (!Other || !(*(DWORD*)((BYTE*)Other + 0xa0) & 0x2000000)) )
+		{
+			if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x2000000) && Other)
+			{
+				// vtable[26] on Other — IsStaticActor or similar
+				typedef int (__thiscall* VFn26)(AActor*);
+				int r = ((VFn26)(*(INT*)(*(INT*)Other + 0x68)))(Other);
+				if (!r)
+					return 0;
+			}
+			if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x100000) && (SBYTE)TraceFlags < 0)
+				return 1;
+			if (TraceFlags & 8)
+			{
+				if (!(TraceFlags & 0x20))
+				{
+					if (TraceFlags & 0x40)
+					{
+						if (!Other) return 0;
+						// vtable[28] on Other with this as parameter
+						typedef int (__thiscall* VFn28)(AActor*, AActor*);
+						int r2 = ((VFn28)(*(INT*)(*(INT*)Other + 0x70)))(Other, (AActor*)this);
+						if (!r2) return 0;
+						return 1;
+					}
+				}
+				else
+				{
+					DWORD uVar1 = *(DWORD*)((BYTE*)this + 0xa8);
+					if ((SBYTE)(uVar1 >> 8) >= 0)
+					{
+						if (!(uVar1 & 0x2000)) return 0;
+						if (!(uVar1 & 0x4000)) return 0;
+					}
+				}
+				return 1;
+			}
+		}
+	}
 	return 0;
+	unguard;
 }
 
 void AVolume::PostBeginPlay()
@@ -145,9 +195,17 @@ void AWarpZoneMarker::addReachSpecs(APawn*,int)
 	unguardSlow;
 }
 
-int AWarpZoneMarker::IsIdentifiedAs(FName)
+int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 {
+	guard(AWarpZoneMarker::IsIdentifiedAs);
+	// Ghidra 0xd5f00: compare Name against own name, then against linked actor (this+0x3e8) name.
+	if (Name == GetFName())
+		return 1;
+	UObject* linked = *(UObject**)((BYTE*)this + 0x3e8); // unknown linked actor field
+	if (linked != NULL && Name == linked->GetFName())
+		return 1;
 	return 0;
+	unguard;
 }
 
 

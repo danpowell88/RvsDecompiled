@@ -712,7 +712,15 @@ void UFixedArrayProperty::Link( FArchive& Ar, UProperty* Prev )
 
 UBOOL UFixedArrayProperty::Identical( const void* A, const void* B ) const
 {
-	return 0;
+	// Ghidra 0x44790: iterate all Count elements and compare via Inner->Identical.
+	// No SEH frame in Ghidra.
+	for( INT i = 0; i < Count; i++ )
+	{
+		const void* BElem = B ? (const void*)((BYTE*)B + Inner->ElementSize * i) : NULL;
+		if( !Inner->Identical( (const void*)((BYTE*)A + Inner->ElementSize * i), BElem ) )
+			return 0;
+	}
+	return 1;
 }
 
 void UFixedArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
@@ -765,7 +773,36 @@ void UArrayProperty::Link( FArchive& Ar, UProperty* Prev )
 
 UBOOL UArrayProperty::Identical( const void* A, const void* B ) const
 {
-	return 0;
+	// Ghidra 0x44ca0: compare element counts first, then compare each element via Inner->Identical.
+	// No SEH frame in Ghidra.
+	const FArray* ArrayA = (const FArray*)A;
+	const FArray* ArrayB = (const FArray*)B;
+	INT CountA = ArrayA->Num();
+	INT CountB = B ? ArrayB->Num() : 0;
+	if( CountA != CountB )
+		return 0;
+	BYTE* DataA = (BYTE*)ArrayA->GetData();
+	if( B == NULL )
+	{
+		for( INT i = 0; i < CountA; i++ )
+		{
+			if( !Inner->Identical( DataA, NULL ) )
+				return 0;
+			DataA += Inner->ElementSize;
+		}
+	}
+	else
+	{
+		BYTE* DataB = (BYTE*)ArrayB->GetData();
+		for( INT i = 0; i < CountA; i++ )
+		{
+			if( !Inner->Identical( DataA, DataB ) )
+				return 0;
+			DataA += Inner->ElementSize;
+			DataB += Inner->ElementSize;
+		}
+	}
+	return 1;
 }
 
 void UArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
@@ -852,7 +889,8 @@ void UMapProperty::Link( FArchive& Ar, UProperty* Prev )
 
 UBOOL UMapProperty::Identical( const void* A, const void* B ) const
 {
-	return 0;
+	// Ghidra 0x45270: maps are always considered identical (unused in Ravenshield).
+	return 1;
 }
 
 void UMapProperty::SerializeItem( FArchive& Ar, void* Value ) const {}
