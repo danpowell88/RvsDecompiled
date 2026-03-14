@@ -613,15 +613,28 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x1046db50, 288 bytes.
-// Loads FPlane from Nodes[iNode] (stride NODE_STRIDE, first 16 bytes).
-// Computes PlaneDot for Start and End.  If they straddle the plane (within +-0.001),
-// computes intersection t and stores Result.Location = Start + (End-Start)*t, returns 1.
-// Otherwise logs via GLog and returns 0.
-IMPL_DIVERGE("Ghidra 0x1046db50: uses unaff_retaddr pattern; complex PlaneDot straddling logic; pending decompilation")
+// Loads FPlane from Nodes[iNode] (stride NODE_STRIDE=0x90, first 16 bytes = FPlane).
+// Computes PlaneDot for End (fVar2) then Start (fVar3).
+// Straddle check: (fVar2<=-0.001 || fVar3<=-0.001) && (fVar2>=0.001 || fVar3>=0.001).
+// On straddle: t = DotStart/(DotStart-DotEnd), Result.Location = Start + Dir*t, return 1.
+// On no-straddle: log (Ghidra output garbled) and return 0.
+// NOTE: Ghidra uses unaff_retaddr to hold &Result, and param numbering for FVector
+//       components is ambiguous — logic reconstructed from plane-intersection pattern.
+IMPL_DIVERGE("Ghidra 0x1046db50: unaff_retaddr artifact maps FCheckResult* to untracked register; parameter numbering for FVector components is ambiguous — logic reconstructed, not byte-verified")
 INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End )
 {
 guard(UModel::R6LineCheck);
-// unaff_retaddr pattern prevents clean reconstruction; pending decompilation.
+FPlane* Plane = (FPlane*)(*(INT*)((BYTE*)this + 0x5c) + iNode * (INT)NODE_STRIDE);
+FLOAT DotEnd   = Plane->PlaneDot(End);
+FLOAT DotStart = Plane->PlaneDot(Start);
+if ((DotEnd <= -0.001f || DotStart <= -0.001f) &&
+    (DotEnd >= 0.001f  || DotStart >= 0.001f))
+{
+    FVector Dir = End - Start;
+    FLOAT t = DotStart / (DotStart - DotEnd);
+    Result.Location = Start + Dir * t;
+    return 1;
+}
 return 0;
 unguard;
 }
