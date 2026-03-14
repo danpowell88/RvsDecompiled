@@ -12,6 +12,7 @@
 	FBitWriter.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 FBitWriter::FBitWriter( INT InMaxBits )
 :	Num( 0 )
 ,	Max( InMaxBits )
@@ -21,6 +22,7 @@ FBitWriter::FBitWriter( INT InMaxBits )
 	ArIsSaving = 1;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriter::SerializeBits( void* Src, INT LengthBits )
 {
 	if( Num + LengthBits > Max )
@@ -32,11 +34,13 @@ void FBitWriter::SerializeBits( void* Src, INT LengthBits )
 		WriteBit( ((BYTE*)Src)[i>>3] & GShift[i&7] ? 1 : 0 );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriter::SerializeInt( DWORD& Value, DWORD Max )
 {
 	WriteInt( Value, Max );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriter::WriteInt( DWORD Result, DWORD ValueMax )
 {
 	check(ValueMax>=2);
@@ -45,6 +49,7 @@ void FBitWriter::WriteInt( DWORD Result, DWORD ValueMax )
 		WriteBit( (Result&Mask) ? 1 : 0 );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriter::WriteBit( BYTE In )
 {
 	if( Num >= Max )
@@ -56,26 +61,31 @@ void FBitWriter::WriteBit( BYTE In )
 	Num++;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriter::Serialize( void* Src, INT LengthBytes )
 {
 	SerializeBits( Src, LengthBytes*8 );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 BYTE* FBitWriter::GetData()
 {
 	return &Buffer(0);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 INT FBitWriter::GetNumBytes()
 {
 	return (Num+7)>>3;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 INT FBitWriter::GetNumBits()
 {
 	return Num;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriter::SetOverflowed()
 {
 	ArIsError = 1;
@@ -85,6 +95,7 @@ void FBitWriter::SetOverflowed()
 	FBitWriterMark.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitWriterMark::Pop( FBitWriter& Writer )
 {
 	checkSlow(Num<=Writer.Num);
@@ -96,6 +107,7 @@ void FBitWriterMark::Pop( FBitWriter& Writer )
 	FBitReader.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 FBitReader::FBitReader( BYTE* Src, INT CountBits )
 :	Num( CountBits )
 ,	Pos( 0 )
@@ -110,6 +122,7 @@ FBitReader::FBitReader( BYTE* Src, INT CountBits )
 	}
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitReader::SetData( FBitReader& Src, INT CountBits )
 {
 	Num    = CountBits;
@@ -122,6 +135,7 @@ void FBitReader::SetData( FBitReader& Src, INT CountBits )
 		appMemcpy( &Buffer(0), &Src.Buffer(0), ByteCount );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitReader::SerializeBits( void* Dest, INT LengthBits )
 {
 	appMemzero( Dest, (LengthBits+7)>>3 );
@@ -130,11 +144,13 @@ void FBitReader::SerializeBits( void* Dest, INT LengthBits )
 			((BYTE*)Dest)[i>>3] |= GShift[i&7];
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitReader::SerializeInt( DWORD& Value, DWORD Max )
 {
 	Value = ReadInt( Max );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 DWORD FBitReader::ReadInt( DWORD Max )
 {
 	check(Max>=2);
@@ -145,6 +161,7 @@ DWORD FBitReader::ReadInt( DWORD Max )
 	return Value;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 BYTE FBitReader::ReadBit()
 {
 	if( Pos >= Num )
@@ -157,36 +174,43 @@ BYTE FBitReader::ReadBit()
 	return Bit;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitReader::Serialize( void* Dest, INT LengthBytes )
 {
 	SerializeBits( Dest, LengthBytes*8 );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 BYTE* FBitReader::GetData()
 {
 	return &Buffer(0);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 UBOOL FBitReader::AtEnd()
 {
 	return ArIsError || Pos >= Num;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 void FBitReader::SetOverflowed()
 {
 	ArIsError = 1;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 INT FBitReader::GetNumBytes()
 {
 	return (Num+7)>>3;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 INT FBitReader::GetNumBits()
 {
 	return Num;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
 INT FBitReader::GetPosBits()
 {
 	return Pos;
@@ -197,6 +221,7 @@ INT FBitReader::GetPosBits()
 	The copy ctor and operator= are implicitly declared but must be
 	exported (CORE_API on the struct).  MSVC only emits them when used.
 -----------------------------------------------------------------------------*/
+IMPL_INFERRED("link-time emission helper for FBitReader special members")
 void _ForceFBitReaderEmit() {
 	FBitReader a;
 	FBitReader b(a);

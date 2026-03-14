@@ -12,6 +12,7 @@
 	FMemCache implementation.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::Init( INT BytesToAllocate, INT MaxItems, void* Start, INT SegSize )
 {
 	guard(FMemCache::Init);
@@ -54,6 +55,7 @@ void FMemCache::Init( INT BytesToAllocate, INT MaxItems, void* Start, INT SegSiz
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::Exit( INT FreeMemory )
 {
 	guard(FMemCache::Exit);
@@ -74,6 +76,7 @@ void FMemCache::Exit( INT FreeMemory )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::Flush( QWORD Id, DWORD Mask, UBOOL IgnoreLocked )
 {
 	guard(FMemCache::Flush);
@@ -90,6 +93,7 @@ void FMemCache::Flush( QWORD Id, DWORD Mask, UBOOL IgnoreLocked )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignment, INT SafetyPad )
 {
 	guard(FMemCache::Create);
@@ -138,6 +142,7 @@ BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignm
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::Tick()
 {
 	guard(FMemCache::Tick);
@@ -171,6 +176,7 @@ void FMemCache::Tick()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::CheckState()
 {
 	guard(FMemCache::CheckState);
@@ -187,6 +193,7 @@ void FMemCache::CheckState()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(FMemCache::Exec);
@@ -200,6 +207,7 @@ UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::Status( TCHAR* Msg )
 {
 	guard(FMemCache::Status);
@@ -207,6 +215,7 @@ void FMemCache::Status( TCHAR* Msg )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FCacheItem* Next, INT Segment )
 {
 	guard(FMemCache::CreateNewFreeSpace);
@@ -238,6 +247,7 @@ void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FC
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 {
 	guard(FMemCache::MergeWithNext);
@@ -263,6 +273,7 @@ FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCache.cpp")
 FMemCache::FCacheItem* FMemCache::FlushItem( FCacheItem* Item, UBOOL IgnoreLocked )
 {
 	guard(FMemCache::FlushItem);
