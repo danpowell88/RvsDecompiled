@@ -375,7 +375,7 @@ FCanvasVertex::FCanvasVertex()
 {
 }
 
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_MATCH("Engine.dll", 0x3890)
 FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 {
 	Point = Other.Point;
