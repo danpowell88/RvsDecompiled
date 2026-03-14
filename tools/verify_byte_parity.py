@@ -220,7 +220,12 @@ def get_ghidra_sizes(dll_stem: str) -> dict:
         info = DLL_MAP.get(dll_stem.lower())
         if info:
             path = GHIDRA_DIR / info["ghidra"]
-            _GHIDRA_CACHE[dll_stem] = _parse_ghidra_sizes(path)
+            sizes = _parse_ghidra_sizes(path)
+            # Also merge sizes from _unnamed.cpp (unexported functions) if present
+            unnamed = path.parent / "_unnamed.cpp"
+            if unnamed.exists():
+                sizes.update(_parse_ghidra_sizes(unnamed))
+            _GHIDRA_CACHE[dll_stem] = sizes
         else:
             _GHIDRA_CACHE[dll_stem] = {}
     return _GHIDRA_CACHE[dll_stem]
