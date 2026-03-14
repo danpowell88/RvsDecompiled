@@ -2156,7 +2156,8 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_APPROX("Returns hardcoded resolution — actual display resolution query needs Ghidra")`r`nvoid AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Returns hardcoded resolution — actual display resolution query needs Ghidra")
+void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
 	P_GET_INT(Index);
@@ -2166,7 +2167,8 @@ IMPL_APPROX("Returns hardcoded resolution — actual display resolution query ne
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
 	P_GET_OBJECT(UMaterial,OldTex);
@@ -2176,7 +2178,8 @@ IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value;
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_APPROX("Returns 1 — full implementation needs Ghidra analysis")`r`nvoid AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Returns 1 — full implementation needs Ghidra analysis")
+void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
 	P_FINISH;
@@ -2185,7 +2188,8 @@ IMPL_APPROX("Returns 1 — full implementation needs Ghidra analysis")`r`nvoid A
 }
 IMPLEMENT_FUNCTION( AActor, 2617, execIsVideoHardwareAtLeast64M );
 
-IMPL_APPROX("Returns NULL — full implementation needs Ghidra analysis")`r`nvoid AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Returns NULL — full implementation needs Ghidra analysis")
+void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCanvas);
 	P_FINISH;
@@ -2194,7 +2198,8 @@ IMPL_APPROX("Returns NULL — full implementation needs Ghidra analysis")`r`nvoi
 }
 IMPLEMENT_FUNCTION( AActor, 2618, execGetCanvas );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableLoadingScreen);
 	P_GET_UBOOL(bEnable);
@@ -2214,7 +2219,8 @@ void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2620, execAddMessageToConsole );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUpdateGraphicOptions);
 	P_FINISH;
@@ -2232,7 +2238,8 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
 	P_GET_VECTOR(Start);
@@ -2243,7 +2250,8 @@ IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value;
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_APPROX("Stub — body not yet reconstructed from Ghidra")`r`nvoid AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Stub — body not yet reconstructed from Ghidra")
+void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
 	P_GET_VECTOR(Loc);
@@ -2254,7 +2262,8 @@ IMPL_APPROX("Stub — body not yet reconstructed from Ghidra")`r`nvoid AActor::e
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
 	P_FINISH;
