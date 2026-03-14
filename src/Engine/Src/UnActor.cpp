@@ -1767,7 +1767,7 @@ void AActor::execGetTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1012, execGetTime );
 
-IMPL_DIVERGE("always returns NULL — GameManager not implemented")
+IMPL_MATCH("Engine.dll", 0x1047cbf0)
 void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameManager);
@@ -1777,7 +1777,7 @@ void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1551, execGetGameManager );
 
-IMPL_DIVERGE("always returns NULL — ModManager not implemented")
+IMPL_MATCH("Engine.dll", 0x10422b70)
 void AActor::execGetModMgr( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetModMgr);
@@ -1797,7 +1797,7 @@ void AActor::execGetGameOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1009, execGetGameOptions );
 
-IMPL_DIVERGE("always returns empty string — server options not implemented")
+IMPL_MATCH("Engine.dll", 0x10423ec0)
 void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptions);
@@ -1847,7 +1847,7 @@ void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1312, execGetServerBeacon );
 
-IMPL_DIVERGE("always returns 0 — GameSpy client detection not implemented")
+IMPL_MATCH("Engine.dll", 0x104239a0)
 void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeStartedByGSClient);
@@ -1857,7 +1857,7 @@ void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1200, execNativeStartedByGSClient );
 
-IMPL_DIVERGE("always returns 0 — non-Ubi matchmaking not implemented")
+IMPL_MATCH("Engine.dll", 0x10423be0)
 void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMaking);
@@ -1867,7 +1867,7 @@ void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1303, execNativeNonUbiMatchMaking );
 
-IMPL_DIVERGE("always returns empty string — matchmaking address not implemented")
+IMPL_MATCH("Engine.dll", 0x10423c80)
 void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingAddress);
@@ -1877,7 +1877,7 @@ void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1304, execNativeNonUbiMatchMakingAddress );
 
-IMPL_DIVERGE("always returns empty string — matchmaking password not implemented")
+IMPL_MATCH("Engine.dll", 0x10423da0)
 void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingPassword);
@@ -1887,7 +1887,7 @@ void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1305, execNativeNonUbiMatchMakingPassword );
 
-IMPL_DIVERGE("always returns 0 — matchmaking host flag not implemented")
+IMPL_MATCH("Engine.dll", 0x10423ac0)
 void AActor::execNativeNonUbiMatchMakingHost( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingHost);
