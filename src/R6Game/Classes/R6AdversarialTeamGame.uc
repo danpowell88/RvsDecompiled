@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6AdversarialTeamGame.uc : (add small description)
+//  R6AdversarialTeamGame.uc : Team-based adversarial multiplayer mode tracking living players, round wins,
+//                             and match results for Alpha and Bravo teams.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

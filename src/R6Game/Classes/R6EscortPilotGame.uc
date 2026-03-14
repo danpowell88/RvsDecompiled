@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6EscortPilotGame.uc : (add small description)
+//  R6EscortPilotGame.uc : Adversarial team mode where one player is the pilot who must reach an extraction
+//                         zone; restricts weapon loadout for the pilot role.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

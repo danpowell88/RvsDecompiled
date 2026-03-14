@@ -30,7 +30,7 @@ IMPLEMENT_CLASS(AAIController);
 
 /*-- APawn queries -----------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e7580; P_GET_OBJECT+size check; current approximates intent")
 void APawn::execReachedDestination( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execReachedDestination);
@@ -41,7 +41,7 @@ void APawn::execReachedDestination( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execReachedDestination );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5390; functional match")
 void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsFriend);
@@ -52,7 +52,7 @@ void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsFriend );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5440; functional match")
 void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsEnemy);
@@ -63,7 +63,7 @@ void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsEnemy );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5500; functional match")
 void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsNeutral);
@@ -74,7 +74,7 @@ void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsNeutral );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e55c0; functional match")
 void APawn::execIsAlive( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsAlive);
@@ -86,7 +86,7 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 
 /*-- AController movement latent functions -----------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e870; simplified: omits walk-speed adjustment and MoveTimer setup")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -102,7 +102,7 @@ void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 500, execMoveTo );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cfe0; simplified arrival check")
 void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveTo);
@@ -121,7 +121,7 @@ void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10390940; simplified: omits bShouldWalk/MoveTimer setup")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -138,7 +138,7 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d110; simplified arrival check")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveToward);
@@ -157,7 +157,7 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveToward );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d330; functional match but P_FINISH placement may differ")
 void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFinishRotation);
@@ -167,7 +167,7 @@ void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 508, execFinishRotation );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038eab0; simplified: immediately clears latent action")
 void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollFinishRotation);
@@ -177,7 +177,7 @@ void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollFinishRotation );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cdc0; functional match")
 void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execWaitForLanding);
@@ -187,7 +187,7 @@ void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038dee0; functional match")
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
@@ -199,7 +199,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollWaitForLanding );
 
 /*-- AController perception -------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e750; simplified LOS check")
 void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execLineOfSightTo);
@@ -215,7 +215,7 @@ void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 514, execLineOfSightTo );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038dbb0; simplified visibility check")
 void AController::execCanSee( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execCanSee);
@@ -233,7 +233,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e490; stub — FindPath not yet fully implemented")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -258,7 +258,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e3e0; stub — FindPath not yet fully implemented")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);

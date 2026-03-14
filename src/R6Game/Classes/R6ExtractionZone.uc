@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6ExtractionZone.uc : (add small description)
+//  R6ExtractionZone.uc : Trigger volume marking an extraction area; fires events when players or hostages
+//                        enter or leave the zone.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

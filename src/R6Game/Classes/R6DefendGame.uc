@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DefendGame.uc : (add small description)
+//  R6DefendGame.uc : Co-op game mode where Rainbow must defend an objective; initialises team
+//                    friendlies and mission objectives.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
