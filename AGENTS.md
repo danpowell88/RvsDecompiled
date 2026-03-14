@@ -36,9 +36,12 @@ the current highest number before writing a new post.
 
 **Before creating any blog post, always run:**
 ```powershell
-ls blog/blog/*.md | Sort-Object Name | Select-Object -Last 1 -ExpandProperty Name
+ls blog/blog/*.md | Sort-Object { [int]($_.Name -replace '^(\d+).*','$1') } | Select-Object -Last 1 -ExpandProperty Name
 ```
-This shows the highest existing post number. Use `N+1` for your new post.
+This shows the **numerically** highest existing post number. Use `N+1` for your new post.
+
+⚠️ **Do NOT use `Sort-Object Name`** — that sorts alphabetically and `99` comes after `100` alphabetically,
+giving the wrong result. Always sort numerically with the expression above.
 
 **Rules:**
 - Never hardcode a post number like `100` without checking first.
