@@ -225,13 +225,8 @@ void AProjector::Detach(int Flush)
 		return;
 
 	// Convert rdtsc to seconds and store as a "last used" timestamp at renderInfo+0xc
-	// MSVC 7.1 has no __rdtsc() intrinsic — use inline asm (matches retail codegen).
-	unsigned __int64 tsc;
-#if _MSC_VER <= 1310
-	__asm { rdtsc; mov dword ptr [tsc], eax; mov dword ptr [tsc+4], edx }
-#else
-	tsc = __rdtsc();
-#endif
+	// __rdtsc() expands to _RVS_RDTSC() inline asm wrapper on MSVC 7.1 (via ImplSource.h).
+	unsigned __int64 tsc = __rdtsc();
 	double hi = (double)(int)(tsc >> 32);
 	if ((signed __int64)tsc < 0) hi += 4294967296.0;
 	double lo = (double)(int)(tsc & 0xFFFFFFFF);

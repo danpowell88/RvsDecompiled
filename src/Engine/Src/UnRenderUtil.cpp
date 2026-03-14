@@ -1402,33 +1402,44 @@ int FStaticTexture::GetWidth()
 
 
 // --- FBspSection ---
-IMPL_DIVERGE("FBspSection copy ctor VA unconfirmed; Ghidra 0x10327b60 calls FUN_1031ecc0 (TArray copy) with same semantics")
+IMPL_DIVERGE("0x10327b60 confirmed; calls FUN_1031ecc0 (unresolved TArray<FBspVertex> copy helper)")
 FBspSection::FBspSection(FBspSection const &Other)
 {
 	// Ghidra 0x27b60: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 7 DWORDs at +10..+28
+	// DIVERGENCE: FUN_1031ecc0 is unresolved; using TArray copy ctor directly.
 	new ((BYTE*)this + 0x04) TArray<FBspVertex>(*(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04));
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x10327a70 confirmed; FBspSection has no virtual base in source so vtable pointer is not set by compiler")
 FBspSection::FBspSection()
 {
-	// Initialize TArray<FBspVertex> at +4 to empty
+	// Ghidra 0x27a70: sets vtable (FBspVertexStream::_vftable_), inits TArray at +4,
+	// sets CacheId at +0x10 = DAT_1060b564*0x100+0xE1, zeros +0x18/+0x1C/+0x20/+0x24, sets +0x28 = -1.
+	// DIVERGENCE: vtable not set (FBspSection not declared as virtual class in source).
 	new ((BYTE*)this + 0x04) TArray<FBspVertex>();
+	*(QWORD*)((BYTE*)this + 0x10) = (QWORD)(DWORD)DAT_1060b564 * 0x100 + 0xE1;
+	DAT_1060b564++;
+	*(DWORD*)((BYTE*)this + 0x18) = 0;
+	*(DWORD*)((BYTE*)this + 0x1C) = 0;
+	*(DWORD*)((BYTE*)this + 0x20) = 0;
+	*(DWORD*)((BYTE*)this + 0x24) = 0;
+	*(DWORD*)((BYTE*)this + 0x28) = 0xFFFFFFFF;
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x103278e0 confirmed; calls FUN_10324a50 (unresolved TArray<FBspVertex> dtor helper)")
 FBspSection::~FBspSection()
 {
-	// Ghidra 0x103278e0: shared with ~FBspVertexStream; destroy TArray<FBspVertex> at +4
+	// Ghidra 0x278e0: shared with ~FBspVertexStream; calls FUN_10324a50 to destroy TArray<FBspVertex> at +4
+	// DIVERGENCE: FUN_10324a50 is unresolved; using ~TArray() directly.
 	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x10327bb0 confirmed; calls FUN_10324ae0 (unresolved TArray<FBspVertex> assign helper)")
 FBspSection& FBspSection::operator=(const FBspSection& Other)
 {
-	// Ghidra 0x27bb0: skip vtable at +0, TArray<FBspVertex> at +4 (FUN_10324ae0=40-byte elems),
-	// then 7 DWORDs at +0x10..+0x28
+	// Ghidra 0x27bb0: skip vtable at +0, TArray<FBspVertex> at +4 via FUN_10324ae0; 7 DWORDs at +0x10..+0x28
+	// DIVERGENCE: FUN_10324ae0 is unresolved; using TArray::operator= directly.
 	*(TArray<FBspVertex>*)((BYTE*)this + 0x04) = *(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04);
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 	return *this;
@@ -1436,17 +1447,18 @@ FBspSection& FBspSection::operator=(const FBspSection& Other)
 
 
 // --- FBspVertex ---
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x103fe100)
 FBspVertex::FBspVertex()
 {
-	// Ghidra: constructs two FVectors at offset 0 and 0xC (Position + Normal)
+	// Ghidra 0x1fe100: constructs two FVectors at offset 0 and 0xC (Position + Normal)
 	*(FVector*)&_Data[0] = FVector(0,0,0);
 	*(FVector*)&_Data[12] = FVector(0,0,0);
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x103046a0)
 FBspVertex& FBspVertex::operator=(const FBspVertex& Other)
 {
+	// Ghidra 0x46a0 (49b): 10 DWORD loop → copies 40 bytes
 	appMemcpy( this, &Other, sizeof(FBspVertex) );
 	return *this;
 }
@@ -1468,30 +1480,39 @@ BYTE FConvexVolume::SphereCheck(FSphere Sphere)
 	return Result;
 }
 
-IMPL_DIVERGE("VA unconfirmed; appMemcpy equivalent to FPlane POD copy ctors at 0x10303750")
+IMPL_MATCH("Engine.dll", 0x10303750)
 FConvexVolume::FConvexVolume(const FConvexVolume& Other)
 {
-	// Ghidra 0x3750: 32 FPlane copy ctors (FPlane is POD) + 24 DWORDs = 0x260 bytes total
+	// Ghidra 0x3750: 32 FPlane copy ctors (FPlane is POD) + copy NumPlanes/FVectors/pad/FMatrix.
+	// Equivalent to appMemcpy since all members are POD.
 	appMemcpy(this, &Other, 0x260);
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10414360)
 FConvexVolume::FConvexVolume()
 {
-	// Ghidra: default ctor; no heap allocation; stack/member data left to caller init.
+	// Ghidra 0x114360 (86b): 32 FPlane default ctors, FVector at +0x204, FVector at +0x210,
+	// FMatrix at +0x220; zeroes NumPlanes and _Pad21C.
+	for (int i = 0; i < 32; i++)
+		new (&Planes[i]) FPlane();
+	new (&_ExtraVec0) FVector();
+	new (&_ExtraVec1) FVector();
+	new (&_ExtraMatrix) FMatrix();
 	NumPlanes = 0;
+	_Pad21C = 0;
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10303740)
 FConvexVolume::~FConvexVolume()
 {
-	// Ghidra: trivial dtor; no heap to free.
+	// Ghidra 0x3740: calls FMatrix::~FMatrix at this+0x220 (trivial, FMatrix is POD).
+	_ExtraMatrix.~FMatrix();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x103037f0)
 FConvexVolume& FConvexVolume::operator=(const FConvexVolume& Other)
 {
-	// Ghidra 0x37f0: 0x98 DWORDs from offset 0 (no vtable)
+	// Ghidra 0x37f0 (54b): 0x98 DWORD loop = 0x260 bytes from offset 0.
 	appMemcpy(this, &Other, 0x260);
 	return *this;
 }
@@ -1533,14 +1554,14 @@ void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInt
 	// INTENTIONALLY EMPTY: rendering dispatched via UMeshInstance::Render vtable; FDynamicActor::Render has no per-type render logic
 }
 
-IMPL_DIVERGE("Ghidra 0x103135d0 (135b): FDynamicActor copy ctor; flat memcpy 0x80 bytes; body correct but VA unconfirmed via symbol search")
+IMPL_MATCH("Engine.dll", 0x103135d0)
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 {
-	// Ghidra 0x135d0: no vtable; flat copy of 0x80 bytes (same as operator= at 0x13660)
+	// Ghidra 0x135d0 (135b): no vtable; flat copy of 0x80 bytes (same as operator= at 0x13660)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_DIVERGE("VA unconfirmed; AActor* ctor inits FMatrix@+4, FBox@+48, FSphere@+64, stores actor; transform/bounds setup incomplete (unresolved FUN_* helpers)")
+IMPL_DIVERGE("0x103ffb70 confirmed; complex transform/bounds setup requires unresolved FUN_* helpers")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
@@ -1549,19 +1570,20 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 	new ((BYTE*)this + 0x48) FBox();
 	new ((BYTE*)this + 0x64) FSphere();
 	*(AActor**)this = Actor;
-	// TODO: complete FDynamicActor constructor mesh/physics transform setup (requires unresolved FUN_* helpers)
+	// DIVERGENCE: mesh/physics transform setup requires unresolved FUN_* helpers.
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10309a70)
 FDynamicActor::~FDynamicActor()
 {
-	// Ghidra: trivial dtor; no heap to free.
+	// Ghidra 0x9a70: calls FMatrix::~FMatrix at this+4 (trivial, FMatrix is POD). No heap to free.
+	((FMatrix*)((BYTE*)this + 0x04))->~FMatrix();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10313660)
 FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 {
-	// Ghidra 0x13660: 0x20 DWORDs from offset 0 (FDynamicActor has no vtable)
+	// Ghidra 0x13660 (54b): 0x20 DWORDs from offset 0 = 0x80 bytes (no vtable)
 	appMemcpy(this, &Other, 0x80);
 	return *this;
 }
@@ -1652,13 +1674,15 @@ FColor FDynamicLight::SampleLight(FVector,FVector)
 	return FColor(0,0,0,0);
 }
 
-IMPL_DIVERGE("Ghidra 0x10313540 (100b): FDynamicLight copy ctor; flat memcpy of full object; body correct but VA unconfirmed via symbol search")
+IMPL_MATCH("Engine.dll", 0x10313540)
 FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 {
+	// Ghidra 0x13540 (100b): FPlane copy ctor at +4, copies 10 DWORDs +0x14..+0x38.
+	// FPlane is POD so equivalent to flat memcpy of sizeof(FDynamicLight).
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10313540 not yet fully reconstructed")
+IMPL_DIVERGE("0x1040ff20 confirmed; complex light-color/direction setup (FGetHSV + LightEffect dispatch) not yet reconstructed")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
@@ -1670,9 +1694,10 @@ FDynamicLight::FDynamicLight(AActor* Actor)
 	// DIVERGENCE: complex light-effect and color setup omitted (requires FGetHSV + LightEffect dispatch).
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x103135b0)
 FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
 {
+	// Ghidra 0x135b0 (48b): 0xF DWORDs from offset 0 = 0x3C bytes (FDynamicLight has no vtable).
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 	return *this;
 }
@@ -1690,18 +1715,18 @@ FLightMapIndex::FLightMapIndex()
 	new ((BYTE*)this + 0xa0) FVector(0.f,0.f,0.f);
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10302bc0)
 FLightMapIndex::~FLightMapIndex()
 {
-	// Ghidra 0x2bc0: destructs FMatrix at +0x48 then +8.
-	guard(FLightMapIndex::~FLightMapIndex);
-	unguard;
+	// Ghidra 0x2bc0: calls FMatrix::~FMatrix at +0x48 then +0x08 (trivial, FMatrix is POD).
+	((FMatrix*)((BYTE*)this + 0x48))->~FMatrix();
+	((FMatrix*)((BYTE*)this + 0x08))->~FMatrix();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10302c10)
 FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex& Other)
 {
-	// Ghidra 0x2c10: 0x30 DWORDs from offset 0 (no vtable)
+	// Ghidra 0x2c10 (134b): 0x30 DWORDs from offset 0 = 0xC0 bytes (no vtable).
 	appMemcpy(this, &Other, 0xC0);
 	return *this;
 }
@@ -1722,9 +1747,10 @@ FLineVertex::FLineVertex()
 	// No SEH frame; compiler default-constructs Point (FVector trivial ctor).
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10304570)
 FLineVertex& FLineVertex::operator=(const FLineVertex& Other)
 {
+	// Ghidra 0x4570 (33b): shared stub; 4 DWORDs from offset 0 = 16 bytes.
 	Point = Other.Point;
 	Color = Other.Color;
 	return *this;
@@ -1750,11 +1776,10 @@ FStaticCubemap::FStaticCubemap(UCubemap* Cubemap)
 	*(INT*)(Pad + 12)    = 1;
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10318ee0)
 FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap& Other)
 {
-	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
-	// Shares address with FStaticTexture.
+	// Ghidra 0x18ee0 (33b): skip vtable at +0, copy 4 DWORDs at +4..+10. Shares address with FStaticTexture::operator=.
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 	return *this;
 }
@@ -1787,12 +1812,11 @@ FTexture * FStaticCubemap::GetFace(int FaceIndex)
 	return (FTexture*)GetRI(bm);
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10414310)
 int FStaticCubemap::GetFirstMip()
 {
-	// UCubemap* at Pad[0] (this+4); cubemap inherits from UTexture.
-	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
-	return tex ? tex->DefaultLOD() : 0;
+	// Ghidra 0x114310: shared stub returning 0 (xor eax,eax; ret). Same 3-byte stub as FStaticLightMapTexture::GetFirstMip etc.
+	return 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x1046ab90)
@@ -1906,10 +1930,11 @@ FTempLineBatcher::FTempLineBatcher()
 	new ((BYTE*)this + 0x30) TArray<FLOAT>();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x10327410 confirmed; calls FUN_10322eb0, FUN_10322e20, FUN_10324640 (unresolved TArray dtor helpers)")
 FTempLineBatcher::~FTempLineBatcher()
 {
-	// Destroy 5 TArrays in reverse order
+	// Ghidra 0x27410: destroys 5 TArrays via unresolved FUN_* helpers; using ~TArray() directly.
+	// DIVERGENCE: FUN_10322eb0/FUN_10322e20/FUN_10324640 are unresolved.
 	((TArray<FLOAT>*)((BYTE*)this + 0x30))->~TArray();
 	((TArray<FBox>*)((BYTE*)this + 0x24))->~TArray();
 	((TArray<FLOAT>*)((BYTE*)this + 0x18))->~TArray();
@@ -1917,11 +1942,11 @@ FTempLineBatcher::~FTempLineBatcher()
 	((TArray<FVector>*)((BYTE*)this + 0x00))->~TArray();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x10327520 confirmed; calls FUN_* (unresolved TArray assign helpers) for each of the 5 TArray members")
 FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
 {
-	// Ghidra 0x27520: no vtable; line start/end FVectors at +0/+0C, line colors at +18,
-	// box data (FBox) at +24, box colors at +30
+	// Ghidra 0x27520: no vtable; 5 TArray assigns via unresolved FUN_* helpers.
+	// DIVERGENCE: using TArray::operator= directly.
 	*(TArray<FVector>*)((BYTE*)this + 0x00) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x00);
 	*(TArray<FVector>*)((BYTE*)this + 0x0C) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x0C);
 	*(TArray<FLOAT>*)((BYTE*)this + 0x18) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x18);
