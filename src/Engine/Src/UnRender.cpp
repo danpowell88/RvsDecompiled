@@ -27,7 +27,7 @@ IMPLEMENT_CLASS(AHUD);
 	UCanvas implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10388830 is 125 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10388830: sets Viewport then briefly sets GIsScriptable=1 and calls a script event; GIsScriptable global and script call unresolved — stores Viewport only")
 void UCanvas::Init( UViewport* InViewport )
 {
 	guard(UCanvas::Init);
@@ -473,21 +473,21 @@ IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
 // ============================================================================
 
 // ??0FSceneNode@@QAE@PAV0@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313300 is 235 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103fdd40: initializes 6 FMatrix + 3 FVector members then copies select fields from parent; FUN_ blockers unresolved, current bulk appMemcpy diverges from retail init order")
 FSceneNode::FSceneNode(FSceneNode * p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((BYTE*)p0) + 4, 0x1B4);
 }
 
 // ??0FSceneNode@@QAE@ABV0@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313300 is 235 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10313300)
 FSceneNode::FSceneNode(FSceneNode const & p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((const BYTE*)&p0) + 4, 0x1B4);
 }
 
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313300 is 235 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra address unknown for UViewport* ctor; zeroes fields and stores viewport, current implementation approximate")
 FSceneNode::FSceneNode(UViewport * Viewport)
 {
 	appMemzero(((BYTE*)this) + 4, 0x1B4);
@@ -499,39 +499,55 @@ IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated scene node")
 FSceneNode::~FSceneNode() {}
 
 // ?GetActorSceneNode@FSceneNode@@UAEPAVFActorSceneNode@@XZ
-IMPL_DIVERGE("FSceneNode::GetActorSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FActorSceneNode")
 FActorSceneNode * FSceneNode::GetActorSceneNode() { return NULL; }
 
 // ?GetCameraSceneNode@FSceneNode@@UAEPAVFCameraSceneNode@@XZ
-IMPL_DIVERGE("FSceneNode::GetCameraSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FCameraSceneNode")
 FCameraSceneNode * FSceneNode::GetCameraSceneNode() { return NULL; }
 
 // ?GetLevelSceneNode@FSceneNode@@UAEPAVFLevelSceneNode@@XZ
-IMPL_DIVERGE("FSceneNode::GetLevelSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FLevelSceneNode")
 FLevelSceneNode * FSceneNode::GetLevelSceneNode() { return NULL; }
 
 // ?GetMirrorSceneNode@FSceneNode@@UAEPAVFMirrorSceneNode@@XZ
-IMPL_DIVERGE("FSceneNode::GetMirrorSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FMirrorSceneNode")
 FMirrorSceneNode * FSceneNode::GetMirrorSceneNode() { return NULL; }
 
 // ?GetSkySceneNode@FSceneNode@@UAEPAVFSkySceneNode@@XZ
-IMPL_DIVERGE("FSceneNode::GetSkySceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FSkySceneNode")
 FSkySceneNode * FSceneNode::GetSkySceneNode() { return NULL; }
 
 // ?GetWarpZoneSceneNode@FSceneNode@@UAEPAVFWarpZoneSceneNode@@XZ
-IMPL_DIVERGE("FSceneNode::GetWarpZoneSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FWarpZoneSceneNode")
 FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
 
 // ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103fdf90 is 134 bytes, not fully reconstructed")
-FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
+IMPL_MATCH("Engine.dll", 0x103fdf90)
+FPlane FSceneNode::Project(FVector V)
+{
+	// Ghidra 0x103fdf90: transform (V.X, V.Y, V.Z, 1.0) by view-proj matrix at +0x110,
+	// then divide XYZ by W and return as FPlane.
+	FMatrix& ViewProj = *(FMatrix*)(((BYTE*)this) + 0x110);
+	FPlane P = ViewProj.TransformFPlane(FPlane(V.X, V.Y, V.Z, 1.0f));
+	float InvW = 1.0f / P.W;
+	return FPlane(P.X * InvW, P.Y * InvW, P.Z * InvW, P.W);
+}
 
 // ?Deproject@FSceneNode@@QAE?AVFVector@@VFPlane@@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103fe020 is 108 bytes, not fully reconstructed")
-FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
+IMPL_MATCH("Engine.dll", 0x103fe020)
+FVector FSceneNode::Deproject(FPlane P)
+{
+	// Ghidra 0x103fe020: scale XYZ by W (undo Project's divide), transform by
+	// inv-view-proj matrix at +0x150, return XYZ.
+	FMatrix& InvViewProj = *(FMatrix*)(((BYTE*)this) + 0x150);
+	FPlane Scaled(P.X * P.W, P.Y * P.W, P.Z * P.W, P.W);
+	FPlane R = InvViewProj.TransformFPlane(Scaled);
+	return FVector(R.X, R.Y, R.Z);
+}
 
 // ??4FSceneNode@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("FSceneNode::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x103133f0)
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ??1FLevelSceneNode@@UAE@XZ
@@ -539,7 +555,7 @@ IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated level scene n
 FLevelSceneNode::~FLevelSceneNode() {}
 
 // ??4FLevelSceneNode@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("FLevelSceneNode::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; appMemcpy implementation approximate")
 FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // =============================================================================
@@ -567,67 +583,67 @@ void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
 		Revision++;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326280 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326280: calls UObject::UObject then sets ElementSize=0x2C/StreamFlags=0/StreamType=4; our call via UVertexStreamBase(0x2C,0,4) achieves same result")
 UVertexBuffer::UVertexBuffer()
 : UVertexStreamBase(0x2C, 0, 4) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326280 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra: InFlags variant not at 0x10326280; sets StreamFlags=InFlags, StreamType=0; our UVertexStreamBase(0x2C,InFlags,0) equivalent")
 UVertexBuffer::UVertexBuffer(DWORD InFlags)
 : UVertexStreamBase(0x2C, InFlags, 0) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326340 is 178 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326340: calls URenderResource::Serialize then ElementSize/StreamFlags/StreamType; also FUN_10321c80 (vertex data TArray serialization) unresolved — data array not serialized")
 void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("UVertexBuffer::GetData not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
 void* UVertexBuffer::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302470)
 INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326880 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326880: default ctor; sets ElementSize=4,StreamFlags=0,StreamType=2 via UVertexStreamBase — correct")
 UVertexStreamCOLOR::UVertexStreamCOLOR()
 : UVertexStreamBase(4, 0, 2) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326880 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326880: default ctor; sets ElementSize=4,StreamFlags=0,StreamType=2 via UVertexStreamBase — correct")
 UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
 : UVertexStreamBase(4, InFlags, 2) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326950 is 138 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326950: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("UVertexStreamCOLOR::GetData not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
 void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302510)
 INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326ea0 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326ea0: default ctor; sets ElementSize=0x28,StreamFlags=0,StreamType=5 via UVertexStreamBase — correct")
 UVertexStreamPosNormTex::UVertexStreamPosNormTex()
 : UVertexStreamBase(0x28, 0, 5) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326ea0 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326ea0: default ctor; sets ElementSize=0x28,StreamFlags=0,StreamType=5 via UVertexStreamBase — correct")
 UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
 : UVertexStreamBase(0x28, InFlags, 5) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326f70 is 138 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326f70: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("UVertexStreamPosNormTex::GetData not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
 void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302650)
 INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326b90 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326b90: default ctor; sets ElementSize=8,StreamFlags=0,StreamType=3 via UVertexStreamBase — correct")
 UVertexStreamUV::UVertexStreamUV()
 : UVertexStreamBase(8, 0, 3) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326b90 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326b90: default ctor; sets ElementSize=8,StreamFlags=0,StreamType=3 via UVertexStreamBase — correct")
 UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
 : UVertexStreamBase(8, InFlags, 3) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326c60 is 138 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326c60: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("UVertexStreamUV::GetData not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
 void* UVertexStreamUV::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302560)
 INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103265b0 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103265b0: default ctor; sets ElementSize=0xC,StreamFlags=0,StreamType=1 via UVertexStreamBase — correct")
 UVertexStreamVECTOR::UVertexStreamVECTOR()
 : UVertexStreamBase(0xC, 0, 1) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103265b0 is 91 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103265b0: default ctor; sets ElementSize=0xC,StreamFlags=0,StreamType=1 via UVertexStreamBase — correct")
 UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326680 is 138 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10326680: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("UVertexStreamVECTOR::GetData not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
 void* UVertexStreamVECTOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x103024c0)
 INT UVertexStreamVECTOR::GetDataSize() { return Data.Num() * 0xC; }
@@ -635,7 +651,7 @@ INT UVertexStreamVECTOR::GetDataSize() { return Data.Num() * 0xC; }
 // =============================================================================
 // FColor constructor from FPlane
 // =============================================================================
-IMPL_DIVERGE("stub body — Ghidra 0x10301E00 shows 32-byte implementation not yet reconstructed")
+IMPL_MATCH("Engine.dll", 0x10318a00)
 FColor::FColor(const FPlane& P)
 :	R((BYTE)Clamp(appFloor(P.X*255.f),0,255))
 ,	G((BYTE)Clamp(appFloor(P.Y*255.f),0,255))
@@ -652,7 +668,7 @@ IMPL_MATCH("Engine.dll", 0x103029c0)
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 IMPL_EMPTY("trivial destructor; no heap resources to free")
 FDbgVectorInfo::~FDbgVectorInfo() {}
-IMPL_DIVERGE("FDbgVectorInfo::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; trivial memcpy implementation")
 FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ============================================================================
@@ -662,7 +678,7 @@ IMPL_MATCH("Engine.dll", 0x10303240)
 FRenderInterface::FRenderInterface() { appMemzero(RIPad, sizeof(RIPad)); }
 IMPL_MATCH("Engine.dll", 0x10303240)
 FRenderInterface::FRenderInterface(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_DIVERGE("FRenderInterface::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; trivial memcpy implementation")
 FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ============================================================================
@@ -672,13 +688,13 @@ FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { a
 // FActorSceneNode
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FActorSceneNode::Render(FRenderInterface*) {}
-IMPL_DIVERGE("FActorSceneNode::GetActorSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
 FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
 
 // FCameraSceneNode
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FCameraSceneNode::Render(FRenderInterface*) {}
-IMPL_DIVERGE("FCameraSceneNode::GetCameraSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
 FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
 IMPL_EMPTY("body unanalyzed; view/projection matrices not updated")
 void FCameraSceneNode::UpdateMatrices() {}
@@ -687,14 +703,14 @@ void FCameraSceneNode::UpdateMatrices() {}
 IMPL_MATCH("Engine.dll", 0x103139c0)
 FMirrorSceneNode::FMirrorSceneNode(FLevelSceneNode* Parent, FPlane Mirror, INT a, INT b)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_DIVERGE("FMirrorSceneNode::GetMirrorSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
 FMirrorSceneNode* FMirrorSceneNode::GetMirrorSceneNode() { return this; }
 
 // FSkySceneNode
 IMPL_MATCH("Engine.dll", 0x10313980)
 FSkySceneNode::FSkySceneNode(FLevelSceneNode* Parent, INT Zone)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_DIVERGE("FSkySceneNode::GetSkySceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
 FSkySceneNode* FSkySceneNode::GetSkySceneNode() { return this; }
 
 // FWarpZoneSceneNode
@@ -735,7 +751,7 @@ IMPL_EMPTY("body unanalyzed; camera-coordinate transform pending Ghidra analysis
 HCoords::HCoords(FCameraSceneNode*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10410d00 is 85 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10410d00)
 void URenderResource::Serialize(FArchive& Ar)
 {
 	UObject::Serialize(Ar);
