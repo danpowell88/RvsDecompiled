@@ -32,7 +32,7 @@ static INT s_ScoreSubmissionActive = 0;
 
 // --- AR6GameInfo ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::AbortScoreSubmission()
 {
 	if (s_ScoreSubmissionActive)
@@ -46,7 +46,7 @@ void AR6GameInfo::AbortScoreSubmission()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::InitGameInfoGameService()
 {
 	// Load the R6GSServers class from the GameService package
@@ -136,7 +136,7 @@ void AR6GameInfo::InitGameInfoGameService()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::MasterServerManager()
 {
 	if (m_GameService)
@@ -151,7 +151,7 @@ void AR6GameInfo::MasterServerManager()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::PostBeginPlay()
 {
 	if (!m_GameService)

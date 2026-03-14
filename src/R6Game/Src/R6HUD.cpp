@@ -12,7 +12,7 @@ IMPLEMENT_FUNCTION(AR6HUD, -1, execHudStep)
 
 // --- AR6HUD ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void AR6HUD::Destroy()
 {
 	// Clear the object reference held by the HUD (offset 0x5AC)
@@ -55,7 +55,7 @@ void AR6HUD::DrawSingleCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanv
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void AR6HUD::Serialize(FArchive& Ar)
 {
 	AActor::Serialize(Ar);

@@ -53,7 +53,7 @@ IMPLEMENT_CLASS(UWetTexture);
 	The retail DLL exports these explicitly.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FSpark& FSpark::operator=( const FSpark& Other )
 {
 	Type  = Other.Type;
@@ -67,7 +67,7 @@ FSpark& FSpark::operator=( const FSpark& Other )
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FDrop& FDrop::operator=( const FDrop& Other )
 {
 	Type   = Other.Type;
@@ -81,7 +81,7 @@ FDrop& FDrop::operator=( const FDrop& Other )
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 {
 	Type  = Other.Type;
@@ -178,7 +178,7 @@ KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 #define PTR_AT(obj, off)    (*(INT*)((BYTE*)(obj) + (off)))
 
 /* Get pixel data pointer from the first mipmap. */
-IMPL_APPROX("Internal helper reconstructed from context")
+IMPL_INFERRED("Internal helper reconstructed from context")
 static inline BYTE* GetMipPixels( void* Obj )
 {
 	INT MipsPtr = PTR_AT(Obj, 0xbc);
@@ -187,7 +187,7 @@ static inline BYTE* GetMipPixels( void* Obj )
 }
 
 /* Random byte — approximates FUN_10509f60 (retail inline PRNG). */
-IMPL_APPROX("Approximates retail PRNG FUN_10509f60")
+IMPL_INFERRED("Approximates retail PRNG FUN_10509f60")
 static inline BYTE RandByte()
 {
 	return (BYTE)appRand();
@@ -226,7 +226,7 @@ static BYTE  GOrbBright[256];       // DAT_105131c0  orbital brightness
 
 static UBOOL GTablesInit = 0;
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 static void InitFireTables()
 {
 	if( GTablesInit ) return;
@@ -257,7 +257,7 @@ void UFractalTexture::PostLoad()
 	UTexture::PostLoad();
 }
 
-IMPL_MATCH("Fire.dll", 0x6b20)
+IMPL_GHIDRA("Fire.dll", 0x6b20)
 void UFractalTexture::PostEditChange()
 {
 	// Ghidra: PostEditChange at 0x6b20 is empty in the retail binary.
@@ -272,7 +272,7 @@ void UFractalTexture::Prime()
 	UTexture::Prime();
 }
 
-IMPL_APPROX("Confirmed empty in retail binary")
+IMPL_INFERRED("Confirmed empty in retail binary")
 void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Confirmed empty in retail binary.
@@ -282,7 +282,7 @@ void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	UFireTexture — animated fire effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UFireTexture::Clear( DWORD Flags )
 {
 	// Ghidra: memsets the mip pixel buffer to 0.
@@ -300,7 +300,7 @@ void UFireTexture::Init( INT InUSize, INT InVSize )
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
-IMPL_MATCH("Fire.dll", 0x50f0)
+IMPL_GHIDRA("Fire.dll", 0x50f0)
 void UFireTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x50f0: calls RedrawSparks() then PostDrawSparks().
@@ -308,7 +308,7 @@ void UFireTexture::ConstantTimeTick()
 	PostDrawSparks();
 }
 
-IMPL_MATCH("Fire.dll", 0x2440)
+IMPL_GHIDRA("Fire.dll", 0x2440)
 void UFireTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra at 0x2440: calls FirePaint with the click coordinates.
@@ -317,7 +317,7 @@ void UFireTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 	FirePaint( IX, IY, Flags );
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UFireTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra: similar to Click — calls FirePaint.
@@ -326,7 +326,7 @@ void UFireTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 	FirePaint( IX, IY, Flags );
 }
 
-IMPL_MATCH("Fire.dll", 0x6c50)
+IMPL_GHIDRA("Fire.dll", 0x6c50)
 void UFireTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Ghidra at 0x6c50: writes a random byte to the pixel buffer.
@@ -352,7 +352,7 @@ void UFireTexture::Serialize( FArchive& Ar )
 
 /*--- UFireTexture private helpers ---*/
 
-IMPL_MATCH("Fire.dll", 0x6800)
+IMPL_GHIDRA("Fire.dll", 0x6800)
 void UFireTexture::TempDrawSpark( INT X, INT Y, INT H )
 {
 	// Ghidra at 0x6800: writes H to pixel at (X & UMask, Y & VMask).
@@ -2178,6 +2178,7 @@ void UWaveTexture::PostLoad()
 	UWaterTexture::PostLoad();
 }
 
+IMPL_INFERRED("Confirmed empty in retail binary")
 void UWaveTexture::SetWaveLight()
 {
 	// Confirmed empty in the retail binary (just 'ret').
@@ -2187,16 +2188,19 @@ void UWaveTexture::SetWaveLight()
 	UFluidTexture — fluid simulation texture.
 -----------------------------------------------------------------------------*/
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFluidTexture::Clear( DWORD Flags )
 {
 	UWaterTexture::Clear( Flags );
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFluidTexture::Init( INT InUSize, INT InVSize )
 {
 	UWaterTexture::Init( InUSize, InVSize );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x27a0)
 void UFluidTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x27a0: calls WaterRedrawDrops, CalculateFluid.
@@ -2204,11 +2208,13 @@ void UFluidTexture::ConstantTimeTick()
 	CalculateFluid();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFluidTexture::PostLoad()
 {
 	UWaterTexture::PostLoad();
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x7600, "nearest-neighbour 2x2 upsampling instead of bilinear")
 void UFluidTexture::CalculateFluid()
 {
 	// Ghidra: 0x7600, ~3600 bytes (heavily loop-unrolled 2-D wave simulation).
@@ -2291,6 +2297,7 @@ void UFluidTexture::CalculateFluid()
 	UIceTexture — animated ice/glass effect.
 -----------------------------------------------------------------------------*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UIceTexture::Clear( DWORD Flags )
 {
 	BYTE* Pixels = GetMipPixels( this );
@@ -2301,17 +2308,20 @@ void UIceTexture::Clear( DWORD Flags )
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UIceTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x27c0)
 void UIceTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x27c0: calls RenderIce.
 	RenderIce( 1.0f );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x9d70)
 void UIceTexture::Tick( FLOAT DeltaTime )
 {
 	// Ghidra at 0x9d70: if MoveIce byte (0xf9) is set, calls RenderIce.
@@ -2326,27 +2336,29 @@ void UIceTexture::Tick( FLOAT DeltaTime )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x2420)
 void UIceTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra at 0x2420: confirmed empty.
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UIceTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra: sets ForceRefresh flag so ice re-renders.
 	INT_AT(this, 0x130) = 1;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UIceTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UIceTexture::Destroy()
-{
-	UTexture::Destroy();
-}
 
+IMPL_GHIDRA("Fire.dll", 0x89e0)
 void UIceTexture::MoveIcePosition( FLOAT Delta )
 {
 	// Ghidra at 0x89e0: updates UPosition/VPosition floats based on
@@ -2357,6 +2369,7 @@ void UIceTexture::MoveIcePosition( FLOAT Delta )
 	FLOAT_AT(this, 0x114) += VSpeed;
 }
 
+IMPL_GHIDRA("Fire.dll", 0x8c00)
 void UIceTexture::RenderIce( FLOAT Delta )
 {
 	// Ghidra at 0x8c00: renders the ice texture by moving the position
@@ -2387,6 +2400,7 @@ void UIceTexture::RenderIce( FLOAT Delta )
 	INT_AT(this, 0x130) = 0;
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x65c0, "skips vtable lock calls; assumes textures already loaded")
 void UIceTexture::BlitIceTex()
 {
 	// Ghidra: 0x65c0, 380 bytes.
@@ -2428,6 +2442,7 @@ void UIceTexture::BlitIceTex()
 	}
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x6400, "skips vtable lock calls")
 void UIceTexture::BlitTexIce()
 {
 	// Ghidra: 0x6400, 393 bytes.
@@ -2474,6 +2489,7 @@ void UIceTexture::BlitTexIce()
 	UWetTexture — animated wet surface effect.
 -----------------------------------------------------------------------------*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UWetTexture::Clear( DWORD Flags )
 {
 	BYTE* Pixels = GetMipPixels( this );
@@ -2484,22 +2500,26 @@ void UWetTexture::Clear( DWORD Flags )
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWetTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x27b0)
 void UWetTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x27b0: calls ApplyWetTexture.
 	ApplyWetTexture();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWetTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWetTexture::Destroy()
 {
 	// Free locally allocated bitmap if present.
@@ -2512,6 +2532,7 @@ void UWetTexture::Destroy()
 	UTexture::Destroy();
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x62c0, "skips vtable lock; assumes source texture loaded")
 void UWetTexture::ApplyWetTexture()
 {
 	// Ghidra: 0x62c0, 269 bytes.
@@ -2559,6 +2580,7 @@ void UWetTexture::ApplyWetTexture()
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x8900)
 void UWetTexture::SetRefractionTable()
 {
 	// Ghidra at 0x8900: fills the refraction table (this+0x904, 1024 bytes)

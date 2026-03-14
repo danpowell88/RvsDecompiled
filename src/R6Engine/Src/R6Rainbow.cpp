@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6Rainbow)
 
 // --- AR6Rainbow ---
 
-IMPL_APPROX("Updates current yaw/pitch from desired values and calls PawnLook when changed")
+IMPL_INFERRED("Updates current yaw/pitch from desired values and calls PawnLook when changed")
 void AR6Rainbow::UpdateAiming()
 {
 	guard(AR6Rainbow::UpdateAiming);

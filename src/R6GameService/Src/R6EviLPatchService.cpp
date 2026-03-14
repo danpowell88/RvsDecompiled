@@ -101,7 +101,7 @@ void UeviLPatchService::FinalDestroy()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from Ghidra analysis; DAT addresses identified")
+IMPL_INFERRED("Reconstructed from Ghidra analysis; DAT addresses identified")
 DWORD UeviLPatchService::GetPatchServiceState()
 {
 	guard(UeviLPatchService::GetPatchServiceState);

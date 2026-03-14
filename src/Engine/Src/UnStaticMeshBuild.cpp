@@ -24,6 +24,7 @@ void UStaticMesh::StaticConstructor()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::PostEditChange()
 {
 	guard(UStaticMesh::PostEditChange);
@@ -32,6 +33,7 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
@@ -41,6 +43,7 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
@@ -48,6 +51,7 @@ void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshColli
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::Build()
 {
 	guard(UStaticMesh::Build);
@@ -55,9 +59,10 @@ void UStaticMesh::Build()
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
+IMPL_GHIDRA_APPROX("Engine.dll", 0x1c9f0, "fallback GetDefaultMaterial CDO (FUN_10317670) not resolved; returns NULL instead")
 UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
-	// Ghidra 0x1c9f0, 69b: call Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
+	// Ghidra 0x1c9f0, 69b:call Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
 	// If NULL, fall back to Materials TArray at this+0xfc (stride 0x0c; UMaterial* at +0).
 	// If still NULL: FUN_10317670 (default UMaterial CDO) unresolved — return NULL.
 	typedef UMaterial* (__thiscall* GetSkinFn)(AActor*, INT);
@@ -72,6 +77,7 @@ UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 	// Retail returns a fallback default UMaterial; we return NULL here.
 	return pSkin;
 }
+IMPL_GHIDRA("Engine.dll", 0x1478b0)
 FTags * UStaticMesh::GetTag(FString Name)
 {
 	guard(UStaticMesh::GetTag);
@@ -88,14 +94,16 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
+IMPL_GHIDRA_APPROX("Engine.dll", 0x10449de0, "simplified to UObject::Serialize only; version-conditional geometry arrays not reconstructed")
 void UStaticMesh::Serialize(FArchive& Ar)
 {
-	// Retail: 0x10449de0. Calls UPrimitive::Serialize (if version >= 0x55) or UObject::Serialize,
+	// Retail: 0x10449de0.Calls UPrimitive::Serialize (if version >= 0x55) or UObject::Serialize,
 	// then serializes geometry arrays: +0x154/+0x158 (v<0x5C), +0x58 (triangle data),
 	// +0x2C (render bounds), +0x1C4, +0x1D0 (materials), etc.
 	// Divergence: simplified to base class; geometry is loaded from package.
 	UObject::Serialize(Ar);
 }
+IMPL_TODO("Needs Ghidra analysis")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
@@ -105,6 +113,7 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 	return 1;
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
@@ -114,38 +123,45 @@ int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 	return 1;
 	unguard;
 }
+IMPL_GHIDRA_APPROX("Engine.dll", 0x104469d0, "FUN_103582d0 called via hardcoded address thunk")
 void UStaticMesh::Destroy()
 {
-	// Retail: 0x104469d0. Calls FUN_103582d0(this) to release the static mesh collision
+	// Retail: 0x104469d0.Calls FUN_103582d0(this) to release the static mesh collision
 	// node tree and triangle arrays at this+0x164. Then calls UObject::Destroy.
 	typedef void (__cdecl *FreeMeshFn)(UStaticMesh*);
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
+IMPL_TODO("Needs Ghidra analysis")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
 {
 	return FBox();
 }
+IMPL_INFERRED("Retail 41b; delegates to GetCollisionBoundingBox().GetCenter()")
 FVector UStaticMesh::GetEncroachCenter(AActor * Actor)
 {
 	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetCenter().
 	return GetCollisionBoundingBox(Actor).GetCenter();
 }
+IMPL_INFERRED("Retail 41b; delegates to GetCollisionBoundingBox().GetExtent()")
 FVector UStaticMesh::GetEncroachExtent(AActor * Actor)
 {
 	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetExtent().
 	return GetCollisionBoundingBox(Actor).GetExtent();
 }
+IMPL_INFERRED("Retail 23b; raw FBox copy from this+0x2C")
 FBox UStaticMesh::GetRenderBoundingBox(const AActor*)
 {
 	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x2C to return buffer.
 	return *(FBox*)((BYTE*)this + 0x2C);
 }
+IMPL_INFERRED("Retail 23b; raw FSphere copy from this+0x48")
 FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 {
 	// Retail: 23b. Copy-constructs FSphere from this+0x48.
 	return *(FSphere*)((BYTE*)this + 0x48);
 }
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::Illuminate(AActor *,int)
 {
 	guard(UStaticMesh::Illuminate);
@@ -156,6 +172,7 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
+IMPL_GHIDRA_APPROX("Engine.dll", 0x149bb0, "simplified to UObject::Serialize; version-conditional color-stream/index-buffer serialization not reconstructed")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
@@ -166,6 +183,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
@@ -174,6 +192,7 @@ void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 {
 	guard(UStaticMeshInstance::DetachProjectorClipped);
@@ -183,6 +202,7 @@ void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 }
 
 // --- FOrientation ---
+IMPL_INFERRED("Zero-initialised orientation struct; no Ghidra reference")
 FOrientation::FOrientation()
 {
 	*(INT*)&_Data[0x00] = 2;
@@ -195,12 +215,14 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
+IMPL_INFERRED("Raw memcpy assignment; no Ghidra reference")
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
 	appMemcpy(this, &Other, 0x34);
 	return *this;
 }
 
+IMPL_INFERRED("Compares single DWORD field; no Ghidra reference")
 int FOrientation::operator!=(FOrientation const & Other) const
 {
 	return *(INT*)&_Data[0x18] != *(INT*)&Other._Data[0x18];
@@ -208,12 +230,14 @@ int FOrientation::operator!=(FOrientation const & Other) const
 
 
 // --- FRebuildOptions ---
+IMPL_INFERRED("Copy constructor with memcpy + FString copy; no Ghidra reference")
 FRebuildOptions::FRebuildOptions(FRebuildOptions const & Other)
 	: Name(Other.Name)
 {
 	appMemcpy(Options, Other.Options, sizeof(Options));
 }
 
+IMPL_INFERRED("Default constructor with known option values; no Ghidra reference")
 FRebuildOptions::FRebuildOptions()
 {
 	Options[0] = 2;    // 0x0C
@@ -227,11 +251,13 @@ FRebuildOptions::FRebuildOptions()
 	Name = TEXT("Default");
 }
 
+IMPL_INTENTIONALLY_EMPTY("FString member destructor handles cleanup automatically")
 FRebuildOptions::~FRebuildOptions()
 {
 	// Name's implicit destructor handles FString cleanup
 }
 
+IMPL_INFERRED("Assignment with FString copy + memcpy; no Ghidra reference")
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
 	Name = Other.Name;
@@ -239,11 +265,13 @@ FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 	return *this;
 }
 
+IMPL_INFERRED("Returns Name field; no Ghidra reference")
 FString FRebuildOptions::GetName()
 {
 	return Name;
 }
 
+IMPL_INFERRED("Resets option values to defaults; no Ghidra reference")
 void FRebuildOptions::Init()
 {
 	Options[0] = 2;
@@ -258,34 +286,39 @@ void FRebuildOptions::Init()
 
 
 // --- FTags ---
+IMPL_GHIDRA("Engine.dll", 0x2ed0)
 FTags::FTags(FTags const &Other)
 {
-	// Ghidra 0x2ed0: bitwise copy of first 0x30 bytes (TArrays here are shallow/borrowed), then FString copy at +0x30
+	// Ghidra 0x2ed0:bitwise copy of first 0x30 bytes (TArrays here are shallow/borrowed), then FString copy at +0x30
 	appMemcpy(this, &Other, 0x30);
 	new ((BYTE*)this + 0x30) FString(*(const FString*)((const BYTE*)&Other + 0x30));
 }
 
+IMPL_INFERRED("Zero-initialised FTags with empty FString; no Ghidra reference")
 FTags::FTags()
 {
-	// Zero first 0x30 bytes; initialize owned FString at +0x30 to empty
+	// Zero first 0x30 bytes;initialize owned FString at +0x30 to empty
 	appMemzero(this, 0x30);
 	new ((BYTE*)this + 0x30) FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x10302ec0)
 FTags::~FTags()
 {
-	// Ghidra 0x10302ec0: only ~FString at +0x30; TArrays in first 0x30 bytes are not destructed (shallow/borrowed)
+	// Ghidra 0x10302ec0:only ~FString at +0x30; TArrays in first 0x30 bytes are not destructed (shallow/borrowed)
 	((FString*)((BYTE*)this + 0x30))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x2f00)
 FTags& FTags::operator=(const FTags& Other)
 {
-	// Ghidra 0x2f00: 12 DWORDs at +0..+2F (no vtable), then FString at +0x30
+	// Ghidra 0x2f00:12 DWORDs at +0..+2F (no vtable), then FString at +0x30
 	appMemcpy(this, &Other, 0x30);
 	*(FString*)((BYTE*)this + 0x30) = *(const FString*)((const BYTE*)&Other + 0x30);
 	return *this;
 }
 
+IMPL_INFERRED("Ghidra layout; resets FString at +0x30; no explicit RVA")
 void FTags::Init()
 {
 	guard(FTags::Init);
@@ -301,9 +334,11 @@ void FTags::Init()
 // ============================================================================
 
 // ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
+IMPL_INFERRED("Returns first member pointer; no Ghidra reference")
 FRebuildOptions * FRebuildTools::GetCurrent() { return *(FRebuildOptions**)this; }
 
 // ?GetFromName@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
+IMPL_INFERRED("Linear search of option array by name; no Ghidra reference")
 FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 {
 	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
@@ -318,6 +353,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 }
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 
 // --- Moved from EngineStubs.cpp ---
@@ -325,6 +361,7 @@ extern ENGINE_API FRebuildTools GRebuildTools;
 
 // ?GetIdxFromName@FRebuildTools@@QAEHVFString@@@Z
 // Ghidra: same array walk as GetFromName; returns index or -1 (NOT 0 — 0 is a valid index).
+IMPL_INFERRED("Ghidra: same array walk as GetFromName; returns index or -1")
 int FRebuildTools::GetIdxFromName(FString p0)
 {
 	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
@@ -338,16 +375,21 @@ int FRebuildTools::GetIdxFromName(FString p0)
 	return -1;
 }
 // ?Delete@FRebuildTools@@QAEXVFString@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Delete(FString p0) {}
 
 // ?Init@FRebuildTools@@QAEXXZ
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Init() {}
 
 // ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::SetCurrent(FString p0) {}
 
 // ?Shutdown@FRebuildTools@@QAEXXZ
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Shutdown() {}
+IMPL_INFERRED("Vertex component layout; no Ghidra reference")
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
 	C[0].Type = 4; C[0].Function = 3;
 	return 1;

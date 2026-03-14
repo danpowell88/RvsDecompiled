@@ -1299,6 +1299,7 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 //   Scout+0xa8 |= 0x1000  (bPathBuilding flag)
 //   vtable[0x10c] and vtable[0x114] on Scout (SetPhysics-related calls)
 //   Scout->PhysicsVolume = Level->GetDefaultPhysicsVolume()
+IMPL_INFERRED("Decoded from Ghidra vtable and layout analysis; no direct RVA recorded")
 void FPathBuilder::getScout()
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1358,6 +1359,7 @@ void FPathBuilder::getScout()
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
 // Ghidra: call findStart on Scout; if Z matches within MaxStepHeight -> testPathwithRadius;
 // else retry findStart with Start.Z+20. If neither works, return.
+IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
 void FPathBuilder::testPathsFrom(FVector Start) {
 	AScout* Scout = *(AScout**)(Pad + 4);
 	if (Scout->findStart(Start)) {
@@ -1378,6 +1380,7 @@ void FPathBuilder::testPathsFrom(FVector Start) {
 
 // ?testPathwithRadius@FPathBuilder@@AAEXVFVector@@M@Z
 // Ghidra: resize Scout to Radius x 85, then probe 8 horizontal directions (±X, ±Y) at ±1 walk.
+IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
 void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 	AActor* Scout = *(AActor**)(Pad + 4);
 	Scout->SetCollisionSize(Radius, 85.0f);
@@ -1392,21 +1395,26 @@ void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 }
 
 // ??0ECLipSynchData@@QAE@PAVUMeshInstance@@PAVUSound@@1PAVAActor@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 ECLipSynchData::ECLipSynchData(UMeshInstance * p0, USound * p1, USound * p2, AActor * p3) {}
 
 // ??0ECLipSynchData@@QAE@XZ
+IMPL_TODO("Needs Ghidra analysis")
 ECLipSynchData::ECLipSynchData() {}
 
 // ??0FActorSceneNode@@QAE@PAVUViewport@@PAVAActor@@1VFVector@@VFRotator@@M@Z
+IMPL_TODO("Needs Ghidra analysis")
 FActorSceneNode::FActorSceneNode(UViewport * p0, AActor * p1, AActor * p2, FVector p3, FRotator p4, float p5) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCameraSceneNode@@QAE@PAVUViewport@@PAVAActor@@VFVector@@VFRotator@@M@Z
+IMPL_TODO("Needs Ghidra analysis")
 FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRotator p3, float p4) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCollisionHash@@QAE@ABV0@@Z
 // Copy constructor — rarely called; just default-init and leave buckets empty.
 // A proper implementation would clone the hash table from p0, but that involves
 // re-inserting all actors which requires level context we don't have here.
+IMPL_INFERRED("Copy constructor; no direct RVA — rarely invoked, buckets default-initialized")
 FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 	FreeList = NULL;
 	// AllocatedPools default-constructed to empty
@@ -1426,6 +1434,7 @@ FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 // Retail: ordinal 211 (0x6f440).  Size: ~700 bytes.
 // Sets up vftable, zeros pool/FArray, initialises permutation tables once via
 // Fisher-Yates shuffle (seeded by appRand), then NULLs all 0x4000 bucket heads.
+IMPL_GHIDRA("Engine.dll", 0x6f440)
 FCollisionHash::FCollisionHash() {
 	FreeList = NULL;
 	// AllocatedPools is default-constructed (TArray ctor zeroes it)
@@ -1442,12 +1451,14 @@ FCollisionHash::FCollisionHash() {
 }
 
 // ??0FCollisionOctree@@QAE@ABV0@@Z
+IMPL_INFERRED("Copy constructor; inferred from member layout")
 FCollisionOctree::FCollisionOctree(FCollisionOctree const& p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 }
 
 // ??0FCollisionOctree@@QAE@XZ
 // Ghidra: allocates a root FOctreeNode, zeroes counters, sets world bitmask.
+IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
 FCollisionOctree::FCollisionOctree() {
 	appMemzero(Pad, sizeof(Pad));
 	// Pad[0..3] = root FOctreeNode* (object offset +4, ref from Ghidra)
@@ -1459,9 +1470,11 @@ FCollisionOctree::FCollisionOctree() {
 }
 
 // ??0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FHitCause@@QAE@PAVFHitObserver@@PAVUViewport@@KMM@Z
+IMPL_INFERRED("Inferred from member initializer list")
 FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InButtons, float InMouseX, float InMouseY)
 :	Observer(InObserver)
 ,	Viewport(InViewport)
@@ -1471,6 +1484,7 @@ FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InBu
 {}
 
 // ??4FHitCause@@QAEAAU0@ABU0@@Z
+IMPL_INFERRED("Inferred from member copy pattern")
 FHitCause& FHitCause::operator=(const FHitCause& Other)
 {
 	Observer = Other.Observer;
@@ -1482,51 +1496,63 @@ FHitCause& FHitCause::operator=(const FHitCause& Other)
 }
 
 // ??0FLevelSceneNode@@QAE@PAV0@HVFMatrix@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLevelSceneNode@@QAE@ABV0@@Z
 // Ghidra: calls FSceneNode copy ctor, then copies 6 DWORDs at 0x1B8-0x1CC
+IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & Other) : FSceneNode((const FSceneNode&)Other)
 {
 	appMemcpy(((BYTE*)this) + 0x1B8, ((const BYTE*)&Other) + 0x1B8, 24);
 }
 
 // ??0FLevelSceneNode@@QAE@PAVUViewport@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FLevelSceneNode::FLevelSceneNode(UViewport * p0) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@PAVFLightMap@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FLightMapSceneNode::FLightMapSceneNode(UViewport * p0, AActor * p1, FLightMap * p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FMatineeTools@@QAE@ABV0@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
 
 // ??0FOctreeNode@@QAE@ABV0@@Z
 // Copy constructor — copy TArray (actors list at Pad[0..11]) and flag at Pad[12]
+IMPL_INFERRED("Copy constructor; inferred from member layout")
 FOctreeNode::FOctreeNode(FOctreeNode const& p0) {
 	appMemcpy(Pad, p0.Pad, 16);
 }
 
 // ??0FOctreeNode@@QAE@XZ
 // Ghidra: FArray::FArray((FArray*)this) zeros first 12 bytes; *(this+0xc) = 0
+IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
 FOctreeNode::FOctreeNode() {
 	appMemzero(Pad, 16); // TArray<> at 0..11, flag at 12
 }
 
 // ??1FOctreeNode@@QAE@XZ
+IMPL_TODO("Needs Ghidra analysis")
 FOctreeNode::~FOctreeNode() {}
 
 // ??0FPointLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@HHHH@Z
+IMPL_TODO("Needs Ghidra analysis")
 FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3, int p4, int p5, int p6, int p7) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FPoly@@QAE@XZ
+IMPL_INFERRED("Calls FPoly::Init() per SDK pattern")
 FPoly::FPoly() {
 	Init();
 }
 
 // ??0FRebuildTools@@QAE@ABV0@@Z
+IMPL_TODO("Needs Ghidra analysis")
 FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
 
 // ??1FRebuildTools@@QAE@XZ
+IMPL_TODO("Needs Ghidra analysis")
 FRebuildTools::~FRebuildTools() {}
 
 
@@ -1537,20 +1563,35 @@ FRebuildTools::~FRebuildTools() {}
 // UViewport
 // =============================================================================
 
+IMPL_TODO("Needs Ghidra analysis")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
+IMPL_INFERRED("Delegates to Super::Destroy()")
 void UViewport::Destroy() { Super::Destroy(); }
+IMPL_INFERRED("Delegates to Super::Serialize()")
 void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
+IMPL_TODO("Needs Ghidra analysis")
 INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::Unlock() {}
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::Present() {}
+IMPL_TODO("Needs Ghidra analysis")
 INT UViewport::SetDrag( INT NewDrag ) { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 void* UViewport::GetServer() { return NULL; }
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
+IMPL_INFERRED("Inferred from UObject outer cast pattern")
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::InitInput() {}
+IMPL_GHIDRA("Engine.dll", 0x12A60)
 INT UViewport::IsOrtho()
 {
 	// Retail (34b, RVA 0x12A60): load state ptr at +0x34, check RendMap at +0x504
@@ -1560,6 +1601,7 @@ INT UViewport::IsOrtho()
 	INT rm = *(INT*)((BYTE*)st + 0x504);
 	return (rm == 0x0D || rm == 0x0E || rm == 0x0F) ? 1 : 0;
 }
+IMPL_GHIDRA("Engine.dll", 0x12A00)
 INT UViewport::IsPerspective()
 {
 	// Retail (74b, RVA 0x12A00): same state ptr; RendMap 1-7 or 0x1E → perspective.
@@ -1572,6 +1614,7 @@ INT UViewport::IsPerspective()
 	if (rm == 0x10) return *(void**)((BYTE*)st + 0x4FC) != NULL ? 1 : 0;
 	return 0;
 }
+IMPL_GHIDRA("Engine.dll", 0x12A90)
 INT UViewport::IsRealtime()
 {
 	// Retail (26b, RVA 0x12A90): state ptr at +0x34; flags at +0x4F8 bits 11,14.
@@ -1579,8 +1622,11 @@ INT UViewport::IsRealtime()
 	if (!st) return 0;
 	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
 }
+IMPL_TODO("Needs Ghidra analysis")
 INT UViewport::IsWire() { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ScreenShot() {}
+IMPL_GHIDRA("Engine.dll", 0x129D0)
 BYTE* UViewport::_Screen( INT X, INT Y )
 {
 	// Retail (31b, RVA 0x129D0): return FrameBuffer + (Pitch * Y + X) * BytesPerPixel

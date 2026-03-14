@@ -20,7 +20,7 @@ void AR6LadderVolume::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
-IMPL_APPROX("Allows volume traversal when actor-trace flag 0x80000 is set, otherwise delegates to AVolume")
+IMPL_INFERRED("Allows volume traversal when actor-trace flag 0x80000 is set, otherwise delegates to AVolume")
 INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6LadderVolume::ShouldTrace);
@@ -36,7 +36,7 @@ INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6LadderVolume::eventSetPotentialClimber()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetPotentialClimber), NULL);

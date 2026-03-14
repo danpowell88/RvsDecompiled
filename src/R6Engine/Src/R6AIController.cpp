@@ -27,7 +27,7 @@ IMPLEMENT_FUNCTION(AR6AIController, -1, execPollMoveToPosition)
 
 // --- AR6AIController ---
 
-IMPL_APPROX("Reconstructed with divergences: retail door-navigation side-check and AdjustLoc calculation unresolved")
+IMPL_INFERRED("Reconstructed with divergences: retail door-navigation side-check and AdjustLoc calculation unresolved")
 void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 {
 	guard(AR6AIController::AdjustFromWall);

@@ -20,7 +20,7 @@ IMPLEMENT_FUNCTION(AR6RainbowAI, -1, execSetOrientation)
 
 // --- AR6RainbowAI ---
 
-IMPL_APPROX("Line-of-sight check for clear shot; uses cached aim position or spotter head location")
+IMPL_INFERRED("Line-of-sight check for clear shot; uses cached aim position or spotter head location")
 INT AR6RainbowAI::AClearShotIsAvailable(APawn* TargetPawn, FVector ShotTarget)
 {
 	guard(AR6RainbowAI::AClearShotIsAvailable);
@@ -63,7 +63,7 @@ INT AR6RainbowAI::AClearShotIsAvailable(APawn* TargetPawn, FVector ShotTarget)
 	unguard;
 }
 
-IMPL_APPROX("Traces 300 units along snipe direction to verify clear line of sight")
+IMPL_INFERRED("Traces 300 units along snipe direction to verify clear line of sight")
 INT AR6RainbowAI::ClearToSnipe(FVector Position, FRotator Direction)
 {
 	guard(AR6RainbowAI::ClearToSnipe);
@@ -75,7 +75,7 @@ INT AR6RainbowAI::ClearToSnipe(FVector Position, FRotator Direction)
 	unguard;
 }
 
-IMPL_APPROX("Searches anchor path list then all nav points for cover position farther from threat origin")
+IMPL_INFERRED("Searches anchor path list then all nav points for cover position farther from threat origin")
 AActor * AR6RainbowAI::FindSafeSpot()
 {
 	guard(AR6RainbowAI::FindSafeSpot);
@@ -156,7 +156,7 @@ FVector AR6RainbowAI::GetTeamLeftOfDoorPosition(INT, AR6Door *)
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Standard accessor returning team manager pointer")
+IMPL_INFERRED("Standard accessor returning team manager pointer")
 AActor * AR6RainbowAI::GetTeamManager()
 {
 	return m_TeamManager;
@@ -168,7 +168,7 @@ FVector AR6RainbowAI::GetTeamRightOfDoorPosition(INT, AR6Door *)
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Sets pawn desired yaw based on formation layout for room-clearing sweep")
+IMPL_INFERRED("Sets pawn desired yaw based on formation layout for room-clearing sweep")
 void AR6RainbowAI::LookAroundRoom(INT param_1)
 {
 	guard(AR6RainbowAI::LookAroundRoom);
@@ -247,7 +247,7 @@ ApplyYaw:
 	unguard;
 }
 
-IMPL_APPROX("Advances attack timer, fires eventAttackTimer and eventStopAttack, then chains to AActor::UpdateTimers")
+IMPL_INFERRED("Advances attack timer, fires eventAttackTimer and eventStopAttack, then chains to AActor::UpdateTimers")
 void AR6RainbowAI::UpdateTimers(FLOAT DeltaTime)
 {
 	if (m_fAttackTimerRate > 0.0f)
@@ -285,7 +285,7 @@ CallSuper:
 	AActor::UpdateTimers(DeltaTime);
 }
 
-IMPL_APPROX("Traces 60 degrees left and right to classify corridor width; posts formation change event")
+IMPL_INFERRED("Traces 60 degrees left and right to classify corridor width; posts formation change event")
 void AR6RainbowAI::checkEnvironment()
 {
 	guard(AR6RainbowAI::checkEnvironment);
@@ -331,19 +331,19 @@ void AR6RainbowAI::checkEnvironment()
 	unguard;
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6RainbowAI::eventAttackTimer()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_AttackTimer), NULL);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6RainbowAI::eventStopAttack()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StopAttack), NULL);
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native AClearShotIsAvailable")
+IMPL_INFERRED("Standard exec thunk delegating to native AClearShotIsAvailable")
 void AR6RainbowAI::execAClearShotIsAvailable(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(APawn, PTarget);
@@ -352,14 +352,14 @@ void AR6RainbowAI::execAClearShotIsAvailable(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = AClearShotIsAvailable(PTarget, vStart);
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native checkEnvironment")
+IMPL_INFERRED("Standard exec thunk delegating to native checkEnvironment")
 void AR6RainbowAI::execCheckEnvironment(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	checkEnvironment();
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native ClearToSnipe")
+IMPL_INFERRED("Standard exec thunk delegating to native ClearToSnipe")
 void AR6RainbowAI::execClearToSnipe(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vStart);
@@ -368,14 +368,14 @@ void AR6RainbowAI::execClearToSnipe(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = ClearToSnipe(vStart, rSnipingDir);
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native FindSafeSpot")
+IMPL_INFERRED("Standard exec thunk delegating to native FindSafeSpot")
 void AR6RainbowAI::execFindSafeSpot(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(UObject**)Result = FindSafeSpot();
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native getEntryPosition")
+IMPL_INFERRED("Standard exec thunk delegating to native getEntryPosition")
 void AR6RainbowAI::execGetEntryPosition(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bInsideRoom);
@@ -383,28 +383,28 @@ void AR6RainbowAI::execGetEntryPosition(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = getEntryPosition();
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native getGuardPosition")
+IMPL_INFERRED("Standard exec thunk delegating to native getGuardPosition")
 void AR6RainbowAI::execGetGuardPosition(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FVector*)Result = getGuardPosition();
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native getLadderPosition")
+IMPL_INFERRED("Standard exec thunk delegating to native getLadderPosition")
 void AR6RainbowAI::execGetLadderPosition(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FVector*)Result = getLadderPosition();
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native getTargetPosition")
+IMPL_INFERRED("Standard exec thunk delegating to native getTargetPosition")
 void AR6RainbowAI::execGetTargetPosition(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FVector*)Result = getTargetPosition();
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native LookAroundRoom")
+IMPL_INFERRED("Standard exec thunk delegating to native LookAroundRoom")
 void AR6RainbowAI::execLookAroundRoom(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bIsLeadingRoomEntry);
@@ -412,7 +412,7 @@ void AR6RainbowAI::execLookAroundRoom(FFrame& Stack, RESULT_DECL)
 	LookAroundRoom(bIsLeadingRoomEntry);
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native setMemberOrientation")
+IMPL_INFERRED("Standard exec thunk delegating to native setMemberOrientation")
 void AR6RainbowAI::execSetOrientation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_BYTE(eOverrideOrientation);
@@ -450,7 +450,7 @@ FVector AR6RainbowAI::getTargetPosition()
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Resets spine, spine1, and neck bone rotations to identity on the skeletal mesh instance")
+IMPL_INFERRED("Resets spine, spine1, and neck bone rotations to identity on the skeletal mesh instance")
 void AR6RainbowAI::resetBoneRotation()
 {
 	USkeletalMeshInstance* MeshInst = (USkeletalMeshInstance*)Pawn->Mesh->MeshGetInstance(Pawn);
@@ -459,7 +459,7 @@ void AR6RainbowAI::resetBoneRotation()
 	MeshInst->SetBoneRotation(FName(TEXT("R6 Neck"), FNAME_Add), FRotator(0,0,0), 0, 1.0f, 0.5f);
 }
 
-IMPL_APPROX("Maps orientation enum to yaw/pitch bone offsets considering formation, stair state, and peeking")
+IMPL_INFERRED("Maps orientation enum to yaw/pitch bone offsets considering formation, stair state, and peeking")
 void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation param_1)
 {
 	guard(AR6RainbowAI::setMemberOrientation);
@@ -573,7 +573,7 @@ void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation param_1)
 	unguard;
 }
 
-IMPL_APPROX("Selects orientation enum based on pawn prone state, team size, and formation type")
+IMPL_INFERRED("Selects orientation enum based on pawn prone state, team size, and formation type")
 enum ePawnOrientation AR6RainbowAI::updatePawnOrientation()
 {
 	guard(AR6RainbowAI::updatePawnOrientation);

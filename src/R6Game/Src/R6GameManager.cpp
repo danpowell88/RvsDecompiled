@@ -20,7 +20,7 @@ static INT s_GSCreateUbiServer = 0;
 
 // --- UR6GameManager ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6GameManager::ClientLeaveServer()
 {
 	// Clear bit 4 (mask 0x10) of the flags field at this+0x2C
@@ -36,7 +36,7 @@ void UR6GameManager::ClientLeaveServer()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6GameManager::ConnectionInterrupted(INT bInterrupted)
 {
 	if (*(void**)((BYTE*)this + 0x30))
@@ -47,7 +47,7 @@ void UR6GameManager::ConnectionInterrupted(INT bInterrupted)
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6GameManager::DoConsoleCommand(FString Cmd, UConsole* Console)
 {
 	// Ghidra: in_stack_00000010 = Console; iVar3 tracks the "active console/viewport"
@@ -122,7 +122,7 @@ void UR6GameManager::GameServiceTick(UConsole *)
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 INT UR6GameManager::GetGSCreateUbiServer()
 {
 	return s_GSCreateUbiServer;
@@ -163,7 +163,7 @@ void UR6GameManager::MinimizeAndPauseMusic(UConsole *)
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6GameManager::SetGSCreateUbiServer(INT Param)
 {
 	s_GSCreateUbiServer = Param;
@@ -176,7 +176,7 @@ void UR6GameManager::StartJoinServer(FString, FString, INT)
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 INT UR6GameManager::StartLogInProcedure()
 {
 	if (*(void**)((BYTE*)this + 0x30))
@@ -199,7 +199,7 @@ INT UR6GameManager::StartLogInProcedure()
 	return 1;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6GameManager::StartPreJoinProcedure(INT bModServer)
 {
 	if (*(void**)((BYTE*)this + 0x30))
@@ -240,7 +240,7 @@ void UR6GameManager::StartPreJoinProcedure(INT bModServer)
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6GameManager::UnInitialize()
 {
 	// Ghidra accesses GR6GameManager_exref (the singleton), which is == this

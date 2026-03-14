@@ -10,7 +10,7 @@ IMPLEMENT_FUNCTION(AR6Bullet, -1, execBulletGoesThroughSurface)
 
 // --- AR6Bullet ---
 
-IMPL_MATCH("R6Weapons.dll", 0x1000)
+IMPL_GHIDRA("R6Weapons.dll", 0x1000)
 INT AR6Bullet::IsBlockedBy(AActor const* Other) const
 {
 	// Ghidra 0x1000: bullets only collide with level geometry and actors with the
@@ -35,7 +35,7 @@ INT AR6Bullet::IsBlockedBy(AActor const* Other) const
 	return Super::IsBlockedBy(Other);
 }
 
-IMPL_MATCH("R6Weapons.dll", 0x1060)
+IMPL_GHIDRA("R6Weapons.dll", 0x1060)
 INT AR6Bullet::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	// Ghidra 0x1060: non-grenade bullets don't trace against their own owner.
@@ -44,14 +44,14 @@ INT AR6Bullet::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	return Super::ShouldTrace(Other, TraceFlags);
 }
 
-IMPL_MATCH("R6Weapons.dll", 0x1110)
+IMPL_GHIDRA("R6Weapons.dll", 0x1110)
 FLOAT AR6Bullet::RangeConversion(FLOAT fRange)
 {
 	// Ghidra 0x1110: (fRange * m_fRangeConversionConst + 1.0) * fRange
 	return (fRange * m_fRangeConversionConst + 1.0f) * fRange;
 }
 
-IMPL_MATCH("R6Weapons.dll", 0x1130)
+IMPL_GHIDRA("R6Weapons.dll", 0x1130)
 FLOAT AR6Bullet::StunLoss(FLOAT fRange)
 {
 	// Ghidra 0x1130: fRange * m_fRangeConversionConst * fRange

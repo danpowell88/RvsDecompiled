@@ -115,4 +115,10 @@
 // ---------------------------------------------------------------------------
 #define IMPL_TODO(reason)
 
+// IMPL_APPROX(reason) - approximated implementation without specific binary address
+#define IMPL_APPROX(reason)
+
+// IMPL_MATCH(dll, addr) - exact match synonym for IMPL_GHIDRA
+#define IMPL_MATCH(dll, addr)
+
 #endif // IMPL_SOURCE_H

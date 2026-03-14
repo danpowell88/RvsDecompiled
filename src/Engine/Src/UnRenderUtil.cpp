@@ -21,7 +21,7 @@ extern INT GHashExtraCount;
 extern CORE_API UBOOL GHideHiddenInEditor;
 
 // --- FAnimMeshVertexStream ---
-IMPL_MATCH("Engine.dll", 0x2b170)
+IMPL_GHIDRA("Engine.dll", 0x2b170)
 FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 {
 	// Ghidra 0x2b170: vtable set by compiler; DWORD at +4; TArray<FStreamVert32> at +8 (stride 0x20); 6 DWORDs at +14..+28
@@ -30,19 +30,19 @@ FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x14, (const BYTE*)&Other + 0x14, 0x18); // 6 DWORDs
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<FStreamVert32> at +8 to empty")
+IMPL_INFERRED("Default constructor; initializes TArray<FStreamVert32> at +8 to empty")
 FAnimMeshVertexStream::FAnimMeshVertexStream()
 	new ((BYTE*)this + 0x08) TArray<FStreamVert32>();
 }
 
-IMPL_MATCH("Engine.dll", 0x2b160)
+IMPL_GHIDRA("Engine.dll", 0x2b160)
 FAnimMeshVertexStream::~FAnimMeshVertexStream()
 {
 	// Ghidra 0x2b160: destroy TArray<FStreamVert32> at +8 (stride 0x20, POD elements)
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x2b1c0)
+IMPL_GHIDRA("Engine.dll", 0x2b1c0)
 FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStream& Other)
 {
 	// Ghidra 0x2b1c0: skip vtable at +0, DWORD at +4, TArray<FStreamVert32> at +8
@@ -54,7 +54,7 @@ FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStr
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
+IMPL_INFERRED("Ghidra describes logic; no standalone address extracted")
 int FAnimMeshVertexStream::SetPartialSize(int Size)
 {
 	// Ghidra: clamp Size to [0, Num], store at Pad[32], mark dirty (increment Pad[24])
@@ -65,10 +65,10 @@ int FAnimMeshVertexStream::SetPartialSize(int Size)
 	*(INT*)(Pad + 24) += 1;
 	return Size;
 }
-IMPL_APPROX("Returns QWORD cache ID from Pad+16; no Ghidra address")
+IMPL_INFERRED("Returns QWORD cache ID from Pad+16; no Ghidra address")
 unsigned __int64 FAnimMeshVertexStream::GetCacheId()
 }
-IMPL_APPROX("Vertex component layout inferred from stream type; no Ghidra address")
+IMPL_INFERRED("Vertex component layout inferred from stream type; no Ghidra address")
 int FAnimMeshVertexStream::GetComponents(FVertexComponent* C)
 	C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
@@ -623,19 +623,17 @@ int FLineBatcher::GetSize()
 	// Ghidra: FArray::Num(this+4) << 4, TArray at Pad[0]
 	return *(INT*)(Pad + 4) << 4;
 }
+IMPL_INFERRED("Ghidra describes memcpy Num<<4; no standalone address")
 void FLineBatcher::GetStreamData(void * Dest)
-{
-	// Ghidra: memcpy Num<<4 bytes from TArray data
 	INT Size = *(INT*)(Pad + 4) << 4;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
+IMPL_INFERRED("Returns fixed stride 0x10; no Ghidra address")
 int FLineBatcher::GetStride()
-{
-	return 0x10;
-}
 
 
 // --- FRaw32BitIndexBuffer ---
+IMPL_GHIDRA("Engine.dll", 0x209a0)
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 {
 	// Ghidra 0x209a0: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
@@ -643,18 +641,19 @@ FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
+IMPL_INFERRED("Default constructor; initializes TArray<FLOAT> at +4 to empty")
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer()
 {
 	// Initialize TArray<FLOAT> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<FLOAT>();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x1032c020)
 FRaw32BitIndexBuffer::~FRaw32BitIndexBuffer()
-{
-	// Ghidra 0x1032c020: shared with ~FRawColorStream; destroy TArray<FLOAT>(4-byte elements) at +4
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x275b0)
 FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer& Other)
 {
 	// Ghidra 0x275b0: skip vtable +0; +4=TArray<FLOAT> (FUN_1031f660); +0x10,+0x14,+0x18=3 DWORDs
@@ -665,32 +664,28 @@ FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FRaw32BitIndexBuffer::GetCacheId()
-{
-	return *(QWORD*)(Pad + 12);
 }
+IMPL_INFERRED("Ghidra describes memcpy Num<<2; no standalone address")
 void FRaw32BitIndexBuffer::GetContents(void * Dest)
-{
-	// Ghidra: memcpy Num()<<2 bytes
 	INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
+IMPL_INFERRED("Returns fixed index size 4; no Ghidra address")
 int FRaw32BitIndexBuffer::GetIndexSize()
-{
-	return 4;
 }
+IMPL_INFERRED("Returns revision from Pad+20; no Ghidra address")
 int FRaw32BitIndexBuffer::GetRevision()
-{
-	return *(INT*)(Pad + 20);
 }
+IMPL_INFERRED("Ghidra describes Num << 2; no standalone address")
 int FRaw32BitIndexBuffer::GetSize()
-{
-	// Ghidra: Num << 2
 	return *(INT*)(Pad + 4) << 2;
 }
 
 
 // --- FRawColorStream ---
+IMPL_GHIDRA("Engine.dll", 0x27570)
 FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 {
 	// Ghidra 0x27570: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
@@ -698,18 +693,19 @@ FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
+IMPL_INFERRED("Default constructor; initializes TArray<FLOAT> at +4 to empty")
 FRawColorStream::FRawColorStream()
 {
 	// Initialize TArray<FLOAT> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<FLOAT>();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x1032c020)
 FRawColorStream::~FRawColorStream()
-{
-	// Ghidra 0x1032c020: shared with ~FRaw32BitIndexBuffer; destroy TArray<FLOAT>(4-byte elements) at +4
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x275b0)
 FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 {
 	// Ghidra 0x275b0: same body as FRaw32BitIndexBuffer::operator=
@@ -719,42 +715,35 @@ FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FRawColorStream::GetCacheId()
-{
-	return *(QWORD*)(Pad + 12);
 }
+IMPL_INFERRED("Vertex component layout inferred from colour stream type; no Ghidra address")
 int FRawColorStream::GetComponents(FVertexComponent* C)
-{
-	C[0].Type = 4; C[0].Function = 2;
 	return 1;
 }
+IMPL_INFERRED("Ghidra describes logic; no standalone address extracted")
 void FRawColorStream::GetRawStreamData(void ** Out, int Offset)
-{
-	// Ghidra: *Out = data + offset * 4
 	*Out = *(BYTE**)Pad + Offset * 4;
 }
+IMPL_INFERRED("Returns revision from Pad+20; no Ghidra address")
 int FRawColorStream::GetRevision()
-{
-	return *(INT*)(Pad + 20);
 }
+IMPL_INFERRED("Ghidra describes Num << 2; no standalone address")
 int FRawColorStream::GetSize()
-{
-	// Ghidra: Num << 2
 	return *(INT*)(Pad + 4) << 2;
 }
+IMPL_INFERRED("Ghidra describes memcpy Num<<2; no standalone address")
 void FRawColorStream::GetStreamData(void * Dest)
-{
-	// Ghidra: memcpy Num()<<2 bytes
 	INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
+IMPL_INFERRED("Returns fixed stride 4; no Ghidra address")
 int FRawColorStream::GetStride()
-{
-	return 4;
-}
 
 
 // --- FRawIndexBuffer ---
+IMPL_GHIDRA_APPROX("Engine.dll", 0x116e70, "NvTriStrip not available; strip generation skipped; revision still bumped")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
@@ -767,6 +756,7 @@ int FRawIndexBuffer::Stripify()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x18d80)
 FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 {
 	// Ghidra 0x18d80: vtable set by compiler; TArray<_WORD> at +4 (stride 2); 3 DWORDs at +10..+18
@@ -774,18 +764,19 @@ FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
+IMPL_INFERRED("Default constructor; initializes TArray<_WORD> at +4 to empty")
 FRawIndexBuffer::FRawIndexBuffer()
 {
 	// Initialize TArray<_WORD> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<_WORD>();
 }
 
+IMPL_INFERRED("Destroys TArray<_WORD> at +4; no Ghidra address")
 FRawIndexBuffer::~FRawIndexBuffer()
-{
-	// destroy TArray<_WORD> at +4
 	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x18dc0)
 FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 {
 	// Ghidra 0x18dc0: skip vtable +0; +4=TArray<_WORD>; +0x10,+0x14,+0x18=3 DWORDs
@@ -795,6 +786,7 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x116860, "NvTriStrip cache-optimiser not available; optimisation pass skipped")
 void FRawIndexBuffer::CacheOptimize()
 {
 	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
@@ -802,9 +794,8 @@ void FRawIndexBuffer::CacheOptimize()
 	// DIVERGENCE: optimisation pass skipped; revision still bumped for cache invalidation.
 	*(INT*)(Pad + 20) += 1;
 }
+IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FRawIndexBuffer::GetCacheId()
-{
-	return *(QWORD*)(Pad + 12);
 }
 void FRawIndexBuffer::GetContents(void* Dest)
 {
@@ -821,15 +812,15 @@ int FRawIndexBuffer::GetRevision()
 {
 	return *(INT*)(Pad + 20);
 }
+IMPL_INFERRED("Retail byte sequence confirms Num << 1; no standalone Ghidra address")
 int FRawIndexBuffer::GetSize()
-{
-	// Retail (12b): ADD ECX,4; call Num(); SHL EAX,1 = return Data.Num() * 2
 	// TArray<_WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
 	return *(INT*)(Pad + 4) << 1;
 }
 
 
 // --- FSkinVertexStream ---
+IMPL_GHIDRA("Engine.dll", 0x2b7d0)
 FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &Other)
 {
 	// Ghidra 0x2b7d0: vtable set by compiler; 7 DWORDs at +4..+1c; TArray<FStreamVert32> at +20 (stride 0x20)
@@ -837,18 +828,19 @@ FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &Other)
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>(*(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x20));
 }
 
+IMPL_INFERRED("Default constructor; initializes TArray<FStreamVert32> at +0x20 to empty")
 FSkinVertexStream::FSkinVertexStream()
 {
 	// Initialize TArray<FStreamVert32> at +0x20 to empty
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>();
 }
 
+IMPL_INFERRED("Destroys TArray<FStreamVert32> at +0x20; no Ghidra address")
 FSkinVertexStream::~FSkinVertexStream()
-{
-	// destroy TArray<FStreamVert32> at +0x20 (stride 0x20, POD elements)
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x2b820)
 FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 {
 	// Ghidra 0x2b820: skip vtable at +0, 7 DWORDs at +4..+1C,
@@ -859,17 +851,16 @@ FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Returns QWORD cache ID from Pad+8; no Ghidra address")
 unsigned __int64 FSkinVertexStream::GetCacheId()
-{
-	return *(QWORD*)(Pad + 8);
 }
+IMPL_INFERRED("Vertex component layout inferred from skin stream type; no Ghidra address")
 int FSkinVertexStream::GetComponents(FVertexComponent* C)
-{
-	C[0].Type = 1; C[0].Function = 0;
 	C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
+IMPL_INFERRED("Retail describes GPU-only path; no standalone Ghidra address")
 void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
 	// Retail: 20b. GPU-only skin stream; no CPU-accessible raw pointer.
@@ -878,13 +869,11 @@ void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 	if (*(DWORD*)(Pad + 0x18))
 		*ppData = NULL;
 }
+IMPL_INFERRED("Returns revision from Pad+16; no Ghidra address")
 int FSkinVertexStream::GetRevision()
-{
-	return *(INT*)(Pad + 16);
 }
+IMPL_INFERRED("Retail describes GPU/CPU size logic; no standalone Ghidra address")
 int FSkinVertexStream::GetSize()
-{
-	// Retail (22b): guard on Pad+0x18 ([this+0x1C]) = skin verts pointer.
 	// If null, no data allocated → return 0.
 	// Otherwise: load parent object from Pad+4 ([this+8]), call vtable slot 78
 	// (offset 0x138) to get vertex count, multiply by stride 32 (SHL 5).
@@ -894,6 +883,7 @@ int FSkinVertexStream::GetSize()
 	FnType fn = (FnType)(*(void***)obj)[0x138 / sizeof(void*)];
 	return fn(obj) << 5; // vertex_count * 32
 }
+IMPL_GHIDRA("Engine.dll", 0x130c50)
 void FSkinVertexStream::GetStreamData(void* Dest)
 {
 	// Retail: 0x130c50. Two paths:
@@ -915,6 +905,7 @@ void FSkinVertexStream::GetStreamData(void* Dest)
 	INT    num  = *(INT*)(Pad + 0x20);
 	appMemcpy(Dest, data, num << 5); // num * 32
 }
+IMPL_INFERRED("Returns fixed stride 0x20; no Ghidra address")
 int FSkinVertexStream::GetStride()
 {
 	return 0x20;
@@ -922,6 +913,7 @@ int FSkinVertexStream::GetStride()
 
 
 // --- FStaticLightMapTexture ---
+IMPL_GHIDRA("Engine.dll", 0x20cf0)
 FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Other)
 {
 	// Ghidra 0x20cf0: vtable set by compiler; copy-construct 2 TLazyArray<BYTE> at +4 and +0x1C (stride 0x18);
@@ -934,9 +926,8 @@ FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Oth
 	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 0x18); // 6 DWORDs (+0x34..+0x4B)
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x27960, "CacheId left 0; retail uses global per-resource counter DAT_1060b564")
 FStaticLightMapTexture::FStaticLightMapTexture()
-{
-	// Ghidra 0x27960: vtable set by compiler; default-construct 2 TLazyArray<BYTE> at +4/+0x1C (stride 0x18);
 	// cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
 	// revision at +0x48 = 0.
 	appMemzero((BYTE*)this + 0x08, 0x08); // TLazyArray[0] header DWORDs
@@ -947,13 +938,13 @@ FStaticLightMapTexture::FStaticLightMapTexture()
 	// DIVERGENCE: CacheId left 0; retail uses a global per-resource counter (DAT_1060b564).
 }
 
+IMPL_GHIDRA("Engine.dll", 0x20cd0)
 FStaticLightMapTexture::~FStaticLightMapTexture()
-{
-	// Ghidra 0x20cd0: destroy 2 TLazyArray<BYTE> in reverse order (at +0x28 then +0x10).
 	((TArray<BYTE>*)((BYTE*)this + 0x28))->~TArray();
 	((TArray<BYTE>*)((BYTE*)this + 0x10))->~TArray();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x20d50)
 FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapTexture& Other)
 {
 	// Ghidra 0x20d50: 2-iteration loop (stride 0x18); each: 2 DWORDs before TArray<BYTE>, then TArray<BYTE>.
@@ -967,29 +958,25 @@ FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapT
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Returns QWORD cache ID from Pad+60; no Ghidra address")
 unsigned __int64 FStaticLightMapTexture::GetCacheId()
-{
-	return *(QWORD*)(Pad + 60);
 }
+IMPL_INFERRED("Ghidra describes UTexture::__Client check; no standalone address")
 int FStaticLightMapTexture::GetFirstMip()
-{
-	// Ghidra (25B): if UTexture::__Client and __Client+0x70 flag is set, return 1
 	if (UTexture::__Client != NULL && *(INT*)((BYTE*)UTexture::__Client + 0x70) != 0)
 		return 1;
 	return 0;
 }
+IMPL_INFERRED("Returns format from Pad+48; no Ghidra address")
 ETextureFormat FStaticLightMapTexture::GetFormat()
-{
-	return (ETextureFormat)Pad[48];
 }
+IMPL_INFERRED("Returns height from Pad+56; no Ghidra address")
 int FStaticLightMapTexture::GetHeight()
-{
-	return *(INT*)(Pad + 56);
 }
+IMPL_INFERRED("Returns fixed mip count 2; no Ghidra address")
 int FStaticLightMapTexture::GetNumMips()
-{
-	return 2;
 }
+IMPL_GHIDRA_APPROX("Engine.dll", 0x10FE60, "GIsEditor assertion removed; returns NULL when not editor-loaded")
 void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 {
 	// Retail: 0x10FE60, ~100b SEH. In editor only (asserts GIsEditor).
@@ -1007,9 +994,8 @@ void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 	}
 	return *(void**)((BYTE*)this + MipIndex * 0x18 + 0x10);
 }
+IMPL_INFERRED("Returns revision from Pad+68; no Ghidra address")
 int FStaticLightMapTexture::GetRevision()
-{
-	return *(INT*)(Pad + 68);
 }
 void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {

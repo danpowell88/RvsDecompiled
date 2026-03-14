@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(UR6AbstractNoiseMgr)
 
 // --- UR6AbstractNoiseMgr ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
 void UR6AbstractNoiseMgr::eventR6MakeNoise(BYTE eType, AActor* Source)
 {
 	struct { BYTE eType; AActor* Source; } Parms;

@@ -15,24 +15,28 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UTerrainBrush ---
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrush::MouseButtonDown);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::MouseButtonUp(UViewport *)
 {
 	guard(UTerrainBrush::MouseButtonUp);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::MouseMove(float,float)
 {
 	guard(UTerrainBrush::MouseMove);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15690)
 UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 {
 	// Ghidra 0x15690: vtable set by compiler; FString placement new at +4 and +10; 19 DWORDs at +1C..+64
@@ -41,6 +45,7 @@ UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrush::UTerrainBrush()
 {
 	// Initialize 2 FStrings to empty
@@ -48,6 +53,7 @@ UTerrainBrush::UTerrainBrush()
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x165170)
 UTerrainBrush::~UTerrainBrush()
 {
 	// Ghidra 0x165170: ~FString at +10 then +4 (reverse order)
@@ -55,6 +61,7 @@ UTerrainBrush::~UTerrainBrush()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15770)
 UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 {
 	// Ghidra 0x15770: skip vtable +0; FString@+4, FString@+0x10, 19 DWORDs@+0x1C..+0x64
@@ -68,6 +75,7 @@ UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 static ATerrainInfo* GCurrentTerrainInfo  = NULL; // DAT_1061b794
 static UTexture*     GCurrentAlphaTexture = NULL; // DAT_1061b790
 
+IMPL_INFERRED("reads GCurrentTerrainInfo/GCurrentAlphaTexture globals and locks alpha texture")
 int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 {
 	guard(UTerrainBrush::BeginPainting);
@@ -98,18 +106,21 @@ int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::EndPainting(UTexture *,ATerrainInfo *)
 {
 	guard(UTerrainBrush::EndPainting);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::Execute(int)
 {
 	guard(UTerrainBrush::Execute);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrush::GetRect()
 {
 	return FBox();
@@ -117,6 +128,7 @@ FBox UTerrainBrush::GetRect()
 
 
 // --- UTerrainBrushColor ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -125,18 +137,21 @@ UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushColor::UTerrainBrushColor()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushColor::~UTerrainBrushColor()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator= (shared by all 13 subclasses)
@@ -144,6 +159,7 @@ UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Othe
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushColor::Execute(int)
 {
 	guard(UTerrainBrushColor::Execute);
@@ -152,6 +168,7 @@ void UTerrainBrushColor::Execute(int)
 
 
 // --- UTerrainBrushEdgeTurn ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -160,18 +177,21 @@ UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeTurn& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -179,12 +199,14 @@ UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeT
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushEdgeTurn::Execute(int)
 {
 	guard(UTerrainBrushEdgeTurn::Execute);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrushEdgeTurn::GetRect()
 {
 	return FBox();
@@ -192,6 +214,7 @@ FBox UTerrainBrushEdgeTurn::GetRect()
 
 
 // --- UTerrainBrushFlatten ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -200,18 +223,21 @@ UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushFlatten::UTerrainBrushFlatten()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushFlatten::~UTerrainBrushFlatten()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -219,6 +245,7 @@ UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushFlatten::Execute(int)
 {
 	guard(UTerrainBrushFlatten::Execute);
@@ -227,6 +254,7 @@ void UTerrainBrushFlatten::Execute(int)
 
 
 // --- UTerrainBrushNoise ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -235,18 +263,21 @@ UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushNoise::UTerrainBrushNoise()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushNoise::~UTerrainBrushNoise()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -254,6 +285,7 @@ UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Othe
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushNoise::Execute(int)
 {
 	guard(UTerrainBrushNoise::Execute);
@@ -262,6 +294,7 @@ void UTerrainBrushNoise::Execute(int)
 
 
 // --- UTerrainBrushPaint ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -270,18 +303,21 @@ UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushPaint::UTerrainBrushPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushPaint::~UTerrainBrushPaint()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -289,6 +325,7 @@ UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Othe
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushPaint::Execute(int)
 {
 	guard(UTerrainBrushPaint::Execute);
@@ -297,12 +334,14 @@ void UTerrainBrushPaint::Execute(int)
 
 
 // --- UTerrainBrushPlanningPaint ---
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrushPlanningPaint::MouseButtonDown);
 	unguard;
 }
 
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -311,18 +350,21 @@ UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPain
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrainBrushPlanningPaint& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -330,6 +372,7 @@ UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrain
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushPlanningPaint::Execute(int)
 {
 	guard(UTerrainBrushPlanningPaint::Execute);
@@ -338,18 +381,21 @@ void UTerrainBrushPlanningPaint::Execute(int)
 
 
 // --- UTerrainBrushSelect ---
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrushSelect::MouseButtonDown);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSelect::MouseMove(float,float)
 {
 	guard(UTerrainBrushSelect::MouseMove);
 	unguard;
 }
 
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -358,18 +404,21 @@ UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushSelect::UTerrainBrushSelect()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushSelect::~UTerrainBrushSelect()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -377,12 +426,14 @@ UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& O
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSelect::Execute(int)
 {
 	guard(UTerrainBrushSelect::Execute);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrushSelect::GetRect()
 {
 	return FBox();
@@ -390,6 +441,7 @@ FBox UTerrainBrushSelect::GetRect()
 
 
 // --- UTerrainBrushSmooth ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -398,18 +450,21 @@ UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushSmooth::UTerrainBrushSmooth()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushSmooth::~UTerrainBrushSmooth()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -417,6 +472,7 @@ UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& O
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSmooth::Execute(int)
 {
 	guard(UTerrainBrushSmooth::Execute);
@@ -425,12 +481,14 @@ void UTerrainBrushSmooth::Execute(int)
 
 
 // --- UTerrainBrushTexPan ---
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushTexPan::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexPan::MouseMove);
 	unguard;
 }
 
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -439,18 +497,21 @@ UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushTexPan::UTerrainBrushTexPan()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushTexPan::~UTerrainBrushTexPan()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -460,12 +521,14 @@ UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& O
 
 
 // --- UTerrainBrushTexRotate ---
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushTexRotate::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexRotate::MouseMove);
 	unguard;
 }
 
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -474,18 +537,21 @@ UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Oth
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushTexRotate::UTerrainBrushTexRotate()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushTexRotate::~UTerrainBrushTexRotate()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTexRotate& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -495,12 +561,14 @@ UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTex
 
 
 // --- UTerrainBrushTexScale ---
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushTexScale::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexScale::MouseMove);
 	unguard;
 }
 
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -509,18 +577,21 @@ UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushTexScale::UTerrainBrushTexScale()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushTexScale::~UTerrainBrushTexScale()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexScale& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -530,6 +601,7 @@ UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexSc
 
 
 // --- UTerrainBrushVertexEdit ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -538,18 +610,21 @@ UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushVertexEdit& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -559,6 +634,7 @@ UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushV
 
 
 // --- UTerrainBrushVisibility ---
+IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -567,18 +643,21 @@ UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
+IMPL_INFERRED("placement-new initializes two FStrings to empty")
 UTerrainBrushVisibility::UTerrainBrushVisibility()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
+IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushVisibility::~UTerrainBrushVisibility()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x15b20)
 UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushVisibility& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -586,12 +665,14 @@ UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushV
 	return *this;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushVisibility::Execute(int)
 {
 	guard(UTerrainBrushVisibility::Execute);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrushVisibility::GetRect()
 {
 	return FBox();

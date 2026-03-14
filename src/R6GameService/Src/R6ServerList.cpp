@@ -30,14 +30,14 @@ void UR6ServerList::FillSvrContainer()
 	unguard;
 }
 
-IMPL_MATCH("R6GameService.dll", 0x125e0)
+IMPL_GHIDRA("R6GameService.dll", 0x125e0)
 INT UR6ServerList::GetGroupID()
 {
 	// 0x125e0  54  ?GetGroupID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
 	return GsGroupID;
 }
 
-IMPL_MATCH("R6GameService.dll", 0x125d0)
+IMPL_GHIDRA("R6GameService.dll", 0x125d0)
 INT UR6ServerList::GetLobbyID()
 {
 	// 0x125d0  55  ?GetLobbyID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
@@ -65,7 +65,7 @@ void UR6ServerList::SetOwnSvrPort(INT)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context; delegates to UnrealScript event")
+IMPL_INFERRED("Reconstructed from context; delegates to UnrealScript event")
 void UR6ServerList::eventGetLobbyAndGroupID(INT &iLobbyID, INT &iGroupID)
 {
 	struct {
@@ -96,7 +96,7 @@ void UR6ServerList::execNativeGetMaxPlayers(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context; returns GetTickCount")
+IMPL_INFERRED("Reconstructed from context; returns GetTickCount")
 void UR6ServerList::execNativeGetMilliSeconds(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeGetMilliSeconds);

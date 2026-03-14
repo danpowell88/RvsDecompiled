@@ -7,9 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_APPROX("Standard placement new required for in-place construction in this TU")
+IMPL_INFERRED("Standard placement new required for in-place construction in this TU")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_APPROX("Standard placement delete companion to placement new")
+IMPL_INFERRED("Standard placement delete companion to placement new")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -17,7 +17,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- ULevelSummary ---
-IMPL_MATCH("Engine.dll", 0xfd00)
+IMPL_GHIDRA("Engine.dll", 0xfd00)
 void ULevelSummary::PostLoad()
 {
 	// Ghidra 0xfd00: UObject::PostLoad, then localize the Level title from package.

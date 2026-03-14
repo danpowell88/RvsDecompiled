@@ -1,7 +1,7 @@
 #pragma optimize("", off)
 #include "EnginePrivate.h"
 // --- AJumpDest ---
-IMPL_MATCH("Engine.dll", 0xd67a0)
+IMPL_GHIDRA("Engine.dll", 0xd67a0)
 void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 {
 	guard(AJumpDest::SetupForcedPath);
@@ -36,7 +36,7 @@ void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd69e0)
+IMPL_GHIDRA("Engine.dll", 0xd69e0)
 void AJumpDest::ClearPaths()
 {
 	// Ghidra 0xd69e0, 24B. Call base, then zero the path-count field at +0x3E8.
@@ -46,7 +46,7 @@ void AJumpDest::ClearPaths()
 
 
 // --- AJumpPad ---
-IMPL_MATCH("Engine.dll", 0xd8520)
+IMPL_GHIDRA("Engine.dll", 0xd8520)
 void AJumpPad::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(AJumpPad::addReachSpecs);
@@ -90,7 +90,7 @@ void AJumpPad::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- ALadder ---
-IMPL_MATCH("Engine.dll", 0xd7b00)
+IMPL_GHIDRA("Engine.dll", 0xd7b00)
 void ALadder::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(ALadder::addReachSpecs);
@@ -157,7 +157,7 @@ void ALadder::addReachSpecs(APawn* Scout, int bOnlyChanged)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd7130)
+IMPL_GHIDRA("Engine.dll", 0xd7130)
 int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 {
 	// Ghidra 0xd7130, 131B: if Nav is ALadder with same MyLadder ptr, proscribed
@@ -172,7 +172,7 @@ int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 	return ANavigationPoint::ProscribedPathTo(Nav);
 }
 
-IMPL_MATCH("Engine.dll", 0xd6a60)
+IMPL_GHIDRA("Engine.dll", 0xd6a60)
 void ALadder::ClearPaths()
 {
 	// Ghidra 0xd6a60, 90B: call base, clear ladder reference, zero pointers
@@ -184,7 +184,7 @@ void ALadder::ClearPaths()
 	*MyLadder = 0;
 }
 
-IMPL_MATCH("Engine.dll", 0xd81f0)
+IMPL_GHIDRA("Engine.dll", 0xd81f0)
 void ALadder::InitForPathFinding()
 {
 	guard(ALadder::InitForPathFinding);
@@ -224,7 +224,7 @@ void ALadder::InitForPathFinding()
 
 
 // --- ALadderVolume ---
-IMPL_MATCH("Engine.dll", 0x10d250)
+IMPL_GHIDRA("Engine.dll", 0x10d250)
 void ALadderVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(ALadderVolume::RenderEditorInfo);
@@ -247,7 +247,7 @@ void ALadderVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterfac
 	unguard;
 }
 
-IMPL_EMPTY("Not present in Ghidra exports")
+IMPL_INTENTIONALLY_EMPTY("Not present in Ghidra exports")
 void ALadderVolume::AddMyMarker(AActor* Actor)
 {
 	guard(ALadderVolume::AddMyMarker);
@@ -269,7 +269,7 @@ FVector ALadderVolume::FindTop(FVector)
 
 
 // --- ALiftCenter ---
-IMPL_MATCH("Engine.dll", 0xd75f0)
+IMPL_GHIDRA("Engine.dll", 0xd75f0)
 void ALiftCenter::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(ALiftCenter::addReachSpecs);
@@ -422,7 +422,7 @@ void ALiftCenter::addReachSpecs(APawn* Scout, int bOnlyChanged)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd8780)
+IMPL_GHIDRA("Engine.dll", 0xd8780)
 void ALiftCenter::FindBase()
 {
 	guard(ALiftCenter::FindBase);
@@ -457,7 +457,7 @@ void ALiftCenter::FindBase()
 
 
 // --- ALineOfSightTrigger ---
-IMPL_MATCH("Engine.dll", 0xc4670)
+IMPL_GHIDRA("Engine.dll", 0xc4670)
 void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 {
 	guard(ALineOfSightTrigger::TickAuthoritative);
@@ -527,7 +527,7 @@ void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 
 
 // --- ANote ---
-IMPL_MATCH("Engine.dll", 0x980f0)
+IMPL_GHIDRA("Engine.dll", 0x980f0)
 void ANote::CheckForErrors()
 {
 	// Ghidra 0x980f0: log the Note text via GWarn, then call super.
@@ -538,7 +538,7 @@ void ANote::CheckForErrors()
 
 
 // --- APathNode ---
-IMPL_MATCH("Engine.dll", 0xd6400)
+IMPL_GHIDRA("Engine.dll", 0xd6400)
 int APathNode::ReviewPath(APawn* P)
 {
 	guard(APathNode::ReviewPath);
@@ -565,7 +565,7 @@ int APathNode::ReviewPath(APawn* P)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd64b0)
+IMPL_GHIDRA("Engine.dll", 0xd64b0)
 void APathNode::CheckSymmetry(ANavigationPoint* param_1)
 {
 	guard(APathNode::CheckSymmetry);
@@ -598,7 +598,7 @@ void APathNode::CheckSymmetry(ANavigationPoint* param_1)
 
 
 // --- APlayerStart ---
-IMPL_MATCH("Engine.dll", 0xd7f50)
+IMPL_GHIDRA("Engine.dll", 0xd7f50)
 void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(APlayerStart::addReachSpecs);
@@ -614,7 +614,7 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_APPROX("Engine.dll", 0xe0940, "Internal FUN_ helpers not yet resolved; returns 0 as safe fallback")
+IMPL_GHIDRA_APPROX("Engine.dll", 0xe0940, "Internal FUN_ helpers not yet resolved; returns 0 as safe fallback")
 int AScout::findStart(FVector)
 {
 	guard(AScout::findStart);
@@ -627,14 +627,14 @@ int AScout::findStart(FVector)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x4720)
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int AScout::HurtByVolume(AActor *)
 {
 	// Ghidra 0x4720: shared stub; returns 0.
 	return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0xfc9b0)
+IMPL_GHIDRA("Engine.dll", 0xfc9b0)
 void AScout::InitForPathing()
 {
 	// Retail: 0xfc9b0, ordinal 3354. Initialises the scout's pathfinding state:
@@ -964,6 +964,7 @@ void UR6ModMgr::execGetIWBuildVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetIWBuildVersion );
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execIsOfficialMod);
@@ -973,6 +974,7 @@ void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execIsOfficialMod );
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetGeneralModSettings);
@@ -981,6 +983,7 @@ void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execSetGeneralModSettings );
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ModMgr::execSetSystemMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetSystemMod);
@@ -992,12 +995,14 @@ IMPLEMENT_FUNCTION( UR6ModMgr, 2021, execSetSystemMod );
 
 // =============================================================================
 // --- AAIController ---
+IMPL_INFERRED("Sets bAdjusting flag and AdjustLoc field")
 void AAIController::SetAdjustLocation(FVector NewLoc)
 {
 	bAdjusting = 1;
 	AdjustLoc = NewLoc;
 }
 
+IMPL_INFERRED("Returns 1 if goal is a NavigationPoint, mirroring AI pathfinding acceptance logic")
 int AAIController::AcceptNearbyPath(AActor* Goal)
 {
 	if( Goal && Goal->IsA(ANavigationPoint::StaticClass()) )
@@ -1005,6 +1010,7 @@ int AAIController::AcceptNearbyPath(AActor* Goal)
 	return 0;
 }
 
+IMPL_INFERRED("Reconstructed from disassembly comments; handles mover hit and wall avoidance during AI movement")
 void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 {
 	guard(AAIController::AdjustFromWall);
@@ -1058,6 +1064,7 @@ void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 
 
 // --- AAIMarker ---
+IMPL_INFERRED("Checks own FName and markedScript FName against given Name")
 int AAIMarker::IsIdentifiedAs(FName Name)
 {
 	guard(AAIMarker::IsIdentifiedAs);
@@ -1073,6 +1080,7 @@ int AAIMarker::IsIdentifiedAs(FName Name)
 }
 
 
+IMPL_INFERRED("Reconstructed from Ghidra; spawns AIMarker at scout position and links to this AIScript")
 void AAIScript::AddMyMarker(AActor* param_1)
 {
 	guard(AAIScript::AddMyMarker);
@@ -1135,6 +1143,7 @@ void AAIScript::AddMyMarker(AActor* param_1)
 // ============================================================================
 
 // ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
+IMPL_INFERRED("Reconstructed from disassembly; finds reachable end anchor in sorted path list")
 ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVector EndVec, INT bAllowFallback)
 {
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
@@ -1154,6 +1163,7 @@ ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVec
 }
 
 // ?findStartAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@@Z
+IMPL_INFERRED("Reconstructed from disassembly; finds reachable start anchor in sorted path list")
 ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 {
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
@@ -1169,14 +1179,17 @@ ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 }
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
+IMPL_INFERRED("Bitwise copy of FPathBuilder via appMemcpy")
 FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; }
 
 // --- Moved from EngineStubs.cpp ---
 // ?buildPaths@FPathBuilder@@QAEHPAVULevel@@@Z
+IMPL_TODO("Needs Ghidra analysis")
 int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
 // Ghidra: iterate actors, destroy auto-built navigation points, clear bPathsTransient on LevelInfo
+IMPL_INFERRED("Reconstructed from Ghidra; destroys auto-built nav points and clears bPathsTransient on LevelInfo")
 int FPathBuilder::removePaths(ULevel* Level)
 {
 	// Store level pointer at this+0 (first field in Pad)
@@ -1213,6 +1226,7 @@ int FPathBuilder::removePaths(ULevel* Level)
 // Ghidra: For each AR6ActionSpot, set CollisionHeight, call PutOnGround,
 // find a NavigationPoint anchor within 1200 uu via FSortedPathList, then
 // chain into LevelInfo->m_ActionSpotList linked list.
+IMPL_INFERRED("Reconstructed from Ghidra; populates m_ActionSpotList for AR6ActionSpots with nav anchors")
 void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 	// Spawn a scout if one is not already present (local_18 tracks whether we did)
@@ -1289,6 +1303,7 @@ void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 // ?ReviewPaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: for each NavigationPoint in linked list, call ReviewPath(Scout);
 // then warn about movers without associated nav points.
+IMPL_INFERRED("Reconstructed from Ghidra; iterates nav points calling ReviewPath and warns about orphaned movers")
 void FPathBuilder::ReviewPaths(ULevel* Level) {
 	debugf(NAME_Log, TEXT("Reviewing paths"));
 	GWarn->BeginSlowTask(TEXT("Reviewing paths..."), 0, 0);
@@ -1354,6 +1369,7 @@ void FPathBuilder::ReviewPaths(ULevel* Level) {
 // flagged as changed (no 0x800 bit at NavPoint+0x3a4). For unchanged nav
 // points, empties their PathList (TArray at +0x3d8). Same scout+pass sequence
 // as definePaths but operates on the changed subset and spawns its own scout.
+IMPL_INFERRED("Reconstructed from Ghidra; partial path rebuild for changed nav points only")
 void FPathBuilder::defineChangedPaths(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 
@@ -1517,6 +1533,7 @@ void FPathBuilder::defineChangedPaths(ULevel* Level) {
 // Ghidra: undefinePaths, then spawn scout, build nav-point linked list, run
 // addReachSpecs + SetupForcedPath + PrunePaths + ClearPaths passes, destroy scout,
 // set bPathsDefined, then BuildActionSpotList + PostPath on all actors.
+IMPL_INFERRED("Reconstructed from Ghidra; full path build pipeline: scout spawn, InitForPathFinding, addReachSpecs, prune, BuildActionSpotList")
 void FPathBuilder::definePaths(ULevel* Level) {
 	undefinePaths(Level);
 	*(ULevel**)Pad = Level;
@@ -1646,6 +1663,7 @@ void FPathBuilder::definePaths(ULevel* Level) {
 // ?undefinePaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: destroy all non-transient ANavigationPoints; for transient ones call ClearPaths (vtable[0x66]);
 // clear bPathsDefined on LevelInfo.
+IMPL_INFERRED("Reconstructed from Ghidra; clears path network and bPathsDefined flag on LevelInfo")
 void FPathBuilder::undefinePaths(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 	debugf(NAME_Log, TEXT("Undefining paths"));
@@ -1691,8 +1709,11 @@ void FPathBuilder::undefinePaths(ULevel* Level) {
 // ============================================================================
 // FSortedPathList
 // ============================================================================
+IMPL_INFERRED("Zero-initializes FSortedPathList via appMemzero")
 FSortedPathList::FSortedPathList() { appMemzero(this, sizeof(*this)); }
+IMPL_INFERRED("Bitwise copy of FSortedPathList fields via appMemcpy")
 FSortedPathList& FSortedPathList::operator=(const FSortedPathList& Other) { appMemcpy(this, &Other, 260); return *this; } // 65 dwords
+IMPL_INFERRED("Reconstructed from Ghidra (172B); sorted insertion into fixed 32-element array")
 void FSortedPathList::addPath(ANavigationPoint* Path, INT Cost)
 {
 	// Ghidra (172B): Sorted insertion into fixed 32-element array.

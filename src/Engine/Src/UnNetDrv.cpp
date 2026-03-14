@@ -15,12 +15,14 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UNetDriver ---
+IMPL_TODO("Needs Ghidra analysis")
 void UNetDriver::StaticConstructor()
 {
 guard(UNetDriver::StaticConstructor);
 unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x18b820)
 void UNetDriver::TickFlush()
 {
 // Retail: 0x18b820, ordinal 4877. Calls TickFlush on ServerConnection (this+0x3C)
@@ -39,6 +41,7 @@ INT* conn = (INT*)Clients(i);
 }
 }
 
+IMPL_INFERRED("Advances network time and prunes timed-out client connections")
 void UNetDriver::TickDispatch(float DeltaSeconds)
 {
 guard(UNetDriver::TickDispatch);
@@ -61,6 +64,7 @@ typedef void (__thiscall* DestroyFn)(void*, INT);
 unguard;
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x1048C210, "object-ref fields not serialized; transactor helper not yet identified")
 void UNetDriver::Serialize(FArchive &Ar)
 {
 guard(UNetDriver::Serialize);
@@ -72,6 +76,7 @@ UObject::Serialize(Ar);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
@@ -82,12 +87,14 @@ guard(UNetDriver::NotifyActorDestroyed);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetDriver::AssertValid()
 {
 guard(UNetDriver::AssertValid);
 unguard;
 }
 
+IMPL_INFERRED("Destroys server/client connections and calls LowLevelDestroy via vtable")
 void UNetDriver::Destroy()
 {
 guard(UNetDriver::Destroy);
@@ -112,6 +119,7 @@ Super::Destroy();
 unguard;
 }
 
+IMPL_INFERRED("Stores Notify pointer; base implementation")
 int UNetDriver::InitConnect(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitConnect);
@@ -120,6 +128,7 @@ return 1;
 unguard;
 }
 
+IMPL_INFERRED("Stores Notify pointer; base implementation")
 int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitListen);
@@ -130,18 +139,21 @@ unguard;
 
 
 // --- UDemoRecDriver ---
+IMPL_TODO("Needs Ghidra analysis")
 void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*)
 {
 guard(UDemoRecDriver::SpawnDemoRecSpectator);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UDemoRecDriver::StaticConstructor()
 {
 guard(UDemoRecDriver::StaticConstructor);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
@@ -149,6 +161,7 @@ guard(UDemoRecDriver::TickDispatch);
 unguard;
 }
 
+IMPL_INFERRED("Destroys demo file object via vtable destructor")
 void UDemoRecDriver::LowLevelDestroy()
 {
 guard(UDemoRecDriver::LowLevelDestroy);
@@ -163,11 +176,13 @@ typedef void (__thiscall* VDtor)(void*);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
 return FString();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 int UDemoRecDriver::Exec(const TCHAR*, FOutputDevice&)
 {
 guard(UDemoRecDriver::Exec);
@@ -175,6 +190,7 @@ return 0;
 unguard;
 }
 
+IMPL_INFERRED("Returns level from Notify; asserts validity")
 ULevel* UDemoRecDriver::GetLevel()
 {
 guard(UDemoRecDriver::GetLevel);
@@ -188,6 +204,7 @@ return lev;
 unguard;
 }
 
+IMPL_INFERRED("Initialises demo filename and resets counters")
 int UDemoRecDriver::InitBase(int, FNetworkNotify*, FURL& InURL, FString&)
 {
 guard(UDemoRecDriver::InitBase);
@@ -200,6 +217,7 @@ return 1;
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitConnect);
@@ -207,6 +225,7 @@ return 0;
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -222,8 +241,10 @@ unguard;
 // UNetConnection
 // =============================================================================
 
+IMPL_TODO("Needs Ghidra analysis")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
+IMPL_TODO("Needs Ghidra analysis")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -231,6 +252,7 @@ return 0;
 unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x184540)
 void UNetConnection::Serialize(const TCHAR* Data, EName Event)
 {
 guard(UNetConnection::Serialize);
@@ -247,8 +269,10 @@ fn(fdOut, Data, Event);
 unguard;
 }
 
+IMPL_INFERRED("Delegates to Super::Destroy")
 void UNetConnection::Destroy() { Super::Destroy(); }
 
+IMPL_INFERRED("Serialises PackageMap, all channel objects, and download object")
 void UNetConnection::Serialize(FArchive& Ar)
 {
 guard(UNetConnection::Serialize);
@@ -261,12 +285,14 @@ Ar << *(UObject**)((BYTE*)this + 0x4ba8);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::ReadInput(FLOAT DeltaSeconds)
 {
 guard(UNetConnection::ReadInput);
 unguard;
 }
 
+IMPL_INFERRED("Initialises the output bit-writer to MaxPacket size")
 void UNetConnection::InitOut()
 {
 guard(UNetConnection::InitOut);
@@ -275,6 +301,7 @@ FBitWriter TempWriter(*(INT*)((BYTE*)this + 0xD0) << 3);
 unguard;
 }
 
+IMPL_INFERRED("Validates protocol version and connection state")
 void UNetConnection::AssertValid()
 {
 guard(UNetConnection::AssertValid);
@@ -289,6 +316,7 @@ appFailAssert("State==USOCK_Closed || State==USOCK_Pending || State==USOCK_Open"
 unguard;
 }
 
+IMPL_INFERRED("Sends ACK packet; queues pending ack if RemotePacketId is non-zero")
 void UNetConnection::SendAck(INT PacketId, INT RemotePacketId)
 {
 guard(UNetConnection::SendAck);
@@ -312,6 +340,7 @@ PostSend();
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
@@ -319,6 +348,7 @@ guard(UNetConnection::FlushNet);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
@@ -326,16 +356,20 @@ guard(UNetConnection::Tick);
 unguard;
 }
 
+IMPL_INFERRED("Always returns ready")
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::HandleClientPlayer(APlayerController* PC)
 {
 guard(UNetConnection::HandleClientPlayer);
 unguard;
 }
 
+IMPL_INFERRED("Returns Driver field")
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
 
+IMPL_INFERRED("Flushes output if adding bits would overflow MaxPacket; writes packet header")
 void UNetConnection::PreSend( INT SizeBits )
 {
 // Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -356,6 +390,7 @@ if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
 appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
 }
 
+IMPL_INFERRED("Flushes pending ACK queue")
 void UNetConnection::PurgeAcks()
 {
 guard(UNetConnection::PurgeAcks);
@@ -366,12 +401,14 @@ AckQueue.Empty();
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::ReceiveFile(INT PackageIndex)
 {
 guard(UNetConnection::ReceiveFile);
 unguard;
 }
 
+IMPL_INFERRED("Propagates NAK to dirty channels")
 void UNetConnection::ReceivedNak(INT NakPacketId)
 {
 guard(UNetConnection::ReceivedNak);
@@ -386,6 +423,7 @@ ch->ReceivedAcks();
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::ReceivedPacket(FBitReader& Reader)
 {
 guard(UNetConnection::ReceivedPacket);
@@ -393,18 +431,21 @@ guard(UNetConnection::ReceivedPacket);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
 {
 guard(UNetConnection::ReceivedRawPacket);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::SendPackageMap()
 {
 guard(UNetConnection::SendPackageMap);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
 {
 guard(UNetConnection::SendRawBunch);
@@ -412,6 +453,7 @@ return 0;
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
 guard(UNetConnection::SetActorDirty);
@@ -420,6 +462,7 @@ guard(UNetConnection::SetActorDirty);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetConnection::SlowAssertValid()
 {
 guard(UNetConnection::SlowAssertValid);
@@ -434,6 +477,7 @@ unguard;
 
 // UNetDriver
 // ---------------------------------------------------------------------------
+IMPL_TODO("Needs Ghidra analysis")
 UBOOL UNetDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetDriver::Exec);
@@ -441,12 +485,14 @@ return 0;
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UNetDriver::LowLevelDestroy()
 {
 guard(UNetDriver::LowLevelDestroy);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
 return FString();

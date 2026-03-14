@@ -23,6 +23,7 @@ extern CORE_API INT FLineExtentBoxIntersection(const FBox& Box, const FVector& S
 
 // FUN_103db080: removes an oscillator pointer (passed as &ptr) from the target
 // fluid surface's oscillator TArray at surface+0x47c.
+IMPL_INFERRED("Calls retail helper at 0x103db080 to remove oscillator from fluid surface list")
 static void RemoveOscillatorFromList(void* oscPtr)
 {
 	typedef void (*FnType)(void*);
@@ -30,9 +31,10 @@ static void RemoveOscillatorFromList(void* oscPtr)
 }
 
 // --- AFluidSurfaceInfo ---
+IMPL_GHIDRA("Engine.dll", 0x99f30)
 void AFluidSurfaceInfo::UpdateOscillatorList()
 {
-	// Retail: 0x99f30, 208b. Scan the level actor list at Level+0x30 for
+	// Retail: 0x99f30, 208b.Scan the level actor list at Level+0x30 for
 	// AFluidSurfaceOscillator actors that reference this surface, and append
 	// them to the oscillator list TArray at this+0x47c.
 	INT level = *(INT*)((BYTE*)this + 0x328);
@@ -61,26 +63,29 @@ void AFluidSurfaceInfo::UpdateOscillatorList()
 	}
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x9a030, "actor intersection loop not reconstructed")
 void AFluidSurfaceInfo::RebuildClampedBitmap()
 {
-	// Retail: 0x9a030, 1114b. Iterate level actors and test their collision boxes
+	// Retail: 0x9a030, 1114b.Iterate level actors and test their collision boxes
 	// against the fluid surface bounds to set/clear bits in the clamped bitmap.
 	// DIVERGENCE: Ghidra 0x9a030 (1114 bytes). Full implementation iterates level
 	// actors testing collision boxes against fluid surface bounds to set/clear bits
 	// in the clamped bitmap. Actor intersection loop not reconstructed.
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x9abf0, "vertex/index buffer management and DrawMesh call not reconstructed")
 void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TList<FDynamicLight*>* Lights, FRenderInterface* RI)
 {
-	// Retail: 0x9abf0, 864b. Update vertex/index buffers then submit a DrawMesh call.
+	// Retail: 0x9abf0, 864b.Update vertex/index buffers then submit a DrawMesh call.
 	// DIVERGENCE: Ghidra 0x9abf0 (864 bytes). Full implementation updates vertex/index
 	// buffers with current wave heights and lighting, then submits a DrawMesh call.
 	// Vertex buffer management and D3D draw call pattern not reconstructed.
 }
 
+IMPL_GHIDRA("Engine.dll", 0x1065c0)
 void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
-	// Retail: 0x1065c0, 127b. Draw base editor info then overlay the sprite icon.
+	// Retail: 0x1065c0, 127b.Draw base editor info then overlay the sprite icon.
 	AActor::RenderEditorInfo(SceneNode, RI, DA);
 	if (*(INT*)((BYTE*)this + 0x168) != 0)
 	{
@@ -91,9 +96,10 @@ void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	}
 }
 
+IMPL_GHIDRA("Engine.dll", 0x1cad0)
 void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 {
-	// Retail: 0x1cad0, 72b. Set or clear a single bit in the clamped-bitmap for (X, Y).
+	// Retail: 0x1cad0, 72b.Set or clear a single bit in the clamped-bitmap for (X, Y).
 	// Bitmap base pointer is at *(this+0x404); grid width at this+0x39c.
 	INT bit   = *(INT*)((BYTE*)this + 0x39c) * Y + X;
 	DWORD mask = 1u << (bit & 0x1f);
@@ -102,9 +108,10 @@ void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 	else       *word &= ~mask;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x98a50)
 void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 {
-	// Retail: 0x98a50, 648b. Fill the triangle index buffer for the fluid mesh.
+	// Retail: 0x98a50, 648b.Fill the triangle index buffer for the fluid mesh.
 	// FluidGridType at this+0x394: 1 = hex (offset) grid, otherwise square grid.
 	// FluidXSize at this+0x39c, FluidYSize at this+0x3a0.
 	short* indices = (short*)Buf;
@@ -164,24 +171,27 @@ void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 	}
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x991e0, "per-vertex normal convolution and hex-offset row interleaving not reconstructed")
 void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 {
-	// Retail: 0x991e0, 2890b. Build per-vertex position + normal data for all grid points.
+	// Retail: 0x991e0, 2890b.Build per-vertex position + normal data for all grid points.
 	// DIVERGENCE: Ghidra 0x991e0 (2890 bytes). Builds per-vertex position + normal
 	// data for all grid points. Hex-offset row interleaving and normal-from-heights
 	// convolution involve complex per-row pointer arithmetic not reconstructed.
 }
 
+IMPL_GHIDRA("Engine.dll", 0x1ca90)
 int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)
 {
-	// Ghidra 0x1ca90: bit-array lookup — (xSize * Y + X) into the clamp bitmap at this+0x404.
+	// Ghidra 0x1ca90:bit-array lookup — (xSize * Y + X) into the clamp bitmap at this+0x404.
 	INT idx = *(INT*)((BYTE*)this + 0x39c) * Y + X; // xSize * Y + X
 	return (INT)((*(DWORD*)(*(INT*)((BYTE*)this + 0x404) + (idx >> 5) * 4) & (1u << ((BYTE)idx & 0x1f))) != 0);
 }
 
+IMPL_GHIDRA("Engine.dll", 0x990d0)
 void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 {
-	// Retail: 0x990d0, 199b. Map a world-space position to the nearest grid indices.
+	// Retail: 0x990d0, 199b.Map a world-space position to the nearest grid indices.
 	// Grid origin at this+0x464 (X) / this+0x468 (Y); cell size at this+0x398.
 	// Hex grid (this+0x394==1) uses a Y step of cellSize * 0.866025.
 	FLOAT cellSize = *(FLOAT*)((BYTE*)this + 0x398);
@@ -204,6 +214,7 @@ void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 	Y = yi;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 {
 	return FVector(0,0,0);
@@ -211,6 +222,7 @@ FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 
 
 // --- AFluidSurfaceOscillator ---
+IMPL_GHIDRA("Engine.dll", 0x9af90)
 void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 {
 	// Retail: 0x9af90, 293b. Advance the oscillator's phase and call AFluidSurfaceInfo::Pling.
@@ -246,9 +258,10 @@ void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 	}
 }
 
+IMPL_GHIDRA("Engine.dll", 0x9b0f0)
 void AFluidSurfaceOscillator::PostEditChange()
 {
-	// Retail: 0x9b0f0, 215b. Re-register with the target fluid surface on property change.
+	// Retail: 0x9b0f0, 215b.Re-register with the target fluid surface on property change.
 	INT level = *(INT*)((BYTE*)this + 0x328);
 	if (!level) return;
 
@@ -278,9 +291,10 @@ void AFluidSurfaceOscillator::PostEditChange()
 	}
 }
 
+IMPL_GHIDRA("Engine.dll", 0x9b200)
 void AFluidSurfaceOscillator::Destroy()
 {
-	// Retail: 0x9b200, 92b. Remove from the target surface's list then chain to base.
+	// Retail: 0x9b200, 92b.Remove from the target surface's list then chain to base.
 	AActor::Destroy();
 	if (*(INT*)((BYTE*)this + 0x3a4) != 0)
 	{
@@ -291,15 +305,17 @@ void AFluidSurfaceOscillator::Destroy()
 
 
 // --- UFluidSurfacePrimitive ---
+IMPL_GHIDRA("Engine.dll", 0x98820)
 void UFluidSurfacePrimitive::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x98820: delegates directly to UPrimitive::Serialize.
 	UPrimitive::Serialize(Ar);
 }
 
+IMPL_GHIDRA("Engine.dll", 0x98d90)
 int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
-	// Ghidra 0x98d90: fluid surface line-check against AABB or flat plane.
+	// Ghidra 0x98d90:fluid surface line-check against AABB or flat plane.
 	guard(UFluidSurfacePrimitive::LineCheck);
 
 	AFluidSurfaceInfo* FluidInfo = (AFluidSurfaceInfo*)*(INT*)((BYTE*)this + 0x58);
@@ -354,6 +370,7 @@ int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVect
 	return 1;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x98560)
 int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
 {
 	// Ghidra 0x98560: point-vs-AABB overlap test using fluid surface bounding box.
@@ -377,17 +394,20 @@ int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVec
 	return 1;
 }
 
+IMPL_INFERRED("Returns bounding box from associated FluidSurfaceInfo")
 FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 {
 	// Retail: 29b. REP MOVSD 7 DWORDs from *(this+0x58)+0x448.
 	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
 {
 	return FBox();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 {
 	return FSphere();
@@ -401,16 +421,27 @@ FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 // AFluidSurfaceInfo
 // =============================================================================
 
+IMPL_INFERRED("Delegates to Super::PostLoad")
 void AFluidSurfaceInfo::PostLoad() { Super::PostLoad(); }
+IMPL_INFERRED("Delegates to Super::Destroy")
 void AFluidSurfaceInfo::Destroy() { Super::Destroy(); }
+IMPL_INFERRED("Delegates to Super::PostEditChange")
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
+IMPL_INFERRED("Delegates to Super::Tick")
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PostEditMove() {}
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Spawned() {}
+IMPL_TODO("Needs Ghidra analysis")
 UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Init() {}
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 
 // =============================================================================

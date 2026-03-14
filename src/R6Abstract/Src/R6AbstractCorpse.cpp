@@ -12,14 +12,14 @@ IMPLEMENT_FUNCTION(AR6AbstractCorpse, -1, execRenderBones)
 
 // --- AR6AbstractCorpse ---
 
-IMPL_EMPTY("Abstract base; overridden in concrete subclass")
+IMPL_INTENTIONALLY_EMPTY("Abstract base; overridden in concrete subclass")
 void AR6AbstractCorpse::FirstInit(AR6AbstractPawn*) {}
-IMPL_EMPTY("Abstract base; overridden in concrete subclass")
+IMPL_INTENTIONALLY_EMPTY("Abstract base; overridden in concrete subclass")
 void AR6AbstractCorpse::RenderBones(UCanvas*) {}
-IMPL_EMPTY("Abstract base; overridden in concrete subclass")
+IMPL_INTENTIONALLY_EMPTY("Abstract base; overridden in concrete subclass")
 void AR6AbstractCorpse::AddImpulseToBone(INT, FVector) {}
 
-IMPL_APPROX("UnrealScript exec thunk; reconstructed from context")
+IMPL_INFERRED("UnrealScript exec thunk; reconstructed from context")
 void AR6AbstractCorpse::execAddImpulseToBone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iTracedBone);
@@ -28,7 +28,7 @@ void AR6AbstractCorpse::execAddImpulseToBone(FFrame& Stack, RESULT_DECL)
 	AddImpulseToBone(iTracedBone, vMomentum);
 }
 
-IMPL_APPROX("UnrealScript exec thunk; reconstructed from context")
+IMPL_INFERRED("UnrealScript exec thunk; reconstructed from context")
 void AR6AbstractCorpse::execFirstInit(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6AbstractPawn, pawnOwner);
@@ -36,7 +36,7 @@ void AR6AbstractCorpse::execFirstInit(FFrame& Stack, RESULT_DECL)
 	FirstInit(pawnOwner);
 }
 
-IMPL_APPROX("UnrealScript exec thunk; reconstructed from context")
+IMPL_INFERRED("UnrealScript exec thunk; reconstructed from context")
 void AR6AbstractCorpse::execRenderBones(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(UCanvas, C);

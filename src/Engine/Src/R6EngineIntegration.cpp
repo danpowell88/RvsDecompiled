@@ -15,6 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AR6AbstractCircumstantialActionQuery ---
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -22,12 +23,14 @@ INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPrope
 
 
 // --- AR6ActionSpot ---
+IMPL_TODO("Needs Ghidra analysis")
 void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AR6ActionSpot::RenderEditorInfo);
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; delegates to AActor::CheckForErrors then warns on null Anchor")
 void AR6ActionSpot::CheckForErrors()
 {
 	guard(AR6ActionSpot::CheckForErrors);
@@ -42,6 +45,7 @@ void AR6ActionSpot::CheckForErrors()
 
 
 // --- AR6ColBox ---
+IMPL_INFERRED("No Ghidra RVA; owner-activation-radius/collision-flags guard then owner vtable ShouldTrace dispatch")
 int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 {
 	guard(AR6ColBox::ShouldTrace);
@@ -74,6 +78,7 @@ int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 	unguard;
 }
 
+IMPL_INFERRED("Retail byte-count verified (21b); null-base guard then delegates to AActor::SetBase")
 void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 {
 	// Retail: 21b. If NewBase is NULL, calls error handler (3x null push + call).
@@ -82,6 +87,7 @@ void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 	AActor::SetBase(NewBase, FloorNormal, bNotifyActor);
 }
 
+IMPL_INFERRED("No Ghidra RVA; collision-flags/step-height comparison using owner CollisionHeight at +0x23c")
 int AR6ColBox::CanStepUp(FVector vec)
 {
 	guard(AR6ColBox::CanStepUp);
@@ -109,12 +115,14 @@ int AR6ColBox::CanStepUp(FVector vec)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6ColBox::EnableCollision(int,int,int)
 {
 	guard(AR6ColBox::EnableCollision);
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; projects location from owner's rotation+height, falls back to zero")
 void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 {
 	guard(AR6ColBox::GetColBoxLocationFromOwner);
@@ -132,12 +140,14 @@ void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6ColBox::GetDestination(FVector &,FRotator &)
 {
 	guard(AR6ColBox::GetDestination);
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; collision-flags/owner guard, terrain-aware stepHeight, returns 33.0 default or computed step")
 float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 {
 	guard(AR6ColBox::GetMaxStepUp);
@@ -174,6 +184,7 @@ float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; activation-radius guard selects vtable[0x6c] vs vtable[0x68] on owner for GetPawn dispatch")
 APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 {
 	guard(AR6ColBox::GetPawnOrColBoxOwner);
@@ -199,6 +210,7 @@ APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; owner+flags guard then dispatches owner vtable IsBlockedBy")
 int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 {
 	guard(AR6ColBox::IsBlockedBy);
@@ -216,30 +228,35 @@ int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 
 
 // --- AR6DecalGroup ---
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::Spawned()
 {
 	guard(AR6DecalGroup::Spawned);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::KillDecal(AR6Decal *)
 {
 	guard(AR6DecalGroup::KillDecal);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::PostScriptDestroyed()
 {
 	guard(AR6DecalGroup::PostScriptDestroyed);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::ActivateGroup()
 {
 	guard(AR6DecalGroup::ActivateGroup);
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; active-flag/texture guard, cyclic decal slot index, group-type dispatch with documented divergences")
 int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, int param_4,
 	float param_5, float param_6, float param_7, float param_8, int param_9)
 {
@@ -313,12 +330,14 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 
 
 // --- AR6DecalManager ---
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalManager::Spawned()
 {
 	guard(AR6DecalManager::Spawned);
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; active-flag guard, FindGroup dispatch, type-1 distance-cull deferred")
 int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, eDecalType param_4,
 	int param_5, float param_6, float param_7, float param_8, float param_9, int param_10)
 {
@@ -347,6 +366,7 @@ int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* par
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x177820)
 AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 {
 	// Retail: 0x177820, 66 bytes. Returns the decal group for the given type.
@@ -364,6 +384,7 @@ AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 
 
 // --- AR6DecalsBase ---
+IMPL_INFERRED("No Ghidra RVA; zone team-byte + level visibility table relevancy check")
 int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2, FVector param_3)
 {
 	guard(AR6DecalsBase::IsNetRelevantFor);
@@ -392,6 +413,7 @@ int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2,
 
 
 // --- AR6EngineWeapon ---
+IMPL_GHIDRA("Engine.dll", 0x114310)
 int AR6EngineWeapon::GetHeartBeatStatus()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -400,6 +422,7 @@ int AR6EngineWeapon::GetHeartBeatStatus()
 
 
 // --- AR6RainbowStartInfo ---
+IMPL_INFERRED("No Ghidra RVA; serialises 10+ FString fields plus version-guarded mission-type field")
 void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 {
 	guard(AR6RainbowStartInfo::TransferFile);
@@ -424,6 +447,7 @@ void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 
 
 // --- AR6TeamStartInfo ---
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TeamStartInfo::TransferFile(FArchive &,int)
 {
 	guard(AR6TeamStartInfo::TransferFile);
@@ -432,18 +456,21 @@ void AR6TeamStartInfo::TransferFile(FArchive &,int)
 
 
 // --- AR6WallHit ---
+IMPL_TODO("Needs Ghidra analysis")
 void AR6WallHit::SpawnEffects()
 {
 	guard(AR6WallHit::SpawnEffects);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6WallHit::SpawnSound()
 {
 	guard(AR6WallHit::SpawnSound);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6WallHit::PostBeginPlay()
 {
 	guard(AR6WallHit::PostBeginPlay);
@@ -452,12 +479,14 @@ void AR6WallHit::PostBeginPlay()
 
 
 // --- AR6eviLTesting ---
+IMPL_TODO("Needs Ghidra analysis")
 void AR6eviLTesting::eviLTestATS()
 {
 	guard(AR6eviLTesting::eviLTestATS);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6eviLTesting::evilTestUpdateSystem()
 {
 	guard(AR6eviLTesting::evilTestUpdateSystem);
@@ -466,66 +495,77 @@ void AR6eviLTesting::evilTestUpdateSystem()
 
 
 // --- UR6AbstractGameManager ---
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 {
 	guard(UR6AbstractGameManager::StartJoinServer);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x114310)
 int UR6AbstractGameManager::StartLogInProcedure()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
 	return 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::StartPreJoinProcedure(int)
 {
 	guard(UR6AbstractGameManager::StartPreJoinProcedure);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::UnInitialize()
 {
 	guard(UR6AbstractGameManager::UnInitialize);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::SetGSCreateUbiServer(int)
 {
 	guard(UR6AbstractGameManager::SetGSCreateUbiServer);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::LaunchListenSrv(FString,FString)
 {
 	guard(UR6AbstractGameManager::LaunchListenSrv);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::ClientLeaveServer()
 {
 	guard(UR6AbstractGameManager::ClientLeaveServer);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::ConnectionInterrupted(int)
 {
 	guard(UR6AbstractGameManager::ConnectionInterrupted);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::GameServiceTick(UConsole *)
 {
 	guard(UR6AbstractGameManager::GameServiceTick);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x114310)
 int UR6AbstractGameManager::GetGSCreateUbiServer()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
 	return 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::InitializeGameService(UConsole *)
 {
 	guard(UR6AbstractGameManager::InitializeGameService);
@@ -534,18 +574,21 @@ void UR6AbstractGameManager::InitializeGameService(UConsole *)
 
 
 // --- UR6AbstractPlanningInfo ---
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractPlanningInfo::TransferFile(FArchive &)
 {
 	guard(UR6AbstractPlanningInfo::TransferFile);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractPlanningInfo::AddPoint(AActor *)
 {
 	guard(UR6AbstractPlanningInfo::AddPoint);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x114310)
 AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns NULL.
@@ -554,6 +597,7 @@ AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 
 
 // --- UR6FileManager ---
+IMPL_INFERRED("No Ghidra RVA; GFileManager vtable[1] CreateFileReader probe to check file existence")
 int UR6FileManager::FindFile(FString* param_1)
 {
 	guard(UR6FileManager::FindFile);
@@ -580,6 +624,7 @@ int UR6FileManager::FindFile(FString* param_1)
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; capitalises FString from TArray at +0x2c indexed by param_1")
 void UR6FileManager::GetFileName(int param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetFileName);
@@ -589,6 +634,7 @@ void UR6FileManager::GetFileName(int param_1, FString* param_2)
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; builds wildcard pattern, calls GFileManager->FindFiles, caches results in TArray at +0x2c")
 int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetNbFile);
@@ -621,7 +667,9 @@ int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 // ============================================================================
 
 // ??0UR6AbstractTerroristMgr@@QAE@XZ
+IMPL_TODO("Needs Ghidra analysis")
 UR6AbstractTerroristMgr::UR6AbstractTerroristMgr() {}
 
 // --- Moved from EngineStubs.cpp ---
+IMPL_TODO("Needs Ghidra analysis")
 AR6AbstractClimbableObj::AR6AbstractClimbableObj() {}

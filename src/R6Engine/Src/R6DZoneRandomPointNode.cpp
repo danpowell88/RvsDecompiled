@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6DZoneRandomPointNode)
 
 // --- AR6DZoneRandomPointNode ---
 
-IMPL_APPROX("Reconstructed orphan-check: validates node belongs to zone and puts on ground")
+IMPL_INFERRED("Reconstructed orphan-check: validates node belongs to zone and puts on ground")
 void AR6DZoneRandomPointNode::CheckForErrors()
 {
 	guard(AR6DZoneRandomPointNode::CheckForErrors);

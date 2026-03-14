@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnLevel.cpp: ULevel, ALevelInfo, AGameInfo and related classes.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -26,6 +26,7 @@ IMPLEMENT_CLASS(AR6PawnReplicationInfo);
 	ULevelBase implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from SDK patterns; initialises Engine, NetDriver, DemoRecDriver")
 ULevelBase::ULevelBase( UEngine* InOwner, const FURL& InURL )
 :	Actors( this )
 ,	URL( InURL )
@@ -35,17 +36,20 @@ ULevelBase::ULevelBase( UEngine* InOwner, const FURL& InURL )
 	DemoRecDriver = NULL;
 }
 
+IMPL_INFERRED("Delegates to UObject::Destroy")
 void ULevelBase::Destroy()
 {
 	UObject::Destroy();
 }
 
+IMPL_INFERRED("Serialises base fields and Actors array")
 void ULevelBase::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
 	Ar << Actors;
 }
 
+IMPL_GHIDRA("Engine.dll", 0xbf0d0)
 void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds )
 {
 	guard(ULevelBase::NotifyProgress);
@@ -61,6 +65,7 @@ void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Sec
 	ULevel implementation.
 =============================================================================*/
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0xc2c40, "TMap hash-table init deferred; lazy init divergence from retail")
 ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 :	ULevelBase( InEngine )
 {
@@ -147,16 +152,19 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
+IMPL_INFERRED("Delegates to ULevelBase::Serialize")
 void ULevel::Serialize( FArchive& Ar )
 {
 	ULevelBase::Serialize( Ar );
 }
 
+IMPL_INFERRED("Delegates to UObject::PostLoad")
 void ULevel::PostLoad()
 {
 	UObject::PostLoad();
 }
 
+IMPL_INFERRED("Delegates to ULevelBase::Destroy")
 void ULevel::Destroy()
 {
 	ULevelBase::Destroy();
@@ -165,6 +173,7 @@ void ULevel::Destroy()
 // GNewCollisionHash is defined in UnCamera.cpp
 ENGINE_API FCollisionHashBase* GNewCollisionHash();
 
+IMPL_INFERRED("Reconstructed; forwards to UObject::Modify then model Modify")
 void ULevel::Modify( INT DoTransArrays )
 {
 	guard(ULevel::Modify);
@@ -174,6 +183,7 @@ void ULevel::Modify( INT DoTransArrays )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; adds/removes all colliding actors from hash")
 void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 {
 	guard(ULevel::SetActorCollision);
@@ -221,6 +231,7 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
@@ -228,6 +239,7 @@ void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 	unguard;
 }
 
+IMPL_INFERRED("Partial; BrowseLevel on connection failure not implemented")
 void ULevel::TickNetClient( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetClient);
@@ -268,6 +280,7 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void ULevel::TickNetServer( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetServer);
@@ -275,6 +288,7 @@ void ULevel::TickNetServer( FLOAT DeltaSeconds )
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
@@ -283,6 +297,7 @@ INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed editor camera-viewport reconciliation")
 void ULevel::ReconcileActors()
 {
 	guard(ULevel::ReconcileActors);
@@ -364,6 +379,7 @@ void ULevel::ReconcileActors()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; syncs actor camera data back to viewport before unloading")
 void ULevel::RememberActors()
 {
 	guard(ULevel::RememberActors);
@@ -392,6 +408,7 @@ void ULevel::RememberActors()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
@@ -400,6 +417,7 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	unguard;
 }
 
+IMPL_INFERRED("Delegates model shrink to UModel::ShrinkModel")
 void ULevel::ShrinkLevel()
 {
 	guard(ULevel::ShrinkLevel);
@@ -408,6 +426,7 @@ void ULevel::ShrinkLevel()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; removes deleted actors from the Actors array with undo support")
 void ULevel::CompactActors()
 {
 	guard(ULevel::CompactActors);
@@ -444,6 +463,7 @@ void ULevel::CompactActors()
 	unguard;
 }
 
+IMPL_INFERRED("Partial; NetDriver creation and GameInfo spawn not implemented")
 INT ULevel::Listen( FString& Error )
 {
 	guard(ULevel::Listen);
@@ -456,6 +476,7 @@ INT ULevel::Listen( FString& Error )
 	return 0;
 	unguard;
 }
+IMPL_GHIDRA("Engine.dll", 0xBF270)
 INT ULevel::IsServer()
 {
 	// Retail (34b, RVA 0xBF270): return 1 (server) unless NetDriver or DemoRecDriver
@@ -466,6 +487,7 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
@@ -474,6 +496,7 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 	unguard;
 }
 
+IMPL_INFERRED("Partial; sweep and blocked-movement logic not implemented")
 INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra )
 {
 	guard(ULevel::FarMoveActor);
@@ -498,6 +521,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; network destruction check and touch notifications diverge from retail")
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
 	guard(ULevel::DestroyActor);
@@ -682,6 +706,7 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; flushes pending deleted actors after threshold or forced")
 void ULevel::CleanupDestroyed( INT bForce )
 {
 	guard(ULevel::CleanupDestroyed);
@@ -741,6 +766,7 @@ void ULevel::CleanupDestroyed( INT bForce )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; zone/BSP-leaf init helper not called — divergence noted in comments")
 AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRotator Rotation, AActor* Template, INT bNoCollisionFail, INT bRemoteOwned, AActor* SpawnTag, APawn* Instigator )
 {
 	guard(ULevel::SpawnActor);
@@ -955,6 +981,7 @@ AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRota
 	unguard;
 }
 
+IMPL_INFERRED("Thin wrapper; spawns ABrush and asserts non-null")
 ABrush* ULevel::SpawnBrush()
 {
 	guard(ULevel::SpawnBrush);
@@ -965,6 +992,7 @@ ABrush* ULevel::SpawnBrush()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
@@ -972,6 +1000,7 @@ void ULevel::SpawnViewActor( UViewport* Viewport )
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
@@ -980,6 +1009,7 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
@@ -988,6 +1018,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
@@ -996,6 +1027,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
@@ -1004,6 +1036,7 @@ INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator Tes
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; walks MultiPointCheck results to find closest hit excluding source actor")
 INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
@@ -1025,6 +1058,7 @@ INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Lo
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; overload without source-actor exclusion")
 INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
@@ -1045,6 +1079,7 @@ INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Exten
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; calls MultiLineCheck with TRACE_SingleResult")
 INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVector& End, const FVector& Start, DWORD TraceFlags, FVector Extent )
 {
 	guard(ULevel::SingleLineCheck);
@@ -1064,6 +1099,7 @@ INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVect
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; delegates to MultiPointCheck for world-geometry overlap")
 INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, AActor* Actor )
 {
 	guard(ULevel::EncroachingWorldGeometry);
@@ -1080,6 +1116,7 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
@@ -1088,6 +1125,7 @@ FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
@@ -1096,6 +1134,7 @@ FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; toggles bHighDetailMode and notifies GameReplicationInfo")
 void ULevel::DetailChange( INT NewDetail )
 {
 	guard(ULevel::DetailChange);
@@ -1125,6 +1164,7 @@ void ULevel::DetailChange( INT NewDetail )
 	unguard;
 }
 
+IMPL_INFERRED("Partial; DemoRecDriver actor replication not implemented")
 INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoRecord);
@@ -1135,6 +1175,7 @@ INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 	unguard;
 }
 
+IMPL_INFERRED("Partial; BrowseLevel on demo end not implemented")
 INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoPlayback);
@@ -1160,6 +1201,7 @@ INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; fills ALevelInfo time fields via appSystemTime")
 void ULevel::UpdateTime( ALevelInfo* Info )
 {
 	guard(ULevel::UpdateTime);
@@ -1176,6 +1218,7 @@ void ULevel::UpdateTime( ALevelInfo* Info )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed; checks Pauser pointer and pauseDelay against TimeSeconds")
 INT ULevel::IsPaused()
 {
 	guard(ULevel::IsPaused);
@@ -1191,6 +1234,7 @@ INT ULevel::IsPaused()
 	unguard;
 }
 
+IMPL_INFERRED("Partial; UPackageMap::Copy not synced — divergence noted in comments")
 void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 {
 	guard(ULevel::WelcomePlayer);
@@ -1214,11 +1258,15 @@ void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 	((Fn32)(*(DWORD*)(*(DWORD*)Connection + 0x80)))(Connection);
 	unguard;
 }
+IMPL_INFERRED("Stub; always returns 1 — occlusion logic not yet decompiled")
 INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion ) { return 1; }
+IMPL_INFERRED("Retail formula: 25.0f * (SoundRadius + 1)")
 FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner ) { return 25.f * ((INT)SoundRadius + 1); }
 
 // FNetworkNotify interface.
+IMPL_INFERRED("Stub; always rejects — server-side accept logic not decompiled")
 EAcceptConnection ULevel::NotifyAcceptingConnection() { return ACCEPTC_Reject; }
+IMPL_GHIDRA_APPROX("Engine.dll", 0xbf2a0, "Connection description logging omitted; body approximated")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
@@ -1230,8 +1278,11 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 	// and logs to DevNet. Ghidra 0xbf2a0. Omitted — no-op here.
 	unguard;
 }
+IMPL_INFERRED("Stub; always accepts channels")
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
+IMPL_INFERRED("Returns this level")
 ULevel* ULevel::NotifyGetLevel() { return this; }
+IMPL_GHIDRA_APPROX("Engine.dll", 0xc1d30, "Full network command dispatch (3802 bytes) not reconstructed")
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
@@ -1240,6 +1291,7 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 	// Unresolved — accepting connections will not progress through the handshake.
 	unguard;
 }
+IMPL_GHIDRA_APPROX("Engine.dll", 0xBF590, "NULL-driver safety guard not present in retail")
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 {
 	// Retail (18b, RVA 0xBF590): returns 1 if [this+0x14]->field@+0x3C is NULL, else 0.
@@ -1249,6 +1301,7 @@ INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 	if (!driver) return 1; // safety: not present in retail, but avoids NULL deref
 	return (*(DWORD*)((BYTE*)driver + 0x3C) == 0) ? 1 : 0;
 }
+IMPL_GHIDRA("Engine.dll", 0xbf500)
 void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced )
 {
 	guard(ULevel::NotifyReceivedFile);
@@ -1257,8 +1310,11 @@ void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, c
 }
 
 // Non-virtual methods.
+IMPL_INFERRED("Inline accessor; returns Actors(1) as ABrush")
 ABrush* ULevel::Brush() { return (Actors.Num()>=2 && Actors(1)) ? (ABrush*)Actors(1) : NULL; }
+IMPL_INFERRED("Thin editor wrapper around DestroyActor")
 INT ULevel::EditorDestroyActor( AActor* Actor ) { return DestroyActor( Actor ); }
+IMPL_INFERRED("Linear scan for actor index")
 INT ULevel::GetActorIndex( AActor* Actor )
 {
 	for( INT i=0; i<Actors.Num(); i++ )
@@ -1266,7 +1322,9 @@ INT ULevel::GetActorIndex( AActor* Actor )
 			return i;
 	return INDEX_NONE;
 }
+IMPL_INFERRED("Inline accessor; returns Actors(0) as ALevelInfo")
 ALevelInfo* ULevel::GetLevelInfo() { return (Actors.Num()>0 && Actors(0)) ? (ALevelInfo*)Actors(0) : NULL; }
+IMPL_GHIDRA("Engine.dll", 0x1C0E0)
 AZoneInfo* ULevel::GetZoneActor( INT iZone )
 {
 	// Retail (27b, RVA 0x1C0E0): Accesses Zones array data at [this+0x90].
@@ -1280,8 +1338,11 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 	// Retail 0x1C080 fallback: returns LevelInfo as the default (background) zone.
 	return (AZoneInfo*)GetLevelInfo();
 }
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
+IMPL_INFERRED("Partial; terrain zone registration helper not decompiled")
 void ULevel::UpdateTerrainArrays()
 {
 	guard(ULevel::UpdateTerrainArrays);
@@ -1333,6 +1394,7 @@ void ULevel::UpdateTerrainArrays()
 =============================================================================*/
 
 // GetAddressURL() - returns the server's address URL string.
+IMPL_INFERRED("Reconstructed; returns URL.Host with optional port suffix")
 void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetAddressURL);
@@ -1345,6 +1407,7 @@ void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetAddressURL );
 
 // GetLocalURL() - returns the current map URL.
+IMPL_INFERRED("Reconstructed; returns URL.Map")
 void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetLocalURL);
@@ -1355,6 +1418,7 @@ void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );
 
 // GetMapNameLocalisation() - returns the localised map name.
+IMPL_INFERRED("Reconstructed; returns URL.Map as localisation fallback")
 void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetMapNameLocalisation);
@@ -1365,6 +1429,7 @@ void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetMapNameLocalisation );
 
 // FinalizeLoading() - called when level loading is complete.
+IMPL_INFERRED("Stub; engine loading notification not implemented")
 void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execFinalizeLoading);
@@ -1375,6 +1440,7 @@ void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execFinalizeLoading );
 
 // ResetLevelInNative() - resets native-side level state.
+IMPL_INFERRED("Stub; native level reset not implemented")
 void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execResetLevelInNative);
@@ -1384,6 +1450,7 @@ void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execResetLevelInNative );
 
 // SetBankSound() - registers a sound bank with the audio subsystem.
+IMPL_INFERRED("Stub; DARE audio subsystem not wired in")
 void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execSetBankSound);
@@ -1395,6 +1462,7 @@ void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
 
 // NotifyMatchStart() - notifies native code that a match has begun.
+IMPL_INFERRED("Stub; match start notification not implemented")
 void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execNotifyMatchStart);
@@ -1404,6 +1472,7 @@ void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execNotifyMatchStart );
 
 // PBNotifyServerTravel() - PunkBuster server travel notification.
+IMPL_INFERRED("Stub; PunkBuster not implemented")
 void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execPBNotifyServerTravel);
@@ -1413,6 +1482,7 @@ void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execPBNotifyServerTravel );
 
 // CallLogThisActor() - logging helper.
+IMPL_INFERRED("Reconstructed; forwards log text to debugf")
 void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execCallLogThisActor);
@@ -1424,6 +1494,7 @@ void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execCallLogThisActor );
 
 // AddWritableMapPoint() - adds a point to the writable minimap overlay.
+IMPL_INFERRED("Stub; minimap overlay not implemented")
 void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddWritableMapPoint);
@@ -1435,6 +1506,7 @@ void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddWritableMapPoint );
 
 // AddWritableMapIcon() - adds an icon to the writable minimap overlay.
+IMPL_INFERRED("Stub; minimap overlay not implemented")
 void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddWritableMapIcon);
@@ -1446,6 +1518,7 @@ void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddWritableMapIcon );
 
 // AddEncodedWritableMapStrip() - adds an encoded strip to the writable minimap.
+IMPL_INFERRED("Stub; minimap overlay not implemented")
 void ALevelInfo::execAddEncodedWritableMapStrip( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddEncodedWritableMapStrip);
@@ -1460,6 +1533,7 @@ IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddEncodedWritableMapStrip );
 =============================================================================*/
 
 // GetNetworkNumber() - returns the network version number string.
+IMPL_INFERRED("Reconstructed; returns URL.Host as network version string")
 void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetNetworkNumber);
@@ -1470,6 +1544,7 @@ void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execGetNetworkNumber );
 
 // GetCurrentMapNum() - returns the current map index from the map list.
+IMPL_INFERRED("Stub; map list index not implemented — returns 0")
 void AGameInfo::execGetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetCurrentMapNum);
@@ -1480,6 +1555,7 @@ void AGameInfo::execGetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execGetCurrentMapNum );
 
 // SetCurrentMapNum() - sets the current map index.
+IMPL_INFERRED("Stub; map list index not implemented")
 void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execSetCurrentMapNum);
@@ -1490,6 +1566,7 @@ void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execSetCurrentMapNum );
 
 // ParseKillMessage() - formats a kill message string.
+IMPL_INFERRED("Reconstructed; returns DeathMessage unchanged")
 void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execParseKillMessage);
@@ -1504,6 +1581,7 @@ void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execParseKillMessage );
 
 // ProcessR6Availabilty() - processes R6-specific game type availability.
+IMPL_INFERRED("Stub; R6 availability check not implemented")
 void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execProcessR6Availabilty);
@@ -1513,6 +1591,7 @@ void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execProcessR6Availabilty );
 
 // AbortScoreSubmission() - aborts an in-progress score submission.
+IMPL_INFERRED("Stub; score submission not implemented")
 void AGameInfo::execAbortScoreSubmission( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execAbortScoreSubmission);
@@ -1527,6 +1606,7 @@ IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execAbortScoreSubmission );
 // ============================================================================
 
 // ??4FPointRegion@@QAEAAV0@ABV0@@Z
+IMPL_INFERRED("Reconstructed copy-assignment")
 FPointRegion& FPointRegion::operator=(const FPointRegion& Other)
 {
 	Zone = Other.Zone;
@@ -1536,15 +1616,21 @@ FPointRegion& FPointRegion::operator=(const FPointRegion& Other)
 }
 
 // ??0FPointRegion@@QAE@XZ
+IMPL_INFERRED("Default constructor; zeroes all fields")
 FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@@Z
+IMPL_INFERRED("Zone constructor; iLeaf defaults to INDEX_NONE")
 FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@HE@Z
+IMPL_INFERRED("Full constructor")
 FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
 
 // --- Moved from EngineStubs.cpp ---
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::SetVolumes(const TArray<class AVolume*>&) {}
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::SetVolumes() {}
+IMPL_INFERRED("Reconstructed from retail bytecode; sets Zone/iZone/ZoneNumber fields")
 void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
 {
 	// Retail: 51b. If bit 7 of this+0xA0 is set, skip. Otherwise:
@@ -1555,19 +1641,25 @@ void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
 	*(DWORD*)((BYTE*)this + 0x22C) = 0xFFFFFFFF;
 	*(DWORD*)((BYTE*)this + 0x230) = 0;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::PostNetReceive() {}
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::PreNetReceive() {}
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::CheckForErrors() {}
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::CallLogThisActor(AActor*) {}
 // ?GetDefaultPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@XZ  Ghidra at ~279 bytes.
 // Lazily spawns ADefaultPhysicsVolume and caches it at this+0x164.
 // The original also sets vol+0x40C (Priority field, raw 0xFFF0BDC0) and vol+0xA0 |= 4.
 // Priority raw-write deferred until AVolume layout is confirmed byte-accurate.
 // CRITICAL: this must never return NULL as callers dereference the result unchecked.
+IMPL_INFERRED("Reconstructed from Ghidra; lazily spawns ADefaultPhysicsVolume; priority raw-write deferred pending AVolume layout")
 APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 {
 	APhysicsVolume*& CachedVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
@@ -1584,6 +1676,7 @@ APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 	}
 	return CachedVol;
 }
+IMPL_INFERRED("Identity function; returns input unchanged")
 FString ALevelInfo::GetDisplayAs(FString s) { return s; }
 
 // ?GetPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@VFVector@@PAVAActor@@H@Z  (0x0BBА00, 346 bytes)
@@ -1592,6 +1685,7 @@ FString ALevelInfo::GetDisplayAs(FString s) { return s; }
 // the volumes in Actor->Touching (fast path).
 // The list is lazily rebuilt when the dirty flag at this+0x94C bit 0 is clear.
 // Priority field in APhysicsVolume is at raw offset 0x40C; next-pointer at 0x438.
+IMPL_GHIDRA("Engine.dll", 0x0BBA00)
 APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseTouchingVolumes)
 {
 	APhysicsVolume* Best = GetDefaultPhysicsVolume();
@@ -1643,6 +1737,7 @@ APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseT
 // Each entry is two DWORDs. Bit (Zone2 & 31) of the lo DWORD is checked.
 // CDQ pattern: for Zone2==31 the sign-extended mask also checks the hi DWORD.
 // Returns 1 if audible, 0 if not. (Fallthrough path normalises to 1.)
+IMPL_INFERRED("Reconstructed from retail assembly; CDQ bitmask lookup in zone audibility table")
 INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 {
     if (Zone1 == Zone2)
@@ -1654,12 +1749,16 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
     DWORD hi   = (DWORD)hiMask & Zones[Zone1 * 2 + 1];
     return (lo | hi) ? 1 : 0;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void AGameReplicationInfo::PostNetReceive() {}
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
+IMPL_TODO("Needs Ghidra analysis")
 void APlayerReplicationInfo::PostNetReceive() {}
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -1668,8 +1767,13 @@ INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement*
   AReplicationInfo virtual method stubs.
   Only methods NOT defined in EngineClassImpl.cpp remain here.
 -----------------------------------------------------------------------------*/
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::DisplayVideo(UCanvas*, void*, INT) {}
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT) {}
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::GetAvailableResolutions(TArray<FResolutionInfo>&) {}
+IMPL_TODO("Needs Ghidra analysis")
 DWORD AReplicationInfo::GetAvailableVideoMemory() { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::HandleFullScreenEffects(INT, INT) {}

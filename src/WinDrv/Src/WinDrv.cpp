@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	WinDrv.cpp: WinDrv package init and WWindowsViewportWindow.
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -27,25 +27,25 @@ IMPLEMENT_PACKAGE(WinDrv)
 	WWindowsViewportWindow — Non-UObject Win32 window wrapper.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow()
 	: Viewport(NULL)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow(UWindowsViewport* InViewport)
 	: Viewport(InViewport)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow(const WWindowsViewportWindow& Other)
 	: Viewport(Other.Viewport)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewportWindow& Other)
 {
 	if( this != &Other )
@@ -53,7 +53,7 @@ WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewport
 	return *this;
 }
 
-IMPL_APPROX("WinDrv.dll", 0x2300, "MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
+IMPL_GHIDRA_APPROX("WinDrv.dll", 0x2300, "MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
 WWindowsViewportWindow::~WWindowsViewportWindow()
 {
 	guard(WWindowsViewportWindow::~WWindowsViewportWindow);
@@ -64,19 +64,19 @@ WWindowsViewportWindow::~WWindowsViewportWindow()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 const TCHAR* WWindowsViewportWindow::GetPackageName()
 {
 	return TEXT("WinDrv");
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void WWindowsViewportWindow::GetWindowClassName(TCHAR* OutName)
 {
 	appStrcpy(OutName, TEXT("WWindowsViewportWindow"));
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 LONG WWindowsViewportWindow::WndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	// Forward to the owning UWindowsViewport.
@@ -94,7 +94,7 @@ IMPLEMENT_CLASS(UWindowsClient)
 
 // --- UWindowsClient ---
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	: UClient(Other)
 {
@@ -102,7 +102,7 @@ UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	StartupFullscreen = Other.StartupFullscreen;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 {
 	if (this != &Other)
@@ -126,8 +126,10 @@ void UWindowsClient::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("Releases DirectInput devices then delegates to Super")
+IMPL_INFERRED("Releases DirectInput devices then delegates to Super")
 void UWindowsClient::Destroy()
+{
+	guard(UWindowsClient::Destroy);
 	// Release DirectInput devices before superclass cleanup.
 	if (UWindowsViewport::Joystick)   { UWindowsViewport::Joystick->Release();   UWindowsViewport::Joystick   = NULL; }
 	if (UWindowsViewport::Mouse)      { UWindowsViewport::Mouse->Release();      UWindowsViewport::Mouse      = NULL; }
@@ -137,7 +139,7 @@ void UWindowsClient::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Delegates to Super")
+IMPL_INFERRED("Delegates to Super")
 void UWindowsClient::ShutdownAfterError()
 {
 	guard(UWindowsClient::ShutdownAfterError);
@@ -145,7 +147,7 @@ void UWindowsClient::ShutdownAfterError()
 	unguard;
 }
 
-IMPL_APPROX("Delegates to Super")
+IMPL_INFERRED("Delegates to Super")
 void UWindowsClient::PostEditChange()
 {
 	guard(UWindowsClient::PostEditChange);
@@ -160,7 +162,7 @@ void UWindowsClient::NotifyDestroy(void* Src)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsClient::Init(UEngine* InEngine)
 {
 	guard(UWindowsClient::Init);
@@ -690,6 +692,7 @@ void UWindowsViewport::Restore()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWindowsViewport::CheckCD()
 {
 	guard(UWindowsViewport::CheckCD);
@@ -697,9 +700,8 @@ void UWindowsViewport::CheckCD()
 	unguard;
 }
 
+IMPL_INFERRED("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
 void UWindowsViewport::AcquireKeyboard()
-{
-	guard(UWindowsViewport::AcquireKeyboard);
 	if (DirectInput8 && !Keyboard)
 	{
 		HRESULT hr = DirectInput8->CreateDevice(GUID_SysKeyboard, &Keyboard, NULL);
@@ -722,6 +724,7 @@ void UWindowsViewport::AcquireKeyboard()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::ReleaseKeyboard()
 {
 	guard(UWindowsViewport::ReleaseKeyboard);
@@ -730,6 +733,7 @@ void UWindowsViewport::ReleaseKeyboard()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UWindowsViewport::KeyPressed(INT Key)
 {
 	guard(UWindowsViewport::KeyPressed);
@@ -744,6 +748,7 @@ INT UWindowsViewport::KeyPressed(INT Key)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::ToggleFullscreen()
 {
 	guard(UWindowsViewport::ToggleFullscreen);
@@ -754,6 +759,7 @@ void UWindowsViewport::ToggleFullscreen()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::EndFullscreen()
 {
 	guard(UWindowsViewport::EndFullscreen);
@@ -765,6 +771,7 @@ void UWindowsViewport::EndFullscreen()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UWindowsViewport::CauseInputEvent(INT iKey, EInputAction Action, FLOAT Delta)
 {
 	guard(UWindowsViewport::CauseInputEvent);
@@ -775,6 +782,7 @@ INT UWindowsViewport::CauseInputEvent(INT iKey, EInputAction Action, FLOAT Delta
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::SetTopness()
 {
 	guard(UWindowsViewport::SetTopness);
@@ -783,6 +791,7 @@ void UWindowsViewport::SetTopness()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 {
 	guard(UWindowsViewport::GetViewportButtonFlags);
@@ -795,6 +804,7 @@ DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOAT Delta, INT Abs)
 {
 	guard(UWindowsViewport::JoystickInputEvent);
@@ -815,6 +825,7 @@ INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOA
 	unguard;
 }
 
+IMPL_INFERRED("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
 LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	guard(UWindowsViewport::ViewportWndProc);
@@ -923,11 +934,13 @@ LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 // GetOuterUWindowsClient is provided inline by DECLARE_WITHIN(UWindowsClient)
 // in the class declaration — no out-of-line definition needed.
 
+IMPL_TODO("Needs Ghidra analysis")
 INT STDCALL UWindowsViewport::EnumAxesCallback(const DIDEVICEOBJECTINSTANCEW* pdidoi, void* pContext)
 {
 	return DIENUM_CONTINUE;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT STDCALL UWindowsViewport::EnumJoysticksCallback(const DIDEVICEINSTANCEW* pdidi, void* pContext)
 {
 	return DIENUM_CONTINUE;

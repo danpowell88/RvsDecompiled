@@ -5043,12 +5043,19 @@ public:
 	// Padding to align Client at offset 0x44.
 	// UObject is ~0x30 bytes, USubsystem adds ~0x14 bytes of data.
 	// The exact intermediate layout depends on the full USubsystem layout,
-	// but for vtable dispatch (virtual calls) only the virtual method
-	// declaration order matters — not member layout.
+	// Layout derivation:
+	//   UObject              : 0x00-0x2F  (vtable + 10 fields; sizeof = 0x30)
+	//   USubsystem           : 0x30-0x33  (FExec secondary vtable ptr; sizeof = 0x34)
+	//   UEngine own fields   : 0x34+
+	// Known from Ghidra Serialize: field at 0x40 is a UObject*.
 
+	BYTE            _ue_pre[0x10];  // 0x34..0x43: uncharted UEngine fields
 	UClient*        Client;         // 0x44: Active client (viewport manager)
 	UAudioSubsystem* Audio;         // 0x48: Audio subsystem
 	URenderDevice*  GRenDev;        // 0x4c: Active render device
+
+	// 0x50..0x457: uncharted UEngine fields (CacheSizeMegs@0x84, UseSound@0x88, etc.)
+	BYTE            _ue_unk[0x408]; // padding to reach sizeof(UEngine)==0x458
 
 	// --- Virtual method table ---
 	// The following virtual methods MUST appear in exactly this order to match
@@ -5456,6 +5463,12 @@ class ENGINE_API UGameEngine : public UEngine
 public:
 	DECLARE_CLASS(UGameEngine,UEngine,CLASS_Config|CLASS_Transient,Engine)
 	UGameEngine() {}
+
+	// --- Data members (UGameEngine own fields start at 0x458) ---
+	// Total sizeof(UGameEngine) == 0x4D0; verified from Ghidra Init() assert.
+	ULevel*          GLevel;         // 0x458: current game level
+	ULevel*          GEntry;         // 0x45c: persistent entry level
+	BYTE             _uge_unk[0x70]; // 0x460..0x4CF: GPendingLevel, LastURL, etc. (not yet decoded)
 
 	// Virtual methods
 	virtual INT Exec( const TCHAR* Cmd, FOutputDevice& Ar );

@@ -51,7 +51,7 @@ IMPLEMENT_CLASS(AR6eviLTesting);
 	The vtable requires definitions for all declared virtuals.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Delegates to UObject::Serialize")
+IMPL_INFERRED("Delegates to UObject::Serialize")
 void UPrimitive::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
@@ -77,7 +77,7 @@ INT UPrimitive::UseCylinderCollision( const AActor* Owner )
 IMPL_TODO("Needs Ghidra analysis")
 void UPrimitive::Illuminate( AActor* Owner, INT bDynamic )
 {}
-IMPL_MATCH("Engine.dll", 0xF78E0)
+IMPL_GHIDRA("Engine.dll", 0xF78E0)
 FVector UPrimitive::GetEncroachExtent( AActor* Owner )
 {
 	// Retail (37b, RVA 0xF78E0): cylindrical half-extents — uses CollisionRadius
@@ -87,7 +87,7 @@ FVector UPrimitive::GetEncroachExtent( AActor* Owner )
 	FLOAT h = *(FLOAT*)((BYTE*)Owner + 0xFC);
 	return FVector(r, r, h);
 }
-IMPL_MATCH("Engine.dll", 0xF7730)
+IMPL_GHIDRA("Engine.dll", 0xF7730)
 FVector UPrimitive::GetEncroachCenter( AActor* Owner )
 {
 	// Retail (38b, RVA 0xF7730): returns FVector at Owner+0x234 (actor world position).
@@ -159,11 +159,11 @@ static_assert(sizeof(UGameEngine) == 0x4d0, "UGameEngine layout mismatch — adj
 // UGameEngine
 // =============================================================================
 
-IMPL_APPROX("Delegates to super")
+IMPL_INFERRED("Delegates to super")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
-IMPL_APPROX("Delegates to super")
+IMPL_INFERRED("Delegates to super")
 void UGameEngine::Destroy() { Super::Destroy(); }
-IMPL_APPROX("Delegates to super")
+IMPL_INFERRED("Delegates to super")
 void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
@@ -186,7 +186,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
-IMPL_APPROX("Reconstructed from Ghidra; mixes Challenge halfwords")
+IMPL_INFERRED("Reconstructed from Ghidra; mixes Challenge halfwords")
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
@@ -218,29 +218,29 @@ void UGameEngine::FixUpLevel() {}
 // (moved from EngineStubs.cpp)
 // ============================================================================
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF::FRotatorF(float InPitch, float InYaw, float InRoll) : Pitch(InPitch), Yaw(InYaw), Roll(InRoll) {}
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF::FRotatorF() {}
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotator FRotatorF::Rotator() { return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator*(float p0) const { return FRotatorF(Pitch*p0, Yaw*p0, Roll*p0); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator*=(float p0) { Pitch*=p0; Yaw*=p0; Roll*=p0; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator+(FRotatorF p0) const { return FRotatorF(Pitch+p0.Pitch, Yaw+p0.Yaw, Roll+p0.Roll); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator+=(FRotatorF p0) { Pitch+=p0.Pitch; Yaw+=p0.Yaw; Roll+=p0.Roll; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(Pitch-p0.Pitch, Yaw-p0.Yaw, Roll-p0.Roll); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator-=(FRotatorF p0) { Pitch-=p0.Pitch; Yaw-=p0.Yaw; Roll-=p0.Roll; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_INFERRED("Reconstructed from struct layout")
 FVector FRotatorF::Vector()
 {
 	return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)).Vector();

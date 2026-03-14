@@ -10,7 +10,7 @@
 #include "EngineDecls.h"
 
 // ?KME2UPosition@@YAXPAVFVector@@QBM@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; scale factor 50")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion; scale factor 50")
 void KME2UPosition(FVector* Out, float const * const In) {
 	Out->X = In[0] * 50.0f;
 	Out->Y = In[1] * 50.0f;
@@ -18,7 +18,7 @@ void KME2UPosition(FVector* Out, float const * const In) {
 }
 
 // ?KME2UVecCopy@@YAXPAVFVector@@QBM@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct copy")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion; direct copy")
 void KME2UVecCopy(FVector* Out, float const * const In) {
 	Out->X = In[0];
 	Out->Y = In[1];
@@ -30,7 +30,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void KTermGameKarma() {}
 
 // ?KU2MEPosition@@YAXQAMVFVector@@@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; scale factor 0.02")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion; scale factor 0.02")
 void KU2MEPosition(float * const Out, FVector In) {
 	Out[0] = In.X * 0.02f;
 	Out[1] = In.Y * 0.02f;
@@ -38,7 +38,7 @@ void KU2MEPosition(float * const Out, FVector In) {
 }
 
 // ?KU2MEVecCopy@@YAXQAMVFVector@@@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct copy")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion; direct copy")
 void KU2MEVecCopy(float * const Out, FVector In) {
 	Out[0] = In.X;
 	Out[1] = In.Y;
@@ -68,7 +68,7 @@ struct McdGeomMan;
 
 IMPL_TODO("Needs Ghidra analysis")
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; scale factor 50")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion; scale factor 50")
 void KME2UCoords(FCoords* Out, const FLOAT (* const tm)[4]) {
 	*Out = FCoords(
 		FVector(tm[3][0]*50.f, tm[3][1]*50.f, tm[3][2]*50.f),
@@ -77,11 +77,11 @@ void KME2UCoords(FCoords* Out, const FLOAT (* const tm)[4]) {
 		FVector(tm[2][0], tm[2][1], tm[2][2])
 	);
 }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct memcpy")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion; direct memcpy")
 void KME2UMatrixCopy(FMatrix* Out, FLOAT (* const In)[4]) {
 	appMemcpy(Out, In, sizeof(FLOAT)*16);
 }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion")
+IMPL_INFERRED("Reconstructed from Karma coordinate conversion")
 void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[4]) {
 	OutPos->X = tm[3][0] * 50.0f;
 	OutPos->Y = tm[3][1] * 50.0f;
