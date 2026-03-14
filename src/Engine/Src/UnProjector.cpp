@@ -13,7 +13,9 @@ inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
 #include "EngineDecls.h"
+#if _MSC_VER > 1310
 #include <intrin.h>
+#endif
 
 // DAT_10780140 in retail: the singleton UProjectorPrimitive instance.
 static UPrimitive* GProjectorPrimitive = NULL;
