@@ -200,7 +200,7 @@ void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_MATCH("Engine.dll", 0x1038dee0)
+IMPL_DIVERGE("Ghidra 0x1038dee0; 104b -- logic correct; retail uses ESI-based frame, MSVC 2019 generates EBP+SEH preamble")
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
@@ -598,11 +598,18 @@ void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execPasteFromClipboard );
 
-IMPL_DIVERGE("Ghidra 0x10420230; 88b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10420230; 88b — marks UNetConnection bPendingDestroy when player is about to be destroyed")
 void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSpecialDestroy);
 	P_FINISH;
+	// If the player is a net connection, signal it for destruction.
+	UPlayer* P = *(UPlayer**)(&_NativeData[50]);  // this+0x5b4
+	if( P && P->IsA(UNetConnection::StaticClass()) )
+	{
+		if( *(INT*)((BYTE*)P + 0x7c) )  // UNetConnection: pending close flag
+			*(INT*)((BYTE*)P + 0x80) = 1;  // UNetConnection: bPendingDestroy
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
@@ -670,12 +677,16 @@ void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2708, execGetEnumName );
 
-IMPL_DIVERGE("Ghidra 0x1038f900; 168b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f900; 168b — forwards InputSet to UViewport::ChangeInputSet if player is a viewport")
 void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeInputSet);
 	P_GET_INT(InputSet);
 	P_FINISH;
+	// Forward the input-set change to the viewport if this is a local player.
+	UPlayer* P = *(UPlayer**)(&_NativeData[50]);  // this+0x5b4
+	if( P && P->IsA(UViewport::StaticClass()) )
+		((UViewport*)P)->ChangeInputSet( (BYTE)InputSet );
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
@@ -1078,20 +1089,20 @@ void APawn::PreNetReceive()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10307190)
+IMPL_DIVERGE("Ghidra 0x10307190: retail calls appFailAssert(\"false\", APawn.h, 0x9a) then returns 0; our build string literals differ")
 DWORD APawn::R6LineOfSightTo( AActor* Other, INT bUnused )
 {
-	guard(APawn::R6LineOfSightTo);
+	// Retail intentionally asserts — this method must be overridden in derived pawns.
+	appFailAssert( "false", "d:\\ravenshield\\412\\engine\\inc\\APawn.h", 0x9a );
 	return 0;
-	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10307170)
+IMPL_DIVERGE("Ghidra 0x10307170: retail calls appFailAssert(\"false\", APawn.h, 0x99) then returns 0; our build string literals differ")
 DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 {
-	guard(APawn::R6SeePawn);
+	// Retail intentionally asserts — this method must be overridden in derived pawns.
+	appFailAssert( "false", "d:\\ravenshield\\412\\engine\\inc\\APawn.h", 0x99 );
 	return 0;
-	unguard;
 }
 
 IMPL_DIVERGE("Ghidra 0x103ebe70; 310b -- reconstructed from context, parity unverified")
