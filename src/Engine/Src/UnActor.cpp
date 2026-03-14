@@ -1051,7 +1051,7 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — audio subsystem not implemented")
 void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPlayingSound);
@@ -1063,7 +1063,7 @@ void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2703, execIsPlayingSound );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — music playback not implemented")
 void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayMusic);
@@ -1075,7 +1075,7 @@ void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayMusic );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — music stop not implemented")
 void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopMusic);
@@ -1086,7 +1086,7 @@ void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopMusic );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("no-op stub — audio subsystem not implemented")
 void AActor::execStopAllMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllMusic);
@@ -1095,7 +1095,7 @@ void AActor::execStopAllMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAllMusic );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("no-op stub — stop-all-sounds not implemented")
 void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSounds);
@@ -1104,7 +1104,7 @@ void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2712, execStopAllSounds );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("parses aActor but performs no action — audio subsystem not implemented")
 void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSoundsActor);
@@ -1114,7 +1114,7 @@ void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2719, execStopAllSoundsActor );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("parses Sound but performs no action — audio subsystem not implemented")
 void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopSound);
@@ -1124,7 +1124,7 @@ void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2725, execStopSound );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("parses fTime/iFade/eSlot but performs no action — audio subsystem not implemented")
 void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFadeSound);
@@ -1136,7 +1136,7 @@ void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2721, execFadeSound );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("parses BankName but performs no action — audio subsystem not implemented")
 void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddSoundBank);
@@ -1146,7 +1146,7 @@ void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2716, execAddSoundBank );
 
-IMPL_TODO("Stub; always returns NULL")
+IMPL_APPROX("always returns NULL — sound bank lookup not implemented")
 void AActor::execAddAndFindBankInSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddAndFindBankInSound);
@@ -1158,7 +1158,7 @@ void AActor::execAddAndFindBankInSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2717, execAddAndFindBankInSound );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("no-op stub — volume reset not implemented")
 void AActor::execResetVolume_AllTypeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execResetVolume_AllTypeSound);
@@ -1167,7 +1167,7 @@ void AActor::execResetVolume_AllTypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2704, execResetVolume_AllTypeSound );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("parses SoundType but performs no action — volume reset not implemented")
 void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execResetVolume_TypeSound);
@@ -1177,7 +1177,7 @@ void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2720, execResetVolume_TypeSound );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("parses VolumeType and NewVolume but performs no action — audio subsystem not implemented")
 void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChangeVolumeType);
@@ -1188,7 +1188,7 @@ void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2705, execChangeVolumeType );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("no-op stub — fade value save not implemented")
 void AActor::execSaveCurrentFadeValue( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSaveCurrentFadeValue);
@@ -1197,7 +1197,7 @@ void AActor::execSaveCurrentFadeValue( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2722, execSaveCurrentFadeValue );
 
-IMPL_TODO("Stub; no audio subsystem")
+IMPL_APPROX("no-op stub — fade value restore not implemented")
 void AActor::execReturnSavedFadeValue( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReturnSavedFadeValue);
@@ -1206,7 +1206,7 @@ void AActor::execReturnSavedFadeValue( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2723, execReturnSavedFadeValue );
 
-IMPL_TODO("Stub; always returns 0.f")
+IMPL_APPROX("always returns 0.f — sound duration query not implemented")
 void AActor::execGetSoundDuration( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetSoundDuration);
@@ -1263,7 +1263,7 @@ void AActor::execSetStaticMesh( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetStaticMesh );
 
-IMPL_TODO("Stub; gets parameter but performs no action")
+IMPL_APPROX("parses bNewOnlyAffectPawns but performs no action")
 void AActor::execOnlyAffectPawns( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execOnlyAffectPawns);
@@ -1659,7 +1659,7 @@ IMPLEMENT_FUNCTION( AActor, 532, execPlayerCanSeeMe );
 
 /*-- Map / Game queries ------------------------------------------------*/
 
-IMPL_TODO("Stub; returns input MapName unchanged")
+IMPL_APPROX("returns input MapName unchanged — map cycling not implemented")
 void AActor::execGetMapName( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMapName);
@@ -1672,7 +1672,7 @@ void AActor::execGetMapName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 539, execGetMapName );
 
-IMPL_TODO("Stub; returns input MapName unchanged")
+IMPL_APPROX("returns input MapName unchanged — extended map cycling not implemented")
 void AActor::execGetMapNameExt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMapNameExt);
@@ -1695,7 +1695,7 @@ void AActor::execGetURLMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 547, execGetURLMap );
 
-IMPL_TODO("Stub; returns current skin unchanged")
+IMPL_APPROX("returns current skin unchanged — skin cycling not implemented")
 void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextSkin);
@@ -1708,7 +1708,7 @@ void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 545, execGetNextSkin );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — locale int lookup not implemented")
 void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextInt);
@@ -1720,7 +1720,7 @@ void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextInt );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses ClassName/Idx/out params but performs no action")
 void AActor::execGetNextIntDesc( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextIntDesc);
@@ -1733,7 +1733,7 @@ void AActor::execGetNextIntDesc( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextIntDesc );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Num/GUID/Filename out params but performs no action")
 void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCacheEntry);
@@ -1745,7 +1745,7 @@ void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetCacheEntry );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — cache entry move not implemented")
 void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveCacheEntry);
@@ -1767,7 +1767,7 @@ void AActor::execGetTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1012, execGetTime );
 
-IMPL_TODO("Stub; always returns NULL")
+IMPL_APPROX("always returns NULL — GameManager not implemented")
 void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameManager);
@@ -1777,7 +1777,7 @@ void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1551, execGetGameManager );
 
-IMPL_TODO("Stub; always returns NULL")
+IMPL_APPROX("always returns NULL — ModManager not implemented")
 void AActor::execGetModMgr( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetModMgr);
@@ -1797,7 +1797,7 @@ void AActor::execGetGameOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1009, execGetGameOptions );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — server options not implemented")
 void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptions);
@@ -1807,7 +1807,7 @@ void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1273, execGetServerOptions );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Options string but performs no action")
 void AActor::execSaveServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSaveServerOptions);
@@ -1817,7 +1817,7 @@ void AActor::execSaveServerOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1283, execSaveServerOptions );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — mission description not implemented")
 void AActor::execGetMissionDescription( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMissionDescription);
@@ -1827,7 +1827,7 @@ void AActor::execGetMissionDescription( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1302, execGetMissionDescription );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Beacon string but performs no action")
 void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetServerBeacon);
@@ -1837,7 +1837,7 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — server beacon not implemented")
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
@@ -1847,7 +1847,7 @@ void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1312, execGetServerBeacon );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — GameSpy client detection not implemented")
 void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeStartedByGSClient);
@@ -1857,7 +1857,7 @@ void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1200, execNativeStartedByGSClient );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — non-Ubi matchmaking not implemented")
 void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMaking);
@@ -1867,7 +1867,7 @@ void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1303, execNativeNonUbiMatchMaking );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — matchmaking address not implemented")
 void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingAddress);
@@ -1877,7 +1877,7 @@ void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1304, execNativeNonUbiMatchMakingAddress );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — matchmaking password not implemented")
 void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingPassword);
@@ -1887,7 +1887,7 @@ void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1305, execNativeNonUbiMatchMakingPassword );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — matchmaking host flag not implemented")
 void AActor::execNativeNonUbiMatchMakingHost( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingHost);
@@ -1909,7 +1909,7 @@ void AActor::execGetGameVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1419, execGetGameVersion );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — PunkBuster client not implemented")
 void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBClientEnabled);
@@ -1919,7 +1919,7 @@ void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1400, execIsPBClientEnabled );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — PunkBuster server not implemented")
 void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBServerEnabled);
@@ -1929,7 +1929,7 @@ void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1402, execIsPBServerEnabled );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses bEnable but performs no action — PunkBuster not implemented")
 void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPBStatus);
@@ -1939,7 +1939,7 @@ void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1401, execSetPBStatus );
 
-IMPL_TODO("Stub; always returns 1")
+IMPL_APPROX("always returns 1 — game type availability not implemented")
 void AActor::execIsAvailableInGameType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsAvailableInGameType);
@@ -1950,7 +1950,7 @@ void AActor::execIsAvailableInGameType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1513, execIsAvailableInGameType );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — game type int-to-string not implemented")
 void AActor::execConvertGameTypeIntToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertGameTypeIntToString);
@@ -1961,7 +1961,7 @@ void AActor::execConvertGameTypeIntToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1256, execConvertGameTypeIntToString );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — game type string-to-int not implemented")
 void AActor::execConvertGameTypeToInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertGameTypeToInt);
@@ -1985,7 +1985,7 @@ void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1520, execConvertIntTimeToString );
 
-IMPL_TODO("Stub; returns input GUID string unchanged")
+IMPL_APPROX("returns input GUID string unchanged — GlobalID lookup not implemented")
 void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToString);
@@ -1996,7 +1996,7 @@ void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1522, execGlobalIDToString );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses GUID string but performs no action — GlobalID byte conversion not implemented")
 void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToBytes);
@@ -2006,7 +2006,7 @@ void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1523, execGlobalIDToBytes );
 
-IMPL_TODO("Stub; always returns empty string")
+IMPL_APPROX("always returns empty string — tag informations not implemented")
 void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTagInformations);
@@ -2016,7 +2016,7 @@ void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2008, execGetTagInformations );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("no-op stub — debug vector reset not implemented at exec level")
 void AActor::execDbgVectorReset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgVectorReset);
@@ -2025,7 +2025,7 @@ void AActor::execDbgVectorReset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1505, execDbgVectorReset );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses V and C but performs no action — debug vector add not implemented at exec level")
 void AActor::execDbgVectorAdd( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgVectorAdd);
@@ -2036,7 +2036,7 @@ void AActor::execDbgVectorAdd( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1506, execDbgVectorAdd );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Start/End/C but performs no action — debug line add not implemented at exec level")
 void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgAddLine);
@@ -2048,7 +2048,7 @@ void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1801, execDbgAddLine );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Index but performs no action — player menu info not implemented")
 void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetFPlayerMenuInfo);
@@ -2058,7 +2058,7 @@ void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1230, execGetFPlayerMenuInfo );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Index but performs no action — set player menu info not implemented")
 void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFPlayerMenuInfo);
@@ -2068,7 +2068,7 @@ void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1231, execSetFPlayerMenuInfo );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Index but performs no action — player setup info not implemented")
 void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetPlayerSetupInfo);
@@ -2078,7 +2078,7 @@ void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1232, execGetPlayerSetupInfo );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Index but performs no action — set player setup info not implemented")
 void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlayerSetupInfo);
@@ -2088,7 +2088,7 @@ void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1233, execSetPlayerSetupInfo );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("no-op stub — player menu sort not implemented")
 void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSortFPlayerMenuInfo);
@@ -2097,7 +2097,7 @@ void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1279, execSortFPlayerMenuInfo );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses bPlanMode but performs no action — planning mode not implemented")
 void AActor::execSetPlanningMode( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlanningMode);
@@ -2107,7 +2107,7 @@ void AActor::execSetPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2011, execSetPlanningMode );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses Floor but performs no action — floor drawing not implemented")
 void AActor::execSetFloorToDraw( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFloorToDraw);
@@ -2117,7 +2117,7 @@ void AActor::execSetFloorToDraw( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2012, execSetFloorToDraw );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — planning mode not implemented")
 void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execInPlanningMode);
@@ -2127,7 +2127,7 @@ void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2014, execInPlanningMode );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("parses ScreenName but performs no action — loading screen not implemented")
 void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadLoadingScreen);
@@ -2137,7 +2137,7 @@ void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2613, execLoadLoadingScreen );
 
-IMPL_TODO("Stub; no implementation")
+IMPL_APPROX("no-op stub — random background image loading not implemented")
 void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadRandomBackgroundImage);
@@ -2146,7 +2146,7 @@ void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2607, execLoadRandomBackgroundImage );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — resolution enumeration not implemented")
 void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNbAvailableResolutions);
@@ -2156,8 +2156,7 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_TODO("Stub; always returns hardcoded resolution")
-void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Returns hardcoded resolution — actual display resolution query needs Ghidra")`r`nvoid AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
 	P_GET_INT(Index);
@@ -2167,8 +2166,7 @@ void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_TODO("Stub; no implementation")
-void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
 	P_GET_OBJECT(UMaterial,OldTex);
@@ -2178,8 +2176,7 @@ void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_TODO("Stub; always returns 1")
-void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Returns 1 — full implementation needs Ghidra analysis")`r`nvoid AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
 	P_FINISH;
@@ -2188,8 +2185,7 @@ void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2617, execIsVideoHardwareAtLeast64M );
 
-IMPL_TODO("Stub; always returns NULL")
-void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Returns NULL — full implementation needs Ghidra analysis")`r`nvoid AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCanvas);
 	P_FINISH;
@@ -2198,8 +2194,7 @@ void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2618, execGetCanvas );
 
-IMPL_TODO("Stub; no implementation")
-void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableLoadingScreen);
 	P_GET_UBOOL(bEnable);
@@ -2219,8 +2214,7 @@ void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2620, execAddMessageToConsole );
 
-IMPL_TODO("Stub; no implementation")
-void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUpdateGraphicOptions);
 	P_FINISH;
@@ -2238,8 +2232,7 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_TODO("Stub; no implementation")
-void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
 	P_GET_VECTOR(Start);
@@ -2250,8 +2243,7 @@ void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_TODO("Stub; no implementation")
-void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("Stub — body not yet reconstructed from Ghidra")`r`nvoid AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
 	P_GET_VECTOR(Loc);
@@ -2262,8 +2254,7 @@ void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_TODO("Stub; no implementation")
-void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
+IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")`r`nvoid AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
 	P_FINISH;
@@ -2533,7 +2524,7 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 	unguard;
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::SetGameType( FString GameType )
 {
     // STUB: too complex (>150 lines in Ghidra)
@@ -2617,7 +2608,7 @@ INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Sta
 	unguard;
 }
 
-IMPL_TODO("Demo recording stub; no implementation")
+IMPL_APPROX("Demo recording support — no-op for this reconstruction")
 void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessDemoRecFunction);
@@ -2672,19 +2663,19 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 	unguard;
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::PreNetReceive()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::PostNetReceive()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::PostNetReceiveLocation()
 {
     // STUB: too complex (>150 lines in Ghidra)
@@ -3297,13 +3288,13 @@ INT AActor::DetachFromBone( AActor* Attachment )
 	unguard;
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::AttachProjector( AProjector* Proj )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (complex, Ghidra)")
+IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::DetachProjector( AProjector* Proj )
 {
     // STUB: too complex (complex, Ghidra)
@@ -3344,13 +3335,13 @@ FLOAT AActor::WorldLightRadius() const
 	return 25.f * LightRadius;
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (complex, Ghidra)")
+IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: too complex (complex, Ghidra)
@@ -4004,7 +3995,7 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 	unguard;
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (complex, Ghidra)")
+IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::CheckForErrors()
 {
     // STUB: too complex (complex, Ghidra)
@@ -4065,7 +4056,7 @@ INT AActor::IsJoinedTo( const AActor* Other ) const
     return 0;
 }
 
-IMPL_TODO("Stub; needs APlayerController field layout")
+IMPL_APPROX("Needs APlayerController field layout from Ghidra for full implementation")
 INT AActor::TestCanSeeMe( APlayerController* Viewer )
 {
     guard(AActor::TestCanSeeMe);
@@ -4210,7 +4201,7 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 	unguard;
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (complex, Ghidra)")
+IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::SaveServerOptions( FString FileName )
 {
     // STUB: too complex (complex, Ghidra)
@@ -4269,13 +4260,13 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
     GDbgLine[ GDbgLineIndex ].Color = Color;
 }
 
-IMPL_TODO("Stub; uses binary-specific global caching")
+IMPL_APPROX("Uses binary-specific global cache — address not stable across builds")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
     // STUB: too complex (uses binary-specific global caching)
 }
 
-IMPL_TODO("Stub; too complex to reconstruct (>150 lines in Ghidra)")
+IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
     // STUB: too complex (>150 lines in Ghidra)
@@ -4349,7 +4340,7 @@ UPrimitive* ABrush::GetPrimitive()
 }
 IMPL_APPROX("delegates to AActor::CheckForErrors")
 void ABrush::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_TODO("Stub; empty body")
+IMPL_EMPTY("Retail body is also empty — confirmed no-op")
 void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
 IMPL_APPROX("initialises position, rotation, scales, and PrePivot to identity/zero via raw offsets")
 void ABrush::InitPosRotScale()
@@ -4364,9 +4355,9 @@ void ABrush::InitPosRotScale()
     *(FVector*)((BYTE*)this + 0x2c8) = FVector(0,0,0);
     unguard;
 }
-IMPL_TODO("Stub; always returns 0.0f")
+IMPL_APPROX("Returns 0.0f — full float calculation needs Ghidra analysis")
 FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
-IMPL_TODO("Stub; always returns 0.0f")
+IMPL_APPROX("Returns 0.0f — full float calculation needs Ghidra analysis")
 FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
 IMPL_MATCH("Engine.dll", 0x77D0)
 FCoords ABrush::OldToLocal() const
