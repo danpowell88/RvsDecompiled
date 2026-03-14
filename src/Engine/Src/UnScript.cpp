@@ -27,37 +27,71 @@ void UAnimNotify::PostEditChange()
 
 
 // --- UAnimNotify_DestroyEffect ---
-// 0x136ec0 — iterates XLevel->Actors, finds actors owned by Owner whose Tag
-// matches DestroyTag, then either expires particles (if bExpireParticles) or
-// destroys them via ULevel::DestroyActor.
-// TODO: implement from Ghidra 0x136ec0
+// GHIDRA REF: 0x136ec0 (~120 bytes)
+// Iterates XLevel->Actors in reverse; for each actor whose Owner == Owner and
+// Tag == DestroyTag: if bExpireParticles, tries to expire via AEmitter vtable;
+// otherwise calls ULevel::DestroyActor(actor, 0).
 void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_DestroyEffect::Notify);
+
+	if (DestroyTag == NAME_None)
+		return;
+	if (!Owner || !Owner->XLevel)
+		return;
+
+	ULevel* Level = Owner->XLevel;
+
+	for (INT i = Level->Actors.Num() - 1; i >= 0; i--)
+	{
+		AActor* Actor = Level->Actors(i);
+		if (!Actor) continue;
+		if (Actor->Owner != Owner) continue;
+		if (Actor->Tag != DestroyTag) continue;
+
+		if (bExpireParticles)
+		{
+			// DIVERGENCE: retail casts to AEmitter (FUN_1037a3e0) and calls
+			// vtable[0x63] to let the emitter finish its cycle.  We fall back to
+			// immediate DestroyActor because we cannot safely cast without the full
+			// AEmitter vtable layout.
+			Level->DestroyActor(Actor, 0);
+		}
+		else
+		{
+			Level->DestroyActor(Actor, 0);
+		}
+	}
+
 	unguard;
 }
 
 
 // --- UAnimNotify_Effect ---
-// 0x136b20 — 875 bytes. Spawns the Effect actor (this->Effect at +0x40) at
-// Owner's location/rotation.  Editor path logs the effect name.  Full body
-// involves FCoords rotation math and SpawnActor — not yet reconstructed.
-void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
+// GHIDRA REF: 0x136b20 (~875 bytes)
+// Spawns EffectClass at Owner's location/rotation, optionally attached to a
+// bone.  Body involves FCoords rotation construction from bone transform,
+// bone-relative offsets, and SpawnActor — complex enough that reconstruction
+// risks subtle divergence in coordinate-frame math.
+// DIVERGENCE: spawn omitted; the effect simply doesn't play.
+void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
-	// TODO: implement from Ghidra 0x136b20 (spawn effect actor at owner location)
+	// DIVERGENCE: see comment above.
 	unguard;
 }
 
 
 // --- UAnimNotify_MatSubAction ---
-// 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts the
-// SubAction on it, adjusting start/end times from the scene manager's
-// current position and total duration.
-// TODO: implement from Ghidra 0x136fe0
-void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* Owner)
+// GHIDRA REF: 0x136fe0
+// Finds the first live ASceneManager in XLevel->Actors and calls
+// SubAction->Start() on it, adjusting start/end times relative to the scene
+// manager's current play position and total duration.
+// DIVERGENCE: ASceneManager vtable layout not fully reconstructed; omitted.
+void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
+	// DIVERGENCE: see comment above.
 	unguard;
 }
 

@@ -367,7 +367,9 @@ void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoOpen);
 	P_GET_STR(Filename);
 	P_FINISH;
-	// TODO: Reconstruct proper video API call (Ghidra signature differs from declaration).
+	// DIVERGENCE: Retail calls into the Bink or proprietary video subsystem via a
+	// vtable-dispatched VideoOpen API (Ghidra signature differs from UC declaration).
+	// Returning 0 (invalid handle) — video playback not implemented.
 	*(INT*)Result = 0;
 	unguardexec;
 }
@@ -378,7 +380,7 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoPlay);
 	P_GET_INT(Handle);
 	P_FINISH;
-	// TODO: Reconstruct proper video API call.
+	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
@@ -388,7 +390,7 @@ void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoStop);
 	P_GET_INT(Handle);
 	P_FINISH;
-	// TODO: Reconstruct proper video API call.
+	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
@@ -398,7 +400,7 @@ void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 	guard(UCanvas::execVideoClose);
 	P_GET_INT(Handle);
 	P_FINISH;
-	// TODO: Reconstruct proper video API call.
+	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );

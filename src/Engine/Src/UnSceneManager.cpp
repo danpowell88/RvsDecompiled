@@ -765,8 +765,8 @@ void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRend
 	guard(AInterpolationPoint::RenderEditorSelected);
 	// Ghidra 0x10ba00: draws a wireframe box via FLineBatcher showing the interpolation
 	// point's local axes (32-unit inner face, 64-unit outer face).
-	// DIVERGENCE: full raw-float reconstruction omitted; base class rendering kept.
-	// TODO: implement full 8-vertex wireframe box from Ghidra.
+	// DIVERGENCE: FLineBatcher raw-float 8-vertex box not reconstructed (editor-only path).
+	// Base class rendering is kept as a functional fallback.
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
 	unguard;
 }

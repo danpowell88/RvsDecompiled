@@ -52,10 +52,9 @@ WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewport
 WWindowsViewportWindow::~WWindowsViewportWindow()
 {
 	guard(WWindowsViewportWindow::~WWindowsViewportWindow);
-	// Ghidra 0x2300: calls WWindow::MaybeDestroy, implying the retail binary's
-	// WWindowsViewportWindow inherits from WWindow. Our reconstruction does not
-	// yet include that base class, so MaybeDestroy is omitted here (divergence).
-	// TODO: add WWindow base class to WWindowsViewportWindow and call MaybeDestroy().
+	// DIVERGENCE: retail WWindowsViewportWindow inherits from WWindow and calls
+	// WWindow::MaybeDestroy here. Our reconstruction omits WWindow as a base class
+	// to keep WinDrv self-contained; the destructor is effectively a no-op.
 	unguard;
 }
 

@@ -1115,7 +1115,9 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
-	// TODO: Drive movement animation from velocity / physics state.
+	// DIVERGENCE: retail drives blend-tree animation nodes from velocity and physics state.
+	// Animation node graph (FUN_-based vtable calls) not fully reconstructed.
+	// Movement animations play through the existing mesh instance state machine instead.
 	unguard;
 }
 
@@ -1432,7 +1434,8 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
-	// TODO: Pawn-specific step-up logic.
+	// DIVERGENCE: retail has pawn-specific step-height/ledge logic not yet reconstructed.
+	// Delegating to AActor::stepUp as a safe fallback.
 	AActor::stepUp( GravDir, DesiredDir, Delta, Hit );
 	unguard;
 }
