@@ -773,12 +773,13 @@ void USpriteEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_DIVERGE("sprite vertex buffer fill unresolved; returns 0 stub")
+IMPL_DIVERGE("Ghidra ~line 166974: sprite particle vertex buffer fill (~400b) — camera-facing quad generation and UV/color upload require FUN_ particle transform helpers unresolved")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
-	// DIVERGENCE: vertex buffer fill for sprite particles (~400 lines Ghidra line 166974)
-	// unresolved. Transforms each live particle to camera-facing quad, uploads UV/color data.
+	// Retail: iterates live particles, transforms each to a camera-facing quad,
+	// uploads UV and colour data to the vertex buffer, returns vertex count.
+	// DIVERGENCE: FUN_ particle transform/upload helpers are unresolved.
 	return 0;
 	unguard;
 }

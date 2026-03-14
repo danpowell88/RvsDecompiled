@@ -438,21 +438,21 @@ unguard;
 
 // UChannel
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("base no-op; channel type registration not implemented — not in Engine.dll Ghidra index")
+IMPL_DIVERGE("UChannel::StaticConstructor not found in Engine.dll Ghidra export — base UChannel registers no properties; subclasses (UActorChannel, UVoiceChannel) handle their own")
 void UChannel::StaticConstructor()
 {
 guard(UChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_DIVERGE("base no-op — subclass implements — not in Engine.dll Ghidra index")
+IMPL_DIVERGE("UChannel::ReceivedBunch not found in Engine.dll Ghidra export — base implementation unreachable; always dispatched to concrete subclass (UActorChannel, UControlChannel, etc.)")
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_DIVERGE("base no-op — subclass implements — not in Engine.dll Ghidra index")
+IMPL_DIVERGE("UChannel::Serialize(TCHAR*,EName) not found in Engine.dll Ghidra export — base channel has no describe-serialization; subclasses provide channel-type-specific strings")
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
 guard(UChannel::Serialize);

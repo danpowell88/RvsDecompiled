@@ -230,10 +230,14 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10374b00 is 1025 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10374b00: AController::GetOptimizedRepList base call + 6 replicated properties (m_bRadarActive, ViewTarget, GameReplicationInfo, bOnlySpectator, m_TeamSelection, m_eCameraMode) via DAT_ static caches; DAT_ addresses not yet resolved")
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	// Ghidra 0x74b00 (1025b): calls AController::GetOptimizedRepList, then conditionally
+	// adds replicated property indices for 6 R6-specific fields when bNetOwner && bNetDirty.
+	// DIVERGENCE: uses static DAT_ caches for property FName indices; those DAT_ addresses
+	// not yet resolved to named globals. Delegates to parent only.
+	return AController::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
 IMPL_MATCH("Engine.dll", 0x10425a40)
