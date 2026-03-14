@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTimeLineNext.uc : (add small description)
+//  R6MenuTimeLineNext.uc : Timeline button that steps the planning animation forward to the next waypoint.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

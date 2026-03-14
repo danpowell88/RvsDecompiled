@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuPlanningBar.uc : (add small description)
+//  R6MenuPlanningBar.uc : Container bar for the mission planning toolbar; combines the team selector, node-delete bar, camera view bar and timeline controls.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

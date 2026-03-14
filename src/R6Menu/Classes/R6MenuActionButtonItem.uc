@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuActionButtonItem.uc : (add small description)
+//  R6MenuActionButtonItem.uc : List button item representing a planning action; stores the EPlanAction enum for the selected operative action.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

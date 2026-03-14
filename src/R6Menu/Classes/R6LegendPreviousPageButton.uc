@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6LegendPreviousPageButton.uc : (add small description)
+//  R6LegendPreviousPageButton.uc : Pagination button that navigates back to the previous page of the in-game legend/controls reference overlay.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

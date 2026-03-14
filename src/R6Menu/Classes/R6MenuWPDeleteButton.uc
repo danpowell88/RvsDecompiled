@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuWPDeleteButton.uc : (add small description)
+//  R6MenuWPDeleteButton.uc : Button that deletes the currently selected waypoint node from the active team's mission plan route.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

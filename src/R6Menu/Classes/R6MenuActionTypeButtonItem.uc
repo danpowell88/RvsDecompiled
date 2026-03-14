@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuActionTypeButtonItem.uc : (add small description)
+//  R6MenuActionTypeButtonItem.uc : List button item representing a planning action type; stores the EPlanActionType enum for the selected action category.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

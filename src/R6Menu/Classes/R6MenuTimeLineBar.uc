@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTimeLineBar.uc : (add small description)
+//  R6MenuTimeLineBar.uc : Timeline control bar in the mission planning screen; hosts playback buttons (play, stop, previous, next, goto-first, goto-last).
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

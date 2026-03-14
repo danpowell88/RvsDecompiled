@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuSinglePlayerWidget.uc : (add small description)
+//  R6MenuSinglePlayerWidget.uc : Main single-player menu widget; presents campaign selection, creation and deletion with a map preview panel.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

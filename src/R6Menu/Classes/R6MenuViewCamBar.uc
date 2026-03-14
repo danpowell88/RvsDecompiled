@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuViewCamBar.uc : (add small description)
+//  R6MenuViewCamBar.uc : Toolbar providing camera view selection buttons for the mission planning 3D viewport.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

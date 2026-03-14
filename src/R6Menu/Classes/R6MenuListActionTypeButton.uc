@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuListActionTypeButton.uc : (add small description)
+//  R6MenuListActionTypeButton.uc : Popup list button for selecting an action type/category in the planning bar; opens the action menu popup.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

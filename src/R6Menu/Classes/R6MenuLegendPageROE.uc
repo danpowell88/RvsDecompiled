@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendPageROE.uc : (add small description)
+//  R6MenuLegendPageROE.uc : Legend page listing the Rules of Engagement (ROE) icons with their in-game meanings.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

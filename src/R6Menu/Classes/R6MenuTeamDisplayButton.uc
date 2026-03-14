@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTeamDisplayButton.uc : (add small description)
+//  R6MenuTeamDisplayButton.uc : Display button in the team bar that shows which team is currently active via a coloured indicator texture.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

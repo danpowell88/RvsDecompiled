@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendPageObject.uc : (add small description)
+//  R6MenuLegendPageObject.uc : Legend page listing map objects and markers that appear on the mission planning map.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

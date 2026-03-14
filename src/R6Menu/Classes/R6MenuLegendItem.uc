@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendItem.uc : (add small description)
+//  R6MenuLegendItem.uc : List item entry in the legend panel; holds an icon texture and label for a single legend entry.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

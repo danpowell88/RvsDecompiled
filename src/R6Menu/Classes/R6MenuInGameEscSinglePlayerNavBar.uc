@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuInGameEscSinglePlayerNavBar.uc : (add small description)
+//  R6MenuInGameEscSinglePlayerNavBar.uc : In-game escape menu navigation bar for single-player; provides Continue, Abort, Options, Main Menu and Exit buttons.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

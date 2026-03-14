@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendPageWPDesc.uc : (add small description)
+//  R6MenuLegendPageWPDesc.uc : Legend page listing waypoint types and their descriptions as used in the mission planning screen.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

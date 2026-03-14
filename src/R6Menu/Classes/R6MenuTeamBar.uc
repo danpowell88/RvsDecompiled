@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTeamBar.uc : (add small description)
+//  R6MenuTeamBar.uc : Planning-screen bar containing team selector buttons and team display buttons for switching between the three operative teams.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

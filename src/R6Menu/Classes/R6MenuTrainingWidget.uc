@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTrainingWidget.uc : (add small description)
+//  R6MenuTrainingWidget.uc : Main training menu widget; lists all training mission chapters (basics, shooting, explosives, room clearing and hostage rescue) with a map preview.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
