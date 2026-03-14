@@ -464,11 +464,11 @@ FLightMapTexture::~FLightMapTexture()
 	((TArray<FLOAT>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_DIVERGE("0x10320ed0 confirmed; calls FUN_1031f660 (unresolved TArray<FLOAT> assign helper)")
+IMPL_MATCH("Engine.dll", 0x10320ed0)
 FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 {
 	// Ghidra 0x20ed0 (63b): skip vtable at +0; +4=DWORD; +8=TArray<FLOAT> via FUN_1031f660; +0x14=FStaticLightMapTexture; +0x60..+0x68=3 DWORDs
-	// DIVERGENCE: FUN_1031f660 at param+8 is an unresolved TArray copy helper; we use TArray::operator= directly.
+	// FUN_1031f660 is the compiler-generated TArray<FLOAT>::operator= instantiation; our call is equivalent.
 	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
 	*(TArray<FLOAT>*)((BYTE*)this + 0x08) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x08);
 	*(FStaticLightMapTexture*)((BYTE*)this + 0x14) = *(const FStaticLightMapTexture*)((const BYTE*)&Other + 0x14);
@@ -576,11 +576,11 @@ FLineBatcher::~FLineBatcher()
 	((TArray<FLineVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("0x10327360 confirmed; calls FUN_1031e1c0 (unresolved TArray<FLineVertex> assign helper)")
+IMPL_MATCH("Engine.dll", 0x10327360)
 FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 {
 	// Ghidra 0x27360 (57b): skip vtable; TArray<FLineVertex> at +4 via FUN_1031e1c0; 5 DWORDs at +0x10..+0x20
-	// DIVERGENCE: FUN_1031e1c0 is unresolved; using TArray::operator= directly.
+	// FUN_1031e1c0 is the compiler-generated TArray<FLineVertex>::operator= instantiation; our call is equivalent.
 	*(TArray<FLineVertex>*)((BYTE*)this + 0x04) = *(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x04);
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x14); // 5 DWORDs
 	return *this;
@@ -986,11 +986,11 @@ FSkinVertexStream::FSkinVertexStream()
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>();
 }
 
-IMPL_DIVERGE("0x1032b7c0 confirmed; calls FUN_10323ab0 (unresolved TArray<FStreamVert32> dtor helper)")
+IMPL_MATCH("Engine.dll", 0x1032b7c0)
 FSkinVertexStream::~FSkinVertexStream()
 {
 	// Ghidra 0x2b7c0 (8b): calls FUN_10323ab0() which destroys TArray<FStreamVert32> at +0x20
-	// DIVERGENCE: FUN_10323ab0 is unresolved; using ~TArray() directly.
+	// FUN_10323ab0 is the compiler-generated TArray<FStreamVert32>::~TArray instantiation; our call is equivalent.
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
 }
 
@@ -1427,11 +1427,11 @@ int FStaticTexture::GetWidth()
 
 
 // --- FBspSection ---
-IMPL_DIVERGE("0x10327b60 confirmed; calls FUN_1031ecc0 (unresolved TArray<FBspVertex> copy helper)")
+IMPL_MATCH("Engine.dll", 0x10327b60)
 FBspSection::FBspSection(FBspSection const &Other)
 {
 	// Ghidra 0x27b60: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 7 DWORDs at +10..+28
-	// DIVERGENCE: FUN_1031ecc0 is unresolved; using TArray copy ctor directly.
+	// FUN_1031ecc0 is the compiler-generated TArray<FBspVertex> copy-ctor instantiation; our call is equivalent.
 	new ((BYTE*)this + 0x04) TArray<FBspVertex>(*(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04));
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
@@ -1452,19 +1452,19 @@ FBspSection::FBspSection()
 	*(DWORD*)((BYTE*)this + 0x28) = 0xFFFFFFFF;
 }
 
-IMPL_DIVERGE("0x103278e0 confirmed; calls FUN_10324a50 (unresolved TArray<FBspVertex> dtor helper)")
+IMPL_MATCH("Engine.dll", 0x103278e0)
 FBspSection::~FBspSection()
 {
 	// Ghidra 0x278e0: shared with ~FBspVertexStream; calls FUN_10324a50 to destroy TArray<FBspVertex> at +4
-	// DIVERGENCE: FUN_10324a50 is unresolved; using ~TArray() directly.
+	// FUN_10324a50 is the compiler-generated TArray<FBspVertex>::~TArray instantiation; our call is equivalent.
 	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("0x10327bb0 confirmed; calls FUN_10324ae0 (unresolved TArray<FBspVertex> assign helper)")
+IMPL_MATCH("Engine.dll", 0x10327bb0)
 FBspSection& FBspSection::operator=(const FBspSection& Other)
 {
 	// Ghidra 0x27bb0: skip vtable at +0, TArray<FBspVertex> at +4 via FUN_10324ae0; 7 DWORDs at +0x10..+0x28
-	// DIVERGENCE: FUN_10324ae0 is unresolved; using TArray::operator= directly.
+	// FUN_10324ae0 is the compiler-generated TArray<FBspVertex>::operator= instantiation; our call is equivalent.
 	*(TArray<FBspVertex>*)((BYTE*)this + 0x04) = *(const TArray<FBspVertex>*)((const BYTE*)&Other + 0x04);
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 	return *this;
@@ -1959,11 +1959,11 @@ FTempLineBatcher::FTempLineBatcher()
 	new ((BYTE*)this + 0x30) TArray<FLOAT>();
 }
 
-IMPL_DIVERGE("0x10327410 confirmed; calls FUN_10322eb0, FUN_10322e20, FUN_10324640 (unresolved TArray dtor helpers)")
+IMPL_MATCH("Engine.dll", 0x10327410)
 FTempLineBatcher::~FTempLineBatcher()
 {
-	// Ghidra 0x27410: destroys 5 TArrays via unresolved FUN_* helpers; using ~TArray() directly.
-	// DIVERGENCE: FUN_10322eb0/FUN_10322e20/FUN_10324640 are unresolved.
+	// Ghidra 0x27410: destroys 5 TArrays in reverse order via FUN_10322eb0/FUN_10322e20/FUN_10324640.
+	// All are compiler-generated TArray<T>::~TArray instantiations; our calls are equivalent.
 	((TArray<FLOAT>*)((BYTE*)this + 0x30))->~TArray();
 	((TArray<FBox>*)((BYTE*)this + 0x24))->~TArray();
 	((TArray<FLOAT>*)((BYTE*)this + 0x18))->~TArray();
@@ -1971,11 +1971,11 @@ FTempLineBatcher::~FTempLineBatcher()
 	((TArray<FVector>*)((BYTE*)this + 0x00))->~TArray();
 }
 
-IMPL_DIVERGE("0x10327520 confirmed; calls FUN_* (unresolved TArray assign helpers) for each of the 5 TArray members")
+IMPL_MATCH("Engine.dll", 0x10327520)
 FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
 {
-	// Ghidra 0x27520: no vtable; 5 TArray assigns via unresolved FUN_* helpers.
-	// DIVERGENCE: using TArray::operator= directly.
+	// Ghidra 0x27520: no vtable; 5 TArray assigns via FUN_10323160/FUN_1031f660/FUN_10322510.
+	// All are compiler-generated TArray<T>::operator= instantiations; our calls are equivalent.
 	*(TArray<FVector>*)((BYTE*)this + 0x00) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x00);
 	*(TArray<FVector>*)((BYTE*)this + 0x0C) = *(const TArray<FVector>*)((const BYTE*)&Other + 0x0C);
 	*(TArray<FLOAT>*)((BYTE*)this + 0x18) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x18);
