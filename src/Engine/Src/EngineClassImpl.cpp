@@ -57,7 +57,7 @@ APawn::APawn() {}
       (ECX = this, EDX unused, args on stack).
    2. imp_FMatrix_CopyCtor   — C-linkage pointer variable the linker
       resolves __imp_??0FMatrix@@QAE@ABV0@@Z to via /alternatename.     */
-IMPL_APPROX("FMatrix copy-ctor shim; Core.lib does not export the copy constructor")
+IMPL_DIVERGE("Linker shim: Core.lib does not export FMatrix copy-ctor; this function has no retail counterpart")
 static void __fastcall local_FMatrix_CopyCtor(
 	void* _this, void* /*edx*/, const void* src)
 {
@@ -251,7 +251,7 @@ IMPLEMENT_CLASS(AR6WallHit);
 
 /*-- AActor Karma physics functions (Karma not implemented — stubs) -----*/
 
-IMPL_APPROX("Returns empty FString; server options not populated in rebuild")
+IMPL_DIVERGE("Ghidra 0x1042c7d0: retail calls GetServerOptionsRefreshed on GameInfo; stat system not implemented")
 void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptionsRefreshed);
@@ -261,7 +261,7 @@ void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetServerOptionsRefreshed );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364340: retail calls MeSDK KAddBoneLifter")
 void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddBoneLifter);
@@ -274,7 +274,7 @@ void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddBoneLifter );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363f00: retail calls MeSDK KAddImpulse")
 void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddImpulse);
@@ -286,7 +286,7 @@ void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddImpulse );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363090: retail calls MeSDK KDisableCollision")
 void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKDisableCollision);
@@ -296,7 +296,7 @@ void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKDisableCollision );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363180: retail calls MeSDK KEnableCollision")
 void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKEnableCollision);
@@ -306,7 +306,7 @@ void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKEnableCollision );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362d60: retail calls KFreezeRagdoll(this)")
 void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKFreezeRagdoll);
@@ -315,7 +315,7 @@ void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKFreezeRagdoll );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363d30: retail reads grav scale from KarmaParams")
 void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetActorGravScale);
@@ -325,7 +325,7 @@ void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetActorGravScale );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363870: retail reads COM offset from KarmaParams")
 void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMOffset);
@@ -335,7 +335,7 @@ void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetCOMOffset );
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103626d0: retail calls vtable KGetCOMPosition")
 void AActor::execKGetCOMPosition( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMPosition);
@@ -345,7 +345,7 @@ void AActor::execKGetCOMPosition( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetCOMPosition );
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363ae0: retail reads lin/ang damping from KarmaParams")
 void AActor::execKGetDampingProps( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetDampingProps);
@@ -358,7 +358,7 @@ void AActor::execKGetDampingProps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetDampingProps );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362a40: retail reads friction from KarmaParams+0x30")
 void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetFriction);
@@ -368,7 +368,7 @@ void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetFriction );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362bc0: retail reads impact threshold from KarmaParams")
 void AActor::execKGetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetImpactThreshold);
@@ -378,7 +378,7 @@ void AActor::execKGetImpactThreshold( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetImpactThreshold );
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363440: retail reads inertia tensor from KarmaParams")
 void AActor::execKGetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetInertiaTensor);
@@ -389,7 +389,7 @@ void AActor::execKGetInertiaTensor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetInertiaTensor );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363380: retail reads mass from UKarmaParams")
 void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetMass);
@@ -399,7 +399,7 @@ void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetMass );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103628c0: retail reads restitution from KarmaParams")
 void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetRestitution);
@@ -409,7 +409,7 @@ void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetRestitution );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103645c0: retail calls MeSDK KGetSkelMass")
 void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetSkelMass);
@@ -419,7 +419,7 @@ void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetSkelMass );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362c70: retail calls MeSDK KIsAwake")
 void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsAwake);
@@ -429,7 +429,7 @@ void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsAwake );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362e00: retail checks ragdoll availability via MeSDK")
 void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsRagdollAvailable);
@@ -439,7 +439,7 @@ void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsRagdollAvailable );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364740: retail calls MeSDK KMakeRagdollAvailable")
 void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMakeRagdollAvailable);
@@ -448,7 +448,7 @@ void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMakeRagdollAvailable );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364a60: large MeSDK IO dispatch function")
 void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMP2IOKarmaAllNativeFct);
@@ -457,7 +457,7 @@ void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMP2IOKarmaAllNativeFct );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103651f0: retail calls MeSDK KRemoveAllBoneLifters")
 void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveAllBoneLifters);
@@ -466,7 +466,7 @@ void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveAllBoneLifters );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10365040: retail calls MeSDK KRemoveLifterFromBone")
 void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveLifterFromBone);
@@ -476,7 +476,7 @@ void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveLifterFromBone );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363c50: retail sets grav scale via MeSDK")
 void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetActorGravScale);
@@ -486,7 +486,7 @@ void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetActorGravScale );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362f80: retail calls MeSDK KSetBlockKarma")
 void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetBlockKarma);
@@ -496,7 +496,7 @@ void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetBlockKarma );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363770: retail sets COM offset via MeSDK")
 void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetCOMOffset);
@@ -506,7 +506,7 @@ void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetCOMOffset );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103639d0: retail sets lin/ang damping via MeSDK")
 void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetDampingProps);
@@ -517,7 +517,7 @@ void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetDampingProps );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362970: retail sets friction via MeSDK")
 void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetFriction);
@@ -527,7 +527,7 @@ void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetFriction );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362af0: retail sets impact threshold via MeSDK")
 void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetImpactThreshold);
@@ -537,7 +537,7 @@ void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetImpactThreshold );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363630: retail sets inertia tensor via MeSDK")
 void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetInertiaTensor);
@@ -547,7 +547,7 @@ void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetInertiaTensor );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103632a0: retail sets mass via MeSDK")
 void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetMass);
@@ -557,7 +557,7 @@ void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetMass );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103627f0: retail sets restitution via MeSDK")
 void AActor::execKSetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetRestitution);
@@ -567,7 +567,7 @@ void AActor::execKSetRestitution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetRestitution );
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103641a0: retail sets skeletal velocity via MeSDK")
 void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetSkelVel);
@@ -578,7 +578,7 @@ void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetSkelVel );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364940: retail sets stay-upright params via MeSDK")
 void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetStayUpright);
@@ -589,7 +589,7 @@ void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetStayUpright );
 
-IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363df0: retail calls KWake vtable on KarmaParams")
 void AActor::execKWake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKWake);
@@ -600,7 +600,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKWake );
 
 /*-- AVolume -----------------------------------------------------------*/
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Ghidra 0x101254d0: retail does not null-check Other; reads Location components separately")
 void AVolume::execEncompasses( FFrame& Stack, RESULT_DECL )
 {
 	guard(AVolume::execEncompasses);
@@ -613,7 +613,7 @@ IMPLEMENT_FUNCTION( AVolume, INDEX_NONE, execEncompasses );
 
 /*-- AZoneInfo ---------------------------------------------------------*/
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Ghidra 0x1042b1e0: retail uses raw offsets for XLevel/Actors and zone checks differ")
 void AZoneInfo::execZoneActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AZoneInfo::execZoneActors);
@@ -643,7 +643,7 @@ IMPLEMENT_FUNCTION( AZoneInfo, 308, execZoneActors );
 
 /*-- AWarpZoneInfo -----------------------------------------------------*/
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Ghidra 0x10424c80: retail applies WarpZone coordinate transform to Loc/Vel/R")
 void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execWarp);
@@ -656,7 +656,7 @@ void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 314, execWarp );
 
-IMPL_APPROX("Inverse warp transform on Loc/Vel/R - symmetric to execWarp")
+IMPL_DIVERGE("Ghidra 0x10424e90: retail applies inverse WarpZone coordinate transform to Loc/Vel/R")
 void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execUnWarp);
@@ -670,7 +670,7 @@ IMPLEMENT_FUNCTION( AWarpZoneInfo, 315, execUnWarp );
 
 /*-- AFluidSurfaceInfo -------------------------------------------------*/
 
-IMPL_APPROX("Script interface to create ripple in fluid surface at Position with Strength/Radius")
+IMPL_DIVERGE("Ghidra 0x1039b290: retail calls into FluidSurface Pling implementation")
 void AFluidSurfaceInfo::execPling( FFrame& Stack, RESULT_DECL )
 {
 	guard(AFluidSurfaceInfo::execPling);
@@ -684,7 +684,7 @@ IMPLEMENT_FUNCTION( AFluidSurfaceInfo, INDEX_NONE, execPling );
 
 /*-- AKConstraint ------------------------------------------------------*/
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10359ea0: retail reads constraint force via MeSDK")
 void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintForce);
@@ -694,7 +694,7 @@ void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintForce );
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10359fc0: retail reads constraint torque via MeSDK")
 void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintTorque);
@@ -704,7 +704,7 @@ void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintTorque );
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x1035a0e0: retail calls virtual KUpdateConstraintParams")
 void AKConstraint::execKUpdateConstraintParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKUpdateConstraintParams);
@@ -715,7 +715,7 @@ IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKUpdateConstraintParams );
 
 /*-- ASceneManager -----------------------------------------------------*/
 
-IMPL_APPROX("Returns total accumulated scene time; returns 0 until scene time tracking is implemented")
+IMPL_DIVERGE("Ghidra 0x1041df80: retail calls GetTotalSceneTime(this); scene time tracking not implemented")
 void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execGetTotalSceneTime);
@@ -725,7 +725,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_APPROX("Notify script that scene has been destroyed; cleanup hook")
+IMPL_DIVERGE("Ghidra 0x1041f610: retail logs and calls scene teardown; scene manager not implemented")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -734,7 +734,7 @@ void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, 2909, execSceneDestroyed );
 
-IMPL_APPROX("Terminate current AI action in scene; signals abort to active scripted sequence")
+IMPL_DIVERGE("Ghidra 0x1041d870: retail accumulates scene time into this+0x3d0; scene manager not implemented")
 void ASceneManager::execTerminateAIAction( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execTerminateAIAction);
@@ -745,7 +745,7 @@ IMPLEMENT_FUNCTION( ASceneManager, 2906, execTerminateAIAction );
 
 /*-- AStatLog ----------------------------------------------------------*/
 
-IMPL_APPROX("Batch local stat log entry - no-op in rebuild, game stats not implemented")
+IMPL_MATCH("Engine.dll", 0x10317870)
 void AStatLog::execBatchLocal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execBatchLocal);
@@ -754,7 +754,7 @@ void AStatLog::execBatchLocal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBatchLocal );
 
-IMPL_APPROX("Opens a relative local URL for stat/log browsing; no-op in rebuild")
+IMPL_DIVERGE("Ghidra 0x10317930: retail calls ShellExecute or OS URL handler; stat system not implemented")
 void AStatLog::execBrowseRelativeLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execBrowseRelativeLocalURL);
@@ -764,7 +764,7 @@ void AStatLog::execBrowseRelativeLocalURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBrowseRelativeLocalURL );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_MATCH("Engine.dll", 0x103176f0)
 void AStatLog::execExecuteLocalLogBatcher( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execExecuteLocalLogBatcher);
@@ -773,7 +773,7 @@ void AStatLog::execExecuteLocalLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteLocalLogBatcher );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_MATCH("Engine.dll", 0x103177b0)
 void AStatLog::execExecuteSilentLogBatcher( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execExecuteSilentLogBatcher);
@@ -782,7 +782,7 @@ void AStatLog::execExecuteSilentLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteSilentLogBatcher );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_MATCH("Engine.dll", 0x10317a80)
 void AStatLog::execExecuteWorldLogBatcher( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execExecuteWorldLogBatcher);
@@ -791,7 +791,7 @@ void AStatLog::execExecuteWorldLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteWorldLogBatcher );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x10317b40: retail returns formatted GMT timestamp; stat system not implemented")
 void AStatLog::execGetGMTRef( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetGMTRef);
@@ -801,7 +801,7 @@ void AStatLog::execGetGMTRef( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetGMTRef );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x10317c30: retail returns map filename from XLevel URL; stat system not implemented")
 void AStatLog::execGetMapFileName( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetMapFileName);
@@ -811,7 +811,7 @@ void AStatLog::execGetMapFileName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetMapFileName );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x10317d10: retail computes player checksum; stat system not implemented")
 void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetPlayerChecksum);
@@ -822,7 +822,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_APPROX("Stat logging exec stub - statistics not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x1032f0c0: retail performs stat system initialization checks; not implemented")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);
@@ -834,7 +834,7 @@ IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execInitialCheck );
 
 /*-- AStatLogFile ------------------------------------------------------*/
 
-IMPL_APPROX("Stat log file exec stub - file logging not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x103180d0: retail closes log file handle; file logging not implemented")
 void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execCloseLog);
@@ -843,7 +843,7 @@ void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execCloseLog );
 
-IMPL_APPROX("Stat log file exec stub - file logging not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x10318500: retail flushes file handle at this+0x404; file logging not implemented")
 void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileFlush);
@@ -852,7 +852,7 @@ void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileFlush );
 
-IMPL_APPROX("Stat log file exec stub - file logging not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x103185e0: retail writes to log file; file logging not implemented")
 void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileLog);
@@ -862,7 +862,7 @@ void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileLog );
 
-IMPL_APPROX("Stat log file exec stub - file logging not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x10318320: retail computes file checksum; file logging not implemented")
 void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execGetChecksum);
@@ -872,7 +872,7 @@ void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execGetChecksum );
 
-IMPL_APPROX("Stat log file exec stub - file logging not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x10317fa0: retail opens log file for writing; file logging not implemented")
 void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execOpenLog);
@@ -881,7 +881,7 @@ void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execOpenLog );
 
-IMPL_APPROX("Stat log file exec stub - file logging not implemented in rebuild")
+IMPL_DIVERGE("Ghidra 0x103181f0: retail writes watermark string to log file; file logging not implemented")
 void AStatLogFile::execWatermark( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execWatermark);
@@ -893,7 +893,7 @@ IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execWatermark );
 
 /*-- AR6ColBox ---------------------------------------------------------*/
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Ghidra 0x10476c80: retail reads 3 script args and calls EnableCollision(this,...)")
 void AR6ColBox::execEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6ColBox::execEnableCollision);
@@ -906,7 +906,7 @@ IMPLEMENT_FUNCTION( AR6ColBox, 1503, execEnableCollision );
 
 /*-- AR6DecalGroup & AR6DecalManager -----------------------------------*/
 
-IMPL_APPROX("Decal system exec stub")
+IMPL_DIVERGE("Ghidra 0x104776f0: retail calls ActivateGroup(this); decal system not implemented")
 void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execActivateGroup);
@@ -915,7 +915,7 @@ void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2904, execActivateGroup );
 
-IMPL_APPROX("Decal system exec stub")
+IMPL_DIVERGE("Ghidra 0x10477530: retail adds decal to group; decal system not implemented")
 void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execAddDecal);
@@ -927,7 +927,7 @@ void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2902, execAddDecal );
 
-IMPL_APPROX("Decal system exec stub")
+IMPL_DIVERGE("Ghidra 0x10476d70: retail clears active flag at this+0x3a0; decal system not implemented")
 void AR6DecalGroup::execDeActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execDeActivateGroup);
@@ -936,7 +936,7 @@ void AR6DecalGroup::execDeActivateGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2905, execDeActivateGroup );
 
-IMPL_APPROX("Decal system exec stub")
+IMPL_MATCH("Engine.dll", 0x10476e20)
 void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execKillDecal);
@@ -945,7 +945,7 @@ void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2903, execKillDecal );
 
-IMPL_APPROX("Decal system exec stub")
+IMPL_DIVERGE("Ghidra 0x10477a90: retail adds decal to manager; decal system not implemented")
 void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execAddDecal);
@@ -957,7 +957,7 @@ void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalManager, 2900, execAddDecal );
 
-IMPL_APPROX("Decal system exec stub")
+IMPL_MATCH("Engine.dll", 0x10477790)
 void AR6DecalManager::execKillDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execKillDecal);
@@ -968,7 +968,7 @@ IMPLEMENT_FUNCTION( AR6DecalManager, 2901, execKillDecal );
 
 /*-- AR6eviLTesting ----------------------------------------------------*/
 
-IMPL_APPROX("native exec implementation")
+IMPL_DIVERGE("Ghidra 0x10478e30: retail calls eviLTestATS(this); test runner not implemented")
 void AR6eviLTesting::execNativeRunAllTests( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6eviLTesting::execNativeRunAllTests);
@@ -980,7 +980,7 @@ IMPLEMENT_FUNCTION( AR6eviLTesting, 1356, execNativeRunAllTests );
 
 /*-- UInteraction ------------------------------------------------------*/
 
-IMPL_APPROX("Interaction system exec stub")
+IMPL_DIVERGE("Ghidra 0x103b5fd0: retail dispatches console command through interaction chain")
 void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execConsoleCommand);
@@ -991,7 +991,7 @@ void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execConsoleCommand );
 
-IMPL_APPROX("Interaction system exec stub")
+IMPL_DIVERGE("Ghidra 0x103b5ee0: retail calls virtual Initialize() then fires Initialized event")
 void UInteraction::execInitialize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execInitialize);
@@ -1008,21 +1008,21 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execInitialize );
 
 // AReplicationInfo
 // ---------------------------------------------------------------------------
-IMPL_APPROX("AReplicationInfo stub - replication not fully implemented")
+IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable stub for property registration")
 void AReplicationInfo::StaticConstructor()
 {
 	guard(AReplicationInfo::StaticConstructor);
 	unguard;
 }
 
-IMPL_APPROX("AReplicationInfo stub - replication not fully implemented")
+IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable override stub")
 void AReplicationInfo::StartVideo(UCanvas* Canvas, INT X, INT Y, INT Z)
 {
 	guard(AReplicationInfo::StartVideo);
 	unguard;
 }
 
-IMPL_APPROX("AReplicationInfo stub - replication not fully implemented")
+IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable override stub")
 void AReplicationInfo::StopVideo(UCanvas* Canvas)
 {
 	guard(AReplicationInfo::StopVideo);
@@ -1038,7 +1038,7 @@ INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
 	unguard;
 }
 
-IMPL_APPROX("AReplicationInfo stub - replication not fully implemented")
+IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable override stub")
 void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(AReplicationInfo::ChangeDrawingSurface);
