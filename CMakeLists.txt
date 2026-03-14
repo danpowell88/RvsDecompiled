@@ -140,7 +140,7 @@ include_directories(
 add_library(Core_Dep INTERFACE)
 target_include_directories(Core_Dep INTERFACE ${CSDK_CORE_INC} ${UT99_CORE_INC})
 target_link_libraries(Core_Dep INTERFACE
-    ${CMAKE_BINARY_DIR}/src/Core/Release/Core.lib)
+    $<TARGET_LINKER_FILE:Core>)
 
 # --- Engine (rebuilt from source) ---
 add_library(Engine_Dep INTERFACE)
@@ -149,7 +149,7 @@ target_include_directories(Engine_Dep INTERFACE
     ${UT99_ENGINE_INC}
 )
 target_link_libraries(Engine_Dep INTERFACE
-    ${CMAKE_BINARY_DIR}/src/Engine/Release/Engine.lib)
+    $<TARGET_LINKER_FILE:Engine>)
 
 # --- Helper macro for game modules ---
 macro(add_rvs_module MODULE_NAME)
