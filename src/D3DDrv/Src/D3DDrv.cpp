@@ -172,11 +172,12 @@ UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	, MaxPixelShaderVersion(Other.MaxPixelShaderVersion)
 {
 	guard(UD3DRenderDevice::UD3DRenderDevice);
-	// DIVERGENCE: retail copy ctor (Ghidra 0x1cc0) copies ~200KB of internal D3D
-	// state: a 0x4000-byte block at 0xCC (texture handles), pixel/vertex shader
-	// arrays, and render-state tables across offsets 0x40CC-0x31B94.
-	// These fields are not declared in our reconstructed header — deep state
-	// copy omitted; config fields are copied by the member initializer list above.
+	// DIVERGENCE: retail copy ctor (Ghidra 0x1cc0) copies ~200KB of internal D3D state:
+	// a 0x4000-byte texture handle block at offset 0xCC, pixel/vertex shader arrays,
+	// and render-state tables spanning offsets 0x40CC–0x31B94.
+	// These fields are not declared in the reconstructed header (internal D3D state
+	// not part of the public class layout), so the deep copy is omitted here.
+	// Config fields above are correctly copied by the member initializer list.
 	unguard;
 }
 
