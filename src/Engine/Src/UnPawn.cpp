@@ -975,7 +975,7 @@ INT* APawn::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, I
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e8370; 168b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103e8370)
 INT APawn::HurtByVolume( AActor* V )
 {
 	guard(APawn::HurtByVolume);
@@ -1911,7 +1911,7 @@ INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1041c130; 56b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1041c130)
 void APawn::clearPath(ANavigationPoint* Node)
 {
 	guard(APawn::clearPath);
@@ -2130,7 +2130,7 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103f3810; 112b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103f3810)
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::startNewPhysics);

@@ -151,7 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x1012af10, ~1741 bytes) checks GObjLoaders for existing linkers, handles UCC/server context, and reads FPackageFileSummary via a complex internal reader; our version is significantly simplified")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -218,7 +218,7 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (catch@0x1012aa12) registers the linker in GObjLoaders in addition to verifying imports; our version omits linker lifecycle management")
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
@@ -232,7 +232,7 @@ void ULinkerLoad::Verify()
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (FUN_10128890, ~78 bytes) has no guard/unguard; our version adds unnecessary guard/unguard overhead")
 FName ULinkerLoad::GetExportClassPackage( INT i )
 {
 	guard(ULinkerLoad::GetExportClassPackage);
@@ -246,7 +246,7 @@ FName ULinkerLoad::GetExportClassPackage( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not exported; Ghidra shows no guard handler for retail GetExportClassName; our version adds unnecessary guard/unguard overhead")
 FName ULinkerLoad::GetExportClassName( INT i )
 {
 	guard(ULinkerLoad::GetExportClassName);
@@ -260,7 +260,7 @@ FName ULinkerLoad::GetExportClassName( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (catch@0x1012a4a6) resolves imports through a full linker chain; our version is a simplified stub")
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
@@ -283,7 +283,7 @@ void ULinkerLoad::VerifyImport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (catch@0x1012a524) iterates ExportMap calling CreateExport; concept matches but retail internals differ")
 void ULinkerLoad::LoadAllObjects()
 {
 	guard(ULinkerLoad::LoadAllObjects);
@@ -292,7 +292,7 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (FUN_1012aa50, catch@0x1012abfc) uses ExportHash; concept matches our implementation")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -309,7 +309,7 @@ INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName Obj
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x1012ac30, ~209 bytes) calls FindExportIndex internally; concept matches but retail omits the Checked/error-path logic we have")
 UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoadFlags, UBOOL Checked )
 {
 	guard(ULinkerLoad::Create);
@@ -322,7 +322,7 @@ UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoa
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (catch@0x10128baf) implements Preload with validation; concept matches but may have divergences in seek/precache handling")
 void ULinkerLoad::Preload( UObject* Object )
 {
 	guard(ULinkerLoad::Preload);
@@ -342,7 +342,7 @@ void ULinkerLoad::Preload( UObject* Object )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (catch@0x1012fbac) creates exports; concept matches but struct field offsets and flag handling may differ")
 UObject* ULinkerLoad::CreateExport( INT Index )
 {
 	guard(ULinkerLoad::CreateExport);
@@ -384,7 +384,7 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (catch@0x1012bc4) has significant divergences in import resolution logic compared to our version")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -428,7 +428,7 @@ UObject* ULinkerLoad::CreateImport( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x1012a630, ~247 bytes) has bounds checking our version lacks; otherwise concept matches")
 UObject* ULinkerLoad::IndexToObject( INT Index )
 {
 	guard(ULinkerLoad::IndexToObject);
@@ -441,7 +441,7 @@ UObject* ULinkerLoad::IndexToObject( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x10128fc0, ~450 bytes) has extensive validation and error logging; our version is a simplified stub")
 void ULinkerLoad::DetachExport( INT i )
 {
 	guard(ULinkerLoad::DetachExport);
@@ -455,7 +455,7 @@ void ULinkerLoad::DetachExport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x101291c0) calls CountBytes for LazyLoaders after ULinker::Serialize; our version omits this step")
 void ULinkerLoad::Serialize( FArchive& Ar )
 {
 	guard(ULinkerLoad::Serialize_FArchive);
@@ -463,7 +463,7 @@ void ULinkerLoad::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x1012a760) removes the linker from GObjLoaders; our version omits linker lifecycle management")
 void ULinkerLoad::Destroy()
 {
 	guard(ULinkerLoad::Destroy);
@@ -484,7 +484,7 @@ void ULinkerLoad::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (FUN_10129260) sets Linker and Offset on FLazyLoader and appends unconditionally; our version uses AddUniqueItem and omits field initialization")
 void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::AttachLazyLoader);
@@ -493,7 +493,7 @@ void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x1012a860) zeros Linker/Offset fields on the loader and logs inconsistency warnings; our version is simplified")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);
@@ -501,7 +501,7 @@ void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (FUN_10129330) zeros Linker/Offset fields directly on each loader; concept matches but field manipulation details differ")
 void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 {
 	guard(ULinkerLoad::DetachAllLazyLoaders);
@@ -515,28 +515,36 @@ void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101284e0)
 void ULinkerLoad::Seek( INT InPos )
 {
+	guard(ULinkerLoad::Seek);
 	Loader->Seek( InPos );
+	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10128560)
 INT ULinkerLoad::Tell()
 {
+	guard(ULinkerLoad::Tell);
 	return Loader->Tell();
+	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101285e0)
 INT ULinkerLoad::TotalSize()
 {
+	guard(ULinkerLoad::TotalSize);
 	return Loader->TotalSize();
+	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10128660)
 void ULinkerLoad::Serialize( void* V, INT Length )
 {
+	guard(ULinkerLoad::Serialize);
 	Loader->Serialize( V, Length );
+	unguard;
 }
 
 IMPLEMENT_CLASS(ULinkerLoad);
@@ -545,7 +553,7 @@ IMPLEMENT_CLASS(ULinkerLoad);
 	ULinkerSave.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x1012ad40, ~462 bytes) initializes FArchive state, handles package flags, and sets up class hierarchy; our version is significantly simplified")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
@@ -557,7 +565,7 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Retail (0x101286e0) calls UObject::Destroy directly instead of ULinker::Destroy; our version incorrectly chains to ULinker::Destroy")
 void ULinkerSave::Destroy()
 {
 	guard(ULinkerSave::Destroy);
@@ -568,7 +576,7 @@ void ULinkerSave::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not exported; Ghidra shows no guard handler for retail MapName; our version has extra guard/unguard overhead")
 INT ULinkerSave::MapName( FName* Name )
 {
 	guard(ULinkerSave::MapName);
@@ -576,7 +584,7 @@ INT ULinkerSave::MapName( FName* Name )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not exported; Ghidra shows no guard handler for retail MapObject; our version has extra guard/unguard overhead")
 INT ULinkerSave::MapObject( UObject* Object )
 {
 	guard(ULinkerSave::MapObject);
@@ -584,19 +592,19 @@ INT ULinkerSave::MapObject( UObject* Object )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not exported; Ghidra confirms retail ULinkerSave::Seek has no guard/unguard; concept matches")
 void ULinkerSave::Seek( INT InPos )
 {
 	Saver->Seek( InPos );
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not exported; Ghidra confirms retail ULinkerSave::Tell has no guard/unguard; concept matches")
 INT ULinkerSave::Tell()
 {
 	return Saver->Tell();
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not exported; Ghidra confirms retail ULinkerSave::Serialize has no guard/unguard; concept matches")
 void ULinkerSave::Serialize( void* V, INT Length )
 {
 	Saver->Serialize( V, Length );
