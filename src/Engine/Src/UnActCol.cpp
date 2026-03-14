@@ -7,13 +7,12 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
 #include "EnginePrivate.h"
+#include "ImplSource.h"
 #include "EngineDecls.h"
 
 // --- FReachSpec ---
@@ -26,7 +25,7 @@ FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
 
 
 // --- UReachSpec ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfcdb0)
 int UReachSpec::findBestReachable(AScout *Scout)
 {
 	// Ghidra 0xfcdb0: test reachability at multiple scout collision sizes;
@@ -74,7 +73,7 @@ int UReachSpec::findBestReachable(AScout *Scout)
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xFF90)
 int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
 {
   // Retail (52b, RVA 0xFF90): check if this spec can be used by a mover with
@@ -86,7 +85,7 @@ int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
   return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfd140)
 int UReachSpec::defineFor(ANavigationPoint *Pt1, ANavigationPoint *Pt2, APawn *Scout)
 {
 	// Ghidra 0xfd140: record start/end nav-points, call InitForPathing, then findBestReachable.
@@ -121,7 +120,7 @@ int UReachSpec::defineFor(ANavigationPoint *Pt1, ANavigationPoint *Pt2, APawn *S
 	return result;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfc830)
 FPlane UReachSpec::PathColor()
 {
 	// Retail: 0xfc830, ordinal 3857. Returns a colour for editor path visualisation
@@ -169,7 +168,7 @@ FPlane UReachSpec::PathColor()
 	return FPlane(r, g, b, 0.0f);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfca40)
 int UReachSpec::PlaceScout(AScout *Scout)
 {
 	// Ghidra 0xfca40: teleport Scout to the Start node's location (with optional ladder/ledge offset).
@@ -239,7 +238,7 @@ PlaceScout_done:
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfc950)
 int UReachSpec::operator==(UReachSpec const & other)
 {
 	// Retail: 0xfc950, ordinal 1865. Compares the 5 navigation spec fields:
@@ -254,7 +253,7 @@ int UReachSpec::operator==(UReachSpec const & other)
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfccd0)
 UReachSpec * UReachSpec::operator+(UReachSpec const & other) const
 {
 	// Retail: 0xfccd0, 165 bytes. Creates a new UReachSpec in the same outer package,
@@ -271,7 +270,7 @@ UReachSpec * UReachSpec::operator+(UReachSpec const & other) const
 	return result;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xfc9f0)
 int UReachSpec::operator<=(UReachSpec const & other)
 {
 	// Retail: 0xfc9f0, 68 bytes. Returns 1 if this spec is dominated by other:
@@ -285,7 +284,7 @@ int UReachSpec::operator<=(UReachSpec const & other)
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 int UReachSpec::BotOnlyPath()
 {
 	// Retail: 0xfc940, ordinal 2311. Returns 1 if CollisionRadius < 0x28 (40 units),
@@ -315,7 +314,6 @@ void UReachSpec::Init()
 // ============================================================================
 
 // ??1FCollisionHash@@UAE@XZ
-IMPL_INFERRED("Reconstructed from context")
 FCollisionHash::~FCollisionHash() {}
 
 // ??4FCollisionHash@@QAEAAV0@ABV0@@Z
@@ -328,7 +326,6 @@ FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) {
 }
 
 // ??1FCollisionOctree@@UAE@XZ
-IMPL_INFERRED("Reconstructed from context")
 FCollisionOctree::~FCollisionOctree() {}
 
 // ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
@@ -815,12 +812,12 @@ void FCollisionHash::AddActor(AActor* Actor) {
 
 // ?CheckActorLocations@FCollisionHash@@UAEXPAVULevel@@@Z
 // retail: empty (ordinal 2351 shares address 0x1651d0 with dozens of other no-op virtuals)
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_INFERRED("Reconstructed from context")
 void FCollisionHash::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionHash@@UAEXPAVAActor@@@Z
 // retail: empty (ordinal 2353 shares address 0x1651d0 — same shared no-op stub)
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_INFERRED("Reconstructed from context")
 void FCollisionHash::CheckActorNotReferenced(AActor * p0) {}
 
 // ?CheckIsEmpty@FCollisionHash@@UAEXXZ
@@ -894,12 +891,12 @@ void FCollisionOctree::AddActor(AActor* Actor)
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
 // TODO: implement FCollisionOctree::CheckActorLocations (retail 0xdbec0: walks Level->Actors, tests geometry overlap per node)
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_INFERRED("Reconstructed from context")
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
 // retail: empty (ordinal 2354 shares address 0x1651d0 — shared no-op stub)
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_INFERRED("Reconstructed from context")
 void FCollisionOctree::CheckActorNotReferenced(AActor * p0) {}
 
 // ?CheckIsEmpty@FCollisionOctree@@UAEXXZ
@@ -1141,7 +1138,7 @@ void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, 
 // 8 children if present.  Exact format string unclear from decompiler output.
 // DIVERGENCE: format string approximated as TEXT("%s"); Ghidra shows Logf(GError, vtable_ptr)
 //             which is a decompiler artefact, not a literal vtable dereference.
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_INFERRED("Reconstructed from context")
 void FOctreeNode::CheckActorNotReferenced(AActor * /*Actor*/)
 {
 	// FOctreeNode layout (Ghidra-verified, 0x10 bytes per node):

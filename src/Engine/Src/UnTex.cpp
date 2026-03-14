@@ -7,13 +7,12 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_GHIDRA_APPROX("Engine.dll", 0x103c89f0, "Ghidra reference; body approximated")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x103c89f0, "Ghidra reference; body approximated")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
 #include "EnginePrivate.h"
+#include "ImplSource.h"
 #include "EngineDecls.h"
 // FUN_103c89f0 = StaticConstructObject wrapper for creating a UTexEnvMap.
 // FUN_10386790 = StaticConstructObject wrapper for creating a UShader.
@@ -21,9 +20,9 @@ inline void  operator delete(void*, void*) noexcept {}
 // DIVERGENCE: these helpers call StaticConstructObject with additional initialisation
 // that is not safe to replicate without full CDO layout knowledge; returning NULL
 // ensures ConvertPolyFlagsToMaterial gracefully falls back to the existing object.
-IMPL_GHIDRA("Engine.dll", 0x10386790)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x103c89f0, "these helpers call StaticConstructObject with additional initialisation")
 static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
-IMPL_GHIDRA("Engine.dll", 0x103c89f0)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x10386790, "these helpers call StaticConstructObject with additional initialisation")
 static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
 
 // --- UMaterial ---
@@ -31,7 +30,7 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 
 
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0xc97f0, "FUN_10318850 not called — full ClearFallbacks loop omitted")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
@@ -44,7 +43,7 @@ void UMaterial::ClearFallbacks()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10318850)
+IMPL_GHIDRA("Engine.dll", 0x103c89f0)
 UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param_2)
 {
 	guard(UMaterial::ConvertPolyFlagsToMaterial);
@@ -76,6 +75,7 @@ UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param
 				local_28 = FString::Printf(TEXT("%s_EnvMapCoords"),
 				    (*(UObject**)((BYTE*)this_00 + 0x88))->GetName());
 
+IMPL_GHIDRA("Engine.dll", 0x103c89f0)
 				UObject* pUVar6 = UObject::StaticFindObject(
 				    UTexEnvMap::StaticClass(), (UObject*)0xffffffff, *local_28, 0);
 
@@ -115,6 +115,7 @@ UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param
 
 		FString local_40b = FString::Printf(TEXT("%s_Unlit%s"), this_00->GetName(), pwVar10);
 
+IMPL_GHIDRA("Engine.dll", 0x10386790)
 		UObject* pUVar5 = UObject::StaticFindObject(
 		    UShader::StaticClass(), (UObject*)0xffffffff, *local_40b, 0);
 
@@ -136,6 +137,7 @@ UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param
 
 		FString local_40c = FString::Printf(TEXT("%s_Alpha%s"), this_00->GetName(), pwVar10);
 
+IMPL_GHIDRA("Engine.dll", 0x10386790)
 		UObject* pUVar5 = UObject::StaticFindObject(
 		    UShader::StaticClass(), (UObject*)0xffffffff, *local_40c, 0);
 
@@ -177,13 +179,13 @@ void UTexture::Prime()
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Reconstructed from context")
 void UTexture::SetLastUpdateTime(double Time)
 {
 	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
 	*(double*)((BYTE*)this + 0xD0) = Time;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
@@ -192,17 +194,17 @@ int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 	return 0;
 	unguard;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 ETextureFormat UTexture::ConvertDXT(int,int,int,void * *)
 {
 	return TEXF_P8;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 ETextureFormat UTexture::ConvertDXT()
 {
 	return TEXF_P8;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x16a400)
 void UTexture::CreateColorRange()
 {
 	guard(UTexture::CreateColorRange);
@@ -235,7 +237,7 @@ void UTexture::CreateColorRange()
 	}
 	unguard;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x16bac0, "format-dispatch + colour-conversion helpers not yet decompiled")
 void UTexture::CreateMips(int param1, int param2)
 {
 	guard(UTexture::CreateMips);
@@ -245,7 +247,7 @@ void UTexture::CreateMips(int param1, int param2)
 	(void)param1; (void)param2;
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UTexture::Decompress(ETextureFormat)
 {
 	guard(UTexture::Decompress);
@@ -254,7 +256,7 @@ int UTexture::Decompress(ETextureFormat)
 	return 0;
 	unguard;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1691d0)
 int UTexture::DefaultLOD()
 {
 	guard(UTexture::DefaultLOD);
@@ -319,12 +321,11 @@ DWORD UTexture::GetColorsIndex()
 	UObject* Pal = *(UObject**)((BYTE*)this + 0x70);
 	return Pal->GetIndex();
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FString UTexture::GetFormatDesc()
 {
 	return FString();
 }
-IMPL_INFERRED("Reconstructed from context")
 double UTexture::GetLastUpdateTime()
 {
 	// Ghidra (7B): return double at offset 0xD0
@@ -337,17 +338,17 @@ FMipmapBase * UTexture::GetMip(int MipIndex)
 	BYTE* MipsData = *(BYTE**)((BYTE*)this + 0xBC);
 	return (FMipmapBase*)(MipsData + MipIndex * 0x28);
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 int UTexture::GetNumMips()
 {
 	return Mips.Num();
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FColor UTexture::GetTexel(float,float,float,float)
 {
 	return FColor(0,0,0,0);
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1692a0)
 void UTexture::Tick(float DeltaSeconds)
 {
 	guard(UTexture::Tick);
@@ -392,12 +393,12 @@ void UTexture::Tick(float DeltaSeconds)
 	}
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
 	// DIVERGENCE: retail (~150+ B) does per-pixel blending. Skipped — too complex.
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x16a570)
 void UTexture::Clear(DWORD ClearFlags)
 {
 	// Ghidra 0x16a570, 58B with SEH. If bit 1 of ClearFlags is set, zero each mip's DataArray.
@@ -411,7 +412,7 @@ void UTexture::Clear(DWORD ClearFlags)
 		}
 	}
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x169470)
 void UTexture::Clear(FColor InColor)
 {
 	// Ghidra 0x169470, 108B. TEXF_RGBA8 (5) only: fill all pixels with InColor.
@@ -440,7 +441,7 @@ void UTexture::ConstantTimeTick()
 	void* nxt = *(void**)((BYTE*)cur + 0xA4);
 	*(void**)((BYTE*)this + 0xA8) = nxt ? nxt : this; // advance or wrap to self
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x4490)
 UBitmapMaterial * UTexture::Get(double Time, UViewport *)
 {
 	// Retail: 0x4490, 18b. Advance the texture animation via vtable[0xB4/4] (time-tick),
@@ -451,12 +452,12 @@ UBitmapMaterial * UTexture::Get(double Time, UViewport *)
 	UBitmapMaterial* cur = *(UBitmapMaterial**)((BYTE*)this + 0xA8); // AnimCurrent
 	return cur ? cur : (UBitmapMaterial*)this;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FBaseTexture * UTexture::GetRenderInterface()
 {
 	return reinterpret_cast<FBaseTexture*>(RenderInterface);
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x16b920, "FUN_1032e620 not called")
 void UTexture::Init(int InUSize, int InVSize)
 {
 	guard(UTexture::Init);
@@ -496,13 +497,13 @@ void UTexture::Init(int InUSize, int InVSize)
 
 
 // --- FDXTCompressionOptions ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FDXTCompressionOptions::FDXTCompressionOptions()
 {
 	// Ghidra 0x203248: shares entry with FMipmapBase::FMipmapBase() and others — body is empty.
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x14390)
 FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionOptions& Other)
 {
 	// Ghidra 0x14390: 9 DWORDs, no vtable. Shares address with CCompressedLipDescData.
@@ -512,7 +513,7 @@ FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionO
 
 
 // --- FMipmap ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x27730, "vtable at +0x10 not set to TLazyArray vtable")
 FMipmap::FMipmap(FMipmap const & Other)
 {
 	// Ghidra 0x27730, 90B. Copy FMipmapBase (+0x00..+0x0F), deep-copy DataArray,
@@ -525,7 +526,7 @@ FMipmap::FMipmap(FMipmap const & Other)
 	*(DWORD*)((BYTE*)this + 0x18) = *(const DWORD*)((const BYTE*)&Other + 0x18); // SavedPos
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x20a10, "retail sets TLazyArray vtable)")
 FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 {
 	// Ghidra 0x20a10, 89B. Computes W=1<<UBits, H=1<<VBits, allocates W*H bytes.
@@ -548,7 +549,7 @@ FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 	*(INT*)  ((BYTE*)this + 0x24) = Count;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x20a70, "Documented deviation from retail")
 FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 {
 	// Ghidra 0x20a70, 88B. Like (BYTE,BYTE) but uses explicit byte count instead of W*H.
@@ -568,7 +569,7 @@ FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 	*(INT*)  ((BYTE*)this + 0x24) = InCount;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x209e0, "vtable at +0x10 not set to TLazyArray vtable")
 FMipmap::FMipmap()
 {
 	// Ghidra 0x209e0: calls FArray::FArray(this+0x1c,0,1), zeros SavedAr/Pos, sets vtable.
@@ -576,7 +577,6 @@ FMipmap::FMipmap()
 	appMemzero((BYTE*)this, 0x28);
 }
 
-IMPL_INFERRED("Reconstructed from context")
 FMipmap::~FMipmap()
 {
 	// Ghidra 0x20ad0: calls TLazyArray<BYTE>::~TLazyArray(this+0x10).
@@ -591,7 +591,7 @@ FMipmap::~FMipmap()
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x27790)
 FMipmap& FMipmap::operator=(const FMipmap& Other)
 {
 	// Ghidra 0x27790: FMipmapBase 4 DWORDs at +0..+0C, skip FLazyLoader vtable at +10,
@@ -603,7 +603,7 @@ FMipmap& FMipmap::operator=(const FMipmap& Other)
 	return *this;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x18e10)
 void FMipmap::Clear()
 {
 	// Ghidra 0x18e10, ~40B. Zeroes all bytes in DataArray (at +0x1C).
@@ -615,7 +615,7 @@ void FMipmap::Clear()
 
 
 // --- FMipmapBase ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x4260)
 FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 {
 	// Ghidra 0x4260, 49B.
@@ -626,7 +626,7 @@ FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 	*(INT*)  ((BYTE*)this + 0x08) = 1 << (InVBits & 0x1F);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x203248)
 FMipmapBase::FMipmapBase()
 {
 	// Ghidra 0x203248: merged entry — body is empty (zero-initialisation from callsite).
@@ -644,7 +644,7 @@ FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)
 // --- UBitmapMaterial ---
 
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 UBitmapMaterial * UBitmapMaterial::Get(double,UViewport *)
 {
 	return this;
@@ -661,7 +661,7 @@ UBitmapMaterial * UBitmapMaterial::Get(double,UViewport *)
 
 
 // --- UConstantColor ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FColor UConstantColor::GetColor(float)
 {
 	return Color;
@@ -669,7 +669,7 @@ FColor UConstantColor::GetColor(float)
 
 
 // --- UConstantMaterial ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FColor UConstantMaterial::GetColor(float)
 {
 	return FColor(0,0,0,0);
@@ -677,7 +677,7 @@ FColor UConstantMaterial::GetColor(float)
 
 
 // --- UCubemap ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x168e20)
 void UCubemap::Destroy()
 {
 	guard(UCubemap::Destroy);
@@ -692,7 +692,7 @@ void UCubemap::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FBaseTexture * UCubemap::GetRenderInterface()
 {
 	// Retail: 8B 81 F0 00 00 00 C3 = return *(this+0xF0) — UCubemap's own render interface
@@ -701,7 +701,7 @@ FBaseTexture * UCubemap::GetRenderInterface()
 
 
 // --- UFadeColor ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FColor UFadeColor::GetColor(float)
 {
 	return FColor(0,0,0,0);
@@ -716,7 +716,7 @@ FColor UFadeColor::GetColor(float)
 
 
 // --- UMaterialSwitch ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0xc8920)
 void UMaterialSwitch::PostEditChange()
 {
 	guard(UMaterialSwitch::PostEditChange);
@@ -763,7 +763,7 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 
 
 // --- UPalette ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x16aea0, "FUN_10318850 not called — returns NULL (caller should treat as "no match")")
 UPalette * UPalette::ReplaceWithExisting()
 {
 	// Retail: 0x16aea0, ~200b with SEH. Iterates GObjObjects to find a matching
@@ -774,7 +774,7 @@ UPalette * UPalette::ReplaceWithExisting()
 }
 
 
-IMPL_GHIDRA("Engine.dll", 0x10318850)
+IMPL_GHIDRA("Engine.dll", 0x169890)
 BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 {
 	guard(UPalette::BestMatch);
@@ -817,7 +817,7 @@ BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x169770)
 void UPalette::FixPalette()
 {
 	guard(UPalette::FixPalette);
@@ -873,13 +873,13 @@ void UProxyBitmapMaterial::SetTextureInterface(FBaseTexture * Interface)
 	TextureInterface = Interface;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 UBitmapMaterial * UProxyBitmapMaterial::Get(double,UViewport *)
 {
 	return this;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FBaseTexture * UProxyBitmapMaterial::GetRenderInterface()
 {
 	return TextureInterface;
@@ -892,7 +892,7 @@ FBaseTexture * UProxyBitmapMaterial::GetRenderInterface()
 
 
 // --- UShadowBitmapMaterial ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x12e3f0)
 void UShadowBitmapMaterial::Destroy()
 {
 	// Retail: 0x12e3f0, 125 bytes. Free two render buffers at +0x9C and +0xA0 then
@@ -904,7 +904,7 @@ void UShadowBitmapMaterial::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: 0x12e3e0, 2594b. Shadow map rendering pipeline — too complex to decompile.
@@ -912,7 +912,7 @@ UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 	return NULL;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FBaseTexture * UShadowBitmapMaterial::GetRenderInterface()
 {
 	// Retail: 8B 81 9C 00 00 00 C3 = return *(this+0x9C) — render interface pointer in shadow bitmap
@@ -921,13 +921,13 @@ FBaseTexture * UShadowBitmapMaterial::GetRenderInterface()
 
 
 // --- UTexCoordMaterial ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 INT UTexCoordMaterial::MaterialUSize()
 {
 	return Material ? Material->MaterialUSize() : 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 INT UTexCoordMaterial::MaterialVSize()
 {
 	return Material ? Material->MaterialVSize() : 0;
@@ -964,7 +964,7 @@ FMatrix * UTexEnvMap::GetMatrix(float)
 
 
 // --- UTexMatrix ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FMatrix * UTexMatrix::GetMatrix(float)
 {
 	return &Matrix;
@@ -1017,7 +1017,7 @@ int UTexModifier::MaterialVSize()
 	return Material->MaterialVSize();
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FMatrix * UTexModifier::GetMatrix(float)
 {
 	guard(UTexModifier::GetMatrix);
@@ -1038,7 +1038,7 @@ int UTexModifier::GetValidated()
 
 
 // --- UTexOscillator ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FMatrix * UTexOscillator::GetMatrix(float)
 {
 	guard(UTexOscillator::GetMatrix);
@@ -1049,7 +1049,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 
 
 // --- UTexPanner ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FMatrix * UTexPanner::GetMatrix(float)
 {
 	guard(UTexPanner::GetMatrix);
@@ -1074,7 +1074,7 @@ void UTexRotator::PostLoad()
 	}
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FMatrix * UTexRotator::GetMatrix(float)
 {
 	guard(UTexRotator::GetMatrix);
@@ -1085,7 +1085,7 @@ FMatrix * UTexRotator::GetMatrix(float)
 
 
 // --- UTexScaler ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FMatrix * UTexScaler::GetMatrix(float)
 {
 	guard(UTexScaler::GetMatrix);
