@@ -28,11 +28,13 @@ IMPLEMENT_PACKAGE(WinDrv)
 -----------------------------------------------------------------------------*/
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow()
 	: Viewport(NULL)
 {
 }
 
+IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow(UWindowsViewport* InViewport)
 	: Viewport(InViewport)
@@ -702,6 +704,8 @@ void UWindowsViewport::CheckCD()
 
 IMPL_INFERRED("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
 void UWindowsViewport::AcquireKeyboard()
+{
+	guard(UWindowsViewport::AcquireKeyboard);
 	if (DirectInput8 && !Keyboard)
 	{
 		HRESULT hr = DirectInput8->CreateDevice(GUID_SysKeyboard, &Keyboard, NULL);
