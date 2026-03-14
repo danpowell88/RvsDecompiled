@@ -12,7 +12,7 @@ file(GLOB_RECURSE D3DDRV_SOURCES
 
 list(LENGTH D3DDRV_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(D3DDrv MODULE ${D3DDRV_SOURCES} ${D3DDRV_SRC_DIR}/Src/D3DDrv.def)
+    add_library(D3DDrv SHARED ${D3DDRV_SOURCES} ${D3DDRV_SRC_DIR}/Src/D3DDrv.def)
     target_compile_definitions(D3DDrv PRIVATE D3DDRV_EXPORTS ThisPackage=D3DDrv)
     target_include_directories(D3DDrv BEFORE PRIVATE
         ${D3DDRV_SRC_DIR}/Inc

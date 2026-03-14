@@ -49,7 +49,10 @@
 // UT99 Window.h calls appMsgf(TEXT("..."), ...) without the int Type param.
 // Declare the R6 overload, then use a macro to insert Type=0 for call sites.
 CORE_API const int appMsgf(int Type, const TCHAR* Fmt, ...);
+#if _MSC_VER > 1310
+// Variadic macros (__VA_ARGS__) require MSVC 8.0+; only define on modern compiler.
 #define appMsgf(...) appMsgf(0, __VA_ARGS__)
+#endif
 
 // FPreferencesInfo: MSVC 2019 generates move ctor/assignment that MSVC 7.1
 // didn't have. Core.lib only exports copy versions. Redirect move → copy

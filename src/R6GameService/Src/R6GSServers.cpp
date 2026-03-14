@@ -144,18 +144,18 @@ INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 	{ const char* src = pAnsi; char* dst = szCDKeyHex; while ((*dst++ = *src++)) {} }
 
 	// FUN_10005760 = inline hex nibble decoder — converts single ASCII hex char to 0-15.
-	auto hexNibble = [](char c) -> BYTE {
-		if (c >= '0' && c <= '9') return (BYTE)(c - '0');
-		if (c >= 'A' && c <= 'F') return (BYTE)(c - 'A' + 10);
-		if (c >= 'a' && c <= 'f') return (BYTE)(c - 'a' + 10);
-		return 0;
-	};
+	// MSVC 7.1 has no lambdas; use a macro that exactly replicates the inlined logic.
+#define hexNibble(c) ((BYTE)( \
+		((c) >= '0' && (c) <= '9') ? ((c) - '0') : \
+		((c) >= 'A' && (c) <= 'F') ? ((c) - 'A' + 10) : \
+		((c) >= 'a' && (c) <= 'f') ? ((c) - 'a' + 10) : 0))
 	for (INT uVar9 = 0; uVar9 < 0x28; uVar9 += 2)
 	{
 		BYTE hi = hexNibble(szCDKeyHex[uVar9]);
 		BYTE lo = hexNibble(szCDKeyHex[uVar9 + 1]);
 		aucKey[uVar9 / 2] = (BYTE)(hi * '\x10' + lo);
 	}
+#undef hexNibble
 
 	BYTE ucKeyType = 3;
 	if (bMod != 0)

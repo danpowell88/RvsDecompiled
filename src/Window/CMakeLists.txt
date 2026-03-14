@@ -11,7 +11,7 @@ file(GLOB_RECURSE WINDOW_SOURCES
 
 list(LENGTH WINDOW_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(Window MODULE ${WINDOW_SOURCES} ${WINDOW_SRC_DIR}/Src/Window.def)
+    add_library(Window SHARED ${WINDOW_SOURCES} ${WINDOW_SRC_DIR}/Src/Window.def)
     target_compile_definitions(Window PRIVATE WINDOW_EXPORTS ThisPackage=Window)
     # BEFORE so src/Window/Inc/ and src/Engine/Inc/ shim headers beat UT99 headers.
     # The UT99 Window/Inc path lets Window.h's relative includes resolve:

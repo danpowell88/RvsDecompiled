@@ -10,9 +10,9 @@ file(GLOB_RECURSE R6GAMESERVICE_SOURCES
 
 list(LENGTH R6GAMESERVICE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(R6GameService MODULE ${R6GAMESERVICE_SOURCES} ${R6GAMESERVICE_SRC_DIR}/Src/R6GameService.def)
+    add_library(R6GameService SHARED ${R6GAMESERVICE_SOURCES} ${R6GAMESERVICE_SRC_DIR}/Src/R6GameService.def)
     target_compile_definitions(R6GameService PRIVATE R6GAMESERVICE_EXPORTS ThisPackage=R6GameService)
-    set(R6ABSTRACT_BUILT_LIB ${CMAKE_BINARY_DIR}/src/R6Abstract/Release/R6Abstract.lib)
+    set(R6ABSTRACT_BUILT_LIB $<TARGET_LINKER_FILE:R6Abstract>)
     target_include_directories(R6GameService BEFORE PRIVATE
         ${R6GAMESERVICE_SRC_DIR}/Inc
         ${PROJECT_SOURCE_DIR}/src/R6Abstract/Inc

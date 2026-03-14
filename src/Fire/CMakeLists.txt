@@ -13,7 +13,7 @@ file(GLOB_RECURSE FIRE_SOURCES
 
 list(LENGTH FIRE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(Fire MODULE ${FIRE_SOURCES} ${FIRE_SRC_DIR}/Src/Fire.def)
+    add_library(Fire SHARED ${FIRE_SOURCES} ${FIRE_SRC_DIR}/Src/Fire.def)
     target_compile_definitions(Fire PRIVATE FIRE_EXPORTS ThisPackage=Fire)
     # BEFORE ensures src/Engine/Inc/ shim headers beat global UT99_ENGINE_INC.
     target_include_directories(Fire BEFORE PRIVATE
