@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	R6GSServers.cpp: UR6GSServers — GameSpy / Ubi.com server browser integration.
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -97,7 +97,6 @@ static INT   GsIDListCount       = 0;   // DAT_10092e9c
 static void* GsIDListArray       = NULL; // DAT_10092e98
 
 // Mod CDKey name FString (used in CDKeyValidateUser when bCheckModKey != 0)
-IMPL_INFERRED("Reconstructed from context")
 static FString GsModCDKeyName;           // DAT_100923ac (FString, default empty)
 
 // COM CLSIDs/IIDs are hardcoded in the original binary's .rdata section.
@@ -107,14 +106,14 @@ static BYTE GsComIID[16]   = {0}; // DAT_10072ff8
 
 // --- UR6GSServers ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::AddPlayerToIDList(FString, FString, FString, INT)
 {
 	guard(UR6GSServers::AddPlayerToIDList);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::CDKeyDisconnecUser(FString)
 {
 	guard(UR6GSServers::CDKeyDisconnecUser);
@@ -185,77 +184,77 @@ INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::CancelGSCDKeyActID()
 {
 	guard(UR6GSServers::CancelGSCDKeyActID);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::CancelGSCDKeyAuthID()
 {
 	guard(UR6GSServers::CancelGSCDKeyAuthID);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::CopyActivationIDInByteArray(BYTE *, BYTE *)
 {
 	guard(UR6GSServers::CopyActivationIDInByteArray);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::CreatedCDKey()
 {
 	guard(UR6GSServers::CreatedCDKey);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::Destroy()
 {
 	guard(UR6GSServers::Destroy);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::DisconnectAllCDKeyPlayers()
 {
 	guard(UR6GSServers::DisconnectAllCDKeyPlayers);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::EnterCDKey(FString)
 {
 	guard(UR6GSServers::EnterCDKey);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::GSClientPostMessage(BYTE)
 {
 	guard(UR6GSServers::GSClientPostMessage);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::GSClientUpdateServerInfo()
 {
 	guard(UR6GSServers::GSClientUpdateServerInfo);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::GameServiceManager(INT, INT, INT, INT)
 {
 	guard(UR6GSServers::GameServiceManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FString UR6GSServers::GetAuthID(INT)
 {
 	return TEXT("");
@@ -268,7 +267,7 @@ BYTE UR6GSServers::GetGSGameState()
 	return GsGameState;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FString UR6GSServers::GetGlobalIdFromPlayerIDList(FString)
 {
 	return TEXT("");
@@ -302,14 +301,14 @@ INT UR6GSServers::GetServerRegistered()
 	return GsServerRegistered;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::Init(FString)
 {
 	guard(UR6GSServers::Init);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::InitCDKey(INT, INT)
 {
 	guard(UR6GSServers::InitCDKey);
@@ -369,14 +368,14 @@ INT UR6GSServers::InitGSClient()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::InitMSClient()
 {
 	guard(UR6GSServers::InitMSClient);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::InitProcessUpdateUbiServer(AGameInfo *, ALevelInfo *)
 {
 	guard(UR6GSServers::InitProcessUpdateUbiServer);
@@ -529,21 +528,21 @@ INT UR6GSServers::IsServerJoined()
 	return GsServerJoined;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::LogGSVersion()
 {
 	guard(UR6GSServers::LogGSVersion);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::LogOutServer()
 {
 	guard(UR6GSServers::LogOutServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::MSCLientJoinServer(INT, INT, FString)
 {
 	guard(UR6GSServers::MSCLientJoinServer);
@@ -576,21 +575,21 @@ INT UR6GSServers::MSCLientLeaveServer()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::MSClientServerConnected(INT, INT)
 {
 	guard(UR6GSServers::MSClientServerConnected);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::MasterServerManager(AR6AbstractGameInfo *, ALevelInfo *)
 {
 	guard(UR6GSServers::MasterServerManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::NativeCDKeyPlayerStatusReply(FString, BYTE, INT)
 {
 	guard(UR6GSServers::NativeCDKeyPlayerStatusReply);
@@ -649,7 +648,7 @@ INT UR6GSServers::OnSameSubNet(FString szIPAddr)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PingRequest(FString, FString)
 {
 	guard(UR6GSServers::PingRequest);
@@ -697,154 +696,154 @@ INT UR6GSServers::PlayerIsInIDList(FString szPlayerName, FString szGlobalID, INT
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PollCallbacks(INT, INT, INT, INT)
 {
 	guard(UR6GSServers::PollCallbacks);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PollClientCDKeyCallbacks(INT, INT, INT)
 {
 	guard(UR6GSServers::PollClientCDKeyCallbacks);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PollGSClientCallbacks(INT)
 {
 	guard(UR6GSServers::PollGSClientCallbacks);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PollMSClientCallbacks(INT)
 {
 	guard(UR6GSServers::PollMSClientCallbacks);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PollPingManager(INT)
 {
 	guard(UR6GSServers::PollPingManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::PollRegServerCallbacks(INT)
 {
 	guard(UR6GSServers::PollRegServerCallbacks);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessAuthIdRequest(AController *)
 {
 	guard(UR6GSServers::ProcessAuthIdRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessInternetSrv(AR6AbstractGameInfo *, ALevelInfo *)
 {
 	guard(UR6GSServers::ProcessInternetSrv);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessIsLobbyDisconnect(FLOAT *)
 {
 	guard(UR6GSServers::ProcessIsLobbyDisconnect);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessIsRouterDisconnect(FLOAT *)
 {
 	guard(UR6GSServers::ProcessIsRouterDisconnect);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessJoinServer(FLOAT *)
 {
 	guard(UR6GSServers::ProcessJoinServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessJoinServerRequest()
 {
 	guard(UR6GSServers::ProcessJoinServerRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessLoginMasterSrv(INT, FLOAT *)
 {
 	guard(UR6GSServers::ProcessLoginMasterSrv);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessMSClientInitRequest()
 {
 	guard(UR6GSServers::ProcessMSClientInitRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessPC_CDKeyRequest(AR6AbstractGameInfo *, ALevelInfo *, APlayerController *, INT)
 {
 	guard(UR6GSServers::ProcessPC_CDKeyRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessRegServerGetLobbiesRequest()
 {
 	guard(UR6GSServers::ProcessRegServerGetLobbiesRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessRegServerLoginRequest()
 {
 	guard(UR6GSServers::ProcessRegServerLoginRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessRegServerLoginRouterRequest()
 {
 	guard(UR6GSServers::ProcessRegServerLoginRouterRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessRegServerRegOnLobbyRequest()
 {
 	guard(UR6GSServers::ProcessRegServerRegOnLobbyRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessRegServerUpdateRequest()
 {
 	guard(UR6GSServers::ProcessRegServerUpdateRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessSubmitMatchResultReply()
 {
 	guard(UR6GSServers::ProcessSubmitMatchResultReply);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ProcessUbiComJoinServer(INT, INT, FString, FLOAT *)
 {
 	guard(UR6GSServers::ProcessUbiComJoinServer);
@@ -935,112 +934,112 @@ INT UR6GSServers::ReceiveServer()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ReceiveValidation()
 {
 	guard(UR6GSServers::ReceiveValidation);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RefreshOneServer(INT)
 {
 	guard(UR6GSServers::RefreshOneServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RefreshServers()
 {
 	guard(UR6GSServers::RefreshServers);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RegServerGetLobbies()
 {
 	guard(UR6GSServers::RegServerGetLobbies);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RegServerRouterLogin()
 {
 	guard(UR6GSServers::RegServerRouterLogin);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RegisterServer()
 {
 	guard(UR6GSServers::RegisterServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RequestActivation(FString, INT)
 {
 	guard(UR6GSServers::RequestActivation);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RequestAuthorization(INT)
 {
 	guard(UR6GSServers::RequestAuthorization);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RequestGSCDKeyActID()
 {
 	guard(UR6GSServers::RequestGSCDKeyActID);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RequestGSCDKeyAuthID()
 {
 	guard(UR6GSServers::RequestGSCDKeyAuthID);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RequestModCDKeyProcess(INT)
 {
 	guard(UR6GSServers::RequestModCDKeyProcess);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ResetAuthId()
 {
 	guard(UR6GSServers::ResetAuthId);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::RouterDisconnect()
 {
 	guard(UR6GSServers::RouterDisconnect);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ServerLogin()
 {
 	guard(UR6GSServers::ServerLogin);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ServerRoundFinish()
 {
 	guard(UR6GSServers::ServerRoundFinish);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::ServerRoundStart(INT)
 {
 	guard(UR6GSServers::ServerRoundStart);
@@ -1085,42 +1084,42 @@ INT UR6GSServers::SetGSClientComInterface()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::SetGSGameState(BYTE)
 {
 	guard(UR6GSServers::SetGSGameState);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::SetGameServiceRequestState(BYTE)
 {
 	guard(UR6GSServers::SetGameServiceRequestState);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::SetLoginRegServer(BYTE)
 {
 	guard(UR6GSServers::SetLoginRegServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::SetRegServerLoginRequest(BYTE)
 {
 	guard(UR6GSServers::SetRegServerLoginRequest);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::SubmitMatchResult()
 {
 	guard(UR6GSServers::SubmitMatchResult);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::UnInitCDKey()
 {
 	guard(UR6GSServers::UnInitCDKey);
@@ -1156,14 +1155,14 @@ INT UR6GSServers::UnInitMSClient()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::UnInitRegServer()
 {
 	guard(UR6GSServers::UnInitRegServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::UpdateServer()
 {
 	guard(UR6GSServers::UpdateServer);
@@ -1239,7 +1238,7 @@ void UR6GSServers::eventInitializeMod()
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_InitializeMod), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("generated UScript event thunk")
 DWORD UR6GSServers::eventIsGlobalIDBanned(AR6AbstractGameInfo *pGameInfo, FString const &szGlobalID)
 {
 	struct {
@@ -1254,7 +1253,7 @@ DWORD UR6GSServers::eventIsGlobalIDBanned(AR6AbstractGameInfo *pGameInfo, FStrin
 	return Parms.ReturnValue;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("generated UScript event thunk")
 void UR6GSServers::eventProcessServerMsg(APlayerController *pPC, FString const &szMsg)
 {
 	struct {
@@ -1266,7 +1265,7 @@ void UR6GSServers::eventProcessServerMsg(APlayerController *pPC, FString const &
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_ProcessServerMsg), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("generated UScript event thunk")
 FString UR6GSServers::eventTempGetPBConnectStatus(APlayerController *pPC)
 {
 	struct {
@@ -1279,7 +1278,7 @@ FString UR6GSServers::eventTempGetPBConnectStatus(APlayerController *pPC)
 	return Parms.ReturnValue;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execEnterCDKey(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execEnterCDKey);
@@ -1289,7 +1288,7 @@ void UR6GSServers::execEnterCDKey(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execGetMaxUbiServerNameSize(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execGetMaxUbiServerNameSize);
@@ -1298,7 +1297,7 @@ void UR6GSServers::execGetMaxUbiServerNameSize(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execHandleAnyLobbyConnectionFail(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execHandleAnyLobbyConnectionFail);
@@ -1306,7 +1305,7 @@ void UR6GSServers::execHandleAnyLobbyConnectionFail(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execInitGSCDKey(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execInitGSCDKey);
@@ -1315,7 +1314,7 @@ void UR6GSServers::execInitGSCDKey(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execInitialize(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execInitialize);
@@ -1323,7 +1322,7 @@ void UR6GSServers::execInitialize(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execInitializeMSClient(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execInitializeMSClient);
@@ -1332,7 +1331,7 @@ void UR6GSServers::execInitializeMSClient(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execIsRefreshServersInProgress(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execIsRefreshServersInProgress);
@@ -1340,7 +1339,7 @@ void UR6GSServers::execIsRefreshServersInProgress(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeGetMSClientInitialized(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeGetMSClientInitialized);
@@ -1348,7 +1347,7 @@ void UR6GSServers::execNativeGetMSClientInitialized(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeGetSeconds(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeGetSeconds);
@@ -1356,7 +1355,7 @@ void UR6GSServers::execNativeGetSeconds(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeIsGSReadyToChangeMod(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeIsGSReadyToChangeMod);
@@ -1364,7 +1363,7 @@ void UR6GSServers::execNativeIsGSReadyToChangeMod(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeIsRouterDisconnect(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeIsRouterDisconnect);
@@ -1372,7 +1371,7 @@ void UR6GSServers::execNativeIsRouterDisconnect(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeIsWaitingForGSInit(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeIsWaitingForGSInit);
@@ -1380,7 +1379,7 @@ void UR6GSServers::execNativeIsWaitingForGSInit(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeLogOutServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeLogOutServer);
@@ -1390,7 +1389,7 @@ void UR6GSServers::execNativeLogOutServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeMSCLientJoinServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeMSCLientJoinServer);
@@ -1398,7 +1397,7 @@ void UR6GSServers::execNativeMSCLientJoinServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeMSClientReqAltInfo(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeMSClientReqAltInfo);
@@ -1406,7 +1405,7 @@ void UR6GSServers::execNativeMSClientReqAltInfo(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeProcessIcmpPing(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeProcessIcmpPing);
@@ -1414,7 +1413,7 @@ void UR6GSServers::execNativeProcessIcmpPing(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeSetMatchResult(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeSetMatchResult);
@@ -1422,7 +1421,7 @@ void UR6GSServers::execNativeSetMatchResult(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execNativeUpdateServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeUpdateServer);
@@ -1430,7 +1429,7 @@ void UR6GSServers::execNativeUpdateServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execRefreshOneServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execRefreshOneServer);
@@ -1440,7 +1439,7 @@ void UR6GSServers::execRefreshOneServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execRefreshServers(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execRefreshServers);
@@ -1449,7 +1448,7 @@ void UR6GSServers::execRefreshServers(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execSetLastServerQueried(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execSetLastServerQueried);
@@ -1458,7 +1457,7 @@ void UR6GSServers::execSetLastServerQueried(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execStopRefreshServers(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execStopRefreshServers);
@@ -1466,7 +1465,7 @@ void UR6GSServers::execStopRefreshServers(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6GSServers::execUnInitializeMSClient(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execUnInitializeMSClient);
