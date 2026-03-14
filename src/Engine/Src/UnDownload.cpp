@@ -15,20 +15,20 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UBinaryFileDownload ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("StaticConstructor — sets config key string to 'Enabled' at +0x38; matches Ghidra 0x189160")
 void UBinaryFileDownload::StaticConstructor()
 {
 	// Retail: 0x189160, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Tick — Ghidra shows retail is shared empty stub at 0x176d60")
 void UBinaryFileDownload::Tick()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("TrySkipFile — Ghidra 0x114310: shared zero-return vtable stub")
 int UBinaryFileDownload::TrySkipFile()
 {
 	guard(UBinaryFileDownload::TrySkipFile);
@@ -58,7 +58,7 @@ void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 		*(INT*)((BYTE*)this + 0x44C) += Size;
 	}
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("ReceiveFile — Ghidra shows retail is shared empty stub at 0x14770")
 void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 {
 	// Retail: 0x14770 (shared empty stub)
@@ -98,7 +98,7 @@ void UBinaryFileDownload::DownloadDone()
 		*(INT*)((BYTE*)this + 0x44C) = 0;
 	}
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("DownloadError — Ghidra shows retail is shared empty stub at 0x176d60")
 void UBinaryFileDownload::DownloadError(const TCHAR*)
 {
 	// Retail: 0x176d60 (shared empty stub)
@@ -106,7 +106,7 @@ void UBinaryFileDownload::DownloadError(const TCHAR*)
 
 
 // --- UChannelDownload ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("StaticConstructor — sets config key FString at +0x38 to 'Enabled'; Ghidra 0x188ea0")
 void UChannelDownload::StaticConstructor()
 {
 	// Retail: 0x188ea0, 71b. Sets the config key FString at +0x38 to "Enabled".
@@ -189,7 +189,7 @@ void UChannelDownload::Destroy()
 
 
 // --- UDownload ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("StaticConstructor — initialises config key FString to '' and clears +0x44; Ghidra 0x1889d0")
 void UDownload::StaticConstructor()
 {
 	// Retail: 0x1889d0, 80b. Initialise config key FString at +0x38 to "" and zero +0x44.
@@ -197,7 +197,7 @@ void UDownload::StaticConstructor()
 	*(DWORD*)((BYTE*)this + 0x44) = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Tick — Ghidra shows retail is shared empty stub at 0x176d60")
 void UDownload::Tick()
 {
 	// Retail: 0x176d60 (shared empty stub)

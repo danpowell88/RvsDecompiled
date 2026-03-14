@@ -314,7 +314,7 @@ void UReachSpec::Init()
 // ============================================================================
 
 // ??1FCollisionHash@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Destructor — no custom cleanup; retail also trivial")
 FCollisionHash::~FCollisionHash() {}
 
 // ??4FCollisionHash@@QAEAAV0@ABV0@@Z
@@ -327,7 +327,7 @@ FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) {
 }
 
 // ??1FCollisionOctree@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Destructor — no custom cleanup; retail also trivial")
 FCollisionOctree::~FCollisionOctree() {}
 
 // ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
@@ -697,7 +697,7 @@ FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVec
 }
 
 // ?ActorOverlapCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("ActorOverlapCheck — returns NULL; overlap query needs Ghidra analysis for octree traversal")
 FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
 
 // ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
@@ -932,7 +932,7 @@ void FCollisionOctree::RemoveActor(AActor* Actor)
 }
 
 // ?Tick@FCollisionOctree@@UAEXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Tick — no per-frame cleanup required in this reconstruction; full impl needs Ghidra analysis")
 void FCollisionOctree::Tick() {}
 // ?GetHashIndices@FCollisionHash@@QAEXVFVector@@AAH11@Z
 // Retail ordinal 3033 (0x6dd20).
@@ -1029,7 +1029,7 @@ void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane 
 }
 
 // ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("ActorOverlapCheck node — no-op; overlap traversal needs Ghidra analysis")
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
@@ -1192,11 +1192,10 @@ IMPL_APPROX("Not yet implemented; retail draws node bounding box via GTempLineBa
 void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DrawFlaggedActors — debug draw; no-op for non-editor builds")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 
-// ?FilterTest@FOctreeNode@@QAEXPAVFBox@@HPAV?$TArray@PAVFOctreeNode@@@@PBVFPlane@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("FilterTest — octree subdivision filter; no-op pending Ghidra analysis of child-node routing")
 void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
 
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z

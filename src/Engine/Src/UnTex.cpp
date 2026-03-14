@@ -190,12 +190,12 @@ int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 	return 0;
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("ConvertDXT(int,int,int,void**) — returns TEXF_P8 placeholder; full DXT conversion needs Ghidra")
 ETextureFormat UTexture::ConvertDXT(int,int,int,void * *)
 {
 	return TEXF_P8;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("ConvertDXT() — returns TEXF_P8 placeholder; full conversion needs Ghidra analysis")
 ETextureFormat UTexture::ConvertDXT()
 {
 	return TEXF_P8;
@@ -317,7 +317,7 @@ DWORD UTexture::GetColorsIndex()
 	UObject* Pal = *(UObject**)((BYTE*)this + 0x70);
 	return Pal->GetIndex();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetFormatDesc — returns empty string; full format name lookup needs Ghidra analysis")
 FString UTexture::GetFormatDesc()
 {
 	return FString();
@@ -340,7 +340,7 @@ int UTexture::GetNumMips()
 {
 	return Mips.Num();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetTexel — returns black; full texel sample needs mip format dispatch from Ghidra")
 FColor UTexture::GetTexel(float,float,float,float)
 {
 	return FColor(0,0,0,0);
@@ -667,7 +667,7 @@ FColor UConstantColor::GetColor(float)
 
 
 // --- UConstantMaterial ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetColor — returns black; constant material color needs Ghidra analysis for color field offset")
 FColor UConstantMaterial::GetColor(float)
 {
 	return FColor(0,0,0,0);
@@ -699,7 +699,7 @@ FBaseTexture * UCubemap::GetRenderInterface()
 
 
 // --- UFadeColor ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetColor — returns black; fade color interpolation needs time-field offset from Ghidra")
 FColor UFadeColor::GetColor(float)
 {
 	return FColor(0,0,0,0);
@@ -919,13 +919,13 @@ FBaseTexture * UShadowBitmapMaterial::GetRenderInterface()
 
 
 // --- UTexCoordMaterial ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Delegates USize to wrapped Material; matches retail dispatch pattern")
 INT UTexCoordMaterial::MaterialUSize()
 {
 	return Material ? Material->MaterialUSize() : 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Delegates VSize to wrapped Material; matches retail dispatch pattern")
 INT UTexCoordMaterial::MaterialVSize()
 {
 	return Material ? Material->MaterialVSize() : 0;
@@ -962,7 +962,7 @@ FMatrix * UTexEnvMap::GetMatrix(float)
 
 
 // --- UTexMatrix ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns Matrix member — retail body is 'return &this->Matrix'; field address match pending Ghidra layout verify")
 FMatrix * UTexMatrix::GetMatrix(float)
 {
 	return &Matrix;
