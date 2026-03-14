@@ -90,7 +90,7 @@ static void bspPrecomputeSphereFilterHelper( UModel* Model, INT iNode, const FPl
 // Ghidra: Engine.dll 0x1032f9c0, 229 bytes.
 // Non-trans path: CountBytes, ByteOrderSerialize Num+Max, stream each FPoly.
 // Trans path: CountBytes then compact-index count, then stream each FPoly.
-IMPL_MATCH("Engine.dll", 0x1032f9c0)
+IMPL_DIVERGE("Ghidra 0x1032f9c0: IsTrans path calls FUN_1032c490 (trans-array serialize helper); pending extraction")
 void UPolys::Serialize( FArchive& Ar )
 {
 guard(UPolys::Serialize);
@@ -155,7 +155,7 @@ unguard;
 // sets RF_Transactional, calls EmptyModel(1,1), and -- if Owner is non-NULL --
 // stores this as Owner->Brush (at Owner+0x178) and calls Owner::InitPosRotScale
 // via vtable slot 0x188.
-IMPL_MATCH("Engine.dll", 0x103d06d0)
+IMPL_DIVERGE("Ghidra 0x103d06d0: 446-byte ctor uses in-place TTransArray construction and calls ABrush->vtable[98]; pending decompilation")
 UModel::UModel( ABrush* Owner, INT InRootOutside )
 {
 guard(UModel::UModel);
@@ -217,28 +217,12 @@ unguard;
 // Decrements ref-counts on projector entries attached to each BSP node;
 // frees objects whose count reaches zero (FUN_103719b0 = projector dtor, unnamed).
 // Removes entries via FArray::Remove, then calls UObject::Destroy.
-IMPL_MATCH("Engine.dll", 0x103ce9a0)
+IMPL_DIVERGE("Ghidra 0x103ce9a0: ref-count loop calls FUN_103719b0 (projector dtor) and FUN_1033bbc0 (remove variant); pending extraction")
 void UModel::Destroy()
 {
 guard(UModel::Destroy);
-FArray* nodes = MODEL_NODES(this);
-for (INT iNode = 0; iNode < nodes->Num(); iNode++)
-{
-    FArray* projs = (FArray*)(*(INT*)nodes + iNode * NODE_STRIDE + 0x84);
-    while (projs->Num() >= 1)
-    {
-        INT last = projs->Num() - 1;
-        // First field of each PROJ_STRIDE entry is a pointer to the projector object
-        // whose first INT is the ref count.
-        INT* refcnt = *(INT**)(*(INT*)projs + last * PROJ_STRIDE);
-        if (--(*refcnt) == 0)
-        {
-            // FUN_103719b0: projector object destructor -- unnamed, skipped.
-            appFree(refcnt);
-        }
-        projs->Remove(last, 1, PROJ_STRIDE);
-    }
-}
+// Projector ref-count loop and per-node cleanup pending extraction of
+// FUN_103719b0 (projector dtor) and FUN_1033bbc0 (remove variant).
 Super::Destroy();
 unguard;
 }
@@ -249,7 +233,7 @@ unguard;
 // FUN_103cd140 (Verts), FUN_103cd010 (LightMap), FUN_103218c0 (VertIndices).
 // Handles version-gated legacy data (Ver < 0x5c, < 0x69, < 0x6b, < 0x6e).
 // Primary fields serialised below; full BSP-array serialisation pending extraction.
-IMPL_MATCH("Engine.dll", 0x103d02e0)
+IMPL_DIVERGE("Ghidra 0x103d02e0: uses unnamed TArray serialize helpers FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0/FUN_103cd140; pending extraction")
 void UModel::Serialize( FArchive& Ar )
 {
 guard(UModel::Serialize);
@@ -266,7 +250,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x1046ed90, 651 bytes -- complex BSP point collision.
 // Full body requires unnamed BSP traversal helpers from UnBsp.cpp.
-IMPL_MATCH("Engine.dll", 0x1046ed90)
+IMPL_DIVERGE("Ghidra 0x1046ed90: 651-byte BSP point collision uses unnamed FUN helpers; pending decompilation")
 INT UModel::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 {
 guard(UModel::PointCheck);
@@ -276,7 +260,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x1046feb0, 1542 bytes -- complex BSP line collision.
 // Full body requires unnamed BSP traversal helpers from UnBsp.cpp.
-IMPL_MATCH("Engine.dll", 0x1046feb0)
+IMPL_DIVERGE("Ghidra 0x1046feb0: BSP line collision uses unnamed FUN helpers; pending decompilation")
 INT UModel::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags )
 {
 guard(UModel::LineCheck);
@@ -304,7 +288,7 @@ unguard;
 // Owner==NULL: copies Bound (7 DWORDs at this+0x2c) straight into return value.
 // Owner!=NULL: calls Owner vtable[0xac/4] to get transform matrix, returns
 //              FBox::TransformBy(Bound, matrix).
-IMPL_MATCH("Engine.dll", 0x1046cbe0)
+IMPL_DIVERGE("Ghidra 0x1046cbe0: Owner!=NULL path calls Owner->vtable[0xac/4] for FMatrix; vtable slot not yet identified")
 FBox UModel::GetCollisionBoundingBox( const AActor* Owner ) const
 {
 guard(UModel::GetCollisionBoundingBox);
@@ -323,7 +307,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103d46f0, 2027 bytes -- complex BSP lighting pass.
 // Full body requires unnamed lighting helpers from UnBsp.cpp.
-IMPL_MATCH("Engine.dll", 0x103d46f0)
+IMPL_DIVERGE("Ghidra 0x103d46f0: 2027-byte BSP lighting pass calls unnamed lightmap FUN helpers; pending decompilation")
 void UModel::Illuminate( AActor* Owner, INT bExtra )
 {
 guard(UModel::Illuminate);
@@ -373,7 +357,7 @@ return 0;
 // Ghidra: Engine.dll 0x103ccf00, 219 bytes.
 // Decomposes Box into centre+extent, then calls FUN_103ccc70 (BSP leaf collector)
 // if the model has nodes.
-IMPL_MATCH("Engine.dll", 0x103ccf00)
+IMPL_DIVERGE("Ghidra 0x103ccf00: calls FUN_103ccc70 (BSP leaf collector traversal); pending extraction")
 TArray<INT> UModel::BoxLeaves( FBox Box )
 {
 guard(UModel::BoxLeaves);
@@ -444,7 +428,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103cf020, 880 bytes -- builds BSP render sections from nodes/surfs.
 // Full body requires unnamed section-builder helpers from UnBsp.cpp.
-IMPL_MATCH("Engine.dll", 0x103cf020)
+IMPL_DIVERGE("Ghidra 0x103cf020: 880-byte BuildRenderData calls unnamed render section helpers and FUN_10317670; pending decompilation")
 void UModel::BuildRenderData()
 {
 guard(UModel::BuildRenderData);
@@ -455,7 +439,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_MATCH("Engine.dll", 0x103cef10)
+IMPL_DIVERGE("Ghidra 0x103cef10: calls FUN_10324a50 (unnamed section destructor) per section before emptying; pending extraction")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);
@@ -485,7 +469,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103d2f10, 801 bytes -- compresses lightmap data in-place.
 // Full body requires unnamed lightmap-compression helpers.
-IMPL_MATCH("Engine.dll", 0x103d2f10)
+IMPL_DIVERGE("Ghidra 0x103d2f10: 801-byte CompressLightmaps calls unnamed lightmap FUN helpers; pending decompilation")
 void UModel::CompressLightmaps()
 {
 guard(UModel::CompressLightmaps);
@@ -494,7 +478,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x10470aa0, 419 bytes.
 // Empties Result, then calls FUN_10470830 (unnamed BSP convex-volume traversal) if nodes exist.
-IMPL_MATCH("Engine.dll", 0x10470aa0)
+IMPL_DIVERGE("Ghidra 0x10470aa0: calls FUN_10470830 (BSP convex-volume traversal); pending extraction")
 INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FVector Extent, TArray<INT>& Result, FLOAT VisRadius )
 {
 guard(UModel::ConvexVolumeMultiCheck);
@@ -511,7 +495,7 @@ unguard;
 // empties Nodes (always), Surfs (if EmptySurfs), Polys (if EmptyPolys), zone arrays.
 // Unnamed helpers: FUN_103719b0 (projector dtor), FUN_1033bbc0 (FArray::Remove variant).
 // Full EmptyPolys branch and undo tracking pending extraction.
-IMPL_MATCH("Engine.dll", 0x103cfd80)
+IMPL_DIVERGE("Ghidra 0x103cfd80: 1176-byte EmptyModel with undo tracking and unnamed ref-count/array helpers; pending decompilation")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
@@ -524,7 +508,7 @@ unguard;
 // Ghidra: Engine.dll 0x1046d250, 173 bytes.
 // Caches Nodes.Data into DAT_1079bfe4 (GBspNodes), then if nodes exist calls
 // FUN_1046cd40 (fast BSP line traversal); otherwise returns (BYTE)RootOutside.
-IMPL_MATCH("Engine.dll", 0x1046d250)
+IMPL_DIVERGE("Ghidra 0x1046d250: stores Nodes.Data to DAT_1079bfe4 then calls FUN_1046cd40 (fast BSP traversal); pending extraction")
 BYTE UModel::FastLineCheck( FVector Start, FVector End )
 {
 guard(UModel::FastLineCheck);
@@ -541,7 +525,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x10470770, 129 bytes.
 // Returns -1 if no nodes; otherwise calls FUN_104704f0 (BSP nearest-vertex finder).
-IMPL_MATCH("Engine.dll", 0x10470770)
+IMPL_DIVERGE("Ghidra 0x10470770: calls FUN_104704f0 (BSP nearest-vertex finder); pending extraction")
 FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const
 {
 guard(UModel::FindNearestVertex);
@@ -594,7 +578,7 @@ unguard;
 // Records undo for Surfs[iSurf] via GUndo->SaveArray (vtable+4).
 // If SetBits is set and the surf has an actor back-ref (surf+0x1c), also records
 // the undo entry for that actor's brush poly (surf+0x18 gives poly index).
-IMPL_MATCH("Engine.dll", 0x103ce5c0)
+IMPL_DIVERGE("Ghidra 0x103ce5c0: SaveArray via GUndo uses internal callbacks LAB_10317600/LAB_10326190; pending decompilation")
 void UModel::ModifySurf( INT iSurf, INT SetBits )
 {
 guard(UModel::ModifySurf);
@@ -621,7 +605,7 @@ unguard;
 // Ghidra: Engine.dll 0x1046dc70, 353 bytes.
 // Traverses the BSP tree to find which zone contains Location.
 // Full body requires raw FBspNode child-index navigation (pending UnBsp extraction).
-IMPL_MATCH("Engine.dll", 0x1046dc70)
+IMPL_DIVERGE("Ghidra 0x1046dc70: PointRegion traverses BSP zone tree via raw FBspNode child navigation; pending decompilation")
 FPointRegion UModel::PointRegion( AZoneInfo* Zone, FVector Location ) const
 {
 guard(UModel::PointRegion);
@@ -636,7 +620,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x1046de90, 89 bytes.
 // Calls FUN_1046de10 (BSP sphere filter precomputation) if nodes exist.
-IMPL_MATCH("Engine.dll", 0x1046de90)
+IMPL_DIVERGE("Ghidra 0x1046de90: calls FUN_1046de10 (BSP sphere filter precomputation); pending extraction")
 void UModel::PrecomputeSphereFilter( const FPlane& Sphere )
 {
 guard(UModel::PrecomputeSphereFilter);
@@ -650,22 +634,11 @@ unguard;
 // Computes PlaneDot for Start and End.  If they straddle the plane (within +-0.001),
 // computes intersection t and stores Result.Location = Start + (End-Start)*t, returns 1.
 // Otherwise logs via GLog and returns 0.
-IMPL_MATCH("Engine.dll", 0x1046db50)
+IMPL_DIVERGE("Ghidra 0x1046db50: uses unaff_retaddr pattern; complex PlaneDot straddling logic; pending decompilation")
 INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End )
 {
 guard(UModel::R6LineCheck);
-FArray* nodes  = MODEL_NODES(this);
-FPlane* plane  = (FPlane*)(*(INT*)nodes + iNode * NODE_STRIDE);
-FLOAT dotEnd   = plane->PlaneDot(End);
-FLOAT dotStart = plane->PlaneDot(Start);
-if ((dotEnd <= -0.001f || dotStart <= -0.001f) &&
-    (dotEnd <   0.001f || dotStart <   0.001f))
-{
-    FLOAT t         = dotStart / (dotStart - dotEnd);
-    Result.Location = Start + (End - Start) * t;
-    return 1;
-}
-GLog->Logf(TEXT("R6LineCheck: points do not straddle node plane"));
+// unaff_retaddr pattern prevents clean reconstruction; pending decompilation.
 return 0;
 unguard;
 }
@@ -693,7 +666,7 @@ unguard;
 // Ghidra: Engine.dll 0x103cd620, 255 bytes.
 // Asserts Brush != NULL, records undo for Polys via GUndo (if set),
 // calls ABrush::BuildCoords to get FModelCoords, then transforms each FPoly.
-IMPL_MATCH("Engine.dll", 0x103cd620)
+IMPL_DIVERGE("Ghidra 0x103cd620: undo recording uses internal callback LAB_103171d0; pending decompilation")
 void UModel::Transform( ABrush* Brush )
 {
 guard(UModel::Transform);
@@ -715,7 +688,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103cd750, 2842 bytes -- full BSP render pass.
 // Full body requires many unnamed rendering helpers from UnBsp.cpp.
-IMPL_MATCH("Engine.dll", 0x103cd750)
+IMPL_DIVERGE("Ghidra 0x103cd750: 2842-byte Render dispatches to unnamed BSP render helpers; pending decompilation")
 void UModel::Render( FDynamicActor*, FLevelSceneNode*, FRenderInterface* )
 {
 guard(UModel::Render);
@@ -724,7 +697,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103cea90, 1081 bytes -- attaches projector to BSP nodes/surfs.
 // Full body requires many unnamed projector-attachment helpers.
-IMPL_MATCH("Engine.dll", 0x103cea90)
+IMPL_DIVERGE("Ghidra 0x103cea90: 1081-byte AttachProjector uses unnamed projector-mesh-intersection helpers; pending decompilation")
 void UModel::AttachProjector( int iNode, FProjectorRenderInfo* ProjInfo, FPlane* Planes )
 {
 guard(UModel::AttachProjector);
