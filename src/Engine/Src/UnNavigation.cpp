@@ -263,13 +263,17 @@ FVector ALadderVolume::FindCenter()
 	// FPoly: Vertex[] at +0x30 (12-byte stride, pfVar3 starts at +0x38), NumVertices at +0x100, size 0x15c.
 	FLOAT sumX = 0.0f, sumY = 0.0f, sumZ = 0.0f;
 	INT polyCount = 0;
-	FArray* polyFArray = (FArray*)(*(INT*)(*(INT*)(this + 0x178) + 0x58) + 0x2c);
-	INT numPolys = polyFArray->Num();
+	// Ghidra byte-offset chain: Brush = this+0x178, Polys = Brush+0x58, polyFArray = Polys+0x2c
+	// FArray layout: Data at +0, ArrayNum at +4
+	BYTE* brush       = *(BYTE**)((BYTE*)this + 0x178);
+	BYTE* polys       = *(BYTE**)(brush + 0x58);
+	BYTE* polyData    = *(BYTE**)(polys + 0x2c);       // FArray::Data (base of FPoly array)
+	INT numPolys      = *(INT*)  (polys + 0x30);       // FArray::ArrayNum (Polys+0x2c+4)
 	if (numPolys > 0)
 	{
 		INT byteOffset = 0;
 		do {
-			BYTE* poly = (BYTE*)(*(void**)polyFArray) + byteOffset;
+			BYTE* poly = polyData + byteOffset;
 			FLOAT cx = 0.0f, cy = 0.0f, cz = 0.0f;
 			INT numVerts = *(INT*)(poly + 0x100);
 			if (numVerts > 0)
@@ -288,7 +292,7 @@ FVector ALadderVolume::FindCenter()
 			sumX += cx; sumY += cy; sumZ += cz;
 			polyCount++;
 			byteOffset += 0x15c;
-			numPolys = polyFArray->Num();
+			numPolys = *(INT*)(polys + 0x30);  // re-read ArrayNum each iteration (Ghidra loops)
 		} while (polyCount < numPolys);
 	}
 	FVector result(sumX, sumY, sumZ);
