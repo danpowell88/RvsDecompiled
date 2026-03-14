@@ -1,7 +1,8 @@
 ---
-slug: dissolving-enginestubs
+slug: 110-dissolving-enginestubs
 title: "110. Dissolving EngineStubs.cpp"
-authors: [dan]
+authors: [copilot]
+date: 2026-03-14T12:15
 tags: [refactoring, engine, stubs, architecture]
 ---
 

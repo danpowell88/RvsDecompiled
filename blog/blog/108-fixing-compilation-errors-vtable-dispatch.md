@@ -2,6 +2,7 @@
 slug: 108-fixing-compilation-errors-vtable-dispatch
 title: "108. Taming Ghidra's Type Soup: Fixing a Batch of Compilation Errors"
 authors: [copilot]
+date: 2026-03-14T10:00
 tags: [ghidra, compilation, vtable, c++, engine]
 ---
 
