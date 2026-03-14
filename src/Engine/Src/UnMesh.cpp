@@ -35,7 +35,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- CBoneDescData ---
-IMPL_DIVERGE("reconstructed from Ghidra 0x10355fa0; LBP parsing SEH frame and error paths diverge")
+IMPL_DIVERGE("DAT_10538e9c/DAT_10538e94 separators and FUN_1031f060/FUN_1031efc0 helpers unresolved; bone-name sub-parse omitted; retail 0x10355fa0 (877b)")
 int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
 	guard(CBoneDescData::fn_bInitFromLbpFile);
@@ -84,28 +84,31 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed from Ghidra 0x10355c60; separator is runtime global DAT_1052ec38")
+IMPL_DIVERGE("separator is runtime global DAT_1052ec38 (0x10355c60); replaced with TEXT(\" \") at compile time")
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
 	guard(CBoneDescData::m_vProcessLbpLine);
 	TArray<FString> tokens;
-	// DAT_1052ec38: separator TCHAR* (TODO: unknown at compile time; assumed space for LBP format)
+	// DAT_1052ec38: separator TCHAR* (runtime global; assumed space for LBP format)
 	str.ParseIntoArray(TEXT(" "), &tokens);
 	INT stride = param2 * 0x1C;
 	BYTE* base = *(BYTE**)(*(INT*)((BYTE*)this + 0x20) + param1 * 4);
+	// FArray layout: {Data@+0, ArrayNum@+4, ArrayMax@+8}; element N = Data + N*0xC.
+	// Ghidra: local_28[0]+0xC0=tok16, +0xCC=tok17, +0xD8=tok18;
+	//         +0x108=tok22, +0x114=tok23, +0x120=tok24, +0x12C(300)=tok25.
 	*(float*)(base + stride + 0x00) =  appAtof(*tokens(16)); // X
 	*(float*)(base + stride + 0x04) = -appAtof(*tokens(17)); // -Y (axis flip per Ghidra)
 	*(float*)(base + stride + 0x08) =  appAtof(*tokens(18)); // Z
-	// FQuat stored as [Y, Z, W, X] = [fStack_1c, fStack_18, fStack_14, fStack_10]
-	float fX = -appAtof(*tokens(34)); // fStack_10 (negated)
-	float fY =  appAtof(*tokens(35)); // fStack_1c
-	float fZ = -appAtof(*tokens(36)); // fStack_18 (negated)
-	float fW =  appAtof(*tokens(39)); // fStack_14
+	// FQuat [pfVar1+0..+3] = [fY, fZ, fW, fX] (fStack_1c/18/14/10 in Ghidra)
+	float fX = -appAtof(*tokens(22)); // fStack_10 (negated, Ghidra Data+0x108)
+	float fY =  appAtof(*tokens(23)); // fStack_1c (Ghidra Data+0x114)
+	float fZ = -appAtof(*tokens(24)); // fStack_18 (negated, Ghidra Data+0x120)
+	float fW =  appAtof(*tokens(25)); // fStack_14 (Ghidra Data+0x12C)
 	float* pfQuat = (float*)(base + stride + 0x0C);
-	pfQuat[0] = fY; // *pfVar1
-	pfQuat[1] = fZ; // pfVar1[1]
-	pfQuat[2] = fW; // pfVar1[2]
-	pfQuat[3] = fX; // pfVar1[3]
+	pfQuat[0] = fY;
+	pfQuat[1] = fZ;
+	pfQuat[2] = fW;
+	pfQuat[3] = fX;
 	unguard;
 }
 
@@ -178,7 +181,7 @@ int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 	return iVar1;
 }
 
-IMPL_DIVERGE("reconstructed from Ghidra 0x10354f00; sub-array allocation offsets approximated")
+IMPL_DIVERGE("FUN_10301050 (retail memcpy variant) and DAT_10529dd0 malloc tag differ; offsets confirmed correct; retail 0x10354f00 (365b)")
 int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 {
 	guard(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
@@ -436,7 +439,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_DIVERGE("reconstructed from Ghidra 0x10474da0 (409b); section-building logic approximated")
+IMPL_DIVERGE("FUN_1043d7e0 (unresolved LOD-section entry constructor) used to init new section slots; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -560,7 +563,7 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 	boneDesc->fn_bInitFromLbpFile(*FileName);
 }
 
-IMPL_DIVERGE("reconstructed from Ghidra 0x10438890 (337b); AddUnique loop approximated")
+IMPL_DIVERGE("FUN_10437fb0 (AddUnique helper) not reconstructed; loop replaced with linear search; retail 0x10438890 (337b)")
 int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
 	guard(USkeletalMesh::SetAttachAlias);
