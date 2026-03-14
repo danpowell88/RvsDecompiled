@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuListSpeedButton.uc : (add small description)
+//  R6MenuListSpeedButton.uc : Popup list button for selecting the operative movement speed in the mission planning bar.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

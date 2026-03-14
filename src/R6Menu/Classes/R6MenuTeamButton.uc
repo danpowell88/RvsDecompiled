@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTeamButton.uc : (add small description)
+//  R6MenuTeamButton.uc : Coloured team-select button in the planning bar; displays a team-colour dot and activates that team when clicked.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuCamFloorDownButton.uc : (add small description)
+//  R6MenuCamFloorDownButton.uc : Button that moves the planning camera view down one floor in the building layout.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

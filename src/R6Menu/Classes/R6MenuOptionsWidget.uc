@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuOptionsWidget.uc : (add small description)
+//  R6MenuOptionsWidget.uc : Full-screen options widget; manages tabbed sub-pages for game, sound, graphics, HUD, multiplayer, controls, mods and patch-service settings.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

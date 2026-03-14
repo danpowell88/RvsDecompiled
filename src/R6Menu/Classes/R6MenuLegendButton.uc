@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendButton.uc : (add small description)
+//  R6MenuLegendButton.uc : Stay-down toggle button used to select a category page in the in-game legend/controls reference overlay.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

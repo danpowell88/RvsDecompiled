@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTimeLineLock.uc : (add small description)
+//  R6MenuTimeLineLock.uc : Toggle button that locks or unlocks the camera to the selected operative during planning animation playback.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

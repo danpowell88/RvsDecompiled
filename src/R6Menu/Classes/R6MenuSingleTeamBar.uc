@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuSingleTeamBar.uc : (add small description)
+//  R6MenuSingleTeamBar.uc : Post-mission single-player team summary bar; displays each operative's rounds fired, kills, efficiency and mission time.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

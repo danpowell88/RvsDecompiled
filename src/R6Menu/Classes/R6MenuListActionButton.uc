@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuListActionButton.uc : (add small description)
+//  R6MenuListActionButton.uc : Popup list button for selecting a waypoint action (e.g. snipe, breach door) in the mission planning bar.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

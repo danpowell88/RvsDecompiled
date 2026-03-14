@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTimeLinePlay.uc : (add small description)
+//  R6MenuTimeLinePlay.uc : Play/pause button for the mission planning timeline; begins or halts animated playback of the planned operative routes.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

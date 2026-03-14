@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuCreditsWidget.uc : (add small description)
+//  R6MenuCreditsWidget.uc : Full-screen widget that displays the game credits; scrolls a list of contributor names with optional video panels.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuSinglePlayerCampaignSelect.uc : (add small description)
+//  R6MenuSinglePlayerCampaignSelect.uc : Sub-panel for selecting or managing saved single-player campaigns; lists existing saves and allows loading or deleting them.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

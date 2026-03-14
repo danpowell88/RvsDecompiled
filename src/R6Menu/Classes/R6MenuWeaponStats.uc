@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuWeaponStats.uc : (add small description)
+//  R6MenuWeaponStats.uc : Widget displaying detailed weapon statistics (range, damage, accuracy, recoil, recovery) as labelled bar charts in the loadout screen.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

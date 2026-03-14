@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuDelNodeBar.uc : (add small description)
+//  R6MenuDelNodeBar.uc : Toolbar in the planning screen containing buttons to delete waypoint nodes from a team's route.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

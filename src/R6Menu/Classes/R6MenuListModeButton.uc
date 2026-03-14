@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuListModeButton.uc : (add small description)
+//  R6MenuListModeButton.uc : Popup list button for selecting the operative movement mode in the planning bar; opens the speed/mode menu popup.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

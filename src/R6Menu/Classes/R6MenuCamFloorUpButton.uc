@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuCamFloorUpButton.uc : (add small description)
+//  R6MenuCamFloorUpButton.uc : Button that moves the planning camera view up one floor in the building layout.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuQuit.uc : (add small description)
+//  R6MenuQuit.uc : Quit confirmation widget shown when the player tries to exit the game; offers Return to Main Menu or Quit to Desktop options.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

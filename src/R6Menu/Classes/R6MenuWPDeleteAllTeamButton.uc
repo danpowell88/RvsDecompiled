@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuWPDeleteAllTeamButton.uc : (add small description)
+//  R6MenuWPDeleteAllTeamButton.uc : Button that removes all waypoint nodes belonging to the currently active team from the mission plan.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

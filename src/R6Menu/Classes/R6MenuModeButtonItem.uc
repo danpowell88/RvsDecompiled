@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuModeButtonItem.uc : (add small description)
+//  R6MenuModeButtonItem.uc : List button item representing an operative movement mode; stores the EMovementMode enum value.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

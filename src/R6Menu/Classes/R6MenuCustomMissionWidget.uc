@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuCustomMissionWidget.uc : (add small description)
+//  R6MenuCustomMissionWidget.uc : Widget for setting up a custom quick-play mission; allows selection of map, game type (Terrorist Hunt, Hostage Rescue, etc.) and difficulty.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

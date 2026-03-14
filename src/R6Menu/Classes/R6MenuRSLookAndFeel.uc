@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuRSLookAndFeel.uc : (add small description)
+//  R6MenuRSLookAndFeel.uc : Central look-and-feel class for the Ravenshield UI; provides all themed drawing functions for buttons, frames, scroll bars, navigation bars and other widgets.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

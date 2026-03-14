@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuSpeedButtonItem.uc : (add small description)
+//  R6MenuSpeedButtonItem.uc : List button item representing a movement speed setting; stores the EMovementSpeed enum value.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

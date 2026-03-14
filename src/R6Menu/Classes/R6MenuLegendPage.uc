@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendPage.uc : (add small description)
+//  R6MenuLegendPage.uc : Base class for a page within the in-game legend overlay; renders a titled list of icon-and-text entries for one category.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendPageActions.uc : (add small description)
+//  R6MenuLegendPageActions.uc : Legend page listing all available operative planning actions (e.g. breach, snipe) with icons and descriptions.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

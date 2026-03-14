@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTimeLineGotoFirst.uc : (add small description)
+//  R6MenuTimeLineGotoFirst.uc : Timeline button that jumps the planning animation back to the very first waypoint.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuLegendPageInteractive.uc : (add small description)
+//  R6MenuLegendPageInteractive.uc : Legend page listing interactive world objects (doors, switches, etc.) that operatives can interact with.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

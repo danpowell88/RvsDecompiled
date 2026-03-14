@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuCarreerStats.uc : (add small description)
+//  R6MenuCarreerStats.uc : Window displaying career statistics for an operative; shows missions served, enemies neutralized, shooting accuracy and rounds fired.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6WindowButtonMainMenu.uc : (add small description)
+//  R6WindowButtonMainMenu.uc : Animated main menu button with a horizontal scroll-highlight effect; resizes to fit its label text and supports down/hover colour states.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  This is the class for main men button

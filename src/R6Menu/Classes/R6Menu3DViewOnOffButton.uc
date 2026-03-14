@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6Menu3DViewOnOffButton.uc : (add small description)
+//  R6Menu3DViewOnOffButton.uc : Stay-down toggle button in the planning screen that switches the 3D viewport on or off.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuTimeLineGotoLast.uc : (add small description)
+//  R6MenuTimeLineGotoLast.uc : Timeline button that jumps the planning animation forward to the final waypoint.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

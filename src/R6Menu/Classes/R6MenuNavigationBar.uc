@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6MenuNavigationBar.uc : (add small description)
+//  R6MenuNavigationBar.uc : Top-level navigation bar for the mission briefing/planning flow; hosts buttons for Briefing, Planning, Gear, Play, Load, Save and Options.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
