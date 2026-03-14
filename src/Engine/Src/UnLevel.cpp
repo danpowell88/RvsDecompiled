@@ -1632,13 +1632,16 @@ void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execPBNotifyServerTravel );
 
 // CallLogThisActor() - logging helper.
-IMPL_DIVERGE("partial; retail calls AKConstraint::preKarmaStep not debugf; Ghidra 0xb6e70")
+// Ghidra 0x103b6e70: P_GET_ACTOR then calls non-virtual CallLogThisActor(AActor*).
+// Ghidra labels the callee as AKConstraint::preKarmaStep because both share stub
+// address 0x1651d0; the actual C++ source calls CallLogThisActor.
+IMPL_MATCH("Engine.dll", 0x103b6e70)
 void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execCallLogThisActor);
-	P_GET_STR(LogText);
+	P_GET_ACTOR(LogActor);
 	P_FINISH;
-	debugf( TEXT("LogActor: %s"), *LogText );
+	CallLogThisActor(LogActor);
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execCallLogThisActor );
