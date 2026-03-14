@@ -202,7 +202,7 @@ void FStats::Clear()
 // ============================================================================
 // FEngineStats
 // ============================================================================
-IMPL_DIVERGE("VA unconfirmed; bulk memcpy of all fields (99*4 bytes)")
+IMPL_MATCH("Engine.dll", 0x10301de0)
 FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 {
 	appMemcpy(this, &Other, 99 * 4);

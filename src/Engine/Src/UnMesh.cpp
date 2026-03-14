@@ -658,15 +658,95 @@ void USkeletalMesh::NormalizeInfluences(int)
 	unguard;
 }
 
-IMPL_DIVERGE("full implementation deferred; retail 0x10441560 (634b) requires unresolved TArray strides")
+IMPL_DIVERGE("SEH frame and FUN_10324640 destructor differ; Ghidra 0x10441560 (634b): body implemented")
 void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 {
 	guard(USkeletalMesh::CalculateNormals);
-	// Ghidra 0x1441e0: complex per-triangle normal accumulation.
-	// Reads faces (this+0xAC, stride 8), verts (this+0x1B8), bone weights.
-	// DIVERGENCE: full implementation deferred — requires stride constants and inline
-	// arithmetic from multiple unidentified TArray serializers to be accurate.
-	(void)Normals; (void)param2;
+	// Ghidra 0x141560: if Normals array is non-empty, return immediately.
+	// Otherwise accumulate per-face cross-product normals into a temp array, then
+	// normalize each vertex normal and optionally (param2 != 0) add it to the vertex
+	// position as a displacement.
+	// DIVERGENCE: SEH frame differs; FUN_10324640 (temp-array destructor thunk) differs.
+	if (Normals.Num() != 0)
+	{
+		unguard;
+		return;
+	}
+
+	FArray* vertArr = (FArray*)((BYTE*)this + 0x1b8);
+	INT vertCount = vertArr->Num();
+	if (vertCount == 0)
+	{
+		unguard;
+		return;
+	}
+
+	// Allocate temp per-vertex normal accumulation buffer (zeroed FVectors).
+	// Ghidra: FArray::AddZeroed(local_44, 0xc, iVar1) where iVar1 = vertCount.
+	TArray<FVector> tempNormals;
+	tempNormals.AddZeroed(vertCount);
+
+	BYTE* vertData = (BYTE*)*(INT*)vertArr;          // position array, stride 0xC
+	FArray* faceArr = (FArray*)((BYTE*)this + 0xac);
+	INT faceCount = faceArr->Num();
+	BYTE* faceData = (BYTE*)*(INT*)faceArr;          // face array, stride 8
+
+	// Face loop: accumulate face-normal contributions per vertex.
+	// Each face entry is 8 bytes: 3 x uint16 vertex indices at byte offsets 0, 2, 4.
+	// Ghidra: (iVar2 + iVar1*4)*2 where iVar2=0,1,2 gives byte offsets 0,2,4 within face iVar1.
+	for (INT fi = 0; fi < faceCount; fi++)
+	{
+		WORD vi0 = *(WORD*)(faceData + fi * 8 + 0);
+		WORD vi1 = *(WORD*)(faceData + fi * 8 + 2);
+		WORD vi2 = *(WORD*)(faceData + fi * 8 + 4);
+
+		// Vertex positions: stride 0xC = sizeof(FVector)
+		BYTE* pv0 = vertData + vi0 * 0xC;
+		BYTE* pv1 = vertData + vi1 * 0xC;
+		BYTE* pv2 = vertData + vi2 * 0xC;
+		FLOAT p0x = *(FLOAT*)(pv0 + 0); FLOAT p0y = *(FLOAT*)(pv0 + 4); FLOAT p0z = *(FLOAT*)(pv0 + 8);
+		FLOAT p1x = *(FLOAT*)(pv1 + 0); FLOAT p1y = *(FLOAT*)(pv1 + 4); FLOAT p1z = *(FLOAT*)(pv1 + 8);
+		FLOAT p2x = *(FLOAT*)(pv2 + 0); FLOAT p2y = *(FLOAT*)(pv2 + 4); FLOAT p2z = *(FLOAT*)(pv2 + 8);
+
+		// edge1 = p2 - p0 (local_5c/58/54 in Ghidra)
+		// edge2 = p0 - p1 (local_68/64/60 in Ghidra)
+		// cross = edge2 ^ edge1  (Ghidra: FVector::operator^(this=&local_68, ...) with this=edge2)
+		FLOAT e1x = p2x - p0x, e1y = p2y - p0y, e1z = p2z - p0z;
+		FLOAT e2x = p0x - p1x, e2y = p0y - p1y, e2z = p0z - p1z;
+		FLOAT cx = e2y * e1z - e2z * e1y;
+		FLOAT cy = e2z * e1x - e2x * e1z;
+		FLOAT cz = e2x * e1y - e2y * e1x;
+
+		tempNormals(vi0).X += cx; tempNormals(vi0).Y += cy; tempNormals(vi0).Z += cz;
+		tempNormals(vi1).X += cx; tempNormals(vi1).Y += cy; tempNormals(vi1).Z += cz;
+		tempNormals(vi2).X += cx; tempNormals(vi2).Y += cy; tempNormals(vi2).Z += cz;
+	}
+
+	// Resize output array and write normalised results.
+	// Ghidra: FArray::Add(param_1, vertCount, 0xC) then per-vertex normalize + optional blend.
+	Normals.Add(vertCount);
+	for (INT vi = 0; vi < vertCount; vi++)
+	{
+		FVector& n = tempNormals(vi);
+		FLOAT sqLen = n.SizeSquared();
+		// Ghidra: appSqrt(sqLen + 0.001) used as divisor; avoids zero-length normals.
+		FLOAT invLen = (FLOAT)(1.0 / appSqrt((DOUBLE)(sqLen + 0.001f)));
+		FLOAT nx = n.X * invLen, ny = n.Y * invLen, nz = n.Z * invLen;
+
+		if (param2 != 0)
+		{
+			// Ghidra: when param2 != 0, the normalised vector is added to the vertex
+			// position (this+0x1b8) as a displacement, then stored to Normals.
+			BYTE* pv = vertData + vi * 0xC;
+			nx += *(FLOAT*)(pv + 0);
+			ny += *(FLOAT*)(pv + 4);
+			nz += *(FLOAT*)(pv + 8);
+		}
+
+		Normals(vi).X = nx;
+		Normals(vi).Y = ny;
+		Normals(vi).Z = nz;
+	}
 	unguard;
 }
 
@@ -896,15 +976,32 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 	return USkeletalMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("vtable call on stream at this+0xF4 unresolved; auto-generation via GenerateLodModel (when LOD array empty) also skipped; retail 0x1042f4b0 (232b)")
+IMPL_DIVERGE("vtable stream-clear at this+0xF4 unresolved; retail 0x1042f4b0 (232b): LOD check and auto-generation added")
 void USkeletalMesh::PostLoad()
 {
-	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version at +0x5C < 2,
-	// call ReconstructRawMesh(). If LOD models array (this+0x1AC) is empty,
-	// auto-generate 4 LOD levels.
-	// Divergence: LOD version check and auto-generation skipped;
-	// LOD data is expected to already be in the package file.
+	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version (+0x5C) < 2 call the first
+	// vtable slot of the stream object at this+0xF4 (a Clear/Reset operation), then call
+	// ReconstructRawMesh(). If the LOD models array (this+0x1AC) is empty, log a warning
+	// and auto-generate 4 LOD levels at ratios 1.0, 0.7, 0.35, 0.1.
+	// DIVERGENCE: vtable call on stream at this+0xF4 (stream clear before reconstruction)
+	// is unresolved and skipped — the vtable layout for the render-stream objects is not
+	// yet determined. ReconstructRawMesh() itself is also IMPL_DIVERGE (empty stub).
 	UObject::PostLoad();
+	if (*(INT*)((BYTE*)this + 0x5C) < 2)
+	{
+		// Retail: (*(code**)**(undefined4**)(this+0xF4))() — unresolved stream clear.
+		// DIVERGENCE: stream clear call skipped; vtable layout unknown.
+		ReconstructRawMesh();
+	}
+	if (((FArray*)((BYTE*)this + 0x1AC))->Num() == 0)
+	{
+		// Ghidra: logs warning then calls GenerateLodModel 4 times.
+		GLog->Logf(TEXT(""));
+		GenerateLodModel(0, 1.0f, 1.0f, 4, 0);
+		GenerateLodModel(1, 0.7f, 0.5f, 1, 0);
+		GenerateLodModel(2, 0.35f, 0.4f, 1, 0);
+		GenerateLodModel(3, 0.1f, 0.17f, 1, 0);
+	}
 }
 
 

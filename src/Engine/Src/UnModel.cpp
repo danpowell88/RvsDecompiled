@@ -52,7 +52,7 @@ extern FArchive& operator<<(FArchive& Ar, FPoly& V);
 static INT GBspNodes = 0;
 
 // 0x1046cd40 -- fast BSP line check: traverses the BSP tree to classify a line segment.
-IMPL_APPROX("BSP traversal helper, pending UnBsp decompilation")
+IMPL_DIVERGE("Ghidra 0x1046cd40: BSP traversal helper called from UModel::FastLineCheck; full body in UnBsp.cpp, pending extraction")
 static BYTE bspFastLineCheck( INT iNode, FLOAT sx, FLOAT sy, FLOAT sz,
                                FLOAT ex, FLOAT ey, FLOAT ez, BYTE rootOutside )
 {
@@ -60,7 +60,7 @@ static BYTE bspFastLineCheck( INT iNode, FLOAT sx, FLOAT sy, FLOAT sz,
 }
 
 // 0x104704f0 -- BSP nearest-vertex finder.
-IMPL_APPROX("BSP nearest vertex helper, pending UnBsp decompilation")
+IMPL_DIVERGE("Ghidra 0x104704f0: BSP nearest-vertex helper called from UModel::FindNearestVertex; full body in UnBsp.cpp, pending extraction")
 static FLOAT bspFindNearestVertexHelper( UModel* Model, const FVector* Src, FVector* Dst,
                                           FLOAT MinRadius, INT P5, INT* iVertex )
 {
@@ -68,7 +68,7 @@ static FLOAT bspFindNearestVertexHelper( UModel* Model, const FVector* Src, FVec
 }
 
 // 0x103ccc70 -- BSP leaf enumerator: collects leaf indices overlapping a box.
-IMPL_APPROX("BSP box leaves helper, pending UnBsp decompilation")
+IMPL_DIVERGE("Ghidra 0x103ccc70: BSP box-leaves traversal helper called from UModel::BoxLeaves; full body in UnBsp.cpp, pending extraction")
 static void bspBoxLeavesHelper( UModel* Model, INT iNode,
                                  FLOAT cx, FLOAT cy, FLOAT cz,
                                  FLOAT ex, FLOAT ey, FLOAT ez,
@@ -77,7 +77,7 @@ static void bspBoxLeavesHelper( UModel* Model, INT iNode,
 }
 
 // 0x1046de10 -- BSP sphere filter precomputation pass.
-IMPL_APPROX("BSP sphere filter helper, pending UnBsp decompilation")
+IMPL_DIVERGE("Ghidra 0x1046de10: BSP sphere filter traversal helper called from UModel::PrecomputeSphereFilter; full body in UnBsp.cpp, pending extraction")
 static void bspPrecomputeSphereFilterHelper( UModel* Model, INT iNode, const FPlane* Sphere )
 {
 }
