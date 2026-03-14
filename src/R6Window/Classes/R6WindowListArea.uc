@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListArea.uc : (add small description)
+//  R6WindowListArea.uc : List box that populates each row with an R6WindowArea panel widget.
+//  Extends R6WindowTextListBox and uses a configurable area class for row content.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

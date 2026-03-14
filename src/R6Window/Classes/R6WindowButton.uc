@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowButton.uc : (add small description)
+//  R6WindowButton.uc : Ravenshield-styled push button control.
+//  Extends UWindowButton with R6's typed button variants and look-and-feel skin.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

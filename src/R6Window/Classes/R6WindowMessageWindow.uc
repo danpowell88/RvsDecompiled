@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowMessageWindow.uc : (add small description)
+//  R6WindowMessageWindow.uc : Modal framed window that displays a single styled text message.
+//  Extends R6WindowFramedWindow with a positioned, coloured message string.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

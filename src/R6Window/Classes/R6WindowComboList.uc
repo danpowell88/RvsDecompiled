@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowComboList.uc : (add small description)
+//  R6WindowComboList.uc : Ravenshield-styled combo-box drop-down list.
+//  Extends UWindowComboList with customisable background colour and disabled-item text colour.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

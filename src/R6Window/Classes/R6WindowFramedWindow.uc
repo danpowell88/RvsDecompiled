@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowFramedWindow.uc : (add small description)
+//  R6WindowFramedWindow.uc : Resizable, closeable framed dialog window.
+//  Hosts a client sub-area and close button, and enforces configurable minimum dimensions.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

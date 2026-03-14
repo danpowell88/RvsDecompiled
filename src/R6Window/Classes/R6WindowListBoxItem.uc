@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListBoxItem.uc : (add small description)
+//  R6WindowListBoxItem.uc : List-box row supporting separators, sub-lists, and associated objects.
+//  Extends UWindowListBoxItem with extra metadata for grouped and hierarchical list layouts.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

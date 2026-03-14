@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowTextListBox.uc : (add small description)
+//  R6WindowTextListBox.uc : Text-rendering list box with R6's styled selection border.
+//  Extends R6WindowListBox with text-based row drawing and a fixed selection border width.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

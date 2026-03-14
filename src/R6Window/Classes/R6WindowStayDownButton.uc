@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowStayDownButton.uc : (add small description)
+//  R6WindowStayDownButton.uc : Toggle/latch button that remains pressed until explicitly released.
+//  Extends R6WindowButton with selection-state tracking and optional notify-only unselect mode.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

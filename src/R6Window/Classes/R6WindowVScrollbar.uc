@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowVScrollBar.uc : (add small description)
+//  R6WindowVScrollBar.uc : Ravenshield-styled vertical scrollbar with overridable button classes.
+//  Extends UWindowVScrollbar and allows the up/down arrow button widgets to be swapped.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

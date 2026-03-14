@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowTextLabel.uc : (add small description)
+//  R6WindowTextLabel.uc : Simple text label with optional horizontal decorative border strip.
+//  Extends UWindowWindow with a configurable text colour and skinned border region.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

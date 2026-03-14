@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowLookAndFeel.uc : (add small description)
+//  R6WindowLookAndFeel.uc : Global GUI skin defining Ravenshield's visual style.
+//  Extends UWindowLookAndFeel with textures, button/close-box regions, and scrollbar metrics.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

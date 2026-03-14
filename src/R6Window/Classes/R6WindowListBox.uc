@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListBox.uc : (add small description)
+//  R6WindowListBox.uc : Base list-box control with R6-skinned corner styles.
+//  Extends UWindowListControl and provides the foundation for all R6 list variants.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

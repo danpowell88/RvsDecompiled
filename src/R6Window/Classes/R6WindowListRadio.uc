@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListRadio.uc : (add small description)
+//  R6WindowListRadio.uc : Single-selection list control with tracked selected item.
+//  Extends UWindowListControl; supports configurable row height and double-click forwarding.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

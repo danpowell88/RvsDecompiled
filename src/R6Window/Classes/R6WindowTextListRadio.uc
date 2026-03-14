@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowTextListRadio.uc : (add small description)
+//  R6WindowTextListRadio.uc : Radio-selection list that renders rows as styled text.
+//  Extends R6WindowListRadio with a distinct colour for the currently selected row.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

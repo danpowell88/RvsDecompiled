@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowHSplitter.uc : (add small description)
+//  R6WindowHSplitter.uc : Horizontal divider that partitions a window into top and bottom regions.
+//  Supports three split types: full-top, top-half of a split, and bottom-half of a split.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

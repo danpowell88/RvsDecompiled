@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowEditControl.uc : (add small description)
+//  R6WindowEditControl.uc : Labeled text-entry control with optional custom paint and disabled state.
+//  Composes an R6WindowTextLabel alongside UWindowEditControl for form-style input fields.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

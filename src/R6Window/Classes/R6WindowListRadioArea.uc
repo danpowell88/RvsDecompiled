@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListRadioArea.uc : (add small description)
+//  R6WindowListRadioArea.uc : Radio list that populates each row with an R6WindowArea panel.
+//  Extends R6WindowTextListRadio with a configurable area class for rich row content.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
