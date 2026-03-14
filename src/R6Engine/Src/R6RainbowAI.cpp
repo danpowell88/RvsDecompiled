@@ -150,7 +150,7 @@ AActor * AR6RainbowAI::FindSafeSpot()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::GetTeamLeftOfDoorPosition(INT, AR6Door *)
 {
 	return FVector(0,0,0);
@@ -162,7 +162,7 @@ AActor * AR6RainbowAI::GetTeamManager()
 	return m_TeamManager;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::GetTeamRightOfDoorPosition(INT, AR6Door *)
 {
 	return FVector(0,0,0);
@@ -420,31 +420,31 @@ void AR6RainbowAI::execSetOrientation(FFrame& Stack, RESULT_DECL)
 	setMemberOrientation((EPawnOrientation)eOverrideOrientation);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::getEntryPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::getGuardPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::getLadderPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::getPreEntryPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6RainbowAI::getTargetPosition()
 {
 	return FVector(0,0,0);

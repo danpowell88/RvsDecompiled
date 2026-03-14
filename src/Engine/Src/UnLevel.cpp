@@ -231,7 +231,7 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
@@ -280,7 +280,7 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ULevel::TickNetServer( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetServer);
@@ -288,7 +288,7 @@ void ULevel::TickNetServer( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
@@ -408,7 +408,7 @@ void ULevel::RememberActors()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
@@ -487,7 +487,7 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
@@ -992,7 +992,7 @@ ABrush* ULevel::SpawnBrush()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
@@ -1000,7 +1000,7 @@ void ULevel::SpawnViewActor( UViewport* Viewport )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
@@ -1009,7 +1009,7 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
@@ -1018,7 +1018,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
@@ -1027,7 +1027,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
@@ -1116,7 +1116,7 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
@@ -1125,7 +1125,7 @@ FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
@@ -1338,9 +1338,9 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 	// Retail 0x1C080 fallback: returns LevelInfo as the default (background) zone.
 	return (AZoneInfo*)GetLevelInfo();
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
 IMPL_INFERRED("Partial; terrain zone registration helper not decompiled")
 void ULevel::UpdateTerrainArrays()
@@ -1626,9 +1626,9 @@ IMPL_INFERRED("Full constructor")
 FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::SetVolumes(const TArray<class AVolume*>&) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::SetVolumes() {}
 IMPL_INFERRED("Reconstructed from retail bytecode; sets Zone/iZone/ZoneNumber fields")
 void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
@@ -1641,18 +1641,18 @@ void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
 	*(DWORD*)((BYTE*)this + 0x22C) = 0xFFFFFFFF;
 	*(DWORD*)((BYTE*)this + 0x230) = 0;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::PostNetReceive() {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::PreNetReceive() {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::CheckForErrors() {}
 IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void ALevelInfo::CallLogThisActor(AActor*) {}
 // ?GetDefaultPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@XZ  Ghidra at ~279 bytes.
 // Lazily spawns ADefaultPhysicsVolume and caches it at this+0x164.
@@ -1749,14 +1749,14 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
     DWORD hi   = (DWORD)hiMask & Zones[Zone1 * 2 + 1];
     return (lo | hi) ? 1 : 0;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AGameReplicationInfo::PostNetReceive() {}
 IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APlayerReplicationInfo::PostNetReceive() {}
 IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
@@ -1767,13 +1767,13 @@ INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement*
   AReplicationInfo virtual method stubs.
   Only methods NOT defined in EngineClassImpl.cpp remain here.
 -----------------------------------------------------------------------------*/
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::DisplayVideo(UCanvas*, void*, INT) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::GetAvailableResolutions(TArray<FResolutionInfo>&) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 DWORD AReplicationInfo::GetAvailableVideoMemory() { return 0; }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::HandleFullScreenEffects(INT, INT) {}

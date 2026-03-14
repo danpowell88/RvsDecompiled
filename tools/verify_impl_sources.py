@@ -31,6 +31,12 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 IMPL_MACROS = {
+    # Current 4-macro parity system
+    "IMPL_MATCH",
+    "IMPL_APPROX",
+    "IMPL_EMPTY",
+    "IMPL_DIVERGE",
+    # Legacy aliases (kept for backward compatibility)
     "IMPL_GHIDRA",
     "IMPL_GHIDRA_APPROX",
     "IMPL_SDK",
@@ -121,6 +127,12 @@ def scan_file(path: Path) -> list[dict]:
 
     lines = text.splitlines()
     for idx, line in enumerate(lines):
+        # Function definitions at file scope are never indented.
+        # Skip indented lines to avoid false-positives on calls like
+        # Foo::StaticClass() inside a function body.
+        if not line or line[0].isspace():
+            continue
+
         m = FUNC_DEF_PATTERN.match(line)
         if not m:
             continue

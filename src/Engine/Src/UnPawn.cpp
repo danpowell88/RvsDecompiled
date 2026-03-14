@@ -1041,7 +1041,7 @@ void APawn::PreNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 DWORD APawn::R6LineOfSightTo( AActor* Other, INT bUnused )
 {
 	guard(APawn::R6LineOfSightTo);
@@ -1049,7 +1049,7 @@ DWORD APawn::R6LineOfSightTo( AActor* Other, INT bUnused )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 {
 	guard(APawn::R6SeePawn);
@@ -1210,7 +1210,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis; animation blend tree not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis; animation blend tree not yet reconstructed")
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
@@ -1563,7 +1563,7 @@ INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AAc
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanCrouchWalk);
@@ -1571,7 +1571,7 @@ INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocatio
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanProneWalk);
@@ -1642,7 +1642,7 @@ ETestMoveResult APawn::FindBestJump(FVector Dest)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 ETestMoveResult APawn::FindJumpUp(FVector Dest)
 {
 	guard(APawn::FindJumpUp);
@@ -1668,7 +1668,7 @@ FVector APawn::NewFallVelocity( FVector OldVelocity, FVector OldAcceleration, FL
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::Pick3DWallAdjust(FVector WallHitNormal)
 {
 	guard(APawn::Pick3DWallAdjust);
@@ -1676,7 +1676,7 @@ INT APawn::Pick3DWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::PickWallAdjust(FVector WallHitNormal)
 {
 	guard(APawn::PickWallAdjust);
@@ -1684,7 +1684,7 @@ INT APawn::PickWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 {
 	guard(APawn::SpiderstepUp);
@@ -1750,7 +1750,7 @@ void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJumpZ)
 {
 	guard(APawn::SuggestJumpVelocity);
@@ -1758,7 +1758,7 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
@@ -1848,7 +1848,7 @@ void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), ANavigationPoint* Start, INT MaxPathLength, FLOAT* Weight)
 {
 	guard(APawn::breadthPathTo);
@@ -1921,7 +1921,7 @@ void APawn::clearPaths()
 	}
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);
@@ -1929,7 +1929,7 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -1937,7 +1937,7 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
@@ -1945,7 +1945,7 @@ FVector APawn::findWaterLine(FVector Start, FVector End)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::flyMove);
@@ -1953,7 +1953,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::flyReachable);
@@ -1961,7 +1961,7 @@ INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 {
 	guard(APawn::jumpLanding);
@@ -2007,35 +2007,35 @@ INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physFlying);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSpider);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSwimming);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physWalking);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
@@ -2043,7 +2043,7 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 	guard(APawn::rotateToward);
@@ -2102,14 +2102,14 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
 	guard(APawn::startSwimming);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::swimMove);
@@ -2117,7 +2117,7 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::swimReachable);
@@ -2125,7 +2125,7 @@ INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::walkMove);
@@ -2133,7 +2133,7 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::walkReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::walkReachable);
@@ -2176,7 +2176,7 @@ INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(AController::AdjustFromWall);
@@ -2220,7 +2220,7 @@ INT AController::AcceptNearbyPath( AActor* Goal )
 	return 0;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
 {
 	guard(AController::CanHear);
@@ -2253,7 +2253,7 @@ AActor* AController::GetViewTarget()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::SetAdjustLocation( FVector NewLoc )
 {
 	guard(AController::SetAdjustLocation);
@@ -2264,7 +2264,7 @@ void AController::SetAdjustLocation( FVector NewLoc )
 	AController — Non-virtual methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::ShowSelf()
 {
 	guard(AController::ShowSelf);
@@ -2281,7 +2281,7 @@ DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 AActor* AController::SetPath( INT bInitialPath )
 {
 	guard(AController::SetPath);
@@ -2289,7 +2289,7 @@ AActor* AController::SetPath( INT bInitialPath )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
 	guard(AController::SetRouteCache);
@@ -2306,7 +2306,7 @@ DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudness, FVector& OutNoiseLoc )
 {
 	guard(AController::CanHearSound);
@@ -2327,7 +2327,7 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);

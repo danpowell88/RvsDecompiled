@@ -184,27 +184,27 @@ public:
 		return OutIni;
 	}
 	// R6Reserved slots 23-33: unknown purpose, padding for vtable compatibility.
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void* R6Reserved1(void* arg) { static BYTE _buf[64] = {}; return _buf; }
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved2() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved3() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved4() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved5() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void* R6Reserved6(void* arg) { static BYTE _buf[64] = {}; return _buf; }
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved7() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved8() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved9() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved10() {}
-	IMPL_APPROX("Needs Ghidra analysis")
+	IMPL_INFERRED("Needs Ghidra analysis")
 	void R6Reserved11() {}
 	IMPL_INFERRED("Reconstructed from UT99 reference and import table analysis")
 	static FConfigCache* Factory()

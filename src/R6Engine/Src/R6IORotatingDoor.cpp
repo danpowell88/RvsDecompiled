@@ -15,7 +15,7 @@ static FVector GRotatingDoor_OldLocation;
 
 // --- AR6IORotatingDoor ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
 	guard(AR6IORotatingDoor::AddMyMarker);

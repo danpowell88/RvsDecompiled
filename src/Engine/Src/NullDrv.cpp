@@ -1,19 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 NullDrv.cpp: Null render device stubs (URenderDevice)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INTENTIONALLY_EMPTY("NullDrv — headless renderer; retail body is also empty")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INTENTIONALLY_EMPTY("NullDrv — headless renderer; retail body is also empty")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- URenderDevice ---
@@ -213,3 +211,4 @@ IMPL_INTENTIONALLY_EMPTY("NullDrv — headless renderer; retail body is also emp
 void UNullRenderDevice::SetEmulationMode(EHardwareEmulationMode) {}
 IMPL_INTENTIONALLY_EMPTY("NullDrv — headless renderer; retail body is also empty")
 INT UNullRenderDevice::SupportsTextureFormat(ETextureFormat) { return 1; }
+

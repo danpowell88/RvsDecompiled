@@ -1,23 +1,21 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnScript.cpp: Engine-side animation notify system (UAnimNotify*)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- UAnimNotify ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UAnimNotify::Notify(UMeshInstance *,AActor *)
 {
 }
@@ -72,7 +70,7 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimNotify_Effect ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
@@ -87,7 +85,7 @@ void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 // TODO: implement UAnimNotify_MatSubAction::Notify (retail 0x136fe0: finds live ASceneManager in XLevel->Actors, starts SubAction)
 // GHIDRA REF: 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts
 // the SubAction on it, adjusting start/end times from scene manager position.
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
@@ -198,7 +196,7 @@ void UAnimNotify_Sound::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimation ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UAnimation::Serialize(FArchive &)
 {
 }

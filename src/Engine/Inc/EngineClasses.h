@@ -5037,17 +5037,16 @@ public:
 
 	// --- Member data (offsets from Ghidra analysis of retail Engine.dll) ---
 	// UObject base:   0x00-0x2F
-	// USubsystem add: 0x30-0x43
-	// UEngine add:    0x44+
+	// USubsystem add: 0x30-0x33 (FExec secondary vtable pointer)
+	// UEngine add:    0x34+
 
 	// Padding to align Client at offset 0x44.
-	// UObject is ~0x30 bytes, USubsystem adds ~0x14 bytes of data.
-	// The exact intermediate layout depends on the full USubsystem layout,
 	// Layout derivation:
 	//   UObject              : 0x00-0x2F  (vtable + 10 fields; sizeof = 0x30)
-	//   USubsystem           : 0x30-0x33  (FExec secondary vtable ptr; sizeof = 0x34)
+	//   USubsystem           : 0x30-0x33  (FExec secondary vtable pointer; sizeof = 0x34)
+	//                          The Raven Shield C SDK confirms INT ExecVtbl at offset 0x30.
 	//   UEngine own fields   : 0x34+
-	// Known from Ghidra Serialize: field at 0x40 is a UObject*.
+	// Ghidra confirms Client at 0x44 → 0x10 bytes of uncharted UEngine fields precede it.
 
 	BYTE            _ue_pre[0x10];  // 0x34..0x43: uncharted UEngine fields
 	UClient*        Client;         // 0x44: Active client (viewport manager)
@@ -5055,7 +5054,7 @@ public:
 	URenderDevice*  GRenDev;        // 0x4c: Active render device
 
 	// 0x50..0x457: uncharted UEngine fields (CacheSizeMegs@0x84, UseSound@0x88, etc.)
-	BYTE            _ue_unk[0x408]; // padding to reach sizeof(UEngine)==0x458
+	BYTE            _ue_unk[0x40C]; // padding to reach sizeof(UEngine)==0x458
 
 	// --- Virtual method table ---
 	// The following virtual methods MUST appear in exactly this order to match

@@ -58,3 +58,10 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+
+# Scratch/temp scripts
+tmp_*.py
+fix_*.py
+test_*.cpp
+diag_*.cpp
+*.i

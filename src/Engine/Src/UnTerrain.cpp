@@ -1,17 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnTerrain.cpp: Terrain system (ATerrainInfo, FTerrainTools)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
 inline void* operator new(size_t, void* p) noexcept { return p; }
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "ImplSource.h"
 #include "EngineDecls.h"
 
@@ -116,7 +116,7 @@ void ATerrainInfo::UpdateVertices(float,int,int,int,int)
 	guard(ATerrainInfo::UpdateVertices);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Transforms world position to heightmap space via FCoords at +0x1330")
 FVector ATerrainInfo::WorldToHeightmap(FVector In)
 {
 	// Retail: 29b. ECX=this+0x1330 (heightmap FCoords), call FVector::TransformPointBy.
@@ -134,7 +134,7 @@ void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisib
 	guard(ATerrainInfo::RenderDecorations);
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15cbf0, "editor symmetry globals (DAT_1061b728 etc")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x15cbf0, "Returns 0; vertex selection with symmetry mirrors deferred due to unresolved editor globals")
 int ATerrainInfo::SelectVertex(FVector)
 {
 	guard(ATerrainInfo::SelectVertex);
@@ -147,7 +147,7 @@ int ATerrainInfo::SelectVertex(FVector)
 	return 0;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15cac0, "FUN_1031fe20 (TArray element removal at index) is unresolved")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x15cac0, "FUN_1031fe20 (TArray element removal at index) unresolved; found entry not removed from selection list")
 int ATerrainInfo::SelectVertexX(int X, int Y)
 {
 	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
@@ -183,7 +183,7 @@ void ATerrainInfo::SelectVerticesInBox(FBox &)
 	guard(ATerrainInfo::SelectVerticesInBox);
 	unguard;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes packed bit into EdgeTurnBitmap at +0x137C")
 void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 {
 	// Retail: packed-bit write into EdgeTurnBitmap.Data (Data* at this+0x137C).
@@ -196,7 +196,7 @@ void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 	if (Value) data[idx >> 5] |=  bit_mask;
 	else       data[idx >> 5] &= ~bit_mask;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes 16-bit height value at USize*Y+X in G16 heightmap texture")
 void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 {
 	// Retail: 45b. Writes 16-bit height value at USize*Y+X in the G16 heightmap.
@@ -215,7 +215,7 @@ void ATerrainInfo::SetLayerAlpha(float,float,int,BYTE,UTexture *)
 	guard(ATerrainInfo::SetLayerAlpha);
 	unguard;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes biased 4-bit nibble into packed planning floor map at +0x13C8")
 void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 {
 	// Retail: writes biased 4-bit nibble (Value+8) into packed INT array at
@@ -232,7 +232,7 @@ void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 	// Retail 0x104570D0: mark terrain dirty for rebuild (bit 2 of DWORD at +0x12B4).
 	*(DWORD*)((BYTE*)this + 0x12B4) |= 4;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes packed bit into QuadVisibilityBitmap at +0x1370")
 void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 {
 	// Same as SetEdgeTurnBitmap but for QuadVisibilityBitmap.Data (Data* at this+0x1370).
@@ -250,7 +250,7 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15c3c0, "FUN_1050557c (per-sector ray test), rdtsc perf counters, and full sector")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x15c3c0, "Returns 1 (no hit); per-sector ray test FUN_1050557c unresolved")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
@@ -260,7 +260,7 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 	return 1;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15a480, "returns 1 (no hit) pending full implementation")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x15a480, "Returns 1 (no hit); per-quad ray intersection structures and FUN_ calls unresolved")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);
@@ -355,7 +355,7 @@ void ATerrainInfo::ConvertHeightmapFormat()
 	guard(ATerrainInfo::ConvertHeightmapFormat);
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x157560, "left unchanged by caller")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x157560, "OutY parameter not assigned per Ghidra decompiler artifact")
 int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX, int* OutY)
 {
 	// Ghidra 0x157560, 167b: transform world pos by WorldToHeightmap FCoords at this+0x1330,
@@ -382,7 +382,7 @@ int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX
 	}
 	return 0;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns single bit from EdgeTurnBitmap at +0x137C")
 int ATerrainInfo::GetEdgeTurnBitmap(int X, int Y)
 {
 	// Retail: return single bit from EdgeTurnBitmap (Data* at this+0x137C).
@@ -395,7 +395,7 @@ int ATerrainInfo::GetEdgeTurnBitmap(int X, int Y)
 	INT bit_mask = 1 << (idx & 31);
 	return (word & bit_mask) ? 1 : 0;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns HeightmapX * Y + X linear heightmap index")
 int ATerrainInfo::GetGlobalVertex(int X, int Y)
 {
 	// Retail: 8B 81 E0 12 00 00 0F AF 44 24 08 03 44 24 04 C2 08 00
@@ -420,7 +420,7 @@ _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 		return *((_WORD*)(texData + (USize * Y + X) * 2));
 	return 0;
 }
-IMPL_GHIDRA("Engine.dll", 0x156de0)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x156de0, "Avoids FStaticTexture on stack; calls GetRawTextureData directly instead")
 BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 {
 	// Retail: 0x156de0, ~200b. Lookup layer alpha texture, optionally scale coords
@@ -468,7 +468,7 @@ BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 		return *(BYTE*)((BYTE*)texData + idx);          // 8-bit alpha
 	return 0;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Reads biased 4-bit nibble from packed planning floor map at +0x13C8")
 int ATerrainInfo::GetPlanningFloorMap(int X, int Y)
 {
 	// Retail: 57b. Planning floor map stored as packed 4-bit nibbles in INT array
@@ -482,7 +482,7 @@ int ATerrainInfo::GetPlanningFloorMap(int X, int Y)
 	INT nibble = (planData[idx >> 3] >> bit_pos) & 0x0F;
 	return nibble - 8;            // unbias: stored range 0..15, returned -8..7
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns single bit from QuadVisibilityBitmap at +0x1370")
 int ATerrainInfo::GetQuadVisibilityBitmap(int X, int Y)
 {
 	// Same pattern as GetEdgeTurnBitmap but reads QuadVisibilityBitmap (Data* at this+0x1370).
@@ -542,13 +542,13 @@ FVector ATerrainInfo::GetVertexNormal(int,int)
 {
 	return FVector(0,0,0);
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Transforms heightmap position to world space via FCoords at +0x1300")
 FVector ATerrainInfo::HeightmapToWorld(FVector In)
 {
 	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
-IMPL_GHIDRA("Engine.dll", 0x164cf0)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x164cf0, "Omits legacy version-gated serialization paths prior to version 0x53")
 void ATerrainInfo::Serialize(FArchive& Ar)
 {
 	// Retail: 0x164cf0. Calls AActor::Serialize then serializes terrain dimensions,
@@ -589,7 +589,7 @@ void ATerrainInfo::Destroy()
 	}
 	AActor::Destroy();
 }
-IMPL_GHIDRA("Engine.dll", 0x155c0)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x155c0, "Lazy creation of UTerrainPrimitive via StaticAllocateObject omitted")
 UPrimitive * ATerrainInfo::GetPrimitive()
 {
 	// Retail: 0x155c0. If sector list at this+0x12C8 is empty, defer to AActor.
@@ -612,6 +612,7 @@ FTerrainMaterialLayer::FTerrainMaterialLayer()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x9800)
 FTerrainMaterialLayer::~FTerrainMaterialLayer()
 {
 	guard(FTerrainMaterialLayer::~FTerrainMaterialLayer);
@@ -630,7 +631,7 @@ FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLa
 
 
 // --- FTerrainTools ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes Value to terrain brush adjust field at indirect struct+0x60")
 void FTerrainTools::SetAdjust(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -666,7 +667,7 @@ void FTerrainTools::SetCurrentBrush(int BrushID)
 	appFailAssert("0", ".\\UnTerrainTools.cpp", 0x372);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Updates current terrain info pointer and clears related brush/selection fields")
 void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)
 {
 	// Ghidra (29B): if changed, set ptr and zero related fields
@@ -681,7 +682,7 @@ void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Clamps value to minimum -7 and stores in Pad[0x40]")
 void FTerrainTools::SetFloorOffset(int Value)
 {
 	// Retail: 20b. Clamp to minimum of -7 only; no upper clamp.
@@ -689,7 +690,7 @@ void FTerrainTools::SetFloorOffset(int Value)
 	*(INT*)&Pad[0x40] = Value;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes Value to terrain brush inner radius field at indirect struct+0x54")
 void FTerrainTools::SetInnerRadius(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -697,7 +698,7 @@ void FTerrainTools::SetInnerRadius(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x54) = Value;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes Value to terrain brush mirror axis field at indirect struct+0x64")
 void FTerrainTools::SetMirrorAxis(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -705,7 +706,7 @@ void FTerrainTools::SetMirrorAxis(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x64) = Value;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes Value to terrain brush outer radius field at indirect struct+0x58")
 void FTerrainTools::SetOuterRadius(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -713,7 +714,7 @@ void FTerrainTools::SetOuterRadius(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x58) = Value;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Writes Value to terrain brush strength field at indirect struct+0x5C")
 void FTerrainTools::SetStrength(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -728,6 +729,7 @@ FTerrainTools::FTerrainTools(FTerrainTools const &)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FTerrainTools::~FTerrainTools()
 {
 	guard(FTerrainTools::~FTerrainTools);
@@ -748,7 +750,7 @@ void FTerrainTools::FindActorsToAlign()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns adjust value from active brush struct or fallback at Pad[0x88]")
 int FTerrainTools::GetAdjust()
 {
 	// Ghidra (21B): if brush ptr (Pad[0]) non-null, read from indirect struct;
@@ -762,7 +764,7 @@ int FTerrainTools::GetAdjust()
 	return *(INT*)&Pad[0x88];
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Returns terrain info pointer from Pad[0x78]")
 ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
 {
 	// Ghidra (4B): return pointer at Pad[0x78]
@@ -775,14 +777,14 @@ FString FTerrainTools::GetExecFromBrushName(FString &)
 	return FString();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Returns floor offset stored in Pad[0x40]")
 int FTerrainTools::GetFloorOffset()
 {
 	// Ghidra (4B): direct read from Pad[0x40]
 	return *(INT*)&Pad[0x40];
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns inner radius from active brush struct or fallback at Pad[0x7C]")
 int FTerrainTools::GetInnerRadius()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -794,7 +796,7 @@ int FTerrainTools::GetInnerRadius()
 	return *(INT*)&Pad[0x7C];
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns mirror axis from active brush struct or fallback at Pad[0x8C]")
 int FTerrainTools::GetMirrorAxis()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -806,7 +808,7 @@ int FTerrainTools::GetMirrorAxis()
 	return *(INT*)&Pad[0x8C];
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns outer radius from active brush struct or fallback at Pad[0x80]")
 int FTerrainTools::GetOuterRadius()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -818,7 +820,7 @@ int FTerrainTools::GetOuterRadius()
 	return *(INT*)&Pad[0x80];
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns strength from active brush struct or fallback at Pad[0x84]")
 int FTerrainTools::GetStrength()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -839,7 +841,7 @@ void FTerrainTools::Init()
 
 
 // --- UTerrainMaterial ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Returns this; UTerrainMaterial is its own fallback material")
 UMaterial * UTerrainMaterial::CheckFallback()
 {
 	return this;
@@ -876,35 +878,35 @@ int UTerrainMaterial::HasFallback()
 // ============================================================================
 
 // ??0UTerrainSector@@QAE@PAVATerrainInfo@@HHHH@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 UTerrainSector::UTerrainSector(ATerrainInfo*, INT, INT, INT, INT) {}
 
 // ??0UTerrainPrimitive@@QAE@PAVATerrainInfo@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to UPrimitive::Serialize")
 void UTerrainPrimitive::Serialize(FArchive& Ar) { UPrimitive::Serialize(Ar); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 INT UTerrainPrimitive::LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD) { return 1; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 INT UTerrainPrimitive::PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD) { return 1; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainPrimitive::Illuminate(AActor*, INT) {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor*, INT) { return FBox(); }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to UObject::Serialize")
 void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainSector::PostLoad() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainSector::StaticLight(INT) {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainSector::GenerateTriangles() {}
 // Ghidra at 0x156550. Returns linear index in the global heightmap grid.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x156550)
 INT UTerrainSector::GetGlobalVertex(INT X, INT Y) {
 	// TerrainInfo->HeightmapX is at offset 0x12E0 in ATerrainInfo
 	INT HeightmapX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
@@ -912,16 +914,16 @@ INT UTerrainSector::GetGlobalVertex(INT X, INT Y) {
 }
 
 // Ghidra at 0x153a0. Returns linear index within this sector.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x153a0)
 INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
 // ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
 // Gets the alpha texture for the layer, computes texel range for this sector,
 // then checks that every texel matches 'value'. Returns 1 (true) on empty range.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x107bae30)
 INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 {
 	// Alpha map pointer: TerrainInfo + 0x3AC + layerIdx * 0x78
@@ -950,7 +952,7 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 
 	return 1;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}

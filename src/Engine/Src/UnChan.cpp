@@ -1,25 +1,22 @@
-/*=============================================================================
+﻿/*=============================================================================
 UnChan.cpp: Network channel implementations (UChannel hierarchy)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- UChannel ---
 
-IMPL_APPROX("Needs Ghidra analysis")
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT UChannel::SendBunch(FOutBunch*, INT)
 {
 guard(UChannel::SendBunch);
@@ -29,7 +26,6 @@ unguard;
 
 
 // --- UFileChannel ---
-IMPL_APPROX("Needs Ghidra analysis")
 IMPL_INFERRED("Sets ChType to CHTYPE_File")
 void UFileChannel::StaticConstructor()
 {
@@ -38,8 +34,7 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
@@ -47,8 +42,7 @@ guard(UFileChannel::Tick);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -56,14 +50,12 @@ guard(UFileChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
 IMPL_TODO("Needs Ghidra analysis")
 FString UFileChannel::Describe()
 {
 return FString();
 }
 
-IMPL_INFERRED("Reconstructed from context")
 IMPL_GHIDRA("Engine.dll", 0x184100)
 void UFileChannel::Destroy()
 {
@@ -99,7 +91,6 @@ UChannel::Destroy();
 }
 }
 
-IMPL_INFERRED("Reconstructed from context")
 IMPL_GHIDRA("Engine.dll", 0x180f30)
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
@@ -109,7 +100,7 @@ UChannel::Init(Conn, ChIndex, InType);
 
 
 // --- UActorChannel ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Sets ChType to CHTYPE_Actor")
 void UActorChannel::StaticConstructor()
 {
 guard(UActorChannel::StaticConstructor);
@@ -117,7 +108,7 @@ guard(UActorChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to UChannel::Tick")
 void UActorChannel::Tick()
 {
 guard(UActorChannel::Tick);
@@ -125,7 +116,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -133,7 +124,7 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to UChannel::ReceivedNak; actor replication NAK handling not implemented")
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
@@ -142,7 +133,7 @@ UChannel::ReceivedNak(NakPacketId);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
@@ -150,7 +141,7 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
@@ -158,7 +149,7 @@ guard(UActorChannel::SetChannelActor);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x1821d0, "replication state flush not implemented")
 void UActorChannel::SetClosingFlag()
 {
 // Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
@@ -167,7 +158,7 @@ void UActorChannel::SetClosingFlag()
 UChannel::SetClosingFlag();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10481e90)
+IMPL_GHIDRA("Engine.dll", 0x1813e0)
 void UActorChannel::Close()
 {
 // Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
@@ -175,13 +166,13 @@ UChannel::Close();
 *(INT*)((BYTE*)this + 0x6C) = 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FString UActorChannel::Describe()
 {
 return FString();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Tears down actor channel replication state; client-side actor-ref cleanup deferred")
 void UActorChannel::Destroy()
 {
 	guard(UActorChannel::Destroy);
@@ -233,14 +224,14 @@ void UActorChannel::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns actor pointer at channel offset 0x6C")
 AActor* UActorChannel::GetActor()
 {
 // Ghidra (4B): Actor at offset 0x6C
 return *(AActor**)((BYTE*)this + 0x6C);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x180c90, "replication tracking fields zeroed instead of copying from level state")
 void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
@@ -255,7 +246,7 @@ appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 
 
 // --- UControlChannel ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Sets ChType to CHTYPE_Control")
 void UControlChannel::StaticConstructor()
 {
 guard(UControlChannel::StaticConstructor);
@@ -263,7 +254,7 @@ guard(UControlChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UControlChannel::ReceivedBunch(FInBunch&)
 {
 guard(UControlChannel::ReceivedBunch);
@@ -271,7 +262,7 @@ guard(UControlChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UControlChannel::Serialize(const TCHAR*, EName)
 {
 guard(UControlChannel::Serialize);
@@ -279,13 +270,13 @@ guard(UControlChannel::Serialize);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns empty description string")
 FString UControlChannel::Describe()
 {
 return FString();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x182070)
 void UControlChannel::Destroy()
 {
 // Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.
@@ -295,7 +286,7 @@ if (RouteDestroy() == 0)
 UChannel::Destroy();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to UChannel::Init")
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 UChannel::Init(Conn, ChIndex, InType);
@@ -309,10 +300,10 @@ UChannel::Init(Conn, ChIndex, InType);
 // UChannel
 // =============================================================================
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to Super::Destroy")
 void UChannel::Destroy() { Super::Destroy(); }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Initialises channel connection, index, and opening locality")
 void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
 {
 ChIndex = InChIndex;
@@ -325,10 +316,10 @@ OpenPacketId = INDEX_NONE;
 NegotiatedVer = 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Sets Closing flag to 1")
 void UChannel::SetClosingFlag() { Closing = 1; }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::Close()
 {
 guard(UChannel::Close);
@@ -336,7 +327,7 @@ guard(UChannel::Close);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns empty description string")
 FString UChannel::Describe()
 {
 guard(UChannel::Describe);
@@ -344,7 +335,7 @@ return FString();
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Marks reliable unacked bunches for resend on NAK")
 void UChannel::ReceivedNak(INT NakPacketId)
 {
 guard(UChannel::ReceivedNak);
@@ -361,7 +352,7 @@ Connection->SendRawBunch(*Out, 0);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
@@ -369,7 +360,7 @@ guard(UChannel::Tick);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Asserts InBunch chain is in ascending sequence order")
 void UChannel::AssertInSequenced()
 {
 guard(UChannel::AssertInSequenced);
@@ -381,7 +372,7 @@ appFailAssert("In->Next->ChSequence>In->ChSequence", ".\\UnChan.cpp", 0x108);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns 1 if Type is a registered channel class")
 INT CDECL UChannel::IsKnownChannelType(INT Type)
 {
 if (Type >= 0 && Type < 8 && UChannel::ChannelClasses[Type])
@@ -389,10 +380,10 @@ return 1;
 return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Always returns ready")
 INT UChannel::IsNetReady( INT Saturate ) { return 1; }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns available bytes for next bunch based on connection buffer state")
 INT UChannel::MaxSendBytes()
 {
 guard(UChannel::MaxSendBytes);
@@ -407,7 +398,7 @@ return bytes < 1 ? 0 : bytes;
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
@@ -415,7 +406,7 @@ guard(UChannel::ReceivedAcks);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
@@ -423,7 +414,7 @@ guard(UChannel::ReceivedRawBunch);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedSequencedBunch);
@@ -431,7 +422,7 @@ return 0;
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 INT UChannel::RouteDestroy()
 {
 guard(UChannel::RouteDestroy);
@@ -447,21 +438,21 @@ unguard;
 
 // UChannel
 // ---------------------------------------------------------------------------
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::StaticConstructor()
 {
 guard(UChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
 guard(UChannel::Serialize);
@@ -481,38 +472,38 @@ unguard;
 // DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
 //             that reference allocated memory may alias incorrectly at runtime.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Copies entire FInBunch via memcpy; retail sets individual fields after FBitReader copy-ctor")
 FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
 //             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Zeroes Pad region; retail calls FBitReader(nullptr,0) and sets individual fields")
 FInBunch::FInBunch(UNetConnection*) : FBitReader() { appMemzero(Pad, sizeof(Pad)); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Copies entire FInBunch via memcpy")
 FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("No-op serialiser for network objects")
 FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("No-op serialiser for network names")
 FArchive& FInBunch::operator<<(FName& N) { return *this; }
 
 // ============================================================================
 // FOutBunch
 // ============================================================================
 // DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Zeroes FOutBunch; retail calls FBitWriter(0) then sets vtable")
 FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Copies entire FOutBunch via memcpy; retail sets individual fields")
 FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Zeroes FOutBunch; retail calls FBitWriter and sets channel/sequence fields")
 FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Empty destructor")
 FOutBunch::~FOutBunch() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("No-op serialiser for network objects")
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("No-op serialiser for network names")
 FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
 
 // --- Moved from EngineStubs.cpp ---

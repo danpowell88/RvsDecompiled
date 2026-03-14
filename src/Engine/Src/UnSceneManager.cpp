@@ -1,17 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnSceneManager.cpp: Matinee scene manager and sub-action system
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
 inline void* operator new(size_t, void* p) noexcept { return p; }
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "ImplSource.h"
 #include "EngineDecls.h"
 
@@ -216,7 +216,7 @@ void ASceneManager::ChangeOrientation(FOrientation orient)
 	*(DWORD*)((BYTE*)this + 0x42C) = *(DWORD*)(actor + 0x248);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Empties PathSamples TArray at this+0x3E4")
 void ASceneManager::DeletePathSamples()
 {
 	// Retail: 17b. Empties the PathSamples TArray at this+0x3E4 (FVector elements, 12b each).
@@ -265,7 +265,7 @@ float ASceneManager::GetActionPctFromScenePct(float Pct)
 	return t;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns current actor FVector at +0x234 when scene is playing")
 FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 {
 	// Retail: 102b SEH. Returns the current action's cached location if the scene is playing.
@@ -277,7 +277,7 @@ FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 	return *(FVector*)(action + 0x234);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns current actor FRotator at +0x240 when scene is playing")
 FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMatAction *,int)
 {
 	// Retail: 106b SEH. Same guard as GetLocation: bit 2 of state byte at this+0x398.
@@ -289,7 +289,7 @@ FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMa
 	return *(FRotator*)(action + 0x240);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Calls Initialize() on each action in the Actions TArray")
 void ASceneManager::InitializeActions()
 {
 	// Retail: 48b. Calls Initialize() on each action in the Actions TArray at this+0x3A8.
@@ -327,11 +327,12 @@ FR6MatineePreviewProxy::FR6MatineePreviewProxy()
 {
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FR6MatineePreviewProxy::~FR6MatineePreviewProxy()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Default copy-assignment; no data members to copy")
 FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePreviewProxy&)
 {
 	return *this;
@@ -339,7 +340,7 @@ FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePrevie
 
 
 // --- UMatAction ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Calls Super::PostEditChange and refreshes scene manager path")
 void UMatAction::PostEditChange()
 {
 	guard(UMatAction::PostEditChange);
@@ -353,7 +354,7 @@ void UMatAction::PostEditChange()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Clears stale pending-kill object reference at +0x40 per retail 89b")
 void UMatAction::PostLoad()
 {
 	// Retail: 89b. Call Super::PostLoad() then clear stale object reference.
@@ -411,7 +412,7 @@ int UMatSubAction::Update(float Pct, ASceneManager*)
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Calls Super::PostEditChange and refreshes scene manager path")
 void UMatSubAction::PostEditChange()
 {
 	guard(UMatSubAction::PostEditChange);
@@ -449,14 +450,14 @@ void UMatSubAction::Initialize()
 	eventInitialize();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Returns 1 if status byte at +0x2C equals 2 (ending state)")
 int UMatSubAction::IsEnding()
 {
 	// Retail: 12b. Returns 1 if status byte at this+0x2C == 2 (SETE pattern).
 	return *(BYTE*)((BYTE*)this + 0x2C) == 2 ? 1 : 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns 1 if status byte at +0x2C is 1 (running) or 2 (ending)")
 int UMatSubAction::IsRunning()
 {
 	// Retail: 14b. Returns 1 if status byte at this+0x2C is 1 (started) or 2 (ending).
@@ -522,7 +523,7 @@ FString USubActionCameraEffect::GetStatString()
 
 
 // --- USubActionCameraShake ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x11da60, "FRangeVector::GetRand not implemented; calls parent and returns only")
 int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11da60, 116b. Calls parent Update; if running, gets scene manager via
@@ -784,15 +785,15 @@ FString USubActionTrigger::GetStatString()
 // ASceneManager
 // =============================================================================
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to Super::PostEditChange()")
 void ASceneManager::PostEditChange() { Super::PostEditChange(); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to Super::Tick()")
 INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ASceneManager::PostBeginPlay() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to Super::CheckForErrors()")
 void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
 
 // =============================================================================
@@ -803,7 +804,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::CloseVideo(UCanvas* Canvas)
 {
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Stores raw time, clears reset counter, calls RefreshSubActions with normalised pct")
 void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 	// Retail: 42b. Stores raw time at this+0x3D0, clears reset counter at this+0x448,
 	// then calls RefreshSubActions with time normalized by TotalSceneTime at this+0x3CC.
@@ -811,12 +812,12 @@ void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 	*(INT*)((BYTE*)this + 0x448) = 0;
 	RefreshSubActions( NewTime / *(FLOAT*)((BYTE*)this + 0x3CC) );
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10ba00, "FLineBatcher raw-float 8-vertex box not reconstructed (editor-only path)")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x10ba00, "FLineBatcher wireframe box not reconstructed; falls back to base class rendering")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);
@@ -861,14 +862,15 @@ void AInterpolationPoint::PostEditMove()
 // ============================================================================
 
 // ??1FMatineeTools@@UAE@XZ
+IMPL_TODO("Needs Ghidra analysis")
 FMatineeTools::~FMatineeTools() {}
 
 // ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns CurrentScene pointer")
 ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@PAV2@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Sets current scene and initializes CurrentAction/SubAction from scene's first action")
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
 {
 	CurrentScene = Scene;
@@ -892,7 +894,7 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASce
 }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Finds named scene manager in level actors and sets it as current")
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
 {
 	for (INT i = 0; i < Level->Actors.Num(); i++)
@@ -908,11 +910,11 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FStr
 }
 
 // ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Copies 24 bytes of lip sync data via appMemcpy")
 ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 	appMemcpy(this, &Other, 24);
 	return *this;
@@ -921,12 +923,12 @@ ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 // --- Moved from EngineStubs.cpp ---
 // ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
 // Ghidra: returns CurrentAction (offset 0x44).
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns CurrentAction pointer")
 UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
 
 // ?GetNextAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: GetActionIdx, return [idx+1] wrapping to [0].
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns action at index+1 in Actions array, wrapping to 0 at end")
 UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Current)
 {
 	if (!Scene) return NULL;
@@ -939,7 +941,7 @@ UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Cu
 
 // ?GetNextMovementAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: calls GetNextAction in a loop until the action IsA(UActionMoveCamera).
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Finds next UActionMoveCamera in the action sequence")
 UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAction * Current)
 {
 	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
@@ -958,7 +960,7 @@ UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAct
 
 // ?GetPrevAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: GetActionIdx, return [idx-1] wrapping to [last].
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns action at index-1, wrapping to last at beginning")
 UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Current)
 {
 	if (!Scene) return NULL;
@@ -972,7 +974,7 @@ UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Cu
 
 // ?SetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@PAV2@@Z
 // Ghidra: sets CurrentAction, primes CurrentSubAction from SubActions[0] if available.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Sets CurrentAction and primes CurrentSubAction from SubActions[0]")
 UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 {
 	CurrentAction = Action;
@@ -990,12 +992,12 @@ UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 
 // ?GetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@XZ
 // Ghidra: returns CurrentSubAction (offset 0x48).
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns CurrentSubAction pointer")
 UMatSubAction * FMatineeTools::GetCurrentSubAction() { return CurrentSubAction; }
 
 // ?SetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@PAV2@@Z
 // Ghidra: stores SubAction at this+0x48 and returns it.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Stores SubAction to CurrentSubAction and returns it")
 UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 {
 	CurrentSubAction = SubAction;
@@ -1004,7 +1006,7 @@ UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 
 
 // ?GetActionIdx@FMatineeTools@@QAEHPAVASceneManager@@PAVUMatAction@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns index of Action in SM->Actions array, or -1 if not found")
 int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 {
 	if (!SM)
@@ -1020,7 +1022,7 @@ int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 }
 
 // ?GetPathStyle@FMatineeTools@@QAEHPAVUMatAction@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns path style byte; 0 for Pause actions, per-action byte for MoveCamera")
 int FMatineeTools::GetPathStyle(UMatAction* Action)
 {
 	if (Action)
@@ -1034,7 +1036,7 @@ int FMatineeTools::GetPathStyle(UMatAction* Action)
 }
 
 // ?GetSubActionIdx@FMatineeTools@@QAEHPAVUMatSubAction@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns index of SubAction in CurrentAction->SubActions, or -1")
 int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 {
 	if (!CurrentAction)
@@ -1049,35 +1051,35 @@ int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 	return -1;
 }
 // ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Sets bPlaying=1 to start lip sync playback")
 void ECLipSynchData::m_vStartLipsynch()
 {
 	bPlaying = 1;
 }
 
 // ?m_vStopLipsynch@ECLipSynchData@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ECLipSynchData::m_vStopLipsynch() {}
 
 // ?m_vUpdateBonesCompressed@ECLipSynchData@@QAEXH@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ECLipSynchData::m_vUpdateBonesCompressed(int p0) {}
 
 // ?m_vUpdateBonesCompressed_BoneView@ECLipSynchData@@QAEXH@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ECLipSynchData::m_vUpdateBonesCompressed_BoneView(int p0) {}
 
 // ?m_vUpdateBonesCompressed_PhonemsSeq@ECLipSynchData@@QAEXH@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ECLipSynchData::m_vUpdateBonesCompressed_PhonemsSeq(int p0) {}
 
 // ?m_vUpdateLipSynch@ECLipSynchData@@QAEXM@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void ECLipSynchData::m_vUpdateLipSynch(float p0) {}
 // ?GetSamples@FMatineeTools@@QAEXPAVASceneManager@@PAVUMatAction@@PAV?$TArray@VFVector@@@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void FMatineeTools::GetSamples(ASceneManager * p0, UMatAction * p1, TArray<FVector> * p2) {}
 
 // ?Init@FMatineeTools@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 void FMatineeTools::Init() {}

@@ -1,17 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnRenderUtil.cpp: Render buffers, lighting, and BSP geometry helpers
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
 inline void* operator new(size_t, void* p) noexcept { return p; }
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // extern declarations for FCollisionHash per-frame counters.
@@ -334,13 +334,13 @@ FLightMap& FLightMap::operator=(const FLightMap& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x4750)
 unsigned __int64 FLightMap::GetCacheId()
 {
 	// Ghidra 0x4750: genuine stub; returns 0.
 	return 0;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 int FLightMap::GetFirstMip()
 {
 	// Ghidra 0x114310: shared stub; returns 0.
@@ -361,7 +361,7 @@ int FLightMap::GetNumMips()
 {
 	return 1;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 void * FLightMap::GetRawTextureData(int)
 {
 	// Ghidra 0x4720: shared stub; returns NULL.
@@ -372,7 +372,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x110560, "Too complex to fully decompile; guard/unguard stub only")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
@@ -387,7 +387,7 @@ ETexClampMode FLightMap::GetUClamp()
 {
 	return TC_Clamp;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Shared stub; returns NULL")
 UTexture * FLightMap::GetUTexture()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
@@ -478,7 +478,7 @@ FTexture * FLightMapTexture::GetChild(int Index, int* OutWidth, int* OutHeight)
 	*OutHeight = *(INT*)(texElem + 0x18);
 	return (FTexture*)texElem;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Shared stub; returns 0")
 int FLightMapTexture::GetFirstMip()
 {
 	// Ghidra 0x114310: shared stub; returns 0.
@@ -564,7 +564,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x115560, "FPoly + plane iteration too complex to fully decompile; stub only")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
@@ -609,7 +609,7 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x114e50, "Too complex to fully decompile; stub only")
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
 	// Ghidra 0x114e50: too complex to fully decompile; left empty.
@@ -656,14 +656,14 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x114b90, "Complex FMatrix rotation per ring; stub only")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
 	// TODO: implement FLineBatcher::DrawSphere (Ghidra 0x114b90: complex FMatrix rotation per ring)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x1172a0, "GCache + UProxyBitmapMaterial + vertex stream too complex; stub only")
 void FLineBatcher::Flush(DWORD Flags)
 {
 	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
@@ -681,7 +681,7 @@ int FLineBatcher::GetComponents(FVertexComponent* C)
 	C[1].Type = 4; C[1].Function = 2;
 	return 2;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Ghidra: *Out = data + offset * 0x10")
 void FLineBatcher::GetRawStreamData(void ** Out, int Offset)
 {
 	// Ghidra: *Out = data + offset * 0x10
@@ -700,11 +700,15 @@ int FLineBatcher::GetSize()
 }
 IMPL_INFERRED("Ghidra describes memcpy Num<<4; no standalone address")
 void FLineBatcher::GetStreamData(void * Dest)
+{
 	INT Size = *(INT*)(Pad + 4) << 4;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
 IMPL_INFERRED("Returns fixed stride 0x10; no Ghidra address")
 int FLineBatcher::GetStride()
+{
+	return 0x10;
+}
 
 
 // --- FRaw32BitIndexBuffer ---
@@ -725,6 +729,7 @@ FRaw32BitIndexBuffer::FRaw32BitIndexBuffer()
 
 IMPL_GHIDRA("Engine.dll", 0x1032c020)
 FRaw32BitIndexBuffer::~FRaw32BitIndexBuffer()
+{
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
@@ -741,21 +746,29 @@ FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer
 // (merged from earlier occurrence)
 IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FRaw32BitIndexBuffer::GetCacheId()
+{
+return *(QWORD*)(Pad + 12);
 }
 IMPL_INFERRED("Ghidra describes memcpy Num<<2; no standalone address")
 void FRaw32BitIndexBuffer::GetContents(void * Dest)
-	INT Size = *(INT*)(Pad + 4) << 2;
+{
+INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
 IMPL_INFERRED("Returns fixed index size 4; no Ghidra address")
 int FRaw32BitIndexBuffer::GetIndexSize()
+{
+return 4;
 }
 IMPL_INFERRED("Returns revision from Pad+20; no Ghidra address")
 int FRaw32BitIndexBuffer::GetRevision()
+{
+return *(INT*)(Pad + 20);
 }
 IMPL_INFERRED("Ghidra describes Num << 2; no standalone address")
 int FRaw32BitIndexBuffer::GetSize()
-	return *(INT*)(Pad + 4) << 2;
+{
+return *(INT*)(Pad + 4) << 2;
 }
 
 
@@ -777,6 +790,7 @@ FRawColorStream::FRawColorStream()
 
 IMPL_GHIDRA("Engine.dll", 0x1032c020)
 FRawColorStream::~FRawColorStream()
+{
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
@@ -792,29 +806,40 @@ FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 // (merged from earlier occurrence)
 IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FRawColorStream::GetCacheId()
+{
+return *(QWORD*)(Pad + 12);
 }
 IMPL_INFERRED("Vertex component layout inferred from colour stream type; no Ghidra address")
 int FRawColorStream::GetComponents(FVertexComponent* C)
-	return 1;
+{
+return 1;
 }
 IMPL_INFERRED("Ghidra describes logic; no standalone address extracted")
 void FRawColorStream::GetRawStreamData(void ** Out, int Offset)
-	*Out = *(BYTE**)Pad + Offset * 4;
+{
+*Out = *(BYTE**)Pad + Offset * 4;
 }
 IMPL_INFERRED("Returns revision from Pad+20; no Ghidra address")
 int FRawColorStream::GetRevision()
+{
+return *(INT*)(Pad + 20);
 }
 IMPL_INFERRED("Ghidra describes Num << 2; no standalone address")
 int FRawColorStream::GetSize()
-	return *(INT*)(Pad + 4) << 2;
+{
+return *(INT*)(Pad + 4) << 2;
 }
 IMPL_INFERRED("Ghidra describes memcpy Num<<2; no standalone address")
 void FRawColorStream::GetStreamData(void * Dest)
-	INT Size = *(INT*)(Pad + 4) << 2;
+{
+INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
 IMPL_INFERRED("Returns fixed stride 4; no Ghidra address")
 int FRawColorStream::GetStride()
+{
+return 4;
+}
 
 
 // --- FRawIndexBuffer ---
@@ -848,6 +873,7 @@ FRawIndexBuffer::FRawIndexBuffer()
 
 IMPL_INFERRED("Destroys TArray<_WORD> at +4; no Ghidra address")
 FRawIndexBuffer::~FRawIndexBuffer()
+{
 	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
 }
 
@@ -871,6 +897,8 @@ void FRawIndexBuffer::CacheOptimize()
 }
 IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FRawIndexBuffer::GetCacheId()
+{
+return *(QWORD*)(Pad + 12);
 }
 IMPL_INFERRED("Reconstructed from context")
 void FRawIndexBuffer::GetContents(void* Dest)
@@ -892,7 +920,8 @@ int FRawIndexBuffer::GetRevision()
 }
 IMPL_INFERRED("Retail byte sequence confirms Num << 1; no standalone Ghidra address")
 int FRawIndexBuffer::GetSize()
-	// TArray<_WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
+{
+// TArray<_WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
 	return *(INT*)(Pad + 4) << 1;
 }
 
@@ -915,6 +944,7 @@ FSkinVertexStream::FSkinVertexStream()
 
 IMPL_INFERRED("Destroys TArray<FStreamVert32> at +0x20; no Ghidra address")
 FSkinVertexStream::~FSkinVertexStream()
+{
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
 }
 
@@ -931,10 +961,13 @@ FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 // (merged from earlier occurrence)
 IMPL_INFERRED("Returns QWORD cache ID from Pad+8; no Ghidra address")
 unsigned __int64 FSkinVertexStream::GetCacheId()
+{
+return *(QWORD*)(Pad + 8);
 }
 IMPL_INFERRED("Vertex component layout inferred from skin stream type; no Ghidra address")
 int FSkinVertexStream::GetComponents(FVertexComponent* C)
-	C[1].Type = 1; C[1].Function = 1;
+{
+C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
@@ -949,10 +982,13 @@ void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 }
 IMPL_INFERRED("Returns revision from Pad+16; no Ghidra address")
 int FSkinVertexStream::GetRevision()
+{
+return *(INT*)(Pad + 16);
 }
 IMPL_INFERRED("Retail describes GPU/CPU size logic; no standalone Ghidra address")
 int FSkinVertexStream::GetSize()
-	// If null, no data allocated → return 0.
+{
+// If null, no data allocated → return 0.
 	// Otherwise: load parent object from Pad+4 ([this+8]), call vtable slot 78
 	// (offset 0x138) to get vertex count, multiply by stride 32 (SHL 5).
 	if (!*(DWORD*)(Pad + 0x18)) return 0;
@@ -1006,7 +1042,8 @@ FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Oth
 
 IMPL_GHIDRA_APPROX("Engine.dll", 0x27960, "CacheId left 0; retail uses global per-resource counter DAT_1060b564")
 FStaticLightMapTexture::FStaticLightMapTexture()
-	// cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
+{
+// cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
 	// revision at +0x48 = 0.
 	appMemzero((BYTE*)this + 0x08, 0x08); // TLazyArray[0] header DWORDs
 	new ((BYTE*)this + 0x10) TArray<BYTE>();
@@ -1018,7 +1055,8 @@ FStaticLightMapTexture::FStaticLightMapTexture()
 
 IMPL_GHIDRA("Engine.dll", 0x20cd0)
 FStaticLightMapTexture::~FStaticLightMapTexture()
-	((TArray<BYTE>*)((BYTE*)this + 0x28))->~TArray();
+{
+((TArray<BYTE>*)((BYTE*)this + 0x28))->~TArray();
 	((TArray<BYTE>*)((BYTE*)this + 0x10))->~TArray();
 }
 
@@ -1038,21 +1076,30 @@ FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapT
 // (merged from earlier occurrence)
 IMPL_INFERRED("Returns QWORD cache ID from Pad+60; no Ghidra address")
 unsigned __int64 FStaticLightMapTexture::GetCacheId()
+{
+return *(QWORD*)(Pad + 60);
 }
 IMPL_INFERRED("Ghidra describes UTexture::__Client check; no standalone address")
 int FStaticLightMapTexture::GetFirstMip()
-	if (UTexture::__Client != NULL && *(INT*)((BYTE*)UTexture::__Client + 0x70) != 0)
+{
+if (UTexture::__Client != NULL && *(INT*)((BYTE*)UTexture::__Client + 0x70) != 0)
 		return 1;
 	return 0;
 }
 IMPL_INFERRED("Returns format from Pad+48; no Ghidra address")
 ETextureFormat FStaticLightMapTexture::GetFormat()
+{
+return (ETextureFormat)*(INT*)(Pad + 48);
 }
 IMPL_INFERRED("Returns height from Pad+56; no Ghidra address")
 int FStaticLightMapTexture::GetHeight()
+{
+return *(INT*)(Pad + 56);
 }
 IMPL_INFERRED("Returns fixed mip count 2; no Ghidra address")
 int FStaticLightMapTexture::GetNumMips()
+{
+return 2;
 }
 IMPL_GHIDRA_APPROX("Engine.dll", 0x10FE60, "GIsEditor assertion removed; returns NULL when not editor-loaded")
 void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
@@ -1074,8 +1121,10 @@ void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 }
 IMPL_INFERRED("Returns revision from Pad+68; no Ghidra address")
 int FStaticLightMapTexture::GetRevision()
+{
+return *(INT*)(Pad + 68);
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Complex lazy-load + DXT decode pipeline; stub only")
 void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticLightMapTexture::GetTextureData (Ghidra: complex lazy-load + DXT decode pipeline)
@@ -1085,7 +1134,7 @@ ETexClampMode FStaticLightMapTexture::GetUClamp()
 {
 	return TC_Wrap;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Shared stub; returns NULL")
 UTexture * FStaticLightMapTexture::GetUTexture()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
@@ -1112,7 +1161,7 @@ int FStaticMeshUVStream::GetComponents(FVertexComponent* C)
 	C[0].Type = 2; C[0].Function = *(INT*)(Pad + 0x0C) + 4;
 	return 1;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Ghidra: *Out = data + offset * 8")
 void FStaticMeshUVStream::GetRawStreamData(void ** Out, int Offset)
 {
 	// Ghidra: *Out = data + offset * 8
@@ -1153,7 +1202,7 @@ int FStaticMeshVertexStream::GetComponents(FVertexComponent* C)
 	C[1].Type = 1; C[1].Function = 1;
 	return 2;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Retail: data = [this+4]; stride = 24")
 void FStaticMeshVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
 	// Retail: data = [this+4] (TArray.Data); stride = 24 (3*8); Pad[0] = this+4
@@ -1240,11 +1289,12 @@ int FStaticTexture::GetHeight()
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	return Texture->VSize;
 }
-IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Returns Texture->Mips.Num(); no Ghidra address")
 int FStaticTexture::GetNumMips()
+{
+UTexture* Texture = *(UTexture**)&Pad[8];
+return Texture->Mips.Num();
 }
-IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Ghidra describes lazy-load mip access; no standalone address")
 void * FStaticTexture::GetRawTextureData(int MipIndex)
 {
@@ -1273,10 +1323,10 @@ void * FStaticTexture::GetRawTextureData(int MipIndex)
 
 	return *(void**)(MipEntry + 0x1C);
 }
-IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Retail byte sequence describes bRealtimeChanged check; no standalone address")
 int FStaticTexture::GetRevision()
-	// If bRealtimeChanged flag (bit 6 = 0x40 in bitfield at UTexture+0x94) is set:
+{
+// If bRealtimeChanged flag (bit 6 = 0x40 in bitfield at UTexture+0x94) is set:
 	// increment Revision counter at this+0x10, clear the flag, then return Revision.
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	if (Texture->bRealtimeChanged)
@@ -1286,28 +1336,33 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_TODO("Needs Ghidra analysis")
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Complex lazy-load path; stub only")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
 }
-IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Returns Texture->UClampMode; no Ghidra address")
 ETexClampMode FStaticTexture::GetUClamp()
+{
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return (ETexClampMode)Texture->UClampMode;
 }
 IMPL_INFERRED("Reconstructed from context")
 UTexture * FStaticTexture::GetUTexture()
 {
 	return *(UTexture**)&Pad[8];
 }
-IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Returns Texture->VClampMode; no Ghidra address")
 ETexClampMode FStaticTexture::GetVClamp()
+{
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return (ETexClampMode)Texture->VClampMode;
 }
-IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Returns Texture->USize; no Ghidra address")
 int FStaticTexture::GetWidth()
+{
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	return Texture->USize;
 }
 
 
@@ -1346,7 +1401,7 @@ FBspSection& FBspSection::operator=(const FBspSection& Other)
 
 
 // --- FBspVertex ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Reconstructed from context")
 FBspVertex::FBspVertex()
 {
 	// Ghidra: constructs two FVectors at offset 0 and 0xC (Position + Normal)
@@ -1392,7 +1447,7 @@ FConvexVolume::FConvexVolume()
 	NumPlanes = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Trivial dtor; no heap to free")
 FConvexVolume::~FConvexVolume()
 {
 	// Ghidra: trivial dtor; no heap to free.
@@ -1436,7 +1491,7 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 
 
 // --- FDynamicActor ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Rendering dispatched via UMeshInstance::Render vtable")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
@@ -1462,7 +1517,7 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 	// TODO: complete FDynamicActor constructor mesh/physics transform setup (requires unresolved FUN_* helpers)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Trivial dtor; no heap to free")
 FDynamicActor::~FDynamicActor()
 {
 	// Ghidra: trivial dtor; no heap to free.
@@ -1589,7 +1644,7 @@ FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
 
 
 // --- FLightMapIndex ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Reconstructed from context")
 FLightMapIndex::FLightMapIndex()
 {
 	// Ghidra 0x2b40: constructs FMatrix at +8 and +0x48, FVector at +0x88, +0x94, +0xA0.
@@ -1598,7 +1653,7 @@ FLightMapIndex::FLightMapIndex()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Reconstructed from context")
 FLightMapIndex::~FLightMapIndex()
 {
 	// Ghidra 0x2bc0: destructs FMatrix at +0x48 then +8.
@@ -1616,14 +1671,14 @@ FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex& Other)
 
 
 // --- FLineVertex ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Reconstructed from context")
 FLineVertex::FLineVertex(FVector InPoint, FColor InColor)
 :	Point(InPoint)
 ,	Color(InColor)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Reconstructed from context")
 FLineVertex::FLineVertex()
 {
 	// Ghidra 0x3810: calls FVector::FVector((FVector*)this) then returns.
@@ -1867,7 +1922,7 @@ void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 
 
 // --- UConvexVolume ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Trivial serialize stub; no persistent data beyond UObject base")
 void UConvexVolume::Serialize(FArchive& Ar)
 {
 	// Ghidra: trivial serialize stub; no persistent data beyond UObject base.

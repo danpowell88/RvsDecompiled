@@ -1,19 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnPhysic.cpp: Physics volumes and zone system
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- APhysicsVolume ---
@@ -64,12 +62,12 @@ INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire,
 
 
 // --- AVolume ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AVolume::SetVolumes(TArray<AVolume *> const &)
 {
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AVolume::SetVolumes()
 {
 }
@@ -199,7 +197,7 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 
 
 // --- AWarpZoneMarker ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AWarpZoneMarker::addReachSpecs(APawn*,int)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
@@ -222,7 +220,7 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);
@@ -239,7 +237,9 @@ FZoneProperties::FZoneProperties(const FZoneProperties& Other)
 }
 
 IMPL_GHIDRA("Engine.dll", 0x18b40)
-FZoneProperties::FZoneProperties()(53 bytes): zeroes offsets 0x08–0x44 (16 DWORDs).
+FZoneProperties::FZoneProperties()
+{
+	// Ghidra 0x18b40: 53 bytes. Zeroes offsets 0x08-0x44 (16 DWORDs).
 	// First 8 bytes are left untouched (written only by the copy ctor / operator=).
 	appMemzero((BYTE*)this + 8, 0x40);
 }

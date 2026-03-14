@@ -157,25 +157,25 @@ void UR6PlanningInfo::TransferFile(FArchive& Ar)
 	}
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6PlanningInfo::execAddToTeam(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6PlanningInfo::execDeletePoint(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6PlanningInfo::execFindPathToNextPoint(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6PlanningInfo::execInsertToTeam(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

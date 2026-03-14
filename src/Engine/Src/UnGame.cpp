@@ -1,19 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnGame.cpp: Engine and game-engine core (UEngine, UGameEngine)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- UGameEngine ---
@@ -21,12 +19,13 @@ inline void  operator delete(void*, void*) noexcept {}
 // g_pEngine is defined in UnCamera.cpp; declared here so Init() can set it.
 extern ENGINE_API UEngine* g_pEngine;
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xa37a0,
-    "FUN_103563f0 (post-render-device resource setup) omitted: identity not established. "
-    "appSprintf CLASS= third arg derived from PlayerURL options; Ghidra lost the arg. "
-    "GConfig server-ini section call uses GetSection; original vtable slot unclear. "
-    "GLevel vtable[0xb4] and vtable[0xdc] preserved via raw dispatch; identities unknown. "
-    "Audio vtable[0x78] setup signature approximated as (void*, FString&) -> INT.")
+// Ghidra analysis of Engine.dll at 0xa37a0.
+// FUN_103563f0 (post-render-device resource setup) omitted: identity not established.
+// appSprintf CLASS= third arg derived from PlayerURL options; Ghidra lost the arg.
+// GConfig server-ini section call uses GetSection; original vtable slot unclear.
+// GLevel vtable[0xb4] and vtable[0xdc] preserved via raw dispatch; identities unknown.
+// Audio vtable[0x78] setup signature approximated as (void*, FString&) -> INT.
+IMPL_APPROX("Multiple Ghidra-identified gaps; identity not established for omitted calls")
 void UGameEngine::Init()
 {
     guard(UGameEngine::Init);
@@ -83,7 +82,7 @@ void UGameEngine::Init()
         Cast<URenderDevice>(RenDevObj)->Init();
 
         // FUN_103563f0: post-init render resource setup (GIsClient guard confirmed).
-        // Identity unknown — omitted. See IMPL_GHIDRA_APPROX annotation above.
+        // Identity unknown — omitted. See IMPL_APPROX annotation above.
     }
 
     // Error string used throughout Browse / LoadMap.
@@ -240,7 +239,7 @@ void UGameEngine::Init()
     unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UGameEngine::ReplaceTexture(FString,UTexture *)
 {
 	guard(UGameEngine::ReplaceTexture);
@@ -252,7 +251,7 @@ int UGameEngine::ReplaceTexture(FString,UTexture *)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	guard(UGameEngine::LoadBackgroundImage);
@@ -263,7 +262,7 @@ int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10316cb0)
+IMPL_MATCH("Engine.dll", 0x10316cb0)
 void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 {
 	guard(UGameEngine::LoadRandomMenuBackgroundImage);
@@ -285,7 +284,7 @@ void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewport* Viewport)
 {
 	guard(UGameEngine::PostRenderFullScreenEffects);
@@ -297,7 +296,7 @@ void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewp
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10385b30)
+IMPL_MATCH("Engine.dll", 0x10385b30)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -326,7 +325,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -363,7 +362,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -398,7 +397,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -433,7 +432,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 {
 	guard(UGameEngine::DisplayGameVideo);
@@ -445,7 +444,7 @@ void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 {
 	guard(UGameEngine::InitializeMissionDescription);
@@ -459,12 +458,10 @@ void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 
 
 // --- UEngine ---
-IMPL_INFERRED("Reconstructed from context")
+// Ghidra 0x10393060 (UEngine::StaticConstructor):
+// Register two config properties and create the ArmPatches cache directory.
+IMPL_APPROX("Reconstructed from context")
 void UEngine::StaticConstructor()
-{
-	guard(UEngine::StaticConstructor);
-	// Ghidra 0x10393060 (UEngine::StaticConstructor):
-	// Register two config properties and create the ArmPatches cache directory.
 	new(GetClass(), TEXT("CacheSizeMegs"), RF_Public)
 		UIntProperty(EC_CppProperty, 0x84, TEXT("Settings"), CPF_Config);
 	new(GetClass(), TEXT("UseSound"), RF_Public)
@@ -479,14 +476,14 @@ void UEngine::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UEngine::ReplaceTexture(FString,UTexture *)
 {
 	// Ghidra 0x10311900: destructs FString by-value param, returns 0.
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::Serialize(FArchive &Ar)
 {
 	guard(UEngine::Serialize);
@@ -501,7 +498,7 @@ void UEngine::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UEngine::Key(UViewport*, EInputKey Key)
 {
 	guard(UEngine::Key);
@@ -516,20 +513,20 @@ int UEngine::Key(UViewport*, EInputKey Key)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	// Ghidra 0x103118e0: destructs FString by-value param, returns 1.
 	return 1;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UEngine::LoadRandomMenuBackgroundImage(FString)
 {
 	// Ghidra 0x103118d0: destructs FString by-value param, returns.
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UEngine::CacheArmPatch(FGuid *,DWORD *)
 {
 	guard(UEngine::CacheArmPatch);
@@ -540,7 +537,7 @@ int UEngine::CacheArmPatch(FGuid *,DWORD *)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::Destroy()
 {
 	guard(UEngine::Destroy);
@@ -558,7 +555,7 @@ void UEngine::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UEngine::ExecServerProf);
@@ -568,7 +565,7 @@ int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::InitAudio()
 {
 	guard(UEngine::InitAudio);
@@ -604,7 +601,7 @@ void UEngine::InitAudio()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action, float Delta)
 {
 	guard(UEngine::InputEvent);
@@ -640,7 +637,7 @@ int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action,
 
 
 // --- UInteractionMaster ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UInteractionMaster::MasterProcessKeyEvent(EInputKey,EInputAction,float)
 {
 	guard(UInteractionMaster::MasterProcessKeyEvent);
@@ -650,7 +647,7 @@ int UInteractionMaster::MasterProcessKeyEvent(EInputKey,EInputAction,float)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UInteractionMaster::MasterProcessKeyType(EInputKey)
 {
 	guard(UInteractionMaster::MasterProcessKeyType);
@@ -659,7 +656,7 @@ int UInteractionMaster::MasterProcessKeyType(EInputKey)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UInteractionMaster::MasterProcessMessage(FString const &,float)
 {
 	guard(UInteractionMaster::MasterProcessMessage);
@@ -667,7 +664,7 @@ void UInteractionMaster::MasterProcessMessage(FString const &,float)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UInteractionMaster::MasterProcessPostRender(UCanvas *)
 {
 	guard(UInteractionMaster::MasterProcessPostRender);
@@ -676,7 +673,7 @@ void UInteractionMaster::MasterProcessPostRender(UCanvas *)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UInteractionMaster::MasterProcessPreRender(UCanvas *)
 {
 	guard(UInteractionMaster::MasterProcessPreRender);
@@ -684,7 +681,7 @@ void UInteractionMaster::MasterProcessPreRender(UCanvas *)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UInteractionMaster::MasterProcessTick(float)
 {
 	guard(UInteractionMaster::MasterProcessTick);
@@ -692,7 +689,7 @@ void UInteractionMaster::MasterProcessTick(float)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UInteractionMaster::DisplayCopyright()
 {
 	guard(UInteractionMaster::DisplayCopyright);
@@ -701,7 +698,7 @@ void UInteractionMaster::DisplayCopyright()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 {
 	// Ghidra 0x103b6660: if Level has interactions, dispatch Exec to first interaction
@@ -710,21 +707,21 @@ int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 }
 
 // --- AHUD ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AHUD::DrawInGameMap(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawInGameMap);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AHUD::DrawRadar(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawRadar);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawSpecificModeInfo);
@@ -734,13 +731,13 @@ void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::AbortScoreSubmission() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::MasterServerManager() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::InitGameInfoGameService() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}

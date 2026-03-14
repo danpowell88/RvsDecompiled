@@ -1,37 +1,35 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnTerrainTools.cpp: Terrain editor brush hierarchy (UTerrainBrush*)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- UTerrainBrush ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrush::MouseButtonDown);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::MouseButtonUp(UViewport *)
 {
 	guard(UTerrainBrush::MouseButtonUp);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::MouseMove(float,float)
 {
 	guard(UTerrainBrush::MouseMove);
@@ -108,21 +106,21 @@ int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::EndPainting(UTexture *,ATerrainInfo *)
 {
 	guard(UTerrainBrush::EndPainting);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrush::Execute(int)
 {
 	guard(UTerrainBrush::Execute);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrush::GetRect()
 {
 	return FBox();
@@ -161,7 +159,7 @@ UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Othe
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushColor::Execute(int)
 {
 	guard(UTerrainBrushColor::Execute);
@@ -201,14 +199,14 @@ UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeT
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushEdgeTurn::Execute(int)
 {
 	guard(UTerrainBrushEdgeTurn::Execute);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrushEdgeTurn::GetRect()
 {
 	return FBox();
@@ -247,7 +245,7 @@ UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushFlatten::Execute(int)
 {
 	guard(UTerrainBrushFlatten::Execute);
@@ -287,7 +285,7 @@ UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Othe
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushNoise::Execute(int)
 {
 	guard(UTerrainBrushNoise::Execute);
@@ -327,7 +325,7 @@ UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Othe
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushPaint::Execute(int)
 {
 	guard(UTerrainBrushPaint::Execute);
@@ -336,7 +334,7 @@ void UTerrainBrushPaint::Execute(int)
 
 
 // --- UTerrainBrushPlanningPaint ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrushPlanningPaint::MouseButtonDown);
@@ -374,7 +372,7 @@ UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrain
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushPlanningPaint::Execute(int)
 {
 	guard(UTerrainBrushPlanningPaint::Execute);
@@ -383,14 +381,14 @@ void UTerrainBrushPlanningPaint::Execute(int)
 
 
 // --- UTerrainBrushSelect ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrushSelect::MouseButtonDown);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSelect::MouseMove(float,float)
 {
 	guard(UTerrainBrushSelect::MouseMove);
@@ -428,14 +426,14 @@ UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& O
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSelect::Execute(int)
 {
 	guard(UTerrainBrushSelect::Execute);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrushSelect::GetRect()
 {
 	return FBox();
@@ -474,7 +472,7 @@ UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& O
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushSmooth::Execute(int)
 {
 	guard(UTerrainBrushSmooth::Execute);
@@ -483,7 +481,7 @@ void UTerrainBrushSmooth::Execute(int)
 
 
 // --- UTerrainBrushTexPan ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushTexPan::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexPan::MouseMove);
@@ -523,7 +521,7 @@ UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& O
 
 
 // --- UTerrainBrushTexRotate ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushTexRotate::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexRotate::MouseMove);
@@ -563,7 +561,7 @@ UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTex
 
 
 // --- UTerrainBrushTexScale ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushTexScale::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexScale::MouseMove);
@@ -667,14 +665,14 @@ UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushV
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UTerrainBrushVisibility::Execute(int)
 {
 	guard(UTerrainBrushVisibility::Execute);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainBrushVisibility::GetRect()
 {
 	return FBox();

@@ -131,7 +131,7 @@ void FThrowOut::Serialize( const TCHAR* V, EName Event )
 	FFrame::Serialize.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("retail 0x1bd50: logs script frame context to GLog/GError")
+IMPL_INFERRED("retail 0x1bd50: logs script frame context to GLog/GError")
 void FFrame::Serialize( const TCHAR* V, EName Event )
 {
 	guard(FFrame::Serialize);

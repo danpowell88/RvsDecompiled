@@ -226,7 +226,7 @@ static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 }
 
 // Helper: set post-bind socket options. Always succeeds in this implementation.
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 static bool SetSocketOptions(SOCKET s)
 {
 	(void)s;

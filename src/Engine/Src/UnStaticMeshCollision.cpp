@@ -1,23 +1,21 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnStaticMeshCollision.cpp: Static mesh collision and geometry data structures
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- FStaticMeshCollisionNode ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FStaticMeshCollisionNode::FStaticMeshCollisionNode()
 {
 	// Ghidra: only constructs FBox at offset 0x10 (empty default ctor)
@@ -38,7 +36,7 @@ FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle(FStaticMeshCollisionT
 	appMemcpy(_Data, Other._Data, 84); // 21 dwords: 4 FPlanes + 5 extra dwords
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle()
 {
 	// Ghidra: constructs 4 FPlanes (all empty default ctors)
@@ -72,7 +70,7 @@ FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& O
 
 
 // --- FStaticMeshSection ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FStaticMeshSection::FStaticMeshSection()
 {
 	*(DWORD*)((BYTE*)this + 0x00) = 0;       // +0x00
@@ -93,7 +91,7 @@ FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Othe
 
 
 // --- FStaticMeshTriangle ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FStaticMeshTriangle::FStaticMeshTriangle()
 {
 	// Ghidra: constructs 3 FVectors at offsets 0x00, 0x0C, 0x18 (all empty default ctors)
@@ -152,7 +150,7 @@ FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream& O
 
 
 // --- FStaticMeshVertex ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FStaticMeshVertex::FStaticMeshVertex()
 {
 	// Ghidra: constructs two FVectors at offset 0 and 0xC (same as FBspVertex)

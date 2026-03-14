@@ -49,7 +49,7 @@ void AR6Terrorist::PreNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 {
 	guard(AR6Terrorist::UpdateAiming);

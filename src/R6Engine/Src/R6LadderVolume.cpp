@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6LadderVolume)
 
 // --- AR6LadderVolume ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6LadderVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6LadderVolume::AddMyMarker);

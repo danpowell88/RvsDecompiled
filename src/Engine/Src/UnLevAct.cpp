@@ -1,19 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnLevAct.cpp: Level actor management (ULevelSummary)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Standard placement new required for in-place construction in this TU")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Standard placement delete companion to placement new")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- ULevelSummary ---

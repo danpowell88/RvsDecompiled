@@ -1,44 +1,42 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnFPoly.cpp: Face polygon helpers (FBezier)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- FBezier ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBezier::FBezier(FBezier const &)
 {
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBezier::FBezier()
 {
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBezier::~FBezier()
 {
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBezier& FBezier::operator=(const FBezier&)
 {
 	return *this;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 float FBezier::Evaluate(FVector *,int,TArray<FVector> *)
 {
 	return 0.0f;
@@ -116,7 +114,7 @@ int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection)
 }
 
 // ?Faces@FPoly@@QBEHABV1@@Z
-IMPL_INFERRED("coplanar and dot-product face test")
+IMPL_INFERRED("coplanar and dot-product face test; checks vertex distances between both polys")
 int FPoly::Faces(FPoly const & Other) const {
 	if( IsCoplanar(Other) )
 		return 0;

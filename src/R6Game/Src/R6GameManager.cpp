@@ -108,14 +108,14 @@ found:
 		pMaster->Exec(*Cmd, *GWarn);  // fallback to GWarn if no output device found
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::GSClientManager(UConsole *)
 {
 	guard(UR6GameManager::GSClientManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::GameServiceTick(UConsole *)
 {
 	guard(UR6GameManager::GameServiceTick);
@@ -128,35 +128,35 @@ INT UR6GameManager::GetGSCreateUbiServer()
 	return s_GSCreateUbiServer;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::InitializeGSClient()
 {
 	guard(UR6GameManager::InitializeGSClient);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::InitializeGameService(UConsole *)
 {
 	guard(UR6GameManager::InitializeGameService);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::LaunchListenSrv(FString, FString)
 {
 	guard(UR6GameManager::LaunchListenSrv);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::MSClientManager(UConsole *)
 {
 	guard(UR6GameManager::MSClientManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::MinimizeAndPauseMusic(UConsole *)
 {
 	guard(UR6GameManager::MinimizeAndPauseMusic);
@@ -169,7 +169,7 @@ void UR6GameManager::SetGSCreateUbiServer(INT Param)
 	s_GSCreateUbiServer = Param;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UR6GameManager::StartJoinServer(FString, FString, INT)
 {
 	guard(UR6GameManager::StartJoinServer);

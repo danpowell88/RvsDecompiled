@@ -178,55 +178,55 @@ void AR6GameInfo::PostBeginPlay()
 	}
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execGetSystemUserName(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execInitScoreSubmission(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execLogoutUpdatePlayersCtrlInfo(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execNativeLogout(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execSetController(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionNotifySendStartMatch(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionSrvRoundFinish(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionSrvRoundStart(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionUpdateLadderStat(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

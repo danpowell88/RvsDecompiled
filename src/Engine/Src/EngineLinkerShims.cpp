@@ -30,6 +30,8 @@
 	dummy, satisfying the export without needing the real implementation.
 =============================================================================*/
 
+#include "ImplSource.h"
+
 /*-----------------------------------------------------------------------------
 	Dummy implementations that all /alternatename directives point to.
 	These are extern "C" so their decorated names are predictable:

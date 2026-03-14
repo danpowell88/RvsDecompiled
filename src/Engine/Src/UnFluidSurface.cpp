@@ -1,19 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnFluidSurface.cpp: Fluid surface actors and primitives
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_GHIDRA_APPROX("Engine.dll", 0x103db080, "Ghidra reference; body approximated")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x103db080, "Ghidra reference; body approximated")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // Forward declaration for the DrawSprite free function (defined in EngineStubs.cpp)
@@ -216,7 +214,7 @@ void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 	Y = yi;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 {
 	return FVector(0,0,0);
@@ -403,13 +401,13 @@ FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
 {
 	return FBox();
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 {
 	return FSphere();
@@ -431,19 +429,19 @@ IMPL_INFERRED("Delegates to Super::PostEditChange")
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
 IMPL_INFERRED("Delegates to Super::Tick")
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PostEditMove() {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Spawned() {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Init() {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 
 // =============================================================================

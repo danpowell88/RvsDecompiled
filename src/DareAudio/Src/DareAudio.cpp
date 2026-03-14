@@ -115,7 +115,7 @@ static FLOAT LinearToDb(FLOAT v)
 Constructors / Destructor / Assignment.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 UDareAudioSubsystem::UDareAudioSubsystem()
 {
 }
@@ -137,12 +137,12 @@ return *this;
 UObject interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UDareAudioSubsystem::StaticConstructor()
 {
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UDareAudioSubsystem::PostEditChange()
 {
 }
@@ -327,7 +327,7 @@ void UDareAudioSubsystem::RegisterSound(USound* Sound)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UDareAudioSubsystem::UnregisterSound(USound* Sound)
 {
 }
@@ -968,7 +968,7 @@ UpdateSoundList();
 	Ambient sounds / Update helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UDareAudioSubsystem::UpdateAmbientSounds(FCoords& Coords)
 {
 	// Ambient sound update: walk the ambient actor list, play/stop as needed.
@@ -1001,7 +1001,7 @@ SREQ_COUNT(this) = dst;
 Private helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 FLOAT UDareAudioSubsystem::GetDuration(DWORD SoundHandle)
 {
 return 0.0f;

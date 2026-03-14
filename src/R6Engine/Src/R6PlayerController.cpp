@@ -46,7 +46,7 @@ void AR6PlayerController::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FString AR6PlayerController::GetLocKeyNameByActionKey(TCHAR const *)
 {
 	return TEXT("");
@@ -411,13 +411,13 @@ void AR6PlayerController::eventSetCrouchBlend(FLOAT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetCrouchBlend), &Parms);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execDebugFunction(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execFindPlayer(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(inPlayerIdent);
@@ -426,7 +426,7 @@ void AR6PlayerController::execFindPlayer(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execGetLocStringWithActionKey(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(szText);
@@ -435,7 +435,7 @@ void AR6PlayerController::execGetLocStringWithActionKey(FFrame& Stack, RESULT_DE
 	*(FString*)Result = TEXT("");
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(SectionName);
@@ -447,7 +447,7 @@ void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 	*(FString*)Result = TEXT("");
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6SoundReplicationInfo, aAudioRepInfo);

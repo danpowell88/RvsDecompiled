@@ -518,6 +518,7 @@ FVector AR6Pawn::GetMidSectionLocation(AActor *)
 	return FVector(0,0,0);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 enum eMovementDirection AR6Pawn::GetMovementDirection()
 {
 	guard(AR6Pawn::GetMovementDirection);

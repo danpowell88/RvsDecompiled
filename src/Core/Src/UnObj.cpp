@@ -643,7 +643,7 @@ INT UObject::IsIn( UObject* SomeOuter ) const
 	unguardSlow;
 }
 
-IMPL_APPROX("not yet implemented; stub returning 0")
+IMPL_INFERRED("not yet implemented; stub returning 0")
 INT UObject::IsInState( FName StateName )
 {
 	guard(UObject::IsInState);

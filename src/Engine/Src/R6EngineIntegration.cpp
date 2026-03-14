@@ -1,19 +1,17 @@
-/*=============================================================================
+﻿/*=============================================================================
 	R6EngineIntegration.cpp: R6-specific types hosted in Engine.dll
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 #pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
+#include "EnginePrivate.h"
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
-#include "EnginePrivate.h"
 #include "EngineDecls.h"
 
 // --- AR6AbstractCircumstantialActionQuery ---
@@ -25,7 +23,7 @@ INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPrope
 
 
 // --- AR6ActionSpot ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AR6ActionSpot::RenderEditorInfo);
@@ -117,7 +115,7 @@ int AR6ColBox::CanStepUp(FVector vec)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6ColBox::EnableCollision(int,int,int)
 {
 	guard(AR6ColBox::EnableCollision);
@@ -142,7 +140,7 @@ void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6ColBox::GetDestination(FVector &,FRotator &)
 {
 	guard(AR6ColBox::GetDestination);
@@ -230,28 +228,28 @@ int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 
 
 // --- AR6DecalGroup ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::Spawned()
 {
 	guard(AR6DecalGroup::Spawned);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::KillDecal(AR6Decal *)
 {
 	guard(AR6DecalGroup::KillDecal);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::PostScriptDestroyed()
 {
 	guard(AR6DecalGroup::PostScriptDestroyed);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalGroup::ActivateGroup()
 {
 	guard(AR6DecalGroup::ActivateGroup);
@@ -332,7 +330,7 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 
 
 // --- AR6DecalManager ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DecalManager::Spawned()
 {
 	guard(AR6DecalManager::Spawned);
@@ -449,7 +447,7 @@ void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 
 
 // --- AR6TeamStartInfo ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TeamStartInfo::TransferFile(FArchive &,int)
 {
 	guard(AR6TeamStartInfo::TransferFile);
@@ -458,21 +456,21 @@ void AR6TeamStartInfo::TransferFile(FArchive &,int)
 
 
 // --- AR6WallHit ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6WallHit::SpawnEffects()
 {
 	guard(AR6WallHit::SpawnEffects);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6WallHit::SpawnSound()
 {
 	guard(AR6WallHit::SpawnSound);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6WallHit::PostBeginPlay()
 {
 	guard(AR6WallHit::PostBeginPlay);
@@ -481,14 +479,14 @@ void AR6WallHit::PostBeginPlay()
 
 
 // --- AR6eviLTesting ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6eviLTesting::eviLTestATS()
 {
 	guard(AR6eviLTesting::eviLTestATS);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AR6eviLTesting::evilTestUpdateSystem()
 {
 	guard(AR6eviLTesting::evilTestUpdateSystem);
@@ -497,7 +495,7 @@ void AR6eviLTesting::evilTestUpdateSystem()
 
 
 // --- UR6AbstractGameManager ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 {
 	guard(UR6AbstractGameManager::StartJoinServer);
@@ -511,49 +509,49 @@ int UR6AbstractGameManager::StartLogInProcedure()
 	return 0;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::StartPreJoinProcedure(int)
 {
 	guard(UR6AbstractGameManager::StartPreJoinProcedure);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::UnInitialize()
 {
 	guard(UR6AbstractGameManager::UnInitialize);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::SetGSCreateUbiServer(int)
 {
 	guard(UR6AbstractGameManager::SetGSCreateUbiServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::LaunchListenSrv(FString,FString)
 {
 	guard(UR6AbstractGameManager::LaunchListenSrv);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::ClientLeaveServer()
 {
 	guard(UR6AbstractGameManager::ClientLeaveServer);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::ConnectionInterrupted(int)
 {
 	guard(UR6AbstractGameManager::ConnectionInterrupted);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::GameServiceTick(UConsole *)
 {
 	guard(UR6AbstractGameManager::GameServiceTick);
@@ -567,7 +565,7 @@ int UR6AbstractGameManager::GetGSCreateUbiServer()
 	return 0;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractGameManager::InitializeGameService(UConsole *)
 {
 	guard(UR6AbstractGameManager::InitializeGameService);
@@ -576,14 +574,14 @@ void UR6AbstractGameManager::InitializeGameService(UConsole *)
 
 
 // --- UR6AbstractPlanningInfo ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractPlanningInfo::TransferFile(FArchive &)
 {
 	guard(UR6AbstractPlanningInfo::TransferFile);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UR6AbstractPlanningInfo::AddPoint(AActor *)
 {
 	guard(UR6AbstractPlanningInfo::AddPoint);
@@ -669,9 +667,9 @@ int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 // ============================================================================
 
 // ??0UR6AbstractTerroristMgr@@QAE@XZ
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 UR6AbstractTerroristMgr::UR6AbstractTerroristMgr() {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 AR6AbstractClimbableObj::AR6AbstractClimbableObj() {}
