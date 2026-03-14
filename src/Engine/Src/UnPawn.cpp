@@ -772,16 +772,18 @@ APawn* APawn::GetPlayerPawn() const
 	return (APawn*)this;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c3400: 5-byte JMP thunk redirecting to IsPlayer")
+IMPL_DIVERGE("Ghidra 0x103c3400: calls LocalPlayerController() via vtable+0x19c on Controller; same pattern as IsLocallyControlled")
 INT APawn::PlayerControlled()
 {
-	return Controller && Controller->bIsPlayer;
+	if( Controller && Controller->LocalPlayerController() )
+		return 1;
+	return 0;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e55b0: checks byte at this+0x3a2 < 2; current uses Health > 0")
+IMPL_DIVERGE("Ghidra 0x103e55b0: checks (byte)(this+0x3a2) < 2; m_eHealth enum where 0-1=alive, 2+=dead")
 INT APawn::IsAlive()
 {
-	return Health > 0;
+	return m_eHealth < 2;
 }
 
 IMPL_DIVERGE("Ghidra 0x103ecae0: checks CollisionHeight < DefaultObject.CollisionHeight; current code uses bIsCrouched bitfield")
@@ -2137,8 +2139,8 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 		Controller->MoveTimer = 0.5f;
 	}
 
-	// DIVERGENCE: Ghidra checks bit7 of Controller+0x3a8; mapped to bPreparingMove (bit 7 of first bitfield byte)
-	if ( Controller->bPreparingMove && Controller->Enemy )
+	// Ghidra: bPreparingMove (bit7 of Controller+0x3a8) and PendingMover (Controller+0x3e8)
+	if ( Controller->bPreparingMove && Controller->PendingMover )
 		Controller->MoveTimer += 2.0f;
 
 	unguard;
