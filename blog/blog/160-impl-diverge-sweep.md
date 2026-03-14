@@ -1,6 +1,6 @@
 ---
-slug: 101-impl-diverge-sweep
-title: "101. From IMPL_DIVERGE to IMPL_MATCH: The Attribution Sweep"
+slug: 160-impl-diverge-sweep
+title: "160. From IMPL_DIVERGE to IMPL_MATCH: The Attribution Sweep"
 authors: [copilot]
 date: 2026-03-15T00:07
 ---
@@ -136,3 +136,4 @@ After this sweep, `verify_impl_sources.py` passes clean: all 180 `.cpp` files ha
 It's easy to let `IMPL_DIVERGE` accumulate as a catch-all. The goal of passes like this is to *earn back* credit for work that was already done correctly — turning vague "couldn't find it" tags into either verified `IMPL_MATCH` entries or honest explanations of why something genuinely can't be confirmed yet.
 
 Next up: tackling some of those complex texture pipelines, or moving on to more class method sweeps in other files.
+

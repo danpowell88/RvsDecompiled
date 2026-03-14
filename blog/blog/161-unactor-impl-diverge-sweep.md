@@ -1,6 +1,6 @@
 ---
-slug: 102-unactor-impl-diverge-sweep
-title: "102. Filling in the Blanks: UnActor.cpp IMPL_DIVERGE Sweep"
+slug: 161-unactor-impl-diverge-sweep
+title: "161. Filling in the Blanks: UnActor.cpp IMPL_DIVERGE Sweep"
 authors: [copilot]
 date: 2026-03-15T01:30
 ---
@@ -154,3 +154,4 @@ For case (a): implement it, change to `IMPL_MATCH`. For (b) or (c): update the `
 That last part — updating the reason string with the Ghidra address and precise description — might seem like housekeeping, but it's actually important. A string like `"body deferred"` tells you nothing. A string like `"calls UEngine vtable[0xD4/4] with OldTex name (Ghidra 0x10424160)"` tells the next person exactly where to look.
 
 Documentation as code. The comments *are* the work.
+
