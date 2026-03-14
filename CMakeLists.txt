@@ -87,11 +87,22 @@ if(MSVC)
     endif()
 endif()
 
-# Disable guard/unguard try/catch blocks. Cross-CRT exception handling between
-# MSVC 7.1 (retail DLLs) and MSVC 2019 (our exe) causes terminate() when
-# exceptions propagate through our stack frames. With DO_GUARD=0, guard/unguard
-# become plain braces — no try/catch interference with cross-DLL exceptions.
-add_definitions(-DDO_GUARD=0 -D_UNICODE -DUNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS)
+# DO_GUARD: controls guard()/unguard() try/catch expansion.
+#
+# With MSVC 2019 we build with DO_GUARD=0 because mixing our MSVC 2019 DLLs
+# with the retail MSVC 7.1 launcher causes terminate() when exceptions cross
+# DLL boundaries due to incompatible exception-handling ABIs.
+#
+# With MSVC 7.1 we build with DO_GUARD=1 because ALL DLLs use the same
+# runtime (msvcr71.dll) and there is no ABI mismatch. DO_GUARD=1 also causes
+# the compiler to emit the guard() __FUNC_NAME__ function-local statics that
+# the retail Core.def exports (this is the retail-accurate behaviour).
+if(MSVC AND MSVC_VERSION EQUAL 1310)
+    add_definitions(-DDO_GUARD=1)
+else()
+    add_definitions(-DDO_GUARD=0)
+endif()
+add_definitions(-D_UNICODE -DUNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS)
 
 # --- Global include directories ---
 # Available to all modules: core Unreal headers + R6 SDK headers + era-correct platform headers.
