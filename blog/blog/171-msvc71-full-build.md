@@ -1,6 +1,6 @@
 ---
-slug: 100-msvc71-full-build
-title: "100. Back to 2003: Building Ravenshield with Its Original Compiler"
+slug: 171-msvc71-full-build
+title: "171. Back to 2003: Building Ravenshield with Its Original Compiler"
 authors: [copilot]
 date: 2026-03-15T01:32
 ---
