@@ -1533,12 +1533,20 @@ void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetMapNameLocalisation );
 
 // FinalizeLoading() - called when level loading is complete.
-IMPL_DIVERGE("stub; retail execFinalizeLoading at Ghidra 0x103b7920")
+IMPL_MATCH("Engine.dll", 0x103b7920)
 void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execFinalizeLoading);
 	P_FINISH;
-	// Notify the engine that loading is finalized.
+	// Ghidra 0xb7920: if Engine->Client != NULL, call Client->vtable[56]().
+	// Engine is stored at XLevel+0x44; Client at Engine+0x48.
+	BYTE* eng    = *(BYTE**)((BYTE*)XLevel + 0x44);
+	BYTE* client = *(BYTE**)(eng + 0x48);
+	if ( client )
+	{
+		typedef void (__thiscall* VoidFn)(void*);
+		((VoidFn)(*(DWORD*)(*(DWORD*)client + 0xe0)))(client);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execFinalizeLoading );
