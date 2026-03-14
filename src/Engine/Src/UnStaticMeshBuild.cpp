@@ -205,12 +205,13 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete/diverged — body contains divergence markers (Divergence:)")
+IMPL_DIVERGE("Ghidra 0x10446b40: full projector triangle-clipping loop — FUN_10449ee0 (clip triangle), FUN_10448ca0 (OPCODE BVH gather) unresolved")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
-	// Retail: attaches a projector, clipping its triangles against the mesh.
-	// Divergence: not fully reconstructed from Ghidra.
+	// Retail: gathers triangles from the OPCODE BVH that intersect the projector frustum,
+	// clips each against 6 frustum planes, builds an index buffer, and appends to per-instance
+	// projector list at this+0x54. FUN_10449ee0 (clip) and FUN_10448ca0 (BVH gather) unresolved.
 	unguard;
 }
 
