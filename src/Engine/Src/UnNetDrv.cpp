@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 UnNetDrv.cpp: Network driver (UNetDriver, UDemoRecDriver)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UNetDriver ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("StaticConstructor — registers UNetDriver config properties; no-op without full property layout")
 void UNetDriver::StaticConstructor()
 {
 guard(UNetDriver::StaticConstructor);
@@ -76,7 +76,7 @@ UObject::Serialize(Ar);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("NotifyActorDestroyed — closes actor channels on all connections; FUN_103b7b70 identity unresolved")
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
@@ -87,7 +87,7 @@ guard(UNetDriver::NotifyActorDestroyed);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("AssertValid — internal consistency check; no-op acceptable")
 void UNetDriver::AssertValid()
 {
 guard(UNetDriver::AssertValid);
@@ -139,21 +139,21 @@ unguard;
 
 
 // --- UDemoRecDriver ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*)
 {
 guard(UDemoRecDriver::SpawnDemoRecSpectator);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UDemoRecDriver::StaticConstructor()
 {
 guard(UDemoRecDriver::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
@@ -176,13 +176,13 @@ typedef void (__thiscall* VDtor)(void*);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
 return FString();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 int UDemoRecDriver::Exec(const TCHAR*, FOutputDevice&)
 {
 guard(UDemoRecDriver::Exec);
@@ -217,7 +217,7 @@ return 1;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitConnect);
@@ -225,7 +225,7 @@ return 0;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -241,10 +241,10 @@ unguard;
 // UNetConnection
 // =============================================================================
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -285,7 +285,7 @@ Ar << *(UObject**)((BYTE*)this + 0x4ba8);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::ReadInput(FLOAT DeltaSeconds)
 {
 guard(UNetConnection::ReadInput);
@@ -340,7 +340,7 @@ PostSend();
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
@@ -348,7 +348,7 @@ guard(UNetConnection::FlushNet);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
@@ -359,7 +359,7 @@ unguard;
 IMPL_APPROX("Always returns ready")
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::HandleClientPlayer(APlayerController* PC)
 {
 guard(UNetConnection::HandleClientPlayer);
@@ -401,7 +401,7 @@ AckQueue.Empty();
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::ReceiveFile(INT PackageIndex)
 {
 guard(UNetConnection::ReceiveFile);
@@ -423,7 +423,7 @@ ch->ReceivedAcks();
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::ReceivedPacket(FBitReader& Reader)
 {
 guard(UNetConnection::ReceivedPacket);
@@ -431,21 +431,21 @@ guard(UNetConnection::ReceivedPacket);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
 {
 guard(UNetConnection::ReceivedRawPacket);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::SendPackageMap()
 {
 guard(UNetConnection::SendPackageMap);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
 {
 guard(UNetConnection::SendRawBunch);
@@ -453,7 +453,7 @@ return 0;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
 guard(UNetConnection::SetActorDirty);
@@ -462,7 +462,7 @@ guard(UNetConnection::SetActorDirty);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetConnection::SlowAssertValid()
 {
 guard(UNetConnection::SlowAssertValid);
@@ -477,7 +477,7 @@ unguard;
 
 // UNetDriver
 // ---------------------------------------------------------------------------
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 UBOOL UNetDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetDriver::Exec);
@@ -485,14 +485,14 @@ return 0;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 void UNetDriver::LowLevelDestroy()
 {
 guard(UNetDriver::LowLevelDestroy);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
 return FString();

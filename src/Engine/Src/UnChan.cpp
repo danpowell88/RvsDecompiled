@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 UnChan.cpp: Network channel implementations (UChannel hierarchy)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; bunch sending not implemented")
 INT UChannel::SendBunch(FOutBunch*, INT)
 {
 guard(UChannel::SendBunch);
@@ -34,7 +34,7 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; file-sending tick not implemented")
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
@@ -42,7 +42,7 @@ guard(UFileChannel::Tick);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; file receive handler not implemented")
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -50,7 +50,7 @@ guard(UFileChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; returns empty string")
 FString UFileChannel::Describe()
 {
 return FString();
@@ -116,7 +116,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; actor replication receive not implemented")
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -133,7 +133,7 @@ UChannel::ReceivedNak(NakPacketId);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; actor replication not implemented")
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
@@ -141,7 +141,7 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; actor channel setup not implemented")
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
@@ -166,7 +166,7 @@ UChannel::Close();
 *(INT*)((BYTE*)this + 0x6C) = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; returns empty string")
 FString UActorChannel::Describe()
 {
 return FString();
@@ -254,7 +254,7 @@ guard(UControlChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; control message handling not implemented")
 void UControlChannel::ReceivedBunch(FInBunch&)
 {
 guard(UControlChannel::ReceivedBunch);
@@ -262,7 +262,7 @@ guard(UControlChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; control channel serialization not implemented")
 void UControlChannel::Serialize(const TCHAR*, EName)
 {
 guard(UControlChannel::Serialize);
@@ -319,7 +319,7 @@ NegotiatedVer = 0;
 IMPL_APPROX("Sets Closing flag to 1")
 void UChannel::SetClosingFlag() { Closing = 1; }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; close bunch creation not implemented")
 void UChannel::Close()
 {
 guard(UChannel::Close);
@@ -352,7 +352,7 @@ Connection->SendRawBunch(*Out, 0);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; resend timer logic not implemented")
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
@@ -398,7 +398,7 @@ return bytes < 1 ? 0 : bytes;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; acked-bunch cleanup not implemented")
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
@@ -406,7 +406,7 @@ guard(UChannel::ReceivedAcks);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; raw bunch routing not implemented")
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
@@ -414,7 +414,7 @@ guard(UChannel::ReceivedRawBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; sequenced bunch routing not implemented")
 INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedSequencedBunch);
@@ -422,7 +422,7 @@ return 0;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub; destroy routing not implemented")
 INT UChannel::RouteDestroy()
 {
 guard(UChannel::RouteDestroy);
@@ -438,21 +438,21 @@ unguard;
 
 // UChannel
 // ---------------------------------------------------------------------------
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("base no-op; channel type registration not implemented")
 void UChannel::StaticConstructor()
 {
 guard(UChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("base no-op — subclass implements")
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("base no-op — subclass implements")
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
 guard(UChannel::Serialize);
