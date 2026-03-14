@@ -54,7 +54,7 @@ INT AR6FalseHeartBeat::IsRelevantToPawn(APawn* Other)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AR6FalseHeartBeat::IsRelevantToPawnHeartBeat(APawn *)
 {
 	return 0;

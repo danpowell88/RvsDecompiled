@@ -216,7 +216,7 @@ void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 	Y = yi;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 {
 	return FVector(0,0,0);
@@ -403,13 +403,13 @@ FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
 {
 	return FBox();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 {
 	return FSphere();
@@ -431,19 +431,19 @@ IMPL_INFERRED("Delegates to Super::PostEditChange")
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
 IMPL_INFERRED("Delegates to Super::Tick")
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PostEditMove() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Spawned() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Init() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 
 // =============================================================================

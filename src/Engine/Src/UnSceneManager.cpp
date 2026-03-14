@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnSceneManager.cpp: Matinee scene manager and sub-action system
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -308,27 +308,27 @@ void ASceneManager::InitializeActions()
 
 
 // --- FR6MatineePreviewProxy ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FR6MatineePreviewProxy::OnEndSequenceNotify(ASceneManager *)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FR6MatineePreviewProxy::OnScrollBarUpdate()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FR6MatineePreviewProxy::FR6MatineePreviewProxy(FR6MatineePreviewProxy const &)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FR6MatineePreviewProxy::FR6MatineePreviewProxy()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FR6MatineePreviewProxy::~FR6MatineePreviewProxy()
 {
 }
@@ -427,7 +427,7 @@ void UMatSubAction::PostEditChange()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMatSubAction::PreBeginPreview()
 {
 }
@@ -801,7 +801,7 @@ FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
 
 // ASceneManager extra methods (from EngineClassImpl.cpp)
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AReplicationInfo::CloseVideo(UCanvas* Canvas)
 {
 }

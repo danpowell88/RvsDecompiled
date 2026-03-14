@@ -153,7 +153,7 @@ void UCanvas::execDrawTextClipped( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTextClipped );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execClipTextNative);
@@ -226,7 +226,7 @@ void UCanvas::execDrawStretchedTextureSegmentNative( FFrame& Stack, RESULT_DECL 
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawStretchedTextureSegmentNative );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UCanvas::execDrawActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawActor);
@@ -238,7 +238,7 @@ void UCanvas::execDrawActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawActor );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UCanvas::execDrawPortal( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawPortal);
@@ -365,7 +365,7 @@ void UCanvas::execUseVirtualSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execUseVirtualSize );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetMotionBlurIntensity);
@@ -375,7 +375,7 @@ void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetMotionBlurIntensity );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawWritableMap);
@@ -384,7 +384,7 @@ void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawWritableMap );
 
-IMPL_TODO("video subsystem API unimplemented; returns invalid handle 0")
+IMPL_APPROX("video subsystem API unimplemented; returns invalid handle 0")
 void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoOpen);
@@ -398,7 +398,7 @@ void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoOpen );
 
-IMPL_TODO("video subsystem API unimplemented")
+IMPL_APPROX("video subsystem API unimplemented")
 void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoPlay);
@@ -409,7 +409,7 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
 
-IMPL_TODO("video subsystem API unimplemented")
+IMPL_APPROX("video subsystem API unimplemented")
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);
@@ -420,7 +420,7 @@ void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
 
-IMPL_TODO("video subsystem API unimplemented")
+IMPL_APPROX("video subsystem API unimplemented")
 void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoClose);
@@ -495,7 +495,7 @@ FSceneNode::FSceneNode(UViewport * Viewport)
 }
 
 // ??1FSceneNode@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FSceneNode::~FSceneNode() {}
 
 // ?GetActorSceneNode@FSceneNode@@UAEPAVFActorSceneNode@@XZ
@@ -523,11 +523,11 @@ IMPL_INFERRED("base class returns NULL; subclass FWarpZoneSceneNode overrides")
 FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
 
 // ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
 
 // ?Deproject@FSceneNode@@QAE?AVFVector@@VFPlane@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
 
 // ??4FSceneNode@@QAEAAV0@ABV0@@Z
@@ -535,7 +535,7 @@ IMPL_INFERRED("bitwise copy via appMemcpy")
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ??1FLevelSceneNode@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FLevelSceneNode::~FLevelSceneNode() {}
 
 // ??4FLevelSceneNode@@QAEAAV0@ABV0@@Z
@@ -650,7 +650,7 @@ IMPL_INFERRED("zero-initializes all fields via appMemzero")
 FDbgVectorInfo::FDbgVectorInfo() { appMemzero(this, sizeof(*this)); }
 IMPL_INFERRED("bitwise copy via appMemcpy")
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FDbgVectorInfo::~FDbgVectorInfo() {}
 IMPL_INFERRED("bitwise copy via appMemcpy")
 FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
@@ -670,17 +670,17 @@ FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { a
 // ============================================================================
 
 // FActorSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FActorSceneNode::Render(FRenderInterface*) {}
 IMPL_INFERRED("returns this as FActorSceneNode")
 FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
 
 // FCameraSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FCameraSceneNode::Render(FRenderInterface*) {}
 IMPL_INFERRED("returns this as FCameraSceneNode")
 FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FCameraSceneNode::UpdateMatrices() {}
 
 // FMirrorSceneNode
@@ -705,12 +705,12 @@ IMPL_INFERRED("returns this as FWarpZoneSceneNode")
 FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 
 // FLevelSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FLightMapSceneNode
 extern ENGINE_API FRebuildTools GRebuildTools;
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FLightMapSceneNode::Render(FRenderInterface*) {}
 IMPL_INFERRED("filters actors by rebuild tool flags and actor bits")
 INT FLightMapSceneNode::FilterActor(AActor* Actor)
@@ -721,17 +721,17 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 }
 
 // FDirectionalLightMapSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FPointLightMapSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // ============================================================================
 // HCoords
 // ============================================================================
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 HCoords::HCoords(FCameraSceneNode*) {}
 
 // --- Moved from EngineStubs.cpp ---
@@ -741,25 +741,25 @@ void URenderResource::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 	Ar << Revision;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FHitObserver::Click(const FHitCause& Cause, const HHitProxy& Hit) {}
 
 // ?AVIStart@@YAXPBGPAVUEngine@@H@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AVIStart(const TCHAR* p0, UEngine * p1, int p2) {}
 
 // ?AVIStop@@YAXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AVIStop() {}
 
 // ?AVITakeShot@@YAXPAVUEngine@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AVITakeShot(UEngine * p0) {}
 
 // ?DrawSprite@@YAXPAVAActor@@VFVector@@PAVUMaterial@@PAVFLevelSceneNode@@PAVFRenderInterface@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void DrawSprite(AActor * p0, FVector p1, UMaterial * p2, FLevelSceneNode * p3, FRenderInterface * p4) {}
 
 // ?DrawSprite@@YAXMVFVector@@0PAVUMaterial@@VFPlane@@EPAVFCameraSceneNode@@PAVFRenderInterface@@MHH@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void DrawSprite(float p0, FVector p1, FVector p2, UMaterial * p3, FPlane p4, BYTE p5, FCameraSceneNode * p6, FRenderInterface * p7, float p8, int p9, int p10) {}

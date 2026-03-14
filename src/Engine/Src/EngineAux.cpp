@@ -26,7 +26,7 @@ void KME2UVecCopy(FVector* Out, float const * const In) {
 }
 
 // ?KTermGameKarma@@YAXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void KTermGameKarma() {}
 
 // ?KU2MEPosition@@YAXQAMVFVector@@@Z
@@ -46,11 +46,11 @@ void KU2MEVecCopy(float * const Out, FVector In) {
 }
 
 // ?KUpdateMassProps@@YAXPAVUKMeshProps@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void KUpdateMassProps(UKMeshProps * p0) {}
 
 // ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void KarmaTriListDataInit(_KarmaTriListData * p0) {}
 
 
@@ -66,7 +66,7 @@ template class TLazyArray<BYTE>;
 struct _McdGeometry;
 struct McdGeomMan;
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
 IMPL_INFERRED("Reconstructed from Karma coordinate conversion; scale factor 50")
 void KME2UCoords(FCoords* Out, const FLOAT (* const tm)[4]) {
@@ -90,7 +90,7 @@ void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[
 	KME2UCoords(&Coords, tm);
 	*OutRot = Coords.OrthoRotation();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
 IMPL_INFERRED("Reconstructed from Karma coordinate conversion; direct memcpy")
 void KU2MEMatrixCopy(FLOAT (* const Out)[4], FMatrix* In) {

@@ -238,14 +238,14 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AEmitter::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(AEmitter::Render);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AEmitter::RenderEditorInfo);
@@ -312,7 +312,7 @@ int AEmitter::CheckForProjectors()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AEmitter::Initialize()
 {
 	guard(AEmitter::Initialize);
@@ -321,14 +321,14 @@ void AEmitter::Initialize()
 
 
 // --- UBeamEmitter ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UBeamEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(UBeamEmitter::SpawnParticle);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UBeamEmitter::UpdateActorHitList()
 {
 	guard(UBeamEmitter::UpdateActorHitList);
@@ -400,7 +400,7 @@ int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UBeamEmitter::Scale(float)
 {
 	guard(UBeamEmitter::Scale);
@@ -430,7 +430,7 @@ void UBeamEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UBeamEmitter::Initialize(int)
 {
 	guard(UBeamEmitter::Initialize);
@@ -480,7 +480,7 @@ void UMeshEmitter::PostEditChange()
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshEmitter::Initialize(int)
 {
 	guard(UMeshEmitter::Initialize);
@@ -489,14 +489,14 @@ void UMeshEmitter::Initialize(int)
 
 
 // --- UParticleEmitter ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UParticleEmitter::SpawnIndividualParticles(int)
 {
 	guard(UParticleEmitter::SpawnIndividualParticles);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UParticleEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(UParticleEmitter::SpawnParticle);
@@ -545,7 +545,7 @@ int UParticleEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* p
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UParticleEmitter::Reset()
 {
 	// Ghidra 0xdcb10: clear state flags, zero counters, seed initial delay/warm-up timers.
@@ -558,7 +558,7 @@ void UParticleEmitter::Reset()
 	*(FLOAT*)((BYTE*)this + 0x2ec) = ((FRange*)((BYTE*)this + 0x168))->GetRand();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UParticleEmitter::Scale(float)
 {
 	guard(UParticleEmitter::Scale);
@@ -619,14 +619,14 @@ void UParticleEmitter::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UParticleEmitter::HandleActorForce(AActor *,float)
 {
 	guard(UParticleEmitter::HandleActorForce);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UParticleEmitter::Initialize(int)
 {
 	guard(UParticleEmitter::Initialize);
@@ -635,7 +635,7 @@ void UParticleEmitter::Initialize(int)
 
 
 // --- USparkEmitter ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USparkEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(USparkEmitter::SpawnParticle);
@@ -712,7 +712,7 @@ void USparkEmitter::CleanUp()
 	((FArray*)((BYTE*)this + 0x368))->Empty(0x20, 0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USparkEmitter::Initialize(int)
 {
 	guard(USparkEmitter::Initialize);
@@ -775,7 +775,7 @@ void USpriteEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
@@ -785,7 +785,7 @@ int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelScene
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USpriteEmitter::Initialize(int)
 {
 	guard(USpriteEmitter::Initialize);

@@ -51,7 +51,7 @@ class FSceneNode;
 
 #pragma pack(pop)
 
-// Function source attribution macros (IMPL_GHIDRA, IMPL_TODO, etc.)
+// Function source attribution macros (IMPL_GHIDRA, IMPL_APPROX, etc.)
 // Sourced from src/Core/Inc/ImplSource.h — zero compile-time overhead.
 #include "ImplSource.h"
 

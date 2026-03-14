@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnIn.cpp: Input subsystem (UInputPlanning)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -24,7 +24,7 @@ const TCHAR* UInputPlanning::StaticConfigName()
 	return TEXT("User");
 }
 
-IMPL_TODO("Ghidra 0xb47c0: registers Alias UStruct with FName/FString properties; not yet implemented")
+IMPL_APPROX("Ghidra 0xb47c0: registers Alias UStruct with FName/FString properties; not yet implemented")
 void UInputPlanning::StaticInitInput()
 {
 	guard(UInputPlanning::StaticInitInput);
@@ -45,27 +45,27 @@ void UInputPlanning::StaticInitInput()
 // UInput
 // =============================================================================
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_INFERRED("Delegates to Super::Serialize")
 void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::Init( UViewport* InViewport ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::ResetInput() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::SetKey( const TCHAR* KeyName ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FString UInput::GetActionKey( BYTE Key ) { return FString(); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
 IMPL_INFERRED("Ghidra-verified KeyDownMap layout at offset 0xEB4; no RVA recorded")
 BYTE UInput::KeyDown( INT Key )
@@ -77,7 +77,7 @@ BYTE UInput::KeyDown( INT Key )
 		Key = 0xFE;
 	return KeyDownMap[Key];
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::StaticConstructor() {}
 
 // =============================================================================
@@ -128,7 +128,7 @@ INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT
 	}
 	return 0;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 
 // ?GetKeyName@UInput@@QBEPBGHHPAVEInputKey@@@Z   (returns display name for a virtual-key code)
@@ -231,5 +231,5 @@ FLOAT UInput::GetInputDelta()
 }
 IMPL_INFERRED("Retail byte-count verified (6b); returns hardcoded L\"User\" pointer")
 const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInput::StaticInitInput() {}

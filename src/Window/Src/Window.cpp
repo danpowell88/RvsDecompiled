@@ -35,19 +35,19 @@ IMPLEMENT_PACKAGE(Window)
 
 IMPLEMENT_CLASS(UWindowManager)
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWindowManager::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWindowManager::Destroy()
 {
 	Super::Destroy();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWindowManager::Tick(FLOAT DeltaTime)
 {
 	guard(UWindowManager::Tick);

@@ -97,7 +97,8 @@ void UMaterial::SetValidated( UBOOL InValidated )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 UBOOL UMaterial::IsTransparent()
 {
 	guard(UMaterial::IsTransparent);
@@ -106,7 +107,8 @@ UBOOL UMaterial::IsTransparent()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 INT UMaterial::MaterialUSize()
 {
 	guard(UMaterial::MaterialUSize);
@@ -115,7 +117,8 @@ INT UMaterial::MaterialUSize()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 INT UMaterial::MaterialVSize()
 {
 	guard(UMaterial::MaterialVSize);
@@ -124,7 +127,7 @@ INT UMaterial::MaterialVSize()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UBOOL UMaterial::RequiresSorting()
 {
 	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
@@ -449,7 +452,7 @@ INT UCombiner::MaterialVSize()
 	return vsize2 > vsize1 ? vsize2 : vsize1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UBOOL UCombiner::IsTransparent()
 {
 	guard(UCombiner::IsTransparent);
@@ -458,7 +461,7 @@ UBOOL UCombiner::IsTransparent()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UBOOL UCombiner::RequiresSorting()
 {
 	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().

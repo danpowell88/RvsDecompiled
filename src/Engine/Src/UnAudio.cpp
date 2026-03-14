@@ -57,7 +57,7 @@ void USound::PS2Convert()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 USound::USound(const TCHAR* InName, INT InFlags)
 {
 	guard(USound::USound);

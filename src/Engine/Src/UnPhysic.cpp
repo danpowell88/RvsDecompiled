@@ -64,12 +64,12 @@ INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire,
 
 
 // --- AVolume ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AVolume::SetVolumes(TArray<AVolume *> const &)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AVolume::SetVolumes()
 {
 }
@@ -199,7 +199,7 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 
 
 // --- AWarpZoneMarker ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AWarpZoneMarker::addReachSpecs(APawn*,int)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
@@ -222,7 +222,7 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);

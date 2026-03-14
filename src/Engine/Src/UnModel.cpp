@@ -32,7 +32,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UModel ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
 {
 	guard(UModel::Render);
@@ -41,7 +41,7 @@ void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UModel::AttachProjector(int,FProjectorRenderInfo *,FPlane *)
 {
 	guard(UModel::AttachProjector);

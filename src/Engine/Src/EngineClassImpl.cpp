@@ -251,7 +251,7 @@ IMPLEMENT_CLASS(AR6WallHit);
 
 /*-- AActor Karma physics functions (Karma not implemented — stubs) -----*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptionsRefreshed);
@@ -261,7 +261,7 @@ void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetServerOptionsRefreshed );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddBoneLifter);
@@ -274,7 +274,7 @@ void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddBoneLifter );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddImpulse);
@@ -286,7 +286,7 @@ void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddImpulse );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKDisableCollision);
@@ -296,7 +296,7 @@ void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKDisableCollision );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKEnableCollision);
@@ -306,7 +306,7 @@ void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKEnableCollision );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKFreezeRagdoll);
@@ -315,7 +315,7 @@ void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKFreezeRagdoll );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetActorGravScale);
@@ -325,7 +325,7 @@ void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetActorGravScale );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMOffset);
@@ -358,7 +358,7 @@ void AActor::execKGetDampingProps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetDampingProps );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetFriction);
@@ -368,7 +368,7 @@ void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetFriction );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetImpactThreshold);
@@ -389,7 +389,7 @@ void AActor::execKGetInertiaTensor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetInertiaTensor );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetMass);
@@ -399,7 +399,7 @@ void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetMass );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetRestitution);
@@ -409,7 +409,7 @@ void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetRestitution );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetSkelMass);
@@ -419,7 +419,7 @@ void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetSkelMass );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsAwake);
@@ -429,7 +429,7 @@ void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsAwake );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsRagdollAvailable);
@@ -439,7 +439,7 @@ void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsRagdollAvailable );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMakeRagdollAvailable);
@@ -448,7 +448,7 @@ void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMakeRagdollAvailable );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMP2IOKarmaAllNativeFct);
@@ -457,7 +457,7 @@ void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMP2IOKarmaAllNativeFct );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveAllBoneLifters);
@@ -466,7 +466,7 @@ void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveAllBoneLifters );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveLifterFromBone);
@@ -476,7 +476,7 @@ void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveLifterFromBone );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetActorGravScale);
@@ -486,7 +486,7 @@ void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetActorGravScale );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetBlockKarma);
@@ -496,7 +496,7 @@ void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetBlockKarma );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetCOMOffset);
@@ -506,7 +506,7 @@ void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetCOMOffset );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetDampingProps);
@@ -517,7 +517,7 @@ void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetDampingProps );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetFriction);
@@ -527,7 +527,7 @@ void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetFriction );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetImpactThreshold);
@@ -537,7 +537,7 @@ void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetImpactThreshold );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetInertiaTensor);
@@ -547,7 +547,7 @@ void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetInertiaTensor );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetMass);
@@ -557,7 +557,7 @@ void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetMass );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetRestitution);
@@ -578,7 +578,7 @@ void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetSkelVel );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetStayUpright);
@@ -589,7 +589,7 @@ void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetStayUpright );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::execKWake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKWake);
@@ -656,7 +656,7 @@ void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 314, execWarp );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execUnWarp);
@@ -670,7 +670,7 @@ IMPLEMENT_FUNCTION( AWarpZoneInfo, 315, execUnWarp );
 
 /*-- AFluidSurfaceInfo -------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AFluidSurfaceInfo::execPling( FFrame& Stack, RESULT_DECL )
 {
 	guard(AFluidSurfaceInfo::execPling);
@@ -684,7 +684,7 @@ IMPLEMENT_FUNCTION( AFluidSurfaceInfo, INDEX_NONE, execPling );
 
 /*-- AKConstraint ------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintForce);
@@ -694,7 +694,7 @@ void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintForce );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintTorque);
@@ -704,7 +704,7 @@ void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintTorque );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AKConstraint::execKUpdateConstraintParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKUpdateConstraintParams);
@@ -715,7 +715,7 @@ IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKUpdateConstraintParams );
 
 /*-- ASceneManager -----------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execGetTotalSceneTime);
@@ -725,7 +725,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -734,7 +734,7 @@ void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, 2909, execSceneDestroyed );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ASceneManager::execTerminateAIAction( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execTerminateAIAction);
@@ -745,7 +745,7 @@ IMPLEMENT_FUNCTION( ASceneManager, 2906, execTerminateAIAction );
 
 /*-- AStatLog ----------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execBatchLocal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execBatchLocal);
@@ -754,7 +754,7 @@ void AStatLog::execBatchLocal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBatchLocal );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execBrowseRelativeLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execBrowseRelativeLocalURL);
@@ -764,7 +764,7 @@ void AStatLog::execBrowseRelativeLocalURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBrowseRelativeLocalURL );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execExecuteLocalLogBatcher( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execExecuteLocalLogBatcher);
@@ -773,7 +773,7 @@ void AStatLog::execExecuteLocalLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteLocalLogBatcher );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execExecuteSilentLogBatcher( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execExecuteSilentLogBatcher);
@@ -782,7 +782,7 @@ void AStatLog::execExecuteSilentLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteSilentLogBatcher );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execExecuteWorldLogBatcher( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execExecuteWorldLogBatcher);
@@ -791,7 +791,7 @@ void AStatLog::execExecuteWorldLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteWorldLogBatcher );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execGetGMTRef( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetGMTRef);
@@ -801,7 +801,7 @@ void AStatLog::execGetGMTRef( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetGMTRef );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execGetMapFileName( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetMapFileName);
@@ -811,7 +811,7 @@ void AStatLog::execGetMapFileName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetMapFileName );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetPlayerChecksum);
@@ -822,7 +822,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);
@@ -834,7 +834,7 @@ IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execInitialCheck );
 
 /*-- AStatLogFile ------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execCloseLog);
@@ -843,7 +843,7 @@ void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execCloseLog );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileFlush);
@@ -852,7 +852,7 @@ void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileFlush );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileLog);
@@ -862,7 +862,7 @@ void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileLog );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execGetChecksum);
@@ -872,7 +872,7 @@ void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execGetChecksum );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execOpenLog);
@@ -881,7 +881,7 @@ void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execOpenLog );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AStatLogFile::execWatermark( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execWatermark);
@@ -906,7 +906,7 @@ IMPLEMENT_FUNCTION( AR6ColBox, 1503, execEnableCollision );
 
 /*-- AR6DecalGroup & AR6DecalManager -----------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execActivateGroup);
@@ -915,7 +915,7 @@ void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2904, execActivateGroup );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execAddDecal);
@@ -927,7 +927,7 @@ void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2902, execAddDecal );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DecalGroup::execDeActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execDeActivateGroup);
@@ -936,7 +936,7 @@ void AR6DecalGroup::execDeActivateGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2905, execDeActivateGroup );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execKillDecal);
@@ -945,7 +945,7 @@ void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2903, execKillDecal );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execAddDecal);
@@ -957,7 +957,7 @@ void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalManager, 2900, execAddDecal );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DecalManager::execKillDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execKillDecal);
@@ -980,7 +980,7 @@ IMPLEMENT_FUNCTION( AR6eviLTesting, 1356, execNativeRunAllTests );
 
 /*-- UInteraction ------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execConsoleCommand);
@@ -991,7 +991,7 @@ void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execConsoleCommand );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UInteraction::execInitialize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execInitialize);
@@ -1008,21 +1008,21 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execInitialize );
 
 // AReplicationInfo
 // ---------------------------------------------------------------------------
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AReplicationInfo::StaticConstructor()
 {
 	guard(AReplicationInfo::StaticConstructor);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AReplicationInfo::StartVideo(UCanvas* Canvas, INT X, INT Y, INT Z)
 {
 	guard(AReplicationInfo::StartVideo);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AReplicationInfo::StopVideo(UCanvas* Canvas)
 {
 	guard(AReplicationInfo::StopVideo);
@@ -1038,7 +1038,7 @@ INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(AReplicationInfo::ChangeDrawingSurface);

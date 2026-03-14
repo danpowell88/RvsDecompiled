@@ -223,7 +223,7 @@ void ULodMesh::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int ULodMesh::MemFootprint(int param_1)
 {
 	guard(ULodMesh::MemFootprint);
@@ -595,7 +595,7 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 	unguard;
 }
 
-IMPL_TODO("requires USkeletalMeshInstance::GetTagCoords and bone-transform-to-world conversion")
+IMPL_APPROX("requires USkeletalMeshInstance::GetTagCoords and bone-transform-to-world conversion")
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);

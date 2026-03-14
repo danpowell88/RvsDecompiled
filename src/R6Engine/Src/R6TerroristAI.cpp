@@ -261,14 +261,14 @@ void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6TerroristAI::execCallVisibleTerrorist(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(APawn, PTarget);
@@ -276,7 +276,7 @@ void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6TerroristAI::execGetNextRandomNode(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
@@ -292,14 +292,14 @@ void AR6TerroristAI::execHaveAClearShot(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = HaveAClearShot(vStart, PTarget);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6TerroristAI::execIsAttackSpotStillValid(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6TerroristAI::execMakeBackupList(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

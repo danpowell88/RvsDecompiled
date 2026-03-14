@@ -735,6 +735,7 @@ void UWindowsViewport::AcquireKeyboard()
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::ReleaseKeyboard()
 {
 	guard(UWindowsViewport::ReleaseKeyboard);
@@ -743,6 +744,7 @@ void UWindowsViewport::ReleaseKeyboard()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Reconstructed from context")
 INT UWindowsViewport::KeyPressed(INT Key)
 {
@@ -758,6 +760,7 @@ INT UWindowsViewport::KeyPressed(INT Key)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::ToggleFullscreen()
 {

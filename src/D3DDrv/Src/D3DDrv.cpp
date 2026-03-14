@@ -841,7 +841,7 @@ void UD3DRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels)
 
 	The retail binary appears to ignore this (no D3D reference device usage).
 =============================================================================*/
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UD3DRenderDevice::SetEmulationMode(EHardwareEmulationMode Mode)
 {
 	guard(UD3DRenderDevice::SetEmulationMode);
@@ -1042,7 +1042,7 @@ void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Flags)
 {
 	guard(UD3DRenderDevice::StartVideo);

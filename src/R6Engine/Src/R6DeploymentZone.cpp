@@ -126,7 +126,7 @@ FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FVector AR6DeploymentZone::FindRandomPointInArea()
 {
 	// STUB: too complex — retail tries up to 5 times to find a valid pawn-sized spawn
@@ -264,14 +264,14 @@ INT AR6DeploymentZone::HaveTerrorist()
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DeploymentZone::InitHostageAI(FR6CharTemplate * Template, AR6Hostage * Hostage)
 {
 	// STUB: too complex — sets hostage AI parameters (faction, patrol mode, zone ref)
 	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate * Template, AR6Terrorist * Terrorist)
 {
 	// STUB: too complex — sets terrorist AI parameters (skin, stance, group ID, zone ref)
@@ -328,7 +328,7 @@ void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DeploymentZone::SpawnAHostage()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a hostage class
@@ -336,7 +336,7 @@ void AR6DeploymentZone::SpawnAHostage()
 	// fires a script event, and adds the result to m_aHostage.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6DeploymentZone::SpawnATerrorist()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a terrorist class

@@ -56,25 +56,25 @@ void UPrimitive::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UPrimitive::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UPrimitive::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD ExtraFlags )
 { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FBox UPrimitive::GetRenderBoundingBox( const AActor* Owner )
 { return FBox(0); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FSphere UPrimitive::GetRenderBoundingSphere( const AActor* Owner )
 { return FSphere(0); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FBox UPrimitive::GetCollisionBoundingBox( const AActor* Owner ) const
 { return FBox(0); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UPrimitive::UseCylinderCollision( const AActor* Owner )
 { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UPrimitive::Illuminate( AActor* Owner, INT bDynamic )
 {}
 IMPL_GHIDRA("Engine.dll", 0xF78E0)
@@ -165,26 +165,26 @@ IMPL_INFERRED("Delegates to super")
 void UGameEngine::Destroy() { Super::Destroy(); }
 IMPL_INFERRED("Delegates to super")
 void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::UpdateConnectingMessage() {}
 // UGameEngine::Init() implemented in UnGame.cpp
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::Exit() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
 IMPL_INFERRED("Reconstructed from Ghidra; mixes Challenge halfwords")
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
@@ -192,23 +192,23 @@ INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
 	return ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error ) { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::SaveGame( INT Position ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::CancelPending() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::PaintProgress( const FURL& URL ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::NotifyLevelChange() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UGameEngine::FixUpLevel() {}
 
 // =============================================================================

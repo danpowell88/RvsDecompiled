@@ -17,28 +17,28 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- ATerrainInfo ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::SetupSectors()
 {
 	guard(ATerrainInfo::SetupSectors);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::SoftDeselect()
 {
 	guard(ATerrainInfo::SoftDeselect);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::UpdateFromSelectedVertices()
 {
 	guard(ATerrainInfo::UpdateFromSelectedVertices);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::ResetMove()
 {
 	guard(ATerrainInfo::ResetMove);
@@ -62,14 +62,14 @@ void ATerrainInfo::PostEditChange()
 	Update(0.0f, 0, 0, 0, 0, 0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::PostLoad()
 {
 	guard(ATerrainInfo::PostLoad);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::PrecomputeLayerWeights()
 {
 	guard(ATerrainInfo::PrecomputeLayerWeights);
@@ -77,7 +77,7 @@ void ATerrainInfo::PrecomputeLayerWeights()
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::SoftSelect(float,float)
 {
 	guard(ATerrainInfo::SoftSelect);
@@ -99,19 +99,19 @@ void ATerrainInfo::Update(float Dt, int X1, int Y1, int X2, int Y2, int Flags)
 		CombineLayerWeights();
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::UpdateDecorations(int)
 {
 	guard(ATerrainInfo::UpdateDecorations);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::UpdateTriangles(int,int,int,int,int)
 {
 	guard(ATerrainInfo::UpdateTriangles);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::UpdateVertices(float,int,int,int,int)
 {
 	guard(ATerrainInfo::UpdateVertices);
@@ -123,19 +123,19 @@ FVector ATerrainInfo::WorldToHeightmap(FVector In)
 	// Retail: 29b. ECX=this+0x1330 (heightmap FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1330));
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::Render(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
 {
 	guard(ATerrainInfo::Render);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
 {
 	guard(ATerrainInfo::RenderDecorations);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int ATerrainInfo::SelectVertex(FVector)
 {
 	guard(ATerrainInfo::SelectVertex);
@@ -178,7 +178,7 @@ int ATerrainInfo::SelectVertexX(int X, int Y)
 	*(INT*) (base + idx + 0x10)   = 0;
 	return 1;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::SelectVerticesInBox(FBox &)
 {
 	guard(ATerrainInfo::SelectVerticesInBox);
@@ -210,7 +210,7 @@ void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 	_WORD* heightData = (_WORD*)*(BYTE**)(mipsData + 0x1C); // FMipmapBase[0].DataPtr
 	heightData[idx] = Value;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::SetLayerAlpha(float,float,int,BYTE,UTexture *)
 {
 	guard(ATerrainInfo::SetLayerAlpha);
@@ -245,7 +245,7 @@ void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 	if (Value) data[idx >> 5] |=  bit_mask;
 	else       data[idx >> 5] &= ~bit_mask;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 {
 	guard(ATerrainInfo::SetTextureColor);
@@ -271,7 +271,7 @@ int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVect
 	return 1;
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::MoveVertices(float)
 {
 	guard(ATerrainInfo::MoveVertices);
@@ -326,7 +326,7 @@ void ATerrainInfo::CalcCoords()
 
 	*(FCoords*)((BYTE*)this + 0x1330) = HeightmapToWorld->Inverse();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::CalcLayerTexCoords()
 {
 	guard(ATerrainInfo::CalcLayerTexCoords);
@@ -344,13 +344,13 @@ void ATerrainInfo::CheckComputeDataOnLoad()
 	}
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::CombineLayerWeights()
 {
 	guard(ATerrainInfo::CombineLayerWeights);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ATerrainInfo::ConvertHeightmapFormat()
 {
 	guard(ATerrainInfo::ConvertHeightmapFormat);
@@ -723,28 +723,28 @@ void FTerrainTools::SetStrength(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x5C) = Value;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FTerrainTools::FTerrainTools(FTerrainTools const &)
 {
 	guard(FTerrainTools::FTerrainTools);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FTerrainTools::~FTerrainTools()
 {
 	guard(FTerrainTools::~FTerrainTools);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FTerrainTools::AdjustAlignedActors()
 {
 	guard(FTerrainTools::AdjustAlignedActors);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FTerrainTools::FindActorsToAlign()
 {
 	guard(FTerrainTools::FindActorsToAlign);
@@ -833,7 +833,7 @@ int FTerrainTools::GetStrength()
 	return *(INT*)&Pad[0x84];
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void FTerrainTools::Init()
 {
 	guard(FTerrainTools::Init);

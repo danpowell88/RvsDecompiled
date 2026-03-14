@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 UnChan.cpp: Network channel implementations (UChannel hierarchy)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -18,8 +18,8 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-IMPL_TODO("Needs Ghidra analysis")
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UChannel::SendBunch(FOutBunch*, INT)
 {
 guard(UChannel::SendBunch);
@@ -29,7 +29,7 @@ unguard;
 
 
 // --- UFileChannel ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 IMPL_INFERRED("Sets ChType to CHTYPE_File")
 void UFileChannel::StaticConstructor()
 {
@@ -38,8 +38,8 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
@@ -47,8 +47,8 @@ guard(UFileChannel::Tick);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -57,12 +57,14 @@ unguard;
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_TODO("Needs Ghidra analysis")
 FString UFileChannel::Describe()
 {
 return FString();
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x184100)
 void UFileChannel::Destroy()
 {
 // Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
@@ -98,6 +100,7 @@ UChannel::Destroy();
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x180f30)
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Retail: 0x180f30. Just delegates to UChannel::Init.
@@ -106,7 +109,7 @@ UChannel::Init(Conn, ChIndex, InType);
 
 
 // --- UActorChannel ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UActorChannel::StaticConstructor()
 {
 guard(UActorChannel::StaticConstructor);
@@ -122,7 +125,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -139,7 +142,7 @@ UChannel::ReceivedNak(NakPacketId);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
@@ -147,7 +150,7 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
@@ -252,7 +255,7 @@ appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 
 
 // --- UControlChannel ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UControlChannel::StaticConstructor()
 {
 guard(UControlChannel::StaticConstructor);
@@ -260,7 +263,7 @@ guard(UControlChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UControlChannel::ReceivedBunch(FInBunch&)
 {
 guard(UControlChannel::ReceivedBunch);
@@ -268,7 +271,7 @@ guard(UControlChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UControlChannel::Serialize(const TCHAR*, EName)
 {
 guard(UControlChannel::Serialize);
@@ -325,7 +328,7 @@ NegotiatedVer = 0;
 IMPL_INFERRED("Reconstructed from context")
 void UChannel::SetClosingFlag() { Closing = 1; }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::Close()
 {
 guard(UChannel::Close);
@@ -358,7 +361,7 @@ Connection->SendRawBunch(*Out, 0);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
@@ -404,7 +407,7 @@ return bytes < 1 ? 0 : bytes;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
@@ -412,7 +415,7 @@ guard(UChannel::ReceivedAcks);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
@@ -420,7 +423,7 @@ guard(UChannel::ReceivedRawBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedSequencedBunch);
@@ -428,7 +431,7 @@ return 0;
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT UChannel::RouteDestroy()
 {
 guard(UChannel::RouteDestroy);
@@ -444,21 +447,21 @@ unguard;
 
 // UChannel
 // ---------------------------------------------------------------------------
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::StaticConstructor()
 {
 guard(UChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
 guard(UChannel::Serialize);

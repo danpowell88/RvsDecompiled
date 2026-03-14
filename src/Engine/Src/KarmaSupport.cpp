@@ -74,7 +74,7 @@ guard(AKConstraint::preKarmaStep);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 guard(AKConstraint::RenderEditorSelected);
@@ -88,14 +88,14 @@ guard(AKConstraint::KUpdateConstraintParams);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AKConstraint::PostEditChange()
 {
 guard(AKConstraint::PostEditChange);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AKConstraint::PostEditMove()
 {
 guard(AKConstraint::PostEditMove);
@@ -249,7 +249,7 @@ FKBoxElem::FKBoxElem()
 // Ghidra: just calls FMatrix::FMatrix() (default FMatrix ctor is empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FKBoxElem::~FKBoxElem()
 {
 guard(FKBoxElem::~FKBoxElem);
@@ -310,14 +310,14 @@ Radius = InRadius;
 Length = InLength;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FKCylinderElem::FKCylinderElem()
 {
 guard(FKCylinderElem::FKCylinderElem);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FKCylinderElem::~FKCylinderElem()
 {
 guard(FKCylinderElem::~FKCylinderElem);
@@ -339,14 +339,14 @@ FKSphereElem::FKSphereElem(float InRadius)
 Radius = InRadius;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FKSphereElem::FKSphereElem()
 {
 guard(FKSphereElem::FKSphereElem);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FKSphereElem::~FKSphereElem()
 {
 guard(FKSphereElem::~FKSphereElem);
@@ -380,7 +380,7 @@ Ar.ByteOrderSerialize((BYTE*)this + 0x4C, 4);
 // NOTE: Divergence — TArray at +0x50 (FKConvexElem array) not serialized.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UKMeshProps::Draw(FRenderInterface *,int)
 {
 guard(UKMeshProps::Draw);
@@ -389,7 +389,7 @@ unguard;
 
 
 // --- UKarmaParams ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UKarmaParams::PostEditChange()
 {
 guard(UKarmaParams::PostEditChange);

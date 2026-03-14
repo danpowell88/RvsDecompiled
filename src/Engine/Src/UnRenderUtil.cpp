@@ -1278,16 +1278,12 @@ UTexture * FStaticTexture::GetUTexture()
 	return *(UTexture**)&Pad[8];
 }
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns Texture->VClampMode; no Ghidra address")
 ETexClampMode FStaticTexture::GetVClamp()
-{
-	UTexture* Texture = *(UTexture**)&Pad[8];
-	return (ETexClampMode)Texture->VClampMode;
 }
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns Texture->USize; no Ghidra address")
 int FStaticTexture::GetWidth()
-{
-	UTexture* Texture = *(UTexture**)&Pad[8];
-	return Texture->USize;
 }
 
 

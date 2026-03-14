@@ -116,13 +116,13 @@ void AProjector::PostEditChange()
 	Attach();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AProjector::PostEditLoad()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AProjector::PostEditMove()
 {
 	// Retail: 0x176d60 (shared empty stub)
@@ -202,7 +202,7 @@ void AProjector::Attach()
 	// BSP attachment (bit 0 of this+0x3a0) — loops not reconstructed (see above).
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AProjector::CalcMatrix()
 {
 	// Retail: 0xf8f90, 4699b. Builds projection matrix and 8 frustum corner points

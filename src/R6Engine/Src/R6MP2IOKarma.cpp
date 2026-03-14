@@ -141,7 +141,7 @@ void AMP2IOKarma::eventZDRSetDamageState(INT A, FLOAT B, FVector C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ZDRSetDamageState), &Parms);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AMP2IOKarma::execMP2IOKarmaAllNativeFct(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

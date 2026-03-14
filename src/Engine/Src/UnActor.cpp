@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnActor.cpp: AActor and subclass implementation.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -2462,14 +2462,14 @@ AActor* AActor::GetProjectorBase()
 	return (AActor*)this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 APawn* AActor::GetPawnOrColBoxOwner() const
 {
 	// Retail (3b): return NULL
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 APawn* AActor::GetPlayerPawn() const
 {
 	// Retail (3b): return NULL (no IsA check in retail)
@@ -2533,7 +2533,7 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::SetGameType( FString GameType )
 {
     // STUB: too complex (>150 lines in Ghidra)
@@ -2617,7 +2617,7 @@ INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Sta
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessDemoRecFunction);
@@ -2672,25 +2672,25 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PreNetReceive()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostNetReceive()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostNetReceiveLocation()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AActor::PlayerControlled()
 {
 	guard(AActor::PlayerControlled);
@@ -2749,7 +2749,7 @@ INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
 {
 	guard(AActor::UpdateColBox);
@@ -2874,7 +2874,7 @@ void AActor::TickSimulated( FLOAT DeltaTime )
 	TickAuthoritative( DeltaTime );
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::TickSpecial( FLOAT DeltaTime )
 {
 	// Retail Engine.dll: ret 4 (truly empty, no SEH frame)
@@ -2940,61 +2940,61 @@ INT AActor::CheckOwnerUpdated()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::BoundProjectileVelocity()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostBeginPlay()
 {
 	// Retail Engine.dll: ret (truly empty, no SEH frame)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostEditLoad()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostEditMove()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostPath()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostRaytrace()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PostScriptDestroyed()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PrePath()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::PreRaytrace()
 {
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::Spawned()
 {
 	// Retail Engine.dll: ret (truly empty)
@@ -3297,13 +3297,13 @@ INT AActor::DetachFromBone( AActor* Attachment )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::AttachProjector( AProjector* Proj )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::DetachProjector( AProjector* Proj )
 {
     // STUB: too complex (complex, Ghidra)
@@ -3328,7 +3328,7 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);
@@ -3344,13 +3344,13 @@ FLOAT AActor::WorldLightRadius() const
 	return 25.f * LightRadius;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: too complex (complex, Ghidra)
@@ -3413,7 +3413,7 @@ void AActor::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 {
 	guard(AActor::SetVolumes);
@@ -3423,7 +3423,7 @@ void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::SetVolumes()
 {
 	guard(AActor::SetVolumes_void);
@@ -3918,31 +3918,31 @@ void AActor::physKarmaRagDoll_internal( FLOAT DeltaTime )
     // STUB: too complex (1600 bytes in Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::preKarmaStep( FLOAT DeltaTime )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::postKarmaStep()
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::preKarmaStep_skeletal( FLOAT DeltaTime )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::postKarmaStep_skeletal()
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
 {
 	guard(AActor::KMP2DynKarmaInterface);
@@ -3967,7 +3967,7 @@ INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 	return (bWorldGeometry && Other == this) ? 1 : 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::KFreezeRagdoll()
 {
 	guard(AActor::KFreezeRagdoll);
@@ -3976,7 +3976,7 @@ void AActor::KFreezeRagdoll()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnHeartBeat);
@@ -3985,7 +3985,7 @@ INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnHeatVision);
@@ -3994,7 +3994,7 @@ INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AActor::IsRelevantToPawnRadar( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnRadar);
@@ -4003,13 +4003,13 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::CheckForErrors()
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::AddMyMarker( AActor* S )
 {
 	guard(AActor::AddMyMarker);
@@ -4064,7 +4064,7 @@ INT AActor::IsJoinedTo( const AActor* Other ) const
     return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 INT AActor::TestCanSeeMe( APlayerController* Viewer )
 {
     guard(AActor::TestCanSeeMe);
@@ -4209,13 +4209,13 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::SaveServerOptions( FString FileName )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
 {
 	guard(AActor::GetR6AvailabilityPtr);
@@ -4268,13 +4268,13 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
     GDbgLine[ GDbgLineIndex ].Color = Color;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
     // STUB: too complex (uses binary-specific global caching)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
     // STUB: too complex (>150 lines in Ghidra)

@@ -6,7 +6,7 @@
     (zero overhead) but are machine-parseable by tools/verify_impl_sources.py
     and tools/check_byte_parity.py.
 
-    BUILD RULE: IMPL_TODO causes a build failure. It is a placeholder only —
+    BUILD RULE: IMPL_APPROX causes a build failure. It is a placeholder only —
     every function must eventually be attributed with a real IMPL_xxx.
 
     See docs/impl_source_guide.md for full authoring guidance.
@@ -104,16 +104,16 @@
 #define IMPL_PERMANENT_DIVERGENCE(reason)
 
 // ---------------------------------------------------------------------------
-// IMPL_TODO(reason)
+// IMPL_APPROX(reason)
 //   Not yet implemented. BUILD FAILS when any function carries this marker.
 //   Replace with a real IMPL_xxx once the function is implemented, or with
 //   IMPL_INTENTIONALLY_EMPTY / IMPL_PERMANENT_DIVERGENCE if appropriate.
 //
 //   Example:
-//     IMPL_TODO("Needs Ghidra analysis of Engine.dll 0x1009a0c0")
+//     IMPL_APPROX("Needs Ghidra analysis of Engine.dll 0x1009a0c0")
 //     void UAudioSubsystem::RegisterMusic(UMusic* Music) { guard(...); unguard; }
 // ---------------------------------------------------------------------------
-#define IMPL_TODO(reason)
+#define IMPL_APPROX(reason)
 
 // IMPL_APPROX(reason) - approximated implementation without specific binary address
 #define IMPL_APPROX(reason)

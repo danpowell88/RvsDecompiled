@@ -19,49 +19,49 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UNetConnection ---
 
 // --- UClient ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::StaticConstructor()
 {
 	guard(UClient::StaticConstructor);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::UpdateGamma()
 {
 	guard(UClient::UpdateGamma);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::UpdateGraphicOptions()
 {
 	guard(UClient::UpdateGraphicOptions);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::RestoreGamma()
 {
 	guard(UClient::RestoreGamma);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::Serialize(FArchive &)
 {
 	guard(UClient::Serialize);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::PostEditChange()
 {
 	guard(UClient::PostEditChange);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::Destroy()
 {
 	guard(UClient::Destroy);
@@ -170,7 +170,7 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UClient::Flush(int)
 {
 	guard(UClient::Flush);
@@ -198,7 +198,7 @@ void UPlayer::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UPlayer::Destroy()
 {
 	guard(UPlayer::Destroy);
@@ -359,7 +359,7 @@ void UNetConnection::PostSend()
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
 	guard(UDemoRecConnection::UDemoRecConnection);

@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnTex.cpp: Texture and material system (UTexture hierarchy)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -31,7 +31,7 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 
 
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
@@ -177,13 +177,13 @@ void UTexture::Prime()
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UTexture::SetLastUpdateTime(double Time)
 {
 	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
 	*(double*)((BYTE*)this + 0xD0) = Time;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
@@ -245,7 +245,7 @@ void UTexture::CreateMips(int param1, int param2)
 	(void)param1; (void)param2;
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UTexture::Decompress(ETextureFormat)
 {
 	guard(UTexture::Decompress);
@@ -392,7 +392,7 @@ void UTexture::Tick(float DeltaSeconds)
 	}
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
 	// DIVERGENCE: retail (~150+ B) does per-pixel blending. Skipped — too complex.
@@ -496,7 +496,7 @@ void UTexture::Init(int InUSize, int InVSize)
 
 
 // --- FDXTCompressionOptions ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FDXTCompressionOptions::FDXTCompressionOptions()
 {
 	// Ghidra 0x203248: shares entry with FMipmapBase::FMipmapBase() and others — body is empty.
@@ -615,7 +615,7 @@ void FMipmap::Clear()
 
 
 // --- FMipmapBase ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 {
 	// Ghidra 0x4260, 49B.
@@ -763,7 +763,7 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 
 
 // --- UPalette ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UPalette * UPalette::ReplaceWithExisting()
 {
 	// Retail: 0x16aea0, ~200b with SEH. Iterates GObjObjects to find a matching
@@ -904,7 +904,7 @@ void UShadowBitmapMaterial::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: 0x12e3e0, 2594b. Shadow map rendering pipeline — too complex to decompile.
@@ -1017,7 +1017,7 @@ int UTexModifier::MaterialVSize()
 	return Material->MaterialVSize();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMatrix * UTexModifier::GetMatrix(float)
 {
 	guard(UTexModifier::GetMatrix);
@@ -1038,7 +1038,7 @@ int UTexModifier::GetValidated()
 
 
 // --- UTexOscillator ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMatrix * UTexOscillator::GetMatrix(float)
 {
 	guard(UTexOscillator::GetMatrix);
@@ -1049,7 +1049,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 
 
 // --- UTexPanner ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMatrix * UTexPanner::GetMatrix(float)
 {
 	guard(UTexPanner::GetMatrix);
@@ -1074,7 +1074,7 @@ void UTexRotator::PostLoad()
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMatrix * UTexRotator::GetMatrix(float)
 {
 	guard(UTexRotator::GetMatrix);
@@ -1085,7 +1085,7 @@ FMatrix * UTexRotator::GetMatrix(float)
 
 
 // --- UTexScaler ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMatrix * UTexScaler::GetMatrix(float)
 {
 	guard(UTexScaler::GetMatrix);

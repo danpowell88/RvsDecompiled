@@ -1,4 +1,4 @@
-﻿#pragma optimize("", off)
+#pragma optimize("", off)
 #include "EnginePrivate.h"
 
 // Ghidra labels 80-bit x87 float returns as FLOAT10; treat as double for compilation.
@@ -15,7 +15,7 @@ public:
     INT LineIntersection(const FVector& Start, const FVector& End, FLOAT* const HitTime) const;
 };
 // --- ULodMeshInstance ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
@@ -54,7 +54,7 @@ AActor * ULodMeshInstance::GetActor()
 	return Actor;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(ULodMeshInstance::GetFrame);
@@ -62,7 +62,7 @@ void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,D
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UMaterial * ULodMeshInstance::GetMaterial(int,AActor *)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
@@ -75,7 +75,7 @@ UMesh * ULodMeshInstance::GetMesh()
 	return Mesh;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void ULodMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(ULodMeshInstance::GetMeshVerts);
@@ -91,7 +91,7 @@ INT ULodMeshInstance::GetStatus()
 
 
 // --- UMeshInstance ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::StopAnimating(int)
 {
 	guard(UMeshInstance::StopAnimating);
@@ -100,7 +100,7 @@ int UMeshInstance::StopAnimating(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::UpdateAnimation(float)
 {
 	guard(UMeshInstance::UpdateAnimation);
@@ -109,7 +109,7 @@ int UMeshInstance::UpdateAnimation(float)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UMeshInstance::Render);
@@ -117,31 +117,31 @@ void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::SetActor(AActor *)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::SetAnimFrame(int,float)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::SetMesh(UMesh *)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::SetScale(FVector)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::SetStatus(int)
 {
 	guard(UMeshInstance::SetStatus);
@@ -161,7 +161,7 @@ int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 {
 	guard(UMeshInstance::PlayAnim);
@@ -182,7 +182,7 @@ int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVec
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::AnimForcePose(FName,float,float,int)
 {
 	guard(UMeshInstance::AnimForcePose);
@@ -210,7 +210,7 @@ FName UMeshInstance::AnimGetName(void *)
 	return FName(NAME_None);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::AnimGetNotifyCount(void *)
 {
 	guard(UMeshInstance::AnimGetNotifyCount);
@@ -219,7 +219,7 @@ int UMeshInstance::AnimGetNotifyCount(void *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UAnimNotify * UMeshInstance::AnimGetNotifyObject(void *,int)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
@@ -247,7 +247,7 @@ float UMeshInstance::AnimGetRate(void *)
 	return 15.0f;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::AnimIsInGroup(void *,FName)
 {
 	guard(UMeshInstance::AnimIsInGroup);
@@ -256,7 +256,7 @@ int UMeshInstance::AnimIsInGroup(void *,FName)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::AnimStopLooping(int)
 {
 	guard(UMeshInstance::AnimStopLooping);
@@ -265,13 +265,13 @@ int UMeshInstance::AnimStopLooping(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::ClearChannel(int)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::FreezeAnimAt(float,int)
 {
 	guard(UMeshInstance::FreezeAnimAt);
@@ -300,14 +300,14 @@ FName UMeshInstance::GetActiveAnimSequence(int)
 	return FName(NAME_None);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 AActor * UMeshInstance::GetActor()
 {
 	// Retail 0x114310: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::GetAnimCount()
 {
 	guard(UMeshInstance::GetAnimCount);
@@ -316,14 +316,14 @@ int UMeshInstance::GetAnimCount()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void * UMeshInstance::GetAnimIndexed(int)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void * UMeshInstance::GetAnimNamed(FName)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
@@ -337,7 +337,7 @@ FBox UMeshInstance::GetCollisionBoundingBox(const AActor* Owner)
 	return GetMesh()->GetCollisionBoundingBox(Owner);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UMeshInstance::GetFrame);
@@ -345,14 +345,14 @@ void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWOR
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UMaterial * UMeshInstance::GetMaterial(int,AActor *)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UMesh * UMeshInstance::GetMesh()
 {
 	// Retail 0x114310: shared null-stub, no SEH frame.
@@ -373,7 +373,7 @@ FSphere UMeshInstance::GetRenderBoundingSphere(const AActor* Owner)
 	return GetMesh()->GetRenderBoundingSphere(Owner);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::GetStatus()
 {
 	guard(UMeshInstance::GetStatus);
@@ -382,7 +382,7 @@ int UMeshInstance::GetStatus()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::IsAnimating(int)
 {
 	guard(UMeshInstance::IsAnimating);
@@ -391,7 +391,7 @@ int UMeshInstance::IsAnimating(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::IsAnimLooping(int)
 {
 	guard(UMeshInstance::IsAnimLooping);
@@ -400,7 +400,7 @@ int UMeshInstance::IsAnimLooping(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::IsAnimPastLastFrame(int)
 {
 	guard(UMeshInstance::IsAnimPastLastFrame);
@@ -409,7 +409,7 @@ int UMeshInstance::IsAnimPastLastFrame(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UMeshInstance::IsAnimTweening(int)
 {
 	guard(UMeshInstance::IsAnimTweening);
@@ -421,7 +421,7 @@ int UMeshInstance::IsAnimTweening(int)
 
 
 // --- USkeletalMeshInstance ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start, FVector const& End, FVector const& DirNorm, float const& Extent)
 {
 	// Retail: 0x12FF20, 96b. Casts a line from Start toward End with the given half-extent
@@ -948,7 +948,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -1000,7 +1000,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1666,7 +1666,7 @@ int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(USkeletalMeshInstance::Render);
@@ -1815,7 +1815,7 @@ int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector E
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
 	guard(USkeletalMeshInstance::MeshSkinVertsCallback);
@@ -2241,7 +2241,7 @@ float USkeletalMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int USkeletalMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 {
 	// Retail: 37b. Has direct call — not fully implemented (complex relative call).
@@ -2490,7 +2490,7 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(USkeletalMeshInstance::GetFrame);
@@ -2513,7 +2513,7 @@ UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(USkeletalMeshInstance::GetMeshVerts);
@@ -2617,7 +2617,7 @@ int USkeletalMeshInstance::WasSkeletonUpdated()
 	return (UpdateStamp >= GTicks - 1) ? 1 : 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void USkeletalMeshInstance::MeshBuildBounds()
 {
 	guard(USkeletalMeshInstance::MeshBuildBounds);
@@ -2837,7 +2837,7 @@ int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UVertMeshInstance::Render);
@@ -2846,7 +2846,7 @@ void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicL
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UVertMeshInstance::Serialize(FArchive &)
 {
 	guard(UVertMeshInstance::Serialize);
@@ -2857,7 +2857,7 @@ void UVertMeshInstance::Serialize(FArchive &)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UVertMeshInstance::SetAnimFrame(int, float Frame)
 {
 	// Retail: 13b. Stores Frame float value at this+0xC0 (ignores channel index).
@@ -3182,7 +3182,7 @@ float UVertMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 int UVertMeshInstance::AnimIsInGroup(void*, FName)
 {
 	// Retail: 48b. Has complex sub-call — stub returns 0.
@@ -3272,7 +3272,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3296,7 +3296,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
@@ -3363,7 +3363,7 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 
 // --- UVertMeshInstance ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UVertMeshInstance::MeshBuildBounds()
 {
 	guard(UVertMeshInstance::MeshBuildBounds);

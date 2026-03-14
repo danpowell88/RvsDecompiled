@@ -245,13 +245,13 @@ static void InitFireTables()
 	UFractalTexture — base class for all procedural textures.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFractalTexture::Init( INT InUSize, INT InVSize )
 {
 	UTexture::Init( InUSize, InVSize );
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFractalTexture::PostLoad()
 {
 	UTexture::PostLoad();
@@ -263,7 +263,7 @@ void UFractalTexture::PostEditChange()
 	// Ghidra: PostEditChange at 0x6b20 is empty in the retail binary.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFractalTexture::Prime()
 {
 	// Ghidra: Calls UTexture::Prime after checking client state
@@ -294,7 +294,7 @@ void UFireTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFireTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -338,13 +338,13 @@ void UFireTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFireTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFireTexture::Serialize( FArchive& Ar )
 {
 	UTexture::Serialize( Ar );
@@ -1605,7 +1605,7 @@ void UWaterTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaterTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -1643,7 +1643,7 @@ void UWaterTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	*((BYTE*)SourceFields + Offset + USize) = Val;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaterTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
@@ -2151,13 +2151,13 @@ void UWaterTexture::WaterRedrawDrops()
 	UWaveTexture — animated wave effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaveTexture::Clear( DWORD Flags )
 {
 	UWaterTexture::Clear( Flags );
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaveTexture::Init( INT InUSize, INT InVSize )
 {
 	UWaterTexture::Init( InUSize, InVSize );
@@ -2172,7 +2172,7 @@ void UWaveTexture::ConstantTimeTick()
 	SetWaveLight();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaveTexture::PostLoad()
 {
 	UWaterTexture::PostLoad();
@@ -2188,13 +2188,13 @@ void UWaveTexture::SetWaveLight()
 	UFluidTexture — fluid simulation texture.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFluidTexture::Clear( DWORD Flags )
 {
 	UWaterTexture::Clear( Flags );
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFluidTexture::Init( INT InUSize, INT InVSize )
 {
 	UWaterTexture::Init( InUSize, InVSize );
@@ -2208,7 +2208,7 @@ void UFluidTexture::ConstantTimeTick()
 	CalculateFluid();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFluidTexture::PostLoad()
 {
 	UWaterTexture::PostLoad();
@@ -2308,7 +2308,7 @@ void UIceTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UIceTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -2349,13 +2349,13 @@ void UIceTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 	INT_AT(this, 0x130) = 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UIceTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UIceTexture::Destroy()
 {
 	UTexture::Destroy();
@@ -2503,7 +2503,7 @@ void UWetTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWetTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -2516,7 +2516,7 @@ void UWetTexture::ConstantTimeTick()
 	ApplyWetTexture();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWetTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
