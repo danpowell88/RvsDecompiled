@@ -948,13 +948,20 @@ CORE_API void appCreateTempFilename( const TCHAR* Path, TCHAR* Result256 )
 	unguard;
 }
 
-IMPL_DIVERGE("exported at ordinal 1630 (0x1014c050); retail searches GSys->CachePath\\*.tmp, current implementation searches globally - permanent divergence until USystem struct is fully decompiled")
+IMPL_MATCH("Core.dll", 0x1014c050)
 CORE_API void appCleanFileCache()
 {
 	guard(appCleanFileCache);
-	TArray<FString> Found = GFileManager->FindFiles( TEXT("*.tmp"), 1, 0 );
+	// Ghidra: reads GSys+0x44 (CachePath); searches CachePath\*.tmp;
+	// for each result builds CachePath\filename, logs it, then deletes it.
+	FString SearchPath = FString::Printf( TEXT("%s\\*.tmp"), *GSys->CachePath );
+	TArray<FString> Found = GFileManager->FindFiles( *SearchPath, 1, 0 );
 	for( INT i=0; i<Found.Num(); i++ )
-		GFileManager->Delete( *Found(i) );
+	{
+		FString FullPath = FString::Printf( TEXT("%s\\%s"), *GSys->CachePath, *Found(i) );
+		GLog->Logf( TEXT("Deleting temporary file: %s"), *FullPath );
+		GFileManager->Delete( *FullPath, 0, 0 );
+	}
 	unguard;
 }
 

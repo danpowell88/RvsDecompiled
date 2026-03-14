@@ -1285,7 +1285,7 @@ void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm, UBOO
 	ExportCpp( Out, IsLocal, IsParm );
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("base class virtual no-op; not in named exports; just guard/unguard")
 void UProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	guard(UProperty::SerializeItem);
@@ -1293,13 +1293,13 @@ void UProperty::SerializeItem( FArchive& Ar, void* Value ) const
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("base class virtual no-op; not in named exports; delegates to 2-param override")
 void UProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const
 {
 	SerializeItem( Ar, Value );
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("base class virtual no-op; not in named exports; delegates to SerializeItem")
 void UProperty::SerializeBin( FArchive& Ar, BYTE* Data ) const
 {
 	SerializeItem( Ar, Data );
@@ -1475,7 +1475,7 @@ UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* D
 	Needed because we declared virtual (non-pure) in UProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("base class virtual no-op; not in named exports; just guard/unguard")
 void UProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	guard(UProperty::ExportCppItem);
@@ -1483,7 +1483,7 @@ void UProperty::ExportCppItem( FOutputDevice& Out ) const
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("base class virtual no-op; not in named exports; just guard/unguard")
 void UProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
 {
 	guard(UProperty::ExportCppItem);
