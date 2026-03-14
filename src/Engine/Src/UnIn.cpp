@@ -45,16 +45,34 @@ void UInputPlanning::StaticInitInput()
 
 IMPL_DIVERGE("stub returning 0; retail is 1757-byte command dispatch (0x103b4bd0)")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-IMPL_DIVERGE("omits Ar<<Viewport serialization; retail also serializes Viewport ptr at +0xea8 (0x103b4b40)")
-void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+IMPL_MATCH("Engine.dll", 0x103b4b40)
+void UInput::Serialize( FArchive& Ar )
+{
+	Super::Serialize( Ar );
+	// Serialize the UViewport* stored at offset 0xEA8
+	Ar << *(UViewport**)((BYTE*)this + 0xEA8);
+}
 IMPL_EMPTY("viewport initialization no-op")
 void UInput::Init( UViewport* InViewport ) {}
 IMPL_EMPTY("input polling no-op")
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
 IMPL_EMPTY("input state reset no-op")
 void UInput::ResetInput() {}
-IMPL_DIVERGE("stub returning 0; retail searches bindings array (0x103b4130)")
-BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
+IMPL_MATCH("Engine.dll", 0x103b4130)
+BYTE UInput::GetKey( const TCHAR* KeyName )
+{
+	// Scan bindings array (FString[255] at offset 0x2B0, 0xC bytes each)
+	// Returns the key index (0-254) whose binding string matches KeyName,
+	// or 0 if not found. Retail exits on first match or after 255 slots.
+	BYTE found = 0;
+	for (BYTE i = 0; i != 0xFF && found == 0; i++)
+	{
+		FString& binding = *(FString*)((BYTE*)this + i * 0xC + 0x2B0);
+		if (appStricmp(KeyName, *binding) == 0)
+			found = i;
+	}
+	return found;
+}
 IMPL_EMPTY("key assignment no-op")
 void UInput::SetKey( const TCHAR* KeyName ) {}
 IMPL_MATCH("Engine.dll", 0x103b4350)
