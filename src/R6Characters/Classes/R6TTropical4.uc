@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TTropical4.uc : (add small description)
+//  R6TTropical4.uc : Terrorist pawn variant: fourth tropical skin built on the tropical02 base.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

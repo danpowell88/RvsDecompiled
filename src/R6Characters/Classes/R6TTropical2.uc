@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TTropical2.uc : (add small description)
+//  R6TTropical2.uc : Terrorist pawn variant: second tropical/jungle enemy skin.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

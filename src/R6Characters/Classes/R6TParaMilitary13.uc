@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TParamilitary13.uc : (add small description)
+//  R6TParamilitary13.uc : Terrorist pawn variant: thirteenth paramilitary soldier skin.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

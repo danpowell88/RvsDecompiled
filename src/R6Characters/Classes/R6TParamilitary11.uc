@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TParamilitary11.uc : (add small description)
+//  R6TParamilitary11.uc : Terrorist pawn variant: eleventh paramilitary skin built on the militant01 base.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
