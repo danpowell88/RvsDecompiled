@@ -1114,10 +1114,8 @@ int UTexModifier::GetValidated()
 IMPL_MATCH("Engine.dll", 0x10304720)
 FMatrix * UTexOscillator::GetMatrix(float)
 {
-	guard(UTexOscillator::GetMatrix);
-	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV oscillation not implemented in retail either
+	// No guard/unguard — retail is a bare null stub; compiler deduplicates 4 identical copies
 	return NULL;
-	unguard;
 }
 
 
@@ -1125,10 +1123,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 IMPL_MATCH("Engine.dll", 0x10304720)
 FMatrix * UTexPanner::GetMatrix(float)
 {
-	guard(UTexPanner::GetMatrix);
-	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV panning not implemented in retail either
 	return NULL;
-	unguard;
 }
 
 
@@ -1150,10 +1145,7 @@ void UTexRotator::PostLoad()
 IMPL_MATCH("Engine.dll", 0x10304720)
 FMatrix * UTexRotator::GetMatrix(float)
 {
-	guard(UTexRotator::GetMatrix);
-	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV rotation not implemented in retail either
 	return NULL;
-	unguard;
 }
 
 
@@ -1161,9 +1153,6 @@ FMatrix * UTexRotator::GetMatrix(float)
 IMPL_MATCH("Engine.dll", 0x10304720)
 FMatrix * UTexScaler::GetMatrix(float)
 {
-	guard(UTexScaler::GetMatrix);
-	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV scaling not implemented in retail either
 	return NULL;
-	unguard;
 }
 
