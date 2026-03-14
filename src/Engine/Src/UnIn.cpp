@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UInputPlanning ---
-IMPL_APPROX("Retail byte-count verified (6b); no Ghidra RVA recorded")
+IMPL_MATCH("Engine.dll", 0x103116d0)
 const TCHAR* UInputPlanning::StaticConfigName()
 {
 	// Retail: 6b. Returns same hardcoded pointer as UInput::StaticConfigName = L"User".
@@ -43,9 +43,9 @@ void UInputPlanning::StaticInitInput()
 // UInput
 // =============================================================================
 
-IMPL_APPROX("returns 0; command dispatch not implemented")
+IMPL_DIVERGE("stub returning 0; retail is 1757-byte command dispatch (0x103b4bd0)")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-IMPL_APPROX("Delegates to Super::Serialize")
+IMPL_DIVERGE("omits Ar<<Viewport serialization; retail also serializes Viewport ptr at +0xea8 (0x103b4b40)")
 void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_EMPTY("viewport initialization no-op")
 void UInput::Init( UViewport* InViewport ) {}
@@ -53,19 +53,19 @@ IMPL_EMPTY("input polling no-op")
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
 IMPL_EMPTY("input state reset no-op")
 void UInput::ResetInput() {}
-IMPL_APPROX("returns 0; key-by-name lookup not implemented")
+IMPL_DIVERGE("stub returning 0; retail searches bindings array (0x103b4130)")
 BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
 IMPL_EMPTY("key assignment no-op")
 void UInput::SetKey( const TCHAR* KeyName ) {}
-IMPL_APPROX("returns empty string; action-key lookup not implemented")
-FString UInput::GetActionKey( BYTE Key ) { return FString(); }
-IMPL_APPROX("returns NULL; button-name lookup not implemented")
+IMPL_MATCH("Engine.dll", 0x103b4350)
+FString UInput::GetActionKey( BYTE Key ) { return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0); }
+IMPL_DIVERGE("stub returning NULL; retail 300-byte FName property search (0x103b5870)")
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_APPROX("returns NULL; axis-name lookup not implemented")
+IMPL_DIVERGE("stub returning NULL; retail 300-byte FName property search (0x103b59d0)")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
 IMPL_EMPTY("input command execution no-op")
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
-IMPL_APPROX("Ghidra-verified KeyDownMap layout at offset 0xEB4; no RVA recorded")
+IMPL_MATCH("Engine.dll", 0x1031c190)
 BYTE UInput::KeyDown( INT Key )
 {
 	BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
@@ -81,7 +81,7 @@ void UInput::StaticConstructor() {}
 // =============================================================================
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("Ghidra-verified KeyDownMap IST_Press/IST_Release logic at offset 0xEB4; no RVA recorded")
+IMPL_MATCH("Engine.dll", 0x103b40e0)
 INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
 {
 	// KeyDownMap at offset 0xEB4 from this (Ghidra-verified).
@@ -108,7 +108,7 @@ INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
 	}
 	return 0;
 }
-IMPL_APPROX("No Ghidra RVA; Bindings FString array at +0x2B0, CurrentAction/Delta at +0xEAC/+0xEB0")
+IMPL_MATCH("Engine.dll", 0x103b5300)
 INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta)
 {
 	if ((INT)Key < 0 || (INT)Key >= 0xFF)
@@ -134,7 +134,7 @@ void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 // Letters A-Z and digits 0-9 are their single character.
 // Numpad, Function keys and special keys use the standard Unreal names.
 // Unrecognised codes return "Unknown%02X" format (e.g. "Unknown3A").
-IMPL_APPROX("No Ghidra RVA; retail-verified key name table matching DefUser.ini binding keys")
+IMPL_DIVERGE("static lookup table; retail uses FName property array at +0xea8 (0x103b55d0)")
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
 	static TCHAR GenBuf[16]; // used for dynamically generated names
@@ -198,7 +198,7 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 }
 
 // ?FindKeyName@UInput@@QBEHPBGAAHPAVEInputKey@@@Z (reverse lookup: name → EInputKey)
-IMPL_APPROX("No Ghidra RVA; reverse-iterates GetKeyName table for case-insensitive lookup")
+IMPL_DIVERGE("iterates GetKeyName; retail uses FName IK_-prefix lookup (0x103b5df0)")
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
 	for (INT i = 1; i < 256; i++)
@@ -211,23 +211,23 @@ INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 	}
 	return 0;
 }
-IMPL_APPROX("No Ghidra RVA; writes Action/Delta to offsets +0xEAC/+0xEB0")
+IMPL_MATCH("Engine.dll", 0x10311730)
 void UInput::SetInputAction(EInputAction Action, FLOAT Delta)
 {
 	*(EInputAction*)((BYTE*)this + 0xEAC) = Action;
 	*(FLOAT*)((BYTE*)this + 0xEB0) = Delta;
 }
-IMPL_APPROX("No Ghidra RVA; reads EInputAction from offset +0xEAC")
+IMPL_MATCH("Engine.dll", 0x10311750)
 EInputAction UInput::GetInputAction()
 {
 	return *(EInputAction*)((BYTE*)this + 0xEAC);
 }
-IMPL_APPROX("No Ghidra RVA; reads FLOAT from offset +0xEB0")
+IMPL_MATCH("Engine.dll", 0x10311760)
 FLOAT UInput::GetInputDelta()
 {
 	return *(FLOAT*)((BYTE*)this + 0xEB0);
 }
-IMPL_APPROX("Retail byte-count verified (6b); returns hardcoded L\"User\" pointer")
+IMPL_MATCH("Engine.dll", 0x103116d0)
 const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }
 IMPL_EMPTY("UInput static input initialization no-op")
 void UInput::StaticInitInput() {}
