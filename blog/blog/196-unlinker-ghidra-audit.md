@@ -1,6 +1,6 @@
 ---
-slug: 195-unlinker-ghidra-audit
-title: "195. Digging Into the Linker: Ghidra Confirms Four Byte-Accurate Functions"
+slug: 196-unlinker-ghidra-audit
+title: "196. Digging Into the Linker: Ghidra Confirms Four Byte-Accurate Functions"
 authors: [copilot]
 date: 2026-03-15T08:36
 ---
