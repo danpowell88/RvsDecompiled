@@ -93,9 +93,9 @@ IMPLEMENT_FUNCTION(AUdpLink, -1, execSetPlayingTime)
 
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_DIVERGE("C++ placement new/delete helpers; no standalone retail equivalent")
+IMPL_DIVERGE("C++ compiler-generated placement new/delete; no corresponding standalone retail DLL export")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_DIVERGE("C++ placement new/delete helpers; no standalone retail equivalent")
+IMPL_DIVERGE("C++ compiler-generated placement new/delete; no corresponding standalone retail DLL export")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -115,9 +115,15 @@ enum EConnectionState
 	Async hostname resolution state.
 	Layout matches binary: 0x308 bytes.
 	+0x000: DWORD Addr     – resolved IP (network byte order from gethostbyname)
-	+0x004: DWORD bWorking – non-zero while resolution is pending
+	+0x004: DWORD bWorking – non-zero while resolution is pending; retail uses
+	                         this as the CreateThread lpThreadId output (ThreadId
+	                         is stored here, then cleared to 0 on completion)
 	+0x008: char  HostName[256] – ANSI hostname
-	+0x108: short Error    – WSAGetLastError() on failure, 0 on success
+	+0x108: In the retail binary this holds a wide-string error message written
+	         by appSprintf on failure (making the first short non-zero = error).
+	         We store a short WSA error code here instead; both are zero on success
+	         and non-zero on failure, so the null-check in AInternetLink::Tick
+	         is functionally equivalent.
 -----------------------------------------------------------------------------*/
 
 class FResolveInfo
@@ -301,7 +307,8 @@ static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 
 // Helper: get TSC-based elapsed time matching the binary's rdtsc formula.
 // Returns a large float increasing monotonically, with 16777216 as epoch offset.
-IMPL_DIVERGE("static helper; rdtsc formula inlined in LowLevelSend; no standalone DLL address")
+// This formula is inlined at each usage site in retail (LowLevelSend, SetPlayingTime, etc.).
+IMPL_DIVERGE("static helper; rdtsc formula inlined at each retail call site; not a standalone DLL export")
 static float GetTSCTime()
 {
 	unsigned __int64 tsc = __rdtsc();

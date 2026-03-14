@@ -226,23 +226,21 @@ CORE_API void VARARGS appFailAssert( const ANSICHAR* Expr, const ANSICHAR* File,
 	appErrorf( TEXT("%s"), TempStr );
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x1012f230)
 CORE_API void VARARGS appUnwindf( const TCHAR* Fmt, ... )
 {
-	TCHAR  TempStr[4096];
+	GIsCriticalError = 1;
+	TCHAR TempStr[4096];
 	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
-
-	static INT Pos = 0;
-	Pos += appStrlen(GErrorHist+Pos);
-	if( Pos < ARRAY_COUNT(GErrorHist)-256 )
-	{
-		appStrncat( GErrorHist, TEXT(" <- "), ARRAY_COUNT(GErrorHist) );
-		appStrncat( GErrorHist, TempStr, ARRAY_COUNT(GErrorHist) );
-		appStrncat( GErrorHist, TEXT("\r\n"), ARRAY_COUNT(GErrorHist) );
-	}
+	static INT UnwindCount = 0;
+	INT Prev = UnwindCount++;
+	if( Prev > 0 )
+		appStrncat( GErrorHist, TEXT(" <- "), 4096 );
+	appStrncat( GErrorHist, TempStr, 4096 );
+	debugf( TempStr );
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10148f40)
 CORE_API const TCHAR* appGetSystemErrorMessage( INT Error )
 {
 	guard(appGetSystemErrorMessage);
@@ -258,20 +256,17 @@ CORE_API const TCHAR* appGetSystemErrorMessage( INT Error )
 	{
 		ANSICHAR AMsg[1024];
 		FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM, NULL, Error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), AMsg, 1024, NULL );
-		appStrcpy( Msg, ANSI_TO_TCHAR(AMsg) );
+		appStrcpy( Msg, appFromAnsi(AMsg) );
 	}
-	// Strip trailing whitespace.
-	if( appStrlen(Msg) > 0 )
-	{
-		TCHAR* End = Msg + appStrlen(Msg) - 1;
-		while( End >= Msg && (*End == '\r' || *End == '\n' || *End == ' ') )
-			*End-- = 0;
-	}
+	TCHAR* CR = appStrchr( Msg, TEXT('\r') );
+	if( CR ) *CR = 0;
+	TCHAR* LF = appStrchr( Msg, TEXT('\n') );
+	if( LF ) *LF = 0;
 	return Msg;
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10149580)
 CORE_API const void appDebugMessagef( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -279,7 +274,7 @@ CORE_API const void appDebugMessagef( const TCHAR* Fmt, ... )
 	MessageBox( NULL, TempStr, TEXT("appDebugMessagef"), MB_OK );
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("void-return overload not found in Core.dll export table; retail exports only const INT appMsgf(INT,TCHAR*,...)")
 CORE_API const void appMsgf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -287,10 +282,15 @@ CORE_API const void appMsgf( const TCHAR* Fmt, ... )
 	MessageBox( NULL, TempStr, TEXT("Message"), MB_OK );
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101496f0)
 CORE_API const void appGetLastError( void )
 {
-	debugf( NAME_Warning, TEXT("GetLastError: %s"), appGetSystemErrorMessage() );
+	TCHAR TempStr[4096];
+	TempStr[0] = 0;
+	const TCHAR* ErrMsg = appGetSystemErrorMessage( 0 );
+	DWORD Err = GetLastError();
+	appSprintf( TempStr, TEXT("GetLastError : %d\n\n%s"), Err, ErrMsg );
+	MessageBoxW( NULL, TempStr, TEXT("System Error"), MB_OK );
 }
 
 IMPL_MATCH("Core.dll", 0x1012dfa0)
@@ -386,7 +386,7 @@ CORE_API void appFreeDllHandle( void* DllHandle )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10149470)
 CORE_API void* appGetDllExport( void* DllHandle, const TCHAR* ExportName )
 {
 	guard(appGetDllExport);
@@ -401,12 +401,16 @@ CORE_API void* appGetDllExport( void* DllHandle, const TCHAR* ExportName )
 
 // appCycles is provided inline by UnVcWin32.h (ASM rdtsc).
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101498c0)
 CORE_API DOUBLE appSecondsSlow()
 {
-	LARGE_INTEGER Cycles;
-	QueryPerformanceCounter( &Cycles );
-	return (DOUBLE)Cycles.QuadPart * GSecondsPerCycle;
+	static DWORD LastTickCount = 0;
+	static DOUBLE GCumulativeSeconds = 0.0;
+	DWORD Now = GetTickCount();
+	INT Delta = (INT)(Now - LastTickCount);
+	LastTickCount = Now;
+	GCumulativeSeconds = (DOUBLE)Delta * 0.001 + GCumulativeSeconds;
+	return GCumulativeSeconds;
 }
 
 IMPL_MATCH("Core.dll", 0x10149850)
@@ -424,13 +428,30 @@ CORE_API void appSystemTime( INT& Year, INT& Month, INT& DayOfWeek, INT& Day, IN
 	MSec      = st.wMilliseconds;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10113160)
 CORE_API const TCHAR* appTimestamp()
 {
 	static TCHAR Result[1024];
-	INT Year, Month, DayOfWeek, Day, Hour, Min, Sec, MSec;
-	appSystemTime( Year, Month, DayOfWeek, Day, Hour, Min, Sec, MSec );
-	appSprintf( Result, TEXT("%04i.%02i.%02i-%02i.%02i.%02i"), Year, Month, Day, Hour, Min, Sec );
+	Result[0] = 0;
+	if( GUnicodeOS )
+	{
+		_wstrdate( Result );
+		INT Len = (INT)wcslen( Result );
+		Result[Len] = ' ';
+		Result[Len+1] = 0;
+		_wstrtime( Result + Len + 1 );
+	}
+	else
+	{
+		ANSICHAR ATemp[64] = "";
+		_strdate( ATemp );
+		appStrcpy( Result, appFromAnsi(ATemp) );
+		INT Len = appStrlen( Result );
+		Result[Len] = ' ';
+		Result[Len+1] = 0;
+		_strtime( ATemp );
+		appStrcpy( Result + Len + 1, appFromAnsi(ATemp) );
+	}
 	return Result;
 }
 
@@ -521,7 +542,7 @@ CORE_API TCHAR* appStrcpy( TCHAR* Dest, const TCHAR* Src )
 	return (TCHAR*)_tcscpy( Dest, Src );
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("single-argument INT overload not found in Core.dll export table; may be SDK artifact")
 CORE_API INT appStrcpy( const TCHAR* String )
 {
 	return _tcsclen( String );
@@ -775,7 +796,7 @@ CORE_API DWORD appMemCrc( const void* Data, INT Length, DWORD CRC )
 	return ~CRC;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x1012dd00)
 CORE_API void appMemswap( void* Ptr1, void* Ptr2, DWORD Size )
 {
 	// Swap using temporary buffer.
@@ -792,7 +813,7 @@ CORE_API void appMemset( void* Dest, INT C, INT Count )
 }
 
 #ifndef DEFINED_appMemcpy
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("appMemcpy may be provided as platform assembly in retail build; wrapped in #ifndef DEFINED_appMemcpy")
 CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 {
 	memcpy( Dest, Src, Count );
@@ -800,7 +821,7 @@ CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 #endif
 
 #ifndef DEFINED_appMemzero
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("appMemzero may be provided as platform assembly in retail build; wrapped in #ifndef DEFINED_appMemzero")
 CORE_API void appMemzero( void* Dest, INT Count )
 {
 	memset( Dest, 0, Count );
@@ -858,13 +879,13 @@ CORE_API FLOAT appFrand()
 	return rand() / (FLOAT)RAND_MAX;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("not found in Core.dll Ghidra exports; likely inlined at call sites")
 CORE_API FLOAT appRandRange( FLOAT Min, FLOAT Max )
 {
 	return Min + (Max - Min) * appFrand();
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("not found in Core.dll Ghidra exports; likely inlined at call sites")
 CORE_API INT appRandRange( INT Min, INT Max )
 {
 	return Min + (appRand() % (Max - Min + 1));
@@ -927,7 +948,7 @@ CORE_API void appCreateTempFilename( const TCHAR* Path, TCHAR* Result256 )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("exported at ordinal 1630 (0x1014c050); retail searches GSys->CachePath\\*.tmp, current implementation searches globally - permanent divergence until USystem struct is fully decompiled")
 CORE_API void appCleanFileCache()
 {
 	guard(appCleanFileCache);
@@ -1159,7 +1180,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FLOAT& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10131170)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FString& Value )
 {
 	TCHAR Temp[4096] = TEXT("");
@@ -1183,7 +1204,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, QWORD& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x1012f8d0)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SQWORD& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1275,7 +1296,7 @@ CORE_API UBOOL ParseLine( const TCHAR** Stream, TCHAR* Result, INT MaxLen, UBOOL
 	return GotStream;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10130760)
 CORE_API UBOOL ParseLine( const TCHAR** Stream, FString& Result, UBOOL Exact )
 {
 	TCHAR Temp[4096];
@@ -1368,7 +1389,7 @@ CORE_API UBOOL ParseParam( const TCHAR* Stream, const TCHAR* Param )
 	Localization.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10130860)
 CORE_API const TCHAR* Localize( const TCHAR* Section, const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt, UBOOL Optional, UBOOL Optional2 )
 {
 	guard(Localize);
@@ -1570,7 +1591,7 @@ CORE_API UBOOL appSaveArrayToFile( const TArray<BYTE>& Array, const TCHAR* Filen
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101319d0)
 CORE_API UBOOL appSaveStringToFile( const FString& String, const TCHAR* Filename, FFileManager* FileManager )
 {
 	guard(appSaveStringToFile);
@@ -1628,7 +1649,7 @@ CORE_API FString appFormat( FString Src, const TMultiMap<FString,FString>& Map )
 	Launch URL helper.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x1014a930)
 CORE_API void appLaunchURL( const TCHAR* URL, const TCHAR* Parms, FString* Error )
 {
 	guard(appLaunchURL);
@@ -1644,7 +1665,7 @@ CORE_API void appLaunchURL( const TCHAR* URL, const TCHAR* Parms, FString* Error
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("3-param variant with bRealTime not exported from Core.dll; retail binary only has 2-param version at ordinal 1638 (0x101498f0)")
 CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms, UBOOL bRealTime )
 {
 	guard(appCreateProc);
@@ -1686,14 +1707,29 @@ CORE_API INT appIsPBInstalled()
 	return 0;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101495e0)
 CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
+	TempStr[0] = 0;
 	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
-	if( GWarn )
-		GWarn->Serialize( TempStr, NAME_Log );
-	return 1;
+	INT Result;
+	if( Type == 1 )
+	{
+		INT R = MessageBoxW( NULL, TempStr, TEXT("Message"), MB_YESNO );
+		Result = (R - IDYES) == 0;
+	}
+	else if( Type == 2 )
+	{
+		INT R = MessageBoxW( NULL, TempStr, TEXT("Message"), MB_OKCANCEL );
+		Result = (R - IDOK) == 0;
+	}
+	else
+	{
+		MessageBoxW( NULL, TempStr, TEXT("Message"), MB_OK );
+		Result = 1;
+	}
+	return Result;
 }
 
 IMPL_MATCH("Core.dll", 0x101133c0)
@@ -1826,7 +1862,7 @@ CORE_API TCHAR* winAnsiToTCHAR( char* Str )
 	return Buf;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x10149b30)
 CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 {
 	// Ghidra 0x149b40 (206 bytes): stat the file and compute age in whole days.
@@ -1858,7 +1894,7 @@ CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 	return (INT)(secs / 86400.0);
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x1014b810)
 CORE_API INT RegGet( FString Key, FString Name, FString& Value )
 {
 	// Read a REG_SZ value from HKEY_LOCAL_MACHINE\<Key>\<Name>.
@@ -1877,7 +1913,7 @@ CORE_API INT RegGet( FString Key, FString Name, FString& Value )
 	return 1;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x1014b3f0)
 CORE_API INT RegSet( FString Key, FString Name, FString Value )
 {
 	// Write a REG_SZ value to HKEY_LOCAL_MACHINE\<Key>\<Name>.
@@ -1902,7 +1938,7 @@ CORE_API INT IsRavenShieldCDInDrive()
 	return 1;
 }
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_MATCH("Core.dll", 0x101498f0)
 CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms )
 {
 	return appCreateProc( URL, Parms, 0 );

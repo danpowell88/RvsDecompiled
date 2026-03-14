@@ -154,7 +154,7 @@ FVector AR6Pawn::CheckForLedges(AActor *, FVector, FVector, FVector, INT &, INT 
 	return FVector(0,0,0);
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_100015d0 (unlisted ULevel::ActorLineCheck helper)")
+IMPL_DIVERGE("0x1002cf40: else-branch uses FUN_100015d0 to initialize 4 test positions for multi-point sight check; FUN_100015d0 is an N-times FVector initializer")
 INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 	AActor* param_4, FVector& param_5, AActor* param_6, FVector& param_7)
 {
@@ -859,11 +859,11 @@ void AR6Pawn::PawnSetBoneRotation(FName BoneName, INT Pitch, INT Yaw, INT Roll, 
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_MATCH("R6Engine.dll", 0x1002de70)
 void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 {
-	m_bAim = bShouldAim;
-	m_TrackActor = InActor;
+	*(DWORD*)((BYTE*)this + 0x6c4) ^= ((DWORD)bShouldAim << 29 ^ *(DWORD*)((BYTE*)this + 0x6c4)) & 0x20000000;
+	*(AActor**)((BYTE*)this + 0x7c0) = InActor;
 	UpdatePawnTrackActor(1);
 }
 
