@@ -772,44 +772,50 @@ IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
-IMPL_DIVERGE("GWarn vtable slot 0x28 (MapCheck_Add) not declared — uses debugf as substitute")
+IMPL_MATCH("Engine.dll", 0x103983d0)
 void ANavigationPoint::CheckForErrors()
 {
-	// Ghidra 0x983d0 149B. Call super, then if PathList is empty, warn about the node.
+	// Ghidra 0x983d0 149B. Call super, then if PathList is empty, info-warn via GWarn vtable[0x28].
 	guard(ANavigationPoint::CheckForErrors);
 	Super::CheckForErrors();
 	if (PathList.Num() == 0)
-		debugf(NAME_Warning, TEXT("No paths from %s"), GetName());
+	{
+		typedef void (__thiscall* MapCheckAddFn)(void*, INT, AActor*, const TCHAR*);
+		FString msg = FString::Printf(TEXT("No paths from %s"), GetName());
+		((MapCheckAddFn)(*(void**)(*(INT*)GWarn + 0x28)))(GWarn, 1, this, *msg);
+	}
 	unguard;
 }
-IMPL_DIVERGE("vtable slot 0x1a4 on Nav (ProscribedPaths matching) not yet resolved")
+IMPL_MATCH("Engine.dll", 0x103d5b70)
 INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav)
 {
 	// Ghidra 0xd5b70 317B. Returns 0 (not proscribed), 1 (proscribed by direction/distance),
 	// or 2 (proscribed by matching tag in ProscribedPaths array at this+0x3B8).
 	guard(ANavigationPoint::ProscribedPathTo);
 
-	// bDirectional (bit 3 of flags at 0x3A4): if set, check that Nav is in front of this
-	if ((*(DWORD*)((BYTE*)this + 0x3A4)) & 8)
+	// bDirectional (bit 3 of first flags byte at 0x3A4): if set, check Nav is in front
+	if (((BYTE*)this)[0x3A4] & 8)
 	{
-		FVector diff = Nav->Location - Location;
-		FVector facing = FRotator(*(INT*)((BYTE*)this + 0x240),
-		                          *(INT*)((BYTE*)this + 0x244),
-		                          *(INT*)((BYTE*)this + 0x248)).Vector();
+		FVector diff(Nav->Location.X - Location.X, Nav->Location.Y - Location.Y, Nav->Location.Z - Location.Z);
+		FVector facing = Rotation.Vector();
 		FLOAT dot = diff.X * facing.X + diff.Y * facing.Y + diff.Z * facing.Z;
 		if (dot < 0.0f)
 			return 1;
 	}
 
-	// Distance check: if >1200 units away, proscribe
-	FVector delta = Location - Nav->Location;
+	// Distance check: if more than 1200 units away, proscribe
+	FVector delta(Location.X - Nav->Location.X, Location.Y - Nav->Location.Y, Location.Z - Nav->Location.Z);
 	if (delta.SizeSquared() > 1440000.0f)
 		return 1;
 
-	// Check ProscribedPaths tags (4 entries at this+0x3B8).
-	// DIVERGE: vtable[0x1a4/4] on Nav not identified; tags not verified.
-	unguard;
+	// Check ProscribedPaths tags (4 entries via vtable IsIdentifiedAs on Nav)
+	for (INT i = 0; i < 4; i++)
+	{
+		if (Nav->IsIdentifiedAs(ProscribedPaths[i]))
+			return 2;
+	}
 	return 0;
+	unguard;
 }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
@@ -866,30 +872,55 @@ INT ANavigationPoint::IsIdentifiedAs(FName Name)
 	// Ghidra 0xd5ce0 79B. Compare our actor name with the provided Name.
 	return Name == GetFName();
 }
-IMPL_DIVERGE("GWarn vtable slot 0x28 (MapCheck_Add) not declared — uses debugf as substitute")
+IMPL_MATCH("Engine.dll", 0x103d62f0)
 INT ANavigationPoint::ReviewPath(APawn* Scout)
 {
-	// Ghidra 0xd62f0 223B. If bMustBeReachable, verify all nav points can reach this
-	// one via CanReach; warn for any that cannot. Always returns 1.
+	// Ghidra 0xd62f0 223B. If bMustBeReachable (bit 15 of flags DWORD at +0x3A4), verify
+	// every nav point in the level can reach this one via CanReach; warn for failures.
+	// NavigationPointList sourced from Level (+0x144) + 0x4D0, not Zone.
 	guard(ANavigationPoint::ReviewPath);
-	if (bMustBeReachable)
+	if ((char)((DWORD)*(DWORD*)((BYTE*)this + 0x3A4) >> 8) < 0)
 	{
-		// Walk NavigationPointList from Zone
-		ANavigationPoint* First = *(ANavigationPoint**)((BYTE*)Region.Zone + 0x4D0);
+		ANavigationPoint* First = *(ANavigationPoint**)((BYTE*)Level + 0x4D0);
+		typedef void (__thiscall* MapCheckAddFn)(void*, INT, AActor*, const TCHAR*);
 		for (ANavigationPoint* Nav = First; Nav; Nav = Nav->nextNavigationPoint)
 		{
-			// Reset visitedWeight for all nav points before each reachability check
-			for (ANavigationPoint* N2 = First; N2; N2 = N2->nextNavigationPoint)
-				*(DWORD*)((BYTE*)N2 + 0x394) = 0;
+			for (ANavigationPoint* N = First; N; N = N->nextNavigationPoint)
+				*(DWORD*)((BYTE*)N + 0x394) = 0;
 			if (!Nav->CanReach(this, 1.0e7f))
-				debugf(NAME_Warning, TEXT("Cannot reach %s from this node!"), GetName());
+			{
+				FString msg = FString::Printf(TEXT("Cannot reach %s from this node!"), GetName());
+				((MapCheckAddFn)(*(void**)(*(INT*)GWarn + 0x28)))(GWarn, 0, Nav, *msg);
+			}
 		}
 	}
-	unguard;
 	return 1;
+	unguard;
 }
-IMPL_DIVERGE("calls FUN_1050557c (unresolved — returns unique path-search timestamp for cycle prevention)")
-INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
+IMPL_MATCH("Engine.dll", 0x103d61f0)
+INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist)
+{
+	// Ghidra 0xd61f0 193B. Memoised DFS: if visitedWeight (at +0x394, read as FLOAT) <= Dist,
+	// stamp it with (INT)Dist (via _ftol), then recurse through PathList specs.
+	guard(ANavigationPoint::CanReach);
+	if ((FLOAT)*(INT*)((BYTE*)this + 0x394) <= Dist)
+	{
+		*(INT*)((BYTE*)this + 0x394) = (INT)Dist;
+		if (Dist > 0.0f)
+		{
+			if (this == Nav) return 1;
+			TArray<UReachSpec*>* myPaths = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+			for (INT i = 0; i < myPaths->Num(); i++)
+			{
+				UReachSpec* spec = (*myPaths)(i);
+				if (spec->End->CanReach(Nav, Dist - spec->Distance))
+					return 1;
+			}
+		}
+	}
+	return 0;
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103d7080)
 void ANavigationPoint::CleanUpPruned()
 {
@@ -1018,15 +1049,27 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execWorldToScreen );
 
 /*-- UInteractionMaster ------------------------------------------------*/
 
-IMPL_DIVERGE("accesses Interaction list via raw offsets 0x140/0x144/0x150 — unresolved")
+IMPL_MATCH("Engine.dll", 0x103b6690)
 void UInteractionMaster::execTravel( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0xb6690 231B. Reads URL string, then sets TravelURL/TravelType/TravelFlag
+	// on the first element of the InteractionList at master+0x30 (via raw offsets).
 	guard(UInteractionMaster::execTravel);
 	P_GET_STR(URL);
 	P_FINISH;
-	// Ghidra 0xb6690 231B: reads optional UBOOL from bytecode, then sets
-	// TravelURL (at InteractionList[0]+0x144) and clears TravelType fields.
-	// Raw offsets unresolved — no-op stub.
+	BYTE* master = *(BYTE**)((BYTE*)this + 0x34);
+	if (master)
+	{
+		BYTE** listData = *(BYTE***)(master + 0x30);  // FArray.Data
+		INT   listNum   = *(INT*)  (master + 0x34);  // FArray.ArrayNum
+		if (listNum > 0)
+		{
+			BYTE* first = listData[0];
+			*(FString*)(first + 0x144) = URL;  // TravelURL
+			*(INT*)    (first + 0x140) = 0;    // TravelType
+			*(INT*)    (first + 0x150) = 0;    // TravelFlag
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( UInteractionMaster, INDEX_NONE, execTravel );
@@ -1200,15 +1243,28 @@ void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 2020, execAddNewModExtraPath );
 
-IMPL_DIVERGE("navigates opaque sub-object chain via raw offsets 0x44/0x48 — unresolved vtable call")
+IMPL_MATCH("Engine.dll", 0x10392990)
 void UR6ModMgr::execCallSndEngineInit( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x92990 190B. If AudioMgr->+0x44->+0x48 non-null chain, call vtable[0x88](1).
+	// Retail also stack-allocates an FString from DAT_10529f90 that is never used (dead code).
 	guard(UR6ModMgr::execCallSndEngineInit);
 	P_GET_INT(AudioMgr);
 	P_FINISH;
-	// Ghidra 0x92990 190B: if AudioMgr != 0 and AudioMgr->0x44 != 0 and
-	// AudioMgr->0x44->0x48 != 0, call vtable[0x88/4](1) on that sub-object.
-	// Field layout not resolved.
+	BYTE* audioMgr = (BYTE*)AudioMgr;
+	if (audioMgr)
+	{
+		BYTE* subObj1 = *(BYTE**)(audioMgr + 0x44);
+		if (subObj1)
+		{
+			BYTE* subObj2 = *(BYTE**)(subObj1 + 0x48);
+			if (subObj2)
+			{
+				typedef void (__thiscall* SndInitFn)(void*, INT);
+				((SndInitFn)(*(void**)((BYTE*)(*(void**)subObj2) + 0x88)))(subObj2, 1);
+			}
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 3003, execCallSndEngineInit );
