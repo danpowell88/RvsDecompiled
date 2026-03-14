@@ -31,25 +31,31 @@ date: YYYY-MM-DDTHH:MM
 
 Note blog post dates must be unique, split by minutes if required for multiple
 
-## ⚠️ Blog Post Numbering — CRITICAL (recurring issue)
+## ⚠️ Blog Post Numbering — CRITICAL (recurring issue, happened 4+ times)
 
 Multiple agents running in parallel **will collide on post numbers** unless each one checks
 the current highest number before writing a new post.
 
-**Before creating any blog post, always run:**
+**Before creating any blog post, ALWAYS run this exact command first:**
 ```powershell
-ls blog/blog/*.md | Sort-Object { [int]($_.Name -replace '^(\d+).*','$1') } | Select-Object -Last 1 -ExpandProperty Name
+ls blog\blog\*.md | ForEach-Object { if ($_.Name -match "^(\d+)-") { [int]$Matches[1] } } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
 ```
 This shows the **numerically** highest existing post number. Use `N+1` for your new post.
+
+**Why this keeps breaking:** Agents that check alphabetically (e.g. `Sort-Object Name`) will get
+`99` as the max before `100`, then create another `100`. Always use the numeric check above.
 
 ⚠️ **Do NOT use `Sort-Object Name`** — that sorts alphabetically and `99` comes after `100` alphabetically,
 giving the wrong result. Always sort numerically with the expression above.
 
 **Rules:**
-- Never hardcode a post number like `100` without checking first.
+- NEVER write `100` or any specific number without running the check above first.
+- Do NOT reference a "milestone" post number (like "Post 100!") — it will be wrong.
 - If a conflict is discovered after the fact, renumber the duplicate to `(current_max + 1)`.
 - The filename prefix **must** match the `slug:` NNN and the `title: "NNN."` prefix exactly.
-- After renaming, search for `"Post 100!"` or similar in the post body and update it too.
+- After renaming a file, also update the `slug:`, `title:`, and remove any body text referencing the old number.
+
+**Current max post (as of last update): 194**
 
 ## Ground Truth Priority
 
