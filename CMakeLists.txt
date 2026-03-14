@@ -161,6 +161,9 @@ endmacro()
 # --- Phase 2: Core engine ---
 add_subdirectory(src/Core)
 
+# --- Phase 2.5: MeSDK (MathEngine/Karma physics, statically linked into Engine) ---
+add_subdirectory(src/MeSDK)
+
 # --- Phase 3: Engine ---
 add_subdirectory(src/Engine)
 

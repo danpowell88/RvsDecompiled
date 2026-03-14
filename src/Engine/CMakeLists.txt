@@ -23,7 +23,7 @@ if(SOURCE_COUNT GREATER 0)
     target_include_directories(Engine BEFORE PRIVATE
         ${ENGINE_SRC_DIR}/Inc
     )
-    target_link_libraries(Engine Core_Dep)
+    target_link_libraries(Engine Core_Dep MeSDK)
     # Allow duplicate symbol definitions from compiler-generated virtual destructors
     # across multiple translation units that include the same class definitions.
     target_link_options(Engine PRIVATE /FORCE:MULTIPLE)
