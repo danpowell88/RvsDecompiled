@@ -14,13 +14,13 @@ static DWORD (CDECL* GEviLPatchCallback)(void) = NULL;
 
 // --- UR6AbstractEviLPatchService ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Abstract.dll", 0x10003840)
 void UR6AbstractEviLPatchService::SetFunctionPtr(DWORD (CDECL* Func)(void))
 {
 	GEviLPatchCallback = Func;
 }
 
-IMPL_APPROX("UnrealScript exec thunk; reconstructed from context")
+IMPL_MATCH("R6Abstract.dll", 0x10003780)
 void UR6AbstractEviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

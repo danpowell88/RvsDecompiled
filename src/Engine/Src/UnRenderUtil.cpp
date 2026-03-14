@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnRenderUtil.cpp: Render buffers, lighting, and BSP geometry helpers
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -30,7 +30,7 @@ FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x14, (const BYTE*)&Other + 0x14, 0x18); // 6 DWORDs
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<FStreamVert32> at +8 to empty")
+IMPL_MATCH("Engine.dll", 0x1032b0e0)
 FAnimMeshVertexStream::FAnimMeshVertexStream()
 {
 	new ((BYTE*)this + 0x08) TArray<FStreamVert32>();
@@ -55,7 +55,7 @@ FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStr
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
+IMPL_MATCH("Engine.dll", 0x1031c5b0)
 int FAnimMeshVertexStream::SetPartialSize(int Size)
 {
 	// Ghidra: clamp Size to [0, Num], store at Pad[32], mark dirty (increment Pad[24])
@@ -66,19 +66,19 @@ int FAnimMeshVertexStream::SetPartialSize(int Size)
 	*(INT*)(Pad + 24) += 1;
 	return Size;
 }
-IMPL_APPROX("Returns QWORD cache ID from Pad+16; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x103162b0)
 unsigned __int64 FAnimMeshVertexStream::GetCacheId()
 {
 	return *(QWORD*)(Pad + 16);
 }
-IMPL_APPROX("Vertex component layout inferred from stream type; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10314890)
 int FAnimMeshVertexStream::GetComponents(FVertexComponent* C)
 {
 	C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
-IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
+IMPL_MATCH("Engine.dll", 0x1031c580)
 int FAnimMeshVertexStream::GetPartialSize()
 {
 	INT Num = *(INT*)(Pad + 8);
@@ -89,28 +89,28 @@ int FAnimMeshVertexStream::GetPartialSize()
 	}
 	return Num;
 }
-IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
+IMPL_MATCH("Engine.dll", 0x1031c610)
 void FAnimMeshVertexStream::GetRawStreamData(void ** Out, int Offset)
 {
 	*Out = *(BYTE**)(Pad + 4) + Offset * 0x20;
 }
-IMPL_APPROX("Returns revision counter from Pad+24; no Ghidra address")
+IMPL_DIVERGE("FAnimMeshVertexStream::GetRevision not found in Ghidra export — cannot confirm VA")
 int FAnimMeshVertexStream::GetRevision()
 {
 	return *(INT*)(Pad + 24);
 }
-IMPL_APPROX("Ghidra describes GetPartialSize() << 5; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10314880)
 int FAnimMeshVertexStream::GetSize()
 {
 	return GetPartialSize() << 5;
 }
-IMPL_APPROX("Ghidra describes memcpy logic; no standalone address")
+IMPL_MATCH("Engine.dll", 0x1031c5f0)
 void FAnimMeshVertexStream::GetStreamData(void * Dest)
 {
 	INT Size = GetPartialSize() << 5;
 	appMemcpy(Dest, *(void**)(Pad + 4), Size);
 }
-IMPL_APPROX("Returns fixed stride 0x20; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x1042f4a0)
 int FAnimMeshVertexStream::GetStride()
 {
 	return 0x20;
@@ -126,7 +126,7 @@ FBspVertexStream::FBspVertexStream(FBspVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<FBspVertex> at +4 to empty")
+IMPL_MATCH("Engine.dll", 0x10327860)
 FBspVertexStream::FBspVertexStream()
 {
 	// Initialize TArray<FBspVertex> at +4 to empty
@@ -150,12 +150,12 @@ FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Returns QWORD cache ID from Pad+12; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FBspVertexStream::GetCacheId()
 {
 	return *(unsigned __int64*)(Pad + 12);
 }
-IMPL_APPROX("Vertex component layout inferred from BSP stream type; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x103046e0)
 int FBspVertexStream::GetComponents(FVertexComponent* C)
 {
 	C[0].Type = 0; C[0].Function = 0;
@@ -164,28 +164,28 @@ int FBspVertexStream::GetComponents(FVertexComponent* C)
 	C[3].Type = 2; C[3].Function = 5;
 	return 4;
 }
-IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
+IMPL_MATCH("Engine.dll", 0x10318f70)
 void FBspVertexStream::GetRawStreamData(void ** Out, int Offset)
 {
 	*Out = *(BYTE**)Pad + Offset * 0x28;
 }
-IMPL_APPROX("Returns revision counter from Pad+20; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x1047ad20)
 int FBspVertexStream::GetRevision()
 {
 	return *(INT*)(Pad + 20);
 }
-IMPL_APPROX("Ghidra describes Num * 0x28; no standalone address")
+IMPL_MATCH("Engine.dll", 0x103046c0)
 int FBspVertexStream::GetSize()
 {
 	return *(INT*)(Pad + 4) * 0x28;
 }
-IMPL_APPROX("Ghidra describes memcpy Num*0x28; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10318f40)
 void FBspVertexStream::GetStreamData(void * Dest)
 {
 	INT Size = *(INT*)(Pad + 4) * 0x28;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
-IMPL_APPROX("Returns fixed stride 0x28; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x103046d0)
 int FBspVertexStream::GetStride()
 {
 	return 0x28;
@@ -193,7 +193,7 @@ int FBspVertexStream::GetStride()
 
 
 // --- FLevelSceneNode ---
-IMPL_APPROX("Ghidra reference only; body approximated")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10406670 not yet fully reconstructed")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
@@ -283,7 +283,7 @@ label_check_model:
 	return GHideHiddenInEditor ? 0 : 1;
 }
 
-IMPL_APPROX("Trivially returns this; no Ghidra address")
+IMPL_DIVERGE("FLevelSceneNode::GetLevelSceneNode not found in Ghidra export — cannot confirm VA")
 FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 {
 	return this;
@@ -300,7 +300,7 @@ FLightMap::FLightMap(FLightMap const &Other)
 	new ((BYTE*)this + 0x98) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98));
 }
 
-IMPL_APPROX("Initializes TArray members so dtor is safe; no Ghidra address")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1033c6a0 is 129 bytes, not fully reconstructed")
 FLightMap::FLightMap(ULevel *,int,int)
 {
 	// Initialize TArray members so dtor is safe regardless of which ctor was called
@@ -308,14 +308,14 @@ FLightMap::FLightMap(ULevel *,int,int)
 	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1033c6a0 is 129 bytes, not fully reconstructed")
 FLightMap::FLightMap()
 {
 	new ((BYTE*)this + 0x8C) TArray<FLightMapSample52>();
 	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMap::~FLightMap not found in Ghidra export — cannot confirm VA")
 FLightMap::~FLightMap()
 {
 	// Ghidra 0x3c6a0 area: destroy TArrays in reverse order
@@ -323,7 +323,7 @@ FLightMap::~FLightMap()
 	((TArray<FLightMapSample52>*)((BYTE*)this + 0x8C))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMap::operator= not found in Ghidra export — cannot confirm VA")
 FLightMap& FLightMap::operator=(const FLightMap& Other)
 {
 	// Ghidra 0x3ca10: skip vtable +0; +4..+8B = 34 DWORDs (contiguous); +0x8C=TArray<FLightMapSample52>; +0x98=TArray<FLOAT>
@@ -346,17 +346,17 @@ int FLightMap::GetFirstMip()
 	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10304740)
 ETextureFormat FLightMap::GetFormat()
 {
 	return TEXF_BCRGB8;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10304730)
 int FLightMap::GetHeight()
 {
 	return *(INT*)(Pad + 28);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMap::GetNumMips not found in Ghidra export — cannot confirm VA")
 int FLightMap::GetNumMips()
 {
 	return 1;
@@ -367,12 +367,12 @@ void * FLightMap::GetRawTextureData(int)
 	// Ghidra 0x4720: shared stub; returns NULL.
 	return NULL;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10304760)
 int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_APPROX("Too complex to fully decompile; guard/unguard stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10410560 not yet fully reconstructed")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
@@ -382,23 +382,23 @@ void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 	guard(FLightMap::GetTextureData);
 	unguard;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMap::GetUClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FLightMap::GetUClamp()
 {
 	return TC_Clamp;
 }
-IMPL_APPROX("Shared stub; returns NULL")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 UTexture * FLightMap::GetUTexture()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMap::GetVClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FLightMap::GetVClamp()
 {
 	return TC_Clamp;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10314870)
 int FLightMap::GetWidth()
 {
 	return *(INT*)(Pad + 24);
@@ -406,7 +406,7 @@ int FLightMap::GetWidth()
 
 
 // --- FLightMapTexture ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x10320e50 is 117 bytes, not fully reconstructed")
 FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 {
 	// Ghidra 0x20e50: vtable set by compiler; copy DWORD at +4; copy TArray<FLOAT> at +8;
@@ -417,7 +417,7 @@ FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 	appMemcpy((BYTE*)this + 0x60, (const BYTE*)&Other + 0x60, 0x0C); // 3 DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10320e50 is 117 bytes, not fully reconstructed")
 FLightMapTexture::FLightMapTexture(ULevel* Level)
 {
 	// Ghidra 0x110bd0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4
@@ -426,7 +426,7 @@ FLightMapTexture::FLightMapTexture(ULevel* Level)
 	*(ULevel**)((BYTE*)this + 0x04) = Level;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10320e50 is 117 bytes, not fully reconstructed")
 FLightMapTexture::FLightMapTexture()
 {
 	// Ghidra 0x279b0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14
@@ -434,7 +434,7 @@ FLightMapTexture::FLightMapTexture()
 	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::~FLightMapTexture not found in Ghidra export — cannot confirm VA")
 FLightMapTexture::~FLightMapTexture()
 {
 	// Ghidra 0x20df0: destroy FStaticLightMapTexture at +0x14, then TArray<FLOAT> at +8
@@ -442,7 +442,7 @@ FLightMapTexture::~FLightMapTexture()
 	((TArray<FLOAT>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::operator= not found in Ghidra export — cannot confirm VA")
 FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 {
 	// Ghidra 0x20ed0: skip vtable +0; +4=DWORD; +8=TArray<FLOAT>; +0x14=FStaticLightMapTexture subobj; +0x60,+0x64,+0x68=3 DWORDs
@@ -454,12 +454,12 @@ FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103047c0)
 unsigned __int64 FLightMapTexture::GetCacheId()
 {
 	return *(QWORD*)(Pad + 92);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1040fd50)
 FTexture * FLightMapTexture::GetChild(int Index, int* OutWidth, int* OutHeight)
 {
 	// Retail: 0x10FD50, 56b. Returns the FTexture for a given face index into the
@@ -478,51 +478,51 @@ FTexture * FLightMapTexture::GetChild(int Index, int* OutWidth, int* OutHeight)
 	*OutHeight = *(INT*)(texElem + 0x18);
 	return (FTexture*)texElem;
 }
-IMPL_APPROX("Shared stub; returns 0")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 int FLightMapTexture::GetFirstMip()
 {
 	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::GetFormat not found in Ghidra export — cannot confirm VA")
 ETextureFormat FLightMapTexture::GetFormat()
 {
 	return TEXF_BCRGB8;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::GetHeight not found in Ghidra export — cannot confirm VA")
 int FLightMapTexture::GetHeight()
 {
 	return 0x200;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103047a0)
 int FLightMapTexture::GetNumChildren()
 {
 	// TArray at this+8; ArrayNum is 4 bytes into TArray
 	return *(INT*)(Pad + 8);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::GetNumMips not found in Ghidra export — cannot confirm VA")
 int FLightMapTexture::GetNumMips()
 {
 	return 1;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103047d0)
 int FLightMapTexture::GetRevision()
 {
 	return *(INT*)(Pad + 100);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::GetUClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FLightMapTexture::GetUClamp()
 {
 	// Retail: 33 C0 C3 = return 0 = TC_Wrap
 	return TC_Wrap;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapTexture::GetVClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FLightMapTexture::GetVClamp()
 {
 	// Retail: 33 C0 C3 = return 0 = TC_Wrap
 	return TC_Wrap;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103047b0)
 int FLightMapTexture::GetWidth()
 {
 	return 0x200;
@@ -530,7 +530,7 @@ int FLightMapTexture::GetWidth()
 
 
 // --- FLineBatcher ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10327320)
 FLineBatcher::FLineBatcher(FLineBatcher const &Other)
 {
 	// Ghidra 0x27320: vtable set by compiler; TArray<FLineVertex> at +4 (stride 0x10); 5 DWORDs at +10..+20
@@ -538,7 +538,7 @@ FLineBatcher::FLineBatcher(FLineBatcher const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x14); // 5 DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10327320)
 FLineBatcher::FLineBatcher(FRenderInterface *,int,int)
 {
 	// Initialize TArray<FLineVertex> at +4 to empty so dtor is safe
@@ -546,7 +546,7 @@ FLineBatcher::FLineBatcher(FRenderInterface *,int,int)
 	appMemzero((BYTE*)this + 0x10, 0x14); // zero state DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLineBatcher::~FLineBatcher not found in Ghidra export — cannot confirm VA")
 FLineBatcher::~FLineBatcher()
 {
 	// Ghidra 0x418050: reset vtable, call Flush(false), destroy TArray<FLineVertex> at +4
@@ -554,7 +554,7 @@ FLineBatcher::~FLineBatcher()
 	((TArray<FLineVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLineBatcher::operator= not found in Ghidra export — cannot confirm VA")
 FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 {
 	// Ghidra 0x27360: skip vtable at +0, TArray<FLineVertex> at +4 (FUN_1031e1c0=16-byte),
@@ -564,7 +564,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_APPROX("FPoly + plane iteration too complex to fully decompile; stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10415560 not yet fully reconstructed")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
@@ -572,7 +572,7 @@ void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104147c0)
 void FLineBatcher::DrawBox(FBox Box, FColor Color)
 {
 	// Ghidra 0x1147c0: draw 12 edges of an axis-aligned box.
@@ -592,7 +592,7 @@ void FLineBatcher::DrawBox(FBox Box, FColor Color)
 	}
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104149f0)
 void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Ghidra 0x1149f0: draw a circle using NumSides line segments.
@@ -609,14 +609,14 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 	}
 }
 
-IMPL_APPROX("Too complex to fully decompile; stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10414E50 not yet fully reconstructed")
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
 	// Ghidra 0x114e50: too complex to fully decompile; left empty.
 	// TODO: implement FLineBatcher::DrawCylinder (Ghidra 0x114e50)
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10415190)
 void FLineBatcher::DrawDirectionalArrow(FVector Origin, FRotator Rotation, FColor Color, FLOAT ArrowSize)
 {
 	// Ghidra 0x115190: convert Rotation to FCoords, draw main shaft + two arrow-head wings.
@@ -632,7 +632,7 @@ void FLineBatcher::DrawDirectionalArrow(FVector Origin, FRotator Rotation, FColo
 	DrawLine(Tip - Forward * (1.0f / 3.0f) - Coords.YAxis * WingScale, Tip, Color);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104143c0)
 void FLineBatcher::DrawLine(FVector Start, FVector End, FColor Color)
 {
 	// Ghidra 0x1143c0: add two FLineVertex entries (16 bytes each) to TArray at this+4.
@@ -643,7 +643,7 @@ void FLineBatcher::DrawLine(FVector Start, FVector End, FColor Color)
 	new (&(*Verts)(i)) FLineVertex(End, Color);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104144a0)
 void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 {
 	// Ghidra 0x1144a0: draw a screen-aligned square cross at Point using camera axes.
@@ -656,55 +656,55 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_APPROX("Complex FMatrix rotation per ring; stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10414B90 not yet fully reconstructed")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
 	// TODO: implement FLineBatcher::DrawSphere (Ghidra 0x114b90: complex FMatrix rotation per ring)
 }
 
-IMPL_APPROX("GCache + UProxyBitmapMaterial + vertex stream too complex; stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104172A0 not yet fully reconstructed")
 void FLineBatcher::Flush(DWORD Flags)
 {
 	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
 	// TODO: implement FLineBatcher::Flush (Ghidra 0x1172a0: GCache + UProxyBitmapMaterial + vertex stream)
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLineBatcher::GetCacheId not found in Ghidra export — cannot confirm VA")
 unsigned __int64 FLineBatcher::GetCacheId()
 {
 	return *(QWORD*)(Pad + 12);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10414110)
 int FLineBatcher::GetComponents(FVertexComponent* C)
 {
 	C[0].Type = 1; C[0].Function = 0;
 	C[1].Type = 4; C[1].Function = 2;
 	return 2;
 }
-IMPL_APPROX("Ghidra: *Out = data + offset * 0x10")
+IMPL_MATCH("Engine.dll", 0x104159a0)
 void FLineBatcher::GetRawStreamData(void ** Out, int Offset)
 {
 	// Ghidra: *Out = data + offset * 0x10
 	*Out = *(BYTE**)Pad + Offset * 0x10;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLineBatcher::GetRevision not found in Ghidra export — cannot confirm VA")
 int FLineBatcher::GetRevision()
 {
 	return 1;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104140f0)
 int FLineBatcher::GetSize()
 {
 	// Ghidra: FArray::Num(this+4) << 4, TArray at Pad[0]
 	return *(INT*)(Pad + 4) << 4;
 }
-IMPL_APPROX("Ghidra describes memcpy Num<<4; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10415970)
 void FLineBatcher::GetStreamData(void * Dest)
 {
 	INT Size = *(INT*)(Pad + 4) << 4;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
-IMPL_APPROX("Returns fixed stride 0x10; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10414100)
 int FLineBatcher::GetStride()
 {
 	return 0x10;
@@ -720,7 +720,7 @@ FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<FLOAT> at +4 to empty")
+IMPL_MATCH("Engine.dll", 0x103209a0)
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer()
 {
 	// Initialize TArray<FLOAT> at +4 to empty
@@ -744,28 +744,28 @@ FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Returns QWORD cache ID from Pad+12; no Ghidra address")
+IMPL_DIVERGE("FRaw32BitIndexBuffer::GetCacheId not found in Ghidra export — cannot confirm VA")
 unsigned __int64 FRaw32BitIndexBuffer::GetCacheId()
 {
 return *(QWORD*)(Pad + 12);
 }
-IMPL_APPROX("Ghidra describes memcpy Num<<2; no standalone address")
+IMPL_DIVERGE("FRaw32BitIndexBuffer::GetContents not found in Ghidra export — cannot confirm VA")
 void FRaw32BitIndexBuffer::GetContents(void * Dest)
 {
 INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
-IMPL_APPROX("Returns fixed index size 4; no Ghidra address")
+IMPL_DIVERGE("FRaw32BitIndexBuffer::GetIndexSize not found in Ghidra export — cannot confirm VA")
 int FRaw32BitIndexBuffer::GetIndexSize()
 {
 return 4;
 }
-IMPL_APPROX("Returns revision from Pad+20; no Ghidra address")
+IMPL_DIVERGE("FRaw32BitIndexBuffer::GetRevision not found in Ghidra export — cannot confirm VA")
 int FRaw32BitIndexBuffer::GetRevision()
 {
 return *(INT*)(Pad + 20);
 }
-IMPL_APPROX("Ghidra describes Num << 2; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10414200)
 int FRaw32BitIndexBuffer::GetSize()
 {
 return *(INT*)(Pad + 4) << 2;
@@ -781,7 +781,7 @@ FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<FLOAT> at +4 to empty")
+IMPL_MATCH("Engine.dll", 0x10327570)
 FRawColorStream::FRawColorStream()
 {
 	// Initialize TArray<FLOAT> at +4 to empty
@@ -804,38 +804,38 @@ FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Returns QWORD cache ID from Pad+12; no Ghidra address")
+IMPL_DIVERGE("FRawColorStream::GetCacheId not found in Ghidra export — cannot confirm VA")
 unsigned __int64 FRawColorStream::GetCacheId()
 {
 return *(QWORD*)(Pad + 12);
 }
-IMPL_APPROX("Vertex component layout inferred from colour stream type; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10414210)
 int FRawColorStream::GetComponents(FVertexComponent* C)
 {
 return 1;
 }
-IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
+IMPL_MATCH("Engine.dll", 0x104169b0)
 void FRawColorStream::GetRawStreamData(void ** Out, int Offset)
 {
 *Out = *(BYTE**)Pad + Offset * 4;
 }
-IMPL_APPROX("Returns revision from Pad+20; no Ghidra address")
+IMPL_DIVERGE("FRawColorStream::GetRevision not found in Ghidra export — cannot confirm VA")
 int FRawColorStream::GetRevision()
 {
 return *(INT*)(Pad + 20);
 }
-IMPL_APPROX("Ghidra describes Num << 2; no standalone address")
+IMPL_DIVERGE("FRawColorStream::GetSize not found in Ghidra export — cannot confirm VA")
 int FRawColorStream::GetSize()
 {
 return *(INT*)(Pad + 4) << 2;
 }
-IMPL_APPROX("Ghidra describes memcpy Num<<2; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10416980)
 void FRawColorStream::GetStreamData(void * Dest)
 {
 INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
-IMPL_APPROX("Returns fixed stride 4; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x104141f0)
 int FRawColorStream::GetStride()
 {
 return 4;
@@ -843,7 +843,7 @@ return 4;
 
 
 // --- FRawIndexBuffer ---
-IMPL_APPROX("NvTriStrip not available; strip generation skipped; revision still bumped")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10416E70 not yet fully reconstructed")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
@@ -864,14 +864,14 @@ FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<_WORD> at +4 to empty")
+IMPL_MATCH("Engine.dll", 0x10318d80)
 FRawIndexBuffer::FRawIndexBuffer()
 {
 	// Initialize TArray<_WORD> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<_WORD>();
 }
 
-IMPL_APPROX("Destroys TArray<_WORD> at +4; no Ghidra address")
+IMPL_DIVERGE("FRawIndexBuffer::~FRawIndexBuffer not found in Ghidra export — cannot confirm VA")
 FRawIndexBuffer::~FRawIndexBuffer()
 {
 	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
@@ -887,7 +887,7 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("NvTriStrip cache-optimiser not available; optimisation pass skipped")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10416860 not yet fully reconstructed")
 void FRawIndexBuffer::CacheOptimize()
 {
 	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
@@ -895,12 +895,12 @@ void FRawIndexBuffer::CacheOptimize()
 	// DIVERGENCE: optimisation pass skipped; revision still bumped for cache invalidation.
 	*(INT*)(Pad + 20) += 1;
 }
-IMPL_APPROX("Returns QWORD cache ID from Pad+12; no Ghidra address")
+IMPL_DIVERGE("FRawIndexBuffer::GetCacheId not found in Ghidra export — cannot confirm VA")
 unsigned __int64 FRawIndexBuffer::GetCacheId()
 {
 return *(QWORD*)(Pad + 12);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104141c0)
 void FRawIndexBuffer::GetContents(void* Dest)
 {
 	// Retail: 0x1141c0. TArray<WORD> at this+4 (= Pad+0). Copy Num*2 bytes.
@@ -908,17 +908,17 @@ void FRawIndexBuffer::GetContents(void* Dest)
 	INT    num  = *(INT*)(Pad + 4);
 	appMemcpy(Dest, data, num * 2);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FRawIndexBuffer::GetIndexSize not found in Ghidra export — cannot confirm VA")
 int FRawIndexBuffer::GetIndexSize()
 {
 	return 2;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FRawIndexBuffer::GetRevision not found in Ghidra export — cannot confirm VA")
 int FRawIndexBuffer::GetRevision()
 {
 	return *(INT*)(Pad + 20);
 }
-IMPL_APPROX("Retail byte sequence confirms Num << 1; no standalone Ghidra address")
+IMPL_MATCH("Engine.dll", 0x104141a0)
 int FRawIndexBuffer::GetSize()
 {
 // TArray<_WORD> at object+4; ArrayNum at +4 within TArray = Pad+4
@@ -935,14 +935,14 @@ FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &Other)
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>(*(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x20));
 }
 
-IMPL_APPROX("Default constructor; initializes TArray<FStreamVert32> at +0x20 to empty")
+IMPL_MATCH("Engine.dll", 0x1032b700)
 FSkinVertexStream::FSkinVertexStream()
 {
 	// Initialize TArray<FStreamVert32> at +0x20 to empty
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>();
 }
 
-IMPL_APPROX("Destroys TArray<FStreamVert32> at +0x20; no Ghidra address")
+IMPL_DIVERGE("FSkinVertexStream::~FSkinVertexStream not found in Ghidra export — cannot confirm VA")
 FSkinVertexStream::~FSkinVertexStream()
 {
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
@@ -959,19 +959,19 @@ FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Returns QWORD cache ID from Pad+8; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10458140)
 unsigned __int64 FSkinVertexStream::GetCacheId()
 {
 return *(QWORD*)(Pad + 8);
 }
-IMPL_APPROX("Vertex component layout inferred from skin stream type; no Ghidra address")
+IMPL_DIVERGE("FSkinVertexStream::GetComponents not found in Ghidra export — cannot confirm VA")
 int FSkinVertexStream::GetComponents(FVertexComponent* C)
 {
 C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
-IMPL_APPROX("Retail describes GPU-only path; no standalone Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10430d10)
 void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
 	// Retail: 20b. GPU-only skin stream; no CPU-accessible raw pointer.
@@ -980,12 +980,12 @@ void FSkinVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 	if (*(DWORD*)(Pad + 0x18))
 		*ppData = NULL;
 }
-IMPL_APPROX("Returns revision from Pad+16; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10414320)
 int FSkinVertexStream::GetRevision()
 {
 return *(INT*)(Pad + 16);
 }
-IMPL_APPROX("Retail describes GPU/CPU size logic; no standalone Ghidra address")
+IMPL_MATCH("Engine.dll", 0x1042f470)
 int FSkinVertexStream::GetSize()
 {
 // If null, no data allocated → return 0.
@@ -1019,7 +1019,7 @@ void FSkinVertexStream::GetStreamData(void* Dest)
 	INT    num  = *(INT*)(Pad + 0x20);
 	appMemcpy(Dest, data, num << 5); // num * 32
 }
-IMPL_APPROX("Returns fixed stride 0x20; no Ghidra address")
+IMPL_DIVERGE("FSkinVertexStream::GetStride not found in Ghidra export — cannot confirm VA")
 int FSkinVertexStream::GetStride()
 {
 	return 0x20;
@@ -1040,7 +1040,7 @@ FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Oth
 	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 0x18); // 6 DWORDs (+0x34..+0x4B)
 }
 
-IMPL_APPROX("CacheId left 0; retail uses global per-resource counter DAT_1060b564")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10320CF0 not yet fully reconstructed")
 FStaticLightMapTexture::FStaticLightMapTexture()
 {
 // cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
@@ -1074,34 +1074,34 @@ FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapT
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Returns QWORD cache ID from Pad+60; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10304790)
 unsigned __int64 FStaticLightMapTexture::GetCacheId()
 {
 return *(QWORD*)(Pad + 60);
 }
-IMPL_APPROX("Ghidra describes UTexture::__Client check; no standalone address")
+IMPL_MATCH("Engine.dll", 0x1040d4f0)
 int FStaticLightMapTexture::GetFirstMip()
 {
 if (UTexture::__Client != NULL && *(INT*)((BYTE*)UTexture::__Client + 0x70) != 0)
 		return 1;
 	return 0;
 }
-IMPL_APPROX("Returns format from Pad+48; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10304780)
 ETextureFormat FStaticLightMapTexture::GetFormat()
 {
 return (ETextureFormat)*(INT*)(Pad + 48);
 }
-IMPL_APPROX("Returns height from Pad+56; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10318b20)
 int FStaticLightMapTexture::GetHeight()
 {
 return *(INT*)(Pad + 56);
 }
-IMPL_APPROX("Returns fixed mip count 2; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x104141b0)
 int FStaticLightMapTexture::GetNumMips()
 {
 return 2;
 }
-IMPL_APPROX("GIsEditor assertion removed; returns NULL when not editor-loaded")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1040FE60 not yet fully reconstructed")
 void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 {
 	// Retail: 0x10FE60, ~100b SEH. In editor only (asserts GIsEditor).
@@ -1119,108 +1119,108 @@ void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 	}
 	return *(void**)((BYTE*)this + MipIndex * 0x18 + 0x10);
 }
-IMPL_APPROX("Returns revision from Pad+68; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10316740)
 int FStaticLightMapTexture::GetRevision()
 {
 return *(INT*)(Pad + 68);
 }
-IMPL_APPROX("Complex lazy-load + DXT decode pipeline; stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1040FD90 not yet fully reconstructed")
 void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticLightMapTexture::GetTextureData (Ghidra: complex lazy-load + DXT decode pipeline)
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticLightMapTexture::GetUClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FStaticLightMapTexture::GetUClamp()
 {
 	return TC_Wrap;
 }
-IMPL_APPROX("Shared stub; returns NULL")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 UTexture * FStaticLightMapTexture::GetUTexture()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticLightMapTexture::GetVClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FStaticLightMapTexture::GetVClamp()
 {
 	return TC_Wrap;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10304770)
 int FStaticLightMapTexture::GetWidth()
 {
 	return *(INT*)(Pad + 52);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshUVStream::GetCacheId not found in Ghidra export — cannot confirm VA")
 unsigned __int64 FStaticMeshUVStream::GetCacheId()
 {
 	return *(QWORD*)(Pad + 16);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316290)
 int FStaticMeshUVStream::GetComponents(FVertexComponent* C)
 {
 	C[0].Type = 2; C[0].Function = *(INT*)(Pad + 0x0C) + 4;
 	return 1;
 }
-IMPL_APPROX("Ghidra: *Out = data + offset * 8")
+IMPL_MATCH("Engine.dll", 0x1031c9d0)
 void FStaticMeshUVStream::GetRawStreamData(void ** Out, int Offset)
 {
 	// Ghidra: *Out = data + offset * 8
 	*Out = *(BYTE**)Pad + Offset * 8;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshUVStream::GetRevision not found in Ghidra export — cannot confirm VA")
 int FStaticMeshUVStream::GetRevision()
 {
 	return *(INT*)(Pad + 24);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316270)
 int FStaticMeshUVStream::GetSize()
 {
 	// Ghidra: Num << 3 (stride = 8)
 	return *(INT*)(Pad + 4) << 3;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1031c9a0)
 void FStaticMeshUVStream::GetStreamData(void * Dest)
 {
 	// Ghidra: memcpy Num<<3 bytes from TArray data
 	INT Size = *(INT*)(Pad + 4) << 3;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316280)
 int FStaticMeshUVStream::GetStride()
 {
 	return 8;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshVertexStream::GetCacheId not found in Ghidra export — cannot confirm VA")
 unsigned __int64 FStaticMeshVertexStream::GetCacheId()
 {
 	return *(QWORD*)(Pad + 12);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103161e0)
 int FStaticMeshVertexStream::GetComponents(FVertexComponent* C)
 {
 	C[0].Type = 1; C[0].Function = 0;
 	C[1].Type = 1; C[1].Function = 1;
 	return 2;
 }
-IMPL_APPROX("Retail: data = [this+4]; stride = 24")
+IMPL_MATCH("Engine.dll", 0x10443700)
 void FStaticMeshVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 {
 	// Retail: data = [this+4] (TArray.Data); stride = 24 (3*8); Pad[0] = this+4
 	*ppData = *(BYTE**)(Pad + 0) + FirstVertex * 0x18;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshVertexStream::GetRevision not found in Ghidra export — cannot confirm VA")
 int FStaticMeshVertexStream::GetRevision()
 {
 	return *(INT*)(Pad + 20);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104436c0)
 int FStaticMeshVertexStream::GetSize()
 {
 	// Ghidra (16B): FArray::Num(this+4) * 0x18; Pad[0] = FArray at offset 4
 	INT Num = *(INT*)(Pad + 4); // ArrayNum field of FArray at this+4
 	return Num * 0x18;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1031c970)
 void FStaticMeshVertexStream::GetStreamData(void* Dest)
 {
 	// Retail: 0x1c970. TArray of 24-byte verts at this+4 (= Pad+0). Copy Num*24 bytes.
@@ -1228,7 +1228,7 @@ void FStaticMeshVertexStream::GetStreamData(void* Dest)
 	INT    num  = *(INT*)(Pad + 4);
 	appMemcpy(Dest, data, num * 0x18);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshVertexStream::GetStride not found in Ghidra export — cannot confirm VA")
 int FStaticMeshVertexStream::GetStride()
 {
 	return 0x18;
@@ -1236,14 +1236,14 @@ int FStaticMeshVertexStream::GetStride()
 
 
 // --- FStaticTexture ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10320b50)
 FStaticTexture::FStaticTexture(FStaticTexture const &Other)
 {
 	// Ghidra 0x20b50: vtable set by compiler; scalar copy of 4 DWORDs at +4..+10. Shares address with FStaticCubemap.
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10320b50)
 FStaticTexture::FStaticTexture(UTexture* Texture)
 {
 	// Ghidra 0x16a9a0: store texture pointer, compute CacheId, set initial revision.
@@ -1254,7 +1254,7 @@ FStaticTexture::FStaticTexture(UTexture* Texture)
 	*(INT*)&Pad[12]       = 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticTexture::operator= not found in Ghidra export — cannot confirm VA")
 FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
 {
 	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
@@ -1264,38 +1264,38 @@ FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10408af0)
 unsigned __int64 FStaticTexture::GetCacheId()
 {
 	// Ghidra: return *(__uint64*)(this + 4); CacheId at Pad[0..7]
 	return *(QWORD*)&Pad[0];
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10469cc0)
 int FStaticTexture::GetFirstMip()
 {
 	// Ghidra: UTexture::DefaultLOD(Texture)
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	return Texture->DefaultLOD();
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10468cd0)
 ETextureFormat FStaticTexture::GetFormat()
 {
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	return (ETextureFormat)Texture->Format;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10468cb0)
 int FStaticTexture::GetHeight()
 {
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	return Texture->VSize;
 }
-IMPL_APPROX("Returns Texture->Mips.Num(); no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10468cc0)
 int FStaticTexture::GetNumMips()
 {
 UTexture* Texture = *(UTexture**)&Pad[8];
 return Texture->Mips.Num();
 }
-IMPL_APPROX("Ghidra describes lazy-load mip access; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10469cd0)
 void * FStaticTexture::GetRawTextureData(int MipIndex)
 {
 	// Ghidra (149B): Access Mips array directly via raw offsets.
@@ -1323,7 +1323,7 @@ void * FStaticTexture::GetRawTextureData(int MipIndex)
 
 	return *(void**)(MipEntry + 0x1C);
 }
-IMPL_APPROX("Retail byte sequence describes bRealtimeChanged check; no standalone address")
+IMPL_MATCH("Engine.dll", 0x10468c80)
 int FStaticTexture::GetRevision()
 {
 // If bRealtimeChanged flag (bit 6 = 0x40 in bitfield at UTexture+0x94) is set:
@@ -1336,29 +1336,29 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_APPROX("Complex lazy-load path; stub only")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10469DA0 not yet fully reconstructed")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
 }
-IMPL_APPROX("Returns Texture->UClampMode; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10468ce0)
 ETexClampMode FStaticTexture::GetUClamp()
 {
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	return (ETexClampMode)Texture->UClampMode;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10468d00)
 UTexture * FStaticTexture::GetUTexture()
 {
 	return *(UTexture**)&Pad[8];
 }
-IMPL_APPROX("Returns Texture->VClampMode; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10468cf0)
 ETexClampMode FStaticTexture::GetVClamp()
 {
 	UTexture* Texture = *(UTexture**)&Pad[8];
 	return (ETexClampMode)Texture->VClampMode;
 }
-IMPL_APPROX("Returns Texture->USize; no Ghidra address")
+IMPL_MATCH("Engine.dll", 0x10468ca0)
 int FStaticTexture::GetWidth()
 {
 	UTexture* Texture = *(UTexture**)&Pad[8];
@@ -1367,7 +1367,7 @@ int FStaticTexture::GetWidth()
 
 
 // --- FBspSection ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10327a70 is 83 bytes, not fully reconstructed")
 FBspSection::FBspSection(FBspSection const &Other)
 {
 	// Ghidra 0x27b60: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 7 DWORDs at +10..+28
@@ -1375,21 +1375,21 @@ FBspSection::FBspSection(FBspSection const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10327a70 is 83 bytes, not fully reconstructed")
 FBspSection::FBspSection()
 {
 	// Initialize TArray<FBspVertex> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<FBspVertex>();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FBspSection::~FBspSection not found in Ghidra export — cannot confirm VA")
 FBspSection::~FBspSection()
 {
 	// Ghidra 0x103278e0: shared with ~FBspVertexStream; destroy TArray<FBspVertex> at +4
 	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FBspSection::operator= not found in Ghidra export — cannot confirm VA")
 FBspSection& FBspSection::operator=(const FBspSection& Other)
 {
 	// Ghidra 0x27bb0: skip vtable at +0, TArray<FBspVertex> at +4 (FUN_10324ae0=40-byte elems),
@@ -1401,7 +1401,7 @@ FBspSection& FBspSection::operator=(const FBspSection& Other)
 
 
 // --- FBspVertex ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FBspVertex::FBspVertex not found in Ghidra export — cannot confirm VA")
 FBspVertex::FBspVertex()
 {
 	// Ghidra: constructs two FVectors at offset 0 and 0xC (Position + Normal)
@@ -1409,7 +1409,7 @@ FBspVertex::FBspVertex()
 	*(FVector*)&_Data[12] = FVector(0,0,0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FBspVertex::operator= not found in Ghidra export — cannot confirm VA")
 FBspVertex& FBspVertex::operator=(const FBspVertex& Other)
 {
 	appMemcpy( this, &Other, sizeof(FBspVertex) );
@@ -1418,7 +1418,7 @@ FBspVertex& FBspVertex::operator=(const FBspVertex& Other)
 
 
 // --- FConvexVolume ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10413f20)
 BYTE FConvexVolume::SphereCheck(FSphere Sphere)
 {
 	BYTE Result = 1;
@@ -1433,27 +1433,27 @@ BYTE FConvexVolume::SphereCheck(FSphere Sphere)
 	return Result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10303750 is 158 bytes, not fully reconstructed")
 FConvexVolume::FConvexVolume(const FConvexVolume& Other)
 {
 	// Ghidra 0x3750: 32 FPlane copy ctors (FPlane is POD) + 24 DWORDs = 0x260 bytes total
 	appMemcpy(this, &Other, 0x260);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10303750 is 158 bytes, not fully reconstructed")
 FConvexVolume::FConvexVolume()
 {
 	// Ghidra: default ctor; no heap allocation; stack/member data left to caller init.
 	NumPlanes = 0;
 }
 
-IMPL_APPROX("Trivial dtor; no heap to free")
+IMPL_DIVERGE("FConvexVolume::~FConvexVolume not found in Ghidra export — cannot confirm VA")
 FConvexVolume::~FConvexVolume()
 {
 	// Ghidra: trivial dtor; no heap to free.
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FConvexVolume::operator= not found in Ghidra export — cannot confirm VA")
 FConvexVolume& FConvexVolume::operator=(const FConvexVolume& Other)
 {
 	// Ghidra 0x37f0: 0x98 DWORDs from offset 0 (no vtable)
@@ -1461,7 +1461,7 @@ FConvexVolume& FConvexVolume::operator=(const FConvexVolume& Other)
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x104169d0)
 BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 {
 	BYTE Result = 1;
@@ -1477,13 +1477,13 @@ BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 	return Result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10413f90 is 165 bytes, not fully reconstructed")
 FPoly FConvexVolume::ClipPolygon(FPoly)
 {
 	return FPoly();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10414040 is 165 bytes, not fully reconstructed")
 FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 {
 	return FPoly();
@@ -1491,21 +1491,21 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 
 
 // --- FDynamicActor ---
-IMPL_APPROX("Rendering dispatched via UMeshInstance::Render vtable")
+IMPL_DIVERGE("stub body (0 line(s)) — Ghidra 0x104038b0 is 11290 bytes, not fully reconstructed")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
 	// INTENTIONALLY EMPTY: rendering dispatched via UMeshInstance::Render vtable; FDynamicActor::Render has no per-type render logic
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103135d0 is 135 bytes, not fully reconstructed")
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 {
 	// Ghidra 0x135d0: no vtable; flat copy of 0x80 bytes (same as operator= at 0x13660)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x103135d0 is 135 bytes, not fully reconstructed")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
@@ -1517,13 +1517,13 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 	// TODO: complete FDynamicActor constructor mesh/physics transform setup (requires unresolved FUN_* helpers)
 }
 
-IMPL_APPROX("Trivial dtor; no heap to free")
+IMPL_DIVERGE("FDynamicActor::~FDynamicActor not found in Ghidra export — cannot confirm VA")
 FDynamicActor::~FDynamicActor()
 {
 	// Ghidra: trivial dtor; no heap to free.
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FDynamicActor::operator= not found in Ghidra export — cannot confirm VA")
 FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 {
 	// Ghidra 0x13660: 0x20 DWORDs from offset 0 (FDynamicActor has no vtable)
@@ -1533,7 +1533,7 @@ FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 
 
 // --- FDynamicLight ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1040D5D0 not yet fully reconstructed")
 float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 {
 	// Retail: 0x10D5D0, ~200b. Evaluates per-sample light intensity based on light type.
@@ -1611,19 +1611,19 @@ float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 	return 0.0f;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104104f0 is 102 bytes, not fully reconstructed")
 FColor FDynamicLight::SampleLight(FVector,FVector)
 {
 	return FColor(0,0,0,0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313540 is 100 bytes, not fully reconstructed")
 FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 {
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10313540 not yet fully reconstructed")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
@@ -1635,7 +1635,7 @@ FDynamicLight::FDynamicLight(AActor* Actor)
 	// DIVERGENCE: complex light-effect and color setup omitted (requires FGetHSV + LightEffect dispatch).
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FDynamicLight::operator= not found in Ghidra export — cannot confirm VA")
 FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
 {
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
@@ -1644,7 +1644,7 @@ FDynamicLight& FDynamicLight::operator=(const FDynamicLight& Other)
 
 
 // --- FLightMapIndex ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (0 line(s)) — Ghidra 0x10302b40 is 114 bytes, not fully reconstructed")
 FLightMapIndex::FLightMapIndex()
 {
 	// Ghidra 0x2b40: constructs FMatrix at +8 and +0x48, FVector at +0x88, +0x94, +0xA0.
@@ -1653,7 +1653,7 @@ FLightMapIndex::FLightMapIndex()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapIndex::~FLightMapIndex not found in Ghidra export — cannot confirm VA")
 FLightMapIndex::~FLightMapIndex()
 {
 	// Ghidra 0x2bc0: destructs FMatrix at +0x48 then +8.
@@ -1661,7 +1661,7 @@ FLightMapIndex::~FLightMapIndex()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLightMapIndex::operator= not found in Ghidra export — cannot confirm VA")
 FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex& Other)
 {
 	// Ghidra 0x2c10: 0x30 DWORDs from offset 0 (no vtable)
@@ -1671,21 +1671,21 @@ FLightMapIndex& FLightMapIndex::operator=(const FLightMapIndex& Other)
 
 
 // --- FLineVertex ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_EMPTY("Ghidra 0x10303810 confirms retail body is trivial (13 bytes)")
 FLineVertex::FLineVertex(FVector InPoint, FColor InColor)
 :	Point(InPoint)
 ,	Color(InColor)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10303810)
 FLineVertex::FLineVertex()
 {
 	// Ghidra 0x3810: calls FVector::FVector((FVector*)this) then returns.
 	// No SEH frame; compiler default-constructs Point (FVector trivial ctor).
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FLineVertex::operator= not found in Ghidra export — cannot confirm VA")
 FLineVertex& FLineVertex::operator=(const FLineVertex& Other)
 {
 	Point = Other.Point;
@@ -1695,14 +1695,14 @@ FLineVertex& FLineVertex::operator=(const FLineVertex& Other)
 
 
 // --- FStaticCubemap ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10318eb0)
 FStaticCubemap::FStaticCubemap(FStaticCubemap const &Other)
 {
 	// Ghidra 0x18eb0: vtable set by compiler; scalar copy of 4 DWORDs at +4..+10
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10318eb0)
 FStaticCubemap::FStaticCubemap(UCubemap* Cubemap)
 {
 	// Ghidra 0x16a9f0: store cubemap pointer, compute CacheId, set initial revision.
@@ -1713,7 +1713,7 @@ FStaticCubemap::FStaticCubemap(UCubemap* Cubemap)
 	*(INT*)(Pad + 12)    = 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticCubemap::operator= not found in Ghidra export — cannot confirm VA")
 FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap& Other)
 {
 	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
@@ -1722,14 +1722,14 @@ FStaticCubemap& FStaticCubemap::operator=(const FStaticCubemap& Other)
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10458240)
 unsigned __int64 FStaticCubemap::GetCacheId()
 {
 	// Ghidra: return QWORD at this+8 = Pad+4
 	return *(QWORD*)(Pad + 4);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1046a3b0)
 FTexture * FStaticCubemap::GetFace(int FaceIndex)
 {
 	// Retail: 0x16A3B0, 38b. Returns the render-interface texture for the given cubemap face.
@@ -1750,7 +1750,7 @@ FTexture * FStaticCubemap::GetFace(int FaceIndex)
 	return (FTexture*)GetRI(bm);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticCubemap::GetFirstMip not found in Ghidra export — cannot confirm VA")
 int FStaticCubemap::GetFirstMip()
 {
 	// UCubemap* at Pad[0] (this+4); cubemap inherits from UTexture.
@@ -1758,14 +1758,14 @@ int FStaticCubemap::GetFirstMip()
 	return tex ? tex->DefaultLOD() : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1046ab90 is 102 bytes, not fully reconstructed")
 ETextureFormat FStaticCubemap::GetFormat()
 {
 	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
 	return tex ? (ETextureFormat)tex->Format : TEXF_P8;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1046aab0 is 102 bytes, not fully reconstructed")
 int FStaticCubemap::GetHeight()
 {
 	// Cubemap face height — UCubemap inherits VSize from UTexture.
@@ -1773,14 +1773,14 @@ int FStaticCubemap::GetHeight()
 	return tex ? tex->VSize : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1046ab20 is 102 bytes, not fully reconstructed")
 int FStaticCubemap::GetNumMips()
 {
 	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
 	return tex ? tex->Mips.Num() : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10468d10)
 int FStaticCubemap::GetRevision()
 {
 	// Revision counter at Pad[12] (this+16), same layout as FStaticTexture.
@@ -1793,21 +1793,21 @@ int FStaticCubemap::GetRevision()
 	return *(INT*)&Pad[12];
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1046ac00 is 99 bytes, not fully reconstructed")
 ETexClampMode FStaticCubemap::GetUClamp()
 {
 	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
 	return tex ? (ETexClampMode)tex->UClampMode : TC_Wrap;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1046ac70 is 99 bytes, not fully reconstructed")
 ETexClampMode FStaticCubemap::GetVClamp()
 {
 	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
 	return tex ? (ETexClampMode)tex->VClampMode : TC_Wrap;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1046aa40 is 102 bytes, not fully reconstructed")
 int FStaticCubemap::GetWidth()
 {
 	UTexture* tex = (UTexture*)(*(UCubemap**)&Pad[0]);
@@ -1816,7 +1816,7 @@ int FStaticCubemap::GetWidth()
 
 
 // --- FTempLineBatcher ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104180B0 not yet fully reconstructed")
 void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 {
 	// Ghidra 0x1180b0: create a temporary FLineBatcher, draw all stored lines and boxes, flush.
@@ -1847,7 +1847,7 @@ void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 	Batcher.Flush(0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103273a0)
 FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &Other)
 {
 	// Ghidra 0x27490: no vtable; TArray<FVector>@+0, TArray<FVector>@+0xC, TArray<FLOAT>@+0x18, TArray<FBox>@+0x24, TArray<FLOAT>@+0x30
@@ -1858,7 +1858,7 @@ FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &Other)
 	new ((BYTE*)this + 0x30) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x30));
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103273a0)
 FTempLineBatcher::FTempLineBatcher()
 {
 	// Initialize all 5 TArrays to empty
@@ -1869,7 +1869,7 @@ FTempLineBatcher::FTempLineBatcher()
 	new ((BYTE*)this + 0x30) TArray<FLOAT>();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FTempLineBatcher::~FTempLineBatcher not found in Ghidra export — cannot confirm VA")
 FTempLineBatcher::~FTempLineBatcher()
 {
 	// Destroy 5 TArrays in reverse order
@@ -1880,7 +1880,7 @@ FTempLineBatcher::~FTempLineBatcher()
 	((TArray<FVector>*)((BYTE*)this + 0x00))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FTempLineBatcher::operator= not found in Ghidra export — cannot confirm VA")
 FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
 {
 	// Ghidra 0x27520: no vtable; line start/end FVectors at +0/+0C, line colors at +18,
@@ -1893,7 +1893,7 @@ FTempLineBatcher& FTempLineBatcher::operator=(const FTempLineBatcher& Other)
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10320950)
 void FTempLineBatcher::AddBox(FBox Box, FColor Color)
 {
 	// Ghidra 0x20950: append FBox (0x1C bytes) to TArray<FBox> at this+0x24; append Color DWORD to TArray<FLOAT> at this+0x30.
@@ -1905,7 +1905,7 @@ void FTempLineBatcher::AddBox(FBox Box, FColor Color)
 	*(DWORD*)&(*Colors)(i) = Color.DWColor();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103208d0)
 void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 {
 	// Ghidra 0x208d0: append Start to TArray<FVector>@+0, End to TArray<FVector>@+0xC, Color DWORD to TArray<FLOAT>@+0x18.
@@ -1922,21 +1922,21 @@ void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 
 
 // --- UConvexVolume ---
-IMPL_APPROX("Trivial serialize stub; no persistent data beyond UObject base")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103921D0 not yet fully reconstructed")
 void UConvexVolume::Serialize(FArchive& Ar)
 {
 	// Ghidra: trivial serialize stub; no persistent data beyond UObject base.
 	// INTENTIONALLY EMPTY: retail trivial serialize stub; no persistent data beyond UObject base
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10303220)
 FBox UConvexVolume::GetRenderBoundingBox(AActor const *)
 {
 	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x70 to return buffer.
 	return *(FBox*)((BYTE*)this + 0x70);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10391d90)
 int UConvexVolume::IsPointInside(FVector Point, FMatrix Matrix)
 {
 	// Retail: 0x91D90, ~130b SEH. Transforms each plane by Matrix, then checks if Point
@@ -1957,7 +1957,7 @@ int UConvexVolume::IsPointInside(FVector Point, FMatrix Matrix)
 
 
 // --- UIndexBuffer ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10410D90 not yet fully reconstructed")
 void UIndexBuffer::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x110d90: URenderResource::Serialize + index data TArray at +0x30.
@@ -1967,7 +1967,7 @@ void UIndexBuffer::Serialize(FArchive& Ar)
 
 
 // --- USkinVertexBuffer ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10410F50 not yet fully reconstructed")
 void USkinVertexBuffer::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x110f50: URenderResource::Serialize + skin vertex TArray at +0x30.

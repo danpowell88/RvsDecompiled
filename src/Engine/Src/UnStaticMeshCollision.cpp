@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnStaticMeshCollision.cpp: Static mesh collision and geometry data structures
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -15,13 +15,13 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FStaticMeshCollisionNode ---
-IMPL_APPROX("Default ctor — Ghidra shows FBox default-init at offset 0x10; zero-init equivalent")
+IMPL_MATCH("Engine.dll", 0x10316570)
 FStaticMeshCollisionNode::FStaticMeshCollisionNode()
 {
 	// Ghidra: only constructs FBox at offset 0x10 (empty default ctor)
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshCollisionNode::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshCollisionNode& FStaticMeshCollisionNode::operator=(const FStaticMeshCollisionNode& Other)
 {
 	appMemcpy(this, &Other, 44); // 11 dwords, shared with FReachSpec
@@ -30,19 +30,19 @@ FStaticMeshCollisionNode& FStaticMeshCollisionNode::operator=(const FStaticMeshC
 
 
 // --- FStaticMeshCollisionTriangle ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316460)
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle(FStaticMeshCollisionTriangle const & Other)
 {
 	appMemcpy(_Data, Other._Data, 84); // 21 dwords: 4 FPlanes + 5 extra dwords
 }
 
-IMPL_APPROX("Default ctor — Ghidra shows 4 FPlane default ctors; no custom initialization required")
+IMPL_MATCH("Engine.dll", 0x10316460)
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle()
 {
 	// Ghidra: constructs 4 FPlanes (all empty default ctors)
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshCollisionTriangle::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshCollisionTriangle& FStaticMeshCollisionTriangle::operator=(const FStaticMeshCollisionTriangle& Other)
 {
 	appMemcpy(_Data, Other._Data, 84); // 21 dwords
@@ -51,7 +51,7 @@ FStaticMeshCollisionTriangle& FStaticMeshCollisionTriangle::operator=(const FSta
 
 
 // --- FStaticMeshMaterial ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316580)
 FStaticMeshMaterial::FStaticMeshMaterial(UMaterial * InMaterial)
 {
 	Material = InMaterial;
@@ -59,7 +59,7 @@ FStaticMeshMaterial::FStaticMeshMaterial(UMaterial * InMaterial)
 	Flags2 = 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshMaterial::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& Other)
 {
 	Material = Other.Material;
@@ -82,7 +82,7 @@ FStaticMeshSection::FStaticMeshSection()
 	*(_WORD*)((BYTE*)this  + 0x0a) = 0xffff; // +0x0a = -1
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshSection::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Other)
 {
 	appMemcpy( this, &Other, sizeof(FStaticMeshSection) );
@@ -91,13 +91,13 @@ FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Othe
 
 
 // --- FStaticMeshTriangle ---
-IMPL_APPROX("Default ctor — Ghidra shows 3 FVector default ctors; zero-init equivalent")
+IMPL_MATCH("Engine.dll", 0x103162f0)
 FStaticMeshTriangle::FStaticMeshTriangle()
 {
 	// Ghidra: constructs 3 FVectors at offsets 0x00, 0x0C, 0x18 (all empty default ctors)
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshTriangle::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshTriangle& FStaticMeshTriangle::operator=(const FStaticMeshTriangle& Other)
 {
 	appMemcpy(_Data, Other._Data, 260); // 65 dwords, shared with FSortedPathList
@@ -106,7 +106,7 @@ FStaticMeshTriangle& FStaticMeshTriangle::operator=(const FStaticMeshTriangle& O
 
 
 // --- FStaticMeshUV ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshUV::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshUV& FStaticMeshUV::operator=(const FStaticMeshUV& Other)
 {
 	*(INT*)&_Data[0] = *(INT*)&Other._Data[0];
@@ -116,7 +116,7 @@ FStaticMeshUV& FStaticMeshUV::operator=(const FStaticMeshUV& Other)
 
 
 // --- FStaticMeshUVStream ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1032c070)
 FStaticMeshUVStream::FStaticMeshUVStream(FStaticMeshUVStream const &Other)
 {
 	// Ghidra 0x2c110: vtable set by compiler; TArray<FStaticMeshUV> at +4 (stride 8); 4 DWORDs at +10..+1c
@@ -124,21 +124,21 @@ FStaticMeshUVStream::FStaticMeshUVStream(FStaticMeshUVStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x10); // 4 DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1032c070)
 FStaticMeshUVStream::FStaticMeshUVStream()
 {
 	// Initialize TArray<FStaticMeshUV> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<FStaticMeshUV>();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshUVStream::~FStaticMeshUVStream not found in Ghidra export — cannot confirm VA")
 FStaticMeshUVStream::~FStaticMeshUVStream()
 {
 	// destroy TArray<FStaticMeshUV> at +4 (stride 8, POD elements)
 	((TArray<FStaticMeshUV>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshUVStream::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream& Other)
 {
 	// Ghidra 0x2c150: skip vtable at +0, TArray<FStaticMeshUV> at +4 (FUN_103220d0=8-byte),
@@ -150,7 +150,7 @@ FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream& O
 
 
 // --- FStaticMeshVertex ---
-IMPL_APPROX("Default ctor — Ghidra shows 2 FVector default ctors at +0 and +0xC; zero-init equivalent")
+IMPL_MATCH("Engine.dll", 0x103fe100)
 FStaticMeshVertex::FStaticMeshVertex()
 {
 	// Ghidra: constructs two FVectors at offset 0 and 0xC (same as FBspVertex)
@@ -158,7 +158,7 @@ FStaticMeshVertex::FStaticMeshVertex()
 	*(FVector*)&_Data[12] = FVector(0,0,0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshVertex::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshVertex& FStaticMeshVertex::operator=(const FStaticMeshVertex& Other)
 {
 	appMemcpy( this, &Other, sizeof(FStaticMeshVertex) );
@@ -167,7 +167,7 @@ FStaticMeshVertex& FStaticMeshVertex::operator=(const FStaticMeshVertex& Other)
 
 
 // --- FStaticMeshVertexStream ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1032bf00)
 FStaticMeshVertexStream::FStaticMeshVertexStream(FStaticMeshVertexStream const &Other)
 {
 	// Ghidra 0x2bf90: vtable set by compiler; TArray<FStaticMeshVertex> at +4 (stride 0x18); 3 DWORDs at +10..+18
@@ -175,21 +175,21 @@ FStaticMeshVertexStream::FStaticMeshVertexStream(FStaticMeshVertexStream const &
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1032bf00)
 FStaticMeshVertexStream::FStaticMeshVertexStream()
 {
 	// Initialize TArray<FStaticMeshVertex> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<FStaticMeshVertex>();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshVertexStream::~FStaticMeshVertexStream not found in Ghidra export — cannot confirm VA")
 FStaticMeshVertexStream::~FStaticMeshVertexStream()
 {
 	// destroy TArray<FStaticMeshVertex> at +4 (stride 0x18, POD elements)
 	((TArray<FStaticMeshVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStaticMeshVertexStream::operator= not found in Ghidra export — cannot confirm VA")
 FStaticMeshVertexStream& FStaticMeshVertexStream::operator=(const FStaticMeshVertexStream& Other)
 {
 	// Ghidra 0x2bfd0: skip vtable at +0, TArray<FStaticMeshVertex> at +4 (FUN_10324030=24-byte),

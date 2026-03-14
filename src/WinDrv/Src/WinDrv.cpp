@@ -29,25 +29,25 @@ IMPLEMENT_PACKAGE(WinDrv)
 	WWindowsViewportWindow — Non-UObject Win32 window wrapper.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102370)
 WWindowsViewportWindow::WWindowsViewportWindow()
 	: Viewport(NULL)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102370)
 WWindowsViewportWindow::WWindowsViewportWindow(UWindowsViewport* InViewport)
 	: Viewport(InViewport)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102370)
 WWindowsViewportWindow::WWindowsViewportWindow(const WWindowsViewportWindow& Other)
 	: Viewport(Other.Viewport)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewportWindow& Other)
 {
 	if( this != &Other )
@@ -55,7 +55,7 @@ WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewport
 	return *this;
 }
 
-IMPL_APPROX("MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
+IMPL_DIVERGE("MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
 WWindowsViewportWindow::~WWindowsViewportWindow()
 {
 	guard(WWindowsViewportWindow::~WWindowsViewportWindow);
@@ -66,19 +66,19 @@ WWindowsViewportWindow::~WWindowsViewportWindow()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102360)
 const TCHAR* WWindowsViewportWindow::GetPackageName()
 {
 	return TEXT("WinDrv");
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111022e0)
 void WWindowsViewportWindow::GetWindowClassName(TCHAR* OutName)
 {
 	appStrcpy(OutName, TEXT("WWindowsViewportWindow"));
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111023e0)
 LONG WWindowsViewportWindow::WndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	// Forward to the owning UWindowsViewport.
@@ -96,7 +96,7 @@ IMPLEMENT_CLASS(UWindowsClient)
 
 // --- UWindowsClient ---
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101000)
 UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	: UClient(Other)
 {
@@ -104,7 +104,7 @@ UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	StartupFullscreen = Other.StartupFullscreen;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 {
 	if (this != &Other)
@@ -128,7 +128,7 @@ void UWindowsClient::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("Releases DirectInput devices then delegates to Super")
+IMPL_MATCH("WinDrv.dll", 0x111011a0)
 void UWindowsClient::Destroy()
 {
 	guard(UWindowsClient::Destroy);
@@ -141,7 +141,7 @@ void UWindowsClient::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Delegates to Super")
+IMPL_MATCH("WinDrv.dll", 0x111016f0)
 void UWindowsClient::ShutdownAfterError()
 {
 	guard(UWindowsClient::ShutdownAfterError);
@@ -149,7 +149,7 @@ void UWindowsClient::ShutdownAfterError()
 	unguard;
 }
 
-IMPL_APPROX("Delegates to Super")
+IMPL_MATCH("WinDrv.dll", 0x11101320)
 void UWindowsClient::PostEditChange()
 {
 	guard(UWindowsClient::PostEditChange);
@@ -157,14 +157,14 @@ void UWindowsClient::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("NotifyDestroy callback - no-op; cleanup handled by Destroy()")
+IMPL_MATCH("WinDrv.dll", 0x11101770)
 void UWindowsClient::NotifyDestroy(void* Src)
 {
 	guard(UWindowsClient::NotifyDestroy);
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111015a0)
 void UWindowsClient::Init(UEngine* InEngine)
 {
 	guard(UWindowsClient::Init);
@@ -183,7 +183,7 @@ void UWindowsClient::Init(UEngine* InEngine)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101980)
 void UWindowsClient::ShowViewportWindows(DWORD ShowFlags, INT DoShow)
 {
 	guard(UWindowsClient::ShowViewportWindows);
@@ -196,7 +196,7 @@ void UWindowsClient::ShowViewportWindows(DWORD ShowFlags, INT DoShow)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111018d0)
 void UWindowsClient::EnableViewportWindows(DWORD ShowFlags, INT DoEnable)
 {
 	guard(UWindowsClient::EnableViewportWindows);
@@ -209,7 +209,7 @@ void UWindowsClient::EnableViewportWindows(DWORD ShowFlags, INT DoEnable)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101b00)
 void UWindowsClient::Tick()
 {
 	guard(UWindowsClient::Tick);
@@ -223,7 +223,7 @@ void UWindowsClient::Tick()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101290)
 INT UWindowsClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UWindowsClient::Exec);
@@ -231,7 +231,7 @@ INT UWindowsClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101820)
 UViewport* UWindowsClient::NewViewport(FName Name)
 {
 	guard(UWindowsClient::NewViewport);
@@ -242,7 +242,7 @@ UViewport* UWindowsClient::NewViewport(FName Name)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101a30)
 void UWindowsClient::MakeCurrent(UViewport* InViewport)
 {
 	guard(UWindowsClient::MakeCurrent);
@@ -259,7 +259,7 @@ void UWindowsClient::MakeCurrent(UViewport* InViewport)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11101390)
 UViewport* UWindowsClient::GetLastCurrent()
 {
 	guard(UWindowsClient::GetLastCurrent);
@@ -298,7 +298,7 @@ DIDEVCAPS             UWindowsViewport::JoystickCaps  = {};
 	Exported at ordinal @31: ?DirectInputError@@YAXVFString@@JH@Z
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 {
 	debugf(TEXT("DirectInput error: %s (hr=0x%08X)"), *Msg, (DWORD)hResult);
@@ -315,13 +315,13 @@ WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 // global since Ravenshield only creates one viewport.
 static HWND GViewportHWnd = NULL;
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102040)
 UWindowsViewport::UWindowsViewport(const UWindowsViewport& Other)
 	: UViewport(Other)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 UWindowsViewport& UWindowsViewport::operator=(const UWindowsViewport& Other)
 {
 	if (this != &Other)
@@ -329,7 +329,7 @@ UWindowsViewport& UWindowsViewport::operator=(const UWindowsViewport& Other)
 	return *this;
 }
 
-IMPL_APPROX("Closes window then delegates to Super")
+IMPL_MATCH("WinDrv.dll", 0x111024a0)
 void UWindowsViewport::Destroy()
 {
 	guard(UWindowsViewport::Destroy);
@@ -338,7 +338,7 @@ void UWindowsViewport::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102580)
 void UWindowsViewport::ShutdownAfterError()
 {
 	guard(UWindowsViewport::ShutdownAfterError);
@@ -349,7 +349,7 @@ void UWindowsViewport::ShutdownAfterError()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111054a0)
 INT UWindowsViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UWindowsViewport::Exec);
@@ -367,7 +367,7 @@ INT UWindowsViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: simplified HWND validity check; retail checks WWindowsViewportWindow and HoldCount")
+IMPL_DIVERGE("DIVERGENCE: simplified HWND validity check; retail checks WWindowsViewportWindow and HoldCount")
 INT UWindowsViewport::Lock(BYTE* HitData, INT* HitSize)
 {
 	guard(UWindowsViewport::Lock);
@@ -379,7 +379,7 @@ INT UWindowsViewport::Lock(BYTE* HitData, INT* HitSize)
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_DIVERGE("DIVERGENCE: HoldCount accessed via raw offset 0x214")
 void UWindowsViewport::Unlock()
 {
 	guard(UWindowsViewport::Unlock);
@@ -389,7 +389,7 @@ void UWindowsViewport::Unlock()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102630)
 INT UWindowsViewport::IsFullscreen()
 {
 	guard(UWindowsViewport::IsFullscreen);
@@ -397,7 +397,7 @@ INT UWindowsViewport::IsFullscreen()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11104d00)
 INT UWindowsViewport::ResizeViewport(DWORD NewBlitFlags, INT NewX, INT NewY)
 {
 	guard(UWindowsViewport::ResizeViewport);
@@ -424,7 +424,7 @@ INT UWindowsViewport::ResizeViewport(DWORD NewBlitFlags, INT NewX, INT NewY)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11103900)
 void UWindowsViewport::SetModeCursor()
 {
 	guard(UWindowsViewport::SetModeCursor);
@@ -432,7 +432,7 @@ void UWindowsViewport::SetModeCursor()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102640)
 void UWindowsViewport::UpdateWindowFrame()
 {
 	guard(UWindowsViewport::UpdateWindowFrame);
@@ -443,7 +443,7 @@ void UWindowsViewport::UpdateWindowFrame()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11103300)
 void UWindowsViewport::OpenWindow(DWORD ParentWindow, INT IsTemporary, INT NewX, INT NewY, INT OpenX, INT OpenY)
 {
 	guard(UWindowsViewport::OpenWindow);
@@ -527,7 +527,7 @@ void UWindowsViewport::OpenWindow(DWORD ParentWindow, INT IsTemporary, INT NewX,
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111025a0)
 void UWindowsViewport::CloseWindow()
 {
 	guard(UWindowsViewport::CloseWindow);
@@ -539,7 +539,7 @@ void UWindowsViewport::CloseWindow()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11104310)
 void UWindowsViewport::UpdateInput(INT Reset, FLOAT DeltaSeconds)
 {
 	guard(UWindowsViewport::UpdateInput);
@@ -585,7 +585,7 @@ void UWindowsViewport::UpdateInput(INT Reset, FLOAT DeltaSeconds)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111028b0)
 void* UWindowsViewport::GetWindow()
 {
 	guard(UWindowsViewport::GetWindow);
@@ -593,7 +593,7 @@ void* UWindowsViewport::GetWindow()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11103fd0)
 void UWindowsViewport::SetMouseCapture(INT Capture, INT Clip, INT FocusOnly)
 {
 	guard(UWindowsViewport::SetMouseCapture);
@@ -620,7 +620,7 @@ void UWindowsViewport::SetMouseCapture(INT Capture, INT Clip, INT FocusOnly)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11103870)
 void UWindowsViewport::Repaint(INT Blit)
 {
 	guard(UWindowsViewport::Repaint);
@@ -629,7 +629,7 @@ void UWindowsViewport::Repaint(INT Blit)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111047d0)
 void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, INT Fullscreen)
 {
 	guard(UWindowsViewport::TryRenderDevice);
@@ -657,7 +657,7 @@ void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT New
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_DIVERGE("DIVERGENCE: HoldCount accessed via raw offset 0x214")
 void UWindowsViewport::Hold(INT Horiz)
 {
 	guard(UWindowsViewport::Hold);
@@ -667,7 +667,7 @@ void UWindowsViewport::Hold(INT Horiz)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102b60)
 void UWindowsViewport::Minimize()
 {
 	guard(UWindowsViewport::Minimize);
@@ -676,7 +676,7 @@ void UWindowsViewport::Minimize()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102b90)
 void UWindowsViewport::Maximize()
 {
 	guard(UWindowsViewport::Maximize);
@@ -685,7 +685,7 @@ void UWindowsViewport::Maximize()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102bc0)
 void UWindowsViewport::Restore()
 {
 	guard(UWindowsViewport::Restore);
@@ -702,7 +702,7 @@ void UWindowsViewport::CheckCD()
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
+IMPL_DIVERGE("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
 void UWindowsViewport::AcquireKeyboard()
 {
 	guard(UWindowsViewport::AcquireKeyboard);
@@ -728,7 +728,7 @@ void UWindowsViewport::AcquireKeyboard()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102d40)
 void UWindowsViewport::ReleaseKeyboard()
 {
 	guard(UWindowsViewport::ReleaseKeyboard);
@@ -737,7 +737,7 @@ void UWindowsViewport::ReleaseKeyboard()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11102d70)
 INT UWindowsViewport::KeyPressed(INT Key)
 {
 	guard(UWindowsViewport::KeyPressed);
@@ -752,7 +752,7 @@ INT UWindowsViewport::KeyPressed(INT Key)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11104c20)
 void UWindowsViewport::ToggleFullscreen()
 {
 	guard(UWindowsViewport::ToggleFullscreen);
@@ -763,7 +763,7 @@ void UWindowsViewport::ToggleFullscreen()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11104b30)
 void UWindowsViewport::EndFullscreen()
 {
 	guard(UWindowsViewport::EndFullscreen);
@@ -775,7 +775,7 @@ void UWindowsViewport::EndFullscreen()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11103f40)
 INT UWindowsViewport::CauseInputEvent(INT iKey, EInputAction Action, FLOAT Delta)
 {
 	guard(UWindowsViewport::CauseInputEvent);
@@ -786,7 +786,7 @@ INT UWindowsViewport::CauseInputEvent(INT iKey, EInputAction Action, FLOAT Delta
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111025d0)
 void UWindowsViewport::SetTopness()
 {
 	guard(UWindowsViewport::SetTopness);
@@ -795,7 +795,7 @@ void UWindowsViewport::SetTopness()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x111028c0)
 DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 {
 	guard(UWindowsViewport::GetViewportButtonFlags);
@@ -808,7 +808,7 @@ DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("WinDrv.dll", 0x11104240)
 INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOAT Delta, INT Abs)
 {
 	guard(UWindowsViewport::JoystickInputEvent);
@@ -829,7 +829,7 @@ INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOA
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
+IMPL_DIVERGE("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
 LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	guard(UWindowsViewport::ViewportWndProc);
@@ -938,13 +938,13 @@ LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 // GetOuterUWindowsClient is provided inline by DECLARE_WITHIN(UWindowsClient)
 // in the class declaration — no out-of-line definition needed.
 
-IMPL_APPROX("DirectInput axes enumeration callback - DIENUM_CONTINUE enumerates all available axes")
+IMPL_MATCH("WinDrv.dll", 0x11102b00)
 INT STDCALL UWindowsViewport::EnumAxesCallback(const DIDEVICEOBJECTINSTANCEW* pdidoi, void* pContext)
 {
 	return DIENUM_CONTINUE;
 }
 
-IMPL_APPROX("DirectInput joystick enumeration callback - DIENUM_CONTINUE enumerates all connected joysticks")
+IMPL_MATCH("WinDrv.dll", 0x11102ac0)
 INT STDCALL UWindowsViewport::EnumJoysticksCallback(const DIDEVICEINSTANCEW* pdidi, void* pContext)
 {
 	return DIENUM_CONTINUE;

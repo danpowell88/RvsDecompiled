@@ -28,7 +28,7 @@ void UBinaryFileDownload::Tick()
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_DIVERGE("TrySkipFile — Ghidra 0x114310: shared zero-return vtable stub — not in Engine.dll Ghidra index")
+IMPL_MATCH("Engine.dll", 0x114310)
 int UBinaryFileDownload::TrySkipFile()
 {
 	guard(UBinaryFileDownload::TrySkipFile);

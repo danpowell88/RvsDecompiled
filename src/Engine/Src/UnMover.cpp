@@ -2,7 +2,7 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
-IMPL_APPROX("physMovingBrush body incomplete; cubic/linear interpolation, encroach checking, and anim notify hooks not reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1042BC10 not yet fully reconstructed")
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
@@ -18,7 +18,7 @@ void AMover::physMovingBrush(float DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("Dispatches physics by mode; RDTSC profiling bookends omitted")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103F3470 not yet fully reconstructed")
 void AMover::performPhysics(float DeltaTime)
 {
 	guard(AMover::performPhysics);
@@ -82,7 +82,7 @@ void AMover::performPhysics(float DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("Returns whether TraceFlags requests actor tracing")
+IMPL_MATCH("Engine.dll", 0x103072b0)
 int AMover::ShouldTrace(AActor*,DWORD TraceFlags)
 {
 	return TraceFlags & 2;
@@ -96,7 +96,7 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10374f40 is 1011 bytes, not fully reconstructed")
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -308,7 +308,7 @@ void AMover::PostLoad()
 	*(INT*)((BYTE*)this + 0x6C0) = 0x315;
 }
 
-IMPL_APPROX("mover position interpolation state not updated")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1037DA40 not yet fully reconstructed")
 void AMover::PostNetReceive()
 {
 	// Ghidra 0x7da40: AActor::PostNetReceive, then apply interpolated position
@@ -352,7 +352,7 @@ void AMover::PostRaytrace()
 	unguard;
 }
 
-IMPL_APPROX("pre-receive position snapshot not stored")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10378100 not yet fully reconstructed")
 void AMover::PreNetReceive()
 {
 	// Ghidra 0x78100: snapshot current position this+0x6D0 to a static global,
@@ -361,7 +361,7 @@ void AMover::PreNetReceive()
 	AActor::PreNetReceive();
 }
 
-IMPL_APPROX("DeltaPosition reset uses direct zero instead of external FVector0 reference")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D5460 not yet fully reconstructed")
 void AMover::PreRaytrace()
 {
 	// Ghidra 0xd5460: copy FVector(0,0,0) from FVector0_exref into this+0x694..0x69C
@@ -372,7 +372,7 @@ void AMover::PreRaytrace()
 
 
 // --- ADoor ---
-IMPL_APPROX("Sets bForce flag on path specs for this door and all nav points targeting it")
+IMPL_MATCH("Engine.dll", 0x103d66b0)
 void ADoor::PostaddReachSpecs(APawn *)
 {
 	guard(ADoor::PostaddReachSpecs);

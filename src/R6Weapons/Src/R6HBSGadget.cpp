@@ -10,7 +10,7 @@ IMPLEMENT_FUNCTION(AR6HBSGadget, -1, execToggleHeartBeatProperties)
 
 // --- AR6HBSGadget ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Weapons.dll", 0x10002300)
 INT AR6HBSGadget::GetHeartBeatStatus()
 {
 	return m_bHeartBeatOn ? 1 : 0;

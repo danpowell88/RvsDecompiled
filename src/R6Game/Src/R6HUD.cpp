@@ -12,7 +12,7 @@ IMPLEMENT_FUNCTION(AR6HUD, -1, execHudStep)
 
 // --- AR6HUD ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x1000b2c0)
 void AR6HUD::Destroy()
 {
 	// Clear the object reference held by the HUD (offset 0x5AC)
@@ -20,42 +20,42 @@ void AR6HUD::Destroy()
 	AActor::Destroy();
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000c340)
 void AR6HUD::DisplayOtherTeamInfo(FCanvasUtil &, UCanvas *, INT, AR6RainbowTeam *, FColor &, INT)
 {
 	guard(AR6HUD::DisplayOtherTeamInfo);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000beb0)
 void AR6HUD::DrawCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanvasUtil *, UCanvas *)
 {
 	guard(AR6HUD::DrawCharacterInfo);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100100d0)
 void AR6HUD::DrawInGameMap(FCameraSceneNode *, UViewport *)
 {
 	guard(AR6HUD::DrawInGameMap);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000f8d0)
 void AR6HUD::DrawRadar(FCameraSceneNode *, UViewport *)
 {
 	guard(AR6HUD::DrawRadar);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000b980)
 void AR6HUD::DrawSingleCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanvasUtil *, UCanvas *)
 {
 	guard(AR6HUD::DrawSingleCharacterInfo);
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x1000b950)
 void AR6HUD::Serialize(FArchive& Ar)
 {
 	AActor::Serialize(Ar);
@@ -70,27 +70,27 @@ void AR6HUD::Serialize(FArchive& Ar)
 	}
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000b810)
 void AR6HUD::Spawned()
 {
 	guard(AR6HUD::Spawned);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000b000)
 void AR6HUD::UpdateHUDColors(FColor)
 {
 	guard(AR6HUD::UpdateHUDColors);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x1000ace0)
 void AR6HUD::execHudStep(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

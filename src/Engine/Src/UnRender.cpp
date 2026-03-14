@@ -27,7 +27,7 @@ IMPLEMENT_CLASS(AHUD);
 	UCanvas implementation.
 =============================================================================*/
 
-IMPL_APPROX("sets Viewport pointer")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10388830 is 125 bytes, not fully reconstructed")
 void UCanvas::Init( UViewport* InViewport )
 {
 	guard(UCanvas::Init);
@@ -35,7 +35,7 @@ void UCanvas::Init( UViewport* InViewport )
 	unguard;
 }
 
-IMPL_APPROX("syncs SizeX/SizeY/ClipX/ClipY/HalfClip from Viewport")
+IMPL_MATCH("Engine.dll", 0x103888e0)
 void UCanvas::Update()
 {
 	guard(UCanvas::Update);
@@ -53,7 +53,7 @@ void UCanvas::Update()
 	UCanvas exec functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sets CurX/CurY from script parameters")
+IMPL_MATCH("Engine.dll", 0x10388410)
 void UCanvas::execSetPos( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetPos);
@@ -66,7 +66,7 @@ void UCanvas::execSetPos( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetPos );
 
-IMPL_APPROX("sets OrgX/OrgY from script parameters")
+IMPL_MATCH("Engine.dll", 0x10388500)
 void UCanvas::execSetOrigin( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetOrigin);
@@ -79,7 +79,7 @@ void UCanvas::execSetOrigin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetOrigin );
 
-IMPL_APPROX("sets ClipX/ClipY/HalfClip/NormalClip from script parameters")
+IMPL_MATCH("Engine.dll", 0x103885f0)
 void UCanvas::execSetClip( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetClip);
@@ -96,7 +96,7 @@ void UCanvas::execSetClip( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetClip );
 
-IMPL_APPROX("sets DrawColor RGBA from script parameters")
+IMPL_MATCH("Engine.dll", 0x103886f0)
 void UCanvas::execSetDrawColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetDrawColor);
@@ -110,7 +110,7 @@ void UCanvas::execSetDrawColor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetDrawColor );
 
-IMPL_APPROX("draws text string and advances cursor position")
+IMPL_MATCH("Engine.dll", 0x1038b5c0)
 void UCanvas::execDrawText( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawText);
@@ -134,7 +134,7 @@ void UCanvas::execDrawText( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawText );
 
-IMPL_APPROX("draws text string without cursor advance")
+IMPL_MATCH("Engine.dll", 0x1038b7b0)
 void UCanvas::execDrawTextClipped( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawTextClipped);
@@ -153,7 +153,7 @@ void UCanvas::execDrawTextClipped( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTextClipped );
 
-IMPL_APPROX("partial: parses Text param but clip-text draw not implemented")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1038c810 is 630 bytes, not fully reconstructed")
 void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execClipTextNative);
@@ -163,7 +163,7 @@ void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execClipTextNative );
 
-IMPL_APPROX("draws a material tile and advances cursor")
+IMPL_DIVERGE("UCanvas::execDrawTile not found in Ghidra export — cannot confirm VA")
 void UCanvas::execDrawTile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawTile);
@@ -186,7 +186,7 @@ void UCanvas::execDrawTile( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTile );
 
-IMPL_APPROX("draws a clipped material tile and advances cursor")
+IMPL_MATCH("Engine.dll", 0x10389140)
 void UCanvas::execDrawTileClipped( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawTileClipped);
@@ -206,7 +206,7 @@ void UCanvas::execDrawTileClipped( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTileClipped );
 
-IMPL_APPROX("advances CurX and updates CurYL; actual stretch draw diverged")
+IMPL_MATCH("Engine.dll", 0x1038a180)
 void UCanvas::execDrawStretchedTextureSegmentNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawStretchedTextureSegmentNative);
@@ -226,7 +226,7 @@ void UCanvas::execDrawStretchedTextureSegmentNative( FFrame& Stack, RESULT_DECL 
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawStretchedTextureSegmentNative );
 
-IMPL_APPROX("partial: parses Actor/WireFrame/ClearZ params but actor render not implemented")
+IMPL_MATCH("Engine.dll", 0x10388c50)
 void UCanvas::execDrawActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawActor);
@@ -238,7 +238,7 @@ void UCanvas::execDrawActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawActor );
 
-IMPL_APPROX("partial: parses portal params but portal render not implemented")
+IMPL_MATCH("Engine.dll", 0x10389320)
 void UCanvas::execDrawPortal( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawPortal);
@@ -279,7 +279,7 @@ void UCanvas::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDraw3DLine );
 
-IMPL_APPROX("approximates string pixel width from character count times 8")
+IMPL_MATCH("Engine.dll", 0x10388210)
 void UCanvas::execStrLen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execStrLen);
@@ -302,7 +302,7 @@ void UCanvas::execStrLen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execStrLen );
 
-IMPL_APPROX("approximates text size and returns text via Result")
+IMPL_MATCH("Engine.dll", 0x1038b970)
 void UCanvas::execTextSize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execTextSize);
@@ -327,7 +327,7 @@ void UCanvas::execTextSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execTextSize );
 
-IMPL_APPROX("projects to screen centre; full view-matrix projection diverged")
+IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x103897b0 is 760 bytes, not fully reconstructed")
 void UCanvas::execGetScreenCoordinate( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execGetScreenCoordinate);
@@ -342,7 +342,7 @@ void UCanvas::execGetScreenCoordinate( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execGetScreenCoordinate );
 
-IMPL_APPROX("calls SetVirtualSize with W/H")
+IMPL_MATCH("Engine.dll", 0x1038a810)
 void UCanvas::execSetVirtualSize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetVirtualSize);
@@ -354,7 +354,7 @@ void UCanvas::execSetVirtualSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetVirtualSize );
 
-IMPL_APPROX("calls UseVirtualSize with stored virtual resolution")
+IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x1038a700 is 218 bytes, not fully reconstructed")
 void UCanvas::execUseVirtualSize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execUseVirtualSize);
@@ -365,7 +365,7 @@ void UCanvas::execUseVirtualSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execUseVirtualSize );
 
-IMPL_APPROX("partial: parses Intensity param but motion-blur state not applied")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10389690 is 179 bytes, not fully reconstructed")
 void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetMotionBlurIntensity);
@@ -375,7 +375,7 @@ void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetMotionBlurIntensity );
 
-IMPL_APPROX("partial: P_FINISH only; writable-map draw not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1038bc40 is 2918 bytes, not fully reconstructed")
 void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawWritableMap);
@@ -384,7 +384,7 @@ void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawWritableMap );
 
-IMPL_APPROX("video subsystem unimplemented; returns 0 as invalid handle")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1038A520 not yet fully reconstructed")
 void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoOpen);
@@ -398,7 +398,7 @@ void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoOpen );
 
-IMPL_APPROX("partial: parses Handle param; video playback not implemented")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10389DA0 not yet fully reconstructed")
 void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoPlay);
@@ -409,7 +409,7 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
 
-IMPL_APPROX("partial: parses Handle param; video stop not implemented")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10389EE0 not yet fully reconstructed")
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);
@@ -420,7 +420,7 @@ void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
 
-IMPL_APPROX("partial: parses Handle param; video close not implemented")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10389CC0 not yet fully reconstructed")
 void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoClose);
@@ -435,7 +435,7 @@ IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
 	AHUD implementation.
 =============================================================================*/
 
-IMPL_APPROX("Player->Viewport accessed via raw offset 0x5B4 not in public headers")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1042D710 not yet fully reconstructed")
 void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AHUD::execDraw3DLine);
@@ -473,21 +473,21 @@ IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
 // ============================================================================
 
 // ??0FSceneNode@@QAE@PAV0@@Z
-IMPL_APPROX("copies all fields except vtable via appMemcpy")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313300 is 235 bytes, not fully reconstructed")
 FSceneNode::FSceneNode(FSceneNode * p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((BYTE*)p0) + 4, 0x1B4);
 }
 
 // ??0FSceneNode@@QAE@ABV0@@Z
-IMPL_APPROX("copies all fields except vtable via appMemcpy")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313300 is 235 bytes, not fully reconstructed")
 FSceneNode::FSceneNode(FSceneNode const & p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((const BYTE*)&p0) + 4, 0x1B4);
 }
 
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
-IMPL_APPROX("zero-initializes fields then sets Viewport pointer")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313300 is 235 bytes, not fully reconstructed")
 FSceneNode::FSceneNode(UViewport * Viewport)
 {
 	appMemzero(((BYTE*)this) + 4, 0x1B4);
@@ -499,39 +499,39 @@ IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated scene node")
 FSceneNode::~FSceneNode() {}
 
 // ?GetActorSceneNode@FSceneNode@@UAEPAVFActorSceneNode@@XZ
-IMPL_APPROX("base class returns NULL; subclass FActorSceneNode overrides")
+IMPL_DIVERGE("FSceneNode::GetActorSceneNode not found in Ghidra export — cannot confirm VA")
 FActorSceneNode * FSceneNode::GetActorSceneNode() { return NULL; }
 
 // ?GetCameraSceneNode@FSceneNode@@UAEPAVFCameraSceneNode@@XZ
-IMPL_APPROX("base class returns NULL; subclass FCameraSceneNode overrides")
+IMPL_DIVERGE("FSceneNode::GetCameraSceneNode not found in Ghidra export — cannot confirm VA")
 FCameraSceneNode * FSceneNode::GetCameraSceneNode() { return NULL; }
 
 // ?GetLevelSceneNode@FSceneNode@@UAEPAVFLevelSceneNode@@XZ
-IMPL_APPROX("base class returns NULL; subclass FLevelSceneNode overrides")
+IMPL_DIVERGE("FSceneNode::GetLevelSceneNode not found in Ghidra export — cannot confirm VA")
 FLevelSceneNode * FSceneNode::GetLevelSceneNode() { return NULL; }
 
 // ?GetMirrorSceneNode@FSceneNode@@UAEPAVFMirrorSceneNode@@XZ
-IMPL_APPROX("base class returns NULL; subclass FMirrorSceneNode overrides")
+IMPL_DIVERGE("FSceneNode::GetMirrorSceneNode not found in Ghidra export — cannot confirm VA")
 FMirrorSceneNode * FSceneNode::GetMirrorSceneNode() { return NULL; }
 
 // ?GetSkySceneNode@FSceneNode@@UAEPAVFSkySceneNode@@XZ
-IMPL_APPROX("base class returns NULL; subclass FSkySceneNode overrides")
+IMPL_DIVERGE("FSceneNode::GetSkySceneNode not found in Ghidra export — cannot confirm VA")
 FSkySceneNode * FSceneNode::GetSkySceneNode() { return NULL; }
 
 // ?GetWarpZoneSceneNode@FSceneNode@@UAEPAVFWarpZoneSceneNode@@XZ
-IMPL_APPROX("base class returns NULL; subclass FWarpZoneSceneNode overrides")
+IMPL_DIVERGE("FSceneNode::GetWarpZoneSceneNode not found in Ghidra export — cannot confirm VA")
 FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
 
 // ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
-IMPL_APPROX("returns default FPlane; full projection math not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103fdf90 is 134 bytes, not fully reconstructed")
 FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
 
 // ?Deproject@FSceneNode@@QAE?AVFVector@@VFPlane@@@Z
-IMPL_APPROX("returns zero vector; full deprojection math not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103fe020 is 108 bytes, not fully reconstructed")
 FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
 
 // ??4FSceneNode@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("bitwise copy via appMemcpy")
+IMPL_DIVERGE("FSceneNode::operator= not found in Ghidra export — cannot confirm VA")
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ??1FLevelSceneNode@@UAE@XZ
@@ -539,16 +539,16 @@ IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated level scene n
 FLevelSceneNode::~FLevelSceneNode() {}
 
 // ??4FLevelSceneNode@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("bitwise copy via appMemcpy")
+IMPL_DIVERGE("FLevelSceneNode::operator= not found in Ghidra export — cannot confirm VA")
 FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // =============================================================================
 // UVertexStream class implementations.
 // =============================================================================
-IMPL_APPROX("initializes element size, flags, and stream type")
+IMPL_MATCH("Engine.dll", 0x10302210)
 UVertexStreamBase::UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType)
 : ElementSize(InElementSize), StreamFlags(InFlags), StreamType(InType) {}
-IMPL_APPROX("calls Super::Serialize; serializes element size, flags, type for Ver >= 75")
+IMPL_MATCH("Engine.dll", 0x10302260)
 void UVertexStreamBase::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
@@ -559,7 +559,7 @@ void UVertexStreamBase::Serialize(FArchive& Ar)
 		Ar << StreamType;
 	}
 }
-IMPL_APPROX("updates StreamFlags and bumps Revision if changed")
+IMPL_MATCH("Engine.dll", 0x10302240)
 void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
 	DWORD OldFlags = StreamFlags;
 	StreamFlags = Flags;
@@ -567,75 +567,75 @@ void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
 		Revision++;
 }
 
-IMPL_APPROX("default ctor: element size 0x2C, flags 0, type 4")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326280 is 91 bytes, not fully reconstructed")
 UVertexBuffer::UVertexBuffer()
 : UVertexStreamBase(0x2C, 0, 4) {}
-IMPL_APPROX("ctor with flags: element size 0x2C, type 0")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326280 is 91 bytes, not fully reconstructed")
 UVertexBuffer::UVertexBuffer(DWORD InFlags)
 : UVertexStreamBase(0x2C, InFlags, 0) {}
-IMPL_APPROX("delegates to UVertexStreamBase::Serialize")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326340 is 178 bytes, not fully reconstructed")
 void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_APPROX("returns raw Data array pointer")
+IMPL_DIVERGE("UVertexBuffer::GetData not found in Ghidra export — cannot confirm VA")
 void* UVertexBuffer::GetData() { return Data.GetData(); }
-IMPL_APPROX("returns Data.Num() times 0x2C bytes")
+IMPL_MATCH("Engine.dll", 0x10302470)
 INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
 
-IMPL_APPROX("default ctor: element size 4, flags 0, type 2")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326880 is 91 bytes, not fully reconstructed")
 UVertexStreamCOLOR::UVertexStreamCOLOR()
 : UVertexStreamBase(4, 0, 2) {}
-IMPL_APPROX("ctor with flags: element size 4, type 2")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326880 is 91 bytes, not fully reconstructed")
 UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
 : UVertexStreamBase(4, InFlags, 2) {}
-IMPL_APPROX("delegates to UVertexStreamBase::Serialize")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326950 is 138 bytes, not fully reconstructed")
 void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_APPROX("returns raw Data array pointer")
+IMPL_DIVERGE("UVertexStreamCOLOR::GetData not found in Ghidra export — cannot confirm VA")
 void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
-IMPL_APPROX("returns Data.Num() times 4 bytes")
+IMPL_MATCH("Engine.dll", 0x10302510)
 INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
 
-IMPL_APPROX("default ctor: element size 0x28, flags 0, type 5")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326ea0 is 91 bytes, not fully reconstructed")
 UVertexStreamPosNormTex::UVertexStreamPosNormTex()
 : UVertexStreamBase(0x28, 0, 5) {}
-IMPL_APPROX("ctor with flags: element size 0x28, type 5")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326ea0 is 91 bytes, not fully reconstructed")
 UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
 : UVertexStreamBase(0x28, InFlags, 5) {}
-IMPL_APPROX("delegates to UVertexStreamBase::Serialize")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326f70 is 138 bytes, not fully reconstructed")
 void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_APPROX("returns raw Data array pointer")
+IMPL_DIVERGE("UVertexStreamPosNormTex::GetData not found in Ghidra export — cannot confirm VA")
 void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
-IMPL_APPROX("returns Data.Num() times 0x28 bytes")
+IMPL_MATCH("Engine.dll", 0x10302650)
 INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
 
-IMPL_APPROX("default ctor: element size 8, flags 0, type 3")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326b90 is 91 bytes, not fully reconstructed")
 UVertexStreamUV::UVertexStreamUV()
 : UVertexStreamBase(8, 0, 3) {}
-IMPL_APPROX("ctor with flags: element size 8, type 3")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326b90 is 91 bytes, not fully reconstructed")
 UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
 : UVertexStreamBase(8, InFlags, 3) {}
-IMPL_APPROX("delegates to UVertexStreamBase::Serialize")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326c60 is 138 bytes, not fully reconstructed")
 void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_APPROX("returns raw Data array pointer")
+IMPL_DIVERGE("UVertexStreamUV::GetData not found in Ghidra export — cannot confirm VA")
 void* UVertexStreamUV::GetData() { return Data.GetData(); }
-IMPL_APPROX("returns Data.Num() times 8 bytes")
+IMPL_MATCH("Engine.dll", 0x10302560)
 INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
 
-IMPL_APPROX("default ctor: element size 0xC, flags 0, type 1")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103265b0 is 91 bytes, not fully reconstructed")
 UVertexStreamVECTOR::UVertexStreamVECTOR()
 : UVertexStreamBase(0xC, 0, 1) {}
-IMPL_APPROX("ctor with flags: element size 0xC, type 1")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103265b0 is 91 bytes, not fully reconstructed")
 UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
-IMPL_APPROX("delegates to UVertexStreamBase::Serialize")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10326680 is 138 bytes, not fully reconstructed")
 void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_APPROX("returns raw Data array pointer")
+IMPL_DIVERGE("UVertexStreamVECTOR::GetData not found in Ghidra export — cannot confirm VA")
 void* UVertexStreamVECTOR::GetData() { return Data.GetData(); }
-IMPL_APPROX("returns Data.Num() times 0xC bytes")
+IMPL_MATCH("Engine.dll", 0x103024c0)
 INT UVertexStreamVECTOR::GetDataSize() { return Data.Num() * 0xC; }
 
 // =============================================================================
 // FColor constructor from FPlane
 // =============================================================================
-IMPL_APPROX("converts normalized FPlane XYZW to RGBA bytes via Clamp+appFloor")
+IMPL_DIVERGE("stub body — Ghidra 0x10301E00 shows 32-byte implementation not yet reconstructed")
 FColor::FColor(const FPlane& P)
 :	R((BYTE)Clamp(appFloor(P.X*255.f),0,255))
 ,	G((BYTE)Clamp(appFloor(P.Y*255.f),0,255))
@@ -646,23 +646,23 @@ FColor::FColor(const FPlane& P)
 // ============================================================================
 // FDbgVectorInfo
 // ============================================================================
-IMPL_APPROX("zero-initializes all fields via appMemzero")
+IMPL_MATCH("Engine.dll", 0x103029c0)
 FDbgVectorInfo::FDbgVectorInfo() { appMemzero(this, sizeof(*this)); }
-IMPL_APPROX("bitwise copy via appMemcpy")
+IMPL_MATCH("Engine.dll", 0x103029c0)
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 IMPL_EMPTY("trivial destructor; no heap resources to free")
 FDbgVectorInfo::~FDbgVectorInfo() {}
-IMPL_APPROX("bitwise copy via appMemcpy")
+IMPL_DIVERGE("FDbgVectorInfo::operator= not found in Ghidra export — cannot confirm VA")
 FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ============================================================================
 // FRenderInterface
 // ============================================================================
-IMPL_APPROX("zero-initializes RIPad array")
+IMPL_MATCH("Engine.dll", 0x10303240)
 FRenderInterface::FRenderInterface() { appMemzero(RIPad, sizeof(RIPad)); }
-IMPL_APPROX("bitwise copy via appMemcpy")
+IMPL_MATCH("Engine.dll", 0x10303240)
 FRenderInterface::FRenderInterface(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_APPROX("bitwise copy via appMemcpy")
+IMPL_DIVERGE("FRenderInterface::operator= not found in Ghidra export — cannot confirm VA")
 FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ============================================================================
@@ -672,47 +672,47 @@ FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { a
 // FActorSceneNode
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FActorSceneNode::Render(FRenderInterface*) {}
-IMPL_APPROX("returns this as FActorSceneNode")
+IMPL_DIVERGE("FActorSceneNode::GetActorSceneNode not found in Ghidra export — cannot confirm VA")
 FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
 
 // FCameraSceneNode
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FCameraSceneNode::Render(FRenderInterface*) {}
-IMPL_APPROX("returns this as FCameraSceneNode")
+IMPL_DIVERGE("FCameraSceneNode::GetCameraSceneNode not found in Ghidra export — cannot confirm VA")
 FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
 IMPL_EMPTY("body unanalyzed; view/projection matrices not updated")
 void FCameraSceneNode::UpdateMatrices() {}
 
 // FMirrorSceneNode
-IMPL_APPROX("delegates to FSceneNode(FSceneNode*) base ctor; zero-initializes Pad2")
+IMPL_MATCH("Engine.dll", 0x103139c0)
 FMirrorSceneNode::FMirrorSceneNode(FLevelSceneNode* Parent, FPlane Mirror, INT a, INT b)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_APPROX("returns this as FMirrorSceneNode")
+IMPL_DIVERGE("FMirrorSceneNode::GetMirrorSceneNode not found in Ghidra export — cannot confirm VA")
 FMirrorSceneNode* FMirrorSceneNode::GetMirrorSceneNode() { return this; }
 
 // FSkySceneNode
-IMPL_APPROX("delegates to FSceneNode(FSceneNode*) base ctor; zero-initializes Pad2")
+IMPL_MATCH("Engine.dll", 0x10313980)
 FSkySceneNode::FSkySceneNode(FLevelSceneNode* Parent, INT Zone)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_APPROX("returns this as FSkySceneNode")
+IMPL_DIVERGE("FSkySceneNode::GetSkySceneNode not found in Ghidra export — cannot confirm VA")
 FSkySceneNode* FSkySceneNode::GetSkySceneNode() { return this; }
 
 // FWarpZoneSceneNode
-IMPL_APPROX("delegates to FSceneNode(FSceneNode*) base ctor; zero-initializes Pad2")
+IMPL_MATCH("Engine.dll", 0x10313a60)
 FWarpZoneSceneNode::FWarpZoneSceneNode(FLevelSceneNode* Parent, AWarpZoneInfo*)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_APPROX("returns this as FWarpZoneSceneNode")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 
 // FLevelSceneNode
-IMPL_APPROX("returns empty frustum; frustum computation not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10400290 is 2966 bytes, not fully reconstructed")
 FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FLightMapSceneNode
 extern ENGINE_API FRebuildTools GRebuildTools;
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FLightMapSceneNode::Render(FRenderInterface*) {}
-IMPL_APPROX("filters actors by rebuild tool flags and actor bits")
+IMPL_MATCH("Engine.dll", 0x103d0dc0)
 INT FLightMapSceneNode::FilterActor(AActor* Actor)
 {
 	if ((GRebuildTools.Pad[0x10] & 0x10) && (*(DWORD*)((BYTE*)Actor + 0xAC) & 0x1800))
@@ -721,11 +721,11 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 }
 
 // FDirectionalLightMapSceneNode
-IMPL_APPROX("returns empty frustum; directional light frustum not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103d25d0 is 1896 bytes, not fully reconstructed")
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FPointLightMapSceneNode
-IMPL_APPROX("returns empty frustum; point-light frustum not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103d1740 is 1492 bytes, not fully reconstructed")
 FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // ============================================================================
@@ -735,7 +735,7 @@ IMPL_EMPTY("body unanalyzed; camera-coordinate transform pending Ghidra analysis
 HCoords::HCoords(FCameraSceneNode*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("calls UObject::Serialize then serializes Revision")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10410d00 is 85 bytes, not fully reconstructed")
 void URenderResource::Serialize(FArchive& Ar)
 {
 	UObject::Serialize(Ar);

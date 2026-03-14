@@ -6,7 +6,7 @@ static INT  s_prevViewTarget = 0;
 static BYTE s_prevViewState  = 0;
 
 // --- APlayerController ---
-IMPL_APPROX("Ghidra-sourced logic (no RVA recorded): checks UNetConnection at +0x5B4, sets bPendingDestroy on Driver")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104201F0 not yet fully reconstructed")
 void APlayerController::SpecialDestroy()
 {
 	// Ghidra (49B): If Player (offset 0x5B4) is a UNetConnection with a Driver,
@@ -193,7 +193,7 @@ void APlayerController::SetPlayer(UPlayer* InPlayer)
 	debugf(TEXT("%s"), GetFullName());
 }
 
-IMPL_APPROX("No Ghidra address; checks UViewport at +0x5B4")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1038d7d0 is 106 bytes, not fully reconstructed")
 int APlayerController::LocalPlayerController()
 {
 	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4
@@ -237,13 +237,13 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10374b00 is 1025 bytes, not fully reconstructed")
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
-IMPL_APPROX("Ghidra-noted vtable dispatch to LowLevelGetRemoteAddress; no RVA recorded")
+IMPL_MATCH("Engine.dll", 0x10425a40)
 FString APlayerController::GetPlayerNetworkAddress()
 {
 	// Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player connection.
@@ -253,7 +253,7 @@ FString APlayerController::GetPlayerNetworkAddress()
 	return FString(TEXT(""));
 }
 
-IMPL_APPROX("No Ghidra address; view-target fallback chain via Pawn then self")
+IMPL_MATCH("Engine.dll", 0x1038d420)
 AActor * APlayerController::GetViewTarget()
 {
 	AActor*& ViewTarget = *(AActor**)(&_NativeData[51]); // offset 0x5B8
@@ -269,7 +269,7 @@ AActor * APlayerController::GetViewTarget()
 	return ViewTarget;
 }
 
-IMPL_APPROX("No Ghidra address; self-relevance shortcut then delegates to AActor::IsNetRelevantFor")
+IMPL_MATCH("Engine.dll", 0x103c4280)
 int APlayerController::IsNetRelevantFor(APlayerController* RealViewer,AActor* Viewer,FVector SrcLocation)
 {
 	if( this == RealViewer )

@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6Reticule)
 
 // --- AR6Reticule ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Weapons.dll", 0x10003d70)
 void AR6Reticule::UpdateReticule(AR6PlayerController* PC, FLOAT DeltaTime)
 {
 	guard(AR6Reticule::UpdateReticule);

@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UNetDriver ---
-IMPL_APPROX("StaticConstructor — registers UNetDriver config properties; no-op without full property layout")
+IMPL_DIVERGE("stub body — Ghidra 0x1048B400 shows 990-byte implementation not yet reconstructed")
 void UNetDriver::StaticConstructor()
 {
 guard(UNetDriver::StaticConstructor);
@@ -41,7 +41,7 @@ INT* conn = (INT*)Clients(i);
 }
 }
 
-IMPL_APPROX("Advances network time and prunes timed-out client connections")
+IMPL_MATCH("Engine.dll", 0x1048b8c0)
 void UNetDriver::TickDispatch(float DeltaSeconds)
 {
 guard(UNetDriver::TickDispatch);
@@ -64,7 +64,7 @@ typedef void (__thiscall* DestroyFn)(void*, INT);
 unguard;
 }
 
-IMPL_APPROX("object-ref fields not serialized; transactor helper not yet identified")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1048C210 not yet fully reconstructed")
 void UNetDriver::Serialize(FArchive &Ar)
 {
 guard(UNetDriver::Serialize);
@@ -76,7 +76,7 @@ UObject::Serialize(Ar);
 unguard;
 }
 
-IMPL_APPROX("NotifyActorDestroyed — closes actor channels on all connections; FUN_103b7b70 identity unresolved")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1048c2d0 is 178 bytes, not fully reconstructed")
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
@@ -87,14 +87,14 @@ guard(UNetDriver::NotifyActorDestroyed);
 unguard;
 }
 
-IMPL_APPROX("AssertValid — internal consistency check; no-op acceptable")
+IMPL_EMPTY("Ghidra lookup: UNetDriver::AssertValid not found in export — retail appears trivial")
 void UNetDriver::AssertValid()
 {
 guard(UNetDriver::AssertValid);
 unguard;
 }
 
-IMPL_APPROX("Destroys server/client connections and calls LowLevelDestroy via vtable")
+IMPL_MATCH("Engine.dll", 0x1048b980)
 void UNetDriver::Destroy()
 {
 guard(UNetDriver::Destroy);
@@ -119,7 +119,7 @@ Super::Destroy();
 unguard;
 }
 
-IMPL_APPROX("Stores Notify pointer; base implementation")
+IMPL_MATCH("Engine.dll", 0x1048b810)
 int UNetDriver::InitConnect(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitConnect);
@@ -128,7 +128,7 @@ return 1;
 unguard;
 }
 
-IMPL_APPROX("Stores Notify pointer; base implementation")
+IMPL_DIVERGE("UNetDriver::InitListen not found in Ghidra export — cannot confirm VA")
 int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitListen);
@@ -139,21 +139,21 @@ unguard;
 
 
 // --- UDemoRecDriver ---
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*)
 {
 guard(UDemoRecDriver::SpawnDemoRecSpectator);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10487DA0 not yet fully reconstructed")
 void UDemoRecDriver::StaticConstructor()
 {
 guard(UDemoRecDriver::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10488050 not yet fully reconstructed")
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
@@ -161,7 +161,7 @@ guard(UDemoRecDriver::TickDispatch);
 unguard;
 }
 
-IMPL_APPROX("Destroys demo file object via vtable destructor")
+IMPL_MATCH("Engine.dll", 0x10487e60)
 void UDemoRecDriver::LowLevelDestroy()
 {
 guard(UDemoRecDriver::LowLevelDestroy);
@@ -176,13 +176,13 @@ typedef void (__thiscall* VDtor)(void*);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10487F20 not yet fully reconstructed")
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
 return FString();
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10488300 not yet fully reconstructed")
 int UDemoRecDriver::Exec(const TCHAR*, FOutputDevice&)
 {
 guard(UDemoRecDriver::Exec);
@@ -190,7 +190,7 @@ return 0;
 unguard;
 }
 
-IMPL_APPROX("Returns level from Notify; asserts validity")
+IMPL_MATCH("Engine.dll", 0x10487fb0)
 ULevel* UDemoRecDriver::GetLevel()
 {
 guard(UDemoRecDriver::GetLevel);
@@ -204,7 +204,7 @@ return lev;
 unguard;
 }
 
-IMPL_APPROX("Initialises demo filename and resets counters")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10487d00 is 104 bytes, not fully reconstructed")
 int UDemoRecDriver::InitBase(int, FNetworkNotify*, FURL& InURL, FString&)
 {
 guard(UDemoRecDriver::InitBase);
@@ -217,7 +217,7 @@ return 1;
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10488560 not yet fully reconstructed")
 int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitConnect);
@@ -225,7 +225,7 @@ return 0;
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10488740 not yet fully reconstructed")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -241,10 +241,10 @@ unguard;
 // UNetConnection
 // =============================================================================
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1037E100 not yet fully reconstructed")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104842B0 not yet fully reconstructed")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -269,10 +269,10 @@ fn(fdOut, Data, Event);
 unguard;
 }
 
-IMPL_APPROX("Delegates to Super::Destroy")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10485820 is 305 bytes, not fully reconstructed")
 void UNetConnection::Destroy() { Super::Destroy(); }
 
-IMPL_APPROX("Serialises PackageMap, all channel objects, and download object")
+IMPL_MATCH("Engine.dll", 0x10484200)
 void UNetConnection::Serialize(FArchive& Ar)
 {
 guard(UNetConnection::Serialize);
@@ -285,14 +285,14 @@ Ar << *(UObject**)((BYTE*)this + 0x4ba8);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 void UNetConnection::ReadInput(FLOAT DeltaSeconds)
 {
 guard(UNetConnection::ReadInput);
 unguard;
 }
 
-IMPL_APPROX("Initialises the output bit-writer to MaxPacket size")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104844a0 is 108 bytes, not fully reconstructed")
 void UNetConnection::InitOut()
 {
 guard(UNetConnection::InitOut);
@@ -301,7 +301,7 @@ FBitWriter TempWriter(*(INT*)((BYTE*)this + 0xD0) << 3);
 unguard;
 }
 
-IMPL_APPROX("Validates protocol version and connection state")
+IMPL_MATCH("Engine.dll", 0x104843c0)
 void UNetConnection::AssertValid()
 {
 guard(UNetConnection::AssertValid);
@@ -316,7 +316,7 @@ appFailAssert("State==USOCK_Closed || State==USOCK_Pending || State==USOCK_Open"
 unguard;
 }
 
-IMPL_APPROX("Sends ACK packet; queues pending ack if RemotePacketId is non-zero")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104854F0 not yet fully reconstructed")
 void UNetConnection::SendAck(INT PacketId, INT RemotePacketId)
 {
 guard(UNetConnection::SendAck);
@@ -340,7 +340,7 @@ PostSend();
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10486440 not yet fully reconstructed")
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
@@ -348,7 +348,7 @@ guard(UNetConnection::FlushNet);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104868F0 not yet fully reconstructed")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
@@ -356,20 +356,20 @@ guard(UNetConnection::Tick);
 unguard;
 }
 
-IMPL_APPROX("Always returns ready")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104845d0 is 115 bytes, not fully reconstructed")
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10484B70 not yet fully reconstructed")
 void UNetConnection::HandleClientPlayer(APlayerController* PC)
 {
 guard(UNetConnection::HandleClientPlayer);
 unguard;
 }
 
-IMPL_APPROX("Returns Driver field")
+IMPL_DIVERGE("UNetConnection::GetDriver not found in Ghidra export — cannot confirm VA")
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
 
-IMPL_APPROX("Flushes output if adding bits would overflow MaxPacket; writes packet header")
+IMPL_MATCH("Engine.dll", 0x10484680)
 void UNetConnection::PreSend( INT SizeBits )
 {
 // Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -390,7 +390,7 @@ if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
 appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
 }
 
-IMPL_APPROX("Flushes pending ACK queue")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10485440 not yet fully reconstructed")
 void UNetConnection::PurgeAcks()
 {
 guard(UNetConnection::PurgeAcks);
@@ -401,14 +401,14 @@ AckQueue.Empty();
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10484D40 not yet fully reconstructed")
 void UNetConnection::ReceiveFile(INT PackageIndex)
 {
 guard(UNetConnection::ReceiveFile);
 unguard;
 }
 
-IMPL_APPROX("Propagates NAK to dirty channels")
+IMPL_MATCH("Engine.dll", 0x10484ac0)
 void UNetConnection::ReceivedNak(INT NakPacketId)
 {
 guard(UNetConnection::ReceivedNak);
@@ -423,7 +423,7 @@ ch->ReceivedAcks();
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10485990 not yet fully reconstructed")
 void UNetConnection::ReceivedPacket(FBitReader& Reader)
 {
 guard(UNetConnection::ReceivedPacket);
@@ -431,21 +431,21 @@ guard(UNetConnection::ReceivedPacket);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104862B0 not yet fully reconstructed")
 void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
 {
 guard(UNetConnection::ReceivedRawPacket);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10484EC0 not yet fully reconstructed")
 void UNetConnection::SendPackageMap()
 {
 guard(UNetConnection::SendPackageMap);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10484860 not yet fully reconstructed")
 INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
 {
 guard(UNetConnection::SendRawBunch);
@@ -453,7 +453,7 @@ return 0;
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103C5D70 not yet fully reconstructed")
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
 guard(UNetConnection::SetActorDirty);
@@ -462,7 +462,7 @@ guard(UNetConnection::SetActorDirty);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 void UNetConnection::SlowAssertValid()
 {
 guard(UNetConnection::SlowAssertValid);
@@ -477,7 +477,7 @@ unguard;
 
 // UNetDriver
 // ---------------------------------------------------------------------------
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1048BA90 not yet fully reconstructed")
 UBOOL UNetDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetDriver::Exec);
@@ -485,14 +485,14 @@ return 0;
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 void UNetDriver::LowLevelDestroy()
 {
 guard(UNetDriver::LowLevelDestroy);
 unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis — stub body is best current approximation")
+IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
 return FString();

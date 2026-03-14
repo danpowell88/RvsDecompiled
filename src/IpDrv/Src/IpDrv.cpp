@@ -91,9 +91,9 @@ IMPLEMENT_FUNCTION(AUdpLink, -1, execSetPlayingTime)
 
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("C++ placement new/delete helpers; no standalone retail equivalent")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("C++ placement new/delete helpers; no standalone retail equivalent")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -157,7 +157,7 @@ static INT GWSAInitialized = 0;
 static UINT GDrvSocket = 0;
 
 // Helper: initialise WinSock if not already done.
-IMPL_APPROX("Calls WSAStartup once; stores result in GWSAInitialized global")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static INT InitWSA(FString& Error)
 {
 	if (!GWSAInitialized)
@@ -175,7 +175,7 @@ static INT InitWSA(FString& Error)
 }
 
 // Helper: set socket non-blocking. Returns ioctlsocket error code (0 = OK).
-IMPL_APPROX("Sets socket to non-blocking mode via ioctlsocket FIONBIO")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static INT SetNonBlocking(SOCKET s)
 {
 	u_long NonBlocking = 1;
@@ -183,7 +183,7 @@ static INT SetNonBlocking(SOCKET s)
 }
 
 // Helper: return true if socket handle is valid.
-IMPL_APPROX("Returns true if socket handle is not INVALID_SOCKET")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static bool IsValidSocket(SOCKET s)
 {
 	return s != INVALID_SOCKET;
@@ -191,7 +191,7 @@ static bool IsValidSocket(SOCKET s)
 
 // Helper: get local IP for binding (INADDR_ANY = all interfaces).
 // In the original binary this is FUN_10701be0 which returns the configured bind address.
-IMPL_APPROX("Returns INADDR_ANY; original binary (FUN_10701be0) may read bind address from config")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static UINT GetLocalBindIP()
 {
 	return INADDR_ANY; // host order = 0
@@ -200,7 +200,7 @@ static UINT GetLocalBindIP()
 // Helper: bind socket and update address with assigned port.
 // mask=1 → bind once; mask=10 → cycle through successive ports (for client reuse).
 // Returns assigned port (host order) on success, 0 on failure.
-IMPL_APPROX("Binds socket to address with optional port cycling for successive-port reuse")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 {
 	if (bReuseAddr)
@@ -232,7 +232,7 @@ static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 }
 
 // Helper: set post-bind socket options. Always succeeds in this implementation.
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static bool SetSocketOptions(SOCKET s)
 {
 	(void)s;
@@ -241,7 +241,7 @@ static bool SetSocketOptions(SOCKET s)
 
 // Helper: format IP (stored network-byte-order in a DWORD) as FString.
 // For 1.2.3.4 stored as 0x04030201 on LE: b1=1, b2=2, b3=3, b4=4.
-IMPL_APPROX("Formats IP address DWORD and optional port into dotted-decimal FString")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);
@@ -254,7 +254,7 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 }
 
 // Async DNS resolve thread — fills FResolveInfo then clears bWorking.
-IMPL_APPROX("Async DNS resolution thread; fills FResolveInfo via gethostbyname then clears bWorking")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
@@ -274,7 +274,7 @@ static DWORD WINAPI ResolveThread(LPVOID Param)
 }
 
 // Helper: initialise FResolveInfo and start DNS thread (FUN_10701780).
-IMPL_APPROX("Initialises FResolveInfo buffer and spawns async DNS resolution thread (FUN_10701780)")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
@@ -291,7 +291,7 @@ static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 
 // Helper: get TSC-based elapsed time matching the binary's rdtsc formula.
 // Returns a large float increasing monotonically, with 16777216 as epoch offset.
-IMPL_APPROX("TSC-based monotonic timestamp matching binary rdtsc formula with 16777216 epoch offset")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 static float GetTSCTime()
 {
 	unsigned __int64 tsc = __rdtsc();
@@ -320,7 +320,7 @@ DIVERGENCES FROM BINARY:
 	AInternetLink implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Closes socket and delegates to Super::Destroy")
+IMPL_MATCH("IpDrv.dll", 0x10704620)
 void AInternetLink::Destroy()
 {
 	if (Socket != -1)
@@ -331,7 +331,7 @@ void AInternetLink::Destroy()
 	Super::Destroy();
 }
 
-IMPL_APPROX("Per-frame poll for async DNS completion; fires Resolved or ResolveFailed event")
+IMPL_MATCH("IpDrv.dll", 0x107046b0)
 INT AInternetLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
 	INT Ret = Super::Tick(DeltaTime, TickType);
@@ -358,25 +358,25 @@ INT AInternetLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	return Ret;
 }
 
-IMPL_APPROX("Accessor: reinterprets PrivateResolveInfo int field as FResolveInfo pointer reference")
+IMPL_MATCH("IpDrv.dll", 0x10701da0)
 FResolveInfo*& AInternetLink::GetResolveInfo()
 {
 	return *(FResolveInfo**)&PrivateResolveInfo;
 }
 
-IMPL_APPROX("Accessor: reinterprets Socket int field as UINT reference")
+IMPL_MATCH("IpDrv.dll", 0x10701d90)
 UINT& AInternetLink::GetSocket()
 {
 	return *(UINT*)&Socket;
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ResolveFailed")
+IMPL_MATCH("IpDrv.dll", 0x10701c70)
 void AInternetLink::eventResolveFailed()
 {
 	ProcessEvent(FindFunctionChecked(IPDRV_ResolveFailed), NULL);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for Resolved")
+IMPL_MATCH("IpDrv.dll", 0x10701ca0)
 void AInternetLink::eventResolved(FIpAddr Addr)
 {
 	struct { FIpAddr Addr; } Parms;
@@ -384,14 +384,14 @@ void AInternetLink::eventResolved(FIpAddr Addr)
 	ProcessEvent(FindFunctionChecked(IPDRV_Resolved), &Parms);
 }
 
-IMPL_APPROX("Native: returns last WSA error code, or 0 if WinSock not initialised")
+IMPL_MATCH("IpDrv.dll", 0x10704390)
 void AInternetLink::execGetLastError(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(INT*)Result = GWSAInitialized ? WSAGetLastError() : 0;
 }
 
-IMPL_APPROX("Native: queries local socket address via getsockname and populates FIpAddr")
+IMPL_MATCH("IpDrv.dll", 0x10704a10)
 void AInternetLink::execGetLocalIP(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT_REF(FIpAddr, Addr);
@@ -405,7 +405,7 @@ void AInternetLink::execGetLocalIP(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_APPROX("Native: formats FIpAddr as dotted-decimal IP:port string")
+IMPL_MATCH("IpDrv.dll", 0x107040e0)
 void AInternetLink::execIpAddrToString(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FIpAddr, A);
@@ -419,14 +419,14 @@ void AInternetLink::execIpAddrToString(FFrame& Stack, RESULT_DECL)
 	     A.Port);
 }
 
-IMPL_APPROX("Native: returns the DataPending flag value")
+IMPL_MATCH("IpDrv.dll", 0x10703d10)
 void AInternetLink::execIsDataPending(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = DataPending;
 }
 
-IMPL_APPROX("Native: parses URL into host, port, map, and portal components via FURL")
+IMPL_MATCH("IpDrv.dll", 0x10703df0)
 void AInternetLink::execParseURL(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(Url);
@@ -443,7 +443,7 @@ void AInternetLink::execParseURL(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = 1;
 }
 
-IMPL_APPROX("Native: resolves hostname or dotted-decimal IP, firing Resolved/ResolveFailed event")
+IMPL_MATCH("IpDrv.dll", 0x10704860)
 void AInternetLink::execResolve(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(HostName);
@@ -477,7 +477,7 @@ void AInternetLink::execResolve(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_APPROX("Native: converts dotted-decimal string to FIpAddr via inet_addr")
+IMPL_MATCH("IpDrv.dll", 0x10704210)
 void AInternetLink::execStringToIpAddr(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(Str);
@@ -496,7 +496,7 @@ void AInternetLink::execStringToIpAddr(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = 1;
 }
 
-IMPL_APPROX("Native: CD key validation stub; GameSpy SDK defunct since 2014")
+IMPL_DIVERGE("Native: CD key validation stub; GameSpy SDK defunct since 2014")
 void AInternetLink::execValidate(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(ProductID);
@@ -511,7 +511,7 @@ void AInternetLink::execValidate(FFrame& Stack, RESULT_DECL)
 	ATcpLink implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Per-frame TCP state machine: drives listen/connect/data/shutdown transitions")
+IMPL_MATCH("IpDrv.dll", 0x10706450)
 INT ATcpLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
 	INT Ret = Super::Tick(DeltaTime, TickType);
@@ -538,7 +538,7 @@ INT ATcpLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	return Ret;
 }
 
-IMPL_APPROX("Closes listen and remote sockets on actor script destruction")
+IMPL_MATCH("IpDrv.dll", 0x10704ba0)
 void ATcpLink::PostScriptDestroyed()
 {
 	if (Socket != -1)
@@ -553,7 +553,7 @@ void ATcpLink::PostScriptDestroyed()
 	}
 }
 
-IMPL_APPROX("Polls outbound TCP connect() completion via select()")
+IMPL_MATCH("IpDrv.dll", 0x10705310)
 void ATcpLink::CheckConnectionAttempt()
 {
 	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
@@ -570,7 +570,7 @@ void ATcpLink::CheckConnectionAttempt()
 	}
 }
 
-IMPL_APPROX("Accepts inbound TCP connection; optionally spawns AcceptClass actor")
+IMPL_MATCH("IpDrv.dll", 0x10705ec0)
 void ATcpLink::CheckConnectionQueue()
 {
 	sockaddr RemoteAddr_sa;
@@ -609,7 +609,7 @@ void ATcpLink::CheckConnectionQueue()
 	}
 }
 
-IMPL_APPROX("Drains send FIFO to TCP socket in 512-byte chunks via send()")
+IMPL_MATCH("IpDrv.dll", 0x10705860)
 INT ATcpLink::FlushSendBuffer()
 {
 	if (!GWSAInitialized || Socket == -1 || SendFIFO.Num() == 0)
@@ -628,7 +628,7 @@ INT ATcpLink::FlushSendBuffer()
 	return Sent;
 }
 
-IMPL_APPROX("Polls TCP socket for data; fires Received events or sets DataPending flag")
+IMPL_MATCH("IpDrv.dll", 0x107061d0)
 void ATcpLink::PollConnections()
 {
 	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
@@ -666,7 +666,7 @@ void ATcpLink::PollConnections()
 	}
 }
 
-IMPL_APPROX("Initiates graceful TCP shutdown then closes socket and fires Closed event")
+IMPL_MATCH("IpDrv.dll", 0x10705520)
 void ATcpLink::ShutdownConnection()
 {
 	SOCKET s = (RemoteSocket != -1) ? (SOCKET)RemoteSocket : (SOCKET)Socket;
@@ -690,25 +690,25 @@ void ATcpLink::ShutdownConnection()
 	}
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for Accepted")
+IMPL_MATCH("IpDrv.dll", 0x107021c0)
 void ATcpLink::eventAccepted()
 {
 	ProcessEvent(FindFunctionChecked(IPDRV_Accepted), NULL);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for Closed")
+IMPL_MATCH("IpDrv.dll", 0x10702160)
 void ATcpLink::eventClosed()
 {
 	ProcessEvent(FindFunctionChecked(IPDRV_Closed), NULL);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for Opened")
+IMPL_MATCH("IpDrv.dll", 0x10702190)
 void ATcpLink::eventOpened()
 {
 	ProcessEvent(FindFunctionChecked(IPDRV_Opened), NULL);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ReceivedBinary (TCP)")
+IMPL_MATCH("IpDrv.dll", 0x10702100)
 void ATcpLink::eventReceivedBinary(INT Count, BYTE* B)
 {
 	struct { INT Count; BYTE B[255]; } Parms;
@@ -717,7 +717,7 @@ void ATcpLink::eventReceivedBinary(INT Count, BYTE* B)
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary), &Parms);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ReceivedLine (TCP)")
+IMPL_MATCH("IpDrv.dll", 0x107031e0)
 void ATcpLink::eventReceivedLine(const FString& Line)
 {
 	struct { FString Line; } Parms;
@@ -725,7 +725,7 @@ void ATcpLink::eventReceivedLine(const FString& Line)
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedLine), &Parms);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ReceivedText (TCP)")
+IMPL_MATCH("IpDrv.dll", 0x10703270)
 void ATcpLink::eventReceivedText(const FString& Text)
 {
 	struct { FString Text; } Parms;
@@ -733,7 +733,7 @@ void ATcpLink::eventReceivedText(const FString& Text)
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedText), &Parms);
 }
 
-IMPL_APPROX("Native: creates TCP socket and binds to specified or next-available port")
+IMPL_MATCH("IpDrv.dll", 0x10704bd0)
 void ATcpLink::execBindPort(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(InPort);
@@ -777,7 +777,7 @@ void ATcpLink::execBindPort(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = BoundPort;
 }
 
-IMPL_APPROX("Native: shuts down and closes TCP socket; resets link state")
+IMPL_MATCH("IpDrv.dll", 0x10705410)
 void ATcpLink::execClose(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
@@ -798,14 +798,14 @@ void ATcpLink::execClose(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = 1;
 }
 
-IMPL_APPROX("Native: returns true if LinkState is STATE_Connected")
+IMPL_MATCH("IpDrv.dll", 0x10704e50)
 void ATcpLink::execIsConnected(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = (LinkState == STATE_Connected) ? 1 : 0;
 }
 
-IMPL_APPROX("Native: puts TCP socket into listening state with specified backlog")
+IMPL_MATCH("IpDrv.dll", 0x10704fe0)
 void ATcpLink::execListen(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(QueueSize);
@@ -819,7 +819,7 @@ void ATcpLink::execListen(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = 1;
 }
 
-IMPL_APPROX("Native: initiates non-blocking TCP connect to remote address")
+IMPL_MATCH("IpDrv.dll", 0x10705170)
 void ATcpLink::execOpen(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FIpAddr, Addr);
@@ -842,7 +842,7 @@ void ATcpLink::execOpen(FFrame& Stack, RESULT_DECL)
 	SendFIFO.Empty();
 }
 
-IMPL_APPROX("Native: receives raw binary data from TCP socket")
+IMPL_MATCH("IpDrv.dll", 0x10705ca0)
 void ATcpLink::execReadBinary(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT_REF(Count);
@@ -859,7 +859,7 @@ void ATcpLink::execReadBinary(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = n;
 }
 
-IMPL_APPROX("Native: receives ANSI text from TCP socket")
+IMPL_MATCH("IpDrv.dll", 0x10705650)
 void ATcpLink::execReadText(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR_REF(Str);
@@ -878,7 +878,7 @@ void ATcpLink::execReadText(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = n;
 }
 
-IMPL_APPROX("Native: queues binary data into send FIFO then flushes TCP send buffer")
+IMPL_MATCH("IpDrv.dll", 0x10705960)
 void ATcpLink::execSendBinary(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(Count);
@@ -894,7 +894,7 @@ void ATcpLink::execSendBinary(FFrame& Stack, RESULT_DECL)
 	FlushSendBuffer();
 }
 
-IMPL_APPROX("Native: queues ANSI text (with CRLF in line mode) then flushes TCP send buffer")
+IMPL_MATCH("IpDrv.dll", 0x10705b00)
 void ATcpLink::execSendText(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(Str);
@@ -920,7 +920,7 @@ void ATcpLink::execSendText(FFrame& Stack, RESULT_DECL)
 	AUdpLink implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Per-frame UDP receive loop; fires ReceivedText/Line/Binary events")
+IMPL_MATCH("IpDrv.dll", 0x1070b050)
 INT AUdpLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
 	INT Ret = Super::Tick(DeltaTime, TickType);
@@ -959,7 +959,7 @@ INT AUdpLink::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	return Ret;
 }
 
-IMPL_APPROX("Closes UDP socket on actor destruction")
+IMPL_MATCH("IpDrv.dll", 0x1070a5e0)
 void AUdpLink::PostScriptDestroyed()
 {
 	if (Socket != -1)
@@ -969,7 +969,7 @@ void AUdpLink::PostScriptDestroyed()
 	}
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ReceivedBinary (UDP variant)")
+IMPL_MATCH("IpDrv.dll", 0x10701f00)
 void AUdpLink::eventReceivedBinary(FIpAddr Addr, INT Count, BYTE* B)
 {
 	struct { FIpAddr Addr; INT Count; BYTE B[255]; } Parms;
@@ -979,7 +979,7 @@ void AUdpLink::eventReceivedBinary(FIpAddr Addr, INT Count, BYTE* B)
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary), &Parms);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ReceivedLine (UDP variant)")
+IMPL_MATCH("IpDrv.dll", 0x107030a0)
 void AUdpLink::eventReceivedLine(FIpAddr Addr, const FString& Line)
 {
 	struct { FIpAddr Addr; FString Line; } Parms;
@@ -988,7 +988,7 @@ void AUdpLink::eventReceivedLine(FIpAddr Addr, const FString& Line)
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedLine), &Parms);
 }
 
-IMPL_APPROX("UnrealScript event dispatcher for ReceivedText (UDP variant)")
+IMPL_MATCH("IpDrv.dll", 0x10703140)
 void AUdpLink::eventReceivedText(FIpAddr Addr, const FString& Text)
 {
 	struct { FIpAddr Addr; FString Text; } Parms;
@@ -997,7 +997,7 @@ void AUdpLink::eventReceivedText(FIpAddr Addr, const FString& Text)
 	ProcessEvent(FindFunctionChecked(IPDRV_ReceivedText), &Parms);
 }
 
-IMPL_APPROX("Native: creates UDP socket with broadcast enabled and binds to port")
+IMPL_MATCH("IpDrv.dll", 0x1070a600)
 void AUdpLink::execBindPort(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(InPort);
@@ -1045,7 +1045,7 @@ void AUdpLink::execBindPort(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = BoundPort;
 }
 
-IMPL_APPROX("Native: evicts GPlayerTimes entries that have been idle for more than 120 seconds")
+IMPL_MATCH("IpDrv.dll", 0x1070b2e0)
 void AUdpLink::execCheckForPlayerTimeouts(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
@@ -1062,14 +1062,14 @@ void AUdpLink::execCheckForPlayerTimeouts(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_APPROX("Native: returns hardcoded maximum available ports (10), matching binary")
+IMPL_MATCH("IpDrv.dll", 0x1070a1b0)
 void AUdpLink::execGetMaxAvailPorts(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(INT*)Result = 10; // hardcoded in binary
 }
 
-IMPL_APPROX("Native: returns elapsed session time for a player IP from GPlayerTimes")
+IMPL_MATCH("IpDrv.dll", 0x1070a480)
 void AUdpLink::execGetPlayingTime(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(PlayerIP);
@@ -1088,7 +1088,7 @@ void AUdpLink::execGetPlayingTime(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_APPROX("Native: receives binary UDP datagram with source address populated")
+IMPL_MATCH("IpDrv.dll", 0x1070ae10)
 void AUdpLink::execReadBinary(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT_REF(FIpAddr, Addr);
@@ -1112,7 +1112,7 @@ void AUdpLink::execReadBinary(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = n;
 }
 
-IMPL_APPROX("Native: receives text UDP datagram with source address populated")
+IMPL_MATCH("IpDrv.dll", 0x1070abc0)
 void AUdpLink::execReadText(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT_REF(FIpAddr, Addr);
@@ -1135,7 +1135,7 @@ void AUdpLink::execReadText(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = n;
 }
 
-IMPL_APPROX("Native: sends binary UDP datagram to specified address")
+IMPL_MATCH("IpDrv.dll", 0x1070aa20)
 void AUdpLink::execSendBinary(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FIpAddr, Addr);
@@ -1159,7 +1159,7 @@ void AUdpLink::execSendBinary(FFrame& Stack, RESULT_DECL)
 	// result stays 0 (success) per binary
 }
 
-IMPL_APPROX("Native: sends ANSI text as UDP datagram to specified address")
+IMPL_MATCH("IpDrv.dll", 0x1070a8c0)
 void AUdpLink::execSendText(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FIpAddr, Addr);
@@ -1181,7 +1181,7 @@ void AUdpLink::execSendText(FFrame& Stack, RESULT_DECL)
 		*(DWORD*)Result = 0; // failure
 }
 
-IMPL_APPROX("Native: upserts player session entry in GPlayerTimes by IP address")
+IMPL_MATCH("IpDrv.dll", 0x1070a2b0)
 void AUdpLink::execSetPlayingTime(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(PlayerIP);
@@ -1213,7 +1213,7 @@ void AUdpLink::execSetPlayingTime(FFrame& Stack, RESULT_DECL)
 	UTcpNetDriver implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Property registration stub; CPP_PROPERTY cannot address bitfield members in standard C++")
+IMPL_DIVERGE("Property registration stub; CPP_PROPERTY cannot address bitfield members in standard C++")
 void UTcpNetDriver::StaticConstructor()
 {
 	// Property registration omitted: CPP_PROPERTY cannot take the address
@@ -1221,7 +1221,7 @@ void UTcpNetDriver::StaticConstructor()
 	// in standard C++. Divergence from binary; config values load via .ini.
 }
 
-IMPL_APPROX("Closes network socket stored at driver at offset 0xBC")
+IMPL_MATCH("IpDrv.dll", 0x10706d40)
 void UTcpNetDriver::LowLevelDestroy()
 {
 	SOCKET* pSock = (SOCKET*)((BYTE*)this + 0xbc);
@@ -1234,20 +1234,20 @@ void UTcpNetDriver::LowLevelDestroy()
 	}
 }
 
-IMPL_APPROX("Returns formatted local IP string from driver at offset 0xB0")
+IMPL_MATCH("IpDrv.dll", 0x10706cb0)
 FString UTcpNetDriver::LowLevelGetNetworkNumber()
 {
 	UINT* pLocalIP = (UINT*)((BYTE*)this + 0xb0);
 	return IpAddrToStr(htonl(*pLocalIP), 0);
 }
 
-IMPL_APPROX("Accessor: returns server-side UTcpipConnection from driver at offset 0x3C")
+IMPL_MATCH("IpDrv.dll", 0x10706e10)
 UTcpipConnection* UTcpNetDriver::GetServerConnection()
 {
 	return (UTcpipConnection*)(*(UNetConnection**)((BYTE*)this + 0x3c));
 }
 
-IMPL_APPROX("Initialises WinSock, creates UDP socket, sets buffer sizes, and binds to port")
+IMPL_MATCH("IpDrv.dll", 0x10707450)
 INT UTcpNetDriver::InitBase(INT Reuse, FNetworkNotify* InNotify, FURL& URL, FString& Error)
 {
 	if (!InitWSA(Error))
@@ -1301,7 +1301,7 @@ INT UTcpNetDriver::InitBase(INT Reuse, FNetworkNotify* InNotify, FURL& URL, FStr
 	return 1;
 }
 
-IMPL_APPROX("Client-side driver init: creates UTcpipConnection for outbound connection")
+IMPL_MATCH("IpDrv.dll", 0x107077b0)
 INT UTcpNetDriver::InitConnect(FNetworkNotify* InNotify, FURL& ConnectURL, FString& Error)
 {
 	// Divergence: not calling Super::InitConnect (stub returns 0, aborting init).
@@ -1334,7 +1334,7 @@ INT UTcpNetDriver::InitConnect(FNetworkNotify* InNotify, FURL& ConnectURL, FStri
 	return 1;
 }
 
-IMPL_APPROX("Server-side driver init: binds listen port and records local address in URL")
+IMPL_MATCH("IpDrv.dll", 0x10707930)
 INT UTcpNetDriver::InitListen(FNetworkNotify* InNotify, FURL& URL, FString& Error)
 {
 	// Divergence: not calling Super::InitListen (stub returns 0, aborting init).
@@ -1349,7 +1349,7 @@ INT UTcpNetDriver::InitListen(FNetworkNotify* InNotify, FURL& URL, FString& Erro
 	return 1;
 }
 
-IMPL_APPROX("Receives incoming UDP packets and routes to matching client connections")
+IMPL_MATCH("IpDrv.dll", 0x10707a50)
 void UTcpNetDriver::TickDispatch(FLOAT DeltaTime)
 {
 	Super::TickDispatch(DeltaTime);
@@ -1413,7 +1413,7 @@ void UTcpNetDriver::TickDispatch(FLOAT DeltaTime)
 	UTcpipConnection implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Constructs UTcpipConnection; initialises remote address, socket, state, and TSC timestamp")
+IMPL_MATCH("IpDrv.dll", 0x107066f0)
 UTcpipConnection::UTcpipConnection(UINT InSocket, UNetDriver* InDriver,
     struct sockaddr_in InRemoteAddr, EConnectionState InState,
     INT InOpenedLocally, const FURL& InURL)
@@ -1464,7 +1464,7 @@ UTcpipConnection::UTcpipConnection(UINT InSocket, UNetDriver* InDriver,
 	}
 }
 
-IMPL_APPROX("Returns remote IP:port string from connection at offset 0x4BD4")
+IMPL_MATCH("IpDrv.dll", 0x10706b00)
 FString UTcpipConnection::LowLevelGetRemoteAddress()
 {
 	BYTE* Base    = (BYTE*)this;
@@ -1473,7 +1473,7 @@ FString UTcpipConnection::LowLevelGetRemoteAddress()
 	return IpAddrToStr(RemoteIP, Port);
 }
 
-IMPL_APPROX("Returns human-readable connection state and remote address description")
+IMPL_MATCH("IpDrv.dll", 0x10706ba0)
 FString UTcpipConnection::LowLevelDescribe()
 {
 	BYTE* Base  = (BYTE*)this;
@@ -1489,7 +1489,7 @@ FString UTcpipConnection::LowLevelDescribe()
 	return FString::Printf(TEXT("%s %s state: %s"), *DescStr, *RemoteStr, StateName);
 }
 
-IMPL_APPROX("Sends UDP packet; handles pending async DNS resolution first")
+IMPL_MATCH("IpDrv.dll", 0x10707280)
 void UTcpipConnection::LowLevelSend(void* Data, INT Count)
 {
 	BYTE*         Base = (BYTE*)this;

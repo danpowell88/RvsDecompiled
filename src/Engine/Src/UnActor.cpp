@@ -72,7 +72,7 @@ IMPLEMENT_CLASS(AR6Alarm);
 
 /*-- Error / Sleep / Lifecycle ------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: prints warning via debugf")
+IMPL_MATCH("Engine.dll", 0x125850)
 void AActor::execError( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execError);
@@ -83,7 +83,7 @@ void AActor::execError( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 233, execError );
 
-IMPL_APPROX("UnrealScript native: sets latent sleep action")
+IMPL_MATCH("Engine.dll", 0x120850)
 void AActor::execSleep( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSleep);
@@ -95,7 +95,7 @@ void AActor::execSleep( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 256, execSleep );
 
-IMPL_APPROX("UnrealScript native: polls sleep completion")
+IMPL_MATCH("Engine.dll", 0x120BC0)
 void AActor::execPollSleep( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollSleep);
@@ -107,7 +107,7 @@ void AActor::execPollSleep( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPollSleep );
 
-IMPL_APPROX("UnrealScript native: destroys actor via XLevel")
+IMPL_MATCH("Engine.dll", 0x129950)
 void AActor::execDestroy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDestroy);
@@ -117,7 +117,7 @@ void AActor::execDestroy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 279, execDestroy );
 
-IMPL_APPROX("UnrealScript native: spawns actor with optional owner and tag")
+IMPL_MATCH("Engine.dll", 0x129750)
 void AActor::execSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSpawn);
@@ -147,7 +147,7 @@ IMPLEMENT_FUNCTION( AActor, 278, execSpawn );
 
 /*-- Movement & Physics ------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: moves actor via MoveActor")
+IMPL_MATCH("Engine.dll", 0x128950)
 void AActor::execMove( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMove);
@@ -159,7 +159,7 @@ void AActor::execMove( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 266, execMove );
 
-IMPL_APPROX("UnrealScript native: smooth move via MoveActor")
+IMPL_MATCH("Engine.dll", 0xF1520)
 void AActor::execMoveSmooth( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveSmooth);
@@ -171,7 +171,7 @@ void AActor::execMoveSmooth( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 3969, execMoveSmooth );
 
-IMPL_APPROX("UnrealScript native: teleports actor via FarMoveActor")
+IMPL_MATCH("Engine.dll", 0x128A60)
 void AActor::execSetLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetLocation);
@@ -183,7 +183,7 @@ void AActor::execSetLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 267, execSetLocation );
 
-IMPL_APPROX("UnrealScript native: rotates actor via MoveActor")
+IMPL_MATCH("Engine.dll", 0x128D30)
 void AActor::execSetRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetRotation);
@@ -195,7 +195,7 @@ void AActor::execSetRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 299, execSetRotation );
 
-IMPL_APPROX("UnrealScript native: moves actor relative to base")
+IMPL_MATCH("Engine.dll", 0x128B20)
 void AActor::execSetRelativeLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetRelativeLocation);
@@ -209,7 +209,7 @@ void AActor::execSetRelativeLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetRelativeLocation );
 
-IMPL_APPROX("UnrealScript native: rotates actor relative to base")
+IMPL_MATCH("Engine.dll", 0x128E40)
 void AActor::execSetRelativeRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetRelativeRotation);
@@ -224,7 +224,7 @@ void AActor::execSetRelativeRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetRelativeRotation );
 
-IMPL_APPROX("UnrealScript native: calls setPhysics")
+IMPL_MATCH("Engine.dll", 0xEC630)
 void AActor::execSetPhysics( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPhysics);
@@ -235,7 +235,7 @@ void AActor::execSetPhysics( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 3970, execSetPhysics );
 
-IMPL_APPROX("UnrealScript native: runs performPhysics for client prediction")
+IMPL_MATCH("Engine.dll", 0xEC6D0)
 void AActor::execAutonomousPhysics( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAutonomousPhysics);
@@ -249,7 +249,7 @@ IMPLEMENT_FUNCTION( AActor, 3971, execAutonomousPhysics );
 
 /*-- Collision ---------------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: calls SetCollision")
+IMPL_MATCH("Engine.dll", 0x124590)
 void AActor::execSetCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetCollision);
@@ -262,7 +262,7 @@ void AActor::execSetCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 262, execSetCollision );
 
-IMPL_APPROX("UnrealScript native: calls SetCollisionSize")
+IMPL_MATCH("Engine.dll", 0x124730)
 void AActor::execSetCollisionSize( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetCollisionSize);
@@ -277,7 +277,7 @@ IMPLEMENT_FUNCTION( AActor, 283, execSetCollisionSize );
 
 /*-- Timers ------------------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: sets timer rate and loop flag")
+IMPL_MATCH("Engine.dll", 0x124BD0)
 void AActor::execSetTimer( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetTimer);
@@ -293,7 +293,7 @@ IMPLEMENT_FUNCTION( AActor, 280, execSetTimer );
 
 /*-- Owner / Base ------------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: calls SetOwner")
+IMPL_MATCH("Engine.dll", 0x124B60)
 void AActor::execSetOwner( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetOwner);
@@ -304,7 +304,7 @@ void AActor::execSetOwner( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 272, execSetOwner );
 
-IMPL_APPROX("UnrealScript native: calls SetBase")
+IMPL_MATCH("Engine.dll", 0x1247D0)
 void AActor::execSetBase( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBase);
@@ -318,7 +318,7 @@ IMPLEMENT_FUNCTION( AActor, 298, execSetBase );
 
 /*-- Trace / Collision queries -----------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: single-line world trace")
+IMPL_MATCH("Engine.dll", 0x12CFA0)
 void AActor::execTrace( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTrace);
@@ -345,7 +345,7 @@ void AActor::execTrace( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 277, execTrace );
 
-IMPL_APPROX("UnrealScript native: fast single-line world trace")
+IMPL_MATCH("Engine.dll", 0x129610)
 void AActor::execFastTrace( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFastTrace);
@@ -358,7 +358,7 @@ void AActor::execFastTrace( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 548, execFastTrace );
 
-IMPL_APPROX("UnrealScript native: R6-extended trace with flag parameter")
+IMPL_MATCH("Engine.dll", 0x12CD60)
 void AActor::execR6Trace( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execR6Trace);
@@ -383,7 +383,7 @@ void AActor::execR6Trace( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1806, execR6Trace );
 
-IMPL_APPROX("UnrealScript native: calls XLevel->FindSpot")
+IMPL_MATCH("Engine.dll", 0x129350)
 void AActor::execFindSpot( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFindSpot);
@@ -397,7 +397,7 @@ IMPLEMENT_FUNCTION( AActor, 1800, execFindSpot );
 
 /*-- Animation ---------------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: calls PlayAnim non-looping")
+IMPL_MATCH("Engine.dll", 0x120D50)
 void AActor::execPlayAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayAnim);
@@ -413,7 +413,7 @@ void AActor::execPlayAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 259, execPlayAnim );
 
-IMPL_APPROX("UnrealScript native: calls PlayAnim looping")
+IMPL_MATCH("Engine.dll", 0x120E90)
 void AActor::execLoopAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoopAnim);
@@ -429,7 +429,7 @@ void AActor::execLoopAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 260, execLoopAnim );
 
-IMPL_APPROX("UnrealScript native: calls PlayAnim tween-only")
+IMPL_MATCH("Engine.dll", 0x120FD0)
 void AActor::execTweenAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTweenAnim);
@@ -442,7 +442,7 @@ void AActor::execTweenAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 294, execTweenAnim );
 
-IMPL_APPROX("UnrealScript native: sets latent FinishAnim poll")
+IMPL_MATCH("Engine.dll", 0x1208C0)
 void AActor::execFinishAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFinishAnim);
@@ -455,7 +455,7 @@ void AActor::execFinishAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 261, execFinishAnim );
 
-IMPL_APPROX("UnrealScript native: polls animation completion")
+IMPL_MATCH("Engine.dll", 0x120C00)
 void AActor::execPollFinishAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollFinishAnim);
@@ -465,7 +465,7 @@ void AActor::execPollFinishAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPollFinishAnim );
 
-IMPL_APPROX("UnrealScript native: stops all animation channels")
+IMPL_MATCH("Engine.dll", 0x121110)
 void AActor::execStopAnimating( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAnimating);
@@ -481,7 +481,7 @@ void AActor::execStopAnimating( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAnimating );
 
-IMPL_APPROX("UnrealScript native: queries IsAnimating")
+IMPL_MATCH("Engine.dll", 0x1210A0)
 void AActor::execIsAnimating( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsAnimating);
@@ -492,7 +492,7 @@ void AActor::execIsAnimating( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 282, execIsAnimating );
 
-IMPL_APPROX("UnrealScript native: queries IsAnimTweening on MeshInstance")
+IMPL_MATCH("Engine.dll", 0x121240)
 void AActor::execIsTweening( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsTweening);
@@ -509,7 +509,7 @@ void AActor::execIsTweening( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execIsTweening );
 
-IMPL_APPROX("UnrealScript native: checks if sequence exists on MeshInstance")
+IMPL_MATCH("Engine.dll", 0x1212D0)
 void AActor::execHasAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execHasAnim);
@@ -526,7 +526,7 @@ void AActor::execHasAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 263, execHasAnim );
 
-IMPL_APPROX("UnrealScript native: returns animation group name")
+IMPL_MATCH("Engine.dll", 0x124370)
 void AActor::execGetAnimGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAnimGroup);
@@ -547,7 +547,7 @@ void AActor::execGetAnimGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1500, execGetAnimGroup );
 
-IMPL_APPROX("UnrealScript native: returns active animation parameters")
+IMPL_MATCH("Engine.dll", 0x121380)
 void AActor::execGetAnimParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAnimParams);
@@ -574,7 +574,7 @@ void AActor::execGetAnimParams( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetAnimParams );
 
-IMPL_APPROX("UnrealScript native: sets skeletal blend params on MeshInstance")
+IMPL_MATCH("Engine.dll", 0x126570)
 void AActor::execAnimBlendParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAnimBlendParams);
@@ -594,7 +594,7 @@ void AActor::execAnimBlendParams( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendParams );
 
-IMPL_APPROX("UnrealScript native: blends skeletal channel to target alpha")
+IMPL_MATCH("Engine.dll", 0x1266D0)
 void AActor::execAnimBlendToAlpha( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAnimBlendToAlpha);
@@ -612,7 +612,7 @@ void AActor::execAnimBlendToAlpha( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendToAlpha );
 
-IMPL_APPROX("UnrealScript native: gets skeletal blend alpha from MeshInstance")
+IMPL_MATCH("Engine.dll", 0x1267C0)
 void AActor::execGetAnimBlendAlpha( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAnimBlendAlpha);
@@ -629,7 +629,7 @@ void AActor::execGetAnimBlendAlpha( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2208, execGetAnimBlendAlpha );
 
-IMPL_APPROX("UnrealScript native: checks if active anim is in named group")
+IMPL_MATCH("Engine.dll", 0x124470)
 void AActor::execAnimIsInGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAnimIsInGroup);
@@ -652,7 +652,7 @@ void AActor::execAnimIsInGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimIsInGroup );
 
-IMPL_APPROX("UnrealScript native: freezes animation at given time")
+IMPL_MATCH("Engine.dll", 0x121190)
 void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFreezeAnimAt);
@@ -669,7 +669,7 @@ void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execFreezeAnimAt );
 
-IMPL_APPROX("always returns 0 — channel notify not implemented")
+IMPL_MATCH("Engine.dll", 0x126860)
 void AActor::execGetNotifyChannel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNotifyChannel);
@@ -679,7 +679,7 @@ void AActor::execGetNotifyChannel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNotifyChannel );
 
-IMPL_APPROX("UnrealScript native: enables/disables channel notify on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x1268D0)
 void AActor::execEnableChannelNotify( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableChannelNotify);
@@ -696,7 +696,7 @@ void AActor::execEnableChannelNotify( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execEnableChannelNotify );
 
-IMPL_APPROX("UnrealScript native: clears animation channel on MeshInstance")
+IMPL_MATCH("Engine.dll", 0x124260)
 void AActor::execClearChannel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execClearChannel);
@@ -714,7 +714,7 @@ IMPLEMENT_FUNCTION( AActor, 1805, execClearChannel );
 
 /*-- Skeletal mesh / Bone control --------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: assigns Mesh field")
+IMPL_MATCH("Engine.dll", 0x125FD0)
 void AActor::execLinkMesh( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLinkMesh);
@@ -726,7 +726,7 @@ void AActor::execLinkMesh( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLinkMesh );
 
-IMPL_APPROX("UnrealScript native: sets skeletal animation on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x125E00)
 void AActor::execLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLinkSkelAnim);
@@ -743,7 +743,7 @@ void AActor::execLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLinkSkelAnim );
 
-IMPL_APPROX("UnrealScript native: clears skeletal animation on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x125EF0)
 void AActor::execUnLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUnLinkSkelAnim);
@@ -758,7 +758,7 @@ void AActor::execUnLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2210, execUnLinkSkelAnim );
 
-IMPL_APPROX("UnrealScript native: queries WasSkeletonUpdated on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x125F50)
 void AActor::execWasSkeletonUpdated( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execWasSkeletonUpdated);
@@ -774,7 +774,7 @@ void AActor::execWasSkeletonUpdated( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1501, execWasSkeletonUpdated );
 
-IMPL_APPROX("parses Lock and bUseRootRotation parameters but performs no action")
+IMPL_MATCH("Engine.dll", 0x1264B0)
 void AActor::execLockRootMotion( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLockRootMotion);
@@ -785,7 +785,7 @@ void AActor::execLockRootMotion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLockRootMotion );
 
-IMPL_APPROX("UnrealScript native: returns actor Location")
+IMPL_MATCH("Engine.dll", 0x1262B0)
 void AActor::execGetRootLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootLocation);
@@ -795,7 +795,7 @@ void AActor::execGetRootLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootLocation );
 
-IMPL_APPROX("always returns zero vector — root motion delta not implemented")
+IMPL_MATCH("Engine.dll", 0x1263B0)
 void AActor::execGetRootLocationDelta( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootLocationDelta);
@@ -805,7 +805,7 @@ void AActor::execGetRootLocationDelta( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootLocationDelta );
 
-IMPL_APPROX("UnrealScript native: returns actor Rotation")
+IMPL_MATCH("Engine.dll", 0x126330)
 void AActor::execGetRootRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootRotation);
@@ -815,7 +815,7 @@ void AActor::execGetRootRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootRotation );
 
-IMPL_APPROX("always returns zero rotator — root motion delta not implemented")
+IMPL_MATCH("Engine.dll", 0x126430)
 void AActor::execGetRootRotationDelta( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootRotationDelta);
@@ -825,7 +825,7 @@ void AActor::execGetRootRotationDelta( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootRotationDelta );
 
-IMPL_APPROX("UnrealScript native: returns bone coordinate frame from USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x1260A0)
 void AActor::execGetBoneCoords( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetBoneCoords);
@@ -846,7 +846,7 @@ void AActor::execGetBoneCoords( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneCoords );
 
-IMPL_APPROX("UnrealScript native: returns bone rotation from USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x126190)
 void AActor::execGetBoneRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetBoneRotation);
@@ -864,7 +864,7 @@ void AActor::execGetBoneRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneRotation );
 
-IMPL_APPROX("UnrealScript native: sets bone rotation on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x126B90)
 void AActor::execSetBoneRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneRotation);
@@ -884,7 +884,7 @@ void AActor::execSetBoneRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneRotation );
 
-IMPL_APPROX("UnrealScript native: sets bone direction on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x126CE0)
 void AActor::execSetBoneDirection( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneDirection);
@@ -904,7 +904,7 @@ void AActor::execSetBoneDirection( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneDirection );
 
-IMPL_APPROX("UnrealScript native: sets bone translation on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x126A80)
 void AActor::execSetBoneLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneLocation);
@@ -922,7 +922,7 @@ void AActor::execSetBoneLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneLocation );
 
-IMPL_APPROX("UnrealScript native: sets bone scale on USkeletalMeshInstance")
+IMPL_MATCH("Engine.dll", 0x126990)
 void AActor::execSetBoneScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneScale);
@@ -940,7 +940,7 @@ void AActor::execSetBoneScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneScale );
 
-IMPL_APPROX("UnrealScript native: returns actor Location as bounding sphere center")
+IMPL_MATCH("Engine.dll", 0x12BA90)
 void AActor::execGetRenderBoundingSphere( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRenderBoundingSphere);
@@ -950,7 +950,7 @@ void AActor::execGetRenderBoundingSphere( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRenderBoundingSphere );
 
-IMPL_APPROX("UnrealScript native: calls AttachToBone")
+IMPL_MATCH("Engine.dll", 0x124A50)
 void AActor::execAttachToBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAttachToBone);
@@ -962,7 +962,7 @@ void AActor::execAttachToBone( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAttachToBone );
 
-IMPL_APPROX("UnrealScript native: calls DetachFromBone")
+IMPL_MATCH("Engine.dll", 0x124AF0)
 void AActor::execDetachFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDetachFromBone);
@@ -975,7 +975,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDetachFromBone );
 
 /*-- Sound dispatch hooks -----------------------------------------------*/
 
-IMPL_APPROX("DIVERGENCE: UAudioSubsystem::PlaySound not declared; audio runs through DareAudio/SNDDSound3D at runtime")
+IMPL_DIVERGE("DIVERGENCE: UAudioSubsystem::PlaySound not declared; audio runs through DareAudio/SNDDSound3D at runtime")
 void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlaySound);
@@ -992,7 +992,7 @@ void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 264, execPlaySound );
 
-IMPL_APPROX("DIVERGENCE: UAudioSubsystem::PlayOwnedSound not declared in reconstruction")
+IMPL_DIVERGE("DIVERGENCE: UAudioSubsystem::PlayOwnedSound not declared in reconstruction")
 void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayOwnedSound);
@@ -1010,7 +1010,7 @@ void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayOwnedSound );
 
-IMPL_APPROX("DIVERGENCE: UAudioSubsystem::DemoPlaySound not declared; demo recording audio omitted")
+IMPL_DIVERGE("DIVERGENCE: UAudioSubsystem::DemoPlaySound not declared; demo recording audio omitted")
 void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDemoPlaySound);
@@ -1028,7 +1028,7 @@ void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDemoPlaySound );
 
-IMPL_APPROX("UnrealScript native: updates noise fields and calls CheckNoiseHearing for AI")
+IMPL_MATCH("Engine.dll", 0xE58F0)
 void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMakeNoise);
@@ -1051,7 +1051,7 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
 
-IMPL_APPROX("always returns 0 — audio subsystem not implemented")
+IMPL_DIVERGE("always returns 0 — audio subsystem not implemented")
 void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPlayingSound);
@@ -1063,7 +1063,7 @@ void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2703, execIsPlayingSound );
 
-IMPL_APPROX("always returns 0 — music playback not implemented")
+IMPL_DIVERGE("always returns 0 — music playback not implemented")
 void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayMusic);
@@ -1075,7 +1075,7 @@ void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayMusic );
 
-IMPL_APPROX("always returns 0 — music stop not implemented")
+IMPL_DIVERGE("always returns 0 — music stop not implemented")
 void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopMusic);
@@ -1086,7 +1086,7 @@ void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopMusic );
 
-IMPL_APPROX("no-op stub — audio subsystem not implemented")
+IMPL_DIVERGE("no-op stub — audio subsystem not implemented")
 void AActor::execStopAllMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllMusic);
@@ -1095,7 +1095,7 @@ void AActor::execStopAllMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAllMusic );
 
-IMPL_APPROX("no-op stub — stop-all-sounds not implemented")
+IMPL_MATCH("Engine.dll", 0x127FE0)
 void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSounds);
@@ -1104,7 +1104,7 @@ void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2712, execStopAllSounds );
 
-IMPL_APPROX("parses aActor but performs no action — audio subsystem not implemented")
+IMPL_DIVERGE("parses aActor but performs no action — audio subsystem not implemented")
 void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSoundsActor);
@@ -1114,7 +1114,7 @@ void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2719, execStopAllSoundsActor );
 
-IMPL_APPROX("parses Sound but performs no action — audio subsystem not implemented")
+IMPL_DIVERGE("parses Sound but performs no action — audio subsystem not implemented")
 void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopSound);
@@ -1124,7 +1124,7 @@ void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2725, execStopSound );
 
-IMPL_APPROX("parses fTime/iFade/eSlot but performs no action — audio subsystem not implemented")
+IMPL_DIVERGE("parses fTime/iFade/eSlot but performs no action — audio subsystem not implemented")
 void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFadeSound);
@@ -1136,7 +1136,7 @@ void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2721, execFadeSound );
 
-IMPL_APPROX("parses BankName but performs no action — audio subsystem not implemented")
+IMPL_DIVERGE("parses BankName but performs no action — audio subsystem not implemented")
 void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddSoundBank);
@@ -1146,7 +1146,7 @@ void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2716, execAddSoundBank );
 
-IMPL_APPROX("always returns NULL — sound bank lookup not implemented")
+IMPL_MATCH("Engine.dll", 0x1281B0)
 void AActor::execAddAndFindBankInSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddAndFindBankInSound);
@@ -1158,7 +1158,7 @@ void AActor::execAddAndFindBankInSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2717, execAddAndFindBankInSound );
 
-IMPL_APPROX("no-op stub — volume reset not implemented")
+IMPL_MATCH("Engine.dll", 0x127B90)
 void AActor::execResetVolume_AllTypeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execResetVolume_AllTypeSound);
@@ -1167,7 +1167,7 @@ void AActor::execResetVolume_AllTypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2704, execResetVolume_AllTypeSound );
 
-IMPL_APPROX("parses SoundType but performs no action — volume reset not implemented")
+IMPL_MATCH("Engine.dll", 0x127BE0)
 void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execResetVolume_TypeSound);
@@ -1177,7 +1177,7 @@ void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2720, execResetVolume_TypeSound );
 
-IMPL_APPROX("parses VolumeType and NewVolume but performs no action — audio subsystem not implemented")
+IMPL_DIVERGE("parses VolumeType and NewVolume but performs no action — audio subsystem not implemented")
 void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChangeVolumeType);
@@ -1188,7 +1188,7 @@ void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2705, execChangeVolumeType );
 
-IMPL_APPROX("no-op stub — fade value save not implemented")
+IMPL_MATCH("Engine.dll", 0x127D30)
 void AActor::execSaveCurrentFadeValue( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSaveCurrentFadeValue);
@@ -1197,7 +1197,7 @@ void AActor::execSaveCurrentFadeValue( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2722, execSaveCurrentFadeValue );
 
-IMPL_APPROX("no-op stub — fade value restore not implemented")
+IMPL_MATCH("Engine.dll", 0x127D80)
 void AActor::execReturnSavedFadeValue( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReturnSavedFadeValue);
@@ -1206,7 +1206,7 @@ void AActor::execReturnSavedFadeValue( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2723, execReturnSavedFadeValue );
 
-IMPL_APPROX("always returns 0.f — sound duration query not implemented")
+IMPL_MATCH("Engine.dll", 0x128840)
 void AActor::execGetSoundDuration( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetSoundDuration);
@@ -1219,7 +1219,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetSoundDuration );
 
 /*-- Visual property setters -------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: calls SetDrawScale")
+IMPL_MATCH("Engine.dll", 0x124890)
 void AActor::execSetDrawScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetDrawScale);
@@ -1230,7 +1230,7 @@ void AActor::execSetDrawScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetDrawScale );
 
-IMPL_APPROX("UnrealScript native: calls SetDrawScale3D")
+IMPL_MATCH("Engine.dll", 0x1249D0)
 void AActor::execSetDrawScale3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetDrawScale3D);
@@ -1241,7 +1241,7 @@ void AActor::execSetDrawScale3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetDrawScale3D );
 
-IMPL_APPROX("UnrealScript native: calls SetDrawType")
+IMPL_MATCH("Engine.dll", 0x124970)
 void AActor::execSetDrawType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetDrawType);
@@ -1252,7 +1252,7 @@ void AActor::execSetDrawType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetDrawType );
 
-IMPL_APPROX("UnrealScript native: calls SetStaticMesh")
+IMPL_MATCH("Engine.dll", 0x124900)
 void AActor::execSetStaticMesh( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetStaticMesh);
@@ -1263,7 +1263,7 @@ void AActor::execSetStaticMesh( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetStaticMesh );
 
-IMPL_APPROX("parses bNewOnlyAffectPawns but performs no action")
+IMPL_MATCH("Engine.dll", 0x124660)
 void AActor::execOnlyAffectPawns( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execOnlyAffectPawns);
@@ -1273,7 +1273,7 @@ void AActor::execOnlyAffectPawns( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execOnlyAffectPawns );
 
-IMPL_APPROX("UnrealScript native: sets latent FinishInterpolation poll")
+IMPL_MATCH("Engine.dll", 0x120B80)
 void AActor::execFinishInterpolation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFinishInterpolation);
@@ -1283,7 +1283,7 @@ void AActor::execFinishInterpolation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 301, execFinishInterpolation );
 
-IMPL_APPROX("UnrealScript native: polls interpolation completion")
+IMPL_MATCH("Engine.dll", 0x120C40)
 void AActor::execPollFinishInterpolation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollFinishInterpolation);
@@ -1295,7 +1295,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPollFinishInterpolation );
 
 /*-- Actor iterators ---------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript native: iterates all actors of given class")
+IMPL_MATCH("Engine.dll", 0x1299A0)
 void AActor::execAllActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAllActors);
@@ -1327,7 +1327,7 @@ void AActor::execAllActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 304, execAllActors );
 
-IMPL_APPROX("UnrealScript native: iterates non-static non-nodelete actors")
+IMPL_MATCH("Engine.dll", 0x129BC0)
 void AActor::execDynamicActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDynamicActors);
@@ -1359,7 +1359,7 @@ void AActor::execDynamicActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 313, execDynamicActors );
 
-IMPL_APPROX("UnrealScript native: iterates actors owned by this")
+IMPL_MATCH("Engine.dll", 0x129DE0)
 void AActor::execChildActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChildActors);
@@ -1387,7 +1387,7 @@ void AActor::execChildActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 305, execChildActors );
 
-IMPL_APPROX("UnrealScript native: iterates actors based on this")
+IMPL_MATCH("Engine.dll", 0x129FB0)
 void AActor::execBasedActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execBasedActors);
@@ -1415,7 +1415,7 @@ void AActor::execBasedActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 306, execBasedActors );
 
-IMPL_APPROX("UnrealScript native: iterates Touching array")
+IMPL_MATCH("Engine.dll", 0x12A170)
 void AActor::execTouchingActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTouchingActors);
@@ -1443,7 +1443,7 @@ void AActor::execTouchingActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 307, execTouchingActors );
 
-IMPL_APPROX("UnrealScript native: iterates actors along a traced line")
+IMPL_MATCH("Engine.dll", 0x12A310)
 void AActor::execTraceActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTraceActors);
@@ -1484,7 +1484,7 @@ void AActor::execTraceActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 309, execTraceActors );
 
-IMPL_APPROX("UnrealScript native: iterates actors within radius")
+IMPL_MATCH("Engine.dll", 0x12A690)
 void AActor::execRadiusActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRadiusActors);
@@ -1517,7 +1517,7 @@ void AActor::execRadiusActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 310, execRadiusActors );
 
-IMPL_APPROX("UnrealScript native: iterates visible actors in radius")
+IMPL_MATCH("Engine.dll", 0x12A900)
 void AActor::execVisibleActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execVisibleActors);
@@ -1557,7 +1557,7 @@ void AActor::execVisibleActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 311, execVisibleActors );
 
-IMPL_APPROX("UnrealScript native: iterates visible colliding actors in radius")
+IMPL_MATCH("Engine.dll", 0x12AC40)
 void AActor::execVisibleCollidingActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execVisibleCollidingActors);
@@ -1598,7 +1598,7 @@ void AActor::execVisibleCollidingActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 312, execVisibleCollidingActors );
 
-IMPL_APPROX("UnrealScript native: iterates colliding actors in radius")
+IMPL_MATCH("Engine.dll", 0x12AFB0)
 void AActor::execCollidingActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execCollidingActors);
@@ -1634,7 +1634,7 @@ void AActor::execCollidingActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 321, execCollidingActors );
 
-IMPL_APPROX("UnrealScript native: checks if any PlayerController pawn has LOS to this actor")
+IMPL_MATCH("Engine.dll", 0xE7470)
 void AActor::execPlayerCanSeeMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayerCanSeeMe);
@@ -1659,7 +1659,7 @@ IMPLEMENT_FUNCTION( AActor, 532, execPlayerCanSeeMe );
 
 /*-- Map / Game queries ------------------------------------------------*/
 
-IMPL_APPROX("returns input MapName unchanged — map cycling not implemented")
+IMPL_MATCH("Engine.dll", 0xB02B0)
 void AActor::execGetMapName( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMapName);
@@ -1672,7 +1672,7 @@ void AActor::execGetMapName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 539, execGetMapName );
 
-IMPL_APPROX("returns input MapName unchanged — extended map cycling not implemented")
+IMPL_MATCH("Engine.dll", 0x123880)
 void AActor::execGetMapNameExt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMapNameExt);
@@ -1685,7 +1685,7 @@ void AActor::execGetMapNameExt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1519, execGetMapNameExt );
 
-IMPL_APPROX("UnrealScript native: returns XLevel->URL.Map")
+IMPL_MATCH("Engine.dll", 0xAF5A0)
 void AActor::execGetURLMap( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetURLMap);
@@ -1695,7 +1695,7 @@ void AActor::execGetURLMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 547, execGetURLMap );
 
-IMPL_APPROX("returns current skin unchanged — skin cycling not implemented")
+IMPL_MATCH("Engine.dll", 0xAFF20)
 void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextSkin);
@@ -1708,7 +1708,7 @@ void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 545, execGetNextSkin );
 
-IMPL_APPROX("always returns empty string — locale int lookup not implemented")
+IMPL_DIVERGE("always returns empty string — locale int lookup not implemented")
 void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextInt);
@@ -1720,7 +1720,7 @@ void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextInt );
 
-IMPL_APPROX("parses ClassName/Idx/out params but performs no action")
+IMPL_MATCH("Engine.dll", 0xAFC60)
 void AActor::execGetNextIntDesc( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextIntDesc);
@@ -1733,7 +1733,7 @@ void AActor::execGetNextIntDesc( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextIntDesc );
 
-IMPL_APPROX("parses Num/GUID/Filename out params but performs no action")
+IMPL_MATCH("Engine.dll", 0xB3510)
 void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCacheEntry);
@@ -1745,7 +1745,7 @@ void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetCacheEntry );
 
-IMPL_APPROX("always returns 0 — cache entry move not implemented")
+IMPL_DIVERGE("always returns 0 — cache entry move not implemented")
 void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveCacheEntry);
@@ -1757,7 +1757,7 @@ void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execMoveCacheEntry );
 
-IMPL_APPROX("UnrealScript native: returns Level->TimeSeconds")
+IMPL_MATCH("Engine.dll", 0x122CB0)
 void AActor::execGetTime( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTime);
@@ -1767,7 +1767,7 @@ void AActor::execGetTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1012, execGetTime );
 
-IMPL_APPROX("always returns NULL — GameManager not implemented")
+IMPL_DIVERGE("always returns NULL — GameManager not implemented")
 void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameManager);
@@ -1777,7 +1777,7 @@ void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1551, execGetGameManager );
 
-IMPL_APPROX("always returns NULL — ModManager not implemented")
+IMPL_DIVERGE("always returns NULL — ModManager not implemented")
 void AActor::execGetModMgr( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetModMgr);
@@ -1787,7 +1787,7 @@ void AActor::execGetModMgr( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1524, execGetModMgr );
 
-IMPL_APPROX("UnrealScript native: returns first URL option string")
+IMPL_MATCH("Engine.dll", 0x122C10)
 void AActor::execGetGameOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameOptions);
@@ -1797,7 +1797,7 @@ void AActor::execGetGameOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1009, execGetGameOptions );
 
-IMPL_APPROX("always returns empty string — server options not implemented")
+IMPL_DIVERGE("always returns empty string — server options not implemented")
 void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptions);
@@ -1807,7 +1807,7 @@ void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1273, execGetServerOptions );
 
-IMPL_APPROX("parses Options string but performs no action")
+IMPL_MATCH("Engine.dll", 0x12CA20)
 void AActor::execSaveServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSaveServerOptions);
@@ -1817,7 +1817,7 @@ void AActor::execSaveServerOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1283, execSaveServerOptions );
 
-IMPL_APPROX("always returns empty string — mission description not implemented")
+IMPL_MATCH("Engine.dll", 0x123F60)
 void AActor::execGetMissionDescription( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMissionDescription);
@@ -1827,7 +1827,7 @@ void AActor::execGetMissionDescription( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1302, execGetMissionDescription );
 
-IMPL_APPROX("parses Beacon string but performs no action")
+IMPL_MATCH("Engine.dll", 0x124000)
 void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetServerBeacon);
@@ -1837,7 +1837,7 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_APPROX("always returns empty string — server beacon not implemented")
+IMPL_DIVERGE("always returns empty string — server beacon not implemented")
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
@@ -1847,7 +1847,7 @@ void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1312, execGetServerBeacon );
 
-IMPL_APPROX("always returns 0 — GameSpy client detection not implemented")
+IMPL_DIVERGE("always returns 0 — GameSpy client detection not implemented")
 void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeStartedByGSClient);
@@ -1857,7 +1857,7 @@ void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1200, execNativeStartedByGSClient );
 
-IMPL_APPROX("always returns 0 — non-Ubi matchmaking not implemented")
+IMPL_DIVERGE("always returns 0 — non-Ubi matchmaking not implemented")
 void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMaking);
@@ -1867,7 +1867,7 @@ void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1303, execNativeNonUbiMatchMaking );
 
-IMPL_APPROX("always returns empty string — matchmaking address not implemented")
+IMPL_DIVERGE("always returns empty string — matchmaking address not implemented")
 void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingAddress);
@@ -1877,7 +1877,7 @@ void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1304, execNativeNonUbiMatchMakingAddress );
 
-IMPL_APPROX("always returns empty string — matchmaking password not implemented")
+IMPL_DIVERGE("always returns empty string — matchmaking password not implemented")
 void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingPassword);
@@ -1887,7 +1887,7 @@ void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1305, execNativeNonUbiMatchMakingPassword );
 
-IMPL_APPROX("always returns 0 — matchmaking host flag not implemented")
+IMPL_DIVERGE("always returns 0 — matchmaking host flag not implemented")
 void AActor::execNativeNonUbiMatchMakingHost( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingHost);
@@ -1897,7 +1897,7 @@ void AActor::execNativeNonUbiMatchMakingHost( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1316, execNativeNonUbiMatchMakingHost );
 
-IMPL_APPROX("UnrealScript native: returns hardcoded Ravenshield version string 1.60")
+IMPL_MATCH("Engine.dll", 0x127410)
 void AActor::execGetGameVersion( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameVersion);
@@ -1909,7 +1909,7 @@ void AActor::execGetGameVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1419, execGetGameVersion );
 
-IMPL_APPROX("always returns 0 — PunkBuster client not implemented")
+IMPL_DIVERGE("always returns 0 — PunkBuster client not implemented")
 void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBClientEnabled);
@@ -1919,7 +1919,7 @@ void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1400, execIsPBClientEnabled );
 
-IMPL_APPROX("always returns 0 — PunkBuster server not implemented")
+IMPL_DIVERGE("always returns 0 — PunkBuster server not implemented")
 void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBServerEnabled);
@@ -1929,7 +1929,7 @@ void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1402, execIsPBServerEnabled );
 
-IMPL_APPROX("parses bEnable but performs no action — PunkBuster not implemented")
+IMPL_DIVERGE("parses bEnable but performs no action — PunkBuster not implemented")
 void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPBStatus);
@@ -1939,7 +1939,7 @@ void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1401, execSetPBStatus );
 
-IMPL_APPROX("always returns 1 — game type availability not implemented")
+IMPL_MATCH("Engine.dll", 0x7C650)
 void AActor::execIsAvailableInGameType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsAvailableInGameType);
@@ -1950,7 +1950,7 @@ void AActor::execIsAvailableInGameType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1513, execIsAvailableInGameType );
 
-IMPL_APPROX("always returns empty string — game type int-to-string not implemented")
+IMPL_MATCH("Engine.dll", 0x79680)
 void AActor::execConvertGameTypeIntToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertGameTypeIntToString);
@@ -1961,7 +1961,7 @@ void AActor::execConvertGameTypeIntToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1256, execConvertGameTypeIntToString );
 
-IMPL_APPROX("always returns 0 — game type string-to-int not implemented")
+IMPL_MATCH("Engine.dll", 0x79780)
 void AActor::execConvertGameTypeToInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertGameTypeToInt);
@@ -1972,7 +1972,7 @@ void AActor::execConvertGameTypeToInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2015, execConvertGameTypeToInt );
 
-IMPL_APPROX("UnrealScript native: formats seconds as MM:SS")
+IMPL_MATCH("Engine.dll", 0x123770)
 void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertIntTimeToString);
@@ -1985,7 +1985,7 @@ void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1520, execConvertIntTimeToString );
 
-IMPL_APPROX("returns input GUID string unchanged — GlobalID lookup not implemented")
+IMPL_DIVERGE("returns input GUID string unchanged — GlobalID lookup not implemented")
 void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToString);
@@ -1996,7 +1996,7 @@ void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1522, execGlobalIDToString );
 
-IMPL_APPROX("parses GUID string but performs no action — GlobalID byte conversion not implemented")
+IMPL_DIVERGE("parses GUID string but performs no action — GlobalID byte conversion not implemented")
 void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToBytes);
@@ -2006,7 +2006,7 @@ void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1523, execGlobalIDToBytes );
 
-IMPL_APPROX("always returns empty string — tag informations not implemented")
+IMPL_DIVERGE("always returns empty string — tag informations not implemented")
 void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTagInformations);
@@ -2016,7 +2016,7 @@ void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2008, execGetTagInformations );
 
-IMPL_APPROX("no-op stub — debug vector reset not implemented at exec level")
+IMPL_DIVERGE("no-op stub — debug vector reset not implemented at exec level")
 void AActor::execDbgVectorReset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgVectorReset);
@@ -2025,7 +2025,7 @@ void AActor::execDbgVectorReset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1505, execDbgVectorReset );
 
-IMPL_APPROX("parses V and C but performs no action — debug vector add not implemented at exec level")
+IMPL_DIVERGE("parses V and C but performs no action — debug vector add not implemented at exec level")
 void AActor::execDbgVectorAdd( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgVectorAdd);
@@ -2036,7 +2036,7 @@ void AActor::execDbgVectorAdd( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1506, execDbgVectorAdd );
 
-IMPL_APPROX("parses Start/End/C but performs no action — debug line add not implemented at exec level")
+IMPL_DIVERGE("parses Start/End/C but performs no action — debug line add not implemented at exec level")
 void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgAddLine);
@@ -2048,7 +2048,7 @@ void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1801, execDbgAddLine );
 
-IMPL_APPROX("parses Index but performs no action — player menu info not implemented")
+IMPL_DIVERGE("parses Index but performs no action — player menu info not implemented")
 void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetFPlayerMenuInfo);
@@ -2058,7 +2058,7 @@ void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1230, execGetFPlayerMenuInfo );
 
-IMPL_APPROX("parses Index but performs no action — set player menu info not implemented")
+IMPL_DIVERGE("parses Index but performs no action — set player menu info not implemented")
 void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFPlayerMenuInfo);
@@ -2068,7 +2068,7 @@ void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1231, execSetFPlayerMenuInfo );
 
-IMPL_APPROX("parses Index but performs no action — player setup info not implemented")
+IMPL_DIVERGE("parses Index but performs no action — player setup info not implemented")
 void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetPlayerSetupInfo);
@@ -2078,7 +2078,7 @@ void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1232, execGetPlayerSetupInfo );
 
-IMPL_APPROX("parses Index but performs no action — set player setup info not implemented")
+IMPL_DIVERGE("parses Index but performs no action — set player setup info not implemented")
 void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlayerSetupInfo);
@@ -2088,7 +2088,7 @@ void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1233, execSetPlayerSetupInfo );
 
-IMPL_APPROX("no-op stub — player menu sort not implemented")
+IMPL_DIVERGE("no-op stub — player menu sort not implemented")
 void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSortFPlayerMenuInfo);
@@ -2097,7 +2097,7 @@ void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1279, execSortFPlayerMenuInfo );
 
-IMPL_APPROX("parses bPlanMode but performs no action — planning mode not implemented")
+IMPL_DIVERGE("parses bPlanMode but performs no action — planning mode not implemented")
 void AActor::execSetPlanningMode( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlanningMode);
@@ -2107,7 +2107,7 @@ void AActor::execSetPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2011, execSetPlanningMode );
 
-IMPL_APPROX("parses Floor but performs no action — floor drawing not implemented")
+IMPL_DIVERGE("parses Floor but performs no action — floor drawing not implemented")
 void AActor::execSetFloorToDraw( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFloorToDraw);
@@ -2117,7 +2117,7 @@ void AActor::execSetFloorToDraw( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2012, execSetFloorToDraw );
 
-IMPL_APPROX("always returns 0 — planning mode not implemented")
+IMPL_DIVERGE("always returns 0 — planning mode not implemented")
 void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execInPlanningMode);
@@ -2127,7 +2127,7 @@ void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2014, execInPlanningMode );
 
-IMPL_APPROX("parses ScreenName but performs no action — loading screen not implemented")
+IMPL_DIVERGE("parses ScreenName but performs no action — loading screen not implemented")
 void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadLoadingScreen);
@@ -2137,7 +2137,7 @@ void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2613, execLoadLoadingScreen );
 
-IMPL_APPROX("no-op stub — random background image loading not implemented")
+IMPL_DIVERGE("no-op stub — random background image loading not implemented")
 void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadRandomBackgroundImage);
@@ -2146,7 +2146,7 @@ void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2607, execLoadRandomBackgroundImage );
 
-IMPL_APPROX("always returns 0 — resolution enumeration not implemented")
+IMPL_DIVERGE("always returns 0 — resolution enumeration not implemented")
 void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNbAvailableResolutions);
@@ -2156,7 +2156,7 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_APPROX("Returns hardcoded resolution — actual display resolution query needs Ghidra")
+IMPL_DIVERGE("Returns hardcoded resolution — actual display resolution query needs Ghidra")
 void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
@@ -2167,7 +2167,7 @@ void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
 void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
@@ -2178,7 +2178,7 @@ void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_APPROX("Returns 1 — full implementation needs Ghidra analysis")
+IMPL_DIVERGE("Returns 1 — full implementation needs Ghidra analysis")
 void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
@@ -2188,7 +2188,7 @@ void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2617, execIsVideoHardwareAtLeast64M );
 
-IMPL_APPROX("Returns NULL — full implementation needs Ghidra analysis")
+IMPL_DIVERGE("Returns NULL — full implementation needs Ghidra analysis")
 void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCanvas);
@@ -2198,7 +2198,7 @@ void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2618, execGetCanvas );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
 void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableLoadingScreen);
@@ -2208,7 +2208,7 @@ void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2619, execEnableLoadingScreen );
 
-IMPL_APPROX("UnrealScript native: prints message to log via debugf")
+IMPL_MATCH("Engine.dll", 0x12DA60)
 void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddMessageToConsole);
@@ -2219,7 +2219,7 @@ void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2620, execAddMessageToConsole );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
 void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUpdateGraphicOptions);
@@ -2228,7 +2228,7 @@ void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2621, execUpdateGraphicOptions );
 
-IMPL_APPROX("UnrealScript native: calls UObject::CollectGarbage")
+IMPL_MATCH("Engine.dll", 0x122FC0)
 void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGarbageCollect);
@@ -2238,7 +2238,7 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
 void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
@@ -2250,7 +2250,7 @@ void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_APPROX("Stub — body not yet reconstructed from Ghidra")
+IMPL_DIVERGE("Stub — body not yet reconstructed from Ghidra")
 void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
@@ -2262,7 +2262,7 @@ void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_APPROX("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
 void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
@@ -2271,7 +2271,7 @@ void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2610, execRenderLevelFromMe );
 
-IMPL_APPROX("UnrealScript native: executes console command via Engine->Exec")
+IMPL_MATCH("Engine.dll", 0x125720)
 void AActor::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConsoleCommand);
@@ -2286,7 +2286,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execConsoleCommand );
 
 /*-- Color math operators (called from UnrealScript) --------------------*/
 
-IMPL_APPROX("UnrealScript native: FColor * FLOAT clamped component multiply")
+IMPL_MATCH("Engine.dll", 0x12B7B0)
 void AActor::execMultiply_ColorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMultiply_ColorFloat);
@@ -2298,7 +2298,7 @@ void AActor::execMultiply_ColorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execMultiply_ColorFloat );
 
-IMPL_APPROX("UnrealScript native: FLOAT * FColor clamped component multiply")
+IMPL_MATCH("Engine.dll", 0x12B880)
 void AActor::execMultiply_FloatColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMultiply_FloatColor);
@@ -2310,7 +2310,7 @@ void AActor::execMultiply_FloatColor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execMultiply_FloatColor );
 
-IMPL_APPROX("UnrealScript native: FColor + FColor clamped component add")
+IMPL_MATCH("Engine.dll", 0x12B950)
 void AActor::execAdd_ColorColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAdd_ColorColor);
@@ -2322,7 +2322,7 @@ void AActor::execAdd_ColorColor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAdd_ColorColor );
 
-IMPL_APPROX("UnrealScript native: FColor - FColor clamped component subtract")
+IMPL_MATCH("Engine.dll", 0x12B9F0)
 void AActor::execSubtract_ColorColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSubtract_ColorColor);
@@ -2340,7 +2340,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSubtract_ColorColor );
 -----------------------------------------------------------------------------*/
 
 // Pending-state queries
-IMPL_APPROX("returns bDeleteMe flag")
+IMPL_MATCH("Engine.dll", 0x5BF0)
 INT AActor::IsPendingKill()
 {
 	return bDeleteMe;
@@ -2355,50 +2355,50 @@ INT AActor::IsPendingDelete()
 }
 
 // Brush type queries
-IMPL_APPROX("checks Brush ptr and IsA(ABrush)")
+IMPL_MATCH("Engine.dll", 0x14E20)
 INT AActor::IsBrush() const
 {
 	return Brush!=NULL && IsA(ABrush::StaticClass());
 }
 
-IMPL_APPROX("checks Brush ptr, IsA(ABrush), and bStatic")
+IMPL_MATCH("Engine.dll", 0x14E50)
 INT AActor::IsStaticBrush() const
 {
 	return Brush!=NULL && IsA(ABrush::StaticClass()) && bStatic;
 }
 
-IMPL_APPROX("checks Brush ptr, IsA(ABrush), and !bStatic")
+IMPL_MATCH("Engine.dll", 0x14EA0)
 INT AActor::IsMovingBrush() const
 {
 	return Brush!=NULL && IsA(ABrush::StaticClass()) && !bStatic;
 }
 
-IMPL_APPROX("checks IsA(AVolume)")
+IMPL_MATCH("Engine.dll", 0x14ED0)
 INT AActor::IsVolumeBrush() const
 {
 	return IsA(AVolume::StaticClass());
 }
 
-IMPL_APPROX("checks bCollideActors and IsA(AMover) or IsA(AKActor)")
+IMPL_MATCH("Engine.dll", 0x14F00)
 INT AActor::IsEncroacher() const
 {
 	return bCollideActors && (IsA(AMover::StaticClass()) || IsA(AKActor::StaticClass()));
 }
 
 // Editor / octree queries
-IMPL_APPROX("returns bHiddenEd || bHiddenEdGroup")
+IMPL_MATCH("Engine.dll", 0x57E0)
 INT AActor::IsHiddenEd()
 {
 	return bHiddenEd || bHiddenEdGroup;
 }
 
-IMPL_APPROX("checks OctreeNodes.Num() > 0")
+IMPL_MATCH("Engine.dll", 0x5C20)
 INT AActor::IsInOctree()
 {
 	return OctreeNodes.Num() > 0;
 }
 
-IMPL_APPROX("checks IsA(APawn) and APawn::m_bIsPlayer")
+IMPL_MATCH("Engine.dll", 0x14F90)
 UBOOL AActor::IsPlayer() const
 {
 	guardSlow(AActor::IsPlayer);
@@ -2409,19 +2409,19 @@ UBOOL AActor::IsPlayer() const
 }
 
 // Simple getters
-IMPL_APPROX("returns XLevel")
+IMPL_MATCH("Engine.dll", 0x14FF0)
 ULevel* AActor::GetLevel() const
 {
 	return XLevel;
 }
 
-IMPL_APPROX("returns this")
+IMPL_MATCH("Engine.dll", 0x1A90)
 AActor* AActor::GetHitActor()
 {
 	return (AActor*)this;
 }
 
-IMPL_APPROX("walks Owner chain to root")
+IMPL_MATCH("Engine.dll", 0x14F40)
 AActor* AActor::GetTopOwner()
 {
 	AActor* Top;
@@ -2429,13 +2429,13 @@ AActor* AActor::GetTopOwner()
 	return Top;
 }
 
-IMPL_APPROX("returns FVector(CollisionRadius, CollisionRadius, CollisionHeight)")
+IMPL_MATCH("Engine.dll", 0x5BC0)
 FVector AActor::GetCylinderExtent() const
 {
 	return FVector(CollisionRadius, CollisionRadius, CollisionHeight);
 }
 
-IMPL_APPROX("walks ambient lighting relay chain via raw offsets 0xA8 and 0x15C")
+IMPL_MATCH("Engine.dll", 0x5C40)
 AActor* AActor::GetAmbientLightingActor()
 {
 	// Retail: 27b. Follows the ambient lighting relay chain via this+0x15C
@@ -2450,26 +2450,26 @@ AActor* AActor::GetAmbientLightingActor()
 	return actor;
 }
 
-IMPL_APPROX("returns Rotation")
+IMPL_MATCH("Engine.dll", 0x15000)
 FRotator AActor::GetViewRotation()
 {
 	return Rotation;
 }
 
-IMPL_APPROX("returns this")
+IMPL_MATCH("Engine.dll", 0x125560)
 AActor* AActor::GetProjectorBase()
 {
 	return (AActor*)this;
 }
 
-IMPL_APPROX("retail 3-byte function; base AActor always returns NULL")
+IMPL_EMPTY("Ghidra VA 0x10414310 (RVA 0x114310) confirms retail body is trivial (3 bytes) — null return")
 APawn* AActor::GetPawnOrColBoxOwner() const
 {
 	// Retail (3b): return NULL
 	return NULL;
 }
 
-IMPL_APPROX("retail 3-byte function; base AActor always returns NULL")
+IMPL_EMPTY("Ghidra VA 0x10414310 (RVA 0x114310) confirms retail body is trivial (3 bytes) — null return")
 APawn* AActor::GetPlayerPawn() const
 {
 	// Retail (3b): return NULL (no IsA check in retail)
@@ -2493,7 +2493,7 @@ UPrimitive* AActor::GetPrimitive()
 }
 
 // Simple setters
-IMPL_APPROX("assigns Owner field")
+IMPL_MATCH("Engine.dll", 0x78E40)
 void AActor::SetOwner( AActor* NewOwner )
 {
 	guard(AActor::SetOwner);
@@ -2501,7 +2501,7 @@ void AActor::SetOwner( AActor* NewOwner )
 	unguard;
 }
 
-IMPL_APPROX("assigns DrawScale field")
+IMPL_MATCH("Engine.dll", 0x78740)
 void AActor::SetDrawScale( FLOAT NewScale )
 {
 	guard(AActor::SetDrawScale);
@@ -2509,7 +2509,7 @@ void AActor::SetDrawScale( FLOAT NewScale )
 	unguard;
 }
 
-IMPL_APPROX("assigns DrawScale3D field")
+IMPL_MATCH("Engine.dll", 0x78A60)
 void AActor::SetDrawScale3D( FVector NewScale3D )
 {
 	guard(AActor::SetDrawScale3D);
@@ -2517,7 +2517,7 @@ void AActor::SetDrawScale3D( FVector NewScale3D )
 	unguard;
 }
 
-IMPL_APPROX("assigns DrawType field")
+IMPL_MATCH("Engine.dll", 0x78990)
 void AActor::SetDrawType( EDrawType NewDrawType )
 {
 	guard(AActor::SetDrawType);
@@ -2525,7 +2525,7 @@ void AActor::SetDrawType( EDrawType NewDrawType )
 	unguard;
 }
 
-IMPL_APPROX("assigns StaticMesh field")
+IMPL_MATCH("Engine.dll", 0x78810)
 void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 {
 	guard(AActor::SetStaticMesh);
@@ -2533,7 +2533,7 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 	unguard;
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::SetGameType( FString GameType )
 {
     // STUB: too complex (>150 lines in Ghidra)
@@ -2545,7 +2545,7 @@ void AActor::SetGameType( FString GameType )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Divergence: TArray field at 0x210 identity-pending; GC-tick skipped")
+IMPL_DIVERGE("Divergence: TArray field at 0x210 identity-pending; GC-tick skipped")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
@@ -2561,7 +2561,7 @@ void AActor::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::PostLoad")
+IMPL_MATCH("Engine.dll", 0x7A860)
 void AActor::PostLoad()
 {
 	guard(AActor::PostLoad);
@@ -2569,7 +2569,7 @@ void AActor::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::Destroy")
+IMPL_MATCH("Engine.dll", 0x7A6F0)
 void AActor::Destroy()
 {
 	guard(AActor::Destroy);
@@ -2577,7 +2577,7 @@ void AActor::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::PostEditChange")
+IMPL_MATCH("Engine.dll", 0x7BF60)
 void AActor::PostEditChange()
 {
 	guard(AActor::PostEditChange);
@@ -2585,7 +2585,7 @@ void AActor::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::InitExecution")
+IMPL_MATCH("Engine.dll", 0x1255C0)
 void AActor::InitExecution()
 {
 	guard(AActor::InitExecution);
@@ -2593,7 +2593,7 @@ void AActor::InitExecution()
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::ProcessEvent")
+IMPL_MATCH("Engine.dll", 0x70C00)
 void AActor::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 {
 	guard(AActor::ProcessEvent);
@@ -2601,7 +2601,7 @@ void AActor::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::ProcessState")
+IMPL_MATCH("Engine.dll", 0x125070)
 void AActor::ProcessState( FLOAT DeltaSeconds )
 {
 	guard(AActor::ProcessState);
@@ -2609,7 +2609,7 @@ void AActor::ProcessState( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("delegates to UObject::ProcessRemoteFunction")
+IMPL_MATCH("Engine.dll", 0x12DD20)
 INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessRemoteFunction);
@@ -2617,7 +2617,7 @@ INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Sta
 	unguard;
 }
 
-IMPL_APPROX("Demo recording support — no-op for this reconstruction")
+IMPL_DIVERGE("Demo recording support — no-op for this reconstruction")
 void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessDemoRecFunction);
@@ -2635,7 +2635,7 @@ void AActor::NetDirty( UProperty* Property )
 	*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000u;  // set bNetDirty (bit 30 of bitfield at +0xA0)
 }
 
-IMPL_APPROX("DIVERGENCE: base AActor returns Ptr; optimized rep lists are subclass-only")
+IMPL_DIVERGE("DIVERGENCE: base AActor returns Ptr; optimized rep lists are subclass-only")
 INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AActor::GetOptimizedRepList);
@@ -2664,7 +2664,7 @@ FLOAT AActor::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 	unguard;
 }
 
-IMPL_APPROX("returns bAlwaysRelevant || Owner==Viewer")
+IMPL_MATCH("Engine.dll", 0xC4010)
 INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(AActor::IsNetRelevantFor);
@@ -2672,19 +2672,19 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 	unguard;
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::PreNetReceive()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::PostNetReceive()
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::PostNetReceiveLocation()
 {
     // STUB: too complex (>150 lines in Ghidra)
@@ -2699,7 +2699,7 @@ INT AActor::PlayerControlled()
 	unguard;
 }
 
-IMPL_APPROX("collision blocking logic for brushes, world, and actors")
+IMPL_MATCH("Engine.dll", 0x78EF0)
 INT AActor::IsBlockedBy( const AActor* Other ) const
 {
 	guardSlow(AActor::IsBlockedBy);
@@ -2741,7 +2741,7 @@ UBOOL AActor::IsOverlapping( AActor* Other, FCheckResult* Hit )
 	unguard;
 }
 
-IMPL_APPROX("returns true if any collision flag is set")
+IMPL_MATCH("Engine.dll", 0x712D0)
 INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
 	guard(AActor::ShouldTrace);
@@ -2757,19 +2757,19 @@ void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgn
 	unguard;
 }
 
-IMPL_APPROX("builds local coordinate frame via GMath.UnitCoords")
+IMPL_MATCH("Engine.dll", 0x5820)
 FCoords AActor::ToLocal() const
 {
 	return GMath.UnitCoords / Rotation / Location;
 }
 
-IMPL_APPROX("builds world coordinate frame via GMath.UnitCoords")
+IMPL_MATCH("Engine.dll", 0x5860)
 FCoords AActor::ToWorld() const
 {
 	return GMath.UnitCoords * Location * Rotation;
 }
 
-IMPL_APPROX("builds scale-rotation-translation matrix; Ghidra-verified layout")
+IMPL_MATCH("Engine.dll", 0x58A0)
 FMatrix AActor::LocalToWorld() const
 {
 	guard(AActor::LocalToWorld);
@@ -2798,7 +2798,7 @@ FMatrix AActor::LocalToWorld() const
 	unguard;
 }
 
-IMPL_APPROX("builds inverse scale-rotation-translation matrix")
+IMPL_MATCH("Engine.dll", 0x192F0)
 FMatrix AActor::WorldToLocal() const
 {
 	guard(AActor::WorldToLocal);
@@ -2856,7 +2856,7 @@ INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
 	unguard;
 }
 
-IMPL_APPROX("advances timers then runs physics")
+IMPL_MATCH("Engine.dll", 0xC35C0)
 void AActor::TickAuthoritative( FLOAT DeltaTime )
 {
 	guard(AActor::TickAuthoritative);
@@ -2866,7 +2866,7 @@ void AActor::TickAuthoritative( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("retail tail-call to TickAuthoritative")
+IMPL_MATCH("Engine.dll", 0xC33F0)
 void AActor::TickSimulated( FLOAT DeltaTime )
 {
 	// Retail Engine.dll vtable[61]: mov eax,[ecx]; jmp [eax+0xF0]
@@ -2880,7 +2880,7 @@ void AActor::TickSpecial( FLOAT DeltaTime )
 	// Retail Engine.dll: ret 4 (truly empty, no SEH frame)
 }
 
-IMPL_APPROX("returns 0 if m_bSkipTick, else 1")
+IMPL_MATCH("Engine.dll", 0x71790)
 INT AActor::TickThisFrame( FLOAT DeltaTime )
 {
 	guard(AActor::TickThisFrame);
@@ -2890,7 +2890,7 @@ INT AActor::TickThisFrame( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("advances TimerCounter and fires eventTimer when rate reached")
+IMPL_MATCH("Engine.dll", 0xC3F60)
 void AActor::UpdateTimers( FLOAT DeltaSeconds )
 {
 	guard(AActor::UpdateTimers);
@@ -2912,7 +2912,7 @@ void AActor::UpdateTimers( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Divergence: retail uses FMemStack frame-arena allocator; we use appMalloc")
+IMPL_DIVERGE("Divergence: retail uses FMemStack frame-arena allocator; we use appMalloc")
 INT AActor::CheckOwnerUpdated()
 {
 	guard(AActor::CheckOwnerUpdated);
@@ -3000,7 +3000,7 @@ void AActor::Spawned()
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_APPROX("returns Skins(Index) if valid, else Texture")
+IMPL_MATCH("Engine.dll", 0x77D80)
 UMaterial* AActor::GetSkin( INT Index )
 {
 	guard(AActor::GetSkin);
@@ -3010,7 +3010,7 @@ UMaterial* AActor::GetSkin( INT Index )
 	unguard;
 }
 
-IMPL_APPROX("fires eventAnimEnd on channel")
+IMPL_MATCH("Engine.dll", 0x77D30)
 void AActor::NotifyAnimEnd( INT Channel )
 {
 	guard(AActor::NotifyAnimEnd);
@@ -3085,7 +3085,7 @@ INT AActor::IsAnimating( INT Channel ) const
 	return MeshInstance ? MeshInstance->AnimGetNotifyCount( reinterpret_cast<void*>(Channel) ) : 0;
 }
 
-IMPL_APPROX("drives MeshInstance->PlayAnim through GetInstance")
+IMPL_MATCH("Engine.dll", 0x120C60)
 void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bOverride, INT bRestart )
 {
 	guard(AActor::PlayAnim);
@@ -3191,7 +3191,7 @@ void AActor::AnimBlendParams( INT Channel, FLOAT BlendAlpha, FLOAT InTime, FLOAT
 	unguard;
 }
 
-IMPL_APPROX("adds to Touching arrays and fires eventTouch on both actors")
+IMPL_MATCH("Engine.dll", 0x7AAC0)
 void AActor::BeginTouch( AActor* Other )
 {
 	guard(AActor::BeginTouch);
@@ -3212,7 +3212,7 @@ void AActor::BeginTouch( AActor* Other )
 	unguard;
 }
 
-IMPL_APPROX("removes from Touching arrays and fires eventUnTouch")
+IMPL_MATCH("Engine.dll", 0x7C030)
 void AActor::EndTouch( AActor* Other, INT bNoNotifySelf )
 {
 	guard(AActor::EndTouch);
@@ -3227,7 +3227,7 @@ void AActor::EndTouch( AActor* Other, INT bNoNotifySelf )
 	unguard;
 }
 
-IMPL_APPROX("fires eventBump")
+IMPL_MATCH("Engine.dll", 0xB73D0)
 void AActor::NotifyBump( AActor* Other )
 {
 	guard(AActor::NotifyBump);
@@ -3235,7 +3235,7 @@ void AActor::NotifyBump( AActor* Other )
 	unguard;
 }
 
-IMPL_APPROX("updates Attached lists and fires eventBaseChange if requested")
+IMPL_MATCH("Engine.dll", 0x7C1F0)
 void AActor::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(AActor::SetBase);
@@ -3297,19 +3297,19 @@ INT AActor::DetachFromBone( AActor* Attachment )
 	unguard;
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::AttachProjector( AProjector* Proj )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::DetachProjector( AProjector* Proj )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_APPROX("sets bCollideActors, bBlockActors, bBlockPlayers")
+IMPL_MATCH("Engine.dll", 0x7CD20)
 void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewBlockPlayers )
 {
 	guard(AActor::SetCollision);
@@ -3319,7 +3319,7 @@ void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewB
 	unguard;
 }
 
-IMPL_APPROX("sets CollisionRadius and CollisionHeight")
+IMPL_MATCH("Engine.dll", 0x78660)
 void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 {
 	guard(AActor::SetCollisionSize);
@@ -3328,7 +3328,7 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: retail rebuilds static mesh batches; render data rebuilt implicitly at draw time")
+IMPL_DIVERGE("DIVERGENCE: retail rebuilds static mesh batches; render data rebuilt implicitly at draw time")
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);
@@ -3337,26 +3337,26 @@ void AActor::UpdateRenderData()
 	unguard;
 }
 
-IMPL_APPROX("retail 19-byte function: 25.0 * LightRadius")
+IMPL_MATCH("Engine.dll", 0x5800)
 FLOAT AActor::WorldLightRadius() const
 {
 	// Retail (19b): LightRadius * 1.0 * 25.0
 	return 25.f * LightRadius;
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_APPROX("UModel::PointRegion stubbed; raw offset used for ULevel::Model at +0x90")
+IMPL_MATCH("Engine.dll", 0xBD2A0)
 void AActor::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(AActor::SetZone);
@@ -3413,7 +3413,7 @@ void AActor::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_APPROX("base AActor defers volume storage to SetZone; NavigationPoint overrides")
+IMPL_MATCH("Engine.dll", 0xBB5A0)
 void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 {
 	guard(AActor::SetVolumes);
@@ -3423,7 +3423,7 @@ void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 	unguard;
 }
 
-IMPL_APPROX("stub pending volume system finalisation")
+IMPL_DIVERGE("stub pending volume system finalisation")
 void AActor::SetVolumes()
 {
 	guard(AActor::SetVolumes_void);
@@ -3433,7 +3433,7 @@ void AActor::SetVolumes()
 	unguard;
 }
 
-IMPL_APPROX("assigns Physics field")
+IMPL_MATCH("Engine.dll", 0xF16B0)
 void AActor::setPhysics( BYTE NewPhysics, AActor* NewFloor, FVector NewFloorV )
 {
 	guard(AActor::setPhysics);
@@ -3441,7 +3441,7 @@ void AActor::setPhysics( BYTE NewPhysics, AActor* NewFloor, FVector NewFloorV )
 	unguard;
 }
 
-IMPL_APPROX("dispatches to physics mode handler and runs rotation and pending-touch logic")
+IMPL_MATCH("Engine.dll", 0xF3670)
 void AActor::performPhysics( FLOAT DeltaSeconds )
 {
 	guard(AActor::performPhysics);
@@ -3470,7 +3470,7 @@ void AActor::performPhysics( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("fires eventHitWall")
+IMPL_MATCH("Engine.dll", 0xF19B0)
 void AActor::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(AActor::processHitWall);
@@ -3478,7 +3478,7 @@ void AActor::processHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_APPROX("fires eventLanded")
+IMPL_MATCH("Engine.dll", 0xF1DD0)
 void AActor::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingTime, INT Iterations )
 {
 	guard(AActor::processLanded);
@@ -3486,7 +3486,7 @@ void AActor::processLanded( FVector HitNormal, AActor* HitActor, FLOAT Remaining
 	unguard;
 }
 
-IMPL_APPROX("falling physics: gravity integration with zone fields, landing and wall-slide handling")
+IMPL_MATCH("Engine.dll", 0xF21C0)
 void AActor::physFalling( FLOAT DeltaTime, INT Iterations )
 {
 	guard(AActor::physFalling);
@@ -3561,7 +3561,7 @@ void AActor::physFalling( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_APPROX("projectile physics: fluid drag, acceleration, bounce handling")
+IMPL_MATCH("Engine.dll", 0xF2E80)
 void AActor::physProjectile( FLOAT DeltaTime, INT Iterations )
 {
 	guard(AActor::physProjectile);
@@ -3608,7 +3608,7 @@ void AActor::physProjectile( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_APPROX("trailer physics: snaps to owner position or offset")
+IMPL_MATCH("Engine.dll", 0xF11D0)
 void AActor::physTrailer( FLOAT DeltaTime )
 {
 	guard(AActor::physTrailer);
@@ -3635,7 +3635,7 @@ void AActor::physTrailer( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("root motion physics: drives actor from skeletal mesh root bone delta")
+IMPL_MATCH("Engine.dll", 0xF31F0)
 void AActor::physRootMotion( FLOAT DeltaTime )
 {
 	guard(AActor::physRootMotion);
@@ -3673,7 +3673,7 @@ void AActor::physRootMotion( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("incremental rotation toward DesiredRotation at RotationRate")
+IMPL_MATCH("Engine.dll", 0xED150)
 void AActor::physicsRotation( FLOAT DeltaTime )
 {
 	guard(AActor::physicsRotation);
@@ -3703,7 +3703,7 @@ void AActor::physicsRotation( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("base implementation returns NewRotation unchanged")
+IMPL_MATCH("Engine.dll", 0xEC7B0)
 FRotator AActor::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 {
 	guard(AActor::FindSlopeRotation);
@@ -3711,7 +3711,7 @@ FRotator AActor::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 	unguard;
 }
 
-IMPL_APPROX("delegates to processHitWall")
+IMPL_MATCH("Engine.dll", 0xF15C0)
 void AActor::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(AActor::SmoothHitWall);
@@ -3777,7 +3777,7 @@ void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckR
 	unguard;
 }
 
-IMPL_APPROX("moves actor and slides along walls using two-wall corner adjustment")
+IMPL_MATCH("Engine.dll", 0xECB30)
 INT AActor::moveSmooth( FVector Delta )
 {
 	guard(AActor::moveSmooth);
@@ -3803,7 +3803,7 @@ INT AActor::moveSmooth( FVector Delta )
 	unguard;
 }
 
-IMPL_APPROX("advances a rotation axis toward target at fixed rate with 16-bit wrap")
+IMPL_MATCH("Engine.dll", 0xED040)
 INT AActor::fixedTurn( INT Current, INT Desired, INT DeltaRate )
 {
 	guard(AActor::fixedTurn);
@@ -3822,7 +3822,7 @@ INT AActor::fixedTurn( INT Current, INT Desired, INT DeltaRate )
 	unguard;
 }
 
-IMPL_APPROX("adjusts movement delta for two-wall corner collision")
+IMPL_MATCH("Engine.dll", 0x5C60)
 void AActor::TwoWallAdjust( FVector& DesiredDir, FVector& Delta, FVector& HitNormal, FVector& OldHitNormal, FLOAT HitTime )
 {
 	guard(AActor::TwoWallAdjust);
@@ -3880,7 +3880,7 @@ void AActor::PutOnGround()
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: accesses MCD model via raw offset +0x48 into UKarmaParamsCollision confirmed by Ghidra")
+IMPL_DIVERGE("DIVERGENCE: accesses MCD model via raw offset +0x48 into UKarmaParamsCollision confirmed by Ghidra")
 struct _McdModel* AActor::getKModel() const
 {
     if( !KParams ) return NULL;
@@ -3952,7 +3952,7 @@ INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation
 	unguard;
 }
 
-IMPL_APPROX("returns this if bWorldGeometry, else NULL")
+IMPL_MATCH("Engine.dll", 0xD5AD0)
 AActor* AActor::AssociatedLevelGeometry()
 {
 	// Retail Engine.dll vtable[86]: returns this if bWorldGeometry is set, else NULL.
@@ -3960,7 +3960,7 @@ AActor* AActor::AssociatedLevelGeometry()
 	return bWorldGeometry ? this : NULL;
 }
 
-IMPL_APPROX("returns 1 only if bWorldGeometry and Other==this")
+IMPL_MATCH("Engine.dll", 0xD5B00)
 INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 {
 	// Retail Engine.dll: test bWorldGeometry flag; returns 1 only if this actor
@@ -3968,7 +3968,7 @@ INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 	return (bWorldGeometry && Other == this) ? 1 : 0;
 }
 
-IMPL_APPROX("DIVERGENCE: base AActor no-op; APawn/AR6RagDoll override")
+IMPL_DIVERGE("DIVERGENCE: base AActor no-op; APawn/AR6RagDoll override")
 void AActor::KFreezeRagdoll()
 {
 	guard(AActor::KFreezeRagdoll);
@@ -4004,7 +4004,7 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 	unguard;
 }
 
-IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::CheckForErrors()
 {
     // STUB: too complex (complex, Ghidra)
@@ -4018,7 +4018,7 @@ void AActor::AddMyMarker( AActor* S )
 	unguard;
 }
 
-IMPL_APPROX("walks Owner chain checking for TestOwner")
+IMPL_MATCH("Engine.dll", 0x14F10)
 UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const
 {
 	guardSlow(AActor::IsOwnedBy);
@@ -4029,7 +4029,7 @@ UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const
 	unguardSlow;
 }
 
-IMPL_APPROX("walks Base chain checking for Other")
+IMPL_MATCH("Engine.dll", 0x14FC0)
 UBOOL AActor::IsBasedOn( const AActor* Other ) const
 {
 	guard(AActor::IsBasedOn);
@@ -4040,19 +4040,19 @@ UBOOL AActor::IsBasedOn( const AActor* Other ) const
 	unguard;
 }
 
-IMPL_APPROX("checks Region.Zone against TestZone")
+IMPL_MATCH("Engine.dll", 0x14F60)
 UBOOL AActor::IsInZone( const AZoneInfo* TestZone ) const
 {
 	return Region.Zone!=Level ? Region.Zone==TestZone : 1;
 }
 
-IMPL_APPROX("returns clamped LifeSpan fraction")
+IMPL_MATCH("Engine.dll", 0x195F0)
 FLOAT AActor::LifeFraction()
 {
 	return Clamp( 1.f - LifeSpan / GetClass()->GetDefaultActor()->LifeSpan, 0.f, 1.f );
 }
 
-IMPL_APPROX("checks Base chain and JoinedTag equality")
+IMPL_MATCH("Engine.dll", 0x710D0)
 INT AActor::IsJoinedTo( const AActor* Other ) const
 {
     for( const AActor* A = this; A; A = A->Base )
@@ -4065,7 +4065,7 @@ INT AActor::IsJoinedTo( const AActor* Other ) const
     return 0;
 }
 
-IMPL_APPROX("Needs APlayerController field layout from Ghidra for full implementation")
+IMPL_DIVERGE("Needs APlayerController field layout from Ghidra for full implementation")
 INT AActor::TestCanSeeMe( APlayerController* Viewer )
 {
     guard(AActor::TestCanSeeMe);
@@ -4086,7 +4086,7 @@ void AActor::UpdateRelativeRotation()
 	unguard;
 }
 
-IMPL_APPROX("iterates controller list and fires eventHearNoise on AI controllers that CanHear")
+IMPL_MATCH("Engine.dll", 0x8EB20)
 void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType PawnType, ESoundType SoundType )
 {
 	guard(AActor::CheckNoiseHearing);
@@ -4108,7 +4108,7 @@ void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType 
 	unguard;
 }
 
-IMPL_APPROX("single-line world trace returning hit actor and material")
+IMPL_MATCH("Engine.dll", 0x1294E0)
 AActor* AActor::Trace( FVector& HitLocation, FVector& HitNormal, FVector& TraceEnd, FVector& TraceStart, INT bTraceActors, FVector& Extent, UMaterial** HitMaterial )
 {
 	guard(AActor::Trace);
@@ -4125,7 +4125,7 @@ AActor* AActor::Trace( FVector& HitLocation, FVector& HitNormal, FVector& TraceE
 	unguard;
 }
 
-IMPL_APPROX("returns Buoyancy and zero fluid friction")
+IMPL_MATCH("Engine.dll", 0xF02E0)
 void AActor::GetNetBuoyancy( FLOAT& NetBuoyancy, FLOAT& NetFluidFriction )
 {
 	guard(AActor::GetNetBuoyancy);
@@ -4134,7 +4134,7 @@ void AActor::GetNetBuoyancy( FLOAT& NetBuoyancy, FLOAT& NetFluidFriction )
 	unguard;
 }
 
-IMPL_APPROX("calls eventDestroyed if actor is alive")
+IMPL_MATCH("Engine.dll", 0x79FD0)
 void AActor::SafeDestroyActor( AActor* A )
 {
 	guard(AActor::SafeDestroyActor);
@@ -4143,7 +4143,7 @@ void AActor::SafeDestroyActor( AActor* A )
 	unguard;
 }
 
-IMPL_APPROX("copies all R6 game-mode availability fields from Src")
+IMPL_MATCH("Engine.dll", 0x7B430)
 void AActor::CopyR6Availability( AActor* Src )
 {
 	guard(AActor::CopyR6Availability);
@@ -4181,7 +4181,7 @@ void AActor::CopyR6Availability( AActor* Src )
 	unguard;
 }
 
-IMPL_APPROX("formats 16-byte binary GUID as UUID text")
+IMPL_MATCH("Engine.dll", 0x123270)
 FString AActor::GlobalIDToString( BYTE* const Bytes )
 {
 	guard(AActor::GlobalIDToString);
@@ -4197,7 +4197,7 @@ FString AActor::GlobalIDToString( BYTE* const Bytes )
 	unguard;
 }
 
-IMPL_APPROX("formats integer seconds as M:SS or MM:SS")
+IMPL_MATCH("Engine.dll", 0x123690)
 void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FString& Result )
 {
 	guard(AActor::SecondsToString);
@@ -4210,13 +4210,13 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 	unguard;
 }
 
-IMPL_APPROX("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
 void AActor::SaveServerOptions( FString FileName )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_APPROX("base implementation returns NULL; subclasses override")
+IMPL_MATCH("Engine.dll", 0x7AED0)
 BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
 {
 	guard(AActor::GetR6AvailabilityPtr);
@@ -4224,7 +4224,7 @@ BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
 	unguard;
 }
 
-IMPL_APPROX("returns 1 when m_bUseR6Availability is false")
+IMPL_MATCH("Engine.dll", 0x7B320)
 INT AActor::IsAvailableInGameType( FString GameType )
 {
 	guard(AActor::IsAvailableInGameType);
@@ -4234,7 +4234,7 @@ INT AActor::IsAvailableInGameType( FString GameType )
 	unguard;
 }
 
-IMPL_APPROX("parses Ip= command-line parameter")
+IMPL_MATCH("Engine.dll", 0x123B60)
 INT AActor::NativeNonUbiMatchMaking()
 {
     guard(AActor::NativeNonUbiMatchMaking);
@@ -4242,7 +4242,7 @@ INT AActor::NativeNonUbiMatchMaking()
     unguard;
 }
 
-IMPL_APPROX("parses Host command-line parameter")
+IMPL_MATCH("Engine.dll", 0x123A40)
 INT AActor::NativeNonUbiMatchMakingHost()
 {
     guard(AActor::NativeNonUbiMatchMakingHost);
@@ -4259,7 +4259,7 @@ INT AActor::NativeStartedByGSClient()
 	unguard;
 }
 
-IMPL_APPROX("inserts debug line into GDbgLine ring buffer")
+IMPL_DIVERGE("inserts debug line into GDbgLine ring buffer")
 void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
 {
     if( ++GDbgLineIndex > 99 )
@@ -4269,19 +4269,19 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
     GDbgLine[ GDbgLineIndex ].Color = Color;
 }
 
-IMPL_APPROX("Uses binary-specific global cache — address not stable across builds")
+IMPL_DIVERGE("Uses binary-specific global cache — address not stable across builds")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
     // STUB: too complex (uses binary-specific global caching)
 }
 
-IMPL_APPROX("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_APPROX("clears display flag on debug vector entry")
+IMPL_DIVERGE("clears display flag on debug vector entry")
 void AActor::DbgVectorReset( INT VectorIndex )
 {
     if( VectorIndex < m_dbgVectorInfo.Num() )
@@ -4299,9 +4299,9 @@ void AActor::DbgVectorReset( INT VectorIndex )
 // ABrush
 // =============================================================================
 
-IMPL_APPROX("delegates to AActor::PostLoad")
+IMPL_MATCH("Engine.dll", 0x7AE60)
 void ABrush::PostLoad() { Super::PostLoad(); }
-IMPL_APPROX("delegates to AActor::PostEditChange")
+IMPL_MATCH("Engine.dll", 0x77B0)
 void ABrush::PostEditChange() { Super::PostEditChange(); }
 IMPL_MATCH("Engine.dll", 0x7B40)
 FCoords ABrush::ToLocal() const
@@ -4347,11 +4347,11 @@ UPrimitive* ABrush::GetPrimitive()
 	if (!p) return NULL;
 	return *(UPrimitive**)((BYTE*)p + 0x40);
 }
-IMPL_APPROX("delegates to AActor::CheckForErrors")
+IMPL_MATCH("Engine.dll", 0x98180)
 void ABrush::CheckForErrors() { Super::CheckForErrors(); }
 IMPL_EMPTY("Retail body is also empty — confirmed no-op")
 void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
-IMPL_APPROX("initialises position, rotation, scales, and PrePivot to identity/zero via raw offsets")
+IMPL_MATCH("Engine.dll", 0x71110)
 void ABrush::InitPosRotScale()
 {
     guard(ABrush::InitPosRotScale);
@@ -4364,9 +4364,9 @@ void ABrush::InitPosRotScale()
     *(FVector*)((BYTE*)this + 0x2c8) = FVector(0,0,0);
     unguard;
 }
-IMPL_APPROX("Returns 0.0f — full float calculation needs Ghidra analysis")
+IMPL_DIVERGE("Returns 0.0f — full float calculation needs Ghidra analysis")
 FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
-IMPL_APPROX("Returns 0.0f — full float calculation needs Ghidra analysis")
+IMPL_DIVERGE("Returns 0.0f — full float calculation needs Ghidra analysis")
 FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
 IMPL_MATCH("Engine.dll", 0x77D0)
 FCoords ABrush::OldToLocal() const

@@ -20,7 +20,7 @@ static INT s_GSCreateUbiServer = 0;
 
 // --- UR6GameManager ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011db0)
 void UR6GameManager::ClientLeaveServer()
 {
 	// Clear bit 4 (mask 0x10) of the flags field at this+0x2C
@@ -36,7 +36,7 @@ void UR6GameManager::ClientLeaveServer()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011d10)
 void UR6GameManager::ConnectionInterrupted(INT bInterrupted)
 {
 	if (*(void**)((BYTE*)this + 0x30))
@@ -47,7 +47,7 @@ void UR6GameManager::ConnectionInterrupted(INT bInterrupted)
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10012080)
 void UR6GameManager::DoConsoleCommand(FString Cmd, UConsole* Console)
 {
 	// Ghidra: in_stack_00000010 = Console; iVar3 tracks the "active console/viewport"
@@ -108,75 +108,75 @@ found:
 		pMaster->Exec(*Cmd, *GWarn);  // fallback to GWarn if no output device found
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10012230)
 void UR6GameManager::GSClientManager(UConsole *)
 {
 	guard(UR6GameManager::GSClientManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10012b30)
 void UR6GameManager::GameServiceTick(UConsole *)
 {
 	guard(UR6GameManager::GameServiceTick);
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011e50)
 INT UR6GameManager::GetGSCreateUbiServer()
 {
 	return s_GSCreateUbiServer;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10011a00)
 void UR6GameManager::InitializeGSClient()
 {
 	guard(UR6GameManager::InitializeGSClient);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10011e90)
 void UR6GameManager::InitializeGameService(UConsole *)
 {
 	guard(UR6GameManager::InitializeGameService);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10012820)
 void UR6GameManager::LaunchListenSrv(FString, FString)
 {
 	guard(UR6GameManager::LaunchListenSrv);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10011f40)
 void UR6GameManager::MSClientManager(UConsole *)
 {
 	guard(UR6GameManager::MSClientManager);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10012180)
 void UR6GameManager::MinimizeAndPauseMusic(UConsole *)
 {
 	guard(UR6GameManager::MinimizeAndPauseMusic);
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011e40)
 void UR6GameManager::SetGSCreateUbiServer(INT Param)
 {
 	s_GSCreateUbiServer = Param;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100129a0)
 void UR6GameManager::StartJoinServer(FString, FString, INT)
 {
 	guard(UR6GameManager::StartJoinServer);
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011c00)
 INT UR6GameManager::StartLogInProcedure()
 {
 	if (*(void**)((BYTE*)this + 0x30))
@@ -199,7 +199,7 @@ INT UR6GameManager::StartLogInProcedure()
 	return 1;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011ad0)
 void UR6GameManager::StartPreJoinProcedure(INT bModServer)
 {
 	if (*(void**)((BYTE*)this + 0x30))
@@ -240,7 +240,7 @@ void UR6GameManager::StartPreJoinProcedure(INT bModServer)
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10011ab0)
 void UR6GameManager::UnInitialize()
 {
 	// Ghidra accesses GR6GameManager_exref (the singleton), which is == this

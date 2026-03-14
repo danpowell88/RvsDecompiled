@@ -7,21 +7,21 @@
 IMPLEMENT_CLASS(UeviLPatchService)
 
 // Stubs for unresolved patch service COM functions
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10035870)
 static void* FUN_10035870(void*) { return NULL; }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10035960)
 static void  FUN_10035960(void*, int) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x100358e0)
 static void  FUN_100358e0(void*, const TCHAR*) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10035af0)
 static void  FUN_10035af0(void*, const wchar_t*, const wchar_t*, const wchar_t*) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10035ad0)
 static void  FUN_10035ad0(void*) {}
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10035920)
 static DWORD FUN_10035920(void*) { return 5; }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10035930)
 static DWORD FUN_10035930(void*) { return 0; }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10004b40)
 static void  FUN_10004b40(void*) {}
 
 IMPLEMENT_FUNCTION(UeviLPatchService, -1, execAbortPatchService)
@@ -33,14 +33,14 @@ IMPLEMENT_FUNCTION(UeviLPatchService, -1, execStartPatch)
 
 // --- UeviLPatchService ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10005030)
 void UeviLPatchService::StartPatch()
 {
 	guard(UeviLPatchService::StartPatch);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10004dd0)
 void UeviLPatchService::execAbortPatchService(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execAbortPatchService);
@@ -48,7 +48,7 @@ void UeviLPatchService::execAbortPatchService(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x100046d0)
 void UeviLPatchService::execCanRunUpdateService(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execCanRunUpdateService);
@@ -56,7 +56,7 @@ void UeviLPatchService::execCanRunUpdateService(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10004310)
 void UeviLPatchService::execGetDownloadProgress(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execGetDownloadProgress);
@@ -64,7 +64,7 @@ void UeviLPatchService::execGetDownloadProgress(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x100045e0)
 void UeviLPatchService::execGetExitCause(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execGetExitCause);
@@ -72,7 +72,7 @@ void UeviLPatchService::execGetExitCause(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10004d30)
 void UeviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execGetState);
@@ -80,7 +80,7 @@ void UeviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10005120)
 void UeviLPatchService::execStartPatch(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execStartPatch);
@@ -94,14 +94,14 @@ static DWORD  PatchState         = 0;     // DAT_10091530
 static DWORD  DownloadProgress   = 0;     // DAT_10091534
 static void*  PatchServiceHandle = NULL;  // DAT_10091538
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6GameService.dll", 0x10004850)
 void UeviLPatchService::FinalDestroy()
 {
 	guard(UeviLPatchService::FinalDestroy);
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from Ghidra analysis; DAT addresses identified")
+IMPL_MATCH("R6GameService.dll", 0x10004b80)
 DWORD UeviLPatchService::GetPatchServiceState()
 {
 	guard(UeviLPatchService::GetPatchServiceState);

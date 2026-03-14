@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FStatGraphLine ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1032c410)
 FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 {
 	// Ghidra 0x2c410: no vtable; DWORD at +0; TArray<FLOAT> at +4; 2 DWORDs at +10; FString at +18; 4 DWORDs at +24..+30
@@ -26,7 +26,7 @@ FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1032c410 is 128 bytes, not fully reconstructed")
 FStatGraphLine::FStatGraphLine()
 {
 	// Initialize TArray<FLOAT> at +4 and FString at +18 to empty
@@ -34,7 +34,7 @@ FStatGraphLine::FStatGraphLine()
 	new ((BYTE*)this + 0x18) FString();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStatGraphLine::~FStatGraphLine not found in Ghidra export — cannot confirm VA")
 FStatGraphLine::~FStatGraphLine()
 {
 	// Destroy FString at +18 then TArray<FLOAT> at +4 (reverse order)
@@ -42,7 +42,7 @@ FStatGraphLine::~FStatGraphLine()
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStatGraphLine::operator= not found in Ghidra export — cannot confirm VA")
 FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 {
 	// Ghidra 0x21790: DWORD at +0, TArray<FLOAT> at +4 (FUN_1031f660=4-byte data points),
@@ -55,7 +55,7 @@ FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStatGraphLine::operator== not found in Ghidra export — cannot confirm VA")
 int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 {
 	// Ghidra 0x16930: pointer equality comparison only.
@@ -69,56 +69,56 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // ============================================================================
 
 // ??0FStatGraph@@QAE@ABV0@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103518f0 is 180 bytes, not fully reconstructed")
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStatGraph::~FStatGraph not found in Ghidra export — cannot confirm VA")
 FStatGraph::~FStatGraph() {}
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStatGraph::operator= not found in Ghidra export — cannot confirm VA")
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
 }
 
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445880 is 533 bytes, not fully reconstructed")
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
 
 // ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445e40 is 386 bytes, not fully reconstructed")
 void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {}
 
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445c30 is 219 bytes, not fully reconstructed")
 void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {}
 
 // ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445d40 is 206 bytes, not fully reconstructed")
 void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {}
 
 // ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10446000 is 1990 bytes, not fully reconstructed")
 void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 
 // ?Reset@FStatGraph@@QAEXXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10446800 is 95 bytes, not fully reconstructed")
 void FStatGraph::Reset() {}
 
 // ============================================================================
 // FStats
 // ============================================================================
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1033bdb0 is 346 bytes, not fully reconstructed")
 FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FStats::~FStats not found in Ghidra export — cannot confirm VA")
 FStats::~FStats() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044f1a0 is 595 bytes, not fully reconstructed")
 void FStats::UpdateString(FString&, INT) {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044f6e0 is 20219 bytes, not fully reconstructed")
 void FStats::Render(UViewport*, UEngine*) {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10454670)
 INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	FString StatName, FString DisplayName, EStatsUnit Unit)
 {
@@ -162,9 +162,9 @@ INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	pRec[2] = (INT)Unit;
 	return SlotIdx;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044f5d0 is 257 bytes, not fully reconstructed")
 void FStats::CalcMovingAverage(INT, DWORD) {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1044f430)
 void FStats::Clear()
 {
 	BYTE* Base = (BYTE*)this;
@@ -201,12 +201,12 @@ void FStats::Clear()
 // ============================================================================
 // FEngineStats
 // ============================================================================
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("FEngineStats::operator= not found in Ghidra export — cannot confirm VA")
 FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 {
 	appMemcpy(this, &Other, 99 * 4);
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10454940 is 6696 bytes, not fully reconstructed")
 void FEngineStats::Init() {}
