@@ -17,20 +17,35 @@
 CORE_API Native GNatives[EX_Max];
 NativeLookup GNativeLookupFuncs[32];
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1011BA40)
 BYTE CORE_API GRegisterNative( INT iNative, const Native& Func )
 {
-	GNatives[iNative] = Func;
+	static INT GNativesInitialized = 0;
+	if( !GNativesInitialized )
+	{
+		for( INT i=0; i<EX_Max; i++ )
+			GNatives[i] = &UObject::execUndefined;
+		GNativesInitialized = 1;
+	}
+	if( iNative != INDEX_NONE )
+	{
+		if( (iNative < 0) || (0x1000 < (DWORD)iNative) || GNatives[iNative] != &UObject::execUndefined )
+			GNativeDuplicate = iNative;
+		GNatives[iNative] = Func;
+	}
 	return 0;
 }
 
 static INT GRunawayCount = 0;
 static INT GRunawayLimit = 10000000;
+// GScriptCallDepth: script recursion depth counter (DAT_101cea7c in retail Core.dll).
+static INT GScriptCallDepth = 0;
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1011B2C0)
 CORE_API void GInitRunaway()
 {
-	GRunawayCount = 0;
+	GRunawayCount    = 0;
+	GScriptCallDepth = 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -3134,7 +3149,7 @@ void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 
 static const TCHAR* GCompressedStringPrefix = TEXT("R6C1:");
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3145,7 +3160,7 @@ static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 		OutBytes(i) = ToAnsi( Chars[i] );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 {
 	FString Out;
@@ -3157,7 +3172,7 @@ static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes, UBOOL Encode )
 {
 	FBufferReader Reader( InBytes );
@@ -3168,7 +3183,7 @@ static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BY
 		Codec.Decode( Reader, Writer );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecRLE Stage1;
@@ -3184,7 +3199,7 @@ static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutB
 	RunCodecStage( Stage5, Buffer4, OutBytes, 1 );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecHuffman Stage1;
@@ -3200,13 +3215,13 @@ static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutByt
 	RunCodecStage( Stage5, Buffer4, OutBytes, 0 );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static TCHAR EncodeHexNibble( BYTE Value )
 {
 	return Value < 10 ? TEXT('0') + Value : TEXT('A') + (Value - 10);
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static INT DecodeHexNibble( TCHAR Ch )
 {
 	if( Ch >= TEXT('0') && Ch <= TEXT('9') )
@@ -3218,7 +3233,7 @@ static INT DecodeHexNibble( TCHAR Ch )
 	return INDEX_NONE;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 {
 	const INT PrefixLen = appStrlen( GCompressedStringPrefix );
@@ -3236,7 +3251,7 @@ static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3712,7 +3727,7 @@ enum { MAX_SCRIPT_FILE_HANDLES = 64 };
 static FArchive* GScriptFileHandles[MAX_SCRIPT_FILE_HANDLES];
 static UBOOL GScriptFileHandlesInit = 0;
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static void InitFileHandles()
 {
 	if( !GScriptFileHandlesInit )
@@ -3722,7 +3737,7 @@ static void InitFileHandles()
 	}
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static INT AllocFileHandle( FArchive* Ar )
 {
 	InitFileHandles();
@@ -3738,7 +3753,7 @@ static INT AllocFileHandle( FArchive* Ar )
 	return -1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static FArchive* GetFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3747,7 +3762,7 @@ static FArchive* GetFileHandle( INT Handle )
 	return NULL;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
 static void FreeFileHandle( INT Handle )
 {
 	InitFileHandles();

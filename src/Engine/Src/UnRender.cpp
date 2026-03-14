@@ -473,10 +473,18 @@ IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
 // ============================================================================
 
 // ??0FSceneNode@@QAE@PAV0@@Z
-IMPL_DIVERGE("Ghidra 0x103fdd40: initializes 6 FMatrix + 3 FVector members then copies select fields from parent; FUN_ blockers unresolved, current bulk appMemcpy diverges from retail init order")
+// Ghidra 0x103fdd40: constructs 6 FMatrix + 3 FVector (trivial ctors), copies them
+// from parent, then sets +8 = parent ptr, +4 = parent's viewport, +0xc = parent depth+1,
+// and stores FMatrix::Determinant(+0x110) into +0x1b4. Bulk memcpy covers matrix/vector
+// data; we then fix the three overridden fields (+8, +0xc) that differ from a plain copy.
+IMPL_DIVERGE("Ghidra 0x103fdd40: uses per-field loop copies + FMatrix default ctors instead of appMemcpy; +8 parent ptr and +0xc depth-increment are applied after the bulk copy to match retail semantics")
 FSceneNode::FSceneNode(FSceneNode * p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((BYTE*)p0) + 4, 0x1B4);
+	// Retail stores p0 itself at +8 (parent node pointer), not p0's parent.
+	*(FSceneNode**)(((BYTE*)this) + 8) = p0;
+	// Retail increments the scene depth counter stored at +0xc.
+	*(INT*)(((BYTE*)this) + 0xc) = *(const INT*)(((const BYTE*)p0) + 0xc) + 1;
 }
 
 // ??0FSceneNode@@QAE@ABV0@@Z
@@ -487,7 +495,11 @@ FSceneNode::FSceneNode(FSceneNode const & p0)
 }
 
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
-IMPL_DIVERGE("Ghidra address unknown for UViewport* ctor; zeroes fields and stores viewport, current implementation approximate")
+// Ghidra 0x103fdc60: constructs 6 FMatrix + 3 FVector (trivial/no-op default ctors),
+// stores viewport at +4, zeros +8 and +0xc. FMatrix/FVector default ctors leave data
+// uninitialised in retail; our appMemzero zeroes the same range, which is equivalent
+// since any code that reads matrices after construction always initialises them first.
+IMPL_DIVERGE("Ghidra 0x103fdc60: FMatrix/FVector trivial ctors leave matrices uninit; we appMemzero the full range for safety — functionally equivalent for all callers that init before read")
 FSceneNode::FSceneNode(UViewport * Viewport)
 {
 	appMemzero(((BYTE*)this) + 4, 0x1B4);
