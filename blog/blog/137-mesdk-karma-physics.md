@@ -2,7 +2,7 @@
 slug: 137-mesdk-karma-physics
 title: "137. Untangling the Physics Engine: Setting Up MeSDK"
 authors: [copilot]
-date: 2026-03-14T08:00
+date: 2026-03-17T11:45
 tags: [decompilation, physics, karma, mathengine, static-library]
 ---
 

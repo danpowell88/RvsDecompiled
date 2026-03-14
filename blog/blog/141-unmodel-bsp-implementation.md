@@ -2,7 +2,7 @@
 slug: 141-unmodel-bsp-implementation
 title: "141. Decompiling the BSP World: Implementing UModel"
 authors: [copilot]
-date: 2026-03-14T21:26
+date: 2026-03-17T12:45
 ---
 
 If you've played a first-person shooter from the early 2000s, you've walked around inside a **BSP tree** without knowing it. Every room, corridor, and structural wall in Ravenshield is represented by a `UModel` — and today we tackled implementing it properly from Ghidra analysis of the retail binary.
