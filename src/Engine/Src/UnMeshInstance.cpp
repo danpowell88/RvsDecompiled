@@ -1675,20 +1675,22 @@ void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 	unguard;
 }
 
-IMPL_DIVERGE("simplified to calling base class; per-field data regenerated at runtime")
+// Ghidra 0x10438750 (264b): calls ULodMeshInstance::Serialize, then when !IsPersistent serializes
+// animation-channel TArray (+0x10C via FUN_104372f0), bone scale/pos/rot TArrays (+0x118, +0x124
+// via FUN_10437430/FUN_104375d0), scalar fields at +0x104/+0x108 via ByteOrderSerialize, bone
+// coordinate caches (+0x150/+0x15C/+0x168/+0x190/+0x19C via FUN_10438100/FUN_10321a80/
+// FUN_103218c0 etc.), and AnimObjects TArray (+0xB8 via FUN_104371c0).
+// Divergence: FUN_104372f0/FUN_10437430/FUN_104375d0/FUN_10438100/FUN_10321a80/FUN_103218c0/
+// FUN_104371c0 are unresolved TArray serializers; only the two scalar fields are serialized here.
+IMPL_DIVERGE("retail 0x10438750 (264b): TArray serializers FUN_104372f0 etc. unresolved; scalar fields only")
 void USkeletalMeshInstance::Serialize(FArchive& Ar)
 {
-	// Retail: 0x10438750. Calls ULodMeshInstance::Serialize, then serializes animation-
-	// channel TArray (+0x10C), bone scale/pos/rot TArrays (+0x118, +0x124), scalar fields
-	// at +0x104 and +0x108, bone coordinate caches (+0x150, +0x15C, +0x168, +0x190, +0x19C),
-	// and AnimObjects TArray (+0xB8). Helpers for TArray types are internal addresses.
-	// Divergence: simplified to calling base class; per-field data regenerated at runtime.
 	ULodMeshInstance::Serialize(Ar);
-	if (!Ar.IsLoading())
+	if (!Ar.IsPersistent())
 	{
-		// Serialize two scalar cache fields (+0x104: active vert stream size, +0x108: flags)
-		Ar.Serialize((BYTE*)this + 0x104, 4);
-		Ar.Serialize((BYTE*)this + 0x108, 4);
+		// Scalar cache fields: +0x104 (active vert stream size), +0x108 (flags).
+		Ar.ByteOrderSerialize((BYTE*)this + 0x104, 4);
+		Ar.ByteOrderSerialize((BYTE*)this + 0x108, 4);
 	}
 }
 
@@ -2626,7 +2628,9 @@ void USkeletalMeshInstance::MeshBuildBounds()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+// Ghidra 0x10433de0 (2228b): complex bone-transform-to-world conversion pipeline.
+// Current stub returns identity; full implementation requires bone cache data.
+IMPL_DIVERGE("retail 0x10433de0 (2228b): complex bone-to-world transform pipeline; stub returns identity")
 FMatrix USkeletalMeshInstance::MeshToWorld()
 {
 	return FMatrix();
