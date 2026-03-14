@@ -103,56 +103,56 @@ INT FRange::IsZero() const
 	return Min == 0.f && Max == 0.f;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator+( const FRange& R ) const
 {
 	return FRange( Min + R.Min, Max + R.Max );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator+( FLOAT F ) const
 {
 	return FRange( Min + F, Max + F );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator-( const FRange& R ) const
 {
 	return FRange( Min - R.Min, Max - R.Max );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator-( FLOAT F ) const
 {
 	return FRange( Min - F, Max - F );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator-() const
 {
 	return FRange( -Min, -Max );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator*( const FRange& R ) const
 {
 	return FRange( Min * R.Min, Max * R.Max );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator*( FLOAT F ) const
 {
 	return FRange( Min * F, Max * F );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator/( FLOAT F ) const
 {
 	FLOAT Inv = 1.f / F;
 	return FRange( Min * Inv, Max * Inv );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator+=( const FRange& R )
 {
 	Min += R.Min;
@@ -160,7 +160,7 @@ FRange FRange::operator+=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator+=( FLOAT F )
 {
 	Min += F;
@@ -168,7 +168,7 @@ FRange FRange::operator+=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator-=( const FRange& R )
 {
 	Min -= R.Min;
@@ -176,7 +176,7 @@ FRange FRange::operator-=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator-=( FLOAT F )
 {
 	Min -= F;
@@ -184,7 +184,7 @@ FRange FRange::operator-=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator*=( const FRange& R )
 {
 	Min *= R.Min;
@@ -192,7 +192,7 @@ FRange FRange::operator*=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator*=( FLOAT F )
 {
 	Min *= F;
@@ -200,7 +200,7 @@ FRange FRange::operator*=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator/=( const FRange& R )
 {
 	Min /= R.Min;
@@ -208,7 +208,7 @@ FRange FRange::operator/=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange FRange::operator/=( FLOAT F )
 {
 	FLOAT Inv = 1.f / F;
@@ -217,19 +217,19 @@ FRange FRange::operator/=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 INT FRange::operator==( const FRange& R ) const
 {
 	return Min == R.Min && Max == R.Max;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 INT FRange::operator!=( const FRange& R ) const
 {
 	return Min != R.Min || Max != R.Max;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRange& FRange::operator=( const FRange& R )
 {
 	Min = R.Min;
@@ -315,123 +315,123 @@ INT FRangeVector::IsZero() const
 	return X.IsZero() && Y.IsZero() && Z.IsZero();
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator+( const FRangeVector& R ) const
 {
 	return FRangeVector( X+R.X, Y+R.Y, Z+R.Z );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator+( const FVector& V ) const
 {
 	return FRangeVector( X+V.X, Y+V.Y, Z+V.Z );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator-( const FRangeVector& R ) const
 {
 	return FRangeVector( X-R.X, Y-R.Y, Z-R.Z );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator-( const FVector& V ) const
 {
 	return FRangeVector( X-V.X, Y-V.Y, Z-V.Z );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator-() const
 {
 	return FRangeVector( -X, -Y, -Z );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator*( const FRangeVector& R ) const
 {
 	return FRangeVector( X*R.X, Y*R.Y, Z*R.Z );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator*( FLOAT F ) const
 {
 	return FRangeVector( X*F, Y*F, Z*F );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator/( FLOAT F ) const
 {
 	return FRangeVector( X/F, Y/F, Z/F );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator+=( const FRangeVector& R )
 {
 	X += R.X; Y += R.Y; Z += R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator+=( const FVector& V )
 {
 	X += V.X; Y += V.Y; Z += V.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator-=( const FRangeVector& R )
 {
 	X -= R.X; Y -= R.Y; Z -= R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator-=( const FVector& V )
 {
 	X -= V.X; Y -= V.Y; Z -= V.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator*=( const FRangeVector& R )
 {
 	X *= R.X; Y *= R.Y; Z *= R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator*=( FLOAT F )
 {
 	X *= F; Y *= F; Z *= F;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator/=( const FRangeVector& R )
 {
 	X /= R.X; Y /= R.Y; Z /= R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector FRangeVector::operator/=( FLOAT F )
 {
 	X /= F; Y /= F; Z /= F;
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 INT FRangeVector::operator==( const FRangeVector& R ) const
 {
 	return X==R.X && Y==R.Y && Z==R.Z;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 INT FRangeVector::operator!=( const FRangeVector& R ) const
 {
 	return X!=R.X || Y!=R.Y || Z!=R.Z;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
 FRangeVector& FRangeVector::operator=( const FRangeVector& R )
 {
 	X = R.X;

@@ -283,7 +283,7 @@ label_check_model:
 	return GHideHiddenInEditor ? 0 : 1;
 }
 
-IMPL_DIVERGE("FLevelSceneNode::GetLevelSceneNode not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 {
 	return this;
@@ -300,7 +300,7 @@ FLightMap::FLightMap(FLightMap const &Other)
 	new ((BYTE*)this + 0x98) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98));
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1033c6a0 is 129 bytes, not fully reconstructed")
+IMPL_DIVERGE("retail ULevel* ctor address unresolved")
 FLightMap::FLightMap(ULevel *,int,int)
 {
 	// Initialize TArray members so dtor is safe regardless of which ctor was called
@@ -308,14 +308,18 @@ FLightMap::FLightMap(ULevel *,int,int)
 	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1033c6a0 is 129 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1033c6a0)
 FLightMap::FLightMap()
 {
+	new ((BYTE*)this + 0x28) FMatrix();
+	new ((BYTE*)this + 0x68) FVector(0.f,0.f,0.f);
+	new ((BYTE*)this + 0x74) FVector(0.f,0.f,0.f);
+	new ((BYTE*)this + 0x80) FVector(0.f,0.f,0.f);
 	new ((BYTE*)this + 0x8C) TArray<FLightMapSample52>();
 	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
-IMPL_DIVERGE("FLightMap::~FLightMap not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FLightMap::~FLightMap()
 {
 	// Ghidra 0x3c6a0 area: destroy TArrays in reverse order
@@ -323,7 +327,7 @@ FLightMap::~FLightMap()
 	((TArray<FLightMapSample52>*)((BYTE*)this + 0x8C))->~TArray();
 }
 
-IMPL_DIVERGE("FLightMap::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FLightMap& FLightMap::operator=(const FLightMap& Other)
 {
 	// Ghidra 0x3ca10: skip vtable +0; +4..+8B = 34 DWORDs (contiguous); +0x8C=TArray<FLightMapSample52>; +0x98=TArray<FLOAT>
@@ -356,7 +360,7 @@ int FLightMap::GetHeight()
 {
 	return *(INT*)(Pad + 28);
 }
-IMPL_DIVERGE("FLightMap::GetNumMips not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104436b0)
 int FLightMap::GetNumMips()
 {
 	return 1;
@@ -372,7 +376,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10410560 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x10410560 (1589b): per-lightmap sample cache fill; uses rdtsc performance counters and complex FDynamicLight iteration")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
@@ -382,18 +386,18 @@ void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 	guard(FLightMap::GetTextureData);
 	unguard;
 }
-IMPL_DIVERGE("FLightMap::GetUClamp not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104436b0)
 ETexClampMode FLightMap::GetUClamp()
 {
 	return TC_Clamp;
 }
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_MATCH("Engine.dll", 0x10414310)
 UTexture * FLightMap::GetUTexture()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
-IMPL_DIVERGE("FLightMap::GetVClamp not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104436b0)
 ETexClampMode FLightMap::GetVClamp()
 {
 	return TC_Clamp;
@@ -434,7 +438,7 @@ FLightMapTexture::FLightMapTexture()
 	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
 }
 
-IMPL_DIVERGE("FLightMapTexture::~FLightMapTexture not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FLightMapTexture::~FLightMapTexture()
 {
 	// Ghidra 0x20df0: destroy FStaticLightMapTexture at +0x14, then TArray<FLOAT> at +8
@@ -442,7 +446,7 @@ FLightMapTexture::~FLightMapTexture()
 	((TArray<FLOAT>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_DIVERGE("FLightMapTexture::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 {
 	// Ghidra 0x20ed0: skip vtable +0; +4=DWORD; +8=TArray<FLOAT>; +0x14=FStaticLightMapTexture subobj; +0x60,+0x64,+0x68=3 DWORDs
@@ -478,18 +482,18 @@ FTexture * FLightMapTexture::GetChild(int Index, int* OutWidth, int* OutHeight)
 	*OutHeight = *(INT*)(texElem + 0x18);
 	return (FTexture*)texElem;
 }
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_MATCH("Engine.dll", 0x10414310)
 int FLightMapTexture::GetFirstMip()
 {
 	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
-IMPL_DIVERGE("FLightMapTexture::GetFormat not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10304740)
 ETextureFormat FLightMapTexture::GetFormat()
 {
 	return TEXF_BCRGB8;
 }
-IMPL_DIVERGE("FLightMapTexture::GetHeight not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x103047b0)
 int FLightMapTexture::GetHeight()
 {
 	return 0x200;
@@ -500,7 +504,7 @@ int FLightMapTexture::GetNumChildren()
 	// TArray at this+8; ArrayNum is 4 bytes into TArray
 	return *(INT*)(Pad + 8);
 }
-IMPL_DIVERGE("FLightMapTexture::GetNumMips not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104436b0)
 int FLightMapTexture::GetNumMips()
 {
 	return 1;
@@ -510,13 +514,13 @@ int FLightMapTexture::GetRevision()
 {
 	return *(INT*)(Pad + 100);
 }
-IMPL_DIVERGE("FLightMapTexture::GetUClamp not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10414310)
 ETexClampMode FLightMapTexture::GetUClamp()
 {
 	// Retail: 33 C0 C3 = return 0 = TC_Wrap
 	return TC_Wrap;
 }
-IMPL_DIVERGE("FLightMapTexture::GetVClamp not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10414310)
 ETexClampMode FLightMapTexture::GetVClamp()
 {
 	// Retail: 33 C0 C3 = return 0 = TC_Wrap
@@ -546,7 +550,7 @@ FLineBatcher::FLineBatcher(FRenderInterface *,int,int)
 	appMemzero((BYTE*)this + 0x10, 0x14); // zero state DWORDs
 }
 
-IMPL_DIVERGE("FLineBatcher::~FLineBatcher not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FLineBatcher::~FLineBatcher()
 {
 	// Ghidra 0x418050: reset vtable, call Flush(false), destroy TArray<FLineVertex> at +4
@@ -554,7 +558,7 @@ FLineBatcher::~FLineBatcher()
 	((TArray<FLineVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("FLineBatcher::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 {
 	// Ghidra 0x27360: skip vtable at +0, TArray<FLineVertex> at +4 (FUN_1031e1c0=16-byte),
@@ -564,7 +568,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10415560 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x10415560 (985b): FPoly plane iteration; FPoly class incomplete")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
@@ -609,7 +613,7 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 	}
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10414E50 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x10414e50 (772b): complex sin/cos cylinder loop; implementable but not yet done")
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
 	// Ghidra 0x114e50: too complex to fully decompile; left empty.
@@ -656,20 +660,20 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10414B90 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x10414b90 (656b): FMatrix rotation per ring; implementable but not yet done")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
 	// TODO: implement FLineBatcher::DrawSphere (Ghidra 0x114b90: complex FMatrix rotation per ring)
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104172A0 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x104172a0 (813b): GCache + UProxyBitmapMaterial proxy + vertex stream submit; multiple unresolved DAT globals")
 void FLineBatcher::Flush(DWORD Flags)
 {
 	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
 	// TODO: implement FLineBatcher::Flush (Ghidra 0x1172a0: GCache + UProxyBitmapMaterial + vertex stream)
 }
-IMPL_DIVERGE("FLineBatcher::GetCacheId not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FLineBatcher::GetCacheId()
 {
 	return *(QWORD*)(Pad + 12);
@@ -687,7 +691,7 @@ void FLineBatcher::GetRawStreamData(void ** Out, int Offset)
 	// Ghidra: *Out = data + offset * 0x10
 	*Out = *(BYTE**)Pad + Offset * 0x10;
 }
-IMPL_DIVERGE("FLineBatcher::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104436b0)
 int FLineBatcher::GetRevision()
 {
 	return 1;
@@ -744,23 +748,23 @@ FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("FRaw32BitIndexBuffer::GetCacheId not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FRaw32BitIndexBuffer::GetCacheId()
 {
 return *(QWORD*)(Pad + 12);
 }
-IMPL_DIVERGE("FRaw32BitIndexBuffer::GetContents not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10416980)
 void FRaw32BitIndexBuffer::GetContents(void * Dest)
 {
 INT Size = *(INT*)(Pad + 4) << 2;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
-IMPL_DIVERGE("FRaw32BitIndexBuffer::GetIndexSize not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104141f0)
 int FRaw32BitIndexBuffer::GetIndexSize()
 {
 return 4;
 }
-IMPL_DIVERGE("FRaw32BitIndexBuffer::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1047ad20)
 int FRaw32BitIndexBuffer::GetRevision()
 {
 return *(INT*)(Pad + 20);
@@ -804,7 +808,7 @@ FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("FRawColorStream::GetCacheId not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FRawColorStream::GetCacheId()
 {
 return *(QWORD*)(Pad + 12);
@@ -819,12 +823,12 @@ void FRawColorStream::GetRawStreamData(void ** Out, int Offset)
 {
 *Out = *(BYTE**)Pad + Offset * 4;
 }
-IMPL_DIVERGE("FRawColorStream::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1047ad20)
 int FRawColorStream::GetRevision()
 {
 return *(INT*)(Pad + 20);
 }
-IMPL_DIVERGE("FRawColorStream::GetSize not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10414200)
 int FRawColorStream::GetSize()
 {
 return *(INT*)(Pad + 4) << 2;
@@ -843,7 +847,7 @@ return 4;
 
 
 // --- FRawIndexBuffer ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x10416E70 not yet fully reconstructed")
+IMPL_DIVERGE("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
@@ -871,7 +875,7 @@ FRawIndexBuffer::FRawIndexBuffer()
 	new ((BYTE*)this + 0x04) TArray<_WORD>();
 }
 
-IMPL_DIVERGE("FRawIndexBuffer::~FRawIndexBuffer not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FRawIndexBuffer::~FRawIndexBuffer()
 {
 	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
@@ -887,7 +891,7 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("body incomplete — Ghidra 0x10416860 not yet fully reconstructed")
+IMPL_DIVERGE("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
 void FRawIndexBuffer::CacheOptimize()
 {
 	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
@@ -895,7 +899,7 @@ void FRawIndexBuffer::CacheOptimize()
 	// DIVERGENCE: optimisation pass skipped; revision still bumped for cache invalidation.
 	*(INT*)(Pad + 20) += 1;
 }
-IMPL_DIVERGE("FRawIndexBuffer::GetCacheId not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FRawIndexBuffer::GetCacheId()
 {
 return *(QWORD*)(Pad + 12);
@@ -908,12 +912,12 @@ void FRawIndexBuffer::GetContents(void* Dest)
 	INT    num  = *(INT*)(Pad + 4);
 	appMemcpy(Dest, data, num * 2);
 }
-IMPL_DIVERGE("FRawIndexBuffer::GetIndexSize not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104141b0)
 int FRawIndexBuffer::GetIndexSize()
 {
 	return 2;
 }
-IMPL_DIVERGE("FRawIndexBuffer::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1047ad20)
 int FRawIndexBuffer::GetRevision()
 {
 	return *(INT*)(Pad + 20);
@@ -942,7 +946,7 @@ FSkinVertexStream::FSkinVertexStream()
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>();
 }
 
-IMPL_DIVERGE("FSkinVertexStream::~FSkinVertexStream not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FSkinVertexStream::~FSkinVertexStream()
 {
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
@@ -964,7 +968,7 @@ unsigned __int64 FSkinVertexStream::GetCacheId()
 {
 return *(QWORD*)(Pad + 8);
 }
-IMPL_DIVERGE("FSkinVertexStream::GetComponents not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10314890)
 int FSkinVertexStream::GetComponents(FVertexComponent* C)
 {
 C[1].Type = 1; C[1].Function = 1;
@@ -1019,7 +1023,7 @@ void FSkinVertexStream::GetStreamData(void* Dest)
 	INT    num  = *(INT*)(Pad + 0x20);
 	appMemcpy(Dest, data, num << 5); // num * 32
 }
-IMPL_DIVERGE("FSkinVertexStream::GetStride not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1042f4a0)
 int FSkinVertexStream::GetStride()
 {
 	return 0x20;
@@ -1101,7 +1105,7 @@ int FStaticLightMapTexture::GetNumMips()
 {
 return 2;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1040FE60 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1040fe60)
 void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 {
 	// Retail: 0x10FE60, ~100b SEH. In editor only (asserts GIsEditor).
@@ -1124,10 +1128,21 @@ int FStaticLightMapTexture::GetRevision()
 {
 return *(INT*)(Pad + 68);
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1040FD90 not yet fully reconstructed")
-void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
+IMPL_DIVERGE("retail 0x1040fd90 (159b): format assert, lazy-load, then FUN_10301050 (unresolved memory copy helper); data copy omitted")
+void FStaticLightMapTexture::GetTextureData(int MipIndex,void * Dest,int Size,ETextureFormat Format,int bShrink)
 {
-	// TODO: implement FStaticLightMapTexture::GetTextureData (Ghidra: complex lazy-load + DXT decode pipeline)
+	guard(FStaticLightMapTexture::GetTextureData);
+	// Retail 0x1040fd90: asserts format matches, lazy-loads mip, then calls FUN_10301050(Dest, data, byteCount).
+	// FUN_10301050 is an unresolved memory copy helper; data copy is omitted here.
+	check(Format == (ETextureFormat)*(int*)((BYTE*)this + 0x34));
+	FArray* arr = (FArray*)((BYTE*)this + MipIndex * 0x18 + 0x10);
+	if (arr->Num() == 0)
+	{
+		void** vt = *(void***)((BYTE*)this + MipIndex * 0x18 + 4);
+		((void (__thiscall*)(void*))vt[0])((void*)((BYTE*)this + MipIndex * 0x18 + 4));
+	}
+	// FUN_10301050(Dest, arr->GetData(), arr->Num()) — unresolved; data copy omitted
+	unguard;
 }
 IMPL_DIVERGE("FStaticLightMapTexture::GetUClamp not found in Ghidra export — cannot confirm VA")
 ETexClampMode FStaticLightMapTexture::GetUClamp()

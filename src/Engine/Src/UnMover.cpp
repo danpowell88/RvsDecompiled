@@ -2,7 +2,7 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x1042BC10 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1042BC10: 1345-byte keyframe interpolation with encroach checking not yet reconstructed")
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
@@ -18,7 +18,7 @@ void AMover::physMovingBrush(float DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103F3470 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103F3470: RDTSC profiling bookends (DAT_10799554/DAT_1079976c) omitted — hardware-counter globals not reproduced")
 void AMover::performPhysics(float DeltaTime)
 {
 	guard(AMover::performPhysics);
@@ -96,7 +96,7 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10374f40 is 1011 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10374f40: global property-handle caches (DAT_106669c8 et al.) and StaticFindObjectChecked_exref call pattern not reproduced")
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -308,13 +308,30 @@ void AMover::PostLoad()
 	*(INT*)((BYTE*)this + 0x6C0) = 0x315;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1037DA40 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1037DA40: FUN_1050557c unresolved; BYTE fields +0x397/+0x398 and vtable +0x11c call not reproduced")
 void AMover::PostNetReceive()
 {
-	// Ghidra 0x7da40: AActor::PostNetReceive, then apply interpolated position
-	// if location changed since PreNetReceive snapshot. Complex - simplified to super call.
-	// Divergence: mover position interpolation state at +0x67C..0x6CC not updated.
+	guard(AMover::PostNetReceive);
+	// DAT_10666730/34/38 is the static snapshot stored by PreNetReceive.
+	// Declared as file-static below PreNetReceive.
+	extern FVector AMoverNetRecvSnapshot;
 	AActor::PostNetReceive();
+	if (AMoverNetRecvSnapshot != *(FVector*)((BYTE*)this + 0x6D0))
+	{
+		*(INT*)((BYTE*)this + 0x67C) = *(INT*)((BYTE*)this + 0x6C4);
+		*(float*)((BYTE*)this + 0x3D0) = *(float*)((BYTE*)this + 0x6D0) * 0.01f;
+		*(INT*)((BYTE*)this + 0x680) = *(INT*)((BYTE*)this + 0x6C8);
+		*(INT*)((BYTE*)this + 0x684) = *(INT*)((BYTE*)this + 0x6CC);
+		*(float*)((BYTE*)this + 0x3D4) = *(float*)((BYTE*)this + 0x6D4) * 0.01f;
+		*(INT*)((BYTE*)this + 0x6B0) = *(INT*)((BYTE*)this + 0x3A8);
+		*(INT*)((BYTE*)this + 0x6AC) = *(INT*)((BYTE*)this + 0x3A4);
+		*(INT*)((BYTE*)this + 0x6B4) = *(INT*)((BYTE*)this + 0x3AC);
+		// DIVERGENCE: FUN_1050557c() (unresolved) would set *(BYTE*)(this+0x397) and
+		// *(BYTE*)(this+0x398) from a 16-bit counter value here.
+		// DIVERGENCE: vtable +0x11c call (BeginState-like notify) omitted.
+		*(DWORD*)((BYTE*)this + 0xAC) |= 4;
+	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103d57d0)
@@ -352,22 +369,38 @@ void AMover::PostRaytrace()
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10378100 not yet fully reconstructed")
+// Static snapshot of mover's SimInterpolate position, set by PreNetReceive and read by
+// PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
+FVector AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
+
+IMPL_MATCH("Engine.dll", 0x10378100)
 void AMover::PreNetReceive()
 {
-	// Ghidra 0x78100: snapshot current position this+0x6D0 to a static global,
-	// then call AActor::PreNetReceive. Divergence: snapshot not stored (not needed
-	// without the full PostNetReceive interpolation).
+	guard(AMover::PreNetReceive);
+	// Ghidra 0x78100: snapshot this+0x6D0..0x6D8 (SimInterpolate FVector) to global
+	// DAT_10666730/34/38 before the net receive updates the field.
+	AMoverNetRecvSnapshot = *(FVector*)((BYTE*)this + 0x6D0);
 	AActor::PreNetReceive();
+	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D5460 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103D5460: FVector0_exref substituted with zero literals; vtable +0x184 slot unidentified")
 void AMover::PreRaytrace()
 {
-	// Ghidra 0xd5460: copy FVector(0,0,0) from FVector0_exref into this+0x694..0x69C
-	// (resets DeltaPosition sentinel before raytrace pass). Divergence: skip external ref;
-	// zero the sentinel directly (same effect).
-	appMemzero((BYTE*)this + 0x694, 12);
+	guard(AMover::PreRaytrace);
+	// Ghidra 0xd5460: copy FVector(0,0,0) from FVector0_exref into this+0x694..0x69C,
+	// then store FRotator(0,0,0) at this+0x6B8..0x6C0, then call vtable +0x184.
+	// FVector0_exref is the global Engine.dll FVector zero constant; zeroing directly
+	// is equivalent since it's always (0,0,0).
+	*(float*)((BYTE*)this + 0x694) = 0.0f;
+	*(float*)((BYTE*)this + 0x698) = 0.0f;
+	*(float*)((BYTE*)this + 0x69C) = 0.0f;
+	FRotator ZeroRot(0, 0, 0);
+	*(FRotator*)((BYTE*)this + 0x6B8) = ZeroRot;
+	// vtable[0x184/4] = slot 97; call with implicit this (no extra args per Ghidra)
+	void** vtbl = *(void***)this;
+	((void(__thiscall*)(void*))vtbl[0x184 / 4])(this);
+	unguard;
 }
 
 

@@ -768,7 +768,7 @@ INT APawn::IsPlayer()
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_MATCH("Engine.dll", 0x103e5600)
+IMPL_DIVERGE("Ghidra 0x103e5600: 34 bytes; parity fails — IsA vtable dispatch or calling convention differs from retail")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
@@ -830,17 +830,15 @@ INT APawn::IsNeutral( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x103e5000)
+IMPL_DIVERGE("Ghidra 0x103e5000: 35 bytes; parity fails — retail uses no stack frame (ECX-based thiscall, no push ebp), our compiler generates a standard prologue")
 FLOAT APawn::GetMaxSpeed()
 {
-	guard(APawn::GetMaxSpeed);
 	FLOAT result = GroundSpeed;
 	if( Physics == PHYS_Flying )
 		return AirSpeed;
 	if( Physics == PHYS_Swimming )
 		result = WaterSpeed;
 	return result;
-	unguard;
 }
 
 IMPL_GHIDRA("Engine.dll", 0xC34E0)
@@ -884,12 +882,10 @@ INT APawn::CheckOwnerUpdated()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x103e5260)
+IMPL_DIVERGE("Ghidra 0x103e5260: 29 bytes; parity fails — retail uses no stack frame (ECX thiscall, integer regs for FVector), our compiler uses SSE2 movq")
 void APawn::SetPrePivot( FVector NewPrePivot )
 {
-	guard(APawn::SetPrePivot);
 	PrePivot = NewPrePivot;
-	unguard;
 }
 
 
@@ -1918,7 +1914,7 @@ void APawn::clearPaths()
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x103f07e0)
+IMPL_DIVERGE("Ghidra 0x103f07e0: velocity displacement calculation from FVector division is approximate; parity fails")
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);

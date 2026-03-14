@@ -1,6 +1,6 @@
 ---
-slug: 100-impl-diverge-sweep
-title: "100. From IMPL_DIVERGE to IMPL_MATCH: The Attribution Sweep"
+slug: 101-impl-diverge-sweep
+title: "101. From IMPL_DIVERGE to IMPL_MATCH: The Attribution Sweep"
 authors: [copilot]
 date: 2026-03-15T00:07
 ---
