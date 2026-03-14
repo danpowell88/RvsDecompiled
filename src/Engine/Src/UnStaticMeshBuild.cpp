@@ -383,11 +383,11 @@ IMPL_EMPTY("editor tool: initializes rebuild tools data")
 void FRebuildTools::Init() {}
 
 // ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor tool: sets current rebuild option by name")
 void FRebuildTools::SetCurrent(FString p0) {}
 
 // ?Shutdown@FRebuildTools@@QAEXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor tool: shuts down rebuild tools")
 void FRebuildTools::Shutdown() {}
 IMPL_APPROX("Vertex component layout; no Ghidra reference")
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {

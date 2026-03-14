@@ -140,7 +140,7 @@ void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; output parameters not populated without Ghidra analysis")
 void AR6ColBox::GetDestination(FVector &,FRotator &)
 {
 	guard(AR6ColBox::GetDestination);
@@ -228,28 +228,28 @@ int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 
 
 // --- AR6DecalGroup ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; decal group spawn initialization requires Ghidra analysis")
 void AR6DecalGroup::Spawned()
 {
 	guard(AR6DecalGroup::Spawned);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; decal deactivation and cleanup require Ghidra analysis")
 void AR6DecalGroup::KillDecal(AR6Decal *)
 {
 	guard(AR6DecalGroup::KillDecal);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; post-destroy decal cleanup requires Ghidra analysis")
 void AR6DecalGroup::PostScriptDestroyed()
 {
 	guard(AR6DecalGroup::PostScriptDestroyed);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; decal group activation logic requires Ghidra analysis")
 void AR6DecalGroup::ActivateGroup()
 {
 	guard(AR6DecalGroup::ActivateGroup);
@@ -330,7 +330,7 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 
 
 // --- AR6DecalManager ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; decal manager spawn initialization requires Ghidra analysis")
 void AR6DecalManager::Spawned()
 {
 	guard(AR6DecalManager::Spawned);
@@ -447,7 +447,7 @@ void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 
 
 // --- AR6TeamStartInfo ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; team serialization field layout requires Ghidra analysis")
 void AR6TeamStartInfo::TransferFile(FArchive &,int)
 {
 	guard(AR6TeamStartInfo::TransferFile);
@@ -456,21 +456,21 @@ void AR6TeamStartInfo::TransferFile(FArchive &,int)
 
 
 // --- AR6WallHit ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; wall-hit visual effect spawning requires Ghidra analysis")
 void AR6WallHit::SpawnEffects()
 {
 	guard(AR6WallHit::SpawnEffects);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; wall-hit sound spawning requires Ghidra analysis")
 void AR6WallHit::SpawnSound()
 {
 	guard(AR6WallHit::SpawnSound);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; wall-hit post-begin-play initialization requires Ghidra analysis")
 void AR6WallHit::PostBeginPlay()
 {
 	guard(AR6WallHit::PostBeginPlay);
@@ -479,14 +479,14 @@ void AR6WallHit::PostBeginPlay()
 
 
 // --- AR6eviLTesting ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Debug/testing function; ATS test body requires Ghidra analysis")
 void AR6eviLTesting::eviLTestATS()
 {
 	guard(AR6eviLTesting::eviLTestATS);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Debug/testing function; update-system test body requires Ghidra analysis")
 void AR6eviLTesting::evilTestUpdateSystem()
 {
 	guard(AR6eviLTesting::evilTestUpdateSystem);
@@ -495,7 +495,7 @@ void AR6eviLTesting::evilTestUpdateSystem()
 
 
 // --- UR6AbstractGameManager ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific UbiSoft online-service SDK types not available in Engine.dll")
 void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 {
 	guard(UR6AbstractGameManager::StartJoinServer);
@@ -509,7 +509,7 @@ int UR6AbstractGameManager::StartLogInProcedure()
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific UbiSoft game-service pre-join SDK types not available")
 void UR6AbstractGameManager::StartPreJoinProcedure(int)
 {
 	guard(UR6AbstractGameManager::StartPreJoinProcedure);

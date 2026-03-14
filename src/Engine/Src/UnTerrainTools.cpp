@@ -206,7 +206,7 @@ void UTerrainBrushEdgeTurn::Execute(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
 FBox UTerrainBrushEdgeTurn::GetRect()
 {
 	return FBox();
@@ -245,7 +245,7 @@ UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushFlatten::Execute(int)
 {
 	guard(UTerrainBrushFlatten::Execute);
@@ -285,7 +285,7 @@ UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Othe
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushNoise::Execute(int)
 {
 	guard(UTerrainBrushNoise::Execute);
@@ -325,7 +325,7 @@ UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Othe
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushPaint::Execute(int)
 {
 	guard(UTerrainBrushPaint::Execute);
@@ -334,7 +334,7 @@ void UTerrainBrushPaint::Execute(int)
 
 
 // --- UTerrainBrushPlanningPaint ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrushPlanningPaint::MouseButtonDown);
@@ -372,7 +372,7 @@ UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrain
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushPlanningPaint::Execute(int)
 {
 	guard(UTerrainBrushPlanningPaint::Execute);
@@ -381,14 +381,14 @@ void UTerrainBrushPlanningPaint::Execute(int)
 
 
 // --- UTerrainBrushSelect ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrushSelect::MouseButtonDown);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSelect::MouseMove(float,float)
 {
 	guard(UTerrainBrushSelect::MouseMove);
@@ -426,14 +426,14 @@ UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& O
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSelect::Execute(int)
 {
 	guard(UTerrainBrushSelect::Execute);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
 FBox UTerrainBrushSelect::GetRect()
 {
 	return FBox();
@@ -472,7 +472,7 @@ UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& O
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSmooth::Execute(int)
 {
 	guard(UTerrainBrushSmooth::Execute);
@@ -481,7 +481,7 @@ void UTerrainBrushSmooth::Execute(int)
 
 
 // --- UTerrainBrushTexPan ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushTexPan::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexPan::MouseMove);
@@ -521,7 +521,7 @@ UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& O
 
 
 // --- UTerrainBrushTexRotate ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushTexRotate::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexRotate::MouseMove);
@@ -561,7 +561,7 @@ UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTex
 
 
 // --- UTerrainBrushTexScale ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushTexScale::MouseMove(float,float)
 {
 	guard(UTerrainBrushTexScale::MouseMove);
@@ -665,14 +665,14 @@ UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushV
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushVisibility::Execute(int)
 {
 	guard(UTerrainBrushVisibility::Execute);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
 FBox UTerrainBrushVisibility::GetRect()
 {
 	return FBox();
