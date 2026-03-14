@@ -333,9 +333,10 @@ FR6MatineePreviewProxy::~FR6MatineePreviewProxy()
 {
 }
 
-IMPL_DIVERGE("FR6MatineePreviewProxy::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10311630)
 FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePreviewProxy&)
 {
+	// Ghidra 0x11630: no data members to copy; shares address with FBezier/FHitObserver/FNetworkNotify op=
 	return *this;
 }
 
@@ -1105,16 +1106,17 @@ FString FMatineeTools::GetOrientationDesc(int p0)
 }
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("ECLipSynchData::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10303890)
 ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
+	// Ghidra 0x3890: copies 6 DWORDs (24 bytes); shares address with FCanvasVertex/FStaticMeshVertex op=
 	appMemcpy(this, &Other, 24);
 	return *this;
 }
 
 // --- Moved from EngineStubs.cpp ---
 // ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
-// Ghidra: returns CurrentAction (offset 0x44).
-IMPL_DIVERGE("FMatineeTools::GetCurrentAction not found in Ghidra export — cannot confirm VA")
+// Ghidra 0x10316720: returns *(this+0x44).
+IMPL_MATCH("Engine.dll", 0x10316720)
 UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
 
 // ?GetNextAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
@@ -1182,8 +1184,8 @@ UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 }
 
 // ?GetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@XZ
-// Ghidra: returns CurrentSubAction (offset 0x48).
-IMPL_DIVERGE("FMatineeTools::GetCurrentSubAction not found in Ghidra export — cannot confirm VA")
+// Ghidra 0x10316740: returns *(this+0x48).
+IMPL_MATCH("Engine.dll", 0x10316740)
 UMatSubAction * FMatineeTools::GetCurrentSubAction() { return CurrentSubAction; }
 
 // ?SetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@PAV2@@Z
