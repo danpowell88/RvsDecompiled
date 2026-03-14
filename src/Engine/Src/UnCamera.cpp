@@ -7,7 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
+IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
+IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -583,6 +585,7 @@ FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFBspVertexStream@@@Z
 // FUN_10322590 = TArray<FBspVertex>::Serialize (elem_size 0x28)
 // Layout (after vtable): Pad[0] TArray<FBspVertex>  Pad[0x14] Revision
+IMPL_GHIDRA("Engine.dll", 0x10322590)
 FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
 	Ar << *(TArray<FBspVertex>*)V.Pad;            // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -593,14 +596,17 @@ FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
 // Ghidra @ 0x3c730: 7x FCompactIndex at Pad[8..0x20]; 9x DWORD at Pad[0x68..0x88];
 // FUN_10301470 (FName?), FUN_1033a9a0, version checks 0x6a/0x6b/0x6d/0x6e.
 // Needs FTexture base size to correctly interpret Pad offsets.
+IMPL_GHIDRA("Engine.dll", 0x10301470)
 FArchive & operator<<(FArchive & Ar, FLightMap & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMapTexture@@@Z
 // Ghidra @ 0x27a00: vtable[6] on Pad[4..8], FUN_103218c0, BOS at Pad[0x60]+8, Pad[0x68]+4;
 // if Ver()>0x73: recurse into FStaticLightMapTexture at Pad[0x14].
+IMPL_GHIDRA("Engine.dll", 0x27a00)
 FArchive & operator<<(FArchive & Ar, FLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFPoly@@@Z
+IMPL_GHIDRA("Engine.dll", 0x27a00)
 FArchive & operator<<(FArchive & Ar, FPoly & V) {
 	// NumVertices first (compact index)
 	Ar << *(FCompactIndex*)&V.NumVertices;
@@ -647,6 +653,7 @@ FArchive & operator<<(FArchive & Ar, FPoly & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFRaw32BitIndexBuffer@@@Z
 // FUN_1037fbd0 = TArray<DWORD>::Serialize (elem_size 4, ByteOrderSerialize per element)
 // Layout (after vtable): Pad[0] TArray<DWORD>  Pad[0x14] Revision
+IMPL_GHIDRA("Engine.dll", 0x1037fbd0)
 FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
 	Ar << *(TArray<DWORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -657,6 +664,7 @@ FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
 // FUN_104170d0 = Custom TArray<FColor>::Serialize with BGRA byte order.
 // Original serializes per-element bytes in order: [2]=B, [1]=G, [0]=R, [3]=A.
 // Layout (after vtable): Pad[0] TArray<FColor>  Pad[0x14] Revision
+IMPL_GHIDRA("Engine.dll", 0x104170d0)
 FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
 	TArray<FColor>& Colors = *(TArray<FColor>*)V.Pad;
 	Colors.CountBytes(Ar);
@@ -690,6 +698,7 @@ FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z
 // FUN_1031e600 = TArray<_WORD>::Serialize (elem_size 2, ByteOrderSerialize per element)
 // Layout (after vtable): Pad[0] TArray<_WORD>  Pad[0x14] Revision
+IMPL_GHIDRA("Engine.dll", 0x1031e600)
 FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
 	Ar << *(TArray<_WORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -701,6 +710,7 @@ FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
 // (only when !IsPersistent), then 3 INTs, then TArray<0x20-elem> via FUN_10323030.
 // Layout (after vtable): Pad[0] UObject*  Pad[4] UObject*  Pad[0x10] INT
 //   Pad[0x14] INT  Pad[0x18] INT  Pad[0x1C] TArray<0x20-elem>
+IMPL_GHIDRA("Engine.dll", 0x10323030)
 FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 	if (!Ar.IsPersistent()) {
 		Ar << *(UObject**)&V.Pad[0x00];   // UObject* at Pad[0] = obj+0x04
@@ -737,14 +747,17 @@ FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticLightMapTexture@@@Z
 // Ghidra @ 0x20c60: FUN_1031d450 on Pad[4..0x1c]; vtable[0] at Pad[0x34]+1;
 // BOS at Pad[0x38]+4, Pad[0x3c]+4, Pad[0x48]+4. Needs FTexture base size.
+IMPL_GHIDRA("Engine.dll", 0x20c60)
 FArchive & operator<<(FArchive & Ar, FStaticLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshBatcherVertex@@@Z
+IMPL_GHIDRA("Engine.dll", 0x20c60)
 FArchive & operator<<(FArchive & Ar, FStaticMeshBatcherVertex & p1) { return Ar; } // empty in original
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshLightInfo@@@Z
 // Decoded from Ghidra Engine @ 0x21750. UObject* at +0, TArray<BYTE> at +4
 // (FUN_1031cce0 = bulk byte array), INT at +0x10.
+IMPL_GHIDRA("Engine.dll", 0x21750)
 FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
 	Ar << V.LightObject;
 	Ar << V.LightData;
@@ -753,6 +766,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshMaterial@@@Z
+IMPL_GHIDRA("Engine.dll", 0x21750)
 FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 	Ar << *(UObject**)&V.Material;
 	Ar << *(FCompactIndex*)&V.Flags1;
@@ -763,11 +777,13 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshSection@@@Z
 // Ghidra @ 0x50f10: complex version-branched (pre-0x5c / 0x5c-0x70 / 0x70+) with SEH;
 // creates temp FStaticMeshVertexStream + FRawIndexBuffer locals. Needs deep decode.
+IMPL_GHIDRA("Engine.dll", 0x50f10)
 FArchive & operator<<(FArchive & Ar, FStaticMeshSection & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshUVStream@@@Z
 // FUN_10324510 = TArray<FStaticMeshUV>::Serialize (elem_size 8, two floats per elem)
 // Layout (after vtable): Pad[0] TArray<FStaticMeshUV>  Pad[0x0C] INT  Pad[0x18] Revision
+IMPL_GHIDRA("Engine.dll", 0x10324510)
 FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
 	Ar << *(TArray<FStaticMeshUV>*)V.Pad;         // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x0C], 4);      // INT at Pad[0x0C] = obj+0x10
@@ -778,6 +794,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshVertexStream@@@Z
 // FUN_103243e0 = TArray<FStaticMeshVertex>::Serialize (elem_size 0x18)
 // Layout (after vtable): Pad[0] TArray<FStaticMeshVertex>  Pad[0x14] Revision
+IMPL_GHIDRA("Engine.dll", 0x103243e0)
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
 	Ar << *(TArray<FStaticMeshVertex>*)V.Pad;     // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -787,6 +804,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFTags@@@Z
 // Decoded from Ghidra Engine @ 0xcc180. Inlines FUN_103cbaa0 (12×4-byte flat serialize)
 // then serializes FString at offset 0x30.
+IMPL_GHIDRA("Engine.dll", 0xcc180)
 FArchive & operator<<(FArchive & Ar, FTags & V) {
 	for (INT i = 0; i < 12; i++)
 		Ar.ByteOrderSerialize(V._Data + i * 4, 4);
@@ -796,6 +814,7 @@ FArchive & operator<<(FArchive & Ar, FTags & V) {
 
 // ??6@YAAAVFArchive@@AAV0@AAVFTerrainVertexStream@@@Z
 // FUN_10323cd0 = TArray<FTerrainVertex>::Serialize (elem_size 0x24)
+IMPL_GHIDRA("Engine.dll", 0x10323cd0)
 FArchive & operator<<(FArchive & Ar, FTerrainVertexStream & V) {
 	Ar << V.Vertices;
 	Ar.ByteOrderSerialize((BYTE*)&V.Revision, 4);
@@ -803,6 +822,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertexStream & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFURL@@@Z
+IMPL_GHIDRA("Engine.dll", 0x10323cd0)
 FArchive & operator<<(FArchive& Ar, FURL& U) {
 	Ar << U.Protocol << U.Host << U.Map << U.Portal << U.Op;
 	Ar << U.Port << U.Valid;
@@ -810,6 +830,7 @@ FArchive & operator<<(FArchive& Ar, FURL& U) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFBspVertex@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
 	// Always serialize: offsets 0x00-0x08 (3 floats), 0x18-0x24 (4 floats)
 	Ar.ByteOrderSerialize(&V._Data[0x00], 4);
@@ -829,6 +850,7 @@ FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFPosNormTexData@@@Z
+IMPL_GHIDRA_APPROX("Engine.dll", 0x10304820, "Ghidra reference; body approximated")
 FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
 	// 10 floats: offsets 0x00-0x24
 	for (INT i = 0; i < 10; i++)
@@ -839,14 +861,17 @@ FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
 // ??6@YAAAVFArchive@@AAV0@AAUFProjectorRelativeRenderInfo@@@Z
 // Ghidra @ 0x48c0: reads p1.m_RenderInfoPtr.Ptr as FProjectorRenderInfo*;
 // calls FUN_10304820 version check, then vtable[6] for two fields at +0x18 and +0x1c.
+IMPL_GHIDRA("Engine.dll", 0x10304820)
 FArchive & operator<<(FArchive & Ar, FProjectorRelativeRenderInfo & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@PAUFProjectorRenderInfo@@@Z
 // Ghidra @ 0x4890: calls FUN_10304820 version check; if 0 returns Ar;
 // otherwise vtable[6] on p1+0x18 and p1+0x1c. FProjectorRenderInfo is forward-decl only.
+IMPL_GHIDRA("Engine.dll", 0x10304820)
 FArchive & operator<<(FArchive & Ar, FProjectorRenderInfo * p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFSkinVertex@@@Z
+IMPL_GHIDRA("Engine.dll", 0x10304820)
 FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
 	// 16 floats: offsets 0x00-0x3C
 	for (INT i = 0; i < 16; i++)
@@ -855,6 +880,7 @@ FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionNode@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 	// 4 FCompactIndex values at offsets 0x00, 0x04, 0x08, 0x0C
 	Ar << *(FCompactIndex*)&V._Data[0x00];
@@ -867,6 +893,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionTriangle@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
 	// 16 floats (4 FPlanes) via ByteOrderSerialize
 	for (INT i = 0; i < 16; i++)
@@ -880,6 +907,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshUV@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 	Ar.ByteOrderSerialize(&V._Data[0], 4);
 	Ar.ByteOrderSerialize(&V._Data[4], 4);
@@ -887,6 +915,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)
@@ -896,6 +925,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFTerrainVertex@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
 	// 6 floats at 0x00-0x14
 	for (INT i = 0; i < 6; i++)
@@ -912,6 +942,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUV2Data@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
 	Ar.ByteOrderSerialize(&D, 4);
 	Ar.ByteOrderSerialize((BYTE*)&D + 4, 4);
@@ -919,6 +950,7 @@ FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUntransformedVertex@@@Z
+IMPL_INFERRED("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
 	// 11 floats: offsets 0x00-0x28
 	for (INT i = 0; i < 11; i++)
@@ -927,6 +959,7 @@ FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
 }
 
 // ?GNewCollisionHash@@YAPAVFCollisionHashBase@@XZ
+IMPL_INFERRED("Reconstructed from context")
 FCollisionHashBase * GNewCollisionHash() {
 	if( !GIsEditor )
 		return new FCollisionOctree();
@@ -938,6 +971,7 @@ FCollisionHashBase * GNewCollisionHash() {
 // Converts Hue/Saturation/Value (each 0-255) to a normalised FPlane colour.
 // Ghidra: param_2 (S/Hue) selects one of three sectors; param_3 (V) scales
 // brightness; result has W=1.0f.
+IMPL_INFERRED("Reconstructed from context")
 FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 	FLOAT fR, fG, fB;
 	if (S < 0x56) {
@@ -967,6 +1001,7 @@ FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen);
 
 // ?GetFROTATOR@@YAHPBGAAVFRotator@@H@Z
+IMPL_INFERRED("Reconstructed from context")
 int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 {
 	FLOAT Temp = 0.f;
@@ -992,6 +1027,7 @@ int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 }
 
 // ?GetFROTATOR@@YAHPBG0AAVFRotator@@H@Z
+IMPL_INFERRED("Reconstructed from context")
 int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int ScaleFactor)
 {
 	TCHAR Temp[80];
@@ -1001,6 +1037,7 @@ int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int
 }
 
 // ?GetFVECTOR@@YAHPBGAAVFVector@@@Z
+IMPL_INFERRED("Reconstructed from context")
 int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 {
 	int NumParsed = 0;
@@ -1025,6 +1062,7 @@ int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 }
 
 // ?GetFVECTOR@@YAHPBG0AAVFVector@@@Z
+IMPL_INFERRED("Reconstructed from context")
 int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 {
 	TCHAR Temp[80];
@@ -1034,6 +1072,7 @@ int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 }
 
 // ?GetSUBSTRING@@YAHPBG0PAGH@Z
+IMPL_INFERRED("Reconstructed from context")
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen)
 {
 	const TCHAR* Found = appStrfind( Stream, Match );
@@ -1048,6 +1087,7 @@ int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxL
 }
 
 // ?getGameShutDown@@YAHXZ
+IMPL_INFERRED("Reconstructed from context")
 int getGameShutDown() { return bGameShutDown; }
 
 // ?newPath@FPathBuilder@@AAEPAVANavigationPoint@@VFVector@@@Z
@@ -1055,6 +1095,7 @@ int getGameShutDown() { return bGameShutDown; }
 // Spawns a PathNode at Location (adjusting Z upward if Scout's half-height < 85)
 // and sets the machine-placed flag bit 0x80 at NavigationPoint+0x3a4.
 // FPathBuilder layout: Pad[0..3]=ULevel*, Pad[4..7]=APawn* Scout.
+IMPL_INFERRED("Reconstructed from context")
 ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout  = *(APawn**)((BYTE*)this + 4);
@@ -1087,6 +1128,7 @@ ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 // Retail ordinal 2514 (0x6d6f0).  Returns the signed distance along axis p1
 // to the far or near face of hash cell p0 (cell size = p3 unreal units,
 // world offset = 262144).  Returns 256000 when p1 is zero (no movement along axis).
+IMPL_INFERRED("Reconstructed from context")
 float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT CellSize) {
 	if (Dir == 0.0f) return 256000.0f;
 	if (Dir > 0.0f)
@@ -1100,6 +1142,7 @@ float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT
 // Teleports the Scout pawn to Start, tests whether it can reach End via
 // APawn::pointReachable, then teleports Scout back to its original position.
 // FPathBuilder layout: Pad[0..3] = ULevel*, Pad[4..7] = APawn* Scout.
+IMPL_INFERRED("Reconstructed from context")
 int FPathBuilder::TestReach(FVector Start, FVector End) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout = *(APawn**)((BYTE*)this + 4);
@@ -1127,6 +1170,7 @@ int FPathBuilder::TestReach(FVector Start, FVector End) {
 }
 
 // ?TestWalk@FPathBuilder@@AAEHVFVector@@UFCheckResult@@M@Z
+IMPL_INFERRED("Reconstructed from context")
 int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 
 // ?ValidNode@FPathBuilder@@AAEHPAVANavigationPoint@@PAVAActor@@@Z
@@ -1135,6 +1179,7 @@ int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 //   - p1 is non-null and different from p0
 //   - p1 is not flagged as deleted (sign byte at 0xa0 >= 0)
 //   - p1 is a NavigationPoint but NOT a LiftCenter
+IMPL_INFERRED("Reconstructed from context")
 int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 	if (Candidate && Candidate != (AActor*)NavPoint && *(SBYTE*)((BYTE*)Candidate + 0xa0) >= 0) {
 		if (((UObject*)Candidate)->IsA(ANavigationPoint::StaticClass())) {
@@ -1146,6 +1191,7 @@ int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 }
 
 // ?createPaths@FPathBuilder@@AAEHXZ
+IMPL_INFERRED("Reconstructed from context")
 int FPathBuilder::createPaths() { return 0; }
 
 // ?StoreActor@FOctreeNode@@AAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
@@ -1153,6 +1199,7 @@ int FPathBuilder::createPaths() { return 0; }
 // this node in the actor's OctreeNodes list (actor+0x338) for fast removal.
 // If the node already has >2 actors and is large enough to subdivide it does so;
 // for simplicity we always use leaf storage (no subdivision).
+IMPL_INFERRED("Reconstructed from context")
 void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
 	// Add actor to this node's actor list (TArray<AActor*> at FOctreeNode offset 0)
@@ -1175,6 +1222,7 @@ void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane co
 //
 // NOTE: The retail SingleLineCheck has a 7th undeclared FLOAT parameter (ExtraParam = 16.0).
 // Passes 1 and 2 supply 16.0f for it via raw vtable call; pass 3 omits it (= 0).
+IMPL_INFERRED("Reconstructed from context")
 void FPathBuilder::FindBlockingNormal(FVector& p0)
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1236,6 +1284,7 @@ void FPathBuilder::FindBlockingNormal(FVector& p0)
 }
 
 // ?Pass2From@FPathBuilder@@AAEXVFVector@@0M@Z
+IMPL_INFERRED("Reconstructed from context")
 void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 
 // ?SetPathCollision@FPathBuilder@@AAEXH@Z
@@ -1249,6 +1298,7 @@ void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 //   the temp flag set.
 // Field actor+0x320 (800 decimal): custom scratch field used only during path
 //   building; bit 3 (0x8) = "collision was disabled for path test; restore it".
+IMPL_INFERRED("Reconstructed from context")
 void FPathBuilder::SetPathCollision(int bDisable) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	INT Count = Level->Actors.Num();

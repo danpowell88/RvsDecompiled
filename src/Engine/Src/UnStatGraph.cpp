@@ -7,7 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
+IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
+IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -15,6 +17,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FStatGraphLine ---
+IMPL_INFERRED("Reconstructed from context")
 FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 {
 	// Ghidra 0x2c410: no vtable; DWORD at +0; TArray<FLOAT> at +4; 2 DWORDs at +10; FString at +18; 4 DWORDs at +24..+30
@@ -25,6 +28,7 @@ FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
 }
 
+IMPL_INFERRED("Reconstructed from context")
 FStatGraphLine::FStatGraphLine()
 {
 	// Initialize TArray<FLOAT> at +4 and FString at +18 to empty
@@ -32,6 +36,7 @@ FStatGraphLine::FStatGraphLine()
 	new ((BYTE*)this + 0x18) FString();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 FStatGraphLine::~FStatGraphLine()
 {
 	// Destroy FString at +18 then TArray<FLOAT> at +4 (reverse order)
@@ -39,6 +44,7 @@ FStatGraphLine::~FStatGraphLine()
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 {
 	// Ghidra 0x21790: DWORD at +0, TArray<FLOAT> at +4 (FUN_1031f660=4-byte data points),
@@ -51,6 +57,7 @@ FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 	return *this;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 {
 	// Ghidra 0x16930: pointer equality comparison only.
@@ -64,42 +71,56 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // ============================================================================
 
 // ??0FStatGraph@@QAE@ABV0@@Z
+IMPL_INFERRED("Reconstructed from context")
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
+IMPL_INFERRED("Reconstructed from context")
 FStatGraph::~FStatGraph() {}
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
+IMPL_INFERRED("Reconstructed from context")
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
 }
 
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
+IMPL_INFERRED("Reconstructed from context")
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
 
 // ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
+IMPL_INFERRED("Reconstructed from context")
 void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {}
 
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
+IMPL_INFERRED("Reconstructed from context")
 void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {}
 
 // ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
+IMPL_INFERRED("Reconstructed from context")
 void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {}
 
 // ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
+IMPL_INFERRED("Reconstructed from context")
 void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 
 // ?Reset@FStatGraph@@QAEXXZ
+IMPL_INFERRED("Reconstructed from context")
 void FStatGraph::Reset() {}
 
 // ============================================================================
 // FStats
 // ============================================================================
+IMPL_INFERRED("Reconstructed from context")
 FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+IMPL_INFERRED("Reconstructed from context")
 FStats::~FStats() {}
+IMPL_INFERRED("Reconstructed from context")
 void FStats::UpdateString(FString&, INT) {}
+IMPL_INFERRED("Reconstructed from context")
 void FStats::Render(UViewport*, UEngine*) {}
+IMPL_INFERRED("Reconstructed from context")
 INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	FString StatName, FString DisplayName, EStatsUnit Unit)
 {
@@ -143,7 +164,9 @@ INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	pRec[2] = (INT)Unit;
 	return SlotIdx;
 }
+IMPL_INFERRED("Reconstructed from context")
 void FStats::CalcMovingAverage(INT, DWORD) {}
+IMPL_INFERRED("Reconstructed from context")
 void FStats::Clear()
 {
 	BYTE* Base = (BYTE*)this;
@@ -180,10 +203,12 @@ void FStats::Clear()
 // ============================================================================
 // FEngineStats
 // ============================================================================
+IMPL_INFERRED("Reconstructed from context")
 FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 {
 	appMemcpy(this, &Other, 99 * 4);
 	return *this;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void FEngineStats::Init() {}

@@ -7,7 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
+IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
+IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -310,11 +312,13 @@ int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane 
 	typedef int (__thiscall* DrawStrFn)(UCanvas*, UFont*, int, int, const TCHAR*, FPlane, int, int, int);
 	return ((DrawStrFn)0x1038ac40)(this, Font, XL, YL, Text, Color, CR, RenderStyle, DrawExtraLine);
 }
+IMPL_GHIDRA("Engine.dll", 0x1038ac40)
 void UCanvas::WrappedDrawString(ERenderStyle InStyle, INT& XL, INT& YL, UFont* Font, INT bCenter, const TCHAR* Text)
 {
 	// Ghidra 0x8cac0, 11B. Simply forwards to WrappedPrint.
 	WrappedPrint(InStyle, XL, YL, Font, bCenter, Text);
 }
+IMPL_INFERRED("Reconstructed from context")
 void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
 {
   // Retail (59b, RVA 0x881D0): set clip origin and size, compute half-sizes,
@@ -328,6 +332,7 @@ void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
   CurX      = 0.0f;
   CurY      = 0.0f;
 }
+IMPL_INFERRED("Reconstructed from context")
 void UCanvas::DrawIcon(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XSize, FLOAT YSize, FLOAT ZDepth, FPlane Color, FPlane AlphaScale)
 {
 	// Ghidra 0x880f0, 170B. Get material UV dimensions, then call DrawTile.
@@ -337,6 +342,7 @@ void UCanvas::DrawIcon(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XSize, FLOAT
 	DrawTile(Material, X, Y, XSize, YSize, 0.0f, 0.0f,
 	         (FLOAT)MatUSize, (FLOAT)MatVSize, ZDepth, Color, AlphaScale, 0.0f);
 }
+IMPL_INFERRED("Reconstructed from context")
 void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT TileU, FLOAT TileV, FLOAT TileZ, FPlane Color, FPlane AlphaScale)
 {
 	// Ghidra 0x87ff0. Tile the material across the surface using Scale and UV offsets.
@@ -348,6 +354,7 @@ void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT
 	         (Y - TileV) * Scale + (FLOAT)MatVSize,
 	         XL * Scale, YL * Scale, TileZ, Color, AlphaScale, 0.0f);
 }
+IMPL_TODO("Needs Ghidra analysis")
 void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,float,float,FPlane,FPlane,float)
 {
 	guard(UCanvas::DrawTile);
@@ -356,6 +363,7 @@ void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,flo
 
 
 // --- FCanvasVertex ---
+IMPL_TODO("Needs Ghidra analysis")
 FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float InV)
 :	Point(InPoint)
 ,	Color(InColor)
@@ -364,10 +372,12 @@ FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float I
 {
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FCanvasVertex::FCanvasVertex()
 {
 }
 
+IMPL_INFERRED("Reconstructed from context")
 FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 {
 	Point = Other.Point;
@@ -384,11 +394,13 @@ FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 
 // UCanvas
 // ---------------------------------------------------------------------------
+IMPL_INFERRED("Reconstructed from context")
 void UCanvas::Destroy()
 {
 	Super::Destroy();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UCanvas::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
@@ -396,6 +408,7 @@ void UCanvas::Serialize(FArchive& Ar)
 
 // Ghidra: not present in Ghidra export — shared null stub, no SEH frame.
 // Returns 0 (MSVC requires a return value in non-void functions).
+IMPL_TODO("Needs Ghidra analysis")
 UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return 0;

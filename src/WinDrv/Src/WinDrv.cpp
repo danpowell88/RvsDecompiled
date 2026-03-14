@@ -630,6 +630,7 @@ void UWindowsViewport::Repaint(INT Blit)
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, INT Fullscreen)
 {
 	guard(UWindowsViewport::TryRenderDevice);

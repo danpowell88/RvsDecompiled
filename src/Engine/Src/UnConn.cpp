@@ -7,7 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
+IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
+IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -17,48 +19,56 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UNetConnection ---
 
 // --- UClient ---
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::StaticConstructor()
 {
 	guard(UClient::StaticConstructor);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::UpdateGamma()
 {
 	guard(UClient::UpdateGamma);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::UpdateGraphicOptions()
 {
 	guard(UClient::UpdateGraphicOptions);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::RestoreGamma()
 {
 	guard(UClient::RestoreGamma);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::Serialize(FArchive &)
 {
 	guard(UClient::Serialize);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::PostEditChange()
 {
 	guard(UClient::PostEditChange);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::Destroy()
 {
 	guard(UClient::Destroy);
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UClient::Exec);
@@ -160,12 +170,14 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UClient::Flush(int)
 {
 	guard(UClient::Flush);
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UClient::Init(UEngine* Engine)
 {
 	guard(UClient::Init);
@@ -177,6 +189,7 @@ void UClient::Init(UEngine* Engine)
 
 
 // --- UPlayer ---
+IMPL_INFERRED("Reconstructed from context")
 void UPlayer::Serialize(FArchive &Ar)
 {
 	guard(UPlayer::Serialize);
@@ -185,12 +198,14 @@ void UPlayer::Serialize(FArchive &Ar)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UPlayer::Destroy()
 {
 	guard(UPlayer::Destroy);
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UPlayer::Exec);
@@ -264,9 +279,11 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 // ============================================================================
 
 // ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
+IMPL_INFERRED("Reconstructed from context")
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 
 // --- Moved from EngineStubs.cpp ---
+IMPL_INFERRED("Reconstructed from context")
 UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
 {
 	if (!UChannel::IsKnownChannelType((INT)ChType))
@@ -331,6 +348,7 @@ UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally,
 
 	return Ch;
 }
+IMPL_INFERRED("Reconstructed from context")
 void UNetConnection::PostSend()
 {
 	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -341,14 +359,19 @@ void UNetConnection::PostSend()
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
 }
+IMPL_TODO("Needs Ghidra analysis")
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
 	guard(UDemoRecConnection::UDemoRecConnection);
 	unguard;
 }
+IMPL_INFERRED("Reconstructed from context")
 void UDemoRecConnection::StaticConstructor() {}
+IMPL_INFERRED("Reconstructed from context")
 FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
+IMPL_INFERRED("Reconstructed from context")
 FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
+IMPL_INFERRED("Reconstructed from context")
 void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
 	if (Driver->ServerConnection == NULL) {
@@ -362,13 +385,19 @@ void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 
 // Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
 // JNZ path: if ServerConnection != NULL, cross-function-jump to UNetConnection::FlushNet.
+IMPL_INFERRED("Reconstructed from context")
 void UDemoRecConnection::FlushNet() {
 	if (Driver->ServerConnection != NULL)
 		UNetConnection::FlushNet();
 }
+IMPL_INFERRED("Reconstructed from context")
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
+IMPL_INFERRED("Reconstructed from context")
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
+IMPL_INFERRED("Reconstructed from context")
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
+IMPL_INFERRED("Reconstructed from context")
 INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
 // Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
+IMPL_INFERRED("Reconstructed from context")
 INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }

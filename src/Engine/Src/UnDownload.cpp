@@ -7,7 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
+IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
+IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -15,17 +17,20 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UBinaryFileDownload ---
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::StaticConstructor()
 {
 	// Retail: 0x189160, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::Tick()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 int UBinaryFileDownload::TrySkipFile()
 {
 	guard(UBinaryFileDownload::TrySkipFile);
@@ -35,6 +40,7 @@ int UBinaryFileDownload::TrySkipFile()
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Reconstructed from context")
 void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 {
 	// Retail: 0x189270. Lazy-opens a write-file at path this+0x4C, then appends Data bytes.
@@ -54,16 +60,19 @@ void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 		*(INT*)((BYTE*)this + 0x44C) += Size;
 	}
 }
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 {
 	// Retail: 0x14770 (shared empty stub)
 }
+IMPL_INFERRED("Reconstructed from context")
 void UBinaryFileDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x1891e0. UChannelDownload::Serialize + serialize connection ptr at this+0x458.
 	UChannelDownload::Serialize(Ar);
 	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
+IMPL_INFERRED("Reconstructed from context")
 void UBinaryFileDownload::Destroy()
 {
 	// Retail: 0x189a30. Clear connection back-pointer at conn+0x68, call UChannelDownload::Destroy.
@@ -74,6 +83,7 @@ void UBinaryFileDownload::Destroy()
 	*(INT*)((BYTE*)this + 0x458) = 0;
 	UChannelDownload::Destroy();
 }
+IMPL_INFERRED("Reconstructed from context")
 void UBinaryFileDownload::DownloadDone()
 {
 	// Retail: 0x189330. Closes the file write handle and notifies connection.
@@ -90,6 +100,7 @@ void UBinaryFileDownload::DownloadDone()
 		*(INT*)((BYTE*)this + 0x44C) = 0;
 	}
 }
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::DownloadError(const TCHAR*)
 {
 	// Retail: 0x176d60 (shared empty stub)
@@ -97,12 +108,14 @@ void UBinaryFileDownload::DownloadError(const TCHAR*)
 
 
 // --- UChannelDownload ---
+IMPL_TODO("Needs Ghidra analysis")
 void UChannelDownload::StaticConstructor()
 {
 	// Retail: 0x188ea0, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int UChannelDownload::TrySkipFile()
 {
 	guard(UChannelDownload::TrySkipFile);
@@ -125,6 +138,7 @@ int UChannelDownload::TrySkipFile()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex, const TCHAR* Data, int DataSize)
 {
 	// Retail: 0x1898c0, 310b.
@@ -156,6 +170,7 @@ void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex,
 	ch->SendBunch(&bunch, 0);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UChannelDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x188f20, 84b.
@@ -163,6 +178,7 @@ void UChannelDownload::Serialize(FArchive& Ar)
 	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UChannelDownload::Destroy()
 {
 	// Retail: 0x1890d0, 84b. Clear the channel's back-pointer, then chain to base Destroy.
@@ -175,6 +191,7 @@ void UChannelDownload::Destroy()
 
 
 // --- UDownload ---
+IMPL_TODO("Needs Ghidra analysis")
 void UDownload::StaticConstructor()
 {
 	// Retail: 0x1889d0, 80b. Initialise config key FString at +0x38 to "" and zero +0x44.
@@ -182,11 +199,13 @@ void UDownload::StaticConstructor()
 	*(DWORD*)((BYTE*)this + 0x44) = 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UDownload::Tick()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int UDownload::TrySkipFile()
 {
 	// Retail (28b, RVA 0x188AF0): need the connection object at +0x48 to exist,
@@ -199,6 +218,7 @@ int UDownload::TrySkipFile()
 	return 1;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UDownload::ReceiveData(BYTE* Data, int Size)
 {
 	// Retail: 0x188b10, 544b. Lazy-open a temp file on the first call, then append data.
@@ -227,6 +247,7 @@ void UDownload::ReceiveData(BYTE* Data, int Size)
 	}
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR* /*Data*/, int /*DataSize*/)
 {
 	// Retail: 32b. Stores connection/channel, computes channel base offset.
@@ -236,6 +257,7 @@ void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR
 	*(INT*)((BYTE*)this + 0x34) = Channel * 0x44 + *(INT*)(ChannelTable + 0x2C);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x188a60, 82b.
@@ -243,6 +265,7 @@ void UDownload::Serialize(FArchive& Ar)
 	Ar << *(UObject**)((BYTE*)this + 0x2c);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UDownload::Destroy()
 {
 	// Retail: 0x188df0, 124b. Close and delete the temp file, clear connection back-pointer.
@@ -262,6 +285,7 @@ void UDownload::Destroy()
 	UObject::Destroy();
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x103b1d90, "Ghidra reference; body approximated")
 void UDownload::DownloadDone()
 {
 	// Retail: 0x18ae80, 1347b. Finalises the download: closes the temp file, moves it
@@ -336,6 +360,7 @@ void UDownload::DownloadDone()
 	*(INT*)((BYTE*)this + 0x2c) = 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UDownload::DownloadError(const TCHAR* Error)
 {
 	// Retail: 0x188d70, 79b. Copy error string into the error buffer at +0x24c.

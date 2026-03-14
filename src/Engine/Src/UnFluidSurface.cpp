@@ -7,7 +7,9 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
+IMPL_GHIDRA_APPROX("Engine.dll", 0x103db080, "Ghidra reference; body approximated")
 inline void* operator new(size_t, void* p) noexcept { return p; }
+IMPL_GHIDRA_APPROX("Engine.dll", 0x103db080, "Ghidra reference; body approximated")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 

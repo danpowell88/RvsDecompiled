@@ -49,6 +49,8 @@ IMPLEMENT_CLASS(UPlayerLight);
 	UMaterial implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Delegates to UObject::Serialize")
 void UMaterial::Serialize( FArchive& Ar )
 {
 	guard(UMaterial::Serialize);
@@ -56,6 +58,7 @@ void UMaterial::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UMaterial::CheckCircularReferences);
@@ -73,6 +76,7 @@ UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UMaterial::GetValidated()
 {
 	guard(UMaterial::GetValidated);
@@ -81,6 +85,7 @@ INT UMaterial::GetValidated()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UMaterial::SetValidated( UBOOL InValidated )
 {
 	guard(UMaterial::SetValidated);
@@ -89,6 +94,7 @@ void UMaterial::SetValidated( UBOOL InValidated )
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 UBOOL UMaterial::IsTransparent()
 {
 	guard(UMaterial::IsTransparent);
@@ -97,6 +103,7 @@ UBOOL UMaterial::IsTransparent()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT UMaterial::MaterialUSize()
 {
 	guard(UMaterial::MaterialUSize);
@@ -105,6 +112,7 @@ INT UMaterial::MaterialUSize()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT UMaterial::MaterialVSize()
 {
 	guard(UMaterial::MaterialVSize);
@@ -113,17 +121,20 @@ INT UMaterial::MaterialVSize()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 UBOOL UMaterial::RequiresSorting()
 {
 	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
 	return 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 BYTE UMaterial::RequiredUVStreams()
 {
 	return 1;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UMaterial* UMaterial::CheckFallback()
 {
 	guard(UMaterial::CheckFallback);
@@ -135,12 +146,14 @@ UMaterial* UMaterial::CheckFallback()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UMaterial::HasFallback()
 {
 	// Retail: 8B 51 2C 33 C0 85 D2 0F 95 C0 C3 = return FallbackMaterial != NULL
 	return FallbackMaterial != NULL;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UMaterial* UMaterial::GetDiffuse()
 {
 	return this;
@@ -150,11 +163,13 @@ UMaterial* UMaterial::GetDiffuse()
 	UBitmapMaterial implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 INT UBitmapMaterial::MaterialUSize()
 {
 	return USize;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UBitmapMaterial::MaterialVSize()
 {
 	return VSize;
@@ -164,6 +179,7 @@ INT UBitmapMaterial::MaterialVSize()
 	UTexture implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UTexture::PostLoad()
 {
 	guard(UTexture::PostLoad);
@@ -171,6 +187,7 @@ void UTexture::PostLoad()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UTexture::Destroy()
 {
 	guard(UTexture::Destroy);
@@ -178,6 +195,7 @@ void UTexture::Destroy()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UTexture::Serialize( FArchive& Ar )
 {
 	guard(UTexture::Serialize);
@@ -185,6 +203,7 @@ void UTexture::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UTexture::RequiresSorting()
 {
 	// Retail: F6 41 34 04 74 03 33 C0 C3 8B 81 94 00 00 00 D1 E8 83 E0 01 C3
@@ -193,6 +212,7 @@ UBOOL UTexture::RequiresSorting()
 	return bAlphaTexture ? 1 : 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UTexture::IsTransparent()
 {
 	return bAlphaTexture || bMasked;
@@ -202,6 +222,7 @@ UBOOL UTexture::IsTransparent()
 	UShader implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UShader::PostEditChange()
 {
 	guard(UShader::PostEditChange);
@@ -209,6 +230,7 @@ void UShader::PostEditChange()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UShader::CheckCircularReferences);
@@ -227,6 +249,7 @@ UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UShader::MaterialUSize()
 {
 	// Retail: try Diffuse first, then SelfIllumination (at 0x70), else 0
@@ -237,6 +260,7 @@ INT UShader::MaterialUSize()
 	return 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UShader::MaterialVSize()
 {
 	// Retail: try Diffuse first, then SelfIllumination (at 0x70), else 0
@@ -247,6 +271,7 @@ INT UShader::MaterialVSize()
 	return 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UShader::RequiresSorting()
 {
 	// Retail: F6 41 34 04 75 1E 8A 41 58 84 C0 75 07 8B 51 64 85 D2 75 13
@@ -261,12 +286,14 @@ UBOOL UShader::RequiresSorting()
 	        OutputBlending == OB_Brighten  || OutputBlending == OB_Darken);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UShader::IsTransparent()
 {
 	// Retail: 8B 01 FF 60 78 — tail-call JMP vtable[30] = RequiresSorting.
 	return RequiresSorting();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 BYTE UShader::RequiredUVStreams()
 {
 	// Retail: aggregates all 7 material slots with OR.
@@ -287,6 +314,7 @@ BYTE UShader::RequiredUVStreams()
 	return result;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UMaterial* UShader::CheckFallback()
 {
 	guard(UShader::CheckFallback);
@@ -304,11 +332,13 @@ UMaterial* UShader::CheckFallback()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UShader::HasFallback()
 {
 	return (FallbackMaterial != NULL) || (Diffuse != NULL);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UMaterial* UShader::GetDiffuse()
 {
 	return Diffuse;
@@ -318,6 +348,7 @@ UMaterial* UShader::GetDiffuse()
 	UModifier implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UModifier::PostEditChange()
 {
 	guard(UModifier::PostEditChange);
@@ -325,6 +356,7 @@ void UModifier::PostEditChange()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UModifier::CheckCircularReferences);
@@ -338,26 +370,31 @@ UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UModifier::MaterialUSize()
 {
 	return Material ? Material->MaterialUSize() : 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UModifier::MaterialVSize()
 {
 	return Material ? Material->MaterialVSize() : 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UModifier::RequiresSorting()
 {
 	return Material ? Material->RequiresSorting() : 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UModifier::IsTransparent()
 {
 	return Material ? Material->IsTransparent() : 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 BYTE UModifier::RequiredUVStreams()
 {
 	// Retail (21b): returns 0 when Material is null
@@ -368,6 +405,7 @@ BYTE UModifier::RequiredUVStreams()
 	UCombiner implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UCombiner::PostEditChange()
 {
 	guard(UCombiner::PostEditChange);
@@ -375,6 +413,7 @@ void UCombiner::PostEditChange()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UCombiner::CheckCircularReferences);
@@ -389,6 +428,7 @@ UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UCombiner::MaterialUSize()
 {
 	// Retail: max(Material2->MaterialUSize(), Material1->MaterialUSize())
@@ -397,6 +437,7 @@ INT UCombiner::MaterialUSize()
 	return usize2 > usize1 ? usize2 : usize1;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UCombiner::MaterialVSize()
 {
 	// Retail: max(Material2->MaterialVSize(), Material1->MaterialVSize())
@@ -405,6 +446,7 @@ INT UCombiner::MaterialVSize()
 	return vsize2 > vsize1 ? vsize2 : vsize1;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 UBOOL UCombiner::IsTransparent()
 {
 	guard(UCombiner::IsTransparent);
@@ -413,12 +455,14 @@ UBOOL UCombiner::IsTransparent()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 UBOOL UCombiner::RequiresSorting()
 {
 	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
 	return 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 BYTE UCombiner::RequiredUVStreams()
 {
 	// Retail (80b RVA=0xBD70): OR together Material1 and Material2 stream requirements.
@@ -432,6 +476,7 @@ BYTE UCombiner::RequiredUVStreams()
 	UFinalBlend implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UFinalBlend::PostEditChange()
 {
 	guard(UFinalBlend::PostEditChange);
@@ -439,6 +484,7 @@ void UFinalBlend::PostEditChange()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 INT UFinalBlend::GetValidated()
 {
 	// Retail: delegate to Material->GetValidated() if present, else return 1.
@@ -446,6 +492,7 @@ INT UFinalBlend::GetValidated()
 	return Material ? Material->GetValidated() : 1;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UFinalBlend::SetValidated( UBOOL InValidated )
 {
 	// Retail: delegate to Material->SetValidated() if present.
@@ -454,6 +501,7 @@ void UFinalBlend::SetValidated( UBOOL InValidated )
 		Material->SetValidated(InValidated);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UFinalBlend::RequiresSorting()
 {
 	// Retail: if m_bForceNoSort → return 0;
@@ -463,6 +511,7 @@ UBOOL UFinalBlend::RequiresSorting()
 	return (fb >= FB_Modulate && fb <= FB_Brighten) ? 1 : 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 UBOOL UFinalBlend::IsTransparent()
 {
 	// Retail: JMP vtable[30] = tail-call to RequiresSorting()
@@ -473,6 +522,7 @@ UBOOL UFinalBlend::IsTransparent()
 	UPalette implementation.
 =============================================================================*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UPalette::Serialize( FArchive& Ar )
 {
 	guard(UPalette::Serialize);
@@ -491,6 +541,7 @@ void UPalette::Serialize( FArchive& Ar )
 
 // UMaterial
 // ---------------------------------------------------------------------------
+IMPL_INFERRED("Reconstructed from context")
 void UMaterial::PostEditChange()
 {
 	Super::PostEditChange();

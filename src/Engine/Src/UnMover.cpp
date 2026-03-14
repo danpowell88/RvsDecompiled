@@ -292,6 +292,7 @@ void AMover::PostEditMove()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void AMover::PostLoad()
 {
 	// Ghidra 0xd4f70: AActor::PostLoad, init position sentinel (-12345.678f = 0xC640E400)
@@ -307,6 +308,7 @@ void AMover::PostLoad()
 	*(INT*)((BYTE*)this + 0x6C0) = 0x315;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void AMover::PostNetReceive()
 {
 	// Ghidra 0x7da40: AActor::PostNetReceive, then apply interpolated position
@@ -315,6 +317,7 @@ void AMover::PostNetReceive()
 	AActor::PostNetReceive();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void AMover::PostRaytrace()
 {
 	guard(AMover::PostRaytrace);
@@ -349,6 +352,7 @@ void AMover::PostRaytrace()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void AMover::PreNetReceive()
 {
 	// Ghidra 0x78100: snapshot current position this+0x6D0 to a static global,
@@ -357,6 +361,7 @@ void AMover::PreNetReceive()
 	AActor::PreNetReceive();
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void AMover::PreRaytrace()
 {
 	// Ghidra 0xd5460: copy FVector(0,0,0) from FVector0_exref into this+0x694..0x69C
@@ -367,6 +372,7 @@ void AMover::PreRaytrace()
 
 
 // --- ADoor ---
+IMPL_INFERRED("Reconstructed from context")
 void ADoor::PostaddReachSpecs(APawn *)
 {
 	guard(ADoor::PostaddReachSpecs);
@@ -392,6 +398,7 @@ void ADoor::PostaddReachSpecs(APawn *)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void ADoor::PostPath()
 {
 	guard(ADoor::PostPath);
@@ -407,6 +414,7 @@ void ADoor::PostPath()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void ADoor::PrePath()
 {
 	guard(ADoor::PrePath);
@@ -423,12 +431,14 @@ void ADoor::PrePath()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 AActor * ADoor::AssociatedLevelGeometry()
 {
 	// Ghidra 0xd5af0, 7B: return pointer at offset 0x3ec
 	return *(AActor**)((BYTE*)this + 0x3ec);
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void ADoor::FindBase()
 {
 	guard(ADoor::FindBase);
@@ -445,6 +455,7 @@ void ADoor::FindBase()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int ADoor::HasAssociatedLevelGeometry(AActor * Other)
 {
 	// Ghidra 0xd5b20, 45B: walk linked list at 0x3ec, next ptr at 0x3e0
@@ -459,6 +470,7 @@ int ADoor::HasAssociatedLevelGeometry(AActor * Other)
 	return 0;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void ADoor::InitForPathFinding()
 {
 	guard(ADoor::InitForPathFinding);
@@ -509,6 +521,7 @@ void ADoor::InitForPathFinding()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 int ADoor::IsIdentifiedAs(FName Name)
 {
 	guard(ADoor::IsIdentifiedAs);
