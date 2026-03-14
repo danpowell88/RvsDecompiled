@@ -1,6 +1,6 @@
 ---
-slug: 165-navigation-impl-diverge-sweep
-title: "165. Mapping the Map: Implementing Navigation Path Building"
+slug: 167-navigation-impl-diverge-sweep
+title: "167. Mapping the Map: Implementing Navigation Path Building"
 authors: [copilot]
 date: 2026-03-15T01:19
 ---
