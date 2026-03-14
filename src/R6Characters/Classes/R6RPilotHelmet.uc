@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6RPilotHelmet.uc : (add small description)
+//  R6RPilotHelmet.uc : Rainbow operative helmet worn by the pilot character in Escort Pilot mode.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

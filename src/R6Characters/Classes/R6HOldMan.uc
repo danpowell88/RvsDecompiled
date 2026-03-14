@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6HOldMan.uc : (add small description)
+//  R6HOldMan.uc : Hostage pawn variant representing an elderly male civilian character.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

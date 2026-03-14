@@ -176,10 +176,37 @@ void ULevel::PostLoad()
 	UObject::PostLoad();
 }
 
-IMPL_DIVERGE("stub; retail Destroy cleans up collision hash, geometry and data at Ghidra 0x103c10c0")
+IMPL_DIVERGE("calls FUN_10358ca0 and FUN_1031fc20 omitted; retail at Ghidra 0x103c10c0")
 void ULevel::Destroy()
 {
+	guard(ULevel::Destroy);
+	// Step 1: Destroy and null the collision hash (Ghidra: virtual dtor call then zero).
+	FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+	if ( hash )
+	{
+		delete hash;
+		*(FCollisionHashBase**)((BYTE*)this + 0xf0) = NULL;
+	}
+	// DIVERGENCE: FUN_10358ca0(this) — unresolved geometry/BSP cleanup helper.
+
+	// Step 2: Free Karma physics object at +0x101a8 if present.
+	// DIVERGENCE: FUN_1047c020() — Karma uninit; skipped.
+	INT karmaObj = *(INT*)((BYTE*)this + 0x101a8);
+	if ( karmaObj != 0 )
+	{
+		// FUN_1047c020(); — karma physics teardown, unresolved
+		GMalloc->Free( (void*)karmaObj );
+		*(INT*)((BYTE*)this + 0x101a8) = 0;
+	}
+
+	// Step 3: Clear the replication-info TArray at +0x1020c (element stride 0x14).
+	((FArray*)((BYTE*)this + 0x1020c))->Empty( 0x14, 0 );
+	*(INT*)((BYTE*)this + 0x1021c) = 8;
+
+	// DIVERGENCE: FUN_1031fc20() — TMap hash rehash helper; deferred.
+
 	ULevelBase::Destroy();
+	unguard;
 }
 
 // GNewCollisionHash is defined in UnCamera.cpp
@@ -1304,7 +1331,7 @@ EAcceptConnection ULevel::NotifyAcceptingConnection()
 	return ACCEPTC_Accept;
 	unguard;
 }
-IMPL_DIVERGE("connection description logging omitted; retail at Ghidra 0x103bf2a0")
+IMPL_DIVERGE("this-pointer offset differs; DevNet log format not fully reproduced; retail at Ghidra 0x103bf2a0")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
@@ -1312,8 +1339,13 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 		appFailAssert("NetDriver!=NULL",".\\UnLevel.cpp",0x348);
 	if( *(UNetConnection**)((BYTE*)NetDriver + 0x3c) != NULL )
 		appFailAssert("NetDriver->ServerConnection==NULL",".\\UnLevel.cpp",0x349);
-	// DIVERGENCE: retail calls Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68)
-	// and logs to DevNet. Ghidra 0xbf2a0. Omitted — no-op here.
+	// Ghidra 0xbf2a0: calls Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68)
+	// then logs "[timestamp] level accepted [description]" to GLog at DevNet verbosity.
+	// Retail format string is at 0x313 offset; approximated here with debugf.
+	typedef FString* (__thiscall* DescribeFn)(UNetConnection*, FString*);
+	FString desc;
+	((DescribeFn)(*(DWORD*)(*(DWORD*)Connection + 0x68)))(Connection, &desc);
+	debugf( NAME_DevNet, TEXT("%s accepted connection %s"), GetName(), *desc );
 	unguard;
 }
 IMPL_DIVERGE("this-pointer offset differs; retail at Ghidra 0x103bf3b0")

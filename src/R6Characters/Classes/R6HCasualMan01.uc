@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6HCasualMan01.uc : (add small description)
+//  R6HCasualMan01.uc : Hostage pawn variant: first casual male civilian skin used in missions.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

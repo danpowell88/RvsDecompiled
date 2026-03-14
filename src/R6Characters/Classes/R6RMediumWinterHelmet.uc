@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RMediumWinterHelmet.uc : (add small description)
+//  R6RMediumWinterHelmet.uc : Rainbow operative helmet: medium winter variant using the medium
+//                             helmet mesh.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

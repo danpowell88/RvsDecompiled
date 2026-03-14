@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TrainingMgr.uc : (add small description)
+//  R6TrainingMgr.uc : Controls the training-range practice mode; manages weapon slots, character
+//                     deployment, target scoring, and ammo reloading across 12 weapon categories.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

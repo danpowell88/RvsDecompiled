@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TerroristHuntGame.uc : (add small description)
+//  R6TerroristHuntGame.uc : Co-op game mode where Rainbow must eliminate all terrorists;
+//                           initialises the hunt objectives.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

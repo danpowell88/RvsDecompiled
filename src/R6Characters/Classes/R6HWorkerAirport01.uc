@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6HWorkerAirport01.uc : (add small description)
+//  R6HWorkerAirport01.uc : Hostage pawn variant: first airport worker skin used in airport-themed missions.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

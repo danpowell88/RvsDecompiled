@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6InsertionZone.uc : (add small description)
+//  R6InsertionZone.uc : Marks a team insertion (spawn) area on the map used during the
+//                       pre-mission planning phase.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

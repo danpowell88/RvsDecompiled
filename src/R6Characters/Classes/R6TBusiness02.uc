@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TBusiness02.uc : (add small description)
+//  R6TBusiness02.uc : Terrorist pawn variant: second business-attire enemy skin.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

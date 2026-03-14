@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HCasualMan02.uc : (add small description)
+//  R6HCasualMan02.uc : Hostage pawn variant: second casual male civilian skin; shares animations
+//                      with R6HCasualMan01.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

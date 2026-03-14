@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HostagePawn.uc : (add small description)
+//  R6HostagePawn.uc : Abstract base pawn for all hostage characters; loads the shared hostage
+//                     animation set.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

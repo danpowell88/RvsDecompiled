@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TBusiness01.uc : (add small description)
+//  R6TBusiness01.uc : Terrorist pawn variant: first business-attire skin representing
+//                     corporate/white-collar enemy types.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

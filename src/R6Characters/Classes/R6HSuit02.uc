@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HSuit02.uc : (add small description)
+//  R6HSuit02.uc : Hostage pawn variant: second business-suited civilian skin; shares animations
+//                 with R6HSuit01.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

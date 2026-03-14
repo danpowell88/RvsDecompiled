@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TBusiness03.uc : (add small description)
+//  R6TBusiness03.uc : Terrorist pawn variant: third business-attire skin built on the militant01 base.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

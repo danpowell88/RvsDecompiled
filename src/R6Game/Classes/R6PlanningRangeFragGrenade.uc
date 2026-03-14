@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6PlanningRangeFragGrenade.uc : (add small description)
+//  R6PlanningRangeFragGrenade.uc : Planning range indicator for frag grenades; extends R6PlanningRangeGrenade
+//                                  to show the blast radius in the planning view.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

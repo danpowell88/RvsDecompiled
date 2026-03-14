@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HWorkerMeat02.uc : (add small description)
+//  R6HWorkerMeat02.uc : Hostage pawn variant: second meat-packing plant worker skin; shares animations
+//                       with R6HWorkerMeat01.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

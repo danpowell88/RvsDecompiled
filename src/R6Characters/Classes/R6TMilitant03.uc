@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TMilitant03.uc : (add small description)
+//  R6TMilitant03.uc : Terrorist pawn variant: third militant skin built on the militant01 base.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

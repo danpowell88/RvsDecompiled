@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6HWorkerMeat01.uc : (add small description)
+//  R6HWorkerMeat01.uc : Hostage pawn variant: first meat-packing plant worker skin for industrial missions.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

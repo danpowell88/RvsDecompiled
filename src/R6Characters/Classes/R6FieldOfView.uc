@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6FieldOfView.uc : (add small description)
+//  R6FieldOfView.uc : Static mesh actor that visualises a character's field-of-view cone in
+//                     the editor for debugging AI perception.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

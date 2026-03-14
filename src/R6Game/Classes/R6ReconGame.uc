@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6ReconGame.uc : (add small description)
+//  R6ReconGame.uc : Co-op reconnaissance game mode that initialises recon-specific
+//                   mission objectives.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

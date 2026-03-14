@@ -94,7 +94,7 @@ void FAnimMeshVertexStream::GetRawStreamData(void ** Out, int Offset)
 {
 	*Out = *(BYTE**)(Pad + 4) + Offset * 0x20;
 }
-IMPL_DIVERGE("FAnimMeshVertexStream::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10314870)
 int FAnimMeshVertexStream::GetRevision()
 {
 	return *(INT*)(Pad + 24);
@@ -193,7 +193,7 @@ int FBspVertexStream::GetStride()
 
 
 // --- FLevelSceneNode ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x10406670 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x10406670 (1270b): full scene render loop; references DAT_10780bf0 (UProxyBitmapMaterial global), FUN_10385b30 (viewport setup), and complex BSP/actor dispatch")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.

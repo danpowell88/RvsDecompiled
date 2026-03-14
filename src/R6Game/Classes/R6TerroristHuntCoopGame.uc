@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TerroristHuntCoopGame.uc : (add small description)
+//  R6TerroristHuntCoopGame.uc : Co-operative variant of terrorist hunt; extends R6TerroristHuntGame
+//                               for online co-op sessions.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

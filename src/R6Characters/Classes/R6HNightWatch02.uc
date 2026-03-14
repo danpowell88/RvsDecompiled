@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HNightWatch02.uc : (add small description)
+//  R6HNightWatch02.uc : Hostage pawn variant: second night-watchman skin; shares animations
+//                       with R6HNightWatch01.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

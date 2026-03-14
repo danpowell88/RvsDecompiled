@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RMediumHelmet.uc : (add small description)
+//  R6RMediumHelmet.uc : Rainbow operative helmet: standard medium-protection helmet with its own
+//                       static mesh.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

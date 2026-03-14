@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TGutierrez.uc : (add small description)
+//  R6TGutierrez.uc : Terrorist pawn representing the named campaign villain Gutierrez.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

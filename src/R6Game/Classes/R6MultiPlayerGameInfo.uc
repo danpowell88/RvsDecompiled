@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6MultiPlayerGameInfo.uc : (add small description)
+//  R6MultiPlayerGameInfo.uc : Native base class for all Rainbow Six multiplayer game modes; handles
+//                             player login, team balancing, round timing, and voting systems.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
