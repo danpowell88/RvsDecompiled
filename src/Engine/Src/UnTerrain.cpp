@@ -891,7 +891,7 @@ void FTerrainTools::Init()
 
 
 // --- UTerrainMaterial ---
-IMPL_DIVERGE("VA unconfirmed; virtual — returns this as fallback material")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 UMaterial * UTerrainMaterial::CheckFallback()
 {
 	return this;

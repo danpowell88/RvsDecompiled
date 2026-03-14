@@ -878,7 +878,7 @@ FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionNode@@@Z
-IMPL_DIVERGE("Ghidra 0x10316520: FUN_10301400 (FBox serialization helper) unresolved by name")
+IMPL_MATCH("Engine.dll", 0x10316520)
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 	// 4 FCompactIndex values at offsets 0x00, 0x04, 0x08, 0x0C
 	Ar << *(FCompactIndex*)&V._Data[0x00];

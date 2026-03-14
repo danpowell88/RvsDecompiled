@@ -1002,14 +1002,13 @@ void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x1040BA00 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1040BA00: FLineBatcher wireframe box render (2837b) — editor-only interpolation point visualiser; runtime not affected")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);
-	// Ghidra 0x10ba00: draws a wireframe box via FLineBatcher showing the interpolation
-	// point's local axes (32-unit inner face, 64-unit outer face).
-	// DIVERGENCE: FLineBatcher raw-float 8-vertex box not reconstructed (editor-only path).
-	// Base class rendering is kept as a functional fallback.
+	// Retail: allocates FLineBatcher, draws wireframe box showing local axes
+	// (32-unit inner face, 64-unit outer face) for editor visualisation.
+	// DIVERGENCE: editor-only path; FLineBatcher raw-float vertex setup not reconstructed.
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
 	unguard;
 }
