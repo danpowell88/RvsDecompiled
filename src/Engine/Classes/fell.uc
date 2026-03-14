@@ -1,3 +1,6 @@
+// Fell — damage type for fall deaths.
+// "Left a small crater" messages indicate a fatal drop.
+// Extracted from retail Engine.u.
 class Fell extends DamageType
 	abstract;
 
