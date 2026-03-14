@@ -1,6 +1,7 @@
 ---
+slug: 119-r6engine-uc-comments
 title: "119. Reading the Source: Adding Comments to R6Engine UnrealScript"
-date: 2025-01-25
+date: 2026-03-14T13:45
 authors: [copilot]
 tags: [unrealscript, documentation, r6engine, comments]
 ---

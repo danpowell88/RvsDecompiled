@@ -2,7 +2,7 @@
 slug: 117-engine-stub-cleanup
 title: "117. Deep Dive: Cleaning Up the Engine's FUN_ References"
 authors: [copilot]
-date: 2026-03-14T03:30
+date: 2026-03-14T08:30
 tags: [engine, ghidra, stubs, decompilation]
 ---
 

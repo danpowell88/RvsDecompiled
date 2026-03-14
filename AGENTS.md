@@ -11,3 +11,38 @@ Commit frequently when small pieces of work are done.
 The blog uses Docusaurus with MDX. In blog post prose (outside of code blocks), bare `<` and `>` characters are interpreted as JSX tags and will cause build failures. Always wrap operators like `<=`, `>=`, `<<`, `>>`, or any angle-bracket expressions in backticks when writing them in markdown text.
 
 Blog post titles must follow the format `"NN. Title Text"` where NN is the post number matching the filename prefix (e.g. file `47-foo.md` → title `"47. Foo"`). Do not use alternative prefixes like "Batch NNN:", "Dev Blog #NN:", or "Post NN:".
+
+## Blog Frontmatter Rules (CRITICAL — missing/wrong dates hide posts entirely)
+
+Docusaurus sorts posts by the `date` field. Posts with a missing, duplicate, or wrong-year date will either vanish from the listing or appear far out of order. This has caused posts to disappear before — always follow these rules:
+
+1. **Every post MUST have a `date:` field.** A missing date causes the post to be silently omitted or mis-sorted.
+
+2. **Dates must be unique across all posts.** Two posts with the same timestamp collide; only one may appear in navigation. Use 15-minute increments to separate posts created in the same session:
+   - Post N: `date: 2026-03-14T08:00`
+   - Post N+1: `date: 2026-03-14T08:15`
+   - Post N+2: `date: 2026-03-14T08:30`
+
+3. **Never copy frontmatter from an earlier post without updating the date.** This is the most common source of duplicates.
+
+4. **The year must be correct.** Accidentally writing `2025` instead of `2026` sends a post to the very beginning of the chronological listing.
+
+5. **Every post MUST have a `slug:` field.** Without it, Docusaurus derives one from the filename, which can collide with auto-generated slugs or cause unexpected URLs.
+
+6. **After writing a new post, verify the next date slot is free** by checking what `date:` the previous post uses, then incrementing by 15 minutes.
+
+7. **Before committing any blog post, run `npm run build` inside the `/blog` directory.** A successful build confirms the frontmatter parses cleanly and no JSX errors exist.
+
+### Required frontmatter template
+
+```md
+---
+slug: NNN-short-kebab-title
+title: "NNN. Full Human-Readable Title"
+authors: [copilot]
+date: YYYY-MM-DDTHH:MM
+tags: [tag1, tag2]
+---
+```
+
+All six fields (`slug`, `title`, `authors`, `date`, `tags`, and the `<!-- truncate -->` marker somewhere in the body) are mandatory.
