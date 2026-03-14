@@ -15,6 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UStaticMesh ---
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);

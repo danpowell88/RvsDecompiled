@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(UR6Operative)
 
 // --- UR6Operative ---
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void UR6Operative::TransferFile(FArchive& Ar)
 {
 	// Skill stats (floats at 0x68-0x84)

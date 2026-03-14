@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(UR6SubActionLookAt)
 
 // --- UR6SubActionLookAt ---
 
+IMPL_APPROX("Appends LookAt label to base stat string for scene manager debugging")
 FString UR6SubActionLookAt::GetStatString()
 {
 	FString Result = UMatSubAction::GetStatString();
@@ -15,6 +16,7 @@ FString UR6SubActionLookAt::GetStatString()
 	return Result;
 }
 
+IMPL_APPROX("Delegates to base Update; if running and pawn assigned, calls PawnTrackActor for look-at targeting")
 INT UR6SubActionLookAt::Update(FLOAT DeltaTime, ASceneManager* SceneManager)
 {
 	if (!UMatSubAction::Update(DeltaTime, SceneManager))

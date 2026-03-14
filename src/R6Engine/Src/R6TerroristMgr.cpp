@@ -12,6 +12,7 @@ IMPLEMENT_FUNCTION(UR6TerroristMgr, -1, execInit)
 
 // --- UR6TerroristMgr ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6TerroristMgr::execFindNearestZoneForHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, terro);
@@ -19,6 +20,7 @@ void UR6TerroristMgr::execFindNearestZoneForHostage(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6TerroristMgr::execInit(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, dummy);

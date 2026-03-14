@@ -11,11 +11,13 @@ IMPLEMENT_FUNCTION(UR6MatineeAttach, -1, execTestLocation)
 
 // --- UR6MatineeAttach ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6MatineeAttach::execGetBoneInformation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6MatineeAttach::execTestLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

@@ -18,6 +18,7 @@ IMPLEMENT_FUNCTION(AR6DeploymentZone, -1, execOrderTerroListFromDistanceTo)
 
 // --- AR6DeploymentZone ---
 
+IMPL_INFERRED("Reconstructed editor validation: puts non-path/non-random zones on ground and calls overload")
 void AR6DeploymentZone::CheckForErrors()
 {
 	guard(AR6DeploymentZone::CheckForErrors);
@@ -31,6 +32,7 @@ void AR6DeploymentZone::CheckForErrors()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed template chance and min/max validation; retail copy-paste bug in bSilent path preserved")
 void AR6DeploymentZone::CheckForErrors(bool bSilent)
 {
 	guard(AR6DeploymentZone::CheckForErrors);
@@ -79,6 +81,7 @@ void AR6DeploymentZone::CheckForErrors(bool bSilent)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed closest point dispatch for rectangle and circle zone types")
 FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 {
 	guard(AR6DeploymentZone::FindClosestPointTo);
@@ -123,6 +126,7 @@ FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FVector AR6DeploymentZone::FindRandomPointInArea()
 {
 	// STUB: too complex — retail tries up to 5 times to find a valid pawn-sized spawn
@@ -130,11 +134,13 @@ FVector AR6DeploymentZone::FindRandomPointInArea()
 	return FVector(0,0,0);
 }
 
+IMPL_INFERRED("Simple wrapper delegating to FindRandomPointInArea; ignores rotation/stance/leave params")
 FVector AR6DeploymentZone::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
 {
 	return FindRandomPointInArea();
 }
 
+IMPL_INFERRED("Reconstructed first-time init: cumulative template chances, terrorist and hostage spawning")
 void AR6DeploymentZone::FirstInit()
 {
 	guard(AR6DeploymentZone::FirstInit);
@@ -188,6 +194,7 @@ void AR6DeploymentZone::FirstInit()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed terrorist spawn count: game type override check and random range selection")
 INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 {
 	// Check if game type overrides terrorist count
@@ -203,6 +210,7 @@ INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 	return Result;
 }
 
+IMPL_INFERRED("Reconstructed hostage presence check across this zone and all linked hostage zones")
 INT AR6DeploymentZone::HaveHostage()
 {
 	INT i = -1;
@@ -226,6 +234,7 @@ INT AR6DeploymentZone::HaveHostage()
 	} while (true);
 }
 
+IMPL_INFERRED("Reconstructed spawn-space validation using default terrorist collision extent")
 INT AR6DeploymentZone::HavePlaceForPawnAt(FVector& Position)
 {
 	guard(AR6DeploymentZone::HavePlaceForPawnAt);
@@ -235,6 +244,7 @@ INT AR6DeploymentZone::HavePlaceForPawnAt(FVector& Position)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed alive terrorist presence check with dead-entry pruning")
 INT AR6DeploymentZone::HaveTerrorist()
 {
 	for (INT i = 0; i < m_aTerrorist.Num(); i++)
@@ -254,18 +264,21 @@ INT AR6DeploymentZone::HaveTerrorist()
 	return 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DeploymentZone::InitHostageAI(FR6CharTemplate * Template, AR6Hostage * Hostage)
 {
 	// STUB: too complex — sets hostage AI parameters (faction, patrol mode, zone ref)
 	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate * Template, AR6Terrorist * Terrorist)
 {
 	// STUB: too complex — sets terrorist AI parameters (skin, stance, group ID, zone ref)
 	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
+IMPL_INFERRED("Reconstructed point-in-zone test dispatching to rectangle or circle zone type")
 INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
 {
 	guard(AR6DeploymentZone::IsPointInZone);
@@ -304,6 +317,7 @@ INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
 	unguard;
 }
 
+IMPL_INTENTIONALLY_EMPTY("FLineBatcher drawing stub; Ghidra confirms drawing-only body")
 void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DeploymentZone::RenderEditorInfo);
@@ -314,6 +328,7 @@ void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DeploymentZone::SpawnAHostage()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a hostage class
@@ -321,6 +336,7 @@ void AR6DeploymentZone::SpawnAHostage()
 	// fires a script event, and adds the result to m_aHostage.
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6DeploymentZone::SpawnATerrorist()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a terrorist class
@@ -328,6 +344,7 @@ void AR6DeploymentZone::SpawnATerrorist()
 	// fires a script event, and adds the result to m_aTerrorist.
 }
 
+IMPL_INFERRED("Reconstructed Spawned: sets default terrorist and hostage template names and initial chances")
 void AR6DeploymentZone::Spawned()
 {
 	guard(AR6DeploymentZone::Spawned);
@@ -340,6 +357,7 @@ void AR6DeploymentZone::Spawned()
 	unguard;
 }
 
+IMPL_INFERRED("Exec wrapper; appends hostage to m_aHostage array")
 void AR6DeploymentZone::execAddHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6Hostage, hostage);
@@ -347,6 +365,7 @@ void AR6DeploymentZone::execAddHostage(FFrame& Stack, RESULT_DECL)
 	m_aHostage.AddItem(hostage);
 }
 
+IMPL_INFERRED("Exec wrapper delegating to FindClosestPointTo")
 void AR6DeploymentZone::execFindClosestPointTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -354,18 +373,21 @@ void AR6DeploymentZone::execFindClosestPointTo(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = FindClosestPointTo(vPoint);
 }
 
+IMPL_INFERRED("Exec wrapper delegating to FindRandomPointInArea")
 void AR6DeploymentZone::execFindRandomPointInArea(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FVector*)Result = FindRandomPointInArea();
 }
 
+IMPL_INFERRED("Exec wrapper delegating to FirstInit")
 void AR6DeploymentZone::execFirstInit(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	FirstInit();
 }
 
+IMPL_INFERRED("Reconstructed closest hostage search across all linked hostage zones")
 void AR6DeploymentZone::execGetClosestHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -400,18 +422,21 @@ void AR6DeploymentZone::execGetClosestHostage(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = ClosestHostage;
 }
 
+IMPL_INFERRED("Exec wrapper delegating to HaveHostage")
 void AR6DeploymentZone::execHaveHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = HaveHostage();
 }
 
+IMPL_INFERRED("Exec wrapper delegating to HaveTerrorist")
 void AR6DeploymentZone::execHaveTerrorist(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = HaveTerrorist();
 }
 
+IMPL_INFERRED("Exec wrapper delegating to IsPointInZone")
 void AR6DeploymentZone::execIsPointInZone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -419,6 +444,7 @@ void AR6DeploymentZone::execIsPointInZone(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = IsPointInZone(vPoint);
 }
 
+IMPL_GHIDRA("R6Engine.dll", 0x18a60)
 void AR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -451,6 +477,7 @@ void AR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame& Stack, RESULT_D
 	}
 }
 
+IMPL_INFERRED("Reconstructed cumulative chance sum across a template array")
 INT AR6DeploymentZone::getChanceFromArrayTemplates(struct FSTTemplate *Templates, INT sizeOfArray)
 {
 	check(sizeOfArray <= 5); // UCONST_C_NB_Template

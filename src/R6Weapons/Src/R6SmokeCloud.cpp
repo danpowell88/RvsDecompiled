@@ -8,12 +8,14 @@ IMPLEMENT_CLASS(AR6SmokeCloud)
 
 // --- AR6SmokeCloud ---
 
+IMPL_EMPTY("retail implementation is empty; smoke clouds are never blocked")
 INT AR6SmokeCloud::IsBlockedBy(AActor const* Other) const
 {
 	// retail: empty — smoke clouds are never blocked.
 	return 0;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 INT AR6SmokeCloud::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	if (TraceFlags & 0x80000)

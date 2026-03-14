@@ -25,6 +25,7 @@ static BYTE GR6PlayerController_OldTeamByte;
 
 // --- AR6PlayerController ---
 
+IMPL_INFERRED("Drains voice priority list, freeing all allocated sound entries, then calls base Destroy")
 void AR6PlayerController::Destroy()
 {
 	guard(AR6PlayerController::Destroy);
@@ -45,16 +46,19 @@ void AR6PlayerController::Destroy()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FString AR6PlayerController::GetLocKeyNameByActionKey(TCHAR const *)
 {
 	return TEXT("");
 }
 
+IMPL_INFERRED("Returns cached team manager actor pointer")
 AActor * AR6PlayerController::GetTeamManager()
 {
 	return m_TeamManager;
 }
 
+IMPL_INFERRED("Plays next queued voice sound at the given priority level via audio subsystem vtable")
 INT AR6PlayerController::PlayPriority(INT param_1)
 {
 	guard(AR6PlayerController::PlayPriority);
@@ -146,6 +150,7 @@ INT AR6PlayerController::PlayPriority(INT param_1)
 	unguard;
 }
 
+IMPL_INFERRED("Advances voice priority queue: stops finished sounds and plays next at priority 5/10/15")
 void AR6PlayerController::PlayVoicesPriority()
 {
 	guard(AR6PlayerController::PlayVoicesPriority);
@@ -188,6 +193,7 @@ void AR6PlayerController::PlayVoicesPriority()
 	unguard;
 }
 
+IMPL_INFERRED("Fires team-selection event when replicated team byte changes")
 void AR6PlayerController::PostNetReceive()
 {
 	guard(AR6PlayerController::PostNetReceive);
@@ -197,6 +203,7 @@ void AR6PlayerController::PostNetReceive()
 	unguard;
 }
 
+IMPL_INFERRED("Caches current team byte before net update for change detection in PostNetReceive")
 void AR6PlayerController::PreNetReceive()
 {
 	guard(AR6PlayerController::PreNetReceive);
@@ -205,6 +212,7 @@ void AR6PlayerController::PreNetReceive()
 	unguard;
 }
 
+IMPL_INFERRED("Returns the SoundRepInfo actor if set, otherwise falls back to pawn or self")
 AActor * AR6PlayerController::SelectActorForSound(AR6SoundReplicationInfo * SoundRepInfo)
 {
 	if (!SoundRepInfo)
@@ -216,6 +224,7 @@ AActor * AR6PlayerController::SelectActorForSound(AR6SoundReplicationInfo * Soun
 	return (AActor*)SoundRepInfo;
 }
 
+IMPL_INFERRED("Stops a playing voice via audio subsystem vtable, removes entry from priority list, and frees memory")
 void AR6PlayerController::StopAndRemoveVoices(INT & Index)
 {
 	guard(AR6PlayerController::StopAndRemoveVoices);
@@ -239,6 +248,7 @@ void AR6PlayerController::StopAndRemoveVoices(INT & Index)
 	unguard;
 }
 
+IMPL_INFERRED("Calls PlayVoicesPriority when audio system is present, then delegates to base Tick")
 INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 {
 	guard(AR6PlayerController::Tick);
@@ -250,6 +260,7 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	unguard;
 }
 
+IMPL_INFERRED("Fires line trace from eye to query circumtantial action target; full vtable dispatch pattern deferred")
 void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);
@@ -263,6 +274,7 @@ void AR6PlayerController::UpdateCircumstantialAction()
 	unguard;
 }
 
+IMPL_INFERRED("Scans for alive terrorists and projects bone positions to screen to find closest aim target; helpers deferred")
 void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);
@@ -275,6 +287,7 @@ void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 	unguard;
 }
 
+IMPL_INFERRED("Queries identify target and updates weapon's identify state with reticule info string")
 void AR6PlayerController::UpdateReticuleIdentification(AActor * param_1)
 {
 	guard(AR6PlayerController::UpdateReticuleIdentification);
@@ -295,6 +308,7 @@ void AR6PlayerController::UpdateReticuleIdentification(AActor * param_1)
 	unguard;
 }
 
+IMPL_INFERRED("Traces from spectator eye position to find targeted pawn name; FName copy logic deferred")
 void AR6PlayerController::UpdateSpectatorReticule()
 {
 	guard(AR6PlayerController::UpdateSpectatorReticule);
@@ -306,16 +320,19 @@ void AR6PlayerController::UpdateSpectatorReticule()
 	unguard;
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventClientNotifySendMatchResults()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ClientNotifySendMatchResults), NULL);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventClientNotifySendStartMatch()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ClientNotifySendStartMatch), NULL);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventClientPlayVoices(AR6SoundReplicationInfo * A, USound * B, BYTE C, INT D, DWORD E, FLOAT F)
 {
 	struct { 
@@ -335,6 +352,7 @@ void AR6PlayerController::eventClientPlayVoices(AR6SoundReplicationInfo * A, USo
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ClientPlayVoices), &Parms);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventClientUpdateLadderStat(FString const & A, INT B, INT C, FLOAT D)
 {
 	struct { 
@@ -350,6 +368,7 @@ void AR6PlayerController::eventClientUpdateLadderStat(FString const & A, INT B, 
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ClientUpdateLadderStat), &Parms);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventClientVoteSessionAbort(FString const & A)
 {
 	struct { FString A; } Parms;
@@ -357,6 +376,7 @@ void AR6PlayerController::eventClientVoteSessionAbort(FString const & A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ClientVoteSessionAbort), &Parms);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 FLOAT AR6PlayerController::eventGetZoomMultiplyFactor(FLOAT A)
 {
 	struct {
@@ -369,11 +389,13 @@ FLOAT AR6PlayerController::eventGetZoomMultiplyFactor(FLOAT A)
 	return Parms.ReturnValue;
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventPlayerTeamSelectionReceived()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlayerTeamSelectionReceived), NULL);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventPostRender(UCanvas * A)
 {
 	struct { UCanvas * A; } Parms;
@@ -381,6 +403,7 @@ void AR6PlayerController::eventPostRender(UCanvas * A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PostRender), &Parms);
 }
 
+IMPL_INFERRED("Standard UObject event thunk")
 void AR6PlayerController::eventSetCrouchBlend(FLOAT A)
 {
 	struct { FLOAT A; } Parms;
@@ -388,11 +411,13 @@ void AR6PlayerController::eventSetCrouchBlend(FLOAT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetCrouchBlend), &Parms);
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execDebugFunction(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execFindPlayer(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(inPlayerIdent);
@@ -401,6 +426,7 @@ void AR6PlayerController::execFindPlayer(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execGetLocStringWithActionKey(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(szText);
@@ -409,6 +435,7 @@ void AR6PlayerController::execGetLocStringWithActionKey(FFrame& Stack, RESULT_DE
 	*(FString*)Result = TEXT("");
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(SectionName);
@@ -420,6 +447,7 @@ void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 	*(FString*)Result = TEXT("");
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6SoundReplicationInfo, aAudioRepInfo);
@@ -434,12 +462,14 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 	// Full implementation requires resolving FstSoundPriorityPtr struct and priority queue.
 }
 
+IMPL_INFERRED("Delegates to UpdateCircumstantialAction after parameter extraction")
 void AR6PlayerController::execUpdateCircumstantialAction(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	UpdateCircumstantialAction();
 }
 
+IMPL_INFERRED("Delegates to UpdateReticule after parameter extraction")
 void AR6PlayerController::execUpdateReticule(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_FLOAT(fDeltaTime);
@@ -447,6 +477,7 @@ void AR6PlayerController::execUpdateReticule(FFrame& Stack, RESULT_DECL)
 	UpdateReticule(fDeltaTime);
 }
 
+IMPL_INFERRED("Delegates to UpdateSpectatorReticule")
 void AR6PlayerController::execUpdateSpectatorReticule(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

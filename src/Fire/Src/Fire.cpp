@@ -53,6 +53,7 @@ IMPLEMENT_CLASS(UWetTexture);
 	The retail DLL exports these explicitly.
 -----------------------------------------------------------------------------*/
 
+IMPL_APPROX("Reconstructed from context")
 FSpark& FSpark::operator=( const FSpark& Other )
 {
 	Type  = Other.Type;
@@ -66,6 +67,7 @@ FSpark& FSpark::operator=( const FSpark& Other )
 	return *this;
 }
 
+IMPL_APPROX("Reconstructed from context")
 FDrop& FDrop::operator=( const FDrop& Other )
 {
 	Type   = Other.Type;
@@ -79,6 +81,7 @@ FDrop& FDrop::operator=( const FDrop& Other )
 	return *this;
 }
 
+IMPL_APPROX("Reconstructed from context")
 KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 {
 	Type  = Other.Type;
@@ -175,6 +178,7 @@ KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 #define PTR_AT(obj, off)    (*(INT*)((BYTE*)(obj) + (off)))
 
 /* Get pixel data pointer from the first mipmap. */
+IMPL_APPROX("Internal helper reconstructed from context")
 static inline BYTE* GetMipPixels( void* Obj )
 {
 	INT MipsPtr = PTR_AT(Obj, 0xbc);
@@ -183,6 +187,7 @@ static inline BYTE* GetMipPixels( void* Obj )
 }
 
 /* Random byte — approximates FUN_10509f60 (retail inline PRNG). */
+IMPL_APPROX("Approximates retail PRNG FUN_10509f60")
 static inline BYTE RandByte()
 {
 	return (BYTE)appRand();
@@ -221,6 +226,7 @@ static BYTE  GOrbBright[256];       // DAT_105131c0  orbital brightness
 
 static UBOOL GTablesInit = 0;
 
+IMPL_APPROX("Reconstructed from context")
 static void InitFireTables()
 {
 	if( GTablesInit ) return;
@@ -239,21 +245,25 @@ static void InitFireTables()
 	UFractalTexture — base class for all procedural textures.
 -----------------------------------------------------------------------------*/
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFractalTexture::Init( INT InUSize, INT InVSize )
 {
 	UTexture::Init( InUSize, InVSize );
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFractalTexture::PostLoad()
 {
 	UTexture::PostLoad();
 }
 
+IMPL_MATCH("Fire.dll", 0x6b20)
 void UFractalTexture::PostEditChange()
 {
 	// Ghidra: PostEditChange at 0x6b20 is empty in the retail binary.
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFractalTexture::Prime()
 {
 	// Ghidra: Calls UTexture::Prime after checking client state
@@ -262,6 +272,7 @@ void UFractalTexture::Prime()
 	UTexture::Prime();
 }
 
+IMPL_APPROX("Confirmed empty in retail binary")
 void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Confirmed empty in retail binary.
@@ -271,6 +282,7 @@ void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	UFireTexture — animated fire effect.
 -----------------------------------------------------------------------------*/
 
+IMPL_APPROX("Reconstructed from context")
 void UFireTexture::Clear( DWORD Flags )
 {
 	// Ghidra: memsets the mip pixel buffer to 0.
@@ -282,11 +294,13 @@ void UFireTexture::Clear( DWORD Flags )
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFireTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
+IMPL_MATCH("Fire.dll", 0x50f0)
 void UFireTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x50f0: calls RedrawSparks() then PostDrawSparks().
@@ -294,6 +308,7 @@ void UFireTexture::ConstantTimeTick()
 	PostDrawSparks();
 }
 
+IMPL_MATCH("Fire.dll", 0x2440)
 void UFireTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra at 0x2440: calls FirePaint with the click coordinates.
@@ -302,6 +317,7 @@ void UFireTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 	FirePaint( IX, IY, Flags );
 }
 
+IMPL_APPROX("Reconstructed from context")
 void UFireTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra: similar to Click — calls FirePaint.
@@ -310,6 +326,7 @@ void UFireTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 	FirePaint( IX, IY, Flags );
 }
 
+IMPL_MATCH("Fire.dll", 0x6c50)
 void UFireTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Ghidra at 0x6c50: writes a random byte to the pixel buffer.
@@ -321,11 +338,13 @@ void UFireTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFireTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UFireTexture::Serialize( FArchive& Ar )
 {
 	UTexture::Serialize( Ar );
@@ -333,6 +352,7 @@ void UFireTexture::Serialize( FArchive& Ar )
 
 /*--- UFireTexture private helpers ---*/
 
+IMPL_MATCH("Fire.dll", 0x6800)
 void UFireTexture::TempDrawSpark( INT X, INT Y, INT H )
 {
 	// Ghidra at 0x6800: writes H to pixel at (X & UMask, Y & VMask).
@@ -347,6 +367,7 @@ void UFireTexture::TempDrawSpark( INT X, INT Y, INT H )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x6830)
 void UFireTexture::FirePaint( INT X, INT Y, DWORD C )
 {
 	// Ghidra at 0x6830: if flag bit 0 set, calls AddSpark.
@@ -357,6 +378,7 @@ void UFireTexture::FirePaint( INT X, INT Y, DWORD C )
 		DeleteSparks( X, Y, 12 );
 }
 
+IMPL_GHIDRA("Fire.dll", 0xa120)
 void UFireTexture::MoveSpark( FSpark* S )
 {
 	// Ghidra at 0xa120: probabilistic movement based on spark speed.
@@ -391,6 +413,7 @@ void UFireTexture::MoveSpark( FSpark* S )
 	}
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0xa280, "sine table approximated with appSin")
 void UFireTexture::MoveSparkAngle( FSpark* S, BYTE Angle )
 {
 	// Ghidra at 0xa280: like MoveSpark but speed is derived from a
@@ -427,6 +450,7 @@ void UFireTexture::MoveSparkAngle( FSpark* S, BYTE Angle )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0xa400)
 void UFireTexture::MoveSparkTwo( FSpark* S )
 {
 	// Ghidra at 0xa400: like MoveSpark for X, but Y always decrements by 2.
@@ -448,6 +472,7 @@ void UFireTexture::MoveSparkTwo( FSpark* S )
 	S->Y = (BYTE)((S->Y - 2) & VMaskB);
 }
 
+IMPL_GHIDRA("Fire.dll", 0x9fc0)
 void UFireTexture::MoveSparkXY( FSpark* S, signed char DX, signed char DY )
 {
 	// Ghidra at 0x9fc0: like MoveSpark but with explicit DX/DY parameters.
@@ -477,6 +502,7 @@ void UFireTexture::MoveSparkXY( FSpark* S, signed char DX, signed char DY )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x2490)
 void UFireTexture::CloseSpark( INT X, INT Y )
 {
 	// Ghidra at 0x2490: searches for the nearest spark of matching type
@@ -512,6 +538,7 @@ void UFireTexture::CloseSpark( INT X, INT Y )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x26d0)
 void UFireTexture::DeleteSparks( INT X, INT Y, INT Z )
 {
 	// Ghidra at 0x26d0: removes sparks within distance Z of (X,Y).
@@ -534,6 +561,7 @@ void UFireTexture::DeleteSparks( INT X, INT Y, INT Z )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x6840)
 void UFireTexture::DrawFlashRamp( LineSeg Seg, BYTE A, BYTE B )
 {
 	// Ghidra at 0x6840: draws a line with ramping brightness.
@@ -542,6 +570,7 @@ void UFireTexture::DrawFlashRamp( LineSeg Seg, BYTE A, BYTE B )
 		(INT)Seg.Y1 + (INT)(signed char)Seg.Y2, A );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x68a0)
 void UFireTexture::DrawSparkLine( INT X1, INT Y1, INT X2, INT Y2, INT H )
 {
 	// Ghidra at 0x68a0: Bresenham-style line drawing using TempDrawSpark.
@@ -586,6 +615,7 @@ void UFireTexture::DrawSparkLine( INT X1, INT Y1, INT X2, INT Y2, INT H )
 	}
 }
 
+IMPL_GHIDRA("Fire.dll", 0x50d0)
 void UFireTexture::PostDrawSparks()
 {
 	// Ghidra at 0x50d0: applies a heat diffusion pass over the pixel buffer.
@@ -622,6 +652,7 @@ void UFireTexture::PostDrawSparks()
 	}
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x2c70, "cases 0x9/0xa DrawMode sub-variants simplified for readability")
 void UFireTexture::AddSpark( INT X, INT Y )
 {
 	// Ghidra: 0x2c70, 12628 bytes.
@@ -852,6 +883,7 @@ void UFireTexture::AddSpark( INT X, INT Y )
 	}
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x3c20, "spark removal decrements i; loop-unrolled cases simplified")
 void UFireTexture::RedrawSparks()
 {
 	// Ghidra: 0x3c20, ~30000 bytes (heavily loop-unrolled spark simulation).
@@ -1561,6 +1593,7 @@ void UFireTexture::RedrawSparks()
 	UWaterTexture — animated water ripple effect.
 -----------------------------------------------------------------------------*/
 
+IMPL_INFERRED("Reconstructed from context")
 void UWaterTexture::Clear( DWORD Flags )
 {
 	// Ghidra: clears source fields buffer.
@@ -1572,11 +1605,13 @@ void UWaterTexture::Clear( DWORD Flags )
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWaterTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWaterTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	INT IX = (INT)X;
@@ -1584,6 +1619,7 @@ void UWaterTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 	WaterPaint( IX, IY, Flags );
 }
 
+IMPL_INFERRED("Reconstructed from context")
 void UWaterTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	INT IX = (INT)X;
@@ -1591,6 +1627,7 @@ void UWaterTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 	WaterPaint( IX, IY, Flags );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x25b0)
 void UWaterTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Ghidra at 0x25b0: writes random byte to two locations in the
@@ -1606,11 +1643,13 @@ void UWaterTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	*((BYTE*)SourceFields + Offset + USize) = Val;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWaterTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
+IMPL_GHIDRA("Fire.dll", 0x6970)
 void UWaterTexture::Destroy()
 {
 	// Ghidra at 0x6970: frees the SourceFields buffer.
@@ -1623,6 +1662,7 @@ void UWaterTexture::Destroy()
 	UTexture::Destroy();
 }
 
+IMPL_GHIDRA("Fire.dll", 0x7010)
 void UWaterTexture::WaterPaint( INT X, INT Y, DWORD C )
 {
 	// Ghidra at 0x7010: conditional add/delete drops based on flags.
@@ -1644,6 +1684,7 @@ void UWaterTexture::WaterPaint( INT X, INT Y, DWORD C )
 	GWaterLastFlags = C & 1;
 }
 
+IMPL_GHIDRA("Fire.dll", 0x2160)
 void UWaterTexture::AddDrop( INT X, INT Y )
 {
 	// Ghidra at 0x2160: adds a drop to the inline Drops[256] array.
@@ -1671,6 +1712,7 @@ void UWaterTexture::AddDrop( INT X, INT Y )
 	BYTE_AT(this, 0xec) = BYTE_AT(this, 0xec) + 1;
 }
 
+IMPL_GHIDRA("Fire.dll", 0x27f0)
 void UWaterTexture::DeleteDrops( INT X, INT Y, INT Z )
 {
 	// Ghidra at 0x27f0: removes drops near (X,Y) within distance Z.
@@ -1696,6 +1738,7 @@ void UWaterTexture::DeleteDrops( INT X, INT Y, INT Z )
 	}
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x5160, "nearest-neighbour 2x2 upsampling instead of bilinear")
 void UWaterTexture::CalculateWater()
 {
 	// Ghidra: 0x5160, ~4400 bytes (heavily loop-unrolled 2-D wave simulation).
@@ -1782,6 +1825,7 @@ void UWaterTexture::CalculateWater()
 	}
 }
 
+IMPL_GHIDRA_APPROX("Fire.dll", 0x18e0, "PRNG approximated with RandByte")
 void UWaterTexture::WaterRedrawDrops()
 {
 	// Ghidra: 0x18e0, ~2000 bytes — full drop-type switch.
@@ -2107,16 +2151,19 @@ void UWaterTexture::WaterRedrawDrops()
 	UWaveTexture — animated wave effect.
 -----------------------------------------------------------------------------*/
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWaveTexture::Clear( DWORD Flags )
 {
 	UWaterTexture::Clear( Flags );
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWaveTexture::Init( INT InUSize, INT InVSize )
 {
 	UWaterTexture::Init( InUSize, InVSize );
 }
 
+IMPL_GHIDRA("Fire.dll", 0x2780)
 void UWaveTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x2780: calls WaterRedrawDrops, CalculateWater, SetWaveLight.
@@ -2125,6 +2172,7 @@ void UWaveTexture::ConstantTimeTick()
 	SetWaveLight();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UWaveTexture::PostLoad()
 {
 	UWaterTexture::PostLoad();

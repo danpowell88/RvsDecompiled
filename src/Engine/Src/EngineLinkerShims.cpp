@@ -36,6 +36,7 @@
 	  _dummy_stub_func   (for all function symbols)
 	  _dummy_stub_data   (for all data symbols)
 -----------------------------------------------------------------------------*/
+IMPL_INTENTIONALLY_EMPTY("Catch-all dummy target for /alternatename linker directives")
 extern "C" __declspec(noinline) int dummy_stub_func() { return 0; }
 extern "C" void* dummy_stub_data = 0;
 

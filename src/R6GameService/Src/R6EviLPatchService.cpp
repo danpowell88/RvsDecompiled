@@ -7,13 +7,21 @@
 IMPLEMENT_CLASS(UeviLPatchService)
 
 // Stubs for unresolved patch service COM functions
+IMPL_TODO("Needs Ghidra analysis")
 static void* FUN_10035870(void*) { return NULL; }
+IMPL_TODO("Needs Ghidra analysis")
 static void  FUN_10035960(void*, int) {}
+IMPL_TODO("Needs Ghidra analysis")
 static void  FUN_100358e0(void*, const TCHAR*) {}
+IMPL_TODO("Needs Ghidra analysis")
 static void  FUN_10035af0(void*, const wchar_t*, const wchar_t*, const wchar_t*) {}
+IMPL_TODO("Needs Ghidra analysis")
 static void  FUN_10035ad0(void*) {}
+IMPL_TODO("Needs Ghidra analysis")
 static DWORD FUN_10035920(void*) { return 5; }
+IMPL_TODO("Needs Ghidra analysis")
 static DWORD FUN_10035930(void*) { return 0; }
+IMPL_TODO("Needs Ghidra analysis")
 static void  FUN_10004b40(void*) {}
 
 IMPLEMENT_FUNCTION(UeviLPatchService, -1, execAbortPatchService)
@@ -25,12 +33,14 @@ IMPLEMENT_FUNCTION(UeviLPatchService, -1, execStartPatch)
 
 // --- UeviLPatchService ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::StartPatch()
 {
 	guard(UeviLPatchService::StartPatch);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::execAbortPatchService(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execAbortPatchService);
@@ -38,6 +48,7 @@ void UeviLPatchService::execAbortPatchService(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::execCanRunUpdateService(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execCanRunUpdateService);
@@ -45,6 +56,7 @@ void UeviLPatchService::execCanRunUpdateService(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::execGetDownloadProgress(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execGetDownloadProgress);
@@ -52,6 +64,7 @@ void UeviLPatchService::execGetDownloadProgress(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::execGetExitCause(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execGetExitCause);
@@ -59,6 +72,7 @@ void UeviLPatchService::execGetExitCause(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execGetState);
@@ -66,6 +80,7 @@ void UeviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::execStartPatch(FFrame& Stack, RESULT_DECL)
 {
 	guard(UeviLPatchService::execStartPatch);
@@ -79,12 +94,14 @@ static DWORD  PatchState         = 0;     // DAT_10091530
 static DWORD  DownloadProgress   = 0;     // DAT_10091534
 static void*  PatchServiceHandle = NULL;  // DAT_10091538
 
+IMPL_TODO("Needs Ghidra analysis")
 void UeviLPatchService::FinalDestroy()
 {
 	guard(UeviLPatchService::FinalDestroy);
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed from Ghidra analysis; DAT addresses identified")
 DWORD UeviLPatchService::GetPatchServiceState()
 {
 	guard(UeviLPatchService::GetPatchServiceState);

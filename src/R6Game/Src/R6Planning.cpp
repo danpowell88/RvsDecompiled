@@ -13,6 +13,7 @@ IMPLEMENT_FUNCTION(UR6PlanningInfo, -1, execInsertToTeam)
 
 // --- UR6PlanningInfo ---
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void UR6PlanningInfo::AddPoint(AActor* param_1)
 {
 	// Append param_1 to the action-point array at this+0x5C
@@ -29,6 +30,7 @@ void UR6PlanningInfo::AddPoint(AActor* param_1)
 	}
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 AActor* UR6PlanningInfo::GetTeamLeader()
 {
 	if (*(INT*)((BYTE*)this + 0x58) != 0)
@@ -36,6 +38,7 @@ AActor* UR6PlanningInfo::GetTeamLeader()
 	return NULL;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 INT UR6PlanningInfo::NoStairsBetweenPoints(AActor* param_1)
 {
 	AController* pCtrl = *(AController**)((BYTE*)this + 0x58);
@@ -64,6 +67,7 @@ INT UR6PlanningInfo::NoStairsBetweenPoints(AActor* param_1)
 	return 1;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void UR6PlanningInfo::TransferFile(FArchive& Ar)
 {
 	// Ghidra checks ArIsLoading at Ar+0x14; if zero this is the SAVING branch
@@ -153,21 +157,25 @@ void UR6PlanningInfo::TransferFile(FArchive& Ar)
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6PlanningInfo::execAddToTeam(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6PlanningInfo::execDeletePoint(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6PlanningInfo::execFindPathToNextPoint(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6PlanningInfo::execInsertToTeam(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

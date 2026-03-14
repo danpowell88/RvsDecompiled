@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(AR6GameReplicationInfo)
 
 // --- AR6GameReplicationInfo ---
 
+IMPL_APPROX("Standard UObject event thunk")
 FLOAT AR6GameReplicationInfo::eventGetRoundTime()
 {
 	struct {

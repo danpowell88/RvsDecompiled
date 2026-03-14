@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(AR6DZonePoint)
 
 // --- AR6DZonePoint ---
 
+IMPL_APPROX("Reconstructed closest point in reaction zone or fixed location")
 FVector AR6DZonePoint::FindClosestPointTo(FVector const & Point)
 {
 	FVector Result = Location;
@@ -22,11 +23,13 @@ FVector AR6DZonePoint::FindClosestPointTo(FVector const & Point)
 	return Result;
 }
 
+IMPL_APPROX("Reconstructed fixed-location random point (returns actor Location)")
 FVector AR6DZonePoint::FindRandomPointInArea()
 {
 	return Location;
 }
 
+IMPL_APPROX("Reconstructed spawning point with rotation and stance from actor properties")
 FVector AR6DZonePoint::FindSpawningPoint(FRotator * pRotation, INT *, enum EStance * pStance, INT *)
 {
 	*pRotation = Rotation;
@@ -34,6 +37,7 @@ FVector AR6DZonePoint::FindSpawningPoint(FRotator * pRotation, INT *, enum EStan
 	return FindRandomPointInArea();
 }
 
+IMPL_APPROX("Reconstructed point-in-zone test supporting circular radius and rectangular reaction zone")
 INT AR6DZonePoint::IsPointInZone(FVector const & Point)
 {
 	FLOAT RefX, DeltaY, DeltaZ;
@@ -71,6 +75,7 @@ INT AR6DZonePoint::IsPointInZone(FVector const & Point)
 	return 0;
 }
 
+IMPL_APPROX("Calls parent RenderEditorInfo; additional FLineBatcher bounding box drawing stubbed")
 void AR6DZonePoint::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DZonePoint::RenderEditorInfo);
@@ -80,6 +85,7 @@ void AR6DZonePoint::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterfac
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed Spawned: delegates to base and caches initial reaction zone centre")
 void AR6DZonePoint::Spawned()
 {
 	guard(AR6DZonePoint::Spawned);

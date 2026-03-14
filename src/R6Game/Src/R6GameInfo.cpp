@@ -32,6 +32,7 @@ static INT s_ScoreSubmissionActive = 0;
 
 // --- AR6GameInfo ---
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::AbortScoreSubmission()
 {
 	if (s_ScoreSubmissionActive)
@@ -45,6 +46,7 @@ void AR6GameInfo::AbortScoreSubmission()
 	}
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::InitGameInfoGameService()
 {
 	// Load the R6GSServers class from the GameService package
@@ -134,6 +136,7 @@ void AR6GameInfo::InitGameInfoGameService()
 	}
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::MasterServerManager()
 {
 	if (m_GameService)
@@ -148,6 +151,7 @@ void AR6GameInfo::MasterServerManager()
 	}
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6GameInfo::PostBeginPlay()
 {
 	if (!m_GameService)
@@ -174,46 +178,55 @@ void AR6GameInfo::PostBeginPlay()
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execGetSystemUserName(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execInitScoreSubmission(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execLogoutUpdatePlayersCtrlInfo(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execNativeLogout(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execSetController(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionNotifySendStartMatch(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionSrvRoundFinish(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionSrvRoundStart(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6GameInfo::execSubmissionUpdateLadderStat(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

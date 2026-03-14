@@ -7,6 +7,7 @@
 
 // --- R6Charts ---
 
+IMPL_EMPTY("Ghidra confirms constructor body is trivial — implicit return this")
 R6Charts::R6Charts()
 {
 	guard(R6Charts::R6Charts);
@@ -14,11 +15,13 @@ R6Charts::R6Charts()
 	unguard;
 }
 
+IMPL_APPROX("Standard identity assignment")
 R6Charts& R6Charts::operator=(R6Charts const &)
 {
 	return *this;
 }
 
+IMPL_APPROX("Reconstructed bullet penetration energy calculation with side and group factors")
 INT R6Charts::BulletGoesThroughCharacter(INT iEnergy, INT iGroup, INT iThreshold, INT iSide)
 {
 	INT iResult = (INT)(iEnergy - (FLOAT)m_iHumanPenetrationTresholds[iGroup][iThreshold] * m_fHumanSidePenetrationFactors[iGroup][iSide]);
@@ -27,6 +30,7 @@ INT R6Charts::BulletGoesThroughCharacter(INT iEnergy, INT iGroup, INT iThreshold
 	return iResult;
 }
 
+IMPL_APPROX("Recovered from Ghidra: switch on eBodyPart returning pointer into m_stKillChart")
 stResultTable* R6Charts::GetKillTable(eBodyPart ePart)
 {
 	// Body parts map to 3 groups: Head, Torso (Chest+Abdomen), Limbs (Legs+Arms).
@@ -46,6 +50,7 @@ stResultTable* R6Charts::GetKillTable(eBodyPart ePart)
 	}
 }
 
+IMPL_APPROX("Mirrors GetKillTable logic for m_stStunChart")
 stResultTable* R6Charts::GetStunTable(eBodyPart ePart)
 {
 	switch (ePart)

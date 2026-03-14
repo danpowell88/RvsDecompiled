@@ -2,6 +2,7 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
+IMPL_GHIDRA_APPROX("Engine.dll", 0x12bc10, "physMovingBrush body incomplete; cubic/linear interpolation, encroach checking, and anim notify hooks not reconstructed")
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
@@ -17,6 +18,7 @@ void AMover::physMovingBrush(float DeltaTime)
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from Ghidra analysis; RDTSC profiling bookends omitted")
 void AMover::performPhysics(float DeltaTime)
 {
 	guard(AMover::performPhysics);
@@ -80,11 +82,13 @@ void AMover::performPhysics(float DeltaTime)
 	unguard;
 }
 
+IMPL_INFERRED("Inferred from collision flag behaviour")
 int AMover::ShouldTrace(AActor*,DWORD TraceFlags)
 {
 	return TraceFlags & 2;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x1651d0)
 void AMover::AddMyMarker(AActor *)
 {
 	guard(AMover::AddMyMarker);
@@ -92,6 +96,7 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -99,6 +104,7 @@ INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Pt
 
 
 // --- AMover ---
+IMPL_GHIDRA("Engine.dll", 0xd5520)
 void AMover::SetWorldRaytraceKey()
 {
 	guard(AMover::SetWorldRaytraceKey);
@@ -138,6 +144,7 @@ void AMover::SetWorldRaytraceKey()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0xd4f30)
 void AMover::Spawned()
 {
 	// Ghidra 0xd4f30: copy BasePos/BaseRot from this+0x234..0x24B to KeyPos0/KeyRot0 at +0x670..0x6A8.
@@ -145,6 +152,7 @@ void AMover::Spawned()
 	appMemcpy((BYTE*)this + 0x6A0, (BYTE*)this + 0x240, 12); // BaseRot -> KeyRot0
 }
 
+IMPL_GHIDRA("Engine.dll", 0xd5680)
 void AMover::SetBrushRaytraceKey()
 {
 	guard(AMover::SetBrushRaytraceKey);
@@ -184,6 +192,7 @@ void AMover::SetBrushRaytraceKey()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0xd52a0)
 void AMover::PostEditChange()
 {
 	guard(AMover::PostEditChange);
@@ -229,6 +238,7 @@ void AMover::PostEditChange()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0xd5090)
 void AMover::PostEditMove()
 {
 	guard(AMover::PostEditMove);

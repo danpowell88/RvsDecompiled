@@ -15,6 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FCanvasUtil ---
+IMPL_GHIDRA("Engine.dll", 0x18c10)
 FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 {
 	// Ghidra 0x18c10: vtable set by compiler; same copy regions as operator= (0x18cb0):
@@ -23,18 +24,21 @@ FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 	appMemcpy((BYTE*)this + 0x94, (const BYTE*)&Other + 0x94, 0xC14);
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
 {
 	guard(FCanvasUtil::FCanvasUtil);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 FCanvasUtil::~FCanvasUtil()
 {
 	guard(FCanvasUtil::~FCanvasUtil);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x18cb0)
 FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 {
 	// Ghidra 0x18cb0: vtable at +0 skipped. Copy +4..+53, skip +54..+93 (transient state),
@@ -45,6 +49,7 @@ FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 }
 
 // (merged from earlier occurrence)
+IMPL_GHIDRA("Engine.dll", 0x115b90)
 void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 {
 	guard(FCanvasUtil::BeginPrimitive);
@@ -57,36 +62,43 @@ void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 	}
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void FCanvasUtil::DrawLine(float,float,float,float,FColor)
 {
 	guard(FCanvasUtil::DrawLine);
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void FCanvasUtil::DrawPoint(float,float,float,float,float,FColor)
 {
 	guard(FCanvasUtil::DrawPoint);
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void FCanvasUtil::DrawTile(float,float,float,float,float,float,float,float,float,UMaterial *,FColor)
 {
 	guard(FCanvasUtil::DrawTile);
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void FCanvasUtil::DrawTileRotated(float,float,float,float,float,float,float,float,float,UMaterial *,FColor,float)
 {
 	guard(FCanvasUtil::DrawTileRotated);
 	unguard;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void FCanvasUtil::Flush()
 {
 	guard(FCanvasUtil::Flush);
 	unguard;
 }
+IMPL_INFERRED("Ghidra layout; CacheId read from Pad+0xc98; no explicit RVA")
 unsigned __int64 FCanvasUtil::GetCacheId()
 {
 	// Ghidra: CacheId QWORD at this+0xc9c = Pad+0xc98
 	return *(QWORD*)(Pad + 0xc98);
 }
+IMPL_INFERRED("Vertex component layout inferred from FCanvasUtil structure")
 int FCanvasUtil::GetComponents(FVertexComponent* C)
 {
 	C[0].Type = 1; C[0].Function = 0;
@@ -94,26 +106,31 @@ int FCanvasUtil::GetComponents(FVertexComponent* C)
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
+IMPL_TODO("Needs Ghidra analysis")
 void FCanvasUtil::GetRawStreamData(void * *,int)
 {
 	guard(FCanvasUtil::GetRawStreamData);
 	unguard;
 }
+IMPL_INFERRED("Returns constant revision 1; no Ghidra reference")
 int FCanvasUtil::GetRevision()
 {
 	return 1;
 }
+IMPL_INFERRED("Ghidra layout; vertex count * stride 0x18; no explicit RVA")
 int FCanvasUtil::GetSize()
 {
 	// Ghidra: count at this+0x98 = Pad+0x94, times stride 0x18
 	return *(INT*)(Pad + 0x94) * 0x18;
 }
+IMPL_INFERRED("Ghidra layout; memcpy from Pad+0x98; no explicit RVA")
 void FCanvasUtil::GetStreamData(void * Dest)
 {
 	// Ghidra: memcpy from inline vertex buffer at this+0x9c = Pad+0x98
 	INT Size = *(INT*)(Pad + 0x94) * 0x18;
 	appMemcpy(Dest, Pad + 0x98, Size);
 }
+IMPL_INFERRED("Returns constant stride 0x18; no Ghidra reference")
 int FCanvasUtil::GetStride()
 {
 	return 0x18;
@@ -121,12 +138,14 @@ int FCanvasUtil::GetStride()
 
 
 // --- UCanvas ---
+IMPL_TODO("Needs Ghidra analysis")
 void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
 {
 	guard(UCanvas::WrappedPrint);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x8b500)
 void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 {
 	// Ghidra 0x8b500, 128B. Format varargs then call WrappedPrint with STY_Normal.
@@ -136,6 +155,7 @@ void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 	WrappedPrint(STY_Normal, XL, YL, Font, bCenter, Buffer);
 }
 
+IMPL_GHIDRA("Engine.dll", 0x8b450)
 void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...)
 {
 	// Ghidra 0x8b450, 122B. Format varargs then call WrappedPrint with STY_None to measure.
@@ -145,6 +165,7 @@ void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ..
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Retail 59b; divergence: < comparison used instead of FUCOMPP/TEST AH pattern")
 void UCanvas::SetVirtualSize(FLOAT SizeX, FLOAT SizeY)
 {
 	// Retail: 59b. Only stores new virtual size if current virtual dims >= origin dims.
@@ -155,6 +176,7 @@ void UCanvas::SetVirtualSize(FLOAT SizeX, FLOAT SizeY)
 	*(FLOAT*)((BYTE*)this + 0x9C) = SizeX;
 	*(FLOAT*)((BYTE*)this + 0xA0) = SizeY;
 }
+IMPL_INFERRED("Retail 47b; layout derived from retail disassembly; no explicit RVA")
 void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags)
 {
 	// Retail: 47b. Stores fade parameters and updates fade state word at this+0xB8.
@@ -168,6 +190,7 @@ void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags
 	*(DWORD*)((BYTE*)this + 0xC8) = 0;
 	*(DWORD*)((BYTE*)this + 0xB8) = state;
 }
+IMPL_GHIDRA_APPROX("Engine.dll", 0x89fd0, "restore path reads both dims from same viewport offset; enable path recursive call approximated")
 void UCanvas::UseVirtualSize(int bEnable, float SizeX, float SizeY)
 {
 	// Retail: 0x89fd0, ordinal 4960. Two modes:
@@ -225,12 +248,14 @@ void UCanvas::UseVirtualSize(int bEnable, float SizeX, float SizeY)
 	*(FLOAT*)((BYTE*)this + 0x48) = *(FLOAT*)((BYTE*)this + 0x40) * 0.5f;
 	*(FLOAT*)((BYTE*)this + 0x4C) = *(FLOAT*)((BYTE*)this + 0x44) * 0.5f;
 }
+IMPL_INFERRED("Retail 23b; direct field assignment; no explicit RVA")
 void UCanvas::SetStretch(float stretchX, float stretchY)
 {
 	// Retail (23b): stores both params directly into m_fStretchX (0x94) and m_fStretchY (0x98)
 	m_fStretchX = stretchX;
 	m_fStretchY = stretchY;
 }
+IMPL_GHIDRA("Engine.dll", 0x88f10)
 void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL)
 {
 	// Ghidra 0x88f10, ~200B. Clip tile to current canvas bounds, then call DrawTile.
@@ -275,6 +300,7 @@ void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, 
 	CurX  = SpaceX + CurX + XL;
 	CurYL = Max(CurYL, YL);
 }
+IMPL_INFERRED("Thin thunk calling internal DrawString at 0x1038ac40; _DrawString itself has no documented RVA")
 int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane Color, int CR, int RenderStyle, int DrawExtraLine)
 {
 	// FUN_1038ac40 = UCanvas_DrawStringInternal() — internal low-level DrawString worker.

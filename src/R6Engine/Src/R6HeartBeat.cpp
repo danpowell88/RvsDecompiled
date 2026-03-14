@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(AR6FalseHeartBeat)
 
 // --- AR6FalseHeartBeat ---
 
+IMPL_APPROX("Prevents blocking by actors owned by the heartbeat puck owner; defers to base class for level info")
 INT AR6FalseHeartBeat::IsBlockedBy(AActor const* Other) const
 {
 	guard(AR6FalseHeartBeat::IsBlockedBy);
@@ -35,6 +36,7 @@ INT AR6FalseHeartBeat::IsBlockedBy(AActor const* Other) const
 	unguard;
 }
 
+IMPL_APPROX("Returns true if pawn has goggles equipped and this heartbeat is within goggle detection range")
 INT AR6FalseHeartBeat::IsRelevantToPawn(APawn* Other)
 {
 	guard(AR6FalseHeartBeat::IsRelevantToPawn);
@@ -52,11 +54,13 @@ INT AR6FalseHeartBeat::IsRelevantToPawn(APawn* Other)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 INT AR6FalseHeartBeat::IsRelevantToPawnHeartBeat(APawn *)
 {
 	return 0;
 }
 
+IMPL_APPROX("Skips trace against actors owned by the heartbeat puck owner; defers to AR6InteractiveObject otherwise")
 INT AR6FalseHeartBeat::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6FalseHeartBeat::ShouldTrace);

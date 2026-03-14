@@ -12,6 +12,7 @@ IMPLEMENT_FUNCTION(AR6HUD, -1, execHudStep)
 
 // --- AR6HUD ---
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6HUD::Destroy()
 {
 	// Clear the object reference held by the HUD (offset 0x5AC)
@@ -19,36 +20,42 @@ void AR6HUD::Destroy()
 	AActor::Destroy();
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::DisplayOtherTeamInfo(FCanvasUtil &, UCanvas *, INT, AR6RainbowTeam *, FColor &, INT)
 {
 	guard(AR6HUD::DisplayOtherTeamInfo);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::DrawCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanvasUtil *, UCanvas *)
 {
 	guard(AR6HUD::DrawCharacterInfo);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::DrawInGameMap(FCameraSceneNode *, UViewport *)
 {
 	guard(AR6HUD::DrawInGameMap);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::DrawRadar(FCameraSceneNode *, UViewport *)
 {
 	guard(AR6HUD::DrawRadar);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::DrawSingleCharacterInfo(AR6Rainbow *, FLOAT, FLOAT, FColor &, FCanvasUtil *, UCanvas *)
 {
 	guard(AR6HUD::DrawSingleCharacterInfo);
 	unguard;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6HUD::Serialize(FArchive& Ar)
 {
 	AActor::Serialize(Ar);
@@ -63,23 +70,27 @@ void AR6HUD::Serialize(FArchive& Ar)
 	}
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::Spawned()
 {
 	guard(AR6HUD::Spawned);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::UpdateHUDColors(FColor)
 {
 	guard(AR6HUD::UpdateHUDColors);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6HUD::execHudStep(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

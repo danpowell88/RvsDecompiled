@@ -51,6 +51,7 @@ static AR6SoundReplicationInfo* GR6Pawn_OldSoundRepInfo;
 
 // --- AR6Pawn ---
 
+IMPL_INFERRED("Lerps collision cylinder toward crouch height and moves pawn; sweep check via ULevel vtable")
 INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT Blend, INT bTest)
 {
 	if (m_bIsProne)
@@ -119,6 +120,7 @@ INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT Blend, INT bTest)
 	return MoveResult;
 }
 
+IMPL_INFERRED("Clamps peeking to a directional limit when moving in the corresponding direction")
 FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT InPeeking, FLOAT InLimit)
 {
 	if (m_bPeekingLeft)
@@ -134,6 +136,7 @@ FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT InPeeking, FLOAT InLimit)
 	return InLimit;
 }
 
+IMPL_INFERRED("Passes touch to base only when genuinely overlapping a door actor")
 void AR6Pawn::BeginTouch(AActor* Other)
 {
 	// If touching a door, only process if genuinely overlapping

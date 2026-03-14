@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(AR6Grenade)
 
 // --- AR6Grenade ---
 
+IMPL_MATCH("R6Weapons.dll", 0x1150)
 void AR6Grenade::PostNetReceive()
 {
 	Super::PostNetReceive();

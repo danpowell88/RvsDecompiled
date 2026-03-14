@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnRenderUtil.cpp: Render buffers, lighting, and BSP geometry helpers
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -21,6 +21,7 @@ extern INT GHashExtraCount;
 extern CORE_API UBOOL GHideHiddenInEditor;
 
 // --- FAnimMeshVertexStream ---
+IMPL_MATCH("Engine.dll", 0x2b170)
 FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 {
 	// Ghidra 0x2b170: vtable set by compiler; DWORD at +4; TArray<FStreamVert32> at +8 (stride 0x20); 6 DWORDs at +14..+28
@@ -29,18 +30,19 @@ FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x14, (const BYTE*)&Other + 0x14, 0x18); // 6 DWORDs
 }
 
+IMPL_APPROX("Default constructor; initializes TArray<FStreamVert32> at +8 to empty")
 FAnimMeshVertexStream::FAnimMeshVertexStream()
-{
-	// Initialize TArray<FStreamVert32> at +8 to empty (equivalent to TArray default ctor)
 	new ((BYTE*)this + 0x08) TArray<FStreamVert32>();
 }
 
+IMPL_MATCH("Engine.dll", 0x2b160)
 FAnimMeshVertexStream::~FAnimMeshVertexStream()
 {
 	// Ghidra 0x2b160: destroy TArray<FStreamVert32> at +8 (stride 0x20, POD elements)
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x08))->~TArray();
 }
 
+IMPL_MATCH("Engine.dll", 0x2b1c0)
 FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStream& Other)
 {
 	// Ghidra 0x2b1c0: skip vtable at +0, DWORD at +4, TArray<FStreamVert32> at +8
@@ -52,6 +54,7 @@ FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStr
 }
 
 // (merged from earlier occurrence)
+IMPL_APPROX("Ghidra describes logic; no standalone address extracted")
 int FAnimMeshVertexStream::SetPartialSize(int Size)
 {
 	// Ghidra: clamp Size to [0, Num], store at Pad[32], mark dirty (increment Pad[24])
@@ -62,20 +65,17 @@ int FAnimMeshVertexStream::SetPartialSize(int Size)
 	*(INT*)(Pad + 24) += 1;
 	return Size;
 }
+IMPL_APPROX("Returns QWORD cache ID from Pad+16; no Ghidra address")
 unsigned __int64 FAnimMeshVertexStream::GetCacheId()
-{
-	return *(QWORD*)(Pad + 16);
 }
+IMPL_APPROX("Vertex component layout inferred from stream type; no Ghidra address")
 int FAnimMeshVertexStream::GetComponents(FVertexComponent* C)
-{
-	C[0].Type = 1; C[0].Function = 0;
 	C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
+IMPL_INFERRED("Ghidra describes logic; no standalone address extracted")
 int FAnimMeshVertexStream::GetPartialSize()
-{
-	// Ghidra: if partial pointer (Pad[28]) non-zero, return min(Pad[32], Num); else Num
 	INT Num = *(INT*)(Pad + 8);
 	if (*(INT*)(Pad + 28))
 	{
@@ -84,33 +84,28 @@ int FAnimMeshVertexStream::GetPartialSize()
 	}
 	return Num;
 }
+IMPL_INFERRED("Ghidra describes logic; no standalone address extracted")
 void FAnimMeshVertexStream::GetRawStreamData(void ** Out, int Offset)
-{
-	// Ghidra: *Out = data + offset * 0x20
 	*Out = *(BYTE**)(Pad + 4) + Offset * 0x20;
 }
+IMPL_INFERRED("Returns revision counter from Pad+24; no Ghidra address")
 int FAnimMeshVertexStream::GetRevision()
-{
-	return *(INT*)(Pad + 24);
 }
+IMPL_INFERRED("Ghidra describes GetPartialSize() << 5; no standalone address")
 int FAnimMeshVertexStream::GetSize()
-{
-	// Ghidra: GetPartialSize() << 5 (multiply by stride 0x20)
 	return GetPartialSize() << 5;
 }
+IMPL_INFERRED("Ghidra describes memcpy logic; no standalone address")
 void FAnimMeshVertexStream::GetStreamData(void * Dest)
-{
-	// Ghidra: memcpy GetPartialSize()<<5 bytes from data
 	INT Size = GetPartialSize() << 5;
 	appMemcpy(Dest, *(void**)(Pad + 4), Size);
 }
+IMPL_INFERRED("Returns fixed stride 0x20; no Ghidra address")
 int FAnimMeshVertexStream::GetStride()
-{
-	return 0x20;
-}
 
 
 // --- FBspVertexStream ---
+IMPL_GHIDRA("Engine.dll", 0x103278f0)
 FBspVertexStream::FBspVertexStream(FBspVertexStream const &Other)
 {
 	// Ghidra 0x103278f0: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 3 DWORDs at +10..+18
@@ -118,18 +113,19 @@ FBspVertexStream::FBspVertexStream(FBspVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
+IMPL_INFERRED("Default constructor; initializes TArray<FBspVertex> at +4 to empty")
 FBspVertexStream::FBspVertexStream()
 {
 	// Initialize TArray<FBspVertex> at +4 to empty
 	new ((BYTE*)this + 0x04) TArray<FBspVertex>();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x103278e0)
 FBspVertexStream::~FBspVertexStream()
-{
-	// Ghidra 0x103278e0: shared with ~FBspSection; destroy TArray<FBspVertex> at +4
 	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
+IMPL_GHIDRA("Engine.dll", 0x27930)
 FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
 {
 	// Ghidra 0x27930: skip vtable at +0, TArray<FBspVertex> at +4 (FUN_10324ae0=40-byte elems),
@@ -140,45 +136,38 @@ FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
 }
 
 // (merged from earlier occurrence)
+IMPL_INFERRED("Returns QWORD cache ID from Pad+12; no Ghidra address")
 unsigned __int64 FBspVertexStream::GetCacheId()
-{
-	return *(QWORD*)(Pad + 12);
 }
+IMPL_INFERRED("Vertex component layout inferred from BSP stream type; no Ghidra address")
 int FBspVertexStream::GetComponents(FVertexComponent* C)
-{
-	C[0].Type = 1; C[0].Function = 0;
 	C[1].Type = 1; C[1].Function = 1;
 	C[2].Type = 2; C[2].Function = 4;
 	C[3].Type = 2; C[3].Function = 5;
 	return 4;
 }
+IMPL_INFERRED("Ghidra describes logic; no standalone address extracted")
 void FBspVertexStream::GetRawStreamData(void ** Out, int Offset)
-{
-	// Ghidra: *Out = data + offset * 0x28
 	*Out = *(BYTE**)Pad + Offset * 0x28;
 }
+IMPL_INFERRED("Returns revision counter from Pad+20; no Ghidra address")
 int FBspVertexStream::GetRevision()
-{
-	return *(INT*)(Pad + 20);
 }
+IMPL_INFERRED("Ghidra describes Num * 0x28; no standalone address")
 int FBspVertexStream::GetSize()
-{
-	// Ghidra: Num * 0x28
 	return *(INT*)(Pad + 4) * 0x28;
 }
+IMPL_INFERRED("Ghidra describes memcpy Num*0x28; no standalone address")
 void FBspVertexStream::GetStreamData(void * Dest)
-{
-	// Ghidra: memcpy Num()*0x28 bytes
 	INT Size = *(INT*)(Pad + 4) * 0x28;
 	appMemcpy(Dest, *(void**)Pad, Size);
 }
+IMPL_INFERRED("Returns fixed stride 0x28; no Ghidra address")
 int FBspVertexStream::GetStride()
-{
-	return 0x28;
-}
 
 
 // --- FLevelSceneNode ---
+IMPL_GHIDRA_APPROX("Engine.dll", 0x106670, "Ghidra reference only; body approximated")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
@@ -187,6 +176,7 @@ void FLevelSceneNode::Render(FRenderInterface *)
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x100E30)
 int FLevelSceneNode::FilterActor(AActor* Actor)
 {
 	// Retail: 0x100E30, ~220b. Complex actor visibility filter used during scene rendering.
@@ -267,6 +257,7 @@ label_check_model:
 	return GHideHiddenInEditor ? 0 : 1;
 }
 
+IMPL_INFERRED("Trivially returns this; no Ghidra address")
 FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 {
 	return this;
@@ -274,6 +265,7 @@ FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 
 
 // --- FLightMap ---
+IMPL_GHIDRA("Engine.dll", 0x3c910)
 FLightMap::FLightMap(FLightMap const &Other)
 {
 	// Ghidra 0x3c910: vtable set by compiler; 34 DWORDs at +4..+8B; TArray<FLightMapSample52> at +0x8C; TArray<FLOAT> at +0x98
@@ -282,6 +274,7 @@ FLightMap::FLightMap(FLightMap const &Other)
 	new ((BYTE*)this + 0x98) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98));
 }
 
+IMPL_INFERRED("Initializes TArray members so dtor is safe; no Ghidra address")
 FLightMap::FLightMap(ULevel *,int,int)
 {
 	// Initialize TArray members so dtor is safe regardless of which ctor was called

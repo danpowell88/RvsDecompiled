@@ -4,9 +4,9 @@ check_byte_parity.py — Function size parity checker vs retail DLL.
 
 Uses dumpbin /EXPORTS to compare exported function sizes between a rebuilt
 DLL and the corresponding retail DLL. Reports parity failures for functions
-annotated with IMPL_GHIDRA (which claim byte-level parity).
+annotated with IMPL_MATCH (which claim byte-level parity).
 
-Functions annotated with IMPL_GHIDRA_APPROX, IMPL_INFERRED, IMPL_SDK_MODIFIED,
+Functions annotated with IMPL_APPROX, IMPL_INFERRED, IMPL_SDK_MODIFIED,
 or IMPL_PERMANENT_DIVERGENCE are exempt from the size check.
 
 Usage:
@@ -38,16 +38,16 @@ from typing import Optional
 DEFAULT_TOLERANCE = 4  # bytes — accounts for alignment padding differences
 
 # Macros that claim byte parity (checked by this script)
-PARITY_MACROS = {"IMPL_GHIDRA"}
+PARITY_MACROS = {"IMPL_MATCH"}
 
 # Macros that are explicitly exempt from parity checking
 EXEMPT_MACROS = {
-    "IMPL_GHIDRA_APPROX",
-    "IMPL_SDK",
-    "IMPL_SDK_MODIFIED",
-    "IMPL_INFERRED",
-    "IMPL_INTENTIONALLY_EMPTY",
-    "IMPL_PERMANENT_DIVERGENCE",
+    "IMPL_APPROX",
+    "IMPL_APPROX",
+    "IMPL_APPROX",
+    "IMPL_APPROX",
+    "IMPL_EMPTY",
+    "IMPL_DIVERGE",
     "IMPL_TODO",
 }
 
@@ -126,13 +126,13 @@ def compute_function_sizes(exports: dict[str, int]) -> dict[str, int]:
 # Parse IMPL_ macros from source files
 # ---------------------------------------------------------------------------
 
-IMPL_GHIDRA_RE = re.compile(r'IMPL_GHIDRA\s*\(\s*"([^"]+)"\s*,\s*(0x[0-9A-Fa-f]+)\s*\)')
+IMPL_MATCH_RE = re.compile(r'IMPL_MATCH\s*\(\s*"([^"]+)"\s*,\s*(0x[0-9A-Fa-f]+)\s*\)')
 FUNC_COMMENT_RE = re.compile(r'//\s*(?:Ghidra\s+)?(0x[0-9A-Fa-f]+)', re.IGNORECASE)
 
 
 def load_impl_annotations(source_dir: Path) -> dict[str, str]:
     """
-    Scan .cpp files for IMPL_GHIDRA / IMPL_GHIDRA_APPROX / etc. annotations
+    Scan .cpp files for IMPL_GHIDRA / IMPL_APPROX / etc. annotations
     just before function definitions. Returns {decorated_or_plain_name: macro}.
 
     This is a best-effort approximation — mangled names are not resolved.
@@ -145,9 +145,9 @@ def load_impl_annotations(source_dir: Path) -> dict[str, str]:
         except OSError:
             continue
         # Look for IMPL_GHIDRA("DLL", 0xADDR) patterns
-        for m in IMPL_GHIDRA_RE.finditer(text):
+        for m in IMPL_MATCH_RE.finditer(text):
             addr = m.group(2).lower()
-            annotations[addr] = "IMPL_GHIDRA"
+            annotations[addr] = "IMPL_MATCH"
     return annotations
 
 # ---------------------------------------------------------------------------
@@ -240,7 +240,7 @@ def main() -> int:
         print(f"\n{'='*70}")
         print(f"  SIZE DIVERGENCES DETECTED ({len(issues)} function(s))")
         print(f"  These may indicate incomplete implementations.")
-        print(f"  If divergence is intentional, use IMPL_GHIDRA_APPROX with a reason.")
+        print(f"  If divergence is intentional, use IMPL_APPROX with a reason.")
         print(f"{'='*70}")
         for i in issues:
             print(f"  {i['symbol']}")
@@ -257,7 +257,7 @@ def main() -> int:
         print(f"Report written to: {args.report}")
 
     # For now this is always warn-only until annotation pass is complete.
-    # When --warn-only is removed, IMPL_GHIDRA functions that diverge will fail.
+    # When --warn-only is removed, IMPL_MATCH functions that diverge will fail.
     if issues and not args.warn_only:
         return 1
     return 0

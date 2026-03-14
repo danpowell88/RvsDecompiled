@@ -6,6 +6,7 @@ static INT  s_prevViewTarget = 0;
 static BYTE s_prevViewState  = 0;
 
 // --- APlayerController ---
+IMPL_INFERRED("Ghidra-sourced logic (no RVA recorded): checks UNetConnection at +0x5B4, sets bPendingDestroy on Driver")
 void APlayerController::SpecialDestroy()
 {
 	// Ghidra (49B): If Player (offset 0x5B4) is a UNetConnection with a Driver,
@@ -24,6 +25,7 @@ void APlayerController::SpecialDestroy()
 	}
 }
 
+IMPL_GHIDRA("Engine.dll", 0xc3c80)
 int APlayerController::Tick(float DeltaSeconds, ELevelTick TickType)
 {
 	guard(APlayerController::Tick);
@@ -156,6 +158,7 @@ SKIP_INPUT:
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x91550)
 void APlayerController::R6PBKickPlayer(FString KickMsg)
 {
 	guard(APlayerController::R6PBKickPlayer);
@@ -166,6 +169,7 @@ void APlayerController::R6PBKickPlayer(FString KickMsg)
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x7a5c0)
 void APlayerController::SetPlayer(UPlayer* InPlayer)
 {
 	// Ghidra 0x7a5c0: bi-directional controller<->player link, init input if viewport.
@@ -189,12 +193,14 @@ void APlayerController::SetPlayer(UPlayer* InPlayer)
 	debugf(TEXT("%s"), GetFullName());
 }
 
+IMPL_INFERRED("No Ghidra address; checks UViewport at +0x5B4")
 int APlayerController::LocalPlayerController()
 {
 	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4
 	return Player && Player->IsA(UViewport::StaticClass());
 }
 
+IMPL_GHIDRA("Engine.dll", 0x7de60)
 void APlayerController::PostNetReceive()
 {
 	guard(APlayerController::PostNetReceive);
@@ -209,6 +215,7 @@ void APlayerController::PostNetReceive()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x785d0)
 void APlayerController::PreNetReceive()
 {
 	guard(APlayerController::PreNetReceive);
@@ -219,6 +226,7 @@ void APlayerController::PreNetReceive()
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x127760)
 void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags)
 {
 	guard(APlayerController::CheckHearSound);
@@ -229,11 +237,13 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
+IMPL_INFERRED("Ghidra-noted vtable dispatch to LowLevelGetRemoteAddress; no RVA recorded")
 FString APlayerController::GetPlayerNetworkAddress()
 {
 	// Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player connection.
@@ -243,6 +253,7 @@ FString APlayerController::GetPlayerNetworkAddress()
 	return FString(TEXT(""));
 }
 
+IMPL_INFERRED("No Ghidra address; view-target fallback chain via Pawn then self")
 AActor * APlayerController::GetViewTarget()
 {
 	AActor*& ViewTarget = *(AActor**)(&_NativeData[51]); // offset 0x5B8
@@ -258,6 +269,7 @@ AActor * APlayerController::GetViewTarget()
 	return ViewTarget;
 }
 
+IMPL_INFERRED("No Ghidra address; self-relevance shortcut then delegates to AActor::IsNetRelevantFor")
 int APlayerController::IsNetRelevantFor(APlayerController* RealViewer,AActor* Viewer,FVector SrcLocation)
 {
 	if( this == RealViewer )

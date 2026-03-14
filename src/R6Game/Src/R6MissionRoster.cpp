@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(UR6MissionRoster)
 
 // --- UR6MissionRoster ---
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void UR6MissionRoster::TransferFile(FArchive& Ar)
 {
 	// Serialize the operative count.  FUN_1000a250(Ar, &m_MissionOperatives) at 0x1000a250

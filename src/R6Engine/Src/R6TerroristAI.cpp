@@ -20,6 +20,7 @@ IMPLEMENT_FUNCTION(AR6TerroristAI, -1, execMakeBackupList)
 
 // --- AR6TerroristAI ---
 
+IMPL_APPROX("Filters noise types against terrorist hearing flags before delegating to AR6AIController::CanHear")
 INT AR6TerroristAI::CanHear(FVector Location, FLOAT Loudness, AActor* Source, enum ENoiseType NoiseType, enum EPawnType PawnType)
 {
 	// Filter by noise type against terrorist hearing capabilities
@@ -42,6 +43,7 @@ INT AR6TerroristAI::CanHear(FVector Location, FLOAT Loudness, AActor* Source, en
 	return AR6AIController::CanHear(Location, Loudness, Source, NoiseType, PawnType);
 }
 
+IMPL_APPROX("Zone-sphere and line-trace check for clear shot; updates acquired target on obstructed friendly trace")
 INT AR6TerroristAI::HaveAClearShot(FVector vStart, APawn* param_5)
 {
 	guard(AR6TerroristAI::HaveAClearShot);
@@ -121,6 +123,7 @@ INT AR6TerroristAI::HaveAClearShot(FVector vStart, APawn* param_5)
 	unguard;
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6TerroristAI::eventGotoPointAndSearch(FVector A, BYTE B, DWORD C, FLOAT D, BYTE E)
 {
 	struct { 
@@ -138,6 +141,7 @@ void AR6TerroristAI::eventGotoPointAndSearch(FVector A, BYTE B, DWORD C, FLOAT D
 	ProcessEvent(FindFunctionChecked(R6ENGINE_GotoPointAndSearch), &Parms);
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6TerroristAI::eventGotoPointToAttack(FVector A, AActor * B)
 {
 	struct { 
@@ -149,6 +153,7 @@ void AR6TerroristAI::eventGotoPointToAttack(FVector A, AActor * B)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_GotoPointToAttack), &Parms);
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6TerroristAI::eventGotoStateEngageByThreat(FVector A)
 {
 	struct { FVector A; } Parms;
@@ -156,6 +161,7 @@ void AR6TerroristAI::eventGotoStateEngageByThreat(FVector A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_GotoStateEngageByThreat), &Parms);
 }
 
+IMPL_APPROX("Dispatches backup terrorists to flanking positions around attack destination")
 void AR6TerroristAI::execCallBackupForAttack(FFrame& Stack, RESULT_DECL)
 {
 	guard(AR6TerroristAI::execCallBackupForAttack);
@@ -233,6 +239,7 @@ void AR6TerroristAI::execCallBackupForAttack(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_APPROX("Dispatches backup terrorists to investigate at destination position")
 void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 {
 	guard(AR6TerroristAI::execCallBackupForInvestigation);
@@ -254,12 +261,14 @@ void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TerroristAI::execCallVisibleTerrorist(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(APawn, PTarget);
@@ -267,12 +276,14 @@ void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = FVector(0,0,0);
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TerroristAI::execGetNextRandomNode(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(UObject**)Result = NULL;
 }
 
+IMPL_APPROX("Standard exec thunk delegating to native HaveAClearShot")
 void AR6TerroristAI::execHaveAClearShot(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vStart);
@@ -281,12 +292,14 @@ void AR6TerroristAI::execHaveAClearShot(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = HaveAClearShot(vStart, PTarget);
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TerroristAI::execIsAttackSpotStillValid(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6TerroristAI::execMakeBackupList(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

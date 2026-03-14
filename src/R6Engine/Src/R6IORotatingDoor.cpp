@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	R6IORotatingDoor.cpp
 =============================================================================*/
 
@@ -15,6 +15,7 @@ static FVector GRotatingDoor_OldLocation;
 
 // --- AR6IORotatingDoor ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
 	guard(AR6IORotatingDoor::AddMyMarker);
@@ -27,6 +28,7 @@ void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
+IMPL_APPROX("Determines which side of the door a point lies on using dot product against the door's normal vector")
 INT AR6IORotatingDoor::DoorOpenTowards(FVector Point)
 {
 	FVector Dir = Rotation.Vector();
@@ -43,11 +45,13 @@ INT AR6IORotatingDoor::DoorOpenTowards(FVector Point)
 	return m_bIsOpeningClockWise;
 }
 
+IMPL_APPROX("Returns true if the door has a StaticMesh, indicating it acts as a moving brush")
 INT AR6IORotatingDoor::IsMovingBrush() const
 {
 	return StaticMesh != NULL;
 }
 
+IMPL_APPROX("Restores cached door location after net receive; doors do not replicate position")
 void AR6IORotatingDoor::PostNetReceive()
 {
 	guard(AR6IORotatingDoor::PostNetReceive);
@@ -64,6 +68,7 @@ void AR6IORotatingDoor::PostNetReceive()
 	unguard;
 }
 
+IMPL_APPROX("Safely destroys both door actor halves then delegates to AR6InteractiveObject::PostScriptDestroyed")
 void AR6IORotatingDoor::PostScriptDestroyed()
 {
 	guard(AR6IORotatingDoor::PostScriptDestroyed);
@@ -73,6 +78,7 @@ void AR6IORotatingDoor::PostScriptDestroyed()
 	unguard;
 }
 
+IMPL_APPROX("Caches door location before net receive for restoration in PostNetReceive")
 void AR6IORotatingDoor::PreNetReceive()
 {
 	guard(AR6IORotatingDoor::PreNetReceive);
@@ -81,6 +87,7 @@ void AR6IORotatingDoor::PreNetReceive()
 	unguard;
 }
 
+IMPL_MATCH("R6Engine.dll", 0x1d550)
 void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6IORotatingDoor::RenderEditorInfo);
@@ -120,6 +127,7 @@ void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	unguard;
 }
 
+IMPL_APPROX("R6-specific trace filter for rotating doors; respects see-through, bullet-goes-through, and mover flags")
 INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6IORotatingDoor::ShouldTrace);
@@ -143,6 +151,7 @@ INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
+IMPL_APPROX("Returns true if an NPC approaching a closed door should cause it to swing open on touch")
 INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn* Pawn)
 {
 	if (!Pawn->m_bIsPlayer && m_bIsDoorClosed && Rotation.Yaw != m_iYawInit)
@@ -150,6 +159,7 @@ INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn* Pawn)
 	return 0;
 }
 
+IMPL_APPROX("Script-callable: adds a breach actor to the door's breach list")
 void AR6IORotatingDoor::execAddBreach(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, BreachAttached);
@@ -157,6 +167,7 @@ void AR6IORotatingDoor::execAddBreach(FFrame& Stack, RESULT_DECL)
 	m_BreachAttached.AddItem((AR6AbstractBullet*)BreachAttached);
 }
 
+IMPL_APPROX("Script-callable: removes a breach actor from the door's breach list")
 void AR6IORotatingDoor::execRemoveBreach(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, BreachAttached);
@@ -164,6 +175,7 @@ void AR6IORotatingDoor::execRemoveBreach(FFrame& Stack, RESULT_DECL)
 	m_BreachAttached.RemoveItem((AR6AbstractBullet*)BreachAttached);
 }
 
+IMPL_APPROX("Script-callable: returns whether this door will open on touch by the given pawn")
 void AR6IORotatingDoor::execWillOpenOnTouch(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6Pawn, R6Pawn);

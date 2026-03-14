@@ -15,6 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- APhysicsVolume ---
+IMPL_GHIDRA("Engine.dll", 0xb77a0)
 void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 {
 	guard(APhysicsVolume::SetZone);
@@ -53,6 +54,7 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
+IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -60,14 +62,17 @@ INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire,
 
 
 // --- AVolume ---
+IMPL_TODO("Needs Ghidra analysis")
 void AVolume::SetVolumes(TArray<AVolume *> const &)
 {
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AVolume::SetVolumes()
 {
 }
 
+IMPL_GHIDRA("Engine.dll", 0x71530)
 int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AVolume::ShouldTrace);
@@ -123,6 +128,7 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
+IMPL_GHIDRA_APPROX("Engine.dll", 0x175ab0, "R6 decoration-volume spawning deferred: undocumented struct layout at +0x3f8 not yet reconstructed")
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
@@ -135,6 +141,7 @@ void AVolume::PostBeginPlay()
 	unguard;
 }
 
+IMPL_INFERRED("No Ghidra RVA; Brush PointCheck pattern inferred from Ghidra notes")
 int AVolume::Encompasses(FVector Location)
 {
 	// Ghidra: Check if Brush is NULL (offset 0x178), return 0 if so.
@@ -151,6 +158,7 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
+IMPL_GHIDRA_APPROX("Engine.dll", 0xe12c0, "scout zone-resize fallback path deferred: unknown Level vtable slot 0x9c")
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);
@@ -189,12 +197,14 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 
 
 // --- AWarpZoneMarker ---
+IMPL_TODO("Needs Ghidra analysis")
 void AWarpZoneMarker::addReachSpecs(APawn*,int)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
 	unguardSlow;
 }
 
+IMPL_GHIDRA("Engine.dll", 0xd5f00)
 int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 {
 	guard(AWarpZoneMarker::IsIdentifiedAs);
@@ -210,6 +220,7 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
+IMPL_TODO("Needs Ghidra analysis")
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);
@@ -218,19 +229,20 @@ void AZoneInfo::PostEditChange()
 
 
 // --- FZoneProperties ---
+IMPL_GHIDRA("Engine.dll", 0x2ac0)
 FZoneProperties::FZoneProperties(const FZoneProperties& Other)
 {
 	// Ghidra 0x2ac0: shares address with operator=; 18 DWORDs flat copy (no vtable)
 	appMemcpy(this, &Other, 0x48);
 }
 
-FZoneProperties::FZoneProperties()
-{
-	// Ghidra 0x18b40 (53 bytes): zeroes offsets 0x08–0x44 (16 DWORDs).
+IMPL_GHIDRA("Engine.dll", 0x18b40)
+FZoneProperties::FZoneProperties()(53 bytes): zeroes offsets 0x08–0x44 (16 DWORDs).
 	// First 8 bytes are left untouched (written only by the copy ctor / operator=).
 	appMemzero((BYTE*)this + 8, 0x40);
 }
 
+IMPL_GHIDRA("Engine.dll", 0x2ac0)
 FZoneProperties& FZoneProperties::operator=(const FZoneProperties& Other)
 {
 	// Ghidra 0x2ac0: 18 DWORDs from +0x00 (no vtable; also used as copy ctor body)

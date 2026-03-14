@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(AR6DZonePath)
 
 // --- AR6DZonePath ---
 
+IMPL_APPROX("Reconstructed path validation: checks node list is non-empty and delegates to base CheckForErrors")
 void AR6DZonePath::CheckForErrors()
 {
 	guard(AR6DZonePath::CheckForErrors);
@@ -17,6 +18,7 @@ void AR6DZonePath::CheckForErrors()
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed node deletion by pointer: searches m_aNode and delegates to index overload")
 void AR6DZonePath::DeleteANode(AR6DZonePathNode *Node)
 {
 	guard(AR6DZonePath::DeleteANode);
@@ -31,6 +33,7 @@ void AR6DZonePath::DeleteANode(AR6DZonePathNode *Node)
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed node deletion by index: removes from array and destroys actor")
 void AR6DZonePath::DeleteANode(INT iIndex)
 {
 	guard(AR6DZonePath::DeleteANode);
@@ -42,6 +45,7 @@ void AR6DZonePath::DeleteANode(INT iIndex)
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed closest-point-on-circle search across all path nodes")
 FVector AR6DZonePath::FindClosestPointTo(FVector const & Point)
 {
 	guard(AR6DZonePath::FindClosestPointTo);
@@ -81,6 +85,7 @@ FVector AR6DZonePath::FindClosestPointTo(FVector const & Point)
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed random point within a randomly chosen node's radius")
 FVector AR6DZonePath::FindRandomPointInArea()
 {
 	guard(AR6DZonePath::FindRandomPointInArea);
@@ -98,6 +103,7 @@ FVector AR6DZonePath::FindRandomPointInArea()
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed spawning point with rotation from randomly chosen node")
 FVector AR6DZonePath::FindSpawningPoint(FRotator * pRotation, INT *, enum EStance *, INT *)
 {
 	guard(AR6DZonePath::FindSpawningPoint);
@@ -118,11 +124,13 @@ FVector AR6DZonePath::FindSpawningPoint(FRotator * pRotation, INT *, enum EStanc
 
 // Ghidra 0x193c0: shared null stub — same address as HurtByVolume/R6DZoneRandomPoints::IsPointInZone.
 // No SEH frame in binary; returns 0 (MSVC requires a return value in non-void functions).
+IMPL_MATCH("R6Engine.dll", 0x193c0)
 INT AR6DZonePath::IsPointInZone(FVector const &)
 {
 	return 0;
 }
 
+IMPL_APPROX("Reconstructed node list destruction loop with safe actor cleanup")
 void AR6DZonePath::PostScriptDestroyed()
 {
 	guard(AR6DZonePath::PostScriptDestroyed);
@@ -136,6 +144,7 @@ void AR6DZonePath::PostScriptDestroyed()
 	unguard;
 }
 
+IMPL_APPROX("Calls parent RenderEditorInfo; additional FLineBatcher path node drawing stubbed")
 void AR6DZonePath::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DZonePath::RenderEditorInfo);
@@ -146,6 +155,7 @@ void AR6DZonePath::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed path node spawn and parent-link setup")
 void AR6DZonePath::SpawnANewNode(FVector)
 {
 	guard(AR6DZonePath::SpawnANewNode);
@@ -155,6 +165,7 @@ void AR6DZonePath::SpawnANewNode(FVector)
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed initial node spawning with two offset nodes along Y axis")
 void AR6DZonePath::Spawned()
 {
 	guard(AR6DZonePath::Spawned);

@@ -11,11 +11,13 @@ IMPLEMENT_FUNCTION(UR6FileManagerCampaign, -1, execSaveCampaign)
 
 // --- UR6FileManagerCampaign ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6FileManagerCampaign::execLoadCampaign(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6FileManagerCampaign::execSaveCampaign(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

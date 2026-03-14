@@ -60,5 +60,14 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 3. **When adding a new declaration or shim** (e.g. adding a missing function to `EnginePrivate.h` or `CorePrivate.h`), derive the signature from Ghidra's decompilation output in `ghidra/exports/`, not from the SDK. Document the Ghidra address in a comment.
 
 4. **When a SDK declaration disagrees with Ghidra**, the Ghidra-derived version wins. Note the discrepancy with a comment: `// DIVERGENCE from SDK: Ghidra shows N params, SDK shows M`.
+
+5. **Retail parity attribution** — every function definition must be preceded by one of these macros (see `src/Core/Inc/ImplSource.h`):
+   - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact byte parity with retail; build fails if compiled size diverges
+   - `IMPL_APPROX("reason")` — intentional or unverified deviation; parity check skipped; **reason is mandatory**
+   - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed)
+   - `IMPL_DIVERGE("reason")` — permanent divergence (Karma physics, GameSpy, etc.)
+   - `IMPL_TODO("reason")` — not yet implemented; **BUILD FAILS**
 
-5. **`IMPL_SDK` attribution** is only appropriate when Ghidra confirms the SDK implementation matches retail. If the SDK code was modified or differs, use `IMPL_SDK_MODIFIED` or `IMPL_INFERRED`.
+   **The macros express parity status, not code origin.** Where the code came from (Ghidra, UT99 reference, inferred) belongs in a regular `//` comment above the macro. `IMPL_APPROX` is used for UT99-reference-derived code, Ghidra approximations, and anything inferred — all are unverified until confirmed.
+
+   Do NOT use the old `IMPL_GHIDRA`, `IMPL_GHIDRA_APPROX`, `IMPL_UT99_REF`, `IMPL_INFERRED`, `IMPL_INTENTIONALLY_EMPTY`, `IMPL_SDK`, or `IMPL_PERMANENT_DIVERGENCE` macros (all renamed/removed).

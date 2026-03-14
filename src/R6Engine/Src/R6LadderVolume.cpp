@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	R6LadderVolume.cpp
 =============================================================================*/
 
@@ -8,6 +8,7 @@ IMPLEMENT_CLASS(AR6LadderVolume)
 
 // --- AR6LadderVolume ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6LadderVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6LadderVolume::AddMyMarker);
@@ -19,6 +20,7 @@ void AR6LadderVolume::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
+IMPL_APPROX("Allows volume traversal when actor-trace flag 0x80000 is set, otherwise delegates to AVolume")
 INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6LadderVolume::ShouldTrace);
@@ -34,6 +36,7 @@ INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6LadderVolume::eventSetPotentialClimber()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetPotentialClimber), NULL);

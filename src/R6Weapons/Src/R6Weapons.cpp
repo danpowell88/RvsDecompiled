@@ -38,11 +38,13 @@ DWORD g_net_old_bit7      = 0;
 
 IMPLEMENT_CLASS(AR6Weapons)
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6Weapons::ProcessState(FLOAT DeltaTime)
 {
 	Super::ProcessState(DeltaTime);
 }
 
+IMPL_MATCH("R6Weapons.dll", 0x3c30)
 INT AR6Weapons::IsBlockedBy(AActor const* Other) const
 {
 	// Ghidra 0x3c30: if Other has bTrailerSameRotation (bit 17 of flags DWORD at +0xa8), don't block.
@@ -53,6 +55,7 @@ INT AR6Weapons::IsBlockedBy(AActor const* Other) const
 	return Super::IsBlockedBy(Other);
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6Weapons::PreNetReceive()
 {
 	Super::PreNetReceive();
@@ -60,6 +63,7 @@ void AR6Weapons::PreNetReceive()
 	g_net_old_nbBullets = *(BYTE*)((BYTE*)this + 0x396);
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6Weapons::PostNetReceive()
 {
 	Super::PostNetReceive();
@@ -82,17 +86,20 @@ void AR6Weapons::PostNetReceive()
 	}
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6Weapons::TickAuthoritative(FLOAT DeltaTime)
 {
 	Super::TickAuthoritative(DeltaTime);
 }
 
+IMPL_EMPTY("retail: base class always returns 0; AR6HBSGadget overrides")
 INT AR6Weapons::GetHeartBeatStatus()
 {
 	// retail: empty — base class always returns 0; AR6HBSGadget overrides.
 	return 0;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6Weapons::ShowWeaponParticles(AR6Pawn* param_1, AR6PlayerController* param_2)
 {
 	guard(AR6Weapons::ShowWeaponParticles);
@@ -235,6 +242,7 @@ void AR6Weapons::ShowWeaponParticles(AR6Pawn* param_1, AR6PlayerController* para
 	unguard;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 FLOAT AR6Weapons::ComputeEffectiveAccuracy(FLOAT DeltaTime, FLOAT DeltaFrame)
 {
 	// Sync old worst accuracy when it drifts from current worst
@@ -280,6 +288,7 @@ FLOAT AR6Weapons::ComputeEffectiveAccuracy(FLOAT DeltaTime, FLOAT DeltaFrame)
 	return m_fEffectiveAccuracy;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 FLOAT AR6Weapons::GetMovingModifier(FLOAT DeltaTime, FLOAT DeltaFrame)
 {
 	AR6AbstractPawn* pPawn = (AR6AbstractPawn*)Owner;
@@ -423,11 +432,13 @@ FLOAT AR6Weapons::GetMovingModifier(FLOAT DeltaTime, FLOAT DeltaFrame)
 	return m_fWorstAccuracy;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 bool AR6Weapons::WeaponIsNotFiring()
 {
 	return true;
 }
 
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6Weapons::eventHideAttachment()
 {
 	ProcessEvent(FindFunctionChecked(R6WEAPONS_HideAttachment), NULL);

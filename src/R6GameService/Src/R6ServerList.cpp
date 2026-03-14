@@ -23,42 +23,49 @@ static INT GsLobbyID  = 0; // DAT_10093b34 — GetLobbyID()
 
 // --- UR6ServerList ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::FillSvrContainer()
 {
 	guard(UR6ServerList::FillSvrContainer);
 	unguard;
 }
 
+IMPL_MATCH("R6GameService.dll", 0x125e0)
 INT UR6ServerList::GetGroupID()
 {
 	// 0x125e0  54  ?GetGroupID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
 	return GsGroupID;
 }
 
+IMPL_MATCH("R6GameService.dll", 0x125d0)
 INT UR6ServerList::GetLobbyID()
 {
 	// 0x125d0  55  ?GetLobbyID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
 	return GsLobbyID;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::InitFavorites()
 {
 	guard(UR6ServerList::InitFavorites);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::ResetSvrContainer()
 {
 	guard(UR6ServerList::ResetSvrContainer);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::SetOwnSvrPort(INT)
 {
 	guard(UR6ServerList::SetOwnSvrPort);
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed from context; delegates to UnrealScript event")
 void UR6ServerList::eventGetLobbyAndGroupID(INT &iLobbyID, INT &iGroupID)
 {
 	struct {
@@ -72,6 +79,7 @@ void UR6ServerList::eventGetLobbyAndGroupID(INT &iLobbyID, INT &iGroupID)
 	iGroupID = Parms.iGroupID;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execGetDisplayListSize(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execGetDisplayListSize);
@@ -79,6 +87,7 @@ void UR6ServerList::execGetDisplayListSize(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execNativeGetMaxPlayers(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeGetMaxPlayers);
@@ -87,6 +96,7 @@ void UR6ServerList::execNativeGetMaxPlayers(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_APPROX("Reconstructed from context; returns GetTickCount")
 void UR6ServerList::execNativeGetMilliSeconds(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeGetMilliSeconds);
@@ -95,6 +105,7 @@ void UR6ServerList::execNativeGetMilliSeconds(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execNativeGetOwnSvrPort(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeGetOwnSvrPort);
@@ -102,6 +113,7 @@ void UR6ServerList::execNativeGetOwnSvrPort(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execNativeGetPingTime(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeGetPingTime);
@@ -110,6 +122,7 @@ void UR6ServerList::execNativeGetPingTime(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execNativeGetPingTimeOut(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeGetPingTimeOut);
@@ -118,6 +131,7 @@ void UR6ServerList::execNativeGetPingTimeOut(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execNativeInitFavorites(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeInitFavorites);
@@ -126,6 +140,7 @@ void UR6ServerList::execNativeInitFavorites(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execNativeUpdateFavorites(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execNativeUpdateFavorites);
@@ -133,6 +148,7 @@ void UR6ServerList::execNativeUpdateFavorites(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6ServerList::execSortServers(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6ServerList::execSortServers);

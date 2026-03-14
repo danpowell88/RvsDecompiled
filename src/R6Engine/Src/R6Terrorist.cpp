@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	R6Terrorist.cpp
 	AR6Terrorist — terrorist pawn with net replication and special animations.
 =============================================================================*/
@@ -14,6 +14,7 @@ static BYTE GR6Terrorist_OldDefCon;
 
 // --- AR6Terrorist ---
 
+IMPL_APPROX("Triggers animation events on replicated special-anim and health/DefCon state changes")
 void AR6Terrorist::PostNetReceive()
 {
 	guard(AR6Terrorist::PostNetReceive);
@@ -37,6 +38,7 @@ void AR6Terrorist::PostNetReceive()
 	unguard;
 }
 
+IMPL_APPROX("Caches replicated animation and health bytes before net update for change detection")
 void AR6Terrorist::PreNetReceive()
 {
 	guard(AR6Terrorist::PreNetReceive);
@@ -47,6 +49,7 @@ void AR6Terrorist::PreNetReceive()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 {
 	guard(AR6Terrorist::UpdateAiming);
@@ -59,21 +62,25 @@ void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 	unguard;
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6Terrorist::eventFinishInitialization()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_FinishInitialization), NULL);
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6Terrorist::eventLoopSpecialAnim()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_LoopSpecialAnim), NULL);
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6Terrorist::eventPlaySpecialAnim()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlaySpecialAnim), NULL);
 }
 
+IMPL_APPROX("Standard UObject event thunk")
 void AR6Terrorist::eventStopSpecialAnim()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StopSpecialAnim), NULL);

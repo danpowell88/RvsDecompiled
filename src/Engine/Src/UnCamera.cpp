@@ -16,12 +16,14 @@ inline void  operator delete(void*, void*) noexcept {}
 extern ENGINE_API UEngine* g_pEngine;
 
 // --- ACamera ---
+IMPL_TODO("Needs Ghidra analysis")
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(ACamera::RenderEditorInfo);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void ACamera::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(ACamera::RenderEditorSelected);
@@ -30,12 +32,14 @@ void ACamera::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamic
 
 
 // --- UCameraEffect ---
+IMPL_TODO("Needs Ghidra analysis")
 void UCameraEffect::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraEffect::PostRender);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UCameraEffect::PreRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraEffect::PreRender);
@@ -44,6 +48,7 @@ void UCameraEffect::PreRender(UViewport *,FRenderInterface *)
 
 
 // --- UCameraOverlay ---
+IMPL_TODO("Needs Ghidra analysis")
 void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraOverlay::PostRender);
@@ -52,18 +57,21 @@ void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 
 
 // --- UMotionBlur ---
+IMPL_TODO("Needs Ghidra analysis")
 void UMotionBlur::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UMotionBlur::PostRender);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 {
 	guard(UMotionBlur::PreRender);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x86330)
 void UMotionBlur::Destroy()
 {
 	// Retail: 0x86330, ordinal 2491. Calls parent Destroy, then frees the two
@@ -83,24 +91,28 @@ void UMotionBlur::Destroy()
 
 
 // --- UViewport ---
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::PushHit(HHitProxy const &,int)
 {
 	guard(UViewport::PushHit);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::RefreshAll()
 {
 	guard(UViewport::RefreshAll);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::LockOnActor(AActor *)
 {
 	guard(UViewport::LockOnActor);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x83d70)
 int UViewport::MultiShot()
 {
 	// Ghidra 0x83d70: no SEH frame
@@ -189,12 +201,14 @@ int UViewport::MultiShot()
 	return 0;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::PopHit(int)
 {
 	guard(UViewport::PopHit);
 	unguard;
 }
 
+IMPL_INFERRED("Decoded from retail binary; no direct RVA recorded")
 void UViewport::ChangeInputSet(BYTE bReset)
 {
 	// Retail: 23b. If bReset==0, restores input set ptr: copy this+0x84 to this+0x80.
@@ -202,18 +216,21 @@ void UViewport::ChangeInputSet(BYTE bReset)
 		*(DWORD*)((BYTE*)this + 0x80) = *(DWORD*)((BYTE*)this + 0x84);
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ExecProfile(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UViewport::ExecProfile);
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor * *)
 {
 	guard(UViewport::ExecuteHits);
 	unguard;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x12AF0)
 int UViewport::IsDepthComplexity()
 {
 	// Retail (25b, RVA 0x12AF0): RendMap == 0x08 → depth complexity view
@@ -222,6 +239,7 @@ int UViewport::IsDepthComplexity()
 	return (*(DWORD*)((BYTE*)st + 0x504) == 0x08) ? 1 : 0;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x12B90)
 int UViewport::IsEditing()
 {
 	// Retail (74b, RVA 0x12B90): RendMap 0x0D/0x0E/0x0F or 1-8 -> editing view
@@ -233,6 +251,7 @@ int UViewport::IsEditing()
 	return 0;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x12B60)
 int UViewport::IsLit()
 {
 	// Retail (54b, RVA 0x12B60): RendMap 5,7,8,0x1E -> lit; RendMap 0x10 with [state+0x4FC] non-null
@@ -244,6 +263,7 @@ int UViewport::IsLit()
 	return 0;
 }
 
+IMPL_GHIDRA("Engine.dll", 0x12A70)
 int UViewport::IsTopView()
 {
 	// Retail (25b, RVA 0x12A70): RendMap == 0x0D → top-down ortho view
@@ -332,6 +352,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
 // FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
 // Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
+IMPL_INFERRED("Decoded from Ghidra sub-function analysis; no direct RVA for this operator")
 FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
 	FArray& Arr = *(FArray*)&V.Pad[4];
@@ -362,6 +383,7 @@ FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 // Decoded from Ghidra Engine @ 0xcf6f0. Complex with ZoneMask (FUN_103cc610),
 // sub-struct pairs (FUN_103cba20), version-gated multi-branch INT serialization.
 // All internal functions fully decoded from _unnamed.cpp.
+IMPL_GHIDRA("Engine.dll", 0xcf6f0)
 FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 	BYTE* P = (BYTE*)&V;
 
@@ -491,6 +513,7 @@ FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 // UObject* at +0x20, and version-gated INT override.
 // Layout: [0x00] vtable  [0x04] TArray<FBspVertex>  [0x18] INT  [0x1C] INT
 //         [0x20] UObject*  [0x24] INT  [0x28] INT (ver-gated default -1)
+IMPL_GHIDRA("Engine.dll", 0x27ad0)
 FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 	Ar << *(TArray<FBspVertex>*)&V.Pad[4];       // TArray<FBspVertex> at obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);      // INT at obj+0x18
@@ -509,6 +532,7 @@ FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSurf@@@Z
 // Decoded from Ghidra Engine @ 0xcbf50. Uses vtable+0x18 (UObject*), FCompactIndex,
 // ByteOrderSerialize, and Serialize. No FUN_xxx dependencies.
+IMPL_GHIDRA("Engine.dll", 0xcbf50)
 FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 	Ar << V.Texture;
 	Ar.ByteOrderSerialize((BYTE*)&V.PolyFlags, 4);

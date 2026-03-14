@@ -12,16 +12,19 @@ IMPLEMENT_FUNCTION(UR6FileManagerPlanning, -1, execSavePlanning)
 
 // --- UR6FileManagerPlanning ---
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6FileManagerPlanning::execGetNumberOfFiles(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6FileManagerPlanning::execLoadPlanning(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 void UR6FileManagerPlanning::execSavePlanning(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
