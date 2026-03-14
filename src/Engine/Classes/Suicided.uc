@@ -1,3 +1,6 @@
+// Suicided — damage type for self-inflicted death (suicide).
+// GibModifier=0 means suicide does not trigger gibs.
+// Extracted from retail Engine.u.
 class Suicided extends DamageType
 	abstract;
 
