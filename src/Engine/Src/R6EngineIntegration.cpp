@@ -166,7 +166,7 @@ float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 			stepHeight = 50.0f;
 	}
 
-	// Ghidra NaN checktranslates to: fVar1 > 0.0f && stepHeight <= fVar1 → return 0
+	// Ghidra NaN check translates to: fVar1 > 0.0f && stepHeight <= fVar1 → return 0
 	if (fVar1 > 0.0f && stepHeight <= fVar1)
 		return 0.0f;
 
