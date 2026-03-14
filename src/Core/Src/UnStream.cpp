@@ -40,7 +40,7 @@ struct FStream
 	INT            bError;              // +0x20  non-zero on I/O error
 	EFileStreamType Type;               // +0x24  stream type (FST_Unknown=Win32, FST_Read/Write=Ogg)
 };
-static_assert( sizeof(FStream) == 0x28, "FStream must be 0x28 bytes" );
+COMPILE_CHECK( sizeof(FStream) == 0x28, FStream_must_be_0x28_bytes );
 
 /*-----------------------------------------------------------------------------
 	FFileStream — singleton streaming file manager.

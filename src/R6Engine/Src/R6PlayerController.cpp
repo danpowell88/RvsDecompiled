@@ -260,29 +260,29 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	unguard;
 }
 
-IMPL_DIVERGE("~2000-byte function (Ghidra 0x308c0). Queries circumtstantial action system")
+IMPL_DIVERGE("FUN_100017a0 (unresolved navigation helper); ~1645-byte function")
 void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);
 
-	// DIVERGENCE: ~2000-byte function (Ghidra 0x308c0). Queries circumtstantial action system
-	// (m_CircumstantialAction at this+0x8b4): fires a line trace from eye position, checks hit
-	// actor class hierarchy for interactive/pawn types, extracts material/bone info for reticule,
-	// calls eventR6QueryCircumstantialAction, updates reticule target at (this+0x9bc/0x9c0/0x9c4).
-	// Unresolved PrivateStaticClass_exref comparisons and vtable dispatch patterns deferred.
+	// DIVERGENCE: FUN_100017a0 (unresolved navigation helper); ~1645-byte function (Ghidra 0x100308c0).
+	// Queries circumtstantial action system (m_CircumstantialAction at this+0x8b4): fires a line
+	// trace from eye position, checks hit actor class hierarchy for interactive/pawn types, extracts
+	// material/bone info for reticule, calls eventR6QueryCircumstantialAction, updates reticule
+	// target at (this+0x9bc/0x9c0/0x9c4). Blocked by FUN_100017a0 unresolved reference.
 
 	unguard;
 }
 
-IMPL_DIVERGE("~1100-byte function (Ghidra 0x31010). Iterates level actors for alive")
+IMPL_DIVERGE("FUN_10001750/FUN_1002ff80 unresolved; ~1298-byte reticule scan function")
 void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);
 
-	// DIVERGENCE: ~1100-byte function (Ghidra 0x31010). Iterates level actors for alive
-	// terrorists, gets bone positions via USkeletalMeshInstance::GetBoneCoords ("R6 PonyTail1"),
-	// projects to screen via FUN_1002ff80, finds closest in reticule radius. Updates aim info
-	// at (this+0x8b0/0x918/0x91c/0x920/0x86c/0x870). FUN_1002ff80 and bone name logic unresolved.
+	// DIVERGENCE: FUN_10001750/FUN_1002ff80 unresolved; ~1298-byte function (Ghidra 0x10031010).
+	// Iterates level actors for alive terrorists, gets bone positions via
+	// USkeletalMeshInstance::GetBoneCoords ("R6 PonyTail1"), projects to screen via FUN_1002ff80,
+	// finds closest in reticule radius. Updates aim info at (this+0x8b0/0x918/0x91c/0x920/0x86c/0x870).
 
 	unguard;
 }
@@ -308,14 +308,91 @@ void AR6PlayerController::UpdateReticuleIdentification(AActor * param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("~656-byte function (Ghidra 0x305f0). Fires line trace from eye/spectator")
+IMPL_MATCH("R6Engine.dll", 0x100305f0)
 void AR6PlayerController::UpdateSpectatorReticule()
 {
 	guard(AR6PlayerController::UpdateSpectatorReticule);
 
-	// DIVERGENCE: ~656-byte function (Ghidra 0x305f0). Fires line trace from eye/spectator
-	// position; if hit actor has a Pawn owner, copies PlayerName into (this+0xa68).
-	// FVector/rotation resolution and FName-to-FString copy logic unresolved.
+	FVector StartPoint(0.f, 0.f, 0.f);
+	FVector EndPoint(0.f, 0.f, 0.f);
+	UBOOL bDoTrace = TRUE;
+
+	if ((*(UINT*)((BYTE*)this + 0x524) & 0x20000) == 0)
+	{
+		// ViewTarget mode: spectating another player
+		void* pViewTarget = *(void**)((BYTE*)this + 0x5b8);
+		if (pViewTarget == NULL)
+		{
+			bDoTrace = FALSE;
+		}
+		else
+		{
+			// IsAlive via vtable slot 0x68/4=26 on ViewTarget
+			typedef INT (__thiscall *TIsAlive)(void*);
+			INT bAlive = ((TIsAlive)(*(INT**)pViewTarget)[0x68 / 4])(pViewTarget);
+			if (!bAlive)
+			{
+				bDoTrace = FALSE;
+			}
+			else
+			{
+				APawn* ViewTarget = (APawn*)pViewTarget;
+
+				// GetViewRotation via APawn vtable slot 0xd4/4=53; returns FRotator* into buffer
+				FRotator rotBuf;
+				typedef FRotator* (__thiscall *TGetViewRot)(APawn*, FRotator*);
+				FRotator* pRot = ((TGetViewRot)(*(INT**)ViewTarget)[0xd4 / 4])(ViewTarget, &rotBuf);
+				FVector dir = pRot->Vector();
+
+				FVector eyeOfs = ViewTarget->eventEyePosition();
+				StartPoint.X = eyeOfs.X + *(FLOAT*)((BYTE*)ViewTarget + 0x234);
+				StartPoint.Y = eyeOfs.Y + *(FLOAT*)((BYTE*)ViewTarget + 0x238);
+				StartPoint.Z = eyeOfs.Z + *(FLOAT*)((BYTE*)ViewTarget + 0x23c);
+
+				FLOAT Range = *(FLOAT*)((BYTE*)this + 0x848);
+				EndPoint.X = StartPoint.X + dir.X * Range;
+				EndPoint.Y = StartPoint.Y + dir.Y * Range;
+				EndPoint.Z = StartPoint.Z + dir.Z * Range;
+			}
+		}
+	}
+	else
+	{
+		// Direct spectator: use controller's own rotation and location
+		FVector dir = ((FRotator*)((BYTE*)this + 0x240))->Vector();
+		FLOAT Range = *(FLOAT*)((BYTE*)this + 0x848);
+		StartPoint.X = *(FLOAT*)((BYTE*)this + 0x234);
+		StartPoint.Y = *(FLOAT*)((BYTE*)this + 0x238);
+		StartPoint.Z = *(FLOAT*)((BYTE*)this + 0x23c);
+		EndPoint.X = StartPoint.X + dir.X * Range;
+		EndPoint.Y = StartPoint.Y + dir.Y * Range;
+		EndPoint.Z = StartPoint.Z + dir.Z * Range;
+	}
+
+	if (bDoTrace)
+	{
+		FCheckResult Hit(1.0f);
+		XLevel->SingleLineCheck(Hit, *(AActor**)((BYTE*)this + 0x3d8), EndPoint, StartPoint, 0x210bf, FVector(0, 0, 0));
+		if (Hit.Actor != NULL)
+		{
+			// vtable slot 0x6c/4=27 on Hit.Actor: returns controller or similar
+			typedef INT (__thiscall *TVtable27)(AActor*);
+			INT iResult = ((TVtable27)(*(INT**)Hit.Actor)[0x6c / 4])(Hit.Actor);
+			if (iResult != 0)
+			{
+				FStringNoInit* pName;
+				if (*(INT*)(iResult + 0x518) == 0)
+					pName = (FStringNoInit*)(iResult + 0x630);
+				else
+					pName = (FStringNoInit*)(*(INT*)(iResult + 0x518) + 0x408);
+				*(FStringNoInit*)((BYTE*)this + 0xa68) = *pName;
+				return;
+			}
+		}
+	}
+
+	// Clear spectator target name
+	*(FStringNoInit*)((BYTE*)this + 0xa68) = TEXT("");
 
 	unguard;
 }
@@ -403,7 +480,7 @@ void AR6PlayerController::eventPostRender(UCanvas * A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PostRender), &Parms);
 }
 
-IMPL_DIVERGE("Not found in Ghidra export — unresolved implementation")
+IMPL_MATCH("R6Engine.dll", 0x10007c90)
 void AR6PlayerController::eventSetCrouchBlend(FLOAT A)
 {
 	struct { FLOAT A; } Parms;
@@ -447,7 +524,7 @@ void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 	*(FString*)Result = TEXT("");
 }
 
-IMPL_DIVERGE("manages m_PlayVoicesPriority list, allocates FstSoundPriorityPtr,")
+IMPL_MATCH("R6Engine.dll", 0x10041a90)
 void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6SoundReplicationInfo, aAudioRepInfo);
@@ -457,9 +534,152 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 	P_GET_UBOOL(bWaitToFinishSound);
 	P_GET_FLOAT(fTime);
 	P_FINISH;
-	// DIVERGENCE: manages m_PlayVoicesPriority list, allocates FstSoundPriorityPtr,
-	// routes through SelectActorForSound and per-slot stop/play logic.
-	// Full implementation requires resolving FstSoundPriorityPtr struct and priority queue.
+
+	guard(AR6PlayerController::execPlayVoicesPriority);
+
+	if (*(INT*)((BYTE*)g_pEngine + 0x48) == 0)
+		return;
+
+	if (iPriority == 0)
+	{
+		// Diagnostic path only
+		AActor* pActor = SelectActorForSound(aAudioRepInfo);
+		pActor->GetName();
+		return;
+	}
+
+	// Allocate 0x1c-byte FstSoundPriorityPtr entry
+	INT* pEntry = (INT*)GMalloc->Malloc(0x1c);
+	if (pEntry == NULL)
+		return;
+
+	INT bAlreadyExists = 0;
+	INT bIsPlaying     = 0;
+
+	if (fTime == 0.0f)
+	{
+		if (iPriority == 5)
+		{
+			// Stop conflicting priority-5 entries for same RepInfo
+			for (INT i = 0; i < m_PlayVoicesPriority.Num(); i++)
+			{
+				INT* pE = (INT*)*(INT*)(*(INT*)((BYTE*)this + 0x900) + i * 4);
+				if ((AR6SoundReplicationInfo*)pE[0] == aAudioRepInfo &&
+				    (pE[5] == 0 || pE[2] != 5 || pE[6] == 0))
+				{
+					StopAndRemoveVoices(i);
+				}
+			}
+			// Play sound immediately
+			AActor* pActor = SelectActorForSound(aAudioRepInfo);
+			(*(void (__thiscall**)(AActor*, INT, BYTE, INT))
+			    (**(INT**)(*(INT*)((BYTE*)g_pEngine + 0x48)) + 0x84))
+			    (pActor, (INT)sndPlayVoice, eSlotUse, 0);
+			bIsPlaying = 1;
+		}
+		else if (iPriority == 10)
+		{
+			UBOOL bFoundMatch = FALSE;
+			for (INT i = 0; i < m_PlayVoicesPriority.Num(); i++)
+			{
+				INT* pE = (INT*)*(INT*)(*(INT*)((BYTE*)this + 0x900) + i * 4);
+				UBOOL bStop = FALSE;
+				if ((AR6SoundReplicationInfo*)pE[0] == aAudioRepInfo)
+				{
+					if (pE[2] != 10)
+					{
+						bStop = (pE[2] == 15);
+					}
+					else
+					{
+						if (pE[5] == 0 || pE[6] == 0)
+						{
+							bStop = TRUE;
+						}
+						else
+						{
+							if (pE[1] == (INT)sndPlayVoice)
+								bAlreadyExists = 1;
+							bFoundMatch = TRUE;
+						}
+					}
+				}
+				else if (pE[5] == 0 || pE[1] != (INT)sndPlayVoice)
+				{
+					if (aAudioRepInfo != NULL &&
+					    *(INT*)((BYTE*)aAudioRepInfo + 0x3b0) != 0 &&
+					    *(BYTE*)(*(INT*)((BYTE*)aAudioRepInfo + 0x3b0) + 0x394) == 1 &&
+					    *(BYTE*)((BYTE*)pE + 0x0d) == 1 &&
+					    pE[2] > 14)
+					{
+						bStop = TRUE;
+					}
+				}
+				else
+				{
+					bFoundMatch = TRUE;
+					bAlreadyExists = 1;
+				}
+				if (bStop)
+					StopAndRemoveVoices(i);
+			}
+			if (!bFoundMatch)
+			{
+				// No matching entry found — play immediately
+				AActor* pActor = SelectActorForSound(aAudioRepInfo);
+				(*(void (__thiscall**)(AActor*, INT, BYTE, INT))
+				    (**(INT**)(*(INT*)((BYTE*)g_pEngine + 0x48)) + 0x84))
+				    (pActor, (INT)sndPlayVoice, eSlotUse, 0);
+				bIsPlaying = 1;
+			}
+		}
+		else if (iPriority == 15)
+		{
+			for (INT i = 0; i < m_PlayVoicesPriority.Num(); i++)
+			{
+				INT* pE = (INT*)*(INT*)(*(INT*)((BYTE*)this + 0x900) + i * 4);
+				if (pE[2] == 15 &&
+				    (AR6SoundReplicationInfo*)pE[0] == aAudioRepInfo &&
+				    (pE[5] == 0 || pE[6] == 0))
+				{
+					StopAndRemoveVoices(i);
+				}
+			}
+		}
+		// other priorities: fall through to add entry
+
+		if (bAlreadyExists)
+			return; // NOTE: pEntry allocated above is leaked here (matches retail)
+	}
+
+	// Fill the struct fields
+	pEntry[0] = (INT)aAudioRepInfo;
+	pEntry[1] = (INT)sndPlayVoice;
+	pEntry[2] = iPriority;
+	*(BYTE*)((BYTE*)pEntry + 0x0c) = eSlotUse;
+	*(FLOAT*)((BYTE*)pEntry + 0x10) = fTime + (FLOAT)*(double*)(*(INT*)((BYTE*)this + 0x328) + 0xd4);
+	pEntry[5] = bIsPlaying;
+	pEntry[6] = bWaitToFinishSound;
+
+	if (aAudioRepInfo == NULL)
+	{
+		*(BYTE*)((BYTE*)pEntry + 0x0d) = 1;
+	}
+	else if (*(INT*)((BYTE*)aAudioRepInfo + 0x3b0) == 0)
+	{
+		(void)((UObject*)aAudioRepInfo)->GetFullName();
+		*(BYTE*)((BYTE*)pEntry + 0x0d) = 1;
+	}
+	else
+	{
+		*(BYTE*)((BYTE*)pEntry + 0x0d) = *(BYTE*)(*(INT*)((BYTE*)aAudioRepInfo + 0x3b0) + 0x394);
+	}
+
+	// Add pointer to m_PlayVoicesPriority array
+	INT newIdx = ((FArray*)((BYTE*)this + 0x900))->Add(1, 4);
+	*(INT*)(*(INT*)((BYTE*)this + 0x900) + newIdx * 4) = (INT)pEntry;
+
+	unguard;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1002fd90)

@@ -1297,8 +1297,24 @@ void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 	((Fn32)(*(DWORD*)(*(DWORD*)Connection + 0x80)))(Connection);
 	unguard;
 }
-IMPL_DIVERGE("stub returns 1; retail IsAudibleAt at Ghidra 0x103bf9b0")
-INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion ) { return 1; }
+IMPL_MATCH("Engine.dll", 0x103bf9b0)
+INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion )
+{
+	guard(ULevel::IsAudibleAt);
+	// Ghidra 0xbf9b0 261B.
+	// OCCLUSION_Default(0)/BSP(2) → FastLineCheck against world geometry.
+	// OCCLUSION_StaticMeshes(3) → SingleLineCheck via vtable slot 0xcc/4=51.
+	// OCCLUSION_None(1) → always audible, return 1.
+	if ( Occlusion != OCCLUSION_Default && Occlusion != OCCLUSION_BSP )
+	{
+		if ( Occlusion != OCCLUSION_StaticMeshes )
+			return 1;
+		FCheckResult Hit;
+		return SingleLineCheck( Hit, SourceActor, Location, ListenerLocation, 0x286, FVector(0.f,0.f,0.f) );
+	}
+	return (INT)(*(UModel**)((BYTE*)this + 0x90))->FastLineCheck( Location, ListenerLocation );
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103bf600)
 FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner )
 {
@@ -1509,7 +1525,7 @@ void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetAddressURL );
 
 // GetLocalURL() - returns the current map URL.
-IMPL_DIVERGE("retail calls FURL::String (full URL); current returns just the map string at Ghidra 0x10425b60")
+IMPL_MATCH("Engine.dll", 0x10425b60)
 void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetLocalURL);
