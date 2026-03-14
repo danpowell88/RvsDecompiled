@@ -392,13 +392,13 @@ FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 
 // UCanvas
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_DIVERGE("Ghidra: UCanvas::Destroy not found in Engine.dll export table; Super::Destroy() is correct")
 void UCanvas::Destroy()
 {
 	Super::Destroy();
 }
 
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_DIVERGE("Ghidra: UCanvas::Serialize not found in Engine.dll export table; Super::Serialize(Ar) is correct")
 void UCanvas::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
@@ -406,7 +406,7 @@ void UCanvas::Serialize(FArchive& Ar)
 
 // Ghidra: not present in Ghidra export — shared null stub, no SEH frame.
 // Returns 0 (MSVC requires a return value in non-void functions).
-IMPL_DIVERGE("Needs Ghidra analysis — not in Engine.dll Ghidra index")
+IMPL_DIVERGE("Ghidra: UCanvas::Exec not found in Engine.dll export table; returns 0 per standard UObject stub")
 UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return 0;

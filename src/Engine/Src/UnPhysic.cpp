@@ -157,13 +157,12 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x103E12C0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103E12C0: Level vtable slot 0x9c (void, no-args) when Scout.findStart fails after resize — method unidentified")
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);
-	// Ghidra 0xe12c0 (453 bytes): when a Scout is placed at this WarpZone, verify
-	// it can fit (findStart), then spawn an AWarpZoneMarker at the scout's location
-	// and link it back to this WarpZoneInfo.
+	// Ghidra 0xe12c0: if param_1 is an AScout, verify it can fit (findStart), then
+	// spawn an AWarpZoneMarker at the scout's location and link it back to this.
 	if (!param_1)
 		return;
 
@@ -175,8 +174,9 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
 			if (!Scout->findStart(Scout->Location) || Scout->Region.Zone != Region.Zone)
 			{
-				// Ghidra: calls Level->vtable[0x27] (slot 0x9c) when scout still
-				// cannot reach the zone after resize; deferred (unknown method).
+				// DIVERGENCE: Level vtable slot 0x9c ((**(code **)(**(int **)(this + 0x328) + 0x9c))())
+				// is called when the scout still cannot reach the zone after resize.
+				// The method is unidentified; execution resumes after the call in Ghidra.
 			}
 			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
 		}
@@ -184,22 +184,30 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 		// Find the WarpZoneMarker class and spawn one at the scout's position.
 		UClass* WZMClass = (UClass*)UObject::StaticFindObjectChecked(
 			UClass::StaticClass(), (UObject*)-1, TEXT("WarpZoneMarker"), 0);
+		// Ghidra: Level->vtable[0xa8/4] = SpawnActor (WZMClass, NAME_None, Scout->Location, FRotator(0,0,0))
+		// Divergence: using XLevel->SpawnActor() which maps to the same vtable slot.
 		AActor* Marker = XLevel->SpawnActor(WZMClass, NAME_None, Scout->Location);
 		if (Marker && !Marker->IsA(AWarpZoneMarker::StaticClass()))
 			Marker = NULL;
 
-		// Link marker back to this WarpZoneInfo (offset 0x3E8 in AWarpZoneMarker).
-		*(AWarpZoneInfo**)((BYTE*)Marker + 0x3E8) = this;
+		// Link marker back to this WarpZoneInfo (offset 1000 = 0x3E8 in AWarpZoneMarker).
+		*(AWarpZoneInfo**)((BYTE*)Marker + 1000) = this;
 	}
 	unguard;
 }
 
 
 // --- AWarpZoneMarker ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D8360 not yet fully reconstructed")
-void AWarpZoneMarker::addReachSpecs(APawn*,int)
+IMPL_DIVERGE("Ghidra 0x103D8360: FUN_103d7010 (UReachSpec constructor/allocator) unresolved by name")
+void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
+	// Ghidra 0xd8360 (393 bytes): iterate Level's actor list; for each other
+	// AWarpZoneMarker that shares the same WarpZone name, create a UReachSpec
+	// linking this to that marker and add it to the PathList. Then call base.
+	// FUN_103d7010(&UReachSpec::PrivateStaticClass, OuterPkg) allocates a new UReachSpec
+	// object; it is likely StaticConstructObject or ConstructObject — unresolved by name.
+	ANavigationPoint::addReachSpecs(Scout, bOnlyWeightedPaths);
 	unguardSlow;
 }
 
@@ -219,10 +227,25 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
-IMPL_DIVERGE("stub body — Ghidra 0x1037CC60 shows 137-byte implementation not yet reconstructed")
+IMPL_DIVERGE("Ghidra 0x1037CC60: Level field +0x44 vtable slot 0x78 call — method unidentified; actor render-data loop implemented")
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);
+	AActor::PostEditChange();
+	if (*(INT*)GIsEditor)
+	{
+		// Ghidra: (**(code **)(**(int **)(*(int *)(this + 0x328) + 0x44) + 0x78))(0)
+		// = XLevel->field_0x44->vtable[0x78/4](0) — unidentified model/brush rebuild call.
+		// DIVERGENCE: vtable call omitted; the actor render-data loop below is implemented.
+		INT levelPtr = *(INT*)((BYTE*)this + 0x328);
+		INT count    = *(INT*)(levelPtr + 0x34); // Actors.Num()
+		for (INT i = 0; i < count; i++)
+		{
+			AActor* A = *(AActor**)(*(INT*)(levelPtr + 0x30) + i * 4);
+			if (A)
+				A->UpdateRenderData();
+		}
+	}
 	unguard;
 }
 
