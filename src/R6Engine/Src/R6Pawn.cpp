@@ -1210,7 +1210,7 @@ INT AR6Pawn::SetAudioInfo()
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x1002aaf0: FUN_10042934 is x87 ftol2; reads cached bone rotation from FPU ST0 register before each call - values not recoverable from Ghidra decompilation alone")
 void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookAndAimDirection);
@@ -1277,7 +1277,7 @@ void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x1002a550: FUN_10042934 is x87 ftol2; reads cached bone rotation from FPU ST0 - values not recoverable from Ghidra decompilation alone")
 void AR6Pawn::SetPawnLookDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookDirection);
@@ -1341,7 +1341,7 @@ void AR6Pawn::TickSpecial(FLOAT DeltaTime)
 	APawn::TickSpecial(DeltaTime);
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1000da20 (AR6ColBox attach/step helper)")
+IMPL_DIVERGE("0x10024e10: sweep flags should be 0x86 not 0x286; move destination uses this+0x2c8..0x2d0 offsets; PrePivot Z uses this+0x4e8 field after uncrawl")
 void AR6Pawn::UnCrawl(INT param_1)
 {
 	guard(AR6Pawn::UnCrawl);
