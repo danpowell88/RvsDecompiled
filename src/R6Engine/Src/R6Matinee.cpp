@@ -272,12 +272,10 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 	return UpdateGame(Time, Mgr);
 }
 
-IMPL_DIVERGE("IsRunning check via raw vtable slot 27 (offset 0x6C) on this.")
+IMPL_DIVERGE("Ghidra 0x10041420 (343b): anim-playing check via raw vtable slot 57 (0xE4) on m_AffectedActor; UMatSubAction state field at raw offset 0x2C set to 3 (done) without named field")
 INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 {
-	// DIVERGENCE: IsRunning check via raw vtable slot 27 (offset 0x6C) on this.
-	typedef INT (__thiscall *TIsRunning)(UR6SubActionAnimSequence*);
-	if (((TIsRunning)(*(INT**)this)[0x6C / 4])(this) == 0)
+	if (!IsRunning())
 		return 1;
 
 	if (m_Sequences.Num() < 1)
