@@ -2238,7 +2238,7 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("DIVERGENCE: retail appends to global debug ring buffer DAT_1066679c — binary-specific global; dashed line debug rendering stubbed")
 void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
@@ -2246,11 +2246,12 @@ void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor,Color);
 	P_FINISH;
+	// Ghidra 0x1037b630: FArray::Add(&DAT_1066679c, 1, 4) then fills entry with Start/End/Color.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_DIVERGE("Stub — body not yet reconstructed from Ghidra")
+IMPL_DIVERGE("DIVERGENCE: retail appends to global debug ring buffer DAT_10666790 — binary-specific global; 3D text debug rendering stubbed")
 void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
@@ -2258,15 +2259,17 @@ void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 	P_GET_STR(Text);
 	P_GET_STRUCT(FColor,Color);
 	P_FINISH;
+	// Ghidra 0x10379ce0: FArray::Add(&DAT_10666790, 1, 4) then fills entry with Loc/Text/Color.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("DIVERGENCE: retail stores render callback data in binary-specific globals (DAT_1066677c..10666788); render-from-actor stubbed")
 void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
 	P_FINISH;
+	// Ghidra 0x103716a0: stores this-ptr and params to 5 consecutive global render-callback slots.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2610, execRenderLevelFromMe );
