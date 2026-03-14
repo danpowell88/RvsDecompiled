@@ -3509,7 +3509,7 @@ public:
 	INT GetActorIndex( AActor* Actor );
 	ALevelInfo* GetLevelInfo();
 	class AZoneInfo* GetZoneActor( INT iZone );
-	INT MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit );
+	INT MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, FCheckResult* FirstHit, FCheckResult& Hit );
 	INT ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor );
 	void UpdateTerrainArrays();
 

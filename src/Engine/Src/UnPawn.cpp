@@ -200,7 +200,7 @@ void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_DIVERGE("Ghidra 0x1038dee0; 104 bytes; timer decrement at raw offset +0xdc; DeltaTime via Result ptr")
+IMPL_MATCH("Engine.dll", 0x1038dee0)
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
