@@ -131,13 +131,25 @@ CBoneDescData::CBoneDescData()
 	*(DWORD*)((BYTE*)this + 0x20) = 0;
 }
 
-IMPL_DIVERGE("retail 0x10355b90 also frees bone frame data at +0x20; partial destructor only")
+IMPL_DIVERGE("retail 0x10355b90 (196b) has SEH frame; body logic faithful")
 CBoneDescData::~CBoneDescData()
 {
-	// Destroy TArray<FString> at +0x08 and FString at +0x14.
+	// Ghidra 0x55b90: if +0x20 non-null, free each frame buffer (count=this+4),
+	// free the pointer array, zero +0x20/+4/+0. Then ~FString(+0x14), ~TArray(+0x08).
+	if (*(void**)((BYTE*)this + 0x20) != NULL)
+	{
+		INT frameCount = *(INT*)((BYTE*)this + 0x04);
+		BYTE** frames = *(BYTE***)((BYTE*)this + 0x20);
+		for (INT i = 0; i < frameCount; i++)
+			GMalloc->Free(frames[i]);
+		GMalloc->Free(frames);
+		*(void**)((BYTE*)this + 0x20) = NULL;
+		*(INT*)((BYTE*)this + 0x04) = 0;
+		*(INT*)((BYTE*)this + 0x00) = 0;
+	}
+	((FString*)((BYTE*)this + 0x14))->~FString();
 	typedef TArray<FString> TFStringArray;
 	((TFStringArray*)((BYTE*)this + 0x08))->~TFStringArray();
-	((FString*)((BYTE*)this + 0x14))->~FString();
 }
 
 IMPL_MATCH("Engine.dll", 0x1032b0a0)
@@ -154,7 +166,7 @@ CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 
 
 // --- CCompressedLipDescData ---
-IMPL_DIVERGE("retail 0x10355070 has SEH frame; body logic faithful but guard omitted")
+IMPL_DIVERGE("retail 0x10355070 (209b) has SEH frame and rdtsc() timing calls; body logic faithful")
 int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 {
 	if (param_1 == NULL) return 0;
@@ -237,7 +249,7 @@ UClass * ULodMesh::MeshGetInstanceClass()
 
 
 // --- UMesh ---
-IMPL_DIVERGE("retail 0x103ca570 (96b) also serializes persistent in-game data; approximated")
+IMPL_DIVERGE("retail 0x103ca570 (96b) has SEH guard frame; body logic faithful")
 void UMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0xca570, 60b. Calls UPrimitive::Serialize, then if archive is not
@@ -263,11 +275,10 @@ UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 	return *(UMeshInstance**)((BYTE*)this + 0x58);
 }
 
-IMPL_DIVERGE("retail 0x10414310 returns NULL; we return UMeshInstance::StaticClass()")
+IMPL_MATCH("Engine.dll", 0x10414310)
 UClass * UMesh::MeshGetInstanceClass()
 {
-	// Retail: base UMesh uses UMeshInstance; subclasses override this.
-	return UMeshInstance::StaticClass();
+	return NULL;
 }
 
 
@@ -359,45 +370,46 @@ void UMeshAnimation::ClearAnimNotifys()
 	}
 }
 
-IMPL_DIVERGE("reconstructed from Ghidra 0x1031c650 (80b); direct pointer arithmetic vs TArray helpers")
+IMPL_MATCH("Engine.dll", 0x1031c650)
 FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
 {
-	// Retail: 79b. Linear search through Sequences TArray (this+0x48, stride 0x2C=44b).
-	// Compares FName at element+0. Re-fetches count each iteration. Returns element ptr or NULL.
-	BYTE* seqBase = (BYTE*)this + 0x48;
-	INT count = *(INT*)(seqBase + 4);
-	if (count <= 0) return NULL;
-	BYTE* data = *(BYTE**)(seqBase);
-	INT i = 0, byteOff = 0;
-	while (i < count)
+	// Ghidra 0x1c650 (80b): linear search through Sequences TArray (this+0x48, stride 0x2C).
+	// Compares FName at element+0, re-fetches count each iteration. Returns element ptr or NULL.
+	FArray* seqArr = (FArray*)((BYTE*)this + 0x48);
+	INT count = seqArr->Num();
+	if (count > 0)
 	{
-		BYTE* elem = data + byteOff;
-		if (*(FName*)elem == Name) return (FMeshAnimSeq*)elem;
-		i++;
-		byteOff += 0x2C;
-		count = *(INT*)(seqBase + 4);
+		INT byteOff = 0, idx = 0;
+		do
+		{
+			if (Name == *(FName*)(*(INT*)seqArr + byteOff))
+				return (FMeshAnimSeq*)(idx * 0x2C + *(INT*)seqArr);
+			idx++;
+			byteOff += 0x2C;
+			count = seqArr->Num();
+		} while (idx < count);
 	}
 	return NULL;
 }
 
-IMPL_DIVERGE("reconstructed from Ghidra 0x1031c6a0 (93b); MotionChunk stride 0x58 approximated")
+IMPL_MATCH("Engine.dll", 0x1031c6a0)
 MotionChunk * UMeshAnimation::GetMovement(FName Name)
 {
-	// Retail: ~90b. Searches Sequences (this+0x48, stride 0x2C) for FName match.
-	// Returns MotionChunk at Movements.Data (*(this+0x3C)) + index*0x58 (stride=88b).
-	BYTE* seqBase = (BYTE*)this + 0x48;
-	INT count = *(INT*)(seqBase + 4);
-	if (count <= 0) return NULL;
-	BYTE* seqData = *(BYTE**)(seqBase);
-	BYTE* moveData = *(BYTE**)((BYTE*)this + 0x3C);
-	INT i = 0, byteOff = 0;
-	while (i < count)
+	// Ghidra 0x1c6a0 (93b): searches Sequences (this+0x48, stride 0x2C) for FName match.
+	// Returns MotionChunk at Movements.Data (*(this+0x3C)) + index*0x58 (stride confirmed 88b).
+	FArray* seqArr = (FArray*)((BYTE*)this + 0x48);
+	INT count = seqArr->Num();
+	if (count > 0)
 	{
-		BYTE* elem = seqData + byteOff;
-		if (*(FName*)elem == Name) return (MotionChunk*)(moveData + i * 0x58);
-		i++;
-		byteOff += 0x2C;
-		count = *(INT*)(seqBase + 4);
+		INT byteOff = 0, idx = 0;
+		do
+		{
+			if (Name == *(FName*)(*(INT*)seqArr + byteOff))
+				return (MotionChunk*)(idx * 0x58 + *(INT*)((BYTE*)this + 0x3C));
+			idx++;
+			byteOff += 0x2C;
+			count = seqArr->Num();
+		} while (idx < count);
 	}
 	return NULL;
 }
