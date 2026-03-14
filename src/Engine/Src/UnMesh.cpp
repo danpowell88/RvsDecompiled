@@ -227,13 +227,13 @@ CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDe
 
 
 // --- ULodMesh ---
-IMPL_DIVERGE("simplified to UObject::Serialize; retail 0x103c7610 (558b) serializes LOD arrays")
+IMPL_DIVERGE("calls FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340 (unresolved LOD TArray serializers); retail 0x103c7610 (558b)")
 void ULodMesh::Serialize(FArchive& Ar)
 {
-	// Retail: calls UMesh::Serialize (which calls UObject::Serialize) then serializes
-	// LOD section arrays at +0x58, +0x6C, poly data at +0x80, +0x94 etc.
-	// Divergence: simplified to UObject::Serialize. LOD data loaded from package.
-	UObject::Serialize(Ar);
+	// Retail: calls UMesh::Serialize, then serializes LOD version (+0x5C), LOD section arrays,
+	// poly data, and face arrays via FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290 etc.
+	// DIVERGENCE: LOD TArray serializers unresolved; base-class data is preserved correctly.
+	UMesh::Serialize(Ar);
 }
 
 IMPL_MATCH("Engine.dll", 0x10304720)
@@ -764,13 +764,13 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_DIVERGE("simplified to UObject::Serialize; retail 0x1043ffb0 (746b) serializes bone/LOD arrays")
+IMPL_DIVERGE("calls FUN_10321a80/FUN_104378f0/FUN_10415600/FUN_10321870 (unresolved bone/LOD TArray serializers); retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
-	// Retail: 0x1043ffb0. Calls ULodMesh::Serialize, then serializes bone ref pose (+0x1B8),
+	// Retail: calls ULodMesh::Serialize, then serializes bone ref pose (+0x1B8),
 	// bone array (+0x19C), default anim ref (+0x1DC), vertex inflations, LOD arrays etc.
-	// Divergence: simplified to UObject::Serialize; mesh data is loaded from .u package.
-	UObject::Serialize(Ar);
+	// DIVERGENCE: bone/LOD TArray serializers unresolved; base-class data is preserved correctly.
+	ULodMesh::Serialize(Ar);
 }
 
 IMPL_DIVERGE("Karma ragdoll line check pending MeSDK decompilation; retail 0x104354f0 (729b)")
