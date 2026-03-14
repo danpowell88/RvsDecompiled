@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnPawn.cpp: APawn, AController, APlayerController, AAIController.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -244,7 +244,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038e490; stub — FindPath not yet fully implemented")
+IMPL_DIVERGE("Ghidra 0x1038e490; 244 bytes; calls FindPath(zero vector, Goal, bSinglePath); bSinglePath default is 1 not 0")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -257,7 +257,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_DIVERGE("Ghidra 0x1038e590; 289b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038e590; 289 bytes; calls FindPath for nearest of GoalClass; stub returns NULL")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -269,7 +269,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_DIVERGE("Ghidra 0x1038e3e0; stub — FindPath not yet fully implemented")
+IMPL_DIVERGE("Ghidra 0x1038e3e0; 172 bytes; calls FindPath(Point, NULL, bSinglePath); stub returns NULL")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
@@ -280,7 +280,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_DIVERGE("Ghidra 0x1038e030; 273b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038e030; 273 bytes; calls Pawn->actorReachable(anActor, 0, 0); stub returns 0")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -291,7 +291,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e150; 286b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038e150; 286 bytes; calls Pawn->pointReachable(aPoint, 0); stub returns 0")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -302,7 +302,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e6c0; 131b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038e6c0; 131 bytes; calls Pawn->clearPaths() if Pawn; stub is empty")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -311,7 +311,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_DIVERGE("Ghidra 0x1038ce20; 236b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038ce20; 236 bytes; calls eventEAdjustJump with jump vectors from raw pawn offsets; stub is empty")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -320,7 +320,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_DIVERGE("Ghidra 0x10390770; 281b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10390770; 281 bytes; calls findPathToward with random NavPoint destination; stub returns NULL")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -330,7 +330,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_DIVERGE("Ghidra 0x1038df50; 209b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038df50; 209 bytes; calls Pawn->PickWallAdjust(HitNormal) and stores result; stub returns 0")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -340,7 +340,7 @@ void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 526, execPickWallAdjust );
 
-IMPL_DIVERGE("Ghidra 0x1038cce0; 77b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1038cce0)
 void AController::execAddController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execAddController);
@@ -355,7 +355,7 @@ void AController::execAddController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 529, execAddController );
 
-IMPL_DIVERGE("Ghidra 0x1038cd30; 139b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1038cd30)
 void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execRemoveController);
@@ -385,7 +385,7 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714 bytes; complex target-selection loop through pawn list with aim/distance scoring; stub returns NULL")
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
@@ -400,7 +400,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_DIVERGE("Ghidra 0x1038dc20; 688b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038dc20; 688 bytes; complex actor-selection loop with aim/distance scoring; stub returns NULL")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -414,7 +414,7 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 
-IMPL_DIVERGE("Ghidra 0x1038d870; 416b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038d870; 416 bytes; walks navigation point list finding best pickup path; stub returns NULL")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
@@ -425,7 +425,7 @@ void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
-IMPL_DIVERGE("Ghidra 0x10390890; 162b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10390890; 162 bytes; complex ALadder overlap check and PHYS_Falling transition; body simplified")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEndClimbLadder);
@@ -436,7 +436,7 @@ void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
 
-IMPL_DIVERGE("Ghidra 0x1038d090; 114b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1038d090)
 void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execInLatentExecution);
@@ -447,7 +447,7 @@ void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execInLatentExecution );
 
-IMPL_DIVERGE("Ghidra 0x1038cc90; 71b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1038cc90)
 void AController::execStopWaiting( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execStopWaiting);
