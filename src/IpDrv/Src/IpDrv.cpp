@@ -270,27 +270,47 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 }
 
 // Async DNS resolve thread — fills FResolveInfo then clears bWorking.
-IMPL_DIVERGE("static helper; retail DNS thread body inlined in Init/Resolve paths; no standalone DLL address")
+// Retail FUN_1070e0f0 (0x1070e0f0): retries gethostbyname up to 3 times with appSleep(1.0)
+// between attempts. WSATRY_AGAIN (0x2af9) and WSAHOST_NOT_FOUND (0x2afc) cause immediate
+// failure with no retry. On success checks h_addrtype == AF_INET before storing.
+// On failure, retail writes a wide-string error via appSprintf to offset 0x108; we store a
+// short WSA error code there instead. Both are zero on success / non-zero on failure.
+IMPL_DIVERGE("static helper; retail FUN_1070e0f0 writes wide-string error to offset 0x108; we store short WSA error code")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
-	PHOSTENT he = gethostbyname(Info->HostName);
-	if (he)
+	Info->Addr = 0;
+	int wsaErr  = 0;
+	PHOSTENT he = NULL;
+
+	for (int attempt = 0; ; ++attempt)
 	{
-		Info->Addr  = *(DWORD*)he->h_addr_list[0]; // network byte order
-		Info->Error = 0;
+		he = gethostbyname(Info->HostName);
+		if (he) break;
+
+		wsaErr = WSAGetLastError();
+		// Permanent failures: do not retry
+		if (wsaErr == 0x2af9 || wsaErr == 0x2afc) break;  // WSATRY_AGAIN / WSAHOST_NOT_FOUND
+
+		appSleep(1.0f);
+		if (attempt >= 2) break;  // 3 attempts maximum
 	}
+
+	if (he && he->h_addrtype == AF_INET)
+		Info->Addr = *(DWORD*)he->h_addr_list[0]; // network byte order
 	else
-	{
-		Info->Addr  = 0;
-		Info->Error = (short)WSAGetLastError();
-	}
+		Info->Error = (short)wsaErr;
+
 	Info->bWorking = 0;
 	return 0;
 }
 
-// Helper: initialise FResolveInfo and start DNS thread (FUN_10701780).
-IMPL_DIVERGE("static helper; FUN_10701780 not in Ghidra export; no standalone DLL address")
+// Helper: initialise FResolveInfo and start DNS thread.
+// Retail FUN_10701780 (0x10701780): uses FUN_10701220 for ANSI copy and passes &bWorking as
+// lpThreadId (CreateThread writes the thread ID there; the thread clears it to 0 on finish).
+// Also calls appFailAssert if CreateThread fails. We use a separate ThreadId local and omit
+// the assert; both are functionally equivalent for callers that poll bWorking for completion.
+IMPL_DIVERGE("static helper; retail FUN_10701780 passes &bWorking as lpThreadId and asserts on CreateThread failure")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
