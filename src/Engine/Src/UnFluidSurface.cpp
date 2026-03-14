@@ -65,13 +65,17 @@ void AFluidSurfaceInfo::RebuildClampedBitmap()
 {
 	// Retail: 0x9a030, 1114b. Iterate level actors and test their collision boxes
 	// against the fluid surface bounds to set/clear bits in the clamped bitmap.
-	// TODO: full actor intersection loop.
+	// DIVERGENCE: Ghidra 0x9a030 (1114 bytes). Full implementation iterates level
+	// actors testing collision boxes against fluid surface bounds to set/clear bits
+	// in the clamped bitmap. Actor intersection loop not reconstructed.
 }
 
 void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TList<FDynamicLight*>* Lights, FRenderInterface* RI)
 {
 	// Retail: 0x9abf0, 864b. Update vertex/index buffers then submit a DrawMesh call.
-	// TODO: full buffer-update, lighting, and draw-mesh sequence.
+	// DIVERGENCE: Ghidra 0x9abf0 (864 bytes). Full implementation updates vertex/index
+	// buffers with current wave heights and lighting, then submits a DrawMesh call.
+	// Vertex buffer management and D3D draw call pattern not reconstructed.
 }
 
 void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
@@ -163,7 +167,9 @@ void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 {
 	// Retail: 0x991e0, 2890b. Build per-vertex position + normal data for all grid points.
-	// TODO: full implementation (complex hex-offset and normal-from-heights logic).
+	// DIVERGENCE: Ghidra 0x991e0 (2890 bytes). Builds per-vertex position + normal
+	// data for all grid points. Hex-offset row interleaving and normal-from-heights
+	// convolution involve complex per-row pointer arithmetic not reconstructed.
 }
 
 int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)

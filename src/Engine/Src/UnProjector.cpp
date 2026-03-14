@@ -139,7 +139,8 @@ void AProjector::Attach()
 {
 	// Retail: 0xfb160, 1291b. Build the projection matrix then allocate and populate
 	// a FProjectorRenderInfo, and attach to terrain/BSP as appropriate.
-	// TODO: full terrain sector iteration and BSP ConvexVolumeMultiCheck loop.
+	// DIVERGENCE: terrain sector iteration and BSP ConvexVolumeMultiCheck loop not
+	// reconstructed — projector attaches without terrain/BSP surface info.
 
 	// Recalculate projection matrix
 	CalcMatrix();
@@ -185,15 +186,15 @@ void AProjector::Attach()
 		}
 	}
 
-	// TODO: terrain attachment (bit 1 of this+0x3a0)
-	// TODO: BSP attachment  (bit 0 of this+0x3a0)
+	// DIVERGENCE: terrain attachment (bit 1 of this+0x3a0) and
+	// BSP attachment (bit 0 of this+0x3a0) — loops not reconstructed (see above).
 }
 
 void AProjector::CalcMatrix()
 {
-	// Retail: 0xf8f90, 4699b. Builds the projection matrix and 8 corner points from
-	// the projector's position, rotation, FOV, and draw-distance properties.
-	// TODO: full matrix/corner computation (complex FCoords + float math).
+	// Retail: 0xf8f90, 4699b. Builds projection matrix and 8 frustum corner points
+	// from position, rotation, FOV, and draw-distance properties.
+	// DIVERGENCE: FCoords construction and matrix-multiply helpers not reconstructed.
 }
 
 void AProjector::Destroy()
