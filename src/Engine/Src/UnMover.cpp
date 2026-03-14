@@ -5,12 +5,10 @@ struct FPropertyRetirement;
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
-	// Ghidra 0x12bc10: cubic/linear interpolation between keyframes.
-	// Clamp MoverEncroachType byte at +0x397 to [0, 0x18].
-	// Main loop interpolates position and rotation, checks encroach, fires notifies.
-	// DIVERGENCE: full interpolation state machine not reconstructed — too many
-	//   unresolved actor-move helpers (FUN_ calls) and local FVector/FRotator temporaries.
-	//   Mover physics works through SetWorldRaytraceKey/physMovingBrush for snap-keyed movers.
+	// DIVERGENCE: full physMovingBrush implementation not yet reconstructed.
+	// GHIDRA REF: 0x12bc10 — cubic/linear interpolation between mover keyframes,
+	// encroach checking, and anim notifies. Requires unidentified actor-move helper
+	// functions and complex FVector/FRotator temporaries not yet resolved.
 	DWORD key = (DWORD)(BYTE)*(BYTE*)((BYTE*)this + 0x397);
 	if ((INT)key < 0)  key = 0;
 	else if (key > 0x17) key = 0x18;
@@ -22,8 +20,8 @@ void AMover::physMovingBrush(float DeltaTime)
 void AMover::performPhysics(float DeltaTime)
 {
 	guard(AMover::performPhysics);
-	// DIVERGENCE: RDTSC profiling bookend (DAT_10799554, DAT_1079976c) are
-	// retail performance counters with no game-logic effect. Omitted.
+	// DIVERGENCE: RDTSC profiling bookends omitted (DAT_10799554, DAT_1079976c are
+	// internal profiling counters with no observable effect on gameplay).
 	void** vtbl = *(void***)this;
 	switch (*(BYTE*)((BYTE*)this + 0x2C)) // Physics
 	{
@@ -78,7 +76,7 @@ void AMover::performPhysics(float DeltaTime)
 		*(INT*)((BYTE*)this + 0x188) = *(INT*)(next + 0x188);
 		*(INT*)(next + 0x188) = 0;
 	}
-	// DIVERGENCE: RDTSC profiling end — retail performance counter omitted (no game-logic effect).
+	// DIVERGENCE: RDTSC profiling end omitted (see performPhysics entry comment).
 	unguard;
 }
 
