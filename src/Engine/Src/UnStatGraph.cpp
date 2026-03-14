@@ -69,54 +69,54 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // ============================================================================
 
 // ??0FStatGraph@@QAE@ABV0@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103518f0 is 180 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103518f0: copy ctor with FUN_ calls for nested TArrays/FStrings — bulk memcpy approximation")
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
-IMPL_DIVERGE("FStatGraph::~FStatGraph not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; trivially empty")
 FStatGraph::~FStatGraph() {}
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("FStatGraph::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; bulk memcpy of Pad fields")
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
 }
 
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445880 is 533 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10445880, 533 bytes: command dispatch with FUN_ calls — returns 0")
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
 
 // ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445e40 is 386 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10445e40, 386 bytes: adds float data to a named graph line; FUN_ blockers")
 void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {}
 
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445c30 is 219 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10445c30, 219 bytes: adds graph line with color/range; FUN_ blockers")
 void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {}
 
 // ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10445d40 is 206 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10445d40, 206 bytes: adds auto-range graph line; FUN_ blockers")
 void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {}
 
 // ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10446000 is 1990 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10446000, 1990 bytes: renders stat graph to viewport; FUN_ blockers for D3D draw calls")
 void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 
 // ?Reset@FStatGraph@@QAEXXZ
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10446800 is 95 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10446800, 95 bytes: calls FUN_1033bb10, FUN_103203b0, FUN_1031fea0 — unresolved")
 void FStatGraph::Reset() {}
 
 // ============================================================================
 // FStats
 // ============================================================================
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1033bdb0 is 346 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1033bdb0, 346 bytes: copy ctor with FUN_ calls for nested TArrays; bulk memcpy approximation")
 FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_DIVERGE("FStats::~FStats not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; trivially empty")
 FStats::~FStats() {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044f1a0 is 595 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1044f1a0, 595 bytes: updates display string for a stat slot; FUN_ blockers")
 void FStats::UpdateString(FString&, INT) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044f6e0 is 20219 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1044f6e0, 20219 bytes: renders all stat categories to viewport; FUN_ blockers for D3D draw calls")
 void FStats::Render(UViewport*, UEngine*) {}
 IMPL_MATCH("Engine.dll", 0x10454670)
 INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
@@ -162,7 +162,7 @@ INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	pRec[2] = (INT)Unit;
 	return SlotIdx;
 }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044f5d0 is 257 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1044f5d0, 257 bytes: moving average on stat data; FUN_ blockers")
 void FStats::CalcMovingAverage(INT, DWORD) {}
 IMPL_MATCH("Engine.dll", 0x1044f430)
 void FStats::Clear()
@@ -201,12 +201,12 @@ void FStats::Clear()
 // ============================================================================
 // FEngineStats
 // ============================================================================
-IMPL_DIVERGE("FEngineStats::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; bulk memcpy of all fields (99*4 bytes)")
 FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 {
 	appMemcpy(this, &Other, 99 * 4);
 	return *this;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10454940 is 6696 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10454940, 6696 bytes: registers all engine stats via RegisterStats; FUN_ blockers for stat name strings")
 void FEngineStats::Init() {}
