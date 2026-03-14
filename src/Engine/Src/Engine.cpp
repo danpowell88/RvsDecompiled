@@ -152,8 +152,8 @@ ENGINE_API AR6eviLTesting*			GEvilTest				= NULL;
 
 // Compile-time layout verification.
 // If either assert fires, adjust the padding arrays in EngineClasses.h.
-static_assert(sizeof(UEngine)     == 0x458, "UEngine layout mismatch — adjust _ue_unk padding");
-static_assert(sizeof(UGameEngine) == 0x4d0, "UGameEngine layout mismatch — adjust _uge_unk padding");
+COMPILE_CHECK(sizeof(UEngine)     == 0x458, UEngine_layout_mismatch_adjust_ue_unk_padding);
+COMPILE_CHECK(sizeof(UGameEngine) == 0x4d0, UGameEngine_layout_mismatch_adjust_uge_unk_padding);
 
 // =============================================================================
 // UGameEngine (moved from EngineClassImpl.cpp)

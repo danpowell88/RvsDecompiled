@@ -43,6 +43,7 @@
 #include <windows.h>
 #include <malloc.h>   // _aligned_malloc / _aligned_free
 #include <string.h>   // memcpy, memmove, memset
+#include "ImplSource.h"
 
 /*-----------------------------------------------------------------------------
 	DllMain entry point.
@@ -293,7 +294,7 @@ struct SndStream
 	BYTE   _pad[ SND_STREAM_BYTES - 5 * (int)sizeof(DWORD) ]; // [+0x14..+0x12B]
 };
 
-static_assert( sizeof(SndStream) == SND_STREAM_BYTES, "SndStream size mismatch" );
+COMPILE_CHECK( sizeof(SndStream) == SND_STREAM_BYTES, SndStream_size_mismatch );
 
 extern "C" __declspec(dllexport) int __stdcall SND_fn_bInitStreamAsyncSnd( int iMaxBytesPerRead, int iStreamCount )
 {

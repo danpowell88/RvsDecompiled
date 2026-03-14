@@ -88,4 +88,21 @@
 // ---------------------------------------------------------------------------
 #define IMPL_TODO(reason)
 
+
+// ---------------------------------------------------------------------------
+// COMPILE_CHECK(expr, tag)
+//   Compile-time assertion compatible with MSVC 7.1 and later.
+//   'tag' must be a valid C identifier (no spaces/quotes).
+//   On C++11+ compilers, expands to static_assert for a better error message.
+//
+//   Example:
+//     COMPILE_CHECK(sizeof(FStream) == 0x28, FStream_size_must_be_0x28);
+// ---------------------------------------------------------------------------
+#if _MSC_VER < 1600
+    // MSVC 7.1 – 9.0: no static_assert. Use negative-size array trick.
+    #define COMPILE_CHECK(expr, tag) typedef char _compile_check_##tag[(expr) ? 1 : -1]
+#else
+    #define COMPILE_CHECK(expr, tag) static_assert(expr, #tag)
+#endif
+
 #endif // IMPL_SOURCE_H

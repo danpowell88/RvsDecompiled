@@ -13,6 +13,12 @@
 ----------------------------------------------------------------------------*/
 
 #ifndef _WINDOWS_
+// Target Windows 2000+ — this is the minimum version Ravenshield supports.
+// Without _WIN32_WINNT >= 0x0400, IsDebuggerPresent and other NT4+ APIs are
+// excluded from <windows.h> even when WIN32_LEAN_AND_MEAN is defined.
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0500
+#endif
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif

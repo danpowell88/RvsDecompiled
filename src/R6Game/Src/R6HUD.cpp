@@ -84,7 +84,7 @@ void AR6HUD::UpdateHUDColors(FColor)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("10251-byte HUD rendering function (Ghidra 0x1000ceb0); Ghidra decompilation failed")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

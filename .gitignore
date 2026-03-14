@@ -17,6 +17,7 @@ ghidra/exports/
 
 # --- Build output ---
 build/
+build-*/
 out/
 *.obj
 *.pdb

@@ -14,6 +14,9 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EngineDecls.h"
 
+// Defined in UnCamera.cpp; no header declaration available.
+ENGINE_API FArchive& operator<<(FArchive& Ar, FRawColorStream& V);
+
 // --- UStaticMesh ---
 IMPL_DIVERGE("body incomplete — Ghidra 0x10446A90 not yet fully reconstructed")
 void UStaticMesh::StaticConstructor()
@@ -132,10 +135,15 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044c130 is 206 bytes, not fully reconstructed")
-FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
+IMPL_DIVERGE("Ghidra 0x1044c130: model bbox (this+0x120 via vtable[29]) not merged — DIVERGENCE")
+FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const
 {
-	return FBox();
+	// Ghidra: if actor flag[0x2a] & 0x400000 == 0, transform mesh bbox (this+0x2c)
+	// by Actor->LocalToWorld(), then optionally merge model bbox via this+0x120 vtable[29].
+	// We omit the model merge due to unresolved vtable target.
+	if (Actor && !(((const DWORD*)Actor)[0x2a] & 0x400000))
+		return (*(const FBox*)((const BYTE*)this + 0x2c)).TransformBy(Actor->LocalToWorld());
+	return UPrimitive::GetCollisionBoundingBox(Actor);
 }
 IMPL_DIVERGE("UStaticMesh::GetEncroachCenter not found in Ghidra export — cannot confirm VA")
 FVector UStaticMesh::GetEncroachCenter(AActor * Actor)
@@ -172,14 +180,17 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x10449BB0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10449bb0: FUN_10449a90 (old color stream) and FUN_10448de0 (index buffer) unresolved")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
-	// Retail 0x149bb0: UObject::Serialize, then version-conditional
-	// color-stream / index-buffer serialization.
-	// Divergence: only base class call; full format not reconstructed.
 	UObject::Serialize(Ar);
+	// Ghidra: version < 0x70 uses legacy format via FUN_10449a90 (unresolved).
+	// Version >= 0x70: serialize color stream at this+0x38.
+	if (Ar.Ver() >= 0x70)
+		Ar << *(FRawColorStream*)((BYTE*)this + 0x38);
+	// Ghidra: version > 0x6d (0x6e+): serialize index buffer at this+0x2c via FUN_10448de0.
+	// DIVERGENCE: FUN_10448de0 unresolved — index buffer skipped.
 	unguard;
 }
 
