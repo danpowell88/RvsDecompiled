@@ -87,7 +87,6 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		}
 		else
 		{
-			// TODO: FUN_10317640 — clamp(val, 0.0f, 1.0f)
 			FLOAT val = appAtof(Cmd);
 			if (val < 0.0f || val != val) val = 0.0f;
 			else if (val > 1.0f) val = 1.0f;
@@ -97,7 +96,6 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		SaveConfig(0x4000, NULL);
 		if (((FArray*)((BYTE*)this + 0x30))->Num() == 0) return 1;
 		if (*(INT*)(**(INT**)((BYTE*)this + 0x30) + 0x34) == 0) return 1;
-		// TODO: FUN_1050557c — build message string
 		OutStr = FString::Printf(TEXT("Brightness %i"));
 	}
 	else if (ParseCommand(&Cmd, TEXT("CONTRAST")))
@@ -115,7 +113,6 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		}
 		else
 		{
-			// TODO: FUN_10317640 — clamp(val, 0.0f, 1.0f)
 			FLOAT val = appAtof(Cmd);
 			if (val < 0.0f || val != val) val = 0.0f;
 			else if (val > 1.0f) val = 1.0f;
@@ -125,7 +122,6 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		SaveConfig(0x4000, NULL);
 		if (((FArray*)((BYTE*)this + 0x30))->Num() == 0) return 1;
 		if (*(INT*)(**(INT**)((BYTE*)this + 0x30) + 0x34) == 0) return 1;
-		// TODO: FUN_1050557c — build message string
 		OutStr = FString::Printf(TEXT("Contrast %i"));
 	}
 	else if (ParseCommand(&Cmd, TEXT("GAMMA")))
@@ -143,8 +139,7 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		}
 		else
 		{
-			// TODO: FUN_10317640 — clamp(val, 0.5f, 2.5f)
-			*(FLOAT*)((BYTE*)this + 0x60) = appAtof(Cmd);
+			*(FLOAT*)((BYTE*)this + 0x60) = Clamp(appAtof(Cmd), 0.5f, 2.5f);
 		}
 		CALL_UPDATE_GAMMA();
 		SaveConfig(0x4000, NULL);

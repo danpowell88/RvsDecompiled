@@ -9,8 +9,6 @@
 
 IMPLEMENT_CLASS(AR6Pawn)
 
-static FLOAT FUN_10017320(FLOAT a, FLOAT b, FLOAT c) { return a < b ? b : (a > c ? c : a); }
-
 IMPLEMENT_FUNCTION(AR6Pawn, -1, execAdjustFluidCollisionCylinder)
 IMPLEMENT_FUNCTION(AR6Pawn, -1, execCheckCylinderTranslation)
 IMPLEMENT_FUNCTION(AR6Pawn, -1, execFootStep)
@@ -1517,8 +1515,8 @@ FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 		if (local_1c < 0.0f)
 			fVar6 = fVar6 * -1.0f;
 
-		// TODO: FUN_10017320 — clamp interpolation (fVar6*0.017857144*1000+1000, 0, 2000)
-		FLOAT fVar7 = (FLOAT)FUN_10017320(fVar6 * 0.017857144f * 1000.0f + 1000.0f, 0.0f, 2000.0f);
+		// Clamp peek displacement to [C_fPeekLeftMax, C_fPeekRightMax] = [0, 2000]
+		FLOAT fVar7 = Clamp(fVar6 * 0.017857144f * 1000.0f + 1000.0f, 0.0f, 2000.0f);
 
 		if (fabsf(*(FLOAT*)((BYTE*)this + 0x720) - fVar7) > 100.0f)
 		{

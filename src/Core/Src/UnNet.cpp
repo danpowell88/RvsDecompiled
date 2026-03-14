@@ -32,7 +32,8 @@ FClassNetCache::FClassNetCache()
 	// TArray default ctor is trivially-empty; zero fields explicitly (Ghidra 0x1ab10).
 	appMemzero( &RepProperties, sizeof(RepProperties) );
 	appMemzero( &Fields,        sizeof(Fields)        );
-	// TODO: FUN_10118f90(&FieldMap) — initialises FieldMap hash table with 8 initial buckets.
+	// FieldMap is default-constructed: TMapBase() sets HashCount=8 and calls Rehash()
+	// (retail: FUN_10118f90(&FieldMap) at Ghidra 0x1ab10)
 	unguard;
 }
 
@@ -46,7 +47,8 @@ FClassNetCache::FClassNetCache( UClass* InClass )
 	// TArray default ctor is trivially-empty; zero fields explicitly (Ghidra 0x1a580).
 	appMemzero( &RepProperties, sizeof(RepProperties) );
 	appMemzero( &Fields,        sizeof(Fields)        );
-	// TODO: FUN_10118f90(&FieldMap) — initialises FieldMap hash table with 8 initial buckets.
+	// FieldMap is default-constructed: TMapBase() sets HashCount=8 and calls Rehash()
+	// (retail: FUN_10118f90(&FieldMap) at Ghidra 0x1a580)
 	unguard;
 }
 

@@ -1708,7 +1708,6 @@ CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 	time_t now;
 	time( &now );
 	double secs = difftime( now, buf.st_mtime );
-	// TODO: FUN_1014e410 — converts FPU difftime result to days (secs / 86400)
 	return (INT)(secs / 86400.0);
 }
 
