@@ -26,7 +26,7 @@ FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1032c410 is 128 bytes, not fully reconstructed")
+IMPL_DIVERGE("VA unconfirmed (not at 0x1032c410 which is copy ctor); correct init of TArray<FLOAT> and FString members")
 FStatGraphLine::FStatGraphLine()
 {
 	// Initialize TArray<FLOAT> at +4 and FString at +18 to empty
@@ -34,7 +34,7 @@ FStatGraphLine::FStatGraphLine()
 	new ((BYTE*)this + 0x18) FString();
 }
 
-IMPL_DIVERGE("FStatGraphLine::~FStatGraphLine not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; destroys FString at +0x18 and TArray<FLOAT> at +0x04")
 FStatGraphLine::~FStatGraphLine()
 {
 	// Destroy FString at +18 then TArray<FLOAT> at +4 (reverse order)
@@ -42,7 +42,7 @@ FStatGraphLine::~FStatGraphLine()
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("FStatGraphLine::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; correct field-by-field copy")
 FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 {
 	// Ghidra 0x21790: DWORD at +0, TArray<FLOAT> at +4 (FUN_1031f660=4-byte data points),
@@ -55,7 +55,7 @@ FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("FStatGraphLine::operator== not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; pointer equality")
 int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 {
 	// Ghidra 0x16930: pointer equality comparison only.
