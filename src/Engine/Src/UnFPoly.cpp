@@ -15,28 +15,28 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FBezier ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Copy constructor — compiler-synthesized, no managed resources; Ghidra shows no body")
 FBezier::FBezier(FBezier const &)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Default constructor — no fields to initialize; Ghidra shows no body")
 FBezier::FBezier()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Destructor — no resources to release; Ghidra shows no body")
 FBezier::~FBezier()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Copy assignment — returns *this; Ghidra analysis pending")
 FBezier& FBezier::operator=(const FBezier&)
 {
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns 0.0f placeholder — requires Ghidra for spline evaluation implementation")
 float FBezier::Evaluate(FVector *,int,TArray<FVector> *)
 {
 	return 0.0f;

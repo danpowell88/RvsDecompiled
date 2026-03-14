@@ -55,7 +55,7 @@ void USound::PS2Convert()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Named-sound constructor — fields not declared in stripped header; base UObject init only")
 USound::USound(const TCHAR* InName, INT InFlags)
 {
 	guard(USound::USound);

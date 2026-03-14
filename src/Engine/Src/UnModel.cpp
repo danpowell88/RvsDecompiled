@@ -30,7 +30,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UModel ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("BSP model render dispatch — full reconstruction deferred; Phase B rendering work")
 void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
 {
 	guard(UModel::Render);
@@ -39,7 +39,7 @@ void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("BSP projector attachment — full reconstruction deferred; Phase B rendering work")
 void UModel::AttachProjector(int,FProjectorRenderInfo *,FPlane *)
 {
 	guard(UModel::AttachProjector);

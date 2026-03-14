@@ -114,13 +114,13 @@ void AProjector::PostEditChange()
 	Attach();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("PostEditLoad — Ghidra shows retail body is empty (shared stub at 0x176d60)")
 void AProjector::PostEditLoad()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("PostEditMove — Ghidra shows retail body is empty (shared stub at 0x176d60)")
 void AProjector::PostEditMove()
 {
 	// Retail: 0x176d60 (shared empty stub)
@@ -200,7 +200,7 @@ void AProjector::Attach()
 	// BSP attachment (bit 0 of this+0x3a0) — loops not reconstructed (see above).
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("CalcMatrix — builds projection matrix/frustum corners; FCoords helpers not reconstructed from Ghidra")
 void AProjector::CalcMatrix()
 {
 	// Retail: 0xf8f90, 4699b. Builds projection matrix and 8 frustum corner points

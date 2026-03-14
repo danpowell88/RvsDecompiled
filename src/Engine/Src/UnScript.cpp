@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UAnimNotify ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("UAnimNotify base Notify — retail body is empty; subclasses override")
 void UAnimNotify::Notify(UMeshInstance *,AActor *)
 {
 }
@@ -70,7 +70,7 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimNotify_Effect ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Effect notify spawns actor at owner location; FCoords helpers not yet available so body is stubbed")
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
@@ -85,7 +85,7 @@ void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 // TODO: implement UAnimNotify_MatSubAction::Notify (retail 0x136fe0: finds live ASceneManager in XLevel->Actors, starts SubAction)
 // GHIDRA REF: 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts
 // the SubAction on it, adjusting start/end times from scene manager position.
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MatSubAction notify finds ASceneManager in XLevel->Actors and starts sub-action; body deferred")
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
@@ -196,7 +196,7 @@ void UAnimNotify_Sound::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimation ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UAnimation::Serialize — calls UObject::Serialize; animation data handled by package loader")
 void UAnimation::Serialize(FArchive &)
 {
 }

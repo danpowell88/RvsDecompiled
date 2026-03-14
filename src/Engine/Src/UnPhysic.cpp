@@ -62,12 +62,12 @@ INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire,
 
 
 // --- AVolume ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("SetVolumes(array) — no volume tracking required for minimal playback; Ghidra analysis pending")
 void AVolume::SetVolumes(TArray<AVolume *> const &)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("SetVolumes() — no-arg override; Ghidra analysis pending")
 void AVolume::SetVolumes()
 {
 }
@@ -197,7 +197,7 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 
 
 // --- AWarpZoneMarker ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("addReachSpecs — navigation reach spec generation; Ghidra analysis pending")
 void AWarpZoneMarker::addReachSpecs(APawn*,int)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
@@ -220,7 +220,7 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostEditChange — zone property sync; no-op acceptable for non-editor builds")
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);

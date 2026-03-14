@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 KarmaSupport.cpp: Karma physics actors and geometry elements
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -73,7 +73,7 @@ guard(AKConstraint::preKarmaStep);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; editor rendering not implemented")
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 guard(AKConstraint::RenderEditorSelected);
@@ -87,14 +87,14 @@ guard(AKConstraint::KUpdateConstraintParams);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostEditChange callback - no-op in rebuild; Karma params not updated")
 void AKConstraint::PostEditChange()
 {
 guard(AKConstraint::PostEditChange);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostEditMove callback - no-op in rebuild")
 void AKConstraint::PostEditMove()
 {
 guard(AKConstraint::PostEditMove);
@@ -248,7 +248,7 @@ FKBoxElem::FKBoxElem()
 // Ghidra: just calls FMatrix::FMatrix() (default FMatrix ctor is empty)
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Karma box elem destructor - no-op, no resources to free without Karma SDK")
 FKBoxElem::~FKBoxElem()
 {
 guard(FKBoxElem::~FKBoxElem);
@@ -309,14 +309,14 @@ Radius = InRadius;
 Length = InLength;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Karma cylinder elem default constructor")
 FKCylinderElem::FKCylinderElem()
 {
 guard(FKCylinderElem::FKCylinderElem);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Karma cylinder elem destructor - no-op")
 FKCylinderElem::~FKCylinderElem()
 {
 guard(FKCylinderElem::~FKCylinderElem);
@@ -338,14 +338,14 @@ FKSphereElem::FKSphereElem(float InRadius)
 Radius = InRadius;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Karma sphere elem default constructor")
 FKSphereElem::FKSphereElem()
 {
 guard(FKSphereElem::FKSphereElem);
 unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Karma sphere elem destructor - no-op")
 FKSphereElem::~FKSphereElem()
 {
 guard(FKSphereElem::~FKSphereElem);
@@ -379,7 +379,7 @@ Ar.ByteOrderSerialize((BYTE*)this + 0x4C, 4);
 // NOTE: Divergence — TArray at +0x50 (FKConvexElem array) not serialized.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Karma mesh props draw - editor visualization requires Karma SDK")
 void UKMeshProps::Draw(FRenderInterface *,int)
 {
 guard(UKMeshProps::Draw);
@@ -388,7 +388,7 @@ unguard;
 
 
 // --- UKarmaParams ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostEditChange callback - no-op; Karma not updating params")
 void UKarmaParams::PostEditChange()
 {
 guard(UKarmaParams::PostEditChange);

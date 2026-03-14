@@ -141,7 +141,7 @@ void AMP2IOKarma::eventZDRSetDamageState(INT A, FLOAT B, FVector C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ZDRSetDamageState), &Parms);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Exec thunk for MP2IOKarmaAllNativeFct; native body empty — all logic is in UnrealScript")
 void AMP2IOKarma::execMP2IOKarmaAllNativeFct(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

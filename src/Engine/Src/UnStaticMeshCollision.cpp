@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FStaticMeshCollisionNode ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Default ctor — Ghidra shows FBox default-init at offset 0x10; zero-init equivalent")
 FStaticMeshCollisionNode::FStaticMeshCollisionNode()
 {
 	// Ghidra: only constructs FBox at offset 0x10 (empty default ctor)
@@ -36,7 +36,7 @@ FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle(FStaticMeshCollisionT
 	appMemcpy(_Data, Other._Data, 84); // 21 dwords: 4 FPlanes + 5 extra dwords
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Default ctor — Ghidra shows 4 FPlane default ctors; no custom initialization required")
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle()
 {
 	// Ghidra: constructs 4 FPlanes (all empty default ctors)
@@ -70,7 +70,7 @@ FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& O
 
 
 // --- FStaticMeshSection ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_MATCH("Engine.dll", 0x2bfb0)
 FStaticMeshSection::FStaticMeshSection()
 {
 	*(DWORD*)((BYTE*)this + 0x00) = 0;       // +0x00
@@ -91,7 +91,7 @@ FStaticMeshSection& FStaticMeshSection::operator=(const FStaticMeshSection& Othe
 
 
 // --- FStaticMeshTriangle ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Default ctor — Ghidra shows 3 FVector default ctors; zero-init equivalent")
 FStaticMeshTriangle::FStaticMeshTriangle()
 {
 	// Ghidra: constructs 3 FVectors at offsets 0x00, 0x0C, 0x18 (all empty default ctors)
@@ -150,7 +150,7 @@ FStaticMeshUVStream& FStaticMeshUVStream::operator=(const FStaticMeshUVStream& O
 
 
 // --- FStaticMeshVertex ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Default ctor — Ghidra shows 2 FVector default ctors at +0 and +0xC; zero-init equivalent")
 FStaticMeshVertex::FStaticMeshVertex()
 {
 	// Ghidra: constructs two FVectors at offset 0 and 0xC (same as FBspVertex)

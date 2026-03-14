@@ -11,13 +11,13 @@ IMPLEMENT_FUNCTION(UR6MatineeAttach, -1, execTestLocation)
 
 // --- UR6MatineeAttach ---
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Exec thunk for GetBoneInformation; native body unimplemented — logic resides in UnrealScript")
 void UR6MatineeAttach::execGetBoneInformation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Exec thunk for TestLocation; native body unimplemented — logic resides in UnrealScript")
 void UR6MatineeAttach::execTestLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
