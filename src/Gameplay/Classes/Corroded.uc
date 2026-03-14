@@ -1,5 +1,6 @@
-class Corroded extends DamageType
-	abstract;
+// Damage type applied by corrosive or biological attacks (e.g. the BioRifle).
+// Bypasses armour, applies a sickly green view fog, and uses acid-themed kill messages.
+class Corroded extends DamageType abstract;
 
 static function class<Effects> GetPawnDamageEffect( vector HitLocation, float Damage, vector Momentum, Pawn Victim, bool bLowDetail )
 {

@@ -1,3 +1,5 @@
+// Scripted action that makes the controlled pawn toss their current weapon away
+// with the given velocity vector.
 class ACTION_ThrowWeapon extends ScriptedAction;
 
 var(Action) vector WeaponVelocity;

@@ -1,3 +1,5 @@
+// Scripted action that sets the pawn's alertness level, controlling whether it ignores
+// enemies, stays on script, or breaks out of the sequence to fight.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class ACTION_SetAlertness extends ScriptedAction;

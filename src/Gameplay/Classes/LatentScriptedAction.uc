@@ -1,3 +1,6 @@
+// Abstract base for scripted actions that take time to complete (latent actions).
+// The ScriptedController keeps calling StillTicking() each frame until the action
+// signals completion via one of the CompleteWhen*() or CompleteOnAnim() helpers.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class LatentScriptedAction extends ScriptedAction

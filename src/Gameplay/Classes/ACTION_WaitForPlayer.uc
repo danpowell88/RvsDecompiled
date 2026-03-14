@@ -1,3 +1,5 @@
+// Latent scripted action that pauses the sequence until a player is within the
+// specified distance of the pawn.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class ACTION_WaitForPlayer extends LatentScriptedAction;

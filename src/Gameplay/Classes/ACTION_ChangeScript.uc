@@ -1,3 +1,5 @@
+// Scripted action that redirects the ScriptedController to execute a different
+// ScriptedSequence, identified by its NextScriptTag.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class ACTION_ChangeScript extends ScriptedAction;

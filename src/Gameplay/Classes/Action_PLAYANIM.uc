@@ -1,3 +1,5 @@
+// Scripted action that plays a named base animation on the pawn with configurable blend
+// times, playback rate, iteration count, and looping.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class Action_PLAYANIM extends ScriptedAction;

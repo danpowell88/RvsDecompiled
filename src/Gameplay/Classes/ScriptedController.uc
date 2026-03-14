@@ -1,6 +1,9 @@
+//=============================================================================
 // ScriptedController
-// AI controller which is controlling the pawn through a scripted sequence specified by 
-// an AIScript
+// AI controller that drives a Pawn through a ScriptedSequence step-by-step.
+// Spawned automatically by ScriptedSequence.SpawnControllerFor() and removed
+// when the sequence ends or is aborted via LeaveScripting().
+//=============================================================================
 class ScriptedController extends AIController;
 
 // --- Variables ---

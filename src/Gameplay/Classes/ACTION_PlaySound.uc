@@ -1,3 +1,5 @@
+// Scripted action that plays a 3D-positioned sound at the pawn's location, with
+// configurable volume, pitch, and attenuation.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class ACTION_PlaySound extends ScriptedAction;

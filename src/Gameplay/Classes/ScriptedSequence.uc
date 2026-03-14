@@ -1,7 +1,8 @@
 //=============================================================================
 // ScriptedSequence
-// used for setting up scripted sequences for pawns.
-// A ScriptedController is spawned to carry out the scripted sequence.
+// Holds an ordered array of ScriptedAction objects that define a scripted
+// behaviour for a Pawn.  When activated, a ScriptedController is spawned and
+// steps through the actions one by one.
 //=============================================================================
 class ScriptedSequence extends AIScript;
 

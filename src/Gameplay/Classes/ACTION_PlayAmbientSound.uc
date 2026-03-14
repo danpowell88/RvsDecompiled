@@ -1,3 +1,4 @@
+// Scripted action that sets or clears a looping ambient sound on the controlled pawn.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class ACTION_PlayAmbientSound extends ScriptedAction;

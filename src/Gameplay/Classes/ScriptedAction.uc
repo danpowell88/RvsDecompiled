@@ -1,3 +1,6 @@
+// Abstract base class for all scripted actions used in ScriptedSequence/ScriptedTrigger chains.
+// Each subclass implements InitActionFor() to execute its specific behaviour when the
+// ScriptedController advances to that step in the sequence.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class ScriptedAction extends Object
