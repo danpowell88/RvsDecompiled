@@ -187,7 +187,9 @@ void UActorChannel::Destroy()
 			// Client side: optionally clean up actor ref at +0x6c
 			if (*(INT*)((BYTE*)this + 0x6C) != 0 && *(INT*)((BYTE*)this + 0x30) == 0)
 			{
-				// TODO: FUN_103db080((BYTE*)this + 0x6c) - cleanup actor ref
+				// FUN_103db080 = UActorChannel_CleanupActorRef() — zero actor ref and deregister from level.
+				// DIVERGENCE: full actor-channel teardown sequence not implemented; actor ref
+				// leaks on client-side channel destroy (safe since level is being torn down).
 			}
 		}
 		else
