@@ -1615,15 +1615,37 @@ FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 
 
 // --- FDynamicLight ---
-IMPL_DIVERGE("calls FUN_1040d530 (unresolved radius-based falloff helper) in general-case branch; directional/cylinder/cone cases reconstructed from Ghidra 0x1040D5D0")
+// FUN_1040d530 (Ghidra _unnamed.cpp, 150b): Hermite-smoothstep radial falloff weighted
+// by the Lambertian (Normal·delta) factor.  Inlined into SampleIntensity below.
+// param1=dist, param2=Radius, param3..5=delta(dx,dy,dz), param6..8=Normal(nx,ny,nz).
+// Returns 2*(|dot(Normal,delta)|/dist) * (2t³-3t²+1) if dot>0 && dist<Radius, else 0.
+static FLOAT FalloffHelper(FLOAT dist, FLOAT Radius,
+                            FLOAT dx, FLOAT dy, FLOAT dz,
+                            FLOAT nx, FLOAT ny, FLOAT nz)
+{
+	FLOAT dot = nx * dx + ny * dy + nz * dz;
+	if (dot > 0.0f && dist < Radius)
+	{
+		FLOAT t  = dist / Radius;
+		FLOAT t2 = t * t;
+		FLOAT t3 = t * t2;
+		FLOAT hermite = (2.0f * t3 - 3.0f * t2 + 1.0f);
+		FLOAT dot_nr  = Abs(dot / Radius);
+		FLOAT f = (dot_nr / t) * hermite;
+		return f + f;
+	}
+	return 0.0f;
+}
+
+IMPL_MATCH("Engine.dll", 0x1040d5d0)
 float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 {
-	// Retail: 0x10D5D0, ~200b. Evaluates per-sample light intensity based on light type.
-	// Light type byte is stored at vtable+0x37 (custom descriptor, not C++ vtable).
+	// Retail: 0x10D5D0, 859b. Evaluates per-sample light intensity based on light type.
+	// Light type byte is stored at vtable-descriptor+0x37 (custom descriptor, not C++ vtable).
 	// LightPos = this+0x14 (FVector), LightDir = this+0x20 (FVector), Radius = this+0x2C.
 	BYTE lightType = *(BYTE*)(*(BYTE**)this + 0x37);
 
-	if (lightType == 0x14) // LT_Directional — dot-product with surface normal
+	if (lightType == 0x14) // LT_Directional — Lambertian dot-product with surface normal
 	{
 		FVector* LightDir = (FVector*)((BYTE*)this + 0x20);
 		FLOAT dot = Normal.X * LightDir->X + Normal.Y * LightDir->Y + Normal.Z * LightDir->Z;
@@ -1638,7 +1660,7 @@ float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 		FLOAT Radius  = *(FLOAT*)((BYTE*)this + 0x2C);
 		if (dist3D < Radius)
 		{
-			FLOAT r_sq = dX*dX + dY*dY; // XY plane only
+			FLOAT r_sq   = dX*dX + dY*dY; // XY-plane only
 			FLOAT falloff = 1.0f - r_sq / (Radius * Radius);
 			if (falloff <= 0.0f) falloff = 0.0f;
 			return falloff + falloff;
@@ -1649,9 +1671,9 @@ float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 		FLOAT dX = *(FLOAT*)((BYTE*)this + 0x14) - Point.X;
 		FLOAT dY = *(FLOAT*)((BYTE*)this + 0x18) - Point.Y;
 		FLOAT dZ = *(FLOAT*)((BYTE*)this + 0x1C) - Point.Z;
-		FLOAT dist = appSqrt(dX*dX + dY*dY + dZ*dZ);
+		FLOAT dist   = appSqrt(dX*dX + dY*dY + dZ*dZ);
 		FLOAT Radius = *(FLOAT*)((BYTE*)this + 0x2C);
-		FLOAT inDot = dX * Normal.X + dZ * Normal.Z + dY * Normal.Y;
+		FLOAT inDot  = dX * Normal.X + dZ * Normal.Z + dY * Normal.Y;
 		if (inDot > 0.0f && dist < Radius)
 		{
 			FLOAT f = appSqrt(1.02f - dist / Radius);
@@ -1660,34 +1682,41 @@ float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 	}
 	else
 	{
-		// Types 0x0C, 0x08 and others: distance falloff + optional cone attenuation.
-		// DIVERGENCE: FUN_1040d530 (radius-based falloff via x87 FPU stack) not implemented;
-		// approximated as linear falloff. Cases 0x0C/0x08 use same formula, cone attenuation
-		// applied for non-0x0C/0x08 types when falloff > 0.
+		// Ghidra: if lightType != 0x0C ('\f') AND != 0x08 ('\b'): pure radial falloff only.
+		// If lightType IS 0x0C or 0x08: radial falloff * squared cone-attenuation factor.
 		FLOAT dX = *(FLOAT*)((BYTE*)this + 0x14) - Point.X;
 		FLOAT dY = *(FLOAT*)((BYTE*)this + 0x18) - Point.Y;
 		FLOAT dZ = *(FLOAT*)((BYTE*)this + 0x1C) - Point.Z;
-		FLOAT dist   = appSqrt(dX*dX + dY*dY + dZ*dZ);
-		FLOAT Radius = *(FLOAT*)((BYTE*)this + 0x2C);
-		// Approximate FUN_1040d530: linear falloff
-		FLOAT baseFalloff = (Radius > 0.0f) ? (1.0f - dist / Radius) : 0.0f;
-		if (baseFalloff <= 0.0f) return 0.0f;
-
-		if (lightType == 0x0C || lightType == 0x08)
-			return baseFalloff; // No cone attenuation for these types
-
-		// Apply cone attenuation (spot light style)
-		FLOAT cosOuter = 1.0f - *(BYTE*)(*(BYTE**)this + 0x3C) * (1.0f/256.0f);
-		if (cosOuter >= 1.0f) return 0.0f;
-		FLOAT invRange  = 1.0f / (1.0f - cosOuter);
-		FVector* LightDir = (FVector*)((BYTE*)this + 0x20);
-		FLOAT coneDot = -dX * LightDir->X - dY * LightDir->Y - dZ * LightDir->Z;
-		if (coneDot <= 0.0f) return 0.0f;
 		FLOAT distSq = dX*dX + dY*dY + dZ*dZ;
-		if (distSq < coneDot * coneDot)
+		FLOAT dist   = appSqrt(distSq);
+		FLOAT Radius = *(FLOAT*)((BYTE*)this + 0x2C);
+
+		// Inline FUN_1040d530 (Ghidra _unnamed.cpp 0x1040d530, 150b):
+		FLOAT falloff = FalloffHelper(dist, Radius, dX, dY, dZ, Normal.X, Normal.Y, Normal.Z);
+
+		if (lightType != 0x0C && lightType != 0x08)
+			return falloff; // pure radial falloff for non-spotlight types
+
+		// 0x0C / 0x08: spotlight — apply squared cone-attenuation on top of radial falloff.
+		if (falloff > 0.0f)
 		{
-			FLOAT coneAtten = (coneDot / dist) * invRange - invRange * cosOuter;
-			return coneAtten * coneAtten * baseFalloff;
+			// cosOuter = cos of outer cone angle; byte at vtable-descriptor+0x3C scaled to [0,1].
+			FLOAT cosOuter = 1.0f - *(BYTE*)(*(BYTE**)this + 0x3C) * 0.00390625f;
+			FLOAT invRange = 1.0f / (1.0f - cosOuter);
+			// coneDot = projection of (Point - LightPos) onto LightDir.
+			FLOAT coneDot = -dX * *(FLOAT*)((BYTE*)this + 0x20)
+			              + -dZ * *(FLOAT*)((BYTE*)this + 0x28)
+			              + -dY * *(FLOAT*)((BYTE*)this + 0x24);
+			if (coneDot > 0.0f)
+			{
+				// Check: cosOuter² * dist² < coneDot²  (point inside outer cone)
+				FLOAT cosOuter2 = cosOuter * cosOuter;
+				if (cosOuter2 * distSq < coneDot * coneDot)
+				{
+					FLOAT coneAtten = (coneDot / dist) * invRange - invRange * cosOuter;
+					return coneAtten * coneAtten * falloff;
+				}
+			}
 		}
 	}
 	return 0.0f;
@@ -2047,22 +2076,31 @@ int UConvexVolume::IsPointInside(FVector Point, FMatrix Matrix)
 }
 
 
+// Forward declaration: defined in UnCamera.cpp (no header).
+FArchive& operator<<(FArchive& Ar, FSkinVertex& V);
+
 // --- UIndexBuffer ---
-IMPL_DIVERGE("retail 0x10410d90 (83b) serializes index TArray at +0x30 via FUN_1031e600 (unresolved)")
+IMPL_MATCH("Engine.dll", 0x10410d90)
 void UIndexBuffer::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x110d90: URenderResource::Serialize + index data TArray at +0x30.
-	// Divergence: TArray<WORD> at +0x30 not serialized (render data reconstructed at load).
+	// Ghidra 0x110d90 (83b): URenderResource::Serialize, then FUN_1031e600(Ar, this+0x30)
+	// = TArray<unsigned short> serializer (CountBytes + count + per-element ByteOrderSerialize(2)).
+	guard(UIndexBuffer::Serialize);
 	URenderResource::Serialize(Ar);
+	Ar << *(TArray<_WORD>*)((BYTE*)this + 0x30);
+	unguard;
 }
 
 
 // --- USkinVertexBuffer ---
-IMPL_DIVERGE("retail 0x10410f50 (83b) serializes skin vertex TArray at +0x30 via FUN_10410e20 (unresolved)")
+IMPL_MATCH("Engine.dll", 0x10410f50)
 void USkinVertexBuffer::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x110f50: URenderResource::Serialize + skin vertex TArray at +0x30.
-	// Divergence: skin vertex TArray at +0x30 not serialized (render data reconstructed at load).
+	// Ghidra 0x110f50 (83b): URenderResource::Serialize, then FUN_10410e20(Ar, this+0x30)
+	// = TArray<FSkinVertex> serializer (stride 0x40, CountBytes + count + operator<< per element).
+	guard(USkinVertexBuffer::Serialize);
 	URenderResource::Serialize(Ar);
+	Ar << *(TArray<FSkinVertex>*)((BYTE*)this + 0x30);
+	unguard;
 }
 
