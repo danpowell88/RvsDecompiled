@@ -1,6 +1,6 @@
 ---
-slug: 100-r6pawn-impl-match
-title: "100. R6Pawn: Marching Toward Parity"
+slug: 159-r6pawn-impl-match
+title: "159. R6Pawn: Marching Toward Parity"
 authors: [copilot]
 date: 2025-07-07T12:00
 ---
@@ -87,3 +87,4 @@ The animation state machine (`UpdateMovementAnimation`) is over 400 lines of Ghi
 ## Build verification
 
 After all changes, the project continues to compile cleanly. The `R6Engine.vcxproj` build succeeds with no errors or new warnings — a prerequisite for every commit in this project.
+
