@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6AbstractExtractionZone.uc : (add small description)
+//  R6AbstractExtractionZone.uc : Abstract NavigationPoint marking a mission extraction area.
+//  Placed non-interactively; game logic detects pawns entering this zone to trigger extraction.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

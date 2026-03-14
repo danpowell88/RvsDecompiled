@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6MissionObjectiveMgr.uc : 
+//  R6MissionObjectiveMgr.uc : Actor that tracks the status of all mission objectives.
+//  Stores per-objective status (none/success/failed) and drives mission completion logic. 
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6AstractHUD.uc : (add small description)
+//  R6AstractHUD.uc : Abstract base class for the Rainbow Six HUD.
+//  Tracks HUD resolution and provides the helmet overlay toggle; subclassed by R6HUD in R6Game.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
