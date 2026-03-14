@@ -190,7 +190,7 @@ DWORD AActor::eventGetReticuleInfo(APawn* Pawn, FString& Info)
 	return Parms.ReturnValue;
 }
 
-IMPL_MATCH("Engine.dll", 0x103f1dd0);
+IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
 void AActor::eventHitWall(FVector HitNormal, AActor* HitActor)
 {
 	struct { FVector HitNormal; AActor* HitActor; } Parms;
@@ -241,7 +241,7 @@ void AActor::eventKVelDropBelow()
 	ProcessEvent( FindFunctionChecked(ENGINE_KVelDropBelow, 0), NULL, NULL );
 }
 
-IMPL_MATCH("Engine.dll", 0x10505b14);
+IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
 void AActor::eventLanded(FVector HitNormal)
 {
 	struct { FVector HitNormal; } Parms;
@@ -497,7 +497,7 @@ void APawn::eventEndCrouch(FLOAT HeightAdjust)
 	ProcessEvent( FindFunctionChecked(ENGINE_EndCrouch, 0), &Parms, NULL );
 }
 
-IMPL_MATCH("Engine.dll", 0x1038df50);
+IMPL_MATCH("Engine.dll", 0x10305400);
 FVector APawn::eventEyePosition()
 {
 	struct { FVector ReturnValue; } Parms;
@@ -599,7 +599,7 @@ void APawn::eventStartCrouch(FLOAT HeightAdjust)
 	ProcessEvent( FindFunctionChecked(ENGINE_StartCrouch, 0), &Parms, NULL );
 }
 
-IMPL_MATCH("Engine.dll", 0x10361d50);
+IMPL_MATCH("Engine.dll", 0x10306e90);
 void APawn::eventStopAnimForRG()
 {
 	ProcessEvent( FindFunctionChecked(ENGINE_StopAnimForRG, 0), NULL, NULL );
@@ -842,7 +842,7 @@ DWORD APlayerController::eventIsPlayerPassiveSpectator()
 	return Parms.ReturnValue;
 }
 
-IMPL_MATCH("Engine.dll", 0x1042b1e0);
+IMPL_MATCH("Engine.dll", 0x1030f360);
 void APlayerController::eventPlayerCalcView(AActor*& ViewActor, FVector& CameraLocation, FRotator& CameraRotation)
 {
 	struct { AActor* ViewActor; FVector CameraLocation; FRotator CameraRotation; } Parms;
@@ -1304,7 +1304,7 @@ void UInteractionMaster::eventSetFocusTo(UInteraction* Interaction, UPlayer* Pla
 	UR6ModMgr event thunks (16).
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x104264b0);
+IMPL_MATCH("Engine.dll", 0x10319d20);
 FString UR6ModMgr::eventGetBackgroundsRoot()
 {
 	struct { FString ReturnValue; } Parms;
@@ -1347,7 +1347,7 @@ FString UR6ModMgr::eventGetGameTypeName(INT Index)
 	return Parms.ReturnValue;
 }
 
-IMPL_MATCH("Engine.dll", 0x10423f60);
+IMPL_MATCH("Engine.dll", 0x10319890);
 FString UR6ModMgr::eventGetIniFilesDir()
 {
 	struct { FString ReturnValue; } Parms;
@@ -1355,7 +1355,7 @@ FString UR6ModMgr::eventGetIniFilesDir()
 	return Parms.ReturnValue;
 }
 
-IMPL_MATCH("Engine.dll", 0x1042c4c0);
+IMPL_MATCH("Engine.dll", 0x1031b200);
 FString UR6ModMgr::eventGetMapsDir()
 {
 	struct { FString ReturnValue; } Parms;
@@ -1388,7 +1388,7 @@ INT UR6ModMgr::eventGetNbMods()
 	return Parms.ReturnValue;
 }
 
-IMPL_MATCH("Engine.dll", 0x10428840);
+IMPL_MATCH("Engine.dll", 0x1031b7b0);
 FString UR6ModMgr::eventGetServerIni()
 {
 	struct { FString ReturnValue; } Parms;
@@ -1396,7 +1396,7 @@ FString UR6ModMgr::eventGetServerIni()
 	return Parms.ReturnValue;
 }
 
-IMPL_MATCH("Engine.dll", 0x10389da0);
+IMPL_MATCH("Engine.dll", 0x1031a050);
 FString UR6ModMgr::eventGetVideosRoot()
 {
 	struct { FString ReturnValue; } Parms;
@@ -1475,7 +1475,7 @@ IMPL_MATCH("Engine.dll", 0x10306990);
 DWORD ANavigationPoint::eventAccept(AActor* Requester, AActor* RequestedDest) { struct { AActor* Requester; AActor* RequestedDest; DWORD R; } P; P.Requester = Requester; P.RequestedDest = RequestedDest; P.R = 0; ProcessEvent( FindFunctionChecked(ENGINE_Accept, 0), &P, NULL ); return P.R; }
 IMPL_MATCH("Engine.dll", 0x10305150);
 INT ANavigationPoint::eventSpecialCost(APawn* Seeker, UReachSpec* Path) { struct { APawn* Seeker; UReachSpec* Path; INT R; } P; P.Seeker = Seeker; P.Path = Path; P.R = 0; ProcessEvent( FindFunctionChecked(ENGINE_SpecialCost, 0), &P, NULL ); return P.R; }
-IMPL_MATCH("Engine.dll", 0x1042b7b0);
+IMPL_MATCH("Engine.dll", 0x1031a4c0);
 DWORD ANavigationPoint::eventSuggestMovePreparation(APawn* Other) { struct { APawn* Other; DWORD R; } P; P.Other = Other; P.R = 0; ProcessEvent( FindFunctionChecked(ENGINE_SuggestMovePreparation, 0), &P, NULL ); return P.R; }
 
 // AWarpZoneInfo (2)
@@ -1515,7 +1515,7 @@ IMPL_MATCH("Engine.dll", 0x103086b0);
 void ALineOfSightTrigger::eventPlayerSeesMe(APlayerController* PC) { struct { APlayerController* PC; } P; P.PC = PC; ProcessEvent( FindFunctionChecked(ENGINE_PlayerSeesMe, 0), &P, NULL ); }
 
 // AStatLog (3)
-IMPL_MATCH("Engine.dll", 0x10319730);
+IMPL_MATCH("Engine.dll", 0x1031a570);
 FString AStatLog::eventGetLocalLogFileName() { struct { FString R; } P; ProcessEvent( FindFunctionChecked(ENGINE_GetLocalLogFileName, 0), &P, NULL ); return P.R; }
 IMPL_MATCH("Engine.dll", 0x10319730);
 void AStatLog::eventLogGameSpecial(const FString& S1, const FString& S2) { struct { FString S1; FString S2; } P; P.S1 = S1; P.S2 = S2; ProcessEvent( FindFunctionChecked(ENGINE_LogGameSpecial, 0), &P, NULL ); }
@@ -1555,7 +1555,7 @@ void UR6AbstractGameManager::eventGMProcessMsg(const FString& Msg) { struct { FS
 // UR6MissionDescription (3)
 IMPL_MATCH("Engine.dll", 0x1031ad70);
 DWORD UR6MissionDescription::eventGetSkins(ALevelInfo*& LI, const FString& S) { struct { ALevelInfo* LI; FString S; DWORD R; } P; P.LI = LI; P.S = S; P.R = 0; ProcessEvent( FindFunctionChecked(ENGINE_GetSkins, 0), &P, NULL ); LI = P.LI; return P.R; }
-IMPL_MATCH("Engine.dll", 0x103123d0);
+IMPL_MATCH("Engine.dll", 0x10319dc0);
 DWORD UR6MissionDescription::eventInit(ALevelInfo* LI, const FString& S) { struct { ALevelInfo* LI; FString S; DWORD R; } P; P.LI = LI; P.S = S; P.R = 0; ProcessEvent( FindFunctionChecked(ENGINE_Init, 0), &P, NULL ); return P.R; }
 IMPL_MATCH("Engine.dll", 0x103123d0);
 void UR6MissionDescription::eventReset() { ProcessEvent( FindFunctionChecked(ENGINE_Reset, 0), NULL, NULL ); }
@@ -1571,7 +1571,7 @@ void AR6eviLTesting::eventRunAll() { ProcessEvent( FindFunctionChecked(ENGINE_Ru
 // AR6EngineWeapon (7)
 IMPL_MATCH("Engine.dll", 0x10305690);
 void AR6EngineWeapon::eventDeployWeaponBipod(DWORD bDeploy) { struct { DWORD bDeploy; } P; P.bDeploy = bDeploy; ProcessEvent( FindFunctionChecked(ENGINE_DeployWeaponBipod, 0), &P, NULL ); }
-IMPL_MATCH("Engine.dll", 0x10307f30);
+IMPL_MATCH("Engine.dll", 0x1030f220);
 DWORD AR6EngineWeapon::eventIsGoggles() { struct { DWORD R; } P; P.R = 0; ProcessEvent( FindFunctionChecked(ENGINE_IsGoggles, 0), &P, NULL ); return P.R; }
 IMPL_MATCH("Engine.dll", 0x10307f30);
 void AR6EngineWeapon::eventPawnIsMoving() { ProcessEvent( FindFunctionChecked(ENGINE_PawnIsMoving, 0), NULL, NULL ); }
