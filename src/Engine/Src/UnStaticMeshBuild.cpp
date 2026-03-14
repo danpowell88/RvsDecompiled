@@ -145,22 +145,25 @@ FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const
 		return (*(const FBox*)((const BYTE*)this + 0x2c)).TransformBy(Actor->LocalToWorld());
 	return UPrimitive::GetCollisionBoundingBox(Actor);
 }
-IMPL_DIVERGE("UStaticMesh::GetEncroachCenter not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1046ccb0)
 FVector UStaticMesh::GetEncroachCenter(AActor * Actor)
 {
-	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetCenter().
+	// Ghidra 0x16ccb0: calls vtable[0x74/4]=GetCollisionBoundingBox(Actor), then FBox::GetCenter()
+	// shares address with UModel::GetEncroachCenter and UProjectorPrimitive::GetEncroachCenter
 	return GetCollisionBoundingBox(Actor).GetCenter();
 }
-IMPL_DIVERGE("UStaticMesh::GetEncroachExtent not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10304990)
 FVector UStaticMesh::GetEncroachExtent(AActor * Actor)
 {
-	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetExtent().
+	// Ghidra 0x4990: calls vtable[0x74/4]=GetCollisionBoundingBox(Actor), then FBox::GetExtent()
+	// shares address with UModel::GetEncroachExtent and UProjectorPrimitive::GetEncroachExtent
 	return GetCollisionBoundingBox(Actor).GetExtent();
 }
-IMPL_DIVERGE("UStaticMesh::GetRenderBoundingBox not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10146a50)
 FBox UStaticMesh::GetRenderBoundingBox(const AActor*)
 {
-	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x2C to return buffer.
+	// Ghidra 0x146a50: REP MOVSD 7 DWORDs (28 bytes = FBox) from this+0x2C
+	// shares address with UModel::GetRenderBoundingBox
 	return *(FBox*)((BYTE*)this + 0x2C);
 }
 IMPL_MATCH("Engine.dll", 0x10446a70)
@@ -226,16 +229,19 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-IMPL_DIVERGE("FOrientation::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("Ghidra 0x10301a00: value-type ABI (13 DWORD params) differs from our appMemcpy; VA confirmed")
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
+	// Ghidra 0x1a00: struct passed by value (13 DWORD params on stack), each copied to this+offset.
+	// Our appMemcpy achieves the same result but with different byte pattern.
 	appMemcpy(this, &Other, 0x34);
 	return *this;
 }
 
-IMPL_DIVERGE("FOrientation::operator!= not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10301a70)
 int FOrientation::operator!=(FOrientation const & Other) const
 {
+	// Ghidra 0x1a70: return (uint)(*(int*)(this+0x18) != *(int*)(param_1+0x18))
 	return *(INT*)&_Data[0x18] != *(INT*)&Other._Data[0x18];
 }
 
@@ -345,8 +351,12 @@ void FTags::Init()
 // ============================================================================
 
 // ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
-IMPL_DIVERGE("FRebuildTools::GetCurrent not found in Ghidra export — cannot confirm VA")
-FRebuildOptions * FRebuildTools::GetCurrent() { return *(FRebuildOptions**)this; }
+IMPL_MATCH("Engine.dll", 0x10301d40)
+FRebuildOptions * FRebuildTools::GetCurrent() {
+	// Ghidra 0x1d40: return *(ulong*)this (first DWORD = current options ptr)
+	// shares address with FColor::operator unsigned long and FColor::TrueColor
+	return *(FRebuildOptions**)this;
+}
 
 // ?GetFromName@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
 IMPL_MATCH("Engine.dll", 0x103fd460)
