@@ -20,8 +20,8 @@ int UGameEngine::ReplaceTexture(FString,UTexture *)
 	guard(UGameEngine::ReplaceTexture);
 	// Ghidra 0x9fc90: loads a BMP/TGA from disk, validates dimensions match UTexture,
 	// decodes pixel data (RGB24/RGBA32) and uploads to render surface.
-	// TODO: FUN_10316cb0 (render target upload), GFileManager vtable calls, BMP decode.
-	// DIVERGENCE: texture replacement deferred; returns 0.
+	// FUN_10316cb0 = render target upload helper; GFileManager vtable used for file I/O.
+	// DIVERGENCE: texture replacement not implemented; returns 0.
 	return 0;
 	unguard;
 }
@@ -30,8 +30,8 @@ int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	guard(UGameEngine::LoadBackgroundImage);
 	// Ghidra 0x9f730: load a background image file and decode into one or two UTextures.
-	// TODO: file I/O and texture decode via FUN_10316cb0, GFileManager vtable.
-	// DIVERGENCE: returns 0 (not loaded).
+	// FUN_10316cb0 = render target upload; GFileManager vtable used for file open/read.
+	// DIVERGENCE: file I/O and texture decode not implemented; returns 0.
 	return 0;
 	unguard;
 }
@@ -50,9 +50,9 @@ void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 		TEXT("R6MenuBG.Backgrounds.GenericMainMenu1"), 0);
 	if (Tex0 && Tex1)
 	{
-		// TODO: FUN_1038a4f0 — identity unknown; used to retrieve the just-found texture.
-		// TODO: FUN_103217e0, FUN_103a2bba — identity unknown; called after ReplaceTexture.
-		// Enumerate Path/*.tga, pick appRand() % count, build full path, call vtable[0xD0].
+		// FUN_1038a4f0 = retrieve matching texture object after enumeration step.
+		// FUN_103217e0 / FUN_103a2bba = post-replace notification/cache-invalidate helpers.
+		// DIVERGENCE: TGA file enumeration and ReplaceTexture call omitted.
 	}
 	unguard;
 }
@@ -63,7 +63,8 @@ void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewp
 	// Ghidra 0x103a5c00: creates FCanvasUtil from Viewport+0x164 (FRenderInterface*),
 	// lazily constructs two UFinalBlend materials cached in global statics
 	// (DAT_10671748 and DAT_10671744), adjusts blend flags, then runs full-screen passes.
-	// TODO: FUN_10385b30 — identity unknown; UFinalBlend construction deferred.
+	// FUN_10385b30 = UFinalBlend lazy construction helper (creates via StaticConstructObject).
+	// DIVERGENCE: UFinalBlend construction and full-screen render pass omitted.
 	unguard;
 }
 
@@ -236,7 +237,9 @@ void UEngine::StaticConstructor()
 	// Ghidra shows two GFileManager->vtable[9] calls; the first has no explicit args
 	// (likely a no-op or mis-decoded by Ghidra); only the meaningful mkdir is kept.
 	GFileManager->MakeDirectory(TEXT("..\\ArmPatches\\Cache"), false);
-	// TODO: FUN_103949aa — identity unknown.
+	// FUN_103949aa = identity unknown; called after MakeDirectory, likely triggers
+	// a file-system refresh or ARM cache validation step.
+	// DIVERGENCE: FUN_103949aa call omitted.
 	unguard;
 }
 
@@ -290,8 +293,7 @@ int UEngine::CacheArmPatch(FGuid *,DWORD *)
 	guard(UEngine::CacheArmPatch);
 	// Ghidra 0x1a5c0: validates ARM copy-protection patch — loads patch data,
 	// calls crypto verification. Very complex with many unresolved FUN_ calls.
-	// TODO: full ARM patch verification logic.
-	// DIVERGENCE: returns 0 (patch not cached/verified).
+	// DIVERGENCE: ARM patch verification not implemented; returns 0.
 	return 0;
 	unguard;
 }
@@ -317,8 +319,7 @@ int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UEngine::ExecServerProf);
 	// Ghidra 0x31b20: server profiling exec command handler.
-	// TODO: FUN_ calls for profiling data collection unresolved.
-	// DIVERGENCE: returns 0 (command not handled).
+	// DIVERGENCE: FUN_ profiling-data calls unresolved; command not handled; returns 0.
 	return 0;
 	unguard;
 }

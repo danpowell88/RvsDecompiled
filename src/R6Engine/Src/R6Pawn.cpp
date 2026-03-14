@@ -7,6 +7,14 @@
 #include "R6EnginePrivate.h"
 #include <math.h>
 
+// External engine globals used by viewport-toggle exec functions
+extern ENGINE_API UEngine* g_pEngine;
+
+// Saved viewport overlay states for heat/night/scope toggles (GHIDRA: DAT_10074548/4c/50)
+static INT GR6Pawn_SavedHeatViewport  = 0;
+static INT GR6Pawn_SavedNightViewport = 0;
+static INT GR6Pawn_SavedScopeViewport = 0;
+
 IMPLEMENT_CLASS(AR6Pawn)
 
 IMPLEMENT_FUNCTION(AR6Pawn, -1, execAdjustFluidCollisionCylinder)
@@ -2142,6 +2150,10 @@ void AR6Pawn::execCheckCylinderTranslation(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(AActor, ignoreActor1);
 	P_GET_UBOOL(bIgnoreAllActor1Class);
 	P_FINISH;
+	// GHIDRA REF: 0x25860
+	// DIVERGENCE: function body at 0x25860 uses a cylinder sweep via ULevel vtable
+	// slot 0xD8 (MoveActor/EncroachCheck-style call) with collision extents adjusted
+	// by +3.35 on Z. Returning false (0) as safe default — callers treat 0 as "blocked".
 	*(DWORD*)Result = 0;
 }
 
@@ -2150,7 +2162,11 @@ void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 	P_GET_NAME(nBoneName);
 	P_GET_UBOOL(bLeftFoot);
 	P_FINISH;
-	// TODO: decal/trace footstep effect — complex inline sound/decal logic (see Ghidra)
+	// GHIDRA REF: 0x2a1a0
+	// DIVERGENCE: complex inline logic at 0x2a1a0 performs a downward line trace from the
+	// foot bone position (via USkeletalMeshInstance::GetBoneCoords), spawns a decal/impact
+	// effect at the hit surface (material-dependent), and plays a footstep sound.
+	// Requires resolving UDecalManager and hit-material helpers. Left as no-op.
 }
 
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
@@ -2161,7 +2177,29 @@ void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 	P_GET_INT(iBulletToArmorModifier);
 	P_GET_UBOOL(bHitBySilencedWeapon);
 	P_FINISH;
-	*(BYTE*)Result = 0;
+	// GHIDRA REF: 0x402e0
+	if (iKillDamage < 1)
+	{
+		*(BYTE*)Result = 0;
+		return;
+	}
+	R6Charts Charts;
+	stResultTable* pTable = Charts.GetKillTable((eBodyPart)ePartHit);
+	if (!pTable)
+	{
+		*(BYTE*)Result = 0;
+		return;
+	}
+	// DIVERGENCE: original code applies armor modification to iKillDamage via an x87 ftol
+	// helper (FUN_10042934) that accounts for eArmorType and iBulletToArmorModifier before
+	// comparing against kill thresholds. Using raw iKillDamage as approximation.
+	INT iDmg = Max(1, iKillDamage);
+	if (iDmg < pTable->Threshold1)
+		*(BYTE*)Result = 0;
+	else if (iDmg < pTable->Threshold2)
+		*(BYTE*)Result = 1;
+	else
+		*(BYTE*)Result = (BYTE)((pTable->Threshold3 <= iDmg ? 1 : 0) + 2);
 }
 
 void AR6Pawn::execGetMaxRotationOffset(FFrame& Stack, RESULT_DECL)
@@ -2197,7 +2235,28 @@ void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 	P_GET_INT(iBulletToArmorModifier);
 	P_GET_UBOOL(bHitBySilencedWeapon);
 	P_FINISH;
-	*(BYTE*)Result = 0;
+	// GHIDRA REF: 0x406c0
+	if (iStunDamage < 1)
+	{
+		*(BYTE*)Result = 0;
+		return;
+	}
+	R6Charts Charts;
+	stResultTable* pTable = Charts.GetStunTable((eBodyPart)ePartHit);
+	if (!pTable)
+	{
+		*(BYTE*)Result = 0;
+		return;
+	}
+	// DIVERGENCE: same x87 armor-modification divergence as execGetKillResult;
+	// using raw iStunDamage as approximation.
+	INT iDmg = Max(1, iStunDamage);
+	if (iDmg < pTable->Threshold1)
+		*(BYTE*)Result = 0;
+	else if (iDmg < pTable->Threshold2)
+		*(BYTE*)Result = 1;
+	else
+		*(BYTE*)Result = (BYTE)((pTable->Threshold3 <= iDmg ? 1 : 0) + 2);
 }
 
 void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
@@ -2206,7 +2265,18 @@ void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 	P_GET_INT(ePartHit);
 	P_GET_STRUCT(FVector, vBulletDirection);
 	P_FINISH;
-	*(INT*)Result = 0;
+	// GHIDRA REF: 0x40550
+	// Normalise bullet direction, dot it against the pawn's facing vector to determine
+	// whether the shot is head-on (front) or oblique (side). Pass to BulletGoesThroughCharacter.
+	FVector vDir = vBulletDirection.SafeNormal();
+	FVector vFacing = Rotation.Vector();
+	FLOAT fDot = vDir | vFacing;
+	if (fDot < 0.0f) fDot = -fDot;
+	INT iSide = (fDot < 0.7071f) ? 1 : 0;          // <45° from normal → side shot
+	BYTE iThreshold = ((BYTE*)this)[0x670];           // pawn armor-type threshold index
+	R6Charts Charts;
+	INT iResult = Charts.BulletGoesThroughCharacter(iKillDamage, ePartHit, (INT)iThreshold, iSide);
+	*(INT*)Result = (iResult < 0) ? 0 : iResult;
 }
 
 void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
@@ -2214,14 +2284,35 @@ void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 	P_GET_STRUCT(FRotator, rHitDirection);
 	P_GET_INT(iHitBone);
 	P_FINISH;
-	// TODO: drives hit-reaction bone rotation via USkeletalMeshInstance::SetBoneRotation (see Ghidra)
+	// GHIDRA REF: 0x2c140
+	// DIVERGENCE: function obtains a USkeletalMeshInstance, calls GetBoneCoords for the
+	// hit bone, cross-products the hit direction with the bone axis, then calls
+	// USkeletalMeshInstance::SetBoneRotation (via FUN_10042934 reads for cached state).
+	// Left as no-op pending resolution of FUN_10042934.
 }
 
 void AR6Pawn::execPawnCanBeHurtFrom(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vLocation);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	// GHIDRA REF: 0x2b260
+	// Shoot a line from vLocation (Start) to pawn Location (End).
+	// If blocked, retry from the pawn's eye position. Return 1 if unblocked.
+	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+	typedef void (__fastcall *FSingleLineFn)(void*, void*, FCheckResult*, AActor*,
+		const FVector*, const FVector*, DWORD, const FVector&, const FVector&, const FVector&);
+	FSingleLineFn SingleLineCheck = *(FSingleLineFn*)((BYTE*)*pXLevel + 0xcc);
+	const FVector vZero(0.f, 0.f, 0.f);
+	FCheckResult Hit(1.0f);
+	SingleLineCheck(pXLevel, 0, &Hit, this, &Location, &vLocation, 0x40086, vZero, vZero, vZero);
+	if (Hit.Actor != NULL)
+	{
+		// Retry from world-space eye position
+		FVector* pEyeOff = (FVector*)APawn::eventEyePosition((APawn*)this);
+		FVector vEye(pEyeOff->X + Location.X, pEyeOff->Y + Location.Y, pEyeOff->Z + Location.Z);
+		SingleLineCheck(pXLevel, 0, &Hit, this, &vEye, &vLocation, 0x40086, vZero, vZero, vZero);
+	}
+	*(DWORD*)Result = (Hit.Actor == NULL) ? 1 : 0;
 }
 
 void AR6Pawn::execPawnLook(FFrame& Stack, RESULT_DECL)
@@ -2268,7 +2359,21 @@ void AR6Pawn::execPlayVoices(FFrame& Stack, RESULT_DECL)
 	P_GET_UBOOL(bWaitToFinishSound);
 	P_GET_FLOAT(fTime);
 	P_FINISH;
-	// TODO: routes voice through player controller sound priority system (see Ghidra)
+	// GHIDRA REF: 0x2dea0
+	SetAudioInfo();
+	// Broadcast to every AR6PlayerController in the level (AI-driven pawns only;
+	// byte at this+0x39e == 1 suppresses the broadcast for special pawn types).
+	if (!IsHumanControlled() && ((BYTE*)this)[0x39e] != 1)
+	{
+		// Level+0x4d4 = head of the level's PlayerController linked list
+		AR6PlayerController* pPC = *(AR6PlayerController**)((BYTE*)Level + 0x4d4);
+		while (pPC != NULL)
+		{
+			if (pPC->IsA(AR6PlayerController::StaticClass()))
+				pPC->eventClientPlayVoices(m_AudioRepInfo, sndPlayVoice, (BYTE)eSlotUse, iPriority, (DWORD)bWaitToFinishSound, fTime);
+			pPC = *(AR6PlayerController**)((BYTE*)pPC + 0x3dc);
+		}
+	}
 }
 
 void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
@@ -2283,7 +2388,12 @@ void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 	P_GET_BYTE(ID);
 	P_GET_UBOOL(bDoNotPlayLocallySound);
 	P_FINISH;
-	// TODO: calls SetAudioInfo then replicates sound to all player controllers (see Ghidra)
+	// GHIDRA REF: 0x2e120
+	SetAudioInfo();
+	// DIVERGENCE: server-side network replication walks the PlayerController list at
+	// Level+0x4d4 and performs per-controller proximity/IsA checks before calling a
+	// client-play vtable method. The proximity formula uses unresolved raw offsets
+	// (pawn+0x5e4..0x5ec) so the replication loop is omitted here.
 }
 
 void AR6Pawn::execSetAudioInfo(FFrame& Stack, RESULT_DECL)
@@ -2320,7 +2430,35 @@ void AR6Pawn::execToggleHeatProperties(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(UTexture, pMaskTexture);
 	P_GET_OBJECT(UTexture, pAddTexture);
 	P_FINISH;
-	// TODO: applies/removes thermal-vision viewport texture properties (see Ghidra)
+	// GHIDRA REF: 0x3fd90
+	// Level+0x450 = packed vision-mode bitfield; bit 0x2000000 = heat vision active.
+	// Level+0x54c = mask texture ptr; Level+0x550 = additive texture ptr.
+	BYTE* pLvl = (BYTE*)Level;
+	if (!bTurnItOn || !pMaskTexture)
+	{
+		*(DWORD*)(pLvl + 0x450) &= ~0x2000000u;
+		*(INT*)  (pLvl + 0x550) = 0;
+		// Restore saved viewport overlay mode via g_pEngine->Client->ViewportList[0]+0x34+0x504
+		INT Client = *(INT*)((BYTE*)*(INT*)g_pEngine + 0x44);
+		if (Client && *(INT*)(Client + 0x34))
+		{
+			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
+			if (Vp) *(INT*)(Vp + 0x504) = GR6Pawn_SavedHeatViewport;
+		}
+	}
+	else
+	{
+		*(DWORD*)(pLvl + 0x450) |= 0x2000000u;
+		*(INT*)  (pLvl + 0x54c) = (INT)pMaskTexture;
+		*(INT*)  (pLvl + 0x550) = (INT)pAddTexture;
+		INT Client = *(INT*)((BYTE*)*(INT*)g_pEngine + 0x44);
+		if (Client && *(INT*)(Client + 0x34))
+		{
+			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
+			if (Vp) { GR6Pawn_SavedHeatViewport = *(INT*)(Vp + 0x504); *(INT*)(Vp + 0x504) = 6; }
+		}
+	}
+	GCompileMaterialsRevision++;
 }
 
 void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
@@ -2329,7 +2467,35 @@ void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(UTexture, pMaskTexture);
 	P_GET_OBJECT(UTexture, pAddTexture);
 	P_FINISH;
-	// TODO: sets GNightVisionActive and applies night-vision viewport textures (see Ghidra)
+	// GHIDRA REF: 0x3ff50
+	// bit 0x1000000 = night vision active; also sets Core.dll global GNightVisionActive.
+	BYTE* pLvl = (BYTE*)Level;
+	if (!bTurnItOn || !pMaskTexture)
+	{
+		GNightVisionActive = 0;
+		*(DWORD*)(pLvl + 0x450) &= ~0x1000000u;
+		*(INT*)  (pLvl + 0x550) = 0;
+		INT Client = *(INT*)((BYTE*)*(INT*)g_pEngine + 0x44);
+		if (Client && *(INT*)(Client + 0x34))
+		{
+			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
+			if (Vp) *(INT*)(Vp + 0x504) = GR6Pawn_SavedNightViewport;
+		}
+	}
+	else
+	{
+		GNightVisionActive = 1;
+		*(DWORD*)(pLvl + 0x450) |= 0x1000000u;
+		*(INT*)  (pLvl + 0x54c) = (INT)pMaskTexture;
+		*(INT*)  (pLvl + 0x550) = (INT)pAddTexture;
+		INT Client = *(INT*)((BYTE*)*(INT*)g_pEngine + 0x44);
+		if (Client && *(INT*)(Client + 0x34))
+		{
+			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
+			if (Vp) { GR6Pawn_SavedNightViewport = *(INT*)(Vp + 0x504); *(INT*)(Vp + 0x504) = 5; }
+		}
+	}
+	GCompileMaterialsRevision++;
 }
 
 void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)

@@ -700,9 +700,10 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	guard(USkeletalMesh::R6LineCheck);
 	if ((param_6 & 0x10000) == 0 || (*(DWORD*)((BYTE*)param_2 + 0xa8) & 0x2000) == 0)
 		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
-	// TODO: skeletal hit detection via bone pivots from USkeletalMeshInstance.
-	// Retail reads bone world positions from the mesh instance (via GetMeshInstance)
-	// and tests the ray against per-bone cylinders. Full impl requires GetBoneCylinder.
+	// DIVERGENCE: skeletal hit detection via bone pivots unresolved.
+	// Retail reads bone world positions from the mesh instance (GetMeshInstance) and tests
+	// the ray against per-bone cylinders (GetBoneCylinder). GetBoneCylinder and the bone
+	// radius table (m_fCylindersRadius) are not yet populated from binary data.
 	return 1;
 	unguard;
 }
@@ -720,9 +721,8 @@ int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector par
 	guard(USkeletalMesh::LineCheck);
 	if (*(BYTE*)((BYTE*)param_2 + 0x2c) != 0x0e) // PHYS_KarmaRagDoll = 14
 		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
-	// TODO: Karma ragdoll line check.
-	// Retail delegates to Karma physics engine (MeXContactPoints) for per-body ray cast.
-	// DIVERGENCE: stub returns 1 (no hit) — Karma integration not implemented.
+	// DIVERGENCE: Karma ragdoll line check delegates to MeXContactPoints for per-body ray cast.
+	// Karma physics integration not implemented; returns 1 (no hit).
 	return 1;
 	unguard;
 }

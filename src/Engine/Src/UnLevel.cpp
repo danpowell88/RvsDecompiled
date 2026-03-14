@@ -902,14 +902,14 @@ ABrush* ULevel::SpawnBrush()
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
-	/* TODO: Full SpawnViewActor implementation */
+	// DIVERGENCE: SpawnViewActor not implemented (spawns per-viewport camera actor, sets ViewTarget).
 	unguard;
 }
 
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
-	/* TODO: Full SpawnPlayActor implementation */
+	// DIVERGENCE: SpawnPlayActor not implemented (creates PlayerController, sets up connection replication).
 	return NULL;
 	unguard;
 }
@@ -917,7 +917,7 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
-	/* TODO: Full FindSpot implementation */
+	// DIVERGENCE: FindSpot not implemented (BSP + actor collision-free spawn point search).
 	return 1;
 	unguard;
 }
@@ -925,7 +925,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
-	/* TODO: Full CheckSlice implementation */
+	// DIVERGENCE: CheckSlice not implemented (vertical slab adjustment for player capsule fitting).
 	return 0;
 	unguard;
 }
@@ -933,7 +933,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
-	/* TODO: Full CheckEncroachment implementation */
+	// DIVERGENCE: CheckEncroachment not implemented (collision check for actor placement validity).
 	return 0;
 	unguard;
 }
@@ -1017,7 +1017,7 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
-	/* TODO: Full MultiPointCheck implementation */
+	// DIVERGENCE: MultiPointCheck not implemented (returns all actors/BSP overlapping a box).
 	return NULL;
 	unguard;
 }
@@ -1025,7 +1025,7 @@ FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
-	/* TODO: Full MultiLineCheck implementation */
+	// DIVERGENCE: MultiLineCheck not implemented (returns linked list of all hits along a ray).
 	return NULL;
 	unguard;
 }
@@ -1064,7 +1064,7 @@ INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 	guard(ULevel::TickDemoRecord);
 	if ( !*(INT*)((BYTE*)this + 0x8c) ) // DemoRecDriver == NULL
 		return 0;
-	/* TODO: Iterate actors and replicate to DemoRecDriver */
+	// DIVERGENCE: DemoRecDriver actor replication not implemented.
 	return 1;
 	unguard;
 }
@@ -1088,7 +1088,7 @@ INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
 		if ( nVP == 0 )
 			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x527);
-		/* TODO: BrowseLevel to ?entry */
+		// DIVERGENCE: BrowseLevel to ?entry not implemented (requires UEngine::Browse).
 	}
 	return 1;
 	unguard;
@@ -1129,7 +1129,7 @@ void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 {
 	guard(ULevel::WelcomePlayer);
 	// Copy driver's package map into connection's package map
-	/* TODO: UPackageMap::Copy(Connection+0xC8, Driver+0x44) */
+	// DIVERGENCE: UPackageMap::Copy(Connection+0xC8, Driver+0x44) not implemented — package map not synced.
 	Connection->SendPackageMap();
 	ALevelInfo* info = GetLevelInfo();
 	UObject* outer   = GetOuter();
@@ -1206,7 +1206,7 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 	// Retail (27b, RVA 0x1C0E0): Accesses Zones array data at [this+0x90].
 	// Element layout: stride 72 bytes, AZoneInfo* field at base offset 288
 	// (i.e., index = 72*iZone + 288 byte offset into Zones.Data).
-	// Retail calls a fallback function if result is NULL; omitted here (TODO).
+	// Retail calls a fallback function if result is NULL; retail default zone is LevelInfo.
 	BYTE* data = *(BYTE**)((BYTE*)this + 0x90);
 	if (!data) return NULL;
 	AZoneInfo* zone = *(AZoneInfo**)(data + 72 * iZone + 288);
@@ -1243,7 +1243,9 @@ void ULevel::UpdateTerrainArrays()
 			// SetCollision on terrain info (vtable slot 0x10c bytes into ULevel vtable)
 			typedef void (__thiscall* SetCollisionFn)(AActor*, INT, INT);
 			((SetCollisionFn)(*(DWORD*)(*(DWORD*)this + 0x10c)))((AActor*)Actors(0), 1, 0);
-			/* TODO: FUN_10481dd0 - terrain zone registration helper */
+			// FUN_10481dd0 = terrain zone registration helper: links ATerrainInfo to its
+			// zone actor and populates the Terrains TArray.
+			// DIVERGENCE: terrain zone registration not implemented.
 		}
 	}
 
@@ -1498,7 +1500,7 @@ void ALevelInfo::CallLogThisActor(AActor*) {}
 // ?GetDefaultPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@XZ  Ghidra at ~279 bytes.
 // Lazily spawns ADefaultPhysicsVolume and caches it at this+0x164.
 // The original also sets vol+0x40C (Priority field, raw 0xFFF0BDC0) and vol+0xA0 |= 4.
-// Priority raw-write left as TODO until AVolume layout is confirmed byte-accurate.
+// Priority raw-write deferred until AVolume layout is confirmed byte-accurate.
 // CRITICAL: this must never return NULL as callers dereference the result unchecked.
 APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 {

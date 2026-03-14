@@ -1039,8 +1039,10 @@ int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 	// this+0x19C: parent-bone index array (INT array, stride 4).
 	// m_fCylindersRadius[]: global per-bone radius table (TODO: populate from binary data).
 
-	// TODO: m_fCylindersRadius is a global float array in Engine.dll; actual data TBD.
-	// Until populated this check always fails and GetBoneCylinder returns 0.
+	// m_fCylindersRadius[]: global per-bone radius table in Engine.dll; actual float values
+	// are initialised from the binary and are not yet extracted. Until populated, GetBoneCylinder
+	// always returns radius 0 (effectively disabling per-bone hit detection).
+	// DIVERGENCE: radius data deferred until binary extraction is complete.
 	static FLOAT m_fCylindersRadius[256] = {};
 
 	FLOAT* pBone   = (FLOAT*)(*(INT*)((BYTE*)this + 0x190) + BoneIndex * 0x0C);

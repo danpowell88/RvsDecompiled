@@ -182,7 +182,7 @@ int FBspVertexStream::GetStride()
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
-	// TODO: translate full Ghidra body.
+	// DIVERGENCE: full scene render pass (BSP, actors, decals, post-process) not implemented.
 	guard(FLevelSceneNode::Render);
 	unguard;
 }
@@ -348,7 +348,7 @@ void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
 	// computes lighting contributions from each dynamic light, and copies
 	// the result into param_2. Too complex to translate in full here.
-	// TODO: translate full Ghidra body.
+	// DIVERGENCE: lightmap texture data generation not implemented.
 	guard(FLightMap::GetTextureData);
 	unguard;
 }
@@ -767,8 +767,8 @@ int FRawIndexBuffer::Stripify()
 	guard(FRawIndexBuffer::Stripify);
 	// Ghidra 0x116e70: calls FUN_1048d8b0 (NvTriStrip init) and FUN_1048d8c0 (generate strips),
 	// copies result back into TArray<_WORD> at this+4, bumps revision.
-	// TODO: FUN_1048d8b0/c0 (NvTriStrip library) unresolved.
-	// DIVERGENCE: strip generation skipped; revision bumped; returns Num()-2.
+	// FUN_1048d8b0/FUN_1048d8c0 = NvTriStrip library calls (external GPU vertex cache optimizer).
+	// DIVERGENCE: NvTriStrip not available; strip generation skipped; revision bumped; returns Num()-2.
 	*(INT*)(Pad + 20) += 1;
 	return *(INT*)(Pad + 4) - 2;
 	unguard;
