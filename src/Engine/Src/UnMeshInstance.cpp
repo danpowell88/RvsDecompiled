@@ -2888,14 +2888,15 @@ void UVertMeshInstance::SetScale(FVector Scale)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_103808e0 body unresolved — approximated as safe-divide")
+IMPL_MATCH("Engine.dll", 0x10472d40)
 int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
 	guard(UVertMeshInstance::PlayAnim);
-	// Retail 0x172d40, ~580b. Single-channel vertex mesh animation control.
+	// Retail 0x172d40, 1344b. Single-channel vertex mesh animation control.
 	// this+0xB8=SeqName, +0xBC=rate, +0xC0=curFrame, +0xC4=endFrame,
 	// +0xCC=tweenRate/speedTween, +0xD0=nativeRate, +0xDC=loopLast, +0xE0=bLoop,
 	// +0xE4=bHasNotify, +0xC8=tween-in-rate (offset 200 decimal).
+	// FUN_103808e0 identified as max(a,b) (25b at 0x103808e0) — both CC<0 paths fixed.
 
 	BYTE* vtbl = *(BYTE**)this;
 	typedef INT  (__thiscall *GetAnimNamedFn)(UVertMeshInstance*, FName);
