@@ -6,6 +6,7 @@
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"
+#include <intrin.h>
 #pragma warning(push)
 #pragma warning(disable: 4291)
 inline void* operator new(size_t, void* p) noexcept { return p; }
@@ -648,9 +649,9 @@ FString USubActionFade::GetStatString()
 	const TCHAR* dir = (*(BYTE*)((BYTE*)this + 0x58) & 1) ? TEXT("In") : TEXT("Out");
 	FString extra = FString::Printf(TEXT("Fade [%s], Color : %d,%d,%d\n"),
 		dir,
-		(UINT)((BYTE*)this)[0x5e],
-		(UINT)((BYTE*)this)[0x5d],
-		(UINT)((BYTE*)this)[0x5c]);
+		(DWORD)((BYTE*)this)[0x5e],
+		(DWORD)((BYTE*)this)[0x5d],
+		(DWORD)((BYTE*)this)[0x5c]);
 	result += *extra;
 	return result;
 }
@@ -849,14 +850,133 @@ FString USubActionTrigger::GetStatString()
 
 IMPL_MATCH("Engine.dll", 0x1041fa50)
 void ASceneManager::PostEditChange() { Super::PostEditChange(); }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041fee0 is 728 bytes, not fully reconstructed")
-INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
+
+IMPL_MATCH("Engine.dll", 0x1041fee0)
+INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType )
+{
+	unsigned __int64 tsc = __rdtsc();
+	INT tsc_lo = (INT)(tsc & 0xFFFFFFFF);
+
+	INT result = AActor::Tick(DeltaTime, TickType);
+	if (result == 0 && !(*(DWORD*)((BYTE*)this + 0x3c0) & 2))
+		return 0;
+
+	DWORD flags = *(DWORD*)((BYTE*)this + 0x3c0);
+	if (flags & 2)
+	{
+		if (!(flags & 4))
+		{
+			*(DWORD*)((BYTE*)this + 0x3c0) = flags | 4;
+			SceneStarted();
+			if (*(INT*)((BYTE*)this + 0x3dc) == 0)
+				return 1;
+
+			BYTE* actionsBase = (BYTE*)this + 0x3a8;
+			INT count = *(INT*)(actionsBase + 4);
+			if (count != 0 && !(*(BYTE*)((BYTE*)this + 0x398) & 4))
+			{
+				INT firstAction = *(INT*)(*(INT*)actionsBase);
+				if (*(INT*)(firstAction + 0x40) == 0)
+					appFailAssert("Actions(0)->IntPoint", ".\\UnSceneManager.cpp", 0x19d);
+				typedef void (__cdecl *Fn1)(DWORD, DWORD);
+				((Fn1)0x1035a3d0)(0x3f800000, 0);
+				INT iPoint = *(INT*)(firstAction + 0x40);
+				BYTE checkBuf[48] = {};
+				typedef void (__cdecl *MoveFn)(INT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, void*, INT, INT, INT, INT, INT);
+				((MoveFn)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x98)))(
+					*(INT*)((BYTE*)this + 0x3dc),
+					0.0f, 0.0f, 0.0f,
+					*(FLOAT*)(iPoint + 0x240), *(FLOAT*)(iPoint + 0x244), *(FLOAT*)(iPoint + 0x248),
+					checkBuf, 0, 0, 0, 0, 0);
+			}
+		}
+		else
+		{
+			if (*(INT*)((BYTE*)this + 0x464) == 0)
+			{
+				typedef void (__cdecl *Fn2)(FLOAT);
+				((Fn2)0x1041e8d0)(DeltaTime);
+			}
+			*(FLOAT*)((BYTE*)this + 0x3d0) += DeltaTime * *(FLOAT*)((BYTE*)this + 0x3c8);
+		}
+
+		FLOAT pct = *(FLOAT*)((BYTE*)this + 0x3d0) / *(FLOAT*)((BYTE*)this + 0x3cc);
+		*(FLOAT*)((BYTE*)this + 0x3c4) = pct;
+
+		if (pct <= 1.0f)
+		{
+			INT actor = *(INT*)((BYTE*)this + 0x3dc);
+			FLOAT oldX = *(FLOAT*)(actor + 0x234);
+			FLOAT oldY = *(FLOAT*)(actor + 0x238);
+			FLOAT oldZ = *(FLOAT*)(actor + 0x23c);
+			UpdateViewerFromPct(pct);
+			if (DeltaTime > 0.0f)
+			{
+				actor = *(INT*)((BYTE*)this + 0x3dc);
+				FVector vel(
+					(*(FLOAT*)(actor + 0x234) - oldX) / DeltaTime,
+					(*(FLOAT*)(actor + 0x238) - oldY) / DeltaTime,
+					(*(FLOAT*)(actor + 0x23c) - oldZ) / DeltaTime);
+				*(FLOAT*)(actor + 0x24c) = vel.X;
+				*(FLOAT*)(actor + 0x250) = vel.Y;
+				*(FLOAT*)(actor + 0x254) = vel.Z;
+			}
+		}
+		else
+		{
+			SceneEnded();
+			FName emptyName(NAME_None);
+			if (*(FName*)((BYTE*)this + 0x3a4) != emptyName)
+			{
+				eventTriggerEvent(*(FName*)((BYTE*)this + 0x3a4),
+					*(AActor**)((BYTE*)this + 0x3dc),
+					*(APawn**)((BYTE*)this + 0x3e0));
+			}
+			else
+			{
+				if (*(BYTE*)((BYTE*)this + 0x398) & 1)
+				{
+					eventTriggerEvent(*(FName*)((BYTE*)this + 0x19c),
+						*(AActor**)((BYTE*)this + 0x3dc),
+						*(APawn**)((BYTE*)this + 0x3e0));
+				}
+			}
+		}
+	}
+	return 1;
+}
+
 IMPL_EMPTY("scene manager post-begin-play no-op")
 void ASceneManager::PostBeginPlay() {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e930 is 121 bytes, not fully reconstructed")
-void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041ded0 is 108 bytes, not fully reconstructed")
-FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
+
+IMPL_MATCH("Engine.dll", 0x1041e930)
+void ASceneManager::CheckForErrors()
+{
+	if (*(BYTE*)((BYTE*)this + 0x398) & 4)
+		return;
+	BYTE* actionsBase = (BYTE*)this + 0x3a8;
+	INT count = *(INT*)(actionsBase + 4);
+	for (INT i = 0; i < count; i++)
+	{
+		INT action = *(INT*)(*(INT*)actionsBase + i * 4);
+		if (*(INT*)(action + 0x40) == 0)
+			GWarn->Logf(TEXT("Action found with NULL InterpolationPoint"));
+	}
+}
+
+IMPL_MATCH("Engine.dll", 0x1041ded0)
+FLOAT ASceneManager::GetTotalSceneTime()
+{
+	FLOAT total = 0.0f;
+	BYTE* actionsBase = (BYTE*)this + 0x3a8;
+	INT count = *(INT*)(actionsBase + 4);
+	for (INT i = 0; i < count; i++)
+	{
+		INT action = *(INT*)(*(INT*)actionsBase + i * 4);
+		total += *(FLOAT*)(action + 0x34);
+	}
+	return total;
+}
 
 // =============================================================================
 
@@ -972,8 +1092,17 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FStr
 }
 
 // ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103c98a0 is 177 bytes, not fully reconstructed")
-FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
+IMPL_MATCH("Engine.dll", 0x103c98a0)
+FString FMatineeTools::GetOrientationDesc(int p0)
+{
+	const TCHAR* desc;
+	if      (p0 == 1) desc = TEXT("Look at Actor");
+	else if (p0 == 2) desc = TEXT("Face Path");
+	else if (p0 == 3) desc = TEXT("Interpolation");
+	else if (p0 == 4) desc = TEXT("Dolly");
+	else              desc = TEXT("None");
+	return FString(desc);
+}
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
 IMPL_DIVERGE("ECLipSynchData::operator= not found in Ghidra export — cannot confirm VA")

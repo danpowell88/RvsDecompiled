@@ -45,12 +45,28 @@ UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10315690 is 217 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x104650a0)
 UTerrainBrush::UTerrainBrush()
 {
-	// Initialize 2 FStrings to empty
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
+	new ((BYTE*)this + 0x3c) FVector(0,0,0);
+	new ((BYTE*)this + 0x48) FVector(0,0,0);
+	*(FString*)((BYTE*)this + 0x04) = FString(TEXT("None"));
+	*(FString*)((BYTE*)this + 0x10) = FString(TEXT("NONE"));
+	*(INT*)((BYTE*)this + 0x28) = 0;
+	*(INT*)((BYTE*)this + 0x34) = 0;
+	*(INT*)((BYTE*)this + 100) = 0;
+	*(INT*)((BYTE*)this + 0x20) = 1;
+	*(INT*)((BYTE*)this + 0x24) = 1;
+	*(INT*)((BYTE*)this + 0x2c) = 1;
+	*(INT*)((BYTE*)this + 0x30) = 1;
+	*(INT*)((BYTE*)this + 0x38) = 1;
+	*(INT*)((BYTE*)this + 0x1c) = 0xffffffff;
+	*(INT*)((BYTE*)this + 0x54) = 0x100;
+	*(INT*)((BYTE*)this + 0x58) = 0x400;
+	*(INT*)((BYTE*)this + 0x5c) = 100;
+	*(INT*)((BYTE*)this + 0x60) = 0x20;
 }
 
 IMPL_MATCH("Engine.dll", 0x10465170)
@@ -74,6 +90,7 @@ UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 // Editor globals for the currently-active terrain painting session.
 static ATerrainInfo* GCurrentTerrainInfo  = NULL; // DAT_1061b794
 static UTexture*     GCurrentAlphaTexture = NULL; // DAT_1061b790
+static FVector       GCurrentBrushPos;            // DAT_1061b73c (X,Y,Z)
 
 IMPL_MATCH("Engine.dll", 0x10465a30)
 int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
@@ -206,10 +223,20 @@ void UTerrainBrushEdgeTurn::Execute(int)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10466130 is 172 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10466130)
 FBox UTerrainBrushEdgeTurn::GetRect()
 {
-	return FBox();
+	FBox box(1);
+	box += GCurrentBrushPos;
+	if (GCurrentTerrainInfo != NULL)
+	{
+		FVector corner2(
+			GCurrentBrushPos.X + *(FLOAT*)((BYTE*)GCurrentTerrainInfo + 0x39c),
+			GCurrentBrushPos.Y + *(FLOAT*)((BYTE*)GCurrentTerrainInfo + 0x3a0),
+			GCurrentBrushPos.Z);
+		box += corner2;
+	}
+	return box;
 }
 
 
@@ -433,10 +460,13 @@ void UTerrainBrushSelect::Execute(int)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104657c0 is 113 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x104657c0)
 FBox UTerrainBrushSelect::GetRect()
 {
-	return FBox();
+	FBox box(1);
+	box += *(FVector*)((BYTE*)this + 0x3c);
+	box += *(FVector*)((BYTE*)this + 0x48);
+	return box;
 }
 
 
@@ -672,9 +702,19 @@ void UTerrainBrushVisibility::Execute(int)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10466050 is 172 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10466050)
 FBox UTerrainBrushVisibility::GetRect()
 {
-	return FBox();
+	FBox box(1);
+	box += GCurrentBrushPos;
+	if (GCurrentTerrainInfo != NULL)
+	{
+		FVector corner2(
+			GCurrentBrushPos.X + *(FLOAT*)((BYTE*)GCurrentTerrainInfo + 0x39c),
+			GCurrentBrushPos.Y + *(FLOAT*)((BYTE*)GCurrentTerrainInfo + 0x3a0),
+			GCurrentBrushPos.Z);
+		box += corner2;
+	}
+	return box;
 }
 

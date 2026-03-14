@@ -51,10 +51,9 @@ void AProjector::UpdateParticleMaterial(UParticleMaterial* PM, int Index)
 	*(DWORD*)((BYTE*)PM + Index * 0x4c + 0xd0) = (DWORD)*(BYTE*)((BYTE*)this + 0x395);
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1040b970 is 86 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1040b970)
 void AProjector::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
-	// Retail: 0x10b970, 86b.
 	RenderWireframe(RI);
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
 }
@@ -246,16 +245,11 @@ void AProjector::Detach(int Flush)
 	*(DWORD*)((BYTE*)this + 0x48c) = 0;
 }
 
-IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x103faca0 is 165 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x103faca0)
 UPrimitive * AProjector::GetPrimitive()
 {
-	// Ghidra 0xfaca0: lazily constructs a singleton UProjectorPrimitive (DAT_10780140).
 	if (!GProjectorPrimitive)
-	{
-		guard(AProjector::GetPrimitive);
 		GProjectorPrimitive = ConstructObject<UProjectorPrimitive>(UProjectorPrimitive::StaticClass());
-		unguard;
-	}
 	return GProjectorPrimitive;
 }
 

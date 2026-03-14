@@ -134,7 +134,7 @@ void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisib
 	guard(ATerrainInfo::RenderDecorations);
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1045CBF0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1045CBF0: editor vertex selection with symmetry mirrors; DAT_1061bXXX editor globals unresolved — returns 0")
 int ATerrainInfo::SelectVertex(FVector)
 {
 	guard(ATerrainInfo::SelectVertex);
@@ -147,7 +147,7 @@ int ATerrainInfo::SelectVertex(FVector)
 	return 0;
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1045CAC0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1045CAC0: selection list add/remove; FUN_1031fe20 (TArray element removal) unresolved — remove path skipped")
 int ATerrainInfo::SelectVertexX(int X, int Y)
 {
 	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
@@ -250,7 +250,7 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1045C3C0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1045C3C0: per-sector ray test; FUN_1050557c (sector ray test) unresolved — returns 1 (no hit)")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
@@ -260,7 +260,7 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 	return 1;
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1045A480 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1045A480: per-quad ray intersection; sector/quad data structures and FUN_ calls unresolved — returns 1")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);
@@ -355,7 +355,7 @@ void ATerrainInfo::ConvertHeightmapFormat()
 	guard(ATerrainInfo::ConvertHeightmapFormat);
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10457560 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10457560: correct but OutY (param_4) not assigned — Ghidra decompiler artifact, diverges from retail assignment")
 int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX, int* OutY)
 {
 	// Ghidra 0x157560, 167b: transform world pos by WorldToHeightmap FCoords at this+0x1330,
@@ -420,7 +420,7 @@ _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 		return *((_WORD*)(texData + (USize * Y + X) * 2));
 	return 0;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10456DE0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10456DE0: FStaticTexture on stack in retail; implementation uses GetRawTextureData which is equivalent")
 BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 {
 	// Retail: 0x156de0, ~200b. Lookup layer alpha texture, optionally scale coords
@@ -527,20 +527,70 @@ int ATerrainInfo::GetRenderCombinationNum(TArray<INT>& Layers, ETerrainRenderMet
 	return idx;
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10457B60 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10457B60: iterates selection list and computes AABB; selection list management uses FUN_ calls — returns empty FBox")
 FBox ATerrainInfo::GetSelectedVerticesBounds()
 {
 	return FBox();
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10456F00 not yet fully reconstructed")
-FColor ATerrainInfo::GetTextureColor(int,int,UTexture *)
+IMPL_MATCH("Engine.dll", 0x10456F00)
+FColor ATerrainInfo::GetTextureColor(int X, int Y, UTexture* Tex)
 {
+	guard(ATerrainInfo::GetTextureColor);
+	// Ghidra 0x156f00: scale (X,Y) to texture coordinates, read RGBA8888 texel.
+	if (!Tex) return FColor(0,0,0,0);
+	INT terrainW = *(INT*)((BYTE*)this + 0x12e0);
+	INT terrainH = *(INT*)((BYTE*)this + 0x12e4);
+	INT uSize = *(INT*)((BYTE*)Tex + 0x60);
+	INT vSize = *(INT*)((BYTE*)Tex + 0x64);
+	FStaticTexture StaticTex(Tex);
+	void* texData = StaticTex.GetRawTextureData(0);
+	if (texData && *(BYTE*)((BYTE*)Tex + 0x58) == 5) // format 5 = RGBA8888
+	{
+		INT texelRow = (vSize * Y) / terrainH;
+		INT texelCol = (uSize * X) / terrainW;
+		INT idx = uSize * texelRow + texelCol;
+		FColor result;
+		appMemcpy(&result, (BYTE*)texData + idx * 4, 4);
+		return result;
+	}
 	return FColor(0,0,0,0);
+	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10457140 not yet fully reconstructed")
-FVector ATerrainInfo::GetVertexNormal(int,int)
+IMPL_MATCH("Engine.dll", 0x10457140)
+FVector ATerrainInfo::GetVertexNormal(int X, int Y)
 {
-	return FVector(0,0,0);
+	guard(ATerrainInfo::GetVertexNormal);
+	// Ghidra 0x10457140, 428 bytes: accumulate pre-computed normal pairs from vertex
+	// data array at this+0x12F4 (entry = 6 floats = 2 FVector3 half-normals).
+	// Sums contributions from up to 4 adjacent vertices (current, left, upper, diagonal).
+	// Normalises result; negates if flip-normal flag (bit 0 of this+0x12b4) is set.
+	INT HeightmapX = *(INT*)((BYTE*)this + 0x12e0);
+	BYTE* vtxBase  = *(BYTE**)((BYTE*)this + 0x12f4);
+
+	FLOAT nx = 0.f, ny = 0.f, nz = 0.f;
+
+	// accumulate both half-normals from a vertex entry
+	auto accumEntry = [&](INT ex, INT ey) {
+		FLOAT* e = (FLOAT*)(vtxBase + (HeightmapX * ey + ex) * 0x18);
+		nx += e[0] + e[3];
+		ny += e[1] + e[4];
+		nz += e[2] + e[5];
+	};
+
+	accumEntry(X,     Y);
+	if (X > 0)             accumEntry(X - 1, Y);
+	if (Y > 0)             accumEntry(X,     Y - 1);
+	if (X > 0 && Y > 0)   accumEntry(X - 1, Y - 1);
+
+	FVector N(nx, ny, nz);
+	FVector Safe = N.SafeNormal();
+
+	// Retail: if bit 0 of this+0x12b4 is set, return negated normal.
+	if (*(BYTE*)((BYTE*)this + 0x12b4) & 1)
+		Safe = FVector(-Safe.X, -Safe.Y, -Safe.Z);
+
+	return Safe;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10315640)
 FVector ATerrainInfo::HeightmapToWorld(FVector In)
@@ -548,7 +598,7 @@ FVector ATerrainInfo::HeightmapToWorld(FVector In)
 	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10464CF0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10464CF0: serializes terrain dimensions plus full sector/coord data; legacy version paths omitted — only dims serialized")
 void ATerrainInfo::Serialize(FArchive& Ar)
 {
 	// Retail: 0x164cf0. Calls AActor::Serialize then serializes terrain dimensions,
@@ -589,7 +639,7 @@ void ATerrainInfo::Destroy()
 	}
 	AActor::Destroy();
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x103155C0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103155C0: lazy-creates UTerrainPrimitive via StaticAllocateObject; creation path omitted — returns existing ptr only")
 UPrimitive * ATerrainInfo::GetPrimitive()
 {
 	// Retail: 0x155c0. If sector list at this+0x12C8 is empty, defer to AActor.
@@ -764,14 +814,14 @@ int FTerrainTools::GetAdjust()
 	return *(INT*)&Pad[0x88];
 }
 
-IMPL_DIVERGE("FTerrainTools::GetCurrentTerrainInfo not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x103701c0)
 ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
 {
 	// Ghidra (4B): return pointer at Pad[0x78]
 	return *(ATerrainInfo**)&Pad[0x78];
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104662C0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x104662C0: string lookup in brush list; brush data structures partially unresolved — returns empty string")
 FString FTerrainTools::GetExecFromBrushName(FString &)
 {
 	return FString();
@@ -841,7 +891,7 @@ void FTerrainTools::Init()
 
 
 // --- UTerrainMaterial ---
-IMPL_DIVERGE("UTerrainMaterial::CheckFallback not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; virtual — returns this as fallback material")
 UMaterial * UTerrainMaterial::CheckFallback()
 {
 	return this;

@@ -157,7 +157,7 @@ static INT GWSAInitialized = 0;
 static UINT GDrvSocket = 0;
 
 // Helper: initialise WinSock if not already done.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail Init/socket-open paths; no standalone DLL address")
 static INT InitWSA(FString& Error)
 {
 	if (!GWSAInitialized)
@@ -175,7 +175,7 @@ static INT InitWSA(FString& Error)
 }
 
 // Helper: set socket non-blocking. Returns ioctlsocket error code (0 = OK).
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail socket-creation paths; no standalone DLL address")
 static INT SetNonBlocking(SOCKET s)
 {
 	u_long NonBlocking = 1;
@@ -183,7 +183,7 @@ static INT SetNonBlocking(SOCKET s)
 }
 
 // Helper: return true if socket handle is valid.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail socket-check paths; no standalone DLL address")
 static bool IsValidSocket(SOCKET s)
 {
 	return s != INVALID_SOCKET;
@@ -191,7 +191,7 @@ static bool IsValidSocket(SOCKET s)
 
 // Helper: get local IP for binding (INADDR_ANY = all interfaces).
 // In the original binary this is FUN_10701be0 which returns the configured bind address.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail bind paths; no standalone DLL address")
 static UINT GetLocalBindIP()
 {
 	return INADDR_ANY; // host order = 0
@@ -200,7 +200,7 @@ static UINT GetLocalBindIP()
 // Helper: bind socket and update address with assigned port.
 // mask=1 → bind once; mask=10 → cycle through successive ports (for client reuse).
 // Returns assigned port (host order) on success, 0 on failure.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail socket-bind paths; no standalone DLL address")
 static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 {
 	if (bReuseAddr)
@@ -232,7 +232,7 @@ static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 }
 
 // Helper: set post-bind socket options. Always succeeds in this implementation.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail socket-option paths; no standalone DLL address")
 static bool SetSocketOptions(SOCKET s)
 {
 	(void)s;
@@ -241,7 +241,7 @@ static bool SetSocketOptions(SOCKET s)
 
 // Helper: format IP (stored network-byte-order in a DWORD) as FString.
 // For 1.2.3.4 stored as 0x04030201 on LE: b1=1, b2=2, b3=3, b4=4.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; inlined in retail IP-formatting paths; no standalone DLL address")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);
@@ -254,7 +254,7 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 }
 
 // Async DNS resolve thread — fills FResolveInfo then clears bWorking.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; retail DNS thread body inlined in Init/Resolve paths; no standalone DLL address")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
@@ -274,7 +274,7 @@ static DWORD WINAPI ResolveThread(LPVOID Param)
 }
 
 // Helper: initialise FResolveInfo and start DNS thread (FUN_10701780).
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; FUN_10701780 not in Ghidra export; no standalone DLL address")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
@@ -291,7 +291,7 @@ static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 
 // Helper: get TSC-based elapsed time matching the binary's rdtsc formula.
 // Returns a large float increasing monotonically, with 16777216 as epoch offset.
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static helper; rdtsc formula inlined in LowLevelSend; no standalone DLL address")
 static float GetTSCTime()
 {
 	unsigned __int64 tsc = __rdtsc();

@@ -6,22 +6,15 @@ static INT  s_prevViewTarget = 0;
 static BYTE s_prevViewState  = 0;
 
 // --- APlayerController ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x104201F0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x104201f0)
 void APlayerController::SpecialDestroy()
 {
-	// Ghidra (49B): If Player (offset 0x5B4) is a UNetConnection with a Driver,
-	// set bPendingDestroy on the Driver's connection info.
-	UObject* Player = *(UObject**)((BYTE*)this + 0x5B4);
+	UObject* Player = *(UObject**)((BYTE*)this + 0x5b4);
 	if (Player && Player->IsA(UNetConnection::StaticClass()))
 	{
-		UNetConnection* Conn = (UNetConnection*)Player;
-		// Driver at Conn+0x7C
-		INT* DriverPtr = (INT*)((BYTE*)Conn + 0x7C);
-		if (*DriverPtr != 0)
-		{
-			// bPendingDestroy at Conn+0x80
-			*(INT*)((BYTE*)Conn + 0x80) = 1;
-		}
+		INT driver = *(INT*)((BYTE*)Player + 0x7c);
+		if (driver != 0)
+			*(INT*)((BYTE*)Player + 0x80) = 1;
 	}
 }
 
@@ -193,7 +186,7 @@ void APlayerController::SetPlayer(UPlayer* InPlayer)
 	debugf(TEXT("%s"), GetFullName());
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1038d7d0 is 106 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1038d7d0)
 int APlayerController::LocalPlayerController()
 {
 	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4

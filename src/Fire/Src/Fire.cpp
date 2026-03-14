@@ -53,7 +53,8 @@ IMPLEMENT_CLASS(UWetTexture);
 	The retail DLL exports these explicitly.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+// Ghidra 0xa800: all three operator= share one code body — 8-byte memcpy.
+IMPL_MATCH("Fire.dll", 0x1050a800)
 FSpark& FSpark::operator=( const FSpark& Other )
 {
 	Type  = Other.Type;
@@ -67,7 +68,7 @@ FSpark& FSpark::operator=( const FSpark& Other )
 	return *this;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_MATCH("Fire.dll", 0x1050a800)
 FDrop& FDrop::operator=( const FDrop& Other )
 {
 	Type   = Other.Type;
@@ -81,7 +82,7 @@ FDrop& FDrop::operator=( const FDrop& Other )
 	return *this;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_MATCH("Fire.dll", 0x1050a800)
 KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 {
 	Type  = Other.Type;
@@ -178,7 +179,7 @@ KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 #define PTR_AT(obj, off)    (*(INT*)((BYTE*)(obj) + (off)))
 
 /* Get pixel data pointer from the first mipmap. */
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static inline helper; inlined in retail callers; no standalone DLL address")
 static inline BYTE* GetMipPixels( void* Obj )
 {
 	INT MipsPtr = PTR_AT(Obj, 0xbc);
@@ -187,7 +188,7 @@ static inline BYTE* GetMipPixels( void* Obj )
 }
 
 /* Random byte — approximates FUN_10509f60 (retail inline PRNG). */
-IMPL_DIVERGE("Approximates retail PRNG FUN_10509f60")
+IMPL_DIVERGE("FUN_10509f60 unresolved (inline PRNG); approximated with appRand()")
 static inline BYTE RandByte()
 {
 	return (BYTE)appRand();
@@ -226,7 +227,7 @@ static BYTE  GOrbBright[256];       // DAT_105131c0  orbital brightness
 
 static UBOOL GTablesInit = 0;
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("static; runtime sine-table initialiser; inlined in retail AddSpark/RedrawSparks callers; no standalone DLL address")
 static void InitFireTables()
 {
 	if( GTablesInit ) return;
