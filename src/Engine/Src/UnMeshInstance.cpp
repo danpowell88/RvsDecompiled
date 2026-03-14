@@ -22,12 +22,12 @@ FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 	return NULL;
 }
 
-IMPL_DIVERGE("simplified to UObject::Serialize; render bounds regenerated on load")
+IMPL_MATCH("Engine.dll", 0x103c6ff0)
 void ULodMeshInstance::Serialize(FArchive& Ar)
 {
-	// Retail: 0x103c6ff0. Calls UPrimitive::Serialize (chain: UObject::Serialize + render bounds).
-	// Divergence: simplified to UObject::Serialize; render bounds regenerated on load.
-	UObject::Serialize(Ar);
+	// Retail 0x103c6ff0, 79b. Calls UPrimitive::Serialize, which chains UObject::Serialize
+	// then serializes BoundingBox and BoundingSphere render bounds.
+	UPrimitive::Serialize(Ar);
 }
 
 IMPL_MATCH("Engine.dll", 0x103149A0)

@@ -1776,7 +1776,7 @@ void AActor::execGetGameManager( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameManager);
 	P_FINISH;
-	*(UObject**)Result = NULL;
+	*(UR6AbstractGameManager**)Result = GR6GameManager;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1551, execGetGameManager );
@@ -1786,7 +1786,7 @@ void AActor::execGetModMgr( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetModMgr);
 	P_FINISH;
-	*(UObject**)Result = NULL;
+	*(UR6ModMgr**)Result = GModMgr;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1524, execGetModMgr );
@@ -1806,7 +1806,7 @@ void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptions);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	*(UR6ServerInfo**)Result = GServerOptions;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1273, execGetServerOptions );
@@ -1856,7 +1856,7 @@ void AActor::execNativeStartedByGSClient( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeStartedByGSClient);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(INT*)Result = NativeStartedByGSClient();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1200, execNativeStartedByGSClient );
@@ -1866,7 +1866,7 @@ void AActor::execNativeNonUbiMatchMaking( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMaking);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(INT*)Result = NativeNonUbiMatchMaking();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1303, execNativeNonUbiMatchMaking );
@@ -1875,8 +1875,9 @@ IMPL_MATCH("Engine.dll", 0x10423c80)
 void AActor::execNativeNonUbiMatchMakingAddress( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingAddress);
+	P_GET_STR_REF(Addr);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	Parse(appCmdLine(), TEXT("Ip="), *Addr);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1304, execNativeNonUbiMatchMakingAddress );
@@ -1885,8 +1886,9 @@ IMPL_MATCH("Engine.dll", 0x10423da0)
 void AActor::execNativeNonUbiMatchMakingPassword( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingPassword);
+	P_GET_STR_REF(Pwd);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	Parse(appCmdLine(), TEXT("Pwd="), *Pwd);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1305, execNativeNonUbiMatchMakingPassword );
@@ -1896,7 +1898,7 @@ void AActor::execNativeNonUbiMatchMakingHost( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execNativeNonUbiMatchMakingHost);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(INT*)Result = NativeNonUbiMatchMakingHost();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1316, execNativeNonUbiMatchMakingHost );
@@ -2020,27 +2022,32 @@ void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2008, execGetTagInformations );
 
-IMPL_DIVERGE("no-op stub — debug vector reset not implemented at exec level")
+IMPL_MATCH("Engine.dll", 0x10421570)
 void AActor::execDbgVectorReset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgVectorReset);
+	P_GET_INT(VectorIndex);
 	P_FINISH;
+	DbgVectorReset(VectorIndex);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1505, execDbgVectorReset );
 
-IMPL_DIVERGE("parses V and C but performs no action — debug vector add not implemented at exec level")
+IMPL_MATCH("Engine.dll", 0x104215e0)
 void AActor::execDbgVectorAdd( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgVectorAdd);
-	P_GET_VECTOR(V);
-	P_GET_STRUCT(FColor,C);
+	P_GET_VECTOR(Point);
+	P_GET_VECTOR(Cylinder);
+	P_GET_INT(VectorIndex);
+	P_GET_STR(Def);
 	P_FINISH;
+	DbgVectorAdd(Point, Cylinder, VectorIndex, Def, NULL);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1506, execDbgVectorAdd );
 
-IMPL_DIVERGE("parses Start/End/C but performs no action — debug line add not implemented at exec level")
+IMPL_MATCH("Engine.dll", 0x10426e30)
 void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDbgAddLine);
@@ -2048,6 +2055,7 @@ void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor,C);
 	P_FINISH;
+	DbgAddLine(Start, End, C);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1801, execDbgAddLine );
@@ -2195,7 +2203,7 @@ void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2617, execIsVideoHardwareAtLeast64M );
 
-IMPL_DIVERGE("DIVERGENCE: reads UCanvas from first UViewport via binary-specific offsets (UClient+0x30=Viewports, UViewport+0x7C=Canvas) — Ghidra 0x10427270")
+IMPL_MATCH("Engine.dll", 0x10427270)
 void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCanvas);
@@ -2219,7 +2227,7 @@ void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2618, execGetCanvas );
 
-IMPL_DIVERGE("DIVERGENCE: sets bit 0x8000 in UEngine bitfield at raw offset 0x120 (Ghidra 0x10422d50) — binary-specific field offset")
+IMPL_MATCH("Engine.dll", 0x10422d50)
 void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableLoadingScreen);
@@ -2247,7 +2255,7 @@ void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2620, execAddMessageToConsole );
 
-IMPL_DIVERGE("DIVERGENCE: calls vtable[0x68] on UClient at g_pEngine+0x44 (Ghidra 0x10422f20) — binary-specific vtable offset")
+IMPL_MATCH("Engine.dll", 0x10422f20)
 void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUpdateGraphicOptions);
@@ -4297,7 +4305,7 @@ INT AActor::NativeStartedByGSClient()
 	unguard;
 }
 
-IMPL_DIVERGE("inserts debug line into GDbgLine ring buffer")
+IMPL_MATCH("Engine.dll", 0x10371250)
 void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
 {
     if( ++GDbgLineIndex > 99 )
@@ -4319,7 +4327,7 @@ void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_DIVERGE("clears display flag on debug vector entry")
+IMPL_MATCH("Engine.dll", 0x103794a0)
 void AActor::DbgVectorReset( INT VectorIndex )
 {
     if( VectorIndex < m_dbgVectorInfo.Num() )

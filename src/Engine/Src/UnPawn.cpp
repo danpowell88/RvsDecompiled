@@ -30,18 +30,18 @@ IMPLEMENT_CLASS(AAIController);
 
 /*-- APawn queries -----------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103e7580; P_GET_OBJECT+size check; current approximates intent")
+IMPL_MATCH("Engine.dll", 0x103e7580)
 void APawn::execReachedDestination( FFrame& Stack, RESULT_DECL )
 {
-	guard(APawn::execReachedDestination);
-	P_GET_OBJECT(AActor,Goal);
-	P_FINISH;
-	*(DWORD*)Result = Goal ? (Location - Goal->Location).SizeSquared() < CollisionRadius * CollisionRadius : 0;
-	unguard;
+guard(APawn::execReachedDestination);
+P_GET_OBJECT(AActor,Goal);
+P_FINISH;
+*(DWORD*)Result = Goal ? (DWORD)ReachedDestination(Goal->Location - Location, Goal) : 0;
+unguard;
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execReachedDestination );
 
-IMPL_DIVERGE("Ghidra 0x103e5390; functional match")
+IMPL_MATCH("Engine.dll", 0x103e5390)
 void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsFriend);
@@ -52,7 +52,7 @@ void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsFriend );
 
-IMPL_DIVERGE("Ghidra 0x103e5440; functional match")
+IMPL_MATCH("Engine.dll", 0x103e5440)
 void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsEnemy);
@@ -63,7 +63,7 @@ void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsEnemy );
 
-IMPL_DIVERGE("Ghidra 0x103e5500; functional match")
+IMPL_MATCH("Engine.dll", 0x103e5500)
 void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsNeutral);
@@ -74,7 +74,7 @@ void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsNeutral );
 
-IMPL_DIVERGE("Ghidra 0x103e55c0; functional match")
+IMPL_MATCH("Engine.dll", 0x103e55c0)
 void APawn::execIsAlive( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsAlive);
@@ -86,7 +86,7 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 
 /*-- AController movement latent functions -----------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038e870; simplified: omits walk-speed adjustment and MoveTimer setup")
+IMPL_DIVERGE("Ghidra 0x1038e870; 566 bytes; simplified — retail sets raw timer at +0xdc=4.0f, adjusts walk-speed, and has complex Pawn null path")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -102,7 +102,7 @@ void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 500, execMoveTo );
 
-IMPL_DIVERGE("Ghidra 0x1038cfe0; simplified arrival check")
+IMPL_DIVERGE("Ghidra 0x1038cfe0; 163 bytes; simplified — retail checks MoveTimer at +0x3bc and uses vtable dispatch on Pawn for arrival")
 void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveTo);
@@ -121,7 +121,7 @@ void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 
-IMPL_DIVERGE("Ghidra 0x10390940; simplified: omits bShouldWalk/MoveTimer setup")
+IMPL_DIVERGE("Ghidra 0x10390940; 1402 bytes; simplified — retail has complex bShouldWalk/MoveTimer/ReachSpec path-following logic")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -138,7 +138,7 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
-IMPL_DIVERGE("Ghidra 0x1038d110; simplified arrival check")
+IMPL_DIVERGE("Ghidra 0x1038d110; 534 bytes; simplified — retail checks MoveTimer at +0x3bc and uses vtable dispatch for arrival")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveToward);
@@ -157,7 +157,7 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveToward );
 
-IMPL_DIVERGE("Ghidra 0x1038d330; functional match but P_FINISH placement may differ")
+IMPL_MATCH("Engine.dll", 0x1038d330)
 void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFinishRotation);
@@ -167,66 +167,77 @@ void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 508, execFinishRotation );
 
-IMPL_DIVERGE("Ghidra 0x1038eab0; simplified: immediately clears latent action")
+IMPL_DIVERGE("Ghidra 0x1038eab0; 112 bytes; rotation check via raw Pawn offsets +0x300 and +0x244")
 void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollFinishRotation);
-	// Consider rotation finished when close enough.
+	if( Pawn )
+	{
+		INT iYawDiff = *(INT*)((BYTE*)Pawn + 0x300) - (INT)(*(DWORD*)((BYTE*)Pawn + 0x244) & 0xffff);
+		if( iYawDiff < 0 ) iYawDiff = -iYawDiff;
+		if( iYawDiff > 1999 )
+		{
+			INT iYawDiff2 = *(INT*)((BYTE*)Pawn + 0x300) - (INT)(*(DWORD*)((BYTE*)Pawn + 0x244) & 0xffff);
+			if( iYawDiff2 < 0 ) iYawDiff2 = -iYawDiff2;
+			if( iYawDiff2 < 0xf830 )
+				return;
+		}
+	}
 	GetStateFrame()->LatentAction = 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollFinishRotation );
 
-IMPL_DIVERGE("Ghidra 0x1038cdc0; functional match")
+IMPL_MATCH("Engine.dll", 0x1038cdc0)
 void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execWaitForLanding);
 	P_FINISH;
-	GetStateFrame()->LatentAction = AI_PollWaitForLanding;
+	*(FLOAT*)((BYTE*)this + 0xdc) = 4.0f;
+	if( Pawn && Pawn->Physics == PHYS_Falling )
+		GetStateFrame()->LatentAction = AI_PollWaitForLanding;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_DIVERGE("Ghidra 0x1038dee0; functional match")
+IMPL_DIVERGE("Ghidra 0x1038dee0; 104 bytes; timer decrement at raw offset +0xdc; DeltaTime via Result ptr")
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
 	if( Pawn && Pawn->Physics != PHYS_Falling )
+	{
 		GetStateFrame()->LatentAction = 0;
+		return;
+	}
+	FLOAT DeltaTime = *(FLOAT*)Result;
+	FLOAT& Timer = *(FLOAT*)((BYTE*)this + 0xdc);
+	Timer -= DeltaTime;
+	if( Timer < 0.0f )
+		eventLongFall();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollWaitForLanding );
 
 /*-- AController perception -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038e750; simplified LOS check")
+IMPL_MATCH("Engine.dll", 0x1038e750)
 void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execLineOfSightTo);
 	P_GET_OBJECT(AActor,Other);
 	P_FINISH;
-	*(DWORD*)Result = 0;
-	if( Other && Pawn && Pawn->XLevel )
-	{
-		FCheckResult Hit(1.f);
-		*(DWORD*)Result = !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Other->Location, Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) );
-	}
+	*(DWORD*)Result = LineOfSightTo(Other, 0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 514, execLineOfSightTo );
 
-IMPL_DIVERGE("Ghidra 0x1038dbb0; simplified visibility check")
+IMPL_MATCH("Engine.dll", 0x1038dbb0)
 void AController::execCanSee( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execCanSee);
 	P_GET_OBJECT(APawn,Other);
 	P_FINISH;
-	*(DWORD*)Result = 0;
-	if( Other && Pawn && Pawn->XLevel )
-	{
-		FCheckResult Hit(1.f);
-		*(DWORD*)Result = !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Other->Location, Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) );
-	}
+	*(DWORD*)Result = SeePawn(Other, 0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );

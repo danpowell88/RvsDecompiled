@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnLevel.cpp: ULevel, ALevelInfo, AGameInfo and related classes.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -1024,7 +1024,7 @@ IMPL_DIVERGE("explicit zero args omitted; retail SpawnBrush at Ghidra 0x103b6fb0
 ABrush* ULevel::SpawnBrush()
 {
 	guard(ULevel::SpawnBrush);
-	ABrush* result = (ABrush*)SpawnActor(ABrush::StaticClass());
+	ABrush* result = (ABrush*)SpawnActor(ABrush::StaticClass(), NAME_None, FVector(0.f,0.f,0.f), FRotator(0,0,0));
 	if (!result)
 		appFailAssert("Result", ".\\UnLevAct.cpp", 0xc2);
 	return result;
@@ -1035,7 +1035,64 @@ IMPL_DIVERGE("stub; retail SpawnViewActor at Ghidra 0x103b8840")
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
-	// TODO: implement ULevel::SpawnViewActor (spawns per-viewport camera actor, sets ViewTarget)
+	// Ghidra 0xb8840 (631 bytes): Assert Engine->Client is non-NULL.
+	// this+0x44 = Engine pointer; Engine+0x44 = Client pointer.
+	if ( *(INT*)((BYTE*)*(INT*)((BYTE*)this + 0x44) + 0x44) == 0 )
+		appFailAssert("Engine->Client", ".\\UnLevAct.cpp", 0x29e);
+	// Viewport->Actor must be NULL on entry (no camera attached yet).
+	if ( *(INT*)((BYTE*)Viewport + 0x34) != 0 )
+		appFailAssert("Viewport->Actor==NULL", ".\\UnLevAct.cpp", 0x29f);
+	// Search for an existing unowned ACamera whose Tag matches the viewport's FName.
+	for ( INT i = 0; ; i++ )
+	{
+		if ( i >= Actors.Num() ) break;
+		UObject* a = Actors(i);
+		if ( a != NULL )
+		{
+			if ( a->IsA(ACamera::StaticClass()) && *(INT*)((BYTE*)a + 0x5b4) == 0 )
+			{
+				if ( Viewport->GetFName() == *(FName*)((BYTE*)a + 0x19c) )
+				{
+					*(UObject**)((BYTE*)Viewport + 0x34) = a;
+					break;
+				}
+			}
+		}
+	}
+	// If no camera was found, spawn one at the default editor viewpoint (-500,-300,300).
+	if ( *(INT*)((BYTE*)Viewport + 0x34) == 0 )
+	{
+		INT newCam = (INT)SpawnActor(ACamera::StaticClass(), NAME_None,
+			FVector(-500.f,-300.f,300.f), FRotator(0,0,0), NULL, 1);
+		*(INT*)((BYTE*)Viewport + 0x34) = newCam;
+		if ( newCam == 0 )
+			appFailAssert("Viewport->Actor", ".\\UnLevAct.cpp", 0x2b4);
+		// Ghidra: cam+0x5b8 = cam (self-reference; cleared to Viewport below at +0x5b4).
+		*(INT*)(newCam + 0x5b8) = newCam;
+		// Copy the viewport's FName to the camera's Tag field (+0x19c).
+		*(FName*)(newCam + 0x19c) = Viewport->GetFName();
+	}
+	// Create a UPlayerInput for the camera if it doesn't already have one (+0x7d8).
+	INT cam = *(INT*)((BYTE*)Viewport + 0x34);
+	if ( *(INT*)(cam + 0x7d8) == 0 )
+	{
+		UObject* input = UObject::StaticConstructObject(
+			UPlayerInput::StaticClass(), (UObject*)cam, NAME_None, 0, NULL, GError, NULL);
+		if ( input != NULL && !input->IsA(UPlayerInput::StaticClass()) )
+			input = NULL;
+		*(UObject**)(cam + 0x7d8) = input;
+	}
+	// Set RF_NotForClient|RF_NotForServer (0x300000), clear RF_Transactional (1).
+	UObject* camObj = (UObject*)cam;
+	camObj->SetFlags(0x300000);
+	camObj->ClearFlags(1);
+	// Wire up viewport back-pointer and write renderer/input raw fields.
+	*(UViewport**)(cam + 0x5b4) = Viewport;
+	*(DWORD*)(cam + 0x4f8) = 0x33c6844du;
+	*(DWORD*)(cam + 0x504) = 5u;
+	// Ghidra: final virtual call at vtable+0x10c on the camera actor.
+	typedef void (__thiscall* VoidFn)(UObject*);
+	((VoidFn)(*(DWORD*)(*(DWORD*)cam + 0x10c)))(camObj);
 	unguard;
 }
 
