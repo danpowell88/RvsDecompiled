@@ -31,10 +31,13 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 IMPL_MACROS = {
-    "IMPL_MATCH",
-    "IMPL_APPROX",
-    "IMPL_EMPTY",
-    "IMPL_DIVERGE",
+    "IMPL_GHIDRA",
+    "IMPL_GHIDRA_APPROX",
+    "IMPL_SDK",
+    "IMPL_SDK_MODIFIED",
+    "IMPL_INFERRED",
+    "IMPL_INTENTIONALLY_EMPTY",
+    "IMPL_PERMANENT_DIVERGENCE",
     "IMPL_TODO",
 }
 
