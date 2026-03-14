@@ -142,7 +142,9 @@ return 1;
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1032b9b0 (listen socket creation)")
+// Ghidra 0x1048b810 (15b): shares implementation with InitConnect.
+// Body: *(this+0x40) = Notify; return 1;
+IMPL_MATCH("Engine.dll", 0x1048b810)
 int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitListen);
@@ -191,7 +193,10 @@ typedef void (__thiscall* VDtor)(void*);
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1031ded0 (address string helper)")
+// Ghidra 0x10487f20 (84b): constructs FString from runtime global DAT_10529f90 (WCHAR const*).
+// DAT_10529f90 is a .rdata WCHAR that cannot be reproduced at compile-time; current stub
+// returns an empty FString which may differ if the global is non-empty.
+IMPL_DIVERGE("retail 0x10487f20: returns FString from runtime DAT_10529f90 (unknown WCHAR constant)")
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
 return FString();
@@ -451,7 +456,8 @@ if (*(INT*)((BYTE*)this + 0x80) != 2)
 unguard;
 }
 
-IMPL_DIVERGE("not found in Ghidra export — simple accessor")
+// Ghidra 0x103701c0 (4b): returns *(this+0x7c) = Driver field.
+IMPL_MATCH("Engine.dll", 0x103701c0)
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
 
 IMPL_MATCH("Engine.dll", 0x10484680)
