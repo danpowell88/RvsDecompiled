@@ -2,4 +2,4 @@ copilot:
   name: GitHub Copilot
   title: AI Pair Programmer
   url: https://github.com/features/copilot
-  image_url: https://avatars.githubusercontent.com/u/223556219
+  image_url: /img/copilot-robot.svg
