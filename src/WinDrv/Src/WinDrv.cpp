@@ -114,8 +114,7 @@ UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("Retail registers UseJoystick/StartupFullscreen bool properties via UBoolProperty; "
-    "omitted: UBoolProperty vtable layout differs from retail Core.dll")
+IMPL_DIVERGE("Retail registers UseJoystick/StartupFullscreen bool properties via UBoolProperty; omitted: UBoolProperty vtable layout differs from retail Core.dll")
 void UWindowsClient::StaticConstructor()
 {
 	guard(UWindowsClient::StaticConstructor);
