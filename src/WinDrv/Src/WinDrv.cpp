@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	WinDrv.cpp: WinDrv package init and WWindowsViewportWindow.
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -27,25 +27,25 @@ IMPLEMENT_PACKAGE(WinDrv)
 	WWindowsViewportWindow — Non-UObject Win32 window wrapper.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow()
 	: Viewport(NULL)
 {
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow(UWindowsViewport* InViewport)
 	: Viewport(InViewport)
 {
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 WWindowsViewportWindow::WWindowsViewportWindow(const WWindowsViewportWindow& Other)
 	: Viewport(Other.Viewport)
 {
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewportWindow& Other)
 {
 	if( this != &Other )
@@ -64,19 +64,19 @@ WWindowsViewportWindow::~WWindowsViewportWindow()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 const TCHAR* WWindowsViewportWindow::GetPackageName()
 {
 	return TEXT("WinDrv");
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void WWindowsViewportWindow::GetWindowClassName(TCHAR* OutName)
 {
 	appStrcpy(OutName, TEXT("WWindowsViewportWindow"));
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 LONG WWindowsViewportWindow::WndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	// Forward to the owning UWindowsViewport.
@@ -94,7 +94,7 @@ IMPLEMENT_CLASS(UWindowsClient)
 
 // --- UWindowsClient ---
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	: UClient(Other)
 {
@@ -102,7 +102,7 @@ UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	StartupFullscreen = Other.StartupFullscreen;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 {
 	if (this != &Other)
@@ -126,7 +126,7 @@ void UWindowsClient::StaticConstructor()
 	unguard;
 }
 
-IMPL_INFERRED("Releases DirectInput devices then delegates to Super")
+IMPL_APPROX("Releases DirectInput devices then delegates to Super")
 void UWindowsClient::Destroy()
 {
 	guard(UWindowsClient::Destroy);
@@ -139,7 +139,7 @@ void UWindowsClient::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Delegates to Super")
+IMPL_APPROX("Delegates to Super")
 void UWindowsClient::ShutdownAfterError()
 {
 	guard(UWindowsClient::ShutdownAfterError);
@@ -147,7 +147,7 @@ void UWindowsClient::ShutdownAfterError()
 	unguard;
 }
 
-IMPL_INFERRED("Delegates to Super")
+IMPL_APPROX("Delegates to Super")
 void UWindowsClient::PostEditChange()
 {
 	guard(UWindowsClient::PostEditChange);
@@ -155,14 +155,14 @@ void UWindowsClient::PostEditChange()
 	unguard;
 }
 
-IMPL_INFERRED("NotifyDestroy callback - no-op; cleanup handled by Destroy()")
+IMPL_APPROX("NotifyDestroy callback - no-op; cleanup handled by Destroy()")
 void UWindowsClient::NotifyDestroy(void* Src)
 {
 	guard(UWindowsClient::NotifyDestroy);
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsClient::Init(UEngine* InEngine)
 {
 	guard(UWindowsClient::Init);
@@ -181,7 +181,7 @@ void UWindowsClient::Init(UEngine* InEngine)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsClient::ShowViewportWindows(DWORD ShowFlags, INT DoShow)
 {
 	guard(UWindowsClient::ShowViewportWindows);
@@ -194,7 +194,7 @@ void UWindowsClient::ShowViewportWindows(DWORD ShowFlags, INT DoShow)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsClient::EnableViewportWindows(DWORD ShowFlags, INT DoEnable)
 {
 	guard(UWindowsClient::EnableViewportWindows);
@@ -207,7 +207,7 @@ void UWindowsClient::EnableViewportWindows(DWORD ShowFlags, INT DoEnable)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsClient::Tick()
 {
 	guard(UWindowsClient::Tick);
@@ -221,7 +221,7 @@ void UWindowsClient::Tick()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UWindowsClient::Exec);
@@ -229,7 +229,7 @@ INT UWindowsClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UViewport* UWindowsClient::NewViewport(FName Name)
 {
 	guard(UWindowsClient::NewViewport);
@@ -240,7 +240,7 @@ UViewport* UWindowsClient::NewViewport(FName Name)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsClient::MakeCurrent(UViewport* InViewport)
 {
 	guard(UWindowsClient::MakeCurrent);
@@ -257,7 +257,7 @@ void UWindowsClient::MakeCurrent(UViewport* InViewport)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UViewport* UWindowsClient::GetLastCurrent()
 {
 	guard(UWindowsClient::GetLastCurrent);
@@ -296,7 +296,7 @@ DIDEVCAPS             UWindowsViewport::JoystickCaps  = {};
 	Exported at ordinal @31: ?DirectInputError@@YAXVFString@@JH@Z
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 {
 	debugf(TEXT("DirectInput error: %s (hr=0x%08X)"), *Msg, (DWORD)hResult);
@@ -313,13 +313,13 @@ WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 // global since Ravenshield only creates one viewport.
 static HWND GViewportHWnd = NULL;
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UWindowsViewport::UWindowsViewport(const UWindowsViewport& Other)
 	: UViewport(Other)
 {
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UWindowsViewport& UWindowsViewport::operator=(const UWindowsViewport& Other)
 {
 	if (this != &Other)
@@ -327,7 +327,7 @@ UWindowsViewport& UWindowsViewport::operator=(const UWindowsViewport& Other)
 	return *this;
 }
 
-IMPL_INFERRED("Closes window then delegates to Super")
+IMPL_APPROX("Closes window then delegates to Super")
 void UWindowsViewport::Destroy()
 {
 	guard(UWindowsViewport::Destroy);
@@ -336,7 +336,7 @@ void UWindowsViewport::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::ShutdownAfterError()
 {
 	guard(UWindowsViewport::ShutdownAfterError);
@@ -347,7 +347,7 @@ void UWindowsViewport::ShutdownAfterError()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UWindowsViewport::Exec);
@@ -365,7 +365,7 @@ INT UWindowsViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_INFERRED("DIVERGENCE: simplified HWND validity check; retail checks WWindowsViewportWindow and HoldCount")
+IMPL_APPROX("DIVERGENCE: simplified HWND validity check; retail checks WWindowsViewportWindow and HoldCount")
 INT UWindowsViewport::Lock(BYTE* HitData, INT* HitSize)
 {
 	guard(UWindowsViewport::Lock);
@@ -377,7 +377,7 @@ INT UWindowsViewport::Lock(BYTE* HitData, INT* HitSize)
 	unguard;
 }
 
-IMPL_INFERRED("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_APPROX("DIVERGENCE: HoldCount accessed via raw offset 0x214")
 void UWindowsViewport::Unlock()
 {
 	guard(UWindowsViewport::Unlock);
@@ -387,7 +387,7 @@ void UWindowsViewport::Unlock()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsViewport::IsFullscreen()
 {
 	guard(UWindowsViewport::IsFullscreen);
@@ -395,7 +395,7 @@ INT UWindowsViewport::IsFullscreen()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsViewport::ResizeViewport(DWORD NewBlitFlags, INT NewX, INT NewY)
 {
 	guard(UWindowsViewport::ResizeViewport);
@@ -422,7 +422,7 @@ INT UWindowsViewport::ResizeViewport(DWORD NewBlitFlags, INT NewX, INT NewY)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::SetModeCursor()
 {
 	guard(UWindowsViewport::SetModeCursor);
@@ -430,7 +430,7 @@ void UWindowsViewport::SetModeCursor()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::UpdateWindowFrame()
 {
 	guard(UWindowsViewport::UpdateWindowFrame);
@@ -441,7 +441,7 @@ void UWindowsViewport::UpdateWindowFrame()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::OpenWindow(DWORD ParentWindow, INT IsTemporary, INT NewX, INT NewY, INT OpenX, INT OpenY)
 {
 	guard(UWindowsViewport::OpenWindow);
@@ -525,7 +525,7 @@ void UWindowsViewport::OpenWindow(DWORD ParentWindow, INT IsTemporary, INT NewX,
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::CloseWindow()
 {
 	guard(UWindowsViewport::CloseWindow);
@@ -537,7 +537,7 @@ void UWindowsViewport::CloseWindow()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::UpdateInput(INT Reset, FLOAT DeltaSeconds)
 {
 	guard(UWindowsViewport::UpdateInput);
@@ -583,7 +583,7 @@ void UWindowsViewport::UpdateInput(INT Reset, FLOAT DeltaSeconds)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void* UWindowsViewport::GetWindow()
 {
 	guard(UWindowsViewport::GetWindow);
@@ -591,7 +591,7 @@ void* UWindowsViewport::GetWindow()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::SetMouseCapture(INT Capture, INT Clip, INT FocusOnly)
 {
 	guard(UWindowsViewport::SetMouseCapture);
@@ -618,7 +618,7 @@ void UWindowsViewport::SetMouseCapture(INT Capture, INT Clip, INT FocusOnly)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::Repaint(INT Blit)
 {
 	guard(UWindowsViewport::Repaint);
@@ -627,7 +627,7 @@ void UWindowsViewport::Repaint(INT Blit)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, INT Fullscreen)
 {
 	guard(UWindowsViewport::TryRenderDevice);
@@ -655,7 +655,7 @@ void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT New
 	unguard;
 }
 
-IMPL_INFERRED("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_APPROX("DIVERGENCE: HoldCount accessed via raw offset 0x214")
 void UWindowsViewport::Hold(INT Horiz)
 {
 	guard(UWindowsViewport::Hold);
@@ -665,7 +665,7 @@ void UWindowsViewport::Hold(INT Horiz)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::Minimize()
 {
 	guard(UWindowsViewport::Minimize);
@@ -674,7 +674,7 @@ void UWindowsViewport::Minimize()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::Maximize()
 {
 	guard(UWindowsViewport::Maximize);
@@ -683,7 +683,7 @@ void UWindowsViewport::Maximize()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::Restore()
 {
 	guard(UWindowsViewport::Restore);
@@ -700,7 +700,7 @@ void UWindowsViewport::CheckCD()
 	unguard;
 }
 
-IMPL_INFERRED("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
+IMPL_APPROX("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
 void UWindowsViewport::AcquireKeyboard()
 {
 	guard(UWindowsViewport::AcquireKeyboard);
@@ -726,7 +726,7 @@ void UWindowsViewport::AcquireKeyboard()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::ReleaseKeyboard()
 {
 	guard(UWindowsViewport::ReleaseKeyboard);
@@ -735,7 +735,7 @@ void UWindowsViewport::ReleaseKeyboard()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsViewport::KeyPressed(INT Key)
 {
 	guard(UWindowsViewport::KeyPressed);
@@ -750,7 +750,7 @@ INT UWindowsViewport::KeyPressed(INT Key)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::ToggleFullscreen()
 {
 	guard(UWindowsViewport::ToggleFullscreen);
@@ -761,7 +761,7 @@ void UWindowsViewport::ToggleFullscreen()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::EndFullscreen()
 {
 	guard(UWindowsViewport::EndFullscreen);
@@ -773,7 +773,7 @@ void UWindowsViewport::EndFullscreen()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsViewport::CauseInputEvent(INT iKey, EInputAction Action, FLOAT Delta)
 {
 	guard(UWindowsViewport::CauseInputEvent);
@@ -784,7 +784,7 @@ INT UWindowsViewport::CauseInputEvent(INT iKey, EInputAction Action, FLOAT Delta
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWindowsViewport::SetTopness()
 {
 	guard(UWindowsViewport::SetTopness);
@@ -793,7 +793,7 @@ void UWindowsViewport::SetTopness()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 {
 	guard(UWindowsViewport::GetViewportButtonFlags);
@@ -806,7 +806,7 @@ DWORD UWindowsViewport::GetViewportButtonFlags(DWORD Buttons)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOAT Delta, INT Abs)
 {
 	guard(UWindowsViewport::JoystickInputEvent);
@@ -827,7 +827,7 @@ INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOA
 	unguard;
 }
 
-IMPL_INFERRED("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
+IMPL_APPROX("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
 LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	guard(UWindowsViewport::ViewportWndProc);

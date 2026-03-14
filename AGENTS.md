@@ -85,3 +85,15 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
    **The macros express parity status, not code origin.** Where the code came from (Ghidra, UT99 reference, inferred) belongs in a regular `//` comment above the macro. `IMPL_APPROX` is used for UT99-reference-derived code, Ghidra approximations, and anything inferred — all are unverified until confirmed.
 
    Do NOT use the old `IMPL_GHIDRA`, `IMPL_GHIDRA_APPROX`, `IMPL_UT99_REF`, `IMPL_INFERRED`, `IMPL_INTENTIONALLY_EMPTY`, `IMPL_SDK`, or `IMPL_PERMANENT_DIVERGENCE` macros (all renamed/removed).
+
+   **CRITICAL: IMPL_xxx macros MUST be on a single line.** The attribution scanner (`tools/verify_impl_sources.py`) walks backward one line at a time; a multi-line macro with a string continuation on the next line confuses it. Always write the whole reason on one line:
+   ```cpp
+   // ✅ Correct — single line
+   IMPL_DIVERGE("Retail registers properties; omitted: vtable mismatch with Core.dll")
+   void Foo::Bar() { ... }
+
+   // ❌ Wrong — continuation line confuses the scanner
+   IMPL_DIVERGE("Retail registers properties; "
+       "omitted: vtable mismatch with Core.dll")
+   void Foo::Bar() { ... }
+   ```
