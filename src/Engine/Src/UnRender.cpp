@@ -636,3 +636,26 @@ FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume()
 // HCoords
 // ============================================================================
 HCoords::HCoords(FCameraSceneNode*) {}
+
+// --- Moved from EngineStubs.cpp ---
+void URenderResource::Serialize(FArchive& Ar)
+{
+	UObject::Serialize(Ar);
+	Ar << Revision;
+}
+void FHitObserver::Click(const FHitCause& Cause, const HHitProxy& Hit) {}
+
+// ?AVIStart@@YAXPBGPAVUEngine@@H@Z
+void AVIStart(const TCHAR* p0, UEngine * p1, int p2) {}
+
+// ?AVIStop@@YAXXZ
+void AVIStop() {}
+
+// ?AVITakeShot@@YAXPAVUEngine@@@Z
+void AVITakeShot(UEngine * p0) {}
+
+// ?DrawSprite@@YAXPAVAActor@@VFVector@@PAVUMaterial@@PAVFLevelSceneNode@@PAVFRenderInterface@@@Z
+void DrawSprite(AActor * p0, FVector p1, UMaterial * p2, FLevelSceneNode * p3, FRenderInterface * p4) {}
+
+// ?DrawSprite@@YAXMVFVector@@0PAVUMaterial@@VFPlane@@EPAVFCameraSceneNode@@PAVFRenderInterface@@MHH@Z
+void DrawSprite(float p0, FVector p1, FVector p2, UMaterial * p3, FPlane p4, BYTE p5, FCameraSceneNode * p6, FRenderInterface * p7, float p8, int p9, int p10) {}

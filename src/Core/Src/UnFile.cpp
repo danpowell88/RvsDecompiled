@@ -15,6 +15,7 @@
 #include <math.h>
 #include <malloc.h>
 #include <float.h>
+#include <sys/stat.h>
 
 /*-----------------------------------------------------------------------------
 	CRC table.
@@ -1535,6 +1536,226 @@ CORE_API UBOOL appGetProcReturnCode( void* ProcHandle, INT* ReturnCode )
 	guard(appGetProcReturnCode);
 	return GetExitCodeProcess( (HANDLE)ProcHandle, (DWORD*)ReturnCode ) && *ReturnCode != STILL_ACTIVE;
 	unguard;
+}
+
+CORE_API INT appIsPBInstalled()
+{
+	// Check for pb\pbsv.dll via GFileManager — returns 1 if present.
+	if( GFileManager && GFileManager->FileSize( TEXT("pb\\pbsv.dll") ) >= 0 )
+		return 1;
+	return 0;
+}
+
+CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
+{
+	TCHAR TempStr[4096];
+	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
+	if( GWarn )
+		GWarn->Serialize( TempStr, NAME_Log );
+	return 1;
+}
+
+CORE_API FString appGetGMTRef()
+{
+	// Compute the local UTC offset as a "+HH:MM" / "-HH:MM" string.
+	TIME_ZONE_INFORMATION TZI;
+	DWORD dwRet = GetTimeZoneInformation( &TZI );
+	INT BiasMinutes = TZI.Bias;
+	if( dwRet == TIME_ZONE_ID_DAYLIGHT )
+		BiasMinutes += TZI.DaylightBias;
+	else if( dwRet == TIME_ZONE_ID_STANDARD )
+		BiasMinutes += TZI.StandardBias;
+	// Bias is minutes WEST of UTC; negate to get offset EAST.
+	INT OffsetMinutes = -BiasMinutes;
+	TCHAR Buf[32];
+	appSprintf( Buf, TEXT("%+03d:%02d"), OffsetMinutes / 60, Abs(OffsetMinutes % 60) );
+	return FString( Buf );
+}
+
+CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD* Data, FFileManager* FileManager )
+{
+	guard(appCreateBitmap);
+	if( !FileManager || !Data || Width <= 0 || Height <= 0 )
+		return 0;
+
+	// Find an unused filename: Pattern%05i.bmp
+	static INT BitmapIndex = 0;
+	TCHAR Filename[256];
+	if( BitmapIndex == -1 )
+	{
+		for( INT i = 0; i < 65536; i++ )
+		{
+			appSprintf( Filename, TEXT("%s%05i.bmp"), Pattern, i );
+			if( FileManager->FileSize( Filename ) < 0 )
+				break;
+		}
+	}
+	else
+	{
+		appSprintf( Filename, TEXT("%s%05i.bmp"), Pattern, BitmapIndex );
+		BitmapIndex++;
+	}
+
+	// Open file writer.
+	FArchive* Ar = FileManager->CreateFileWriter( Filename, 0, GNull );
+	if( !Ar )
+		return 0;
+
+	// BMP file header (14 bytes).
+	INT PixelDataSize = Width * Height * 3;
+	INT FileSize      = 0x36 + PixelDataSize;
+	WORD  bfType      = 0x4D42; // 'BM'
+	DWORD bfSize      = FileSize;
+	WORD  bfReserved1 = 0;
+	WORD  bfReserved2 = 0;
+	DWORD bfOffBits   = 0x36;
+	*Ar << bfType << bfSize << bfReserved1 << bfReserved2 << bfOffBits;
+
+	// BMP info header (40 bytes).
+	DWORD biSize          = 40;
+	INT   biWidth         = Width;
+	INT   biHeight        = Height;
+	WORD  biPlanes        = 1;
+	WORD  biBitCount      = 24;
+	DWORD biCompression   = 0;
+	DWORD biSizeImage     = PixelDataSize;
+	DWORD biXPelsPerMeter = 0;
+	DWORD biYPelsPerMeter = 0;
+	DWORD biClrUsed       = 0;
+	DWORD biClrImportant  = 0;
+	*Ar << biSize << biWidth << biHeight << biPlanes << biBitCount
+	    << biCompression << biSizeImage
+	    << biXPelsPerMeter << biYPelsPerMeter << biClrUsed << biClrImportant;
+
+	// Write pixel data bottom-up (BMP convention), 24-bit RGB from 32-bit BGRA input.
+	for( INT y = Height - 1; y >= 0; y-- )
+	{
+		for( INT x = 0; x < Width; x++ )
+		{
+			DWORD Pixel = Data[ y * Width + x ];
+			BYTE R = (BYTE)(Pixel >> 16);
+			BYTE G = (BYTE)(Pixel >>  8);
+			BYTE B = (BYTE)(Pixel      );
+			*Ar << B << G << R;
+		}
+	}
+
+	delete Ar;
+	return 1;
+	unguard;
+}
+
+CORE_API TCHAR* appCharUpper( TCHAR* Str )
+{
+	if( Str )
+	{
+		for( TCHAR* p = Str; *p; p++ )
+		{
+			if( *p >= 'a' && *p <= 'z' )
+				*p += 'A' - 'a';
+		}
+	}
+	return Str;
+}
+
+CORE_API TCHAR* appItoa( INT Num )
+{
+	static TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%i"), Num );
+	return Buf;
+}
+
+CORE_API TCHAR* winAnsiToTCHAR( char* Str )
+{
+	static TCHAR Buf[4096];
+	if( Str )
+	{
+		INT i;
+		for( i=0; Str[i] && i < 4095; i++ )
+			Buf[i] = (TCHAR)(BYTE)Str[i];
+		Buf[i] = 0;
+	}
+	else
+		Buf[0] = 0;
+	return Buf;
+}
+
+CORE_API INT GetFileAgeDays( const TCHAR* Filename )
+{
+	// Ghidra 0x149b40 (206 bytes): stat the file and compute age in whole days.
+	// FUN_1014e410 converts difftime seconds (on FPU) to days (/ 86400).
+	struct _stat buf;
+	int result;
+	if( GUnicodeOS )
+	{
+		result = _wstat( (const wchar_t*)Filename, &buf );
+	}
+	else
+	{
+		char path[MAX_PATH];
+		INT i = 0;
+		const TCHAR* src = Filename;
+		if( src )
+		{
+			while( *src ) path[i++] = (char)*src++;
+			path[i] = 0;
+		}
+		else path[0] = 0;
+		result = _stat( path, &buf );
+	}
+	if( result != 0 )
+		return 0;
+	time_t now;
+	time( &now );
+	double secs = difftime( now, buf.st_mtime );
+	// TODO: FUN_1014e410 — converts FPU difftime result to days (secs / 86400)
+	return (INT)(secs / 86400.0);
+}
+
+CORE_API INT RegGet( FString Key, FString Name, FString& Value )
+{
+	// Read a REG_SZ value from HKEY_LOCAL_MACHINE\<Key>\<Name>.
+	// Returns 1 on success, 0 if the key or value is absent.
+	HKEY hKey = NULL;
+	if( RegOpenKeyExW( HKEY_LOCAL_MACHINE, *Key, 0, KEY_QUERY_VALUE, &hKey ) != ERROR_SUCCESS )
+		return 0;
+	WCHAR Buf[4096] = {};
+	DWORD BufBytes  = sizeof(Buf);
+	DWORD Type      = 0;
+	LONG  Res = RegQueryValueExW( hKey, *Name, NULL, &Type, (LPBYTE)Buf, &BufBytes );
+	RegCloseKey( hKey );
+	if( Res != ERROR_SUCCESS )
+		return 0;
+	Value = FString( Buf );
+	return 1;
+}
+
+CORE_API INT RegSet( FString Key, FString Name, FString Value )
+{
+	// Write a REG_SZ value to HKEY_LOCAL_MACHINE\<Key>\<Name>.
+	// Creates the key if absent. Returns 1 on success.
+	HKEY  hKey    = NULL;
+	DWORD dwDisp  = 0;
+	if( RegCreateKeyExW( HKEY_LOCAL_MACHINE, *Key, 0, NULL,
+	                     REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL,
+	                     &hKey, &dwDisp ) != ERROR_SUCCESS )
+		return 0;
+	const TCHAR* Str = *Value;
+	LONG Res = RegSetValueExW( hKey, *Name, 0, REG_SZ,
+	                           (const BYTE*)Str,
+	                           (appStrlen(Str)+1)*sizeof(TCHAR) );
+	RegCloseKey( hKey );
+	return ( Res == ERROR_SUCCESS ) ? 1 : 0;
+}
+
+CORE_API INT IsRavenShieldCDInDrive()
+{
+	return 1;
+}
+
+CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms )
+{
+	return appCreateProc( URL, Parms, 0 );
 }
 
 /*-----------------------------------------------------------------------------

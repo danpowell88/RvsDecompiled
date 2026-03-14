@@ -3178,3 +3178,10 @@ FMatrix UVertMeshInstance::MeshToWorld()
 }
 
 
+
+// --- Moved from EngineStubs.cpp ---
+// ?MeshBuildBounds@UMeshInstance@@UAEXXZ
+void UMeshInstance::MeshBuildBounds() {}
+// ?MeshToWorld@UMeshInstance@@UAE?AVFMatrix@@XZ
+FMatrix UMeshInstance::MeshToWorld() { // Retail: 36b. Copies FMatrix::Identity (from Core.dll IAT) to return buffer.
+ return FMatrix::Identity; }

@@ -1465,3 +1465,135 @@ FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
 FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@HE@Z
 FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
+
+// --- Moved from EngineStubs.cpp ---
+void ALevelInfo::SetVolumes(const TArray<class AVolume*>&) {}
+void ALevelInfo::SetVolumes() {}
+void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
+{
+	// Retail: 51b. If bit 7 of this+0xA0 is set, skip. Otherwise:
+	// store DWORD from this+0x144 to this+0x228, store 0xFFFFFFFF to this+0x22C, 0 to this+0x230.
+	// ZoneNumber and ZoneBitField args are not used in retail bytecode.
+	if (*(BYTE*)((BYTE*)this + 0xA0) & 0x80) return;
+	*(DWORD*)((BYTE*)this + 0x228) = *(DWORD*)((BYTE*)this + 0x144);
+	*(DWORD*)((BYTE*)this + 0x22C) = 0xFFFFFFFF;
+	*(DWORD*)((BYTE*)this + 0x230) = 0;
+}
+void ALevelInfo::PostNetReceive() {}
+void ALevelInfo::PreNetReceive() {}
+void ALevelInfo::CheckForErrors() {}
+INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+{
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+}
+void ALevelInfo::CallLogThisActor(AActor*) {}
+// ?GetDefaultPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@XZ  Ghidra at ~279 bytes.
+// Lazily spawns ADefaultPhysicsVolume and caches it at this+0x164.
+// The original also sets vol+0x40C (Priority field, raw 0xFFF0BDC0) and vol+0xA0 |= 4.
+// Priority raw-write left as TODO until AVolume layout is confirmed byte-accurate.
+// CRITICAL: this must never return NULL as callers dereference the result unchecked.
+APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
+{
+	APhysicsVolume*& CachedVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
+	if (!CachedVol)
+	{
+		CachedVol = (APhysicsVolume*)XLevel->SpawnActor(ADefaultPhysicsVolume::StaticClass());
+		if (CachedVol)
+		{
+			// Priority: raw DWORD at vol+0x40C = 0xFFF0BDC0 (Ghidra; AVolume layout not yet verified)
+			*(DWORD*)((BYTE*)CachedVol + 0x40C) = 0xFFF0BDC0u;
+			// vol+0xA0 |= 4 (a bitmask flag in AActor's bitfield block)
+			*(DWORD*)((BYTE*)CachedVol + 0xA0) |= 4;
+		}
+	}
+	return CachedVol;
+}
+FString ALevelInfo::GetDisplayAs(FString s) { return s; }
+
+// ?GetPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@VFVector@@PAVAActor@@H@Z  (0x0BBА00, 346 bytes)
+// Walks the PhysicsVolume linked list to find the highest-priority volume
+// that contains point V. With Actor+bUseTouchingVolumes=true it uses only
+// the volumes in Actor->Touching (fast path).
+// The list is lazily rebuilt when the dirty flag at this+0x94C bit 0 is clear.
+// Priority field in APhysicsVolume is at raw offset 0x40C; next-pointer at 0x438.
+APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseTouchingVolumes)
+{
+	APhysicsVolume* Best = GetDefaultPhysicsVolume();
+	if (!bUseTouchingVolumes || !Actor)
+	{
+		// Lazy rebuild of the linear PhysicsVolume list from the level's actor array.
+		if (!(*(DWORD*)((BYTE*)this + 0x94C) & 1))
+		{
+			PhysicsVolumeList = NULL;
+			ULevel* L = XLevel;
+			INT N = L->Actors.Num();
+			for (INT i = 0; i < N; i++)
+			{
+				AActor* A = L->Actors(i);
+				if (A && A->IsA(APhysicsVolume::StaticClass()))
+				{
+					// Prepend A to the singly-linked list (NextVolume pointer at +0x438).
+					*(APhysicsVolume**)((BYTE*)A + 0x438) = PhysicsVolumeList;
+					PhysicsVolumeList = (APhysicsVolume*)A;
+				}
+			}
+			*(DWORD*)((BYTE*)this + 0x94C) |= 1;
+		}
+		for (APhysicsVolume* V2 = PhysicsVolumeList; V2;
+			 V2 = *(APhysicsVolume**)((BYTE*)V2 + 0x438))
+		{
+			// 0x40C = Priority (INT) in AVolume; pick highest-priority enclosing volume.
+			if (*(INT*)((BYTE*)Best + 0x40C) < *(INT*)((BYTE*)V2 + 0x40C) &&
+				V2->Encompasses(V))
+				Best = V2;
+		}
+	}
+	else
+	{
+		// Fast path: restrict search to volumes currently Touching the Actor.
+		for (INT i = 0; i < Actor->Touching.Num(); i++)
+		{
+			AActor* A = Actor->Touching(i);
+			if (A && A->IsA(APhysicsVolume::StaticClass()) &&
+				*(INT*)((BYTE*)Best + 0x40C) < *(INT*)((BYTE*)A + 0x40C) &&
+				((AVolume*)A)->Encompasses(V))
+				Best = (APhysicsVolume*)A;
+		}
+	}
+	return Best;
+}
+// Retail (44b + shared epilogue): zone audibility bitmask lookup.
+// Bitmask is an array of 8-byte entries at this+0x650, indexed by Zone1.
+// Each entry is two DWORDs. Bit (Zone2 & 31) of the lo DWORD is checked.
+// CDQ pattern: for Zone2==31 the sign-extended mask also checks the hi DWORD.
+// Returns 1 if audible, 0 if not. (Fallthrough path normalises to 1.)
+INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
+{
+    if (Zone1 == Zone2)
+        return 1;
+    DWORD* Zones = (DWORD*)((BYTE*)this + 0x650);
+    DWORD bit = 1u << Zone2;
+    DWORD lo   = bit & Zones[Zone1 * 2];
+    INT   hiMask = (INT)bit >> 31;  // CDQ: -1 if Zone2==31, else 0
+    DWORD hi   = (DWORD)hiMask & Zones[Zone1 * 2 + 1];
+    return (lo | hi) ? 1 : 0;
+}
+void AGameReplicationInfo::PostNetReceive() {}
+INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+{
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+}
+void APlayerReplicationInfo::PostNetReceive() {}
+INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+{
+	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+}
+/*-----------------------------------------------------------------------------
+  AReplicationInfo virtual method stubs.
+  Only methods NOT defined in EngineClassImpl.cpp remain here.
+-----------------------------------------------------------------------------*/
+void AReplicationInfo::DisplayVideo(UCanvas*, void*, INT) {}
+void AReplicationInfo::Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT) {}
+void AReplicationInfo::GetAvailableResolutions(TArray<FResolutionInfo>&) {}
+DWORD AReplicationInfo::GetAvailableVideoMemory() { return 0; }
+void AReplicationInfo::HandleFullScreenEffects(INT, INT) {}

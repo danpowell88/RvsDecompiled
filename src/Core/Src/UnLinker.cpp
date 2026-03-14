@@ -566,5 +566,41 @@ void ULinkerSave::Serialize( void* V, INT Length )
 IMPLEMENT_CLASS(ULinkerSave);
 
 /*-----------------------------------------------------------------------------
+	FObjectExport / FObjectImport Serialize member functions.
+	The retail binary exports these as member functions in addition
+	to the inline operator<< already in UnLinker.h.
+-----------------------------------------------------------------------------*/
+
+FArchive& FObjectExport::Serialize( FArchive& Ar )
+{
+	guard(FObjectExport::Serialize);
+	Ar << AR_INDEX(ClassIndex);
+	Ar << AR_INDEX(SuperIndex);
+	Ar << PackageIndex;
+	Ar << ObjectName;
+	Ar << ObjectFlags;
+	Ar << AR_INDEX(SerialSize);
+	if( SerialSize )
+		Ar << AR_INDEX(SerialOffset);
+	return Ar;
+	unguard;
+}
+
+FArchive& FObjectImport::Serialize( FArchive& Ar )
+{
+	guard(FObjectImport::Serialize);
+	Ar << ClassPackage << ClassName;
+	Ar << PackageIndex;
+	Ar << ObjectName;
+	if( Ar.IsLoading() )
+	{
+		SourceIndex = INDEX_NONE;
+		XObject     = NULL;
+	}
+	return Ar;
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

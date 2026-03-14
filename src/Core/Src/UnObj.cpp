@@ -1835,5 +1835,420 @@ void UObject::eventEndState()
 }
 
 /*-----------------------------------------------------------------------------
+	Global variable definitions.
+-----------------------------------------------------------------------------*/
+
+CORE_API TArray<FEdLoadError> GEdLoadErrors;
+CORE_API TArray<INT> GIndexArrayDebugPkg;
+CORE_API TArray<INT> GIntArrayDebugPkg;
+
+class UDebugger;
+CORE_API UDebugger* GDebugger = NULL;
+
+Native GCasts[256];
+
+FGuid FGuid::SpecialGUIDArmPatches;
+
+/*-----------------------------------------------------------------------------
+	FEdLoadError class.
+-----------------------------------------------------------------------------*/
+
+FEdLoadError::FEdLoadError()
+: Type(0), Desc()
+{
+}
+
+FEdLoadError::FEdLoadError( INT InType, TCHAR* InDesc )
+: Type(InType), Desc(InDesc)
+{
+}
+
+FEdLoadError::FEdLoadError( const FEdLoadError& Other )
+: Type(Other.Type), Desc(Other.Desc)
+{
+}
+
+FEdLoadError::~FEdLoadError()
+{
+}
+
+FEdLoadError& FEdLoadError::operator=( FEdLoadError Other )
+{
+	Type = Other.Type;
+	Desc = Other.Desc;
+	return *this;
+}
+
+INT FEdLoadError::operator==( const FEdLoadError& Other ) const
+{
+	return Type == Other.Type && Desc == Other.Desc;
+}
+
+/*-----------------------------------------------------------------------------
+	Editor load error helpers.
+-----------------------------------------------------------------------------*/
+
+CORE_API void EdClearLoadErrors()
+{
+	GEdLoadErrors.Empty();
+}
+
+CORE_API void VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... )
+{
+	TCHAR TempStr[4096];
+	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
+	new(GEdLoadErrors) FEdLoadError( Type, TempStr );
+}
+
+CORE_API BYTE GRegisterCast( INT CastCode, const Native& Func )
+{
+	// On first call, initialise all cast slots to execUndefined.
+	static INT Initialized = 0;
+	if( !Initialized )
+	{
+		for( INT i = 0; i < 256; i++ )
+			GCasts[i] = &UObject::execUndefined;
+		Initialized = 1;
+	}
+
+	if( CastCode != -1 )
+	{
+		if( (DWORD)CastCode > 255 || GCasts[CastCode] != &UObject::execUndefined )
+			GCastDuplicate = CastCode;
+		else
+			GCasts[CastCode] = Func;
+	}
+	return 0;
+}
+
+/*-----------------------------------------------------------------------------
+	ParseObject.
+-----------------------------------------------------------------------------*/
+
+CORE_API INT ParseObject( const TCHAR* Stream, const TCHAR* Match, UClass* Class, UObject*& DestRes, UObject* InParent )
+{
+	guard(ParseObject);
+	// Ghidra Core 0x2fa20 (178 bytes): parse a token then look it up as a UObject.
+	TCHAR TempStr[256];
+	if( !Parse( Stream, Match, TempStr, 0x40 ) )
+		return 0;
+	if( appStricmp( TempStr, TEXT("NONE") ) == 0 )
+	{
+		DestRes = NULL;
+	}
+	else
+	{
+		UObject* Found = UObject::StaticFindObject( Class, InParent, TempStr, 0 );
+		if( !Found )
+			return 0;
+		DestRes = Found;
+	}
+	return 1;
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
+	UObject::operator delete — out-of-line definition.
+	Must be out-of-line so the linker can export the symbol via .def.
+-----------------------------------------------------------------------------*/
+
+void UObject::operator delete( void* Object, size_t Size )
+{
+	guard(UObject::operator delete);
+	appFree( Object );
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
+	Additional UObject methods.
+-----------------------------------------------------------------------------*/
+
+void UObject::AddObject( INT InIndex )
+{
+	guard(UObject::AddObject);
+	if( InIndex == INDEX_NONE )
+	{
+		if( GObjAvailable.Num() )
+		{
+			InIndex = GObjAvailable( GObjAvailable.Num()-1 );
+			GObjAvailable.Remove( GObjAvailable.Num()-1 );
+		}
+		else
+		{
+			InIndex = GObjObjects.Add();
+		}
+	}
+	GObjObjects(InIndex) = this;
+	Index = InIndex;
+	unguard;
+}
+
+void UObject::HashObject()
+{
+	guard(UObject::HashObject);
+	INT iHash       = GetObjectHash( Name, Outer ? Outer->GetIndex() : 0 );
+	HashNext        = GObjHash[iHash];
+	GObjHash[iHash] = this;
+	unguard;
+}
+
+void UObject::UnhashObject( INT OuterIndex )
+{
+	guard(UObject::UnhashObject);
+	INT iHash = GetObjectHash( Name, OuterIndex );
+	UObject** Hash = &GObjHash[iHash];
+	while( *Hash != NULL )
+	{
+		if( *Hash == this )
+		{
+			*Hash = HashNext;
+			break;
+		}
+		Hash = &(*Hash)->HashNext;
+	}
+	unguard;
+}
+
+void UObject::SetLinker( ULinkerLoad* InLinker, INT InLinkerIndex )
+{
+	guard(UObject::SetLinker);
+	_Linker      = InLinker;
+	_LinkerIndex = InLinkerIndex;
+	unguard;
+}
+
+FName UObject::MakeUniqueObjectName( UObject* Parent, UClass* Class )
+{
+	guard(UObject::MakeUniqueObjectName);
+	TCHAR NewBase[NAME_SIZE];
+	appSprintf( NewBase, TEXT("%s"), Class->GetName() );
+	TCHAR Result[NAME_SIZE];
+	do
+	{
+		appSprintf( Result, TEXT("%s%i"), NewBase, GObjRegisterCount++ );
+	}
+	while( StaticFindObject( NULL, Parent, Result, 0 ) );
+	return FName( Result );
+	unguard;
+}
+
+ULinkerLoad* UObject::GetLoader( INT i )
+{
+	guard(UObject::GetLoader);
+	if( i >= 0 && i < GObjLoaders.Num() )
+		return (ULinkerLoad*)GObjLoaders(i);
+	return NULL;
+	unguard;
+}
+
+void UObject::SafeLoadError( DWORD LoadFlags, const TCHAR* Error, const TCHAR* Fmt, ... )
+{
+	guard(UObject::SafeLoadError);
+	TCHAR TempStr[4096];
+	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
+	if( LoadFlags & LOAD_Throw )
+		appThrowf( TEXT("%s"), TempStr );
+	else if( LoadFlags & LOAD_NoWarn )
+		debugf( NAME_Log, TEXT("%s"), TempStr );
+	else
+		GWarn->Logf( TEXT("%s"), TempStr );
+	unguard;
+}
+
+UObject& UObject::operator=( const UObject& Other )
+{
+	return *this;
+}
+
+/*-----------------------------------------------------------------------------
+	UCommandlet stubs.
+-----------------------------------------------------------------------------*/
+
+UCommandlet::UCommandlet( const UCommandlet& Other )
+: UObject( Other )
+, HelpCmd     ( Other.HelpCmd )
+, HelpOneLiner( Other.HelpOneLiner )
+, HelpUsage   ( Other.HelpUsage )
+, HelpWebLink ( Other.HelpWebLink )
+{
+	guard(UCommandlet::UCommandlet);
+	for( INT i = 0; i < ARRAY_COUNT(HelpParm); i++ ) HelpParm[i] = Other.HelpParm[i];
+	for( INT i = 0; i < ARRAY_COUNT(HelpDesc); i++ ) HelpDesc[i] = Other.HelpDesc[i];
+	LogToStdout    = Other.LogToStdout;
+	IsServer       = Other.IsServer;
+	IsClient       = Other.IsClient;
+	IsEditor       = Other.IsEditor;
+	LazyLoad       = Other.LazyLoad;
+	ShowErrorCount = Other.ShowErrorCount;
+	ShowBanner     = Other.ShowBanner;
+	unguard;
+}
+
+UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
+{
+	return *this;
+}
+
+/*-----------------------------------------------------------------------------
+	Ravenshield UObject overloads.
+	These Ravenshield-specific overloads delegate to existing base versions.
+-----------------------------------------------------------------------------*/
+
+void UObject::Rename( const TCHAR* NewName )
+{
+	guard(UObject::Rename);
+	INT OldOuterIndex = Outer ? Outer->GetIndex() : 0;
+	UnhashObject( OldOuterIndex );
+	if( NewName )
+		Name = FName( NewName );
+	HashObject();
+	unguard;
+}
+
+void UObject::Rename( const TCHAR* NewName, UObject* NewOuter )
+{
+	INT OldOuterIndex = Outer ? Outer->GetIndex() : 0;
+	UnhashObject( OldOuterIndex );
+	if( NewName )
+		Name = FName( NewName );
+	if( NewOuter )
+		Outer = NewOuter;
+	HashObject();
+}
+
+void UObject::LoadLocalized( INT Flags, UClass* Class )
+{
+	LoadLocalized();
+}
+
+void UObject::SetKey( UClass* InClass, const TCHAR* Key )
+{
+	guard(UObject::SetKey);
+	TCHAR TokenBuf[258];
+	const TCHAR* P = Key;
+	if( ParseToken( P, TokenBuf, ARRAY_COUNT(TokenBuf), 0 ) )
+	{
+		while( *P == TEXT(' ') )
+			P++;
+		if( appStrlen(P) > 0 )
+		{
+			TCHAR SectionBuf[32000];
+			UBOOL bFound = GConfig->GetSection( InClass->GetPathName(), SectionBuf, 32000, *InClass->ClassConfigName );
+			if( bFound )
+			{
+				for( TCHAR* Entry = SectionBuf; *Entry; Entry += appStrlen(Entry) + 1 )
+				{
+					TCHAR* Eq = appStrstr( Entry, TEXT("=") );
+					if( Eq )
+					{
+						*Eq = TEXT('\0');
+						if( appStricmp( Eq+1, P ) == 0 )
+						{
+							UProperty* Prop = FindField<UProperty>( InClass, Entry );
+							if( Prop )
+								GlobalSetProperty( TEXT(""), InClass, Prop, Prop->Offset, 1 );
+						}
+					}
+				}
+			}
+		}
+		UProperty* Prop = FindField<UProperty>( InClass, TokenBuf );
+		if( Prop )
+			GlobalSetProperty( P, InClass, Prop, Prop->Offset, 1 );
+	}
+	unguard;
+}
+
+void UObject::InitProperties( BYTE* Data, INT DataCount, UClass* DefaultsClass, BYTE* Defaults, INT DefaultsCount, UObject* DestObject, INT bNativeDefaults )
+{
+	InitProperties( Data, DataCount, DefaultsClass, Defaults, DefaultsCount, DestObject, (UObject*)NULL );
+}
+
+UObject* UObject::StaticConstructObject( UClass* Class, UObject* InOuter, FName Name, DWORD Flags, UObject* Template, FOutputDevice* Error, INT Reserved )
+{
+	return StaticConstructObject( Class, InOuter, Name, Flags, Template, Error, (UObject*)NULL );
+}
+
+INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar, INT bShowHelp )
+{
+	return StaticExec( Cmd, Ar );
+}
+
+/*-----------------------------------------------------------------------------
+	UFactory Ravenshield overloads with ULevel* parameter.
+	Delegates to base version ignoring ULevel*.
+-----------------------------------------------------------------------------*/
+
+UObject* UFactory::FactoryCreateText( ULevel* Level, UClass* Class, UObject* InParent, FName Name, DWORD Flags, UObject* Context, const TCHAR* Type, const TCHAR*& Buffer, const TCHAR* BufferEnd, FFeedbackContext* Warn )
+{
+	return FactoryCreateText( Class, InParent, Name, Flags, Context, Type, Buffer, BufferEnd, Warn );
+}
+
+UObject* UFactory::StaticImportObject( ULevel* Level, UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* Factory, const TCHAR* Parms, FFeedbackContext* Warn )
+{
+	return StaticImportObject( Class, InOuter, Name, Flags, Filename, Context, Factory, Parms, Warn );
+}
+
+INT UObject::ResolveName( UObject*& InPackage, const TCHAR*& InName, INT Create, INT Throw )
+{
+	guard(UObject::ResolveName);
+	while( 1 )
+	{
+		const TCHAR* Dot = appStrchr( InName, '.' );
+		if( !Dot )
+			break;
+		TCHAR Part[NAME_SIZE];
+		appStrncpy( Part, InName, Min<INT>((INT)(Dot-InName)+1, NAME_SIZE) );
+		Part[Dot-InName] = 0;
+		UObject* NewPackage = StaticFindObject( UPackage::StaticClass(), InPackage, Part, 0 );
+		if( !NewPackage )
+		{
+			if( Create )
+				NewPackage = CreatePackage( InPackage, Part );
+			else
+				return 0;
+		}
+		InPackage = NewPackage;
+		InName = Dot + 1;
+	}
+	return 1;
+	unguard;
+}
+
+void UObject::CacheDrivers( INT bForceRefresh )
+{
+	guard(UObject::CacheDrivers);
+	// GObjDrivers/GObjPreferences are populated here from config.
+	// Full implementation requires iterating GConfig sections for "Driver=" and
+	// "Preferences=" entries and building FRegistryObjectInfo/FPreferencesInfo entries.
+	// Stub: no-op — subsystems that depend on this (editor tools) will see empty lists.
+	unguard;
+}
+
+void UObject::PurgeGarbage()
+{
+	guard(UObject::PurgeGarbage);
+	debugf( NAME_Log, TEXT("Purging garbage") );
+	// Destroy all objects still tagged as garbage (tagged by IsReferenced / CollectGarbage).
+	// DIVERGENCE: binary also garbage-collects FName entries; we skip that here.
+	INT NumDestroyed = 0;
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+	{
+		UObject* Obj = GObjObjects(i);
+		if( Obj && (Obj->GetFlags() & RF_TagGarbage) && !(Obj->GetFlags() & RF_Native) )
+		{
+			Obj->ConditionalDestroy();
+			NumDestroyed++;
+		}
+	}
+	// Clear any residual tags so objects are not double-destroyed.
+	for( INT i=0; i<GObjObjects.Num(); i++ )
+		if( GObjObjects(i) )
+			GObjObjects(i)->ClearFlags( RF_TagGarbage );
+	debugf( NAME_Log, TEXT("Garbage: purged %i object(s)"), NumDestroyed );
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

@@ -804,3 +804,60 @@ UTerrainSector::UTerrainSector(ATerrainInfo*, INT, INT, INT, INT) {}
 
 // ??0UTerrainPrimitive@@QAE@PAVATerrainInfo@@@Z
 UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
+
+// --- Moved from EngineStubs.cpp ---
+void UTerrainPrimitive::Serialize(FArchive& Ar) { UPrimitive::Serialize(Ar); }
+INT UTerrainPrimitive::LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD) { return 1; }
+INT UTerrainPrimitive::PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD) { return 1; }
+void UTerrainPrimitive::Illuminate(AActor*, INT) {}
+FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor*, INT) { return FBox(); }
+
+void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
+void UTerrainSector::PostLoad() {}
+void UTerrainSector::StaticLight(INT) {}
+void UTerrainSector::GenerateTriangles() {}
+// Ghidra at 0x156550. Returns linear index in the global heightmap grid.
+INT UTerrainSector::GetGlobalVertex(INT X, INT Y) {
+	// TerrainInfo->HeightmapX is at offset 0x12E0 in ATerrainInfo
+	INT HeightmapX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
+	return (OffsetY + Y) * HeightmapX + OffsetX + X;
+}
+
+// Ghidra at 0x153a0. Returns linear index within this sector.
+INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
+	return (SectorSizeX + 1) * Y + X;
+}
+INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
+// ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
+// Gets the alpha texture for the layer, computes texel range for this sector,
+// then checks that every texel matches 'value'. Returns 1 (true) on empty range.
+INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
+{
+	// Alpha map pointer: TerrainInfo + 0x3AC + layerIdx * 0x78
+	UTexture* alphaMap = *(UTexture**)((BYTE*)TerrainInfo + 0x3AC + layerIdx * 0x78);
+	INT QuadsX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
+	INT QuadsY = *(INT*)((BYTE*)TerrainInfo + 0x12E4);
+
+	// Scale factors: texels per quad in each axis
+	INT scaleX = alphaMap->USize / QuadsX;
+	INT scaleY = alphaMap->VSize / QuadsY;
+
+	// Inclusive texel range for this sector
+	INT x0 = OffsetX * scaleX;
+	INT x1 = (OffsetX + SectorSizeX) * scaleX - 1;
+	INT y0 = OffsetY * scaleY;
+	INT y1 = (OffsetY + SectorSizeY) * scaleY - 1;
+
+	// Empty sector (SectorSizeX/Y == 0) → trivially all match
+	if (x0 > x1 || y0 > y1)
+		return 1;
+
+	for (INT y = y0; y <= y1; y++)
+		for (INT x = x0; x <= x1; x++)
+			if (TerrainInfo->GetLayerAlpha(x, y, layerIdx, alphaMap) != value)
+				return 0;
+
+	return 1;
+}
+INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
+void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}

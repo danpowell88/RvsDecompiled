@@ -474,3 +474,10 @@ void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 }
 
 
+
+// --- Moved from EngineStubs.cpp ---
+void AGameInfo::AbortScoreSubmission() {}
+void AGameInfo::MasterServerManager() {}
+void AGameInfo::InitGameInfoGameService() {}
+void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
+void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}

@@ -1125,5 +1125,183 @@ void UDelegateProperty::CopyCompleteValue( void* Dest, void* Src, UObject* Super
 IMPLEMENT_CLASS(UDelegateProperty);
 
 /*-----------------------------------------------------------------------------
+	UStruct::SerializeBin with MaxReadBytes.
+-----------------------------------------------------------------------------*/
+
+void UStruct::SerializeBin( FArchive& Ar, BYTE* Data, INT MaxReadBytes )
+{
+	SerializeBin( Ar, Data );
+}
+
+/*-----------------------------------------------------------------------------
+	UNameProperty::CopyCompleteValue 2-arg.
+-----------------------------------------------------------------------------*/
+
+void UNameProperty::CopyCompleteValue( void* Dest, void* Src ) const
+{
+	*(FName*)Dest = *(FName*)Src;
+}
+
+/*-----------------------------------------------------------------------------
+	UClassProperty::ImportText — delegates to UObjectProperty.
+-----------------------------------------------------------------------------*/
+
+const TCHAR* UClassProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
+{
+	return UObjectProperty::ImportText( Buffer, Data, PortFlags );
+}
+
+/*-----------------------------------------------------------------------------
+	UProperty overloaded methods — Ravenshield 3-arg variants.
+	These delegate to existing 2-arg base versions.
+-----------------------------------------------------------------------------*/
+
+// UProperty base overloads.
+void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm, UBOOL IsStruct ) const
+{
+	ExportCpp( Out, IsLocal, IsParm );
+}
+
+void UProperty::SerializeItem( FArchive& Ar, void* Value ) const
+{
+	guard(UProperty::SerializeItem);
+	// Retail: base no-op; subclasses override.
+	unguard;
+}
+
+void UProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const
+{
+	SerializeItem( Ar, Value );
+}
+
+void UProperty::SerializeBin( FArchive& Ar, BYTE* Data ) const
+{
+	SerializeItem( Ar, Data );
+}
+
+void UProperty::CleanupDestroyed( BYTE* Data ) const
+{
+	guard(UProperty::CleanupDestroyed);
+	// Retail 0x43880 (3b): no-op.
+	unguard;
+}
+
+void UProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const
+{
+	CopySingleValue( Dest, Src );
+}
+
+void UProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const
+{
+	CopyCompleteValue( Dest, Src );
+}
+
+// UByteProperty.
+void UByteProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UByteProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UByteProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UByteProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
+
+// UIntProperty.
+void UIntProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UIntProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UIntProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UIntProperty::CopyCompleteValue( void* Dest, void* Src ) const { *(INT*)Dest = *(INT*)Src; }
+void UIntProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
+
+// UBoolProperty.
+void UBoolProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UBoolProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UBoolProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+
+// UFloatProperty.
+void UFloatProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UFloatProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UFloatProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UFloatProperty::CopyCompleteValue( void* Dest, void* Src ) const { *(FLOAT*)Dest = *(FLOAT*)Src; }
+void UFloatProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
+
+// UObjectProperty.
+void UObjectProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UObjectProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UObjectProperty::CleanupDestroyed( BYTE* Data ) const {}
+void UObjectProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UObjectProperty::CopyCompleteValue( void* Dest, void* Src ) const { *(UObject**)Dest = *(UObject**)Src; }
+void UObjectProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
+
+// UNameProperty.
+void UNameProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UNameProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UNameProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UNameProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { UProperty::CopyCompleteValue( Dest, Src ); }
+
+// UStrProperty.
+void UStrProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UStrProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
+void UStrProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UStrProperty::Serialize( FArchive& Ar ) { UProperty::Serialize( Ar ); }
+
+// UFixedArrayProperty.
+void UFixedArrayProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UFixedArrayProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* FixedArray */") ); }
+void UFixedArrayProperty::CleanupDestroyed( BYTE* Data ) const {}
+void UFixedArrayProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UFixedArrayProperty::AddCppProperty( UProperty* Property, INT Count ) {}
+
+// UArrayProperty.
+void UArrayProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UArrayProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Array */") ); }
+void UArrayProperty::CleanupDestroyed( BYTE* Data ) const {}
+void UArrayProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { UProperty::CopyCompleteValue( Dest, Src ); }
+void UArrayProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UArrayProperty::AddCppProperty( UProperty* Property ) { Inner = Property; }
+
+// UMapProperty.
+void UMapProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UMapProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Map */") ); }
+void UMapProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+void UMapProperty::DestroyValue( void* Dest ) const {}
+
+// UStructProperty.
+void UStructProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
+void UStructProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Struct */") ); }
+void UStructProperty::CleanupDestroyed( BYTE* Data ) const {}
+void UStructProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
+
+// UDelegateProperty — ExportCppItem already implemented in UnProp.cpp.
+
+/*-----------------------------------------------------------------------------
+	NetSerializeItem overloads.
+-----------------------------------------------------------------------------*/
+
+UBOOL UBoolProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UFloatProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UIntProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UObjectProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UArrayProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UFixedArrayProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UMapProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
+
+/*-----------------------------------------------------------------------------
+	UProperty base class ExportCppItem implementations.
+	Needed because we declared virtual (non-pure) in UProperty.
+-----------------------------------------------------------------------------*/
+
+void UProperty::ExportCppItem( FOutputDevice& Out ) const
+{
+	guard(UProperty::ExportCppItem);
+	// Retail: base no-op; subclasses override.
+	unguard;
+}
+
+void UProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
+{
+	guard(UProperty::ExportCppItem);
+	// Retail: base no-op; subclasses override.
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

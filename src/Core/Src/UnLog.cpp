@@ -60,5 +60,62 @@ void FOutputDevice::Logf( enum EName Type, const TCHAR* Fmt, ... )
 // Implementation is entirely in the header (inline Serialize that does nothing).
 
 /*-----------------------------------------------------------------------------
+	FErrorOutError / FLogOutError / FNullOutError / FThrowOut classes.
+-----------------------------------------------------------------------------*/
+
+FErrorOutError::FErrorOutError() {}
+FErrorOutError::FErrorOutError( const FErrorOutError& ) {}
+FErrorOutError& FErrorOutError::operator=( const FErrorOutError& ) { return *this; }
+void FErrorOutError::Serialize( const TCHAR* V, EName Event )
+{
+	if( GError )
+		GError->Serialize( V, Event );
+}
+void FErrorOutError::HandleError()
+{
+	if( GError )
+		GError->HandleError();
+}
+
+FLogOutError::FLogOutError() {}
+FLogOutError::FLogOutError( const FLogOutError& ) {}
+FLogOutError& FLogOutError::operator=( const FLogOutError& ) { return *this; }
+void FLogOutError::Serialize( const TCHAR* V, EName Event )
+{
+	if( GLog )
+		GLog->Serialize( V, Event );
+}
+
+FNullOutError::FNullOutError() {}
+FNullOutError::FNullOutError( const FNullOutError& ) {}
+FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
+void FNullOutError::Serialize( const TCHAR* V, EName Event )
+{
+	guard(FNullOutError::Serialize);
+	// Retail 0x1290: shared null-stub, no-op.
+	unguard;
+}
+
+FThrowOut::FThrowOut() {}
+FThrowOut::FThrowOut( const FThrowOut& ) {}
+FThrowOut& FThrowOut::operator=( const FThrowOut& ) { return *this; }
+void FThrowOut::Serialize( const TCHAR* V, EName Event )
+{
+	appThrowf( TEXT("%s"), V );
+}
+
+/*-----------------------------------------------------------------------------
+	FFrame::Serialize.
+-----------------------------------------------------------------------------*/
+
+void FFrame::Serialize( const TCHAR* V, EName Event )
+{
+	guard(FFrame::Serialize);
+	// Retail 0x1bd50: logs script frame context to GLog or GError.
+	// Divergence: stub, pending full implementation.
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

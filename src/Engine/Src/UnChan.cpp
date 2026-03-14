@@ -449,3 +449,6 @@ FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
 FOutBunch::~FOutBunch() {}
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
 FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
+
+// --- Moved from EngineStubs.cpp ---
+UClass** UChannel::ChannelClasses = NULL;

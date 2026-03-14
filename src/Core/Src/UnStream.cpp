@@ -369,5 +369,234 @@ FFileStream& FFileStream::operator=( const FFileStream& Other )
 }
 
 /*-----------------------------------------------------------------------------
+	FString constructors and methods.
+-----------------------------------------------------------------------------*/
+
+FString::FString( BYTE Arg, INT Digits )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%i"), (INT)Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( SBYTE Arg, INT Digits )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%i"), (INT)Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( _WORD Arg, INT Digits )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%i"), (INT)Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( SWORD Arg, INT Digits )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%i"), (INT)Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( INT Arg, INT Digits )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%i"), Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( DWORD Arg, INT Digits )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[64];
+	appSprintf( Buf, TEXT("%u"), Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[256];
+	appSprintf( Buf, TEXT("%f"), Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
+: TArray<TCHAR>()
+{
+	TCHAR Buf[256];
+	appSprintf( Buf, TEXT("%f"), Arg );
+	INT Len = appStrlen(Buf);
+	Add( Len + 1 );
+	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
+}
+
+FString FString::Chr( TCHAR Ch )
+{
+	TCHAR Buf[2] = { Ch, 0 };
+	return FString( Buf );
+}
+
+FString FString::Printf( const TCHAR* Fmt, ... )
+{
+	TCHAR TempStr[4096];
+	GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
+	return FString( TempStr );
+}
+
+FString FString::FormatAsNumber( INT InNumber )
+{
+	FString Number( InNumber, 0 );
+	return Number;
+}
+
+FString FString::LeftPad( INT ChCount )
+{
+	guard(FString::LeftPad);
+	INT Pad = ChCount - Len();
+	if( Pad > 0 )
+	{
+		FString Result;
+		for( INT i=0; i<Pad; i++ )
+			Result += TEXT(" ");
+		Result += *this;
+		return Result;
+	}
+	return *this;
+	unguard;
+}
+
+FString FString::RightPad( INT ChCount )
+{
+	guard(FString::RightPad);
+	INT Pad = ChCount - Len();
+	FString Result = *this;
+	if( Pad > 0 )
+	{
+		for( INT i=0; i<Pad; i++ )
+			Result += TEXT(" ");
+	}
+	return Result;
+	unguard;
+}
+
+FString FString::Reverse()
+{
+	guard(FString::Reverse);
+	FString Result;
+	for( INT i=Len()-1; i>=0; i-- )
+		Result += Mid(i,1);
+	return Result;
+	unguard;
+}
+
+INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
+{
+	guard(FString::ParseIntoArray);
+	check(Array);
+	Array->Empty();
+	FString Src = *this;
+	INT DelimLen = appStrlen(Delim);
+	TCHAR* Found;
+	while( (Found = appStrstr( *Src, Delim )) != NULL )
+	{
+		INT Pos = (INT)(Found - *Src);
+		if( Pos > 0 )
+			new(*Array) FString( Src.Left(Pos) );
+		Src = Src.Mid( Pos + DelimLen );
+	}
+	if( Src.Len() > 0 )
+		new(*Array) FString( Src );
+	return Array->Num();
+	unguard;
+}
+
+/*-----------------------------------------------------------------------------
+	FArchive << FString operator.
+-----------------------------------------------------------------------------*/
+
+CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
+{
+	if( Ar.IsLoading() )
+	{
+		INT SavedLen;
+		Ar << AR_INDEX(SavedLen);
+		S.Empty();
+		if( SavedLen > 0 )
+		{
+			S.GetCharArray().Add( SavedLen );
+			for( INT i=0; i<SavedLen; i++ )
+			{
+				ANSICHAR Ch;
+				Ar << Ch;
+				S.GetCharArray()(i) = FromAnsi(Ch);
+			}
+		}
+		else if( SavedLen < 0 )
+		{
+			SavedLen = -SavedLen;
+			S.GetCharArray().Add( SavedLen );
+			for( INT i=0; i<SavedLen; i++ )
+			{
+				TCHAR Ch;
+				Ar << Ch;
+				S.GetCharArray()(i) = Ch;
+			}
+		}
+	}
+	else
+	{
+		INT SavedLen = S.Len() ? S.Len()+1 : 0;
+		Ar << AR_INDEX(SavedLen);
+		for( INT i=0; i<SavedLen; i++ )
+		{
+			ANSICHAR Ch = ToAnsi( (*S)[i] );
+			Ar << Ch;
+		}
+	}
+	return Ar;
+}
+
+/*-----------------------------------------------------------------------------
+	TArray<TCHAR> operator+ and operator+=.
+	Explicit template instantiations for .def export.
+-----------------------------------------------------------------------------*/
+
+template<>
+TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
+{
+	for( INT i=0; i<Other.Num(); i++ )
+		AddItem( Other(i) );
+	return *this;
+}
+
+template<>
+TArray<TCHAR>& TArray<TCHAR>::operator+=( const TArray<TCHAR>& Other )
+{
+	return operator+( Other );
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

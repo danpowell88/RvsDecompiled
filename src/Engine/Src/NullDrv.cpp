@@ -180,3 +180,7 @@ void UNullRenderDevice::StaticConstructor()
 	unguard;
 }
 
+
+// --- Moved from EngineStubs.cpp ---
+void UNullRenderDevice::SetEmulationMode(EHardwareEmulationMode) {}
+INT UNullRenderDevice::SupportsTextureFormat(ETextureFormat) { return 1; }

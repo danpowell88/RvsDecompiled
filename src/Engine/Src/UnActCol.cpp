@@ -326,3 +326,857 @@ FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
 }
+
+// --- Moved from EngineStubs.cpp ---
+extern INT GHashActorCount;
+extern INT GHashLinkCellCount;
+extern INT GHashExtraCount;
+
+// ?ActorEncroachmentCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@VFVector@@VFRotator@@KK@Z
+// Retail ordinal 2214 (0x6e3d0). Temporarily moves Actor to NewLocation/NewRotation and checks
+// for overlap with every actor whose AABB touches the new position. Returns a tail-ordered list
+// of encroachment hits. Uses GMem (the Mem argument is unused per the retail binary).
+FCheckResult * FCollisionHash::ActorEncroachmentCheck(FMemStack & Mem, AActor * Actor, FVector NewLocation, FRotator NewRot, DWORD TraceFlags, DWORD ExtraNodeFlags)
+{
+	check(Actor != NULL);
+
+	// Temporarily teleport the actor to the candidate position so GetActorExtent sees the right bounds.
+	FLOAT OldLocX = *(FLOAT*)((BYTE*)Actor + 0x234);
+	FLOAT OldLocY = *(FLOAT*)((BYTE*)Actor + 0x238);
+	FLOAT OldLocZ = *(FLOAT*)((BYTE*)Actor + 0x23c);
+	*(FLOAT*)((BYTE*)Actor + 0x234) = NewLocation.X;
+	*(FLOAT*)((BYTE*)Actor + 0x238) = NewLocation.Y;
+	*(FLOAT*)((BYTE*)Actor + 0x23c) = NewLocation.Z;
+	INT OldRotP = *(INT*)((BYTE*)Actor + 0x240);
+	INT OldRotY = *(INT*)((BYTE*)Actor + 0x244);
+	INT OldRotR = *(INT*)((BYTE*)Actor + 0x248);
+	*(INT*)((BYTE*)Actor + 0x240) = NewRot.Pitch;
+	*(INT*)((BYTE*)Actor + 0x244) = NewRot.Yaw;
+	*(INT*)((BYTE*)Actor + 0x248) = NewRot.Roll;
+
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetActorExtent(Actor, MinX, MaxX, MinY, MaxY, MinZ, MaxZ);
+
+	// Build results as a forward-ordered (tail-insertion) linked list, matching retail binary order.
+	FCheckResult*  ListHead = NULL;
+	FCheckResult** ListTail = &ListHead;
+
+	CollisionTag++;
+
+	for (INT x = MinX; x <= MaxX; x++)
+	for (INT y = MinY; y <= MaxY; y++)
+	for (INT z = MinZ; z <= MaxZ; z++) {
+		const INT Pos = (z*0x400+y)*0x400+x;
+		for (FCollisionLink* L = Buckets[HashX[x]^HashY[y]^HashZ[z]]; L; L = L->Next) {
+			AActor* A = L->Actor;
+			if (*(INT*)((BYTE*)A+0x60) != CollisionTag && L->HashPos == Pos) {
+				// Filter: not joined, should participate in trace, not a no-encroach static.
+				// vtable+0xbc = ShouldTrace(AActor*, DWORD); vtable+0xc8(=200) = IsMovingBrush()
+				// Bit 0x100000 at Actor+0xa0 marks bNoEncroachCheck (bypassed if mover).
+				if (!A->IsJoinedTo(Actor)
+					&& A->ShouldTrace(Actor, ExtraNodeFlags)
+					&& (!Actor->IsMovingBrush() || !(*(DWORD*)((BYTE*)A+0xa0) & 0x100000)))
+				{
+					*(INT*)((BYTE*)A+0x60) = CollisionTag;
+					FCheckResult TestHit(1.f);
+					if (Actor->IsOverlapping(A, &TestHit)) {
+						TestHit.Actor     = A;
+						TestHit.Primitive = NULL;
+						FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+						if (CR) {
+							*ListTail = CR;
+							appMemcpy(CR, &TestHit, sizeof(FCheckResult));
+							ListTail = &CR->GetNext();
+						}
+					}
+				}
+			}
+		}
+	}
+	*ListTail = NULL;
+
+	// Restore original position.
+	*(FLOAT*)((BYTE*)Actor + 0x234) = OldLocX;
+	*(FLOAT*)((BYTE*)Actor + 0x238) = OldLocY;
+	*(FLOAT*)((BYTE*)Actor + 0x23c) = OldLocZ;
+	*(INT*)((BYTE*)Actor + 0x240) = OldRotP;
+	*(INT*)((BYTE*)Actor + 0x244) = OldRotY;
+	*(INT*)((BYTE*)Actor + 0x248) = OldRotR;
+
+	return ListHead;
+}
+
+// ?ActorLineCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@11KKPAVAActor@@@Z
+// Retail ordinal 2217 (0x6e6f0). Sweeps a line (or box if Extent is non-zero) through the hash
+// and collects BlockedBy+LineCheck hits. Two sub-paths:
+//   Non-zero Extent: iterate all cells in the AABB of [Start,End] expanded by Extent.
+//   Zero Extent:     DDA ray traversal from Start to End one cell at a time.
+// TraceFlags bit 0x200 = return first hit only; bit 0x400 = sort by facing distance.
+// Uses the Mem argument for allocation (retail binary does NOT use GMem here).
+FCheckResult * FCollisionHash::ActorLineCheck(FMemStack & Mem, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD TypeFlags, AActor * SourceActor)
+{
+	CollisionTag++;
+	FCheckResult* List = NULL;
+
+	if (!Extent.IsZero()) {
+		// Bounding-box sweep: cover all cells touching the AABB of [Start..End] grown by Extent.
+		INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+		FLOAT BMinX = ::Min(Start.X, End.X), BMinY = ::Min(Start.Y, End.Y), BMinZ = ::Min(Start.Z, End.Z);
+		FLOAT BMaxX = ::Max(Start.X, End.X), BMaxY = ::Max(Start.Y, End.Y), BMaxZ = ::Max(Start.Z, End.Z);
+		GetHashIndices(FVector(BMinX-Extent.X, BMinY-Extent.Y, BMinZ-Extent.Z), MinX, MinY, MinZ);
+		GetHashIndices(FVector(BMaxX+Extent.X, BMaxY+Extent.Y, BMaxZ+Extent.Z), MaxX, MaxY, MaxZ);
+
+		for (INT x = MinX; x <= MaxX; x++)
+		for (INT y = MinY; y <= MaxY; y++)
+		for (INT z = MinZ; z <= MaxZ; z++) {
+			const INT Pos = (z*0x400+y)*0x400+x;
+			for (FCollisionLink* L = Buckets[HashX[x]^HashY[y]^HashZ[z]]; L; L = L->Next) {
+				AActor* A = L->Actor;
+				if (*(INT*)((BYTE*)A+0x60) != CollisionTag && L->HashPos == Pos) {
+					*(INT*)((BYTE*)A+0x60) = CollisionTag;
+					// Skip SourceActor itself and any actor in its ignore chain (offset 0x140).
+					if (A == SourceActor) continue;
+					bool bIgnored = false;
+					for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI+0x140)) {
+						if ((AActor*)pI == A) { bIgnored = true; break; }
+					}
+					if (bIgnored) continue;
+					if (A->ShouldTrace(SourceActor, TraceFlags)) {
+						FCheckResult TestHit(0.f);
+						if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, Extent, TypeFlags, TraceFlags) == 0) {
+							FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+							if (CR) {
+								appMemcpy(CR, &TestHit, sizeof(FCheckResult));
+								CR->GetNext() = List;
+								List = CR;
+							}
+							if (TraceFlags & 0x200) return List;
+						}
+					}
+				}
+			}
+		}
+		// TraceFlags & 0x400 = sort by facing: FUN_103d92c0 not yet identified, return as-is.
+		return List;
+	}
+
+	// DDA zero-extent ray traversal: walk cells from Start to End one step at a time.
+	FVector Dir = (End - Start).SafeNormal();
+	INT CurX, CurY, CurZ, EndX, EndY, EndZ;
+	GetHashIndices(Start, CurX, CurY, CurZ);
+	GetHashIndices(End,   EndX, EndY, EndZ);
+
+	for (bool bKeepGoing = true; bKeepGoing; ) {
+		const INT Pos = (CurZ*0x400+CurY)*0x400+CurX;
+		bool bEarlyExit = false;
+		for (FCollisionLink* L = Buckets[HashX[CurX]^HashY[CurY]^HashZ[CurZ]]; L; L = L->Next) {
+			AActor* A = L->Actor;
+			if (*(INT*)((BYTE*)A+0x60) != CollisionTag && L->HashPos == Pos) {
+				*(INT*)((BYTE*)A+0x60) = CollisionTag;
+				if (A == SourceActor) continue;
+				bool bIgnored = false;
+				for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI+0x140)) {
+					if ((AActor*)pI == A) { bIgnored = true; break; }
+				}
+				if (bIgnored) continue;
+				if (A->ShouldTrace(SourceActor, TraceFlags)) {
+					FCheckResult TestHit(0.f);
+					if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, FVector(0,0,0), TypeFlags, TraceFlags) == 0) {
+						FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+						if (CR) {
+							appMemcpy(CR, &TestHit, sizeof(FCheckResult));
+							CR->GetNext() = List;
+							List = CR;
+						}
+						if (TraceFlags & 0x200) { bEarlyExit = true; break; }
+					}
+				}
+			}
+		}
+		if (List && (TraceFlags & 0x200)) return List;
+		// TraceFlags & 0x400 = sort earliest hit by facing: not yet implemented (FUN_103d92c0).
+		if (CurX == EndX && CurY == EndY && CurZ == EndZ) { bKeepGoing = false; continue; }
+
+		// DDA: advance to the next hash cell along the ray direction.
+		// DistanceToHashPlane returns the parametric distance to the next boundary on each axis.
+		// Direction convention (from retail binary): step OPPOSITE to sign of Dir (Ghidra pattern).
+		FLOAT dX = DistanceToHashPlane(CurX, Dir.X, Start.X, 0x100);
+		FLOAT dY = DistanceToHashPlane(CurY, Dir.Y, Start.Y, 0x100);
+		FLOAT dZ = DistanceToHashPlane(CurZ, Dir.Z, Start.Z, 0x100);
+		INT nX = CurX, nY = CurY, nZ = CurZ;
+		if (dX > dY || dX > dZ) {
+			if (dY > dX || dY > dZ) { nZ += (Dir.Z < 0.f) ? 1 : -1; }
+			else                    { nY += (Dir.Y < 0.f) ? 1 : -1; }
+		} else {
+			nX += (Dir.X < 0.f) ? 1 : -1;
+		}
+		if ((DWORD)nX >= 0x4000u || (DWORD)nY >= 0x4000u || (DWORD)nZ >= 0x4000u) {
+			bKeepGoing = false;
+		} else {
+			CurX = nX; CurY = nY; CurZ = nZ;
+		}
+	}
+	return List;
+}
+
+// ?ActorOverlapCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
+// Retail ordinal 2220 (0x33a0). Stub in retail binary — returns NULL.
+FCheckResult * FCollisionHash::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
+
+// ?ActorPointCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
+// Retail ordinal 2223 (0x6dec0). Tests whether a point+AABB (Location ± Extent) overlaps any
+// actor in the hash. Calls each candidate's ShouldTrace then GetPrimitive()->PointCheck.
+// Uses GMem (the Mem argument is unused per the retail binary).
+FCheckResult * FCollisionHash::ActorPointCheck(FMemStack & Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, DWORD /*unused*/, INT bSingleResult, AActor * SourceActor)
+{
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetHashIndices(FVector(Location.X-Extent.X, Location.Y-Extent.Y, Location.Z-Extent.Z), MinX, MinY, MinZ);
+	GetHashIndices(FVector(Location.X+Extent.X, Location.Y+Extent.Y, Location.Z+Extent.Z), MaxX, MaxY, MaxZ);
+	CollisionTag++;
+	FCheckResult* List = NULL;
+
+	for (INT x = MinX; x <= MaxX; x++)
+	for (INT y = MinY; y <= MaxY; y++)
+	for (INT z = MinZ; z <= MaxZ; z++) {
+		const INT Pos = (z*0x400+y)*0x400+x;
+		for (FCollisionLink* L = Buckets[HashX[x]^HashY[y]^HashZ[z]]; L; L = L->Next) {
+			AActor* A = L->Actor;
+			// Dedup and hash-pos guard, then filter by ShouldTrace before marking visited.
+			if (*(INT*)((BYTE*)A+0x60) != CollisionTag && L->HashPos == Pos
+				&& A->ShouldTrace(SourceActor, ExtraNodeFlags))
+			{
+				*(INT*)((BYTE*)A+0x60) = CollisionTag;
+				FCheckResult TestHit(1.f);
+				if (A->GetPrimitive()->PointCheck(TestHit, A, Location, Extent, 0) == 0) {
+					check(TestHit.Actor == A);
+					FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+					if (CR) {
+						appMemcpy(CR, &TestHit, sizeof(FCheckResult));
+						CR->GetNext() = List;
+						List = CR;
+					}
+					if (bSingleResult) return List;
+				}
+			}
+		}
+	}
+	return List;
+}
+
+// ?ActorRadiusCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
+// Retail ordinal 2226 (0x6e1a0). Returns all actors within Radius of Center (sphere test on
+// stored Location, no primitive shape check). Uses GMem (Mem argument unused per retail binary).
+FCheckResult * FCollisionHash::ActorRadiusCheck(FMemStack & Mem, FVector Center, FLOAT Radius, DWORD ExtraNodeFlags)
+{
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetHashIndices(FVector(Center.X-Radius, Center.Y-Radius, Center.Z-Radius), MinX, MinY, MinZ);
+	GetHashIndices(FVector(Center.X+Radius, Center.Y+Radius, Center.Z+Radius), MaxX, MaxY, MaxZ);
+	const FLOAT RadSq = Radius * Radius;
+	CollisionTag++;
+	FCheckResult* List = NULL;
+
+	for (INT x = MinX; x <= MaxX; x++)
+	for (INT y = MinY; y <= MaxY; y++)
+	for (INT z = MinZ; z <= MaxZ; z++) {
+		const INT Pos = (z*0x400+y)*0x400+x;
+		for (FCollisionLink* L = Buckets[HashX[x]^HashY[y]^HashZ[z]]; L; L = L->Next) {
+			AActor* A = L->Actor;
+			if (*(INT*)((BYTE*)A+0x60) != CollisionTag && L->HashPos == Pos) {
+				*(INT*)((BYTE*)A+0x60) = CollisionTag;
+				// Use stored Location (0x234-0x23c); no primitive shape, pure sphere test.
+				const FLOAT dx = *(FLOAT*)((BYTE*)A+0x234) - Center.X;
+				const FLOAT dy = *(FLOAT*)((BYTE*)A+0x238) - Center.Y;
+				const FLOAT dz = *(FLOAT*)((BYTE*)A+0x23c) - Center.Z;
+				if (dx*dx + dy*dy + dz*dz < RadSq) {
+					FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+					if (CR) {
+						CR->Material  = NULL;
+						CR->Actor     = A;
+						CR->GetNext() = List;
+						List = CR;
+					}
+				}
+			}
+		}
+	}
+	return List;
+}
+
+// Octree collision helpers — shared iteration of the root node's flat actor list.
+// The octree stores all actors in the root node (no subdivision for now), making
+// queries equivalent to linear scans.  The frame counter (Pad[4]) deduplicates
+// actors that appear in multiple query cells via the visited tag at actor+0x60.
+
+// ?ActorEncroachmentCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@VFVector@@VFRotator@@KK@Z
+FCheckResult* FCollisionOctree::ActorEncroachmentCheck(FMemStack& Mem, AActor* Actor, FVector Location, FRotator Rotation, DWORD ExtraNodeFlags, DWORD TypeFlags)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A || A == Actor) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A->ShouldTrace(Actor, ExtraNodeFlags))
+		{
+			FCheckResult TestHit(1.f);
+			if (A->GetPrimitive()->PointCheck(TestHit, A, Location, FVector(0,0,0), 0) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+	return List;
+}
+
+// ?ActorLineCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@11KKPAVAActor@@@Z
+// Sweeps a line (or capsule if Extent nonzero) through all tracked actors.
+// Mirrors FCollisionHash::ActorLineCheck but draws from the octree's root actor list.
+FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD TypeFlags, AActor* SourceActor)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A == SourceActor) continue;
+		// Walk the owner chain to skip owned actors
+		bool bIgnored = false;
+		for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI + 0x140))
+			if ((AActor*)pI == A) { bIgnored = true; break; }
+		if (bIgnored) continue;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(0.f);
+			if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, Extent, TypeFlags, TraceFlags) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+				if (TraceFlags & 0x200) return List;
+			}
+		}
+	}
+	return List;
+}
+
+// ?ActorOverlapCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
+FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
+
+// ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
+// Tests a point+AABB against all tracked actors; uses GMem for allocation (matching retail).
+FCheckResult* FCollisionOctree::ActorPointCheck(FMemStack& /*Mem*/, FVector Location, FVector Extent, DWORD ExtraNodeFlags, DWORD /*unused*/, INT bSingleResult, AActor* SourceActor)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		if (!A->ShouldTrace(SourceActor, ExtraNodeFlags)) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		FCheckResult TestHit(1.f);
+		if (A->GetPrimitive()->PointCheck(TestHit, A, Location, Extent, 0) == 0)
+		{
+			FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+			if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			if (bSingleResult) return List;
+		}
+	}
+	return List;
+}
+
+// ?ActorRadiusCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
+// Returns all actors whose location is within Radius of Center.
+FCheckResult* FCollisionOctree::ActorRadiusCheck(FMemStack& Mem, FVector Center, FLOAT Radius, DWORD ExtraNodeFlags)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root) return NULL;
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (!A->ShouldTrace(NULL, ExtraNodeFlags)) continue;
+		const FLOAT dx = A->Location.X - Center.X;
+		const FLOAT dy = A->Location.Y - Center.Y;
+		const FLOAT dz = A->Location.Z - Center.Z;
+		if (dx*dx + dy*dy + dz*dz <= Radius*Radius)
+		{
+			FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+			if (CR)
+			{
+				appMemzero(CR, sizeof(FCheckResult));
+				CR->Actor = A;
+				CR->GetNext() = List;
+				List = CR;
+			}
+		}
+	}
+	return List;
+}
+
+// ?AddActor@FCollisionHash@@UAEXPAVAActor@@@Z
+// Retail ordinal 2232 (0x6ee70).  Inserts an actor into every hash cell that
+// its bounding box overlaps.  Pool-allocates 12-byte FCollisionLink slabs of
+// 1024 nodes (0x3000 bytes) on demand.  Saves actor Location into ColLocation
+// (offsets 0x308-0x310) so RemoveActor can look it up by the original position.
+void FCollisionHash::AddActor(AActor* Actor) {
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800); // bCollideActors must be set
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;  // bDeleteMe — skip
+	if ((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x100) return; // bIgnoreEncroachers — skip
+
+	CheckActorNotReferenced(Actor); // debug: verify not already tracked
+
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetActorExtent(Actor, MinX, MaxX, MinY, MaxY, MinZ, MaxZ);
+
+	for (INT x = MinX; x <= MaxX; x++) {
+		for (INT y = MinY; y <= MaxY; y++) {
+			for (INT z = MinZ; z <= MaxZ; z++) {
+				// Grow pool if free-list exhausted.
+				if (!FreeList) {
+					BYTE* Slab = (BYTE*)GMalloc->Malloc(0x3000, TEXT("FCollisionLink"));
+					for (INT k = 0; k < 0x3FF; k++)
+						((FCollisionLink*)(Slab + k*12))->Next = (FCollisionLink*)(Slab + (k+1)*12);
+					((FCollisionLink*)(Slab + 0x3FF*12))->Next = NULL;
+					FreeList = (FCollisionLink*)Slab;
+					AllocatedPools.AddItem((void*)Slab);
+				}
+				FCollisionLink* Node = FreeList;
+				FreeList = Node->Next;
+				Node->Actor   = Actor;
+				Node->HashPos = (z * 0x400 + y) * 0x400 + x;
+				FCollisionLink*& Bucket = Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
+				Node->Next = Bucket;
+				Bucket = Node;
+				GHashLinkCellCount++;
+				GHashExtraCount++;
+			}
+		}
+	}
+	GHashActorCount++;
+	// Save current location as ColLocation so we can find the right cells on removal.
+	*(DWORD*)((BYTE*)Actor + 0x308) = *(DWORD*)((BYTE*)Actor + 0x234);
+	*(DWORD*)((BYTE*)Actor + 0x30c) = *(DWORD*)((BYTE*)Actor + 0x238);
+	*(DWORD*)((BYTE*)Actor + 0x310) = *(DWORD*)((BYTE*)Actor + 0x23c);
+}
+
+// ?CheckActorLocations@FCollisionHash@@UAEXPAVULevel@@@Z
+// retail: empty (ordinal 2351 shares address 0x1651d0 with dozens of other no-op virtuals)
+void FCollisionHash::CheckActorLocations(ULevel * p0) {}
+
+// ?CheckActorNotReferenced@FCollisionHash@@UAEXPAVAActor@@@Z
+// retail: empty (ordinal 2353 shares address 0x1651d0 — same shared no-op stub)
+void FCollisionHash::CheckActorNotReferenced(AActor * p0) {}
+
+// ?CheckIsEmpty@FCollisionHash@@UAEXXZ
+// retail: empty (ordinal 2383 shares address 0x176d60 — another shared no-op stub)
+void FCollisionHash::CheckIsEmpty() {}
+
+// ?RemoveActor@FCollisionHash@@UAEXPAVAActor@@@Z
+// Retail ordinal 4274 (0x6f0c0).  Removes an actor from every hash cell it
+// occupies by walking the ColLocation extent (not current Location, so it
+// works even if the actor has moved since it was added).  Returns links to pool.
+void FCollisionHash::RemoveActor(AActor* Actor) {
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800); // bCollideActors must be set
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;  // bDeleteMe
+	// NOTE: retail also checks ColLocation == Location consistency here;
+	// omitted as it only matters for editor-time diagnostics.
+
+	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
+	GetActorExtent(Actor, MinX, MaxX, MinY, MaxY, MinZ, MaxZ);
+
+	for (INT x = MinX; x <= MaxX; x++) {
+		for (INT y = MinY; y <= MaxY; y++) {
+			for (INT z = MinZ; z <= MaxZ; z++) {
+				FCollisionLink** pp = &Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
+				while (*pp) {
+					if ((*pp)->Actor == Actor) {
+						FCollisionLink* Removed = *pp;
+						*pp = Removed->Next;
+						Removed->Next = FreeList;
+						FreeList = Removed;
+					} else {
+						pp = &(*pp)->Next;
+					}
+				}
+			}
+		}
+	}
+}
+
+// ?Tick@FCollisionHash@@UAEXXZ
+// Retail ordinal 4860 (0x6d6d0).  Resets per-frame performance counters.
+void FCollisionHash::Tick() {
+	GHashExtraCount    = 0; // DAT_1064ff34
+	GHashLinkCellCount = 0; // DAT_1064ff2c
+	GHashActorCount    = 0; // DAT_1064ff28
+}
+
+// ?AddActor@FCollisionOctree@@UAEXPAVAActor@@@Z
+// Ghidra (0xdc1a0): Computes actor bbox, inserts into octree via SingleNodeFilter
+// or MultiNodeFilter depending on whether actor is flagged bStatic.
+// Simplified: insert into root node's flat actor list directly.
+void FCollisionOctree::AddActor(AActor* Actor)
+{
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800);          // bCollideActors
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;           // bDeleteMe
+	if ((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x100) return;     // bNoCollision
+	// Skip if already registered (actor's OctreeNodes list non-empty)
+	TArray<FOctreeNode*>& NodeList = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
+	if (NodeList.Num() > 0) return;
+	// Insert into root node (simplified flat storage — no octant subdivision)
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (Root) Root->SingleNodeFilter(Actor, this, NULL);
+	// Save ColLocation for consistent removal even after the actor moves
+	*(DWORD*)((BYTE*)Actor + 0x308) = *(DWORD*)((BYTE*)Actor + 0x234);
+	*(DWORD*)((BYTE*)Actor + 0x30c) = *(DWORD*)((BYTE*)Actor + 0x238);
+	*(DWORD*)((BYTE*)Actor + 0x310) = *(DWORD*)((BYTE*)Actor + 0x23c);
+}
+
+// ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
+// DIVERGENCE: stub; retail (0xdbec0) walks Level->Actors, tests geometry overlap per node.
+void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
+
+// ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
+// retail: empty (ordinal 2354 shares address 0x1651d0 — shared no-op stub)
+void FCollisionOctree::CheckActorNotReferenced(AActor * p0) {}
+
+// ?CheckIsEmpty@FCollisionOctree@@UAEXXZ
+// Ghidra (0xdaf60): delegates straight to FOctreeNode::CheckIsEmpty on the root node.
+// Root FOctreeNode* is stored at Pad[0..3] (first field after vtable pointer).
+void FCollisionOctree::CheckIsEmpty()
+{
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (Root) Root->CheckIsEmpty();
+}
+
+// ?RemoveActor@FCollisionOctree@@UAEXPAVAActor@@@Z
+// Ghidra (0xdbd00): Removes actor from every octree node it appears in,
+// then clears actor's OctreeNodes list.
+void FCollisionOctree::RemoveActor(AActor* Actor)
+{
+	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800);  // bCollideActors
+	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;   // bDeleteMe
+	// Remove actor from each node in its OctreeNodes list
+	TArray<FOctreeNode*>& NodeList = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
+	for (INT i = 0; i < NodeList.Num(); i++)
+	{
+		FOctreeNode* Node = NodeList(i);
+		if (!Node) continue;
+		TArray<AActor*>& ActorList = *(TArray<AActor*>*)Node;
+		ActorList.RemoveItem(Actor);
+	}
+	NodeList.Empty();
+}
+
+// ?Tick@FCollisionOctree@@UAEXXZ
+void FCollisionOctree::Tick() {}
+// ?GetHashIndices@FCollisionHash@@QAEXVFVector@@AAH11@Z
+// Retail ordinal 3033 (0x6dd20).
+// Converts a world-space coordinate to a hash-table grid index in each axis.
+// Grid resolution: each cell = 256 unreal units; world spans [-262144, +262144].
+void FCollisionHash::GetHashIndices(FVector V, INT& XI, INT& YI, INT& ZI) {
+	XI = Clamp(appRound((V.X + 262144.0f) * 0.00390625f), 0, 0x3FFF);
+	YI = Clamp(appRound((V.Y + 262144.0f) * 0.00390625f), 0, 0x3FFF);
+	ZI = Clamp(appRound((V.Z + 262144.0f) * 0.00390625f), 0, 0x3FFF);
+}
+
+// ?GetActorExtent@FCollisionHash@@QAEXPAVAActor@@AAH11111@Z
+// Retail ordinal 2897 (0x6dde0).
+// Converts the actor's collision bounding box into a 3D range of hash indices.
+void FCollisionHash::GetActorExtent(AActor* Actor, INT& MinX, INT& MaxX, INT& MinY, INT& MaxY, INT& MinZ, INT& MaxZ) {
+	FBox Box = Actor->GetPrimitive()->GetCollisionBoundingBox(Actor);
+	GetHashIndices(Box.Min, MinX, MinY, MinZ);
+	GetHashIndices(Box.Max, MaxX, MaxY, MaxZ);
+}
+// ?ActorEncroachmentCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
+// Node-level encroachment check.  Reads query state from OctHash->Pad:
+//   Pad[96..99]   = SourceActor (the encroaching actor)
+//   Pad[16..27]   = query Location (FVector)
+//   Pad[80..87]   = Extent (FVector, zero for point test)
+//   Pad[88..91]   = TraceFlags (DWORD)
+void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+	FVector Location    = *(FVector*)(OctHash->Pad + 16);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A || A == SourceActor) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(1.f);
+			if (A->GetPrimitive()->PointCheck(TestHit, A, Location, FVector(0,0,0), 0) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+}
+
+// ?ActorNonZeroExtentLineCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
+// Capsule line check — like the zero-extent version but passes Extent to LineCheck.
+void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	FVector   Start     = *(FVector*)(OctHash->Pad + 16);
+	FVector   End       = *(FVector*)(OctHash->Pad + 28);
+	FVector   Extent    = *(FVector*)(OctHash->Pad + 80);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+	DWORD TypeFlags     = *(DWORD*)(OctHash->Pad + 92);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A == SourceActor) continue;
+		bool bIgnored = false;
+		for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI + 0x140))
+			if ((AActor*)pI == A) { bIgnored = true; break; }
+		if (bIgnored) continue;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(0.f);
+			if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, Extent, TypeFlags, TraceFlags) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+}
+
+// ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
+void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
+
+// ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
+void FOctreeNode::ActorPointCheck(FCollisionOctree* OctHash, FPlane const* NodePlane, AActor* SourceActor)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FVector Location    = *(FVector*)(OctHash->Pad + 16);
+	FVector Extent      = *(FVector*)(OctHash->Pad + 80);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		if (!A->ShouldTrace(SourceActor, TraceFlags)) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		FCheckResult TestHit(1.f);
+		if (A->GetPrimitive()->PointCheck(TestHit, A, Location, Extent, 0) == 0)
+		{
+			FCheckResult* CR = (FCheckResult*)GMem.PushBytes(sizeof(FCheckResult), 8);
+			if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+		}
+	}
+}
+
+// ?ActorRadiusCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
+void FOctreeNode::ActorRadiusCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	FVector   Center    = *(FVector*)(OctHash->Pad + 16);
+	FLOAT     Radius    = *(FLOAT*)(OctHash->Pad + 80);  // radius in Extent.X
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (!A->ShouldTrace(NULL, TraceFlags)) continue;
+		const FLOAT dx = A->Location.X - Center.X;
+		const FLOAT dy = A->Location.Y - Center.Y;
+		const FLOAT dz = A->Location.Z - Center.Z;
+		if (dx*dx + dy*dy + dz*dz <= Radius*Radius)
+		{
+			FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+			if (CR)
+			{
+				appMemzero(CR, sizeof(FCheckResult));
+				CR->Actor = A;
+				CR->GetNext() = List;
+				List = CR;
+			}
+		}
+	}
+}
+
+// ?ActorZeroExtentLineCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@MMMMMMPBVFPlane@@@Z
+// Entry point for a ray test against actors in this node.  The caller passes
+// Start and End as individual floats; Ghidra confirmed the packing order is
+// Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z.
+void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, float Sy, float Sz, float Ex, float Ey, float Ez, FPlane const* NodePlane)
+{
+	INT     Frame       = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem      = *(FMemStack**)(OctHash->Pad + 12);
+	DWORD TraceFlags    = *(DWORD*)(OctHash->Pad + 88);
+	DWORD TypeFlags     = *(DWORD*)(OctHash->Pad + 92);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+	FVector Start(Sx, Sy, Sz);
+	FVector End(Ex, Ey, Ez);
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+		if (A == SourceActor) continue;
+		bool bIgnored = false;
+		for (BYTE* pI = (BYTE*)SourceActor; pI; pI = (BYTE*)*(INT*)(pI + 0x140))
+			if ((AActor*)pI == A) { bIgnored = true; break; }
+		if (bIgnored) continue;
+		if (A->ShouldTrace(SourceActor, TraceFlags))
+		{
+			FCheckResult TestHit(0.f);
+			if (A->GetPrimitive()->LineCheck(TestHit, A, End, Start, FVector(0,0,0), TypeFlags, TraceFlags) == 0)
+			{
+				FCheckResult* CR = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+				if (CR) { appMemcpy(CR, &TestHit, sizeof(FCheckResult)); CR->GetNext() = List; List = CR; }
+			}
+		}
+	}
+}
+
+// ?CheckActorNotReferenced@FOctreeNode@@QAEXPAVAActor@@@Z
+// Ghidra (0xd93c0): logs every actor in this node to GError, then recurses into
+// 8 children if present.  Exact format string unclear from decompiler output.
+// DIVERGENCE: format string approximated as TEXT("%s"); Ghidra shows Logf(GError, vtable_ptr)
+//             which is a decompiler artefact, not a literal vtable dereference.
+void FOctreeNode::CheckActorNotReferenced(AActor * /*Actor*/)
+{
+	// FOctreeNode layout (Ghidra-verified, 0x10 bytes per node):
+	//   offset 0x00: TArray<AActor*>::Data  (void*)
+	//   offset 0x04: TArray<AActor*>::Num   (INT)
+	//   offset 0x08: TArray<AActor*>::Max   (INT)
+	//   offset 0x0c: children block ptr     (FOctreeNode* block, 8 children × 0x10 bytes)
+	void* DataPtr         = *(void**)Pad;
+	INT   Count           = *(INT*)(Pad + 4);
+	for (INT i = 0; i < Count; i++)
+	{
+		AActor* A = ((AActor**)DataPtr)[i];
+		if (A) GError->Logf(TEXT("%s"), A->GetName());
+	}
+	void* ChildrenBase = *(void**)(Pad + 0xc);
+	if (ChildrenBase)
+	{
+		for (INT i = 0; i < 8; i++)
+			((FOctreeNode*)((BYTE*)ChildrenBase + i * 0x10))->CheckActorNotReferenced(NULL);
+	}
+}
+
+// ?CheckIsEmpty@FOctreeNode@@QAEXXZ
+// Ghidra (0xd9300): logs every actor in this node to GLog, then recurses into
+// 8 children if present.
+// DIVERGENCE: format string approximated; see CheckActorNotReferenced note above.
+void FOctreeNode::CheckIsEmpty()
+{
+	void* DataPtr = *(void**)Pad;
+	INT   Count   = *(INT*)(Pad + 4);
+	for (INT i = 0; i < Count; i++)
+	{
+		AActor* A = ((AActor**)DataPtr)[i];
+		if (A) GLog->Logf(TEXT("%s"), A->GetName());
+	}
+	void* ChildrenBase = *(void**)(Pad + 0xc);
+	if (ChildrenBase)
+	{
+		for (INT i = 0; i < 8; i++)
+			((FOctreeNode*)((BYTE*)ChildrenBase + i * 0x10))->CheckIsEmpty();
+	}
+}
+
+// ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
+// DIVERGENCE: stub; retail (0xdb6c0) draws the node's bounding box via GTempLineBatcher
+//             and recurses into children.  Requires FTempLineBatcher access.
+void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
+
+// ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
+void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
+
+// ?FilterTest@FOctreeNode@@QAEXPAVFBox@@HPAV?$TArray@PAVFOctreeNode@@@@PBVFPlane@@@Z
+void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
+
+// ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
+// Ghidra (0xd8ec0): In the full octree, routes actor to all overlapping child nodes.
+// Simplified: store at this node directly (no subdivision).
+void FOctreeNode::MultiNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
+{
+	StoreActor(Actor, OctHash, Plane);
+}
+
+// ?RemoveAllActors@FOctreeNode@@QAEXPAVFCollisionOctree@@@Z
+// Ghidra (0xdb3e0): Recursively clears all actors from this node and its children.
+// Simplified: just clear this node's actor list.
+void FOctreeNode::RemoveAllActors(FCollisionOctree* OctHash)
+{
+	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
+	ActorList.Empty();
+}
+
+// ?SingleNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
+// Ghidra (0xdc010): In the full octree, routes actor to the single containing child.
+// Simplified: store at this node directly (no subdivision).
+void FOctreeNode::SingleNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
+{
+	StoreActor(Actor, OctHash, Plane);
+}
+// ?GetHashLink@FCollisionHash@@QAEAAPAUFCollisionLink@1@HHHAAH@Z
+// Retail ordinal 3034 (0x6d680).
+// Returns a reference to the bucket-head pointer for hash cell (x, y, z) and
+// writes the encoded position z*0x100000 + y*0x400 + x into OutPos.
+FCollisionHash::FCollisionLink*& FCollisionHash::GetHashLink(INT x, INT y, INT z, INT& OutPos)
+{
+	OutPos = (z * 0x400 + y) * 0x400 + x;
+	return Buckets[HashX[x] ^ HashY[y] ^ HashZ[z]];
+}

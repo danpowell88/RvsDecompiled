@@ -3871,5 +3871,15 @@ void UObject::execSetRegistryKey( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1855, execSetRegistryKey );
 
 /*-----------------------------------------------------------------------------
+	UObject::execVRand — script exec stub for VRand().
+-----------------------------------------------------------------------------*/
+
+void UObject::execVRand( FFrame& Stack, void* const Result )
+{
+	P_FINISH;
+	*(FVector*)Result = VRand();
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

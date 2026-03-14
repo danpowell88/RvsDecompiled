@@ -268,3 +268,110 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 
 // ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
+
+// --- Moved from EngineStubs.cpp ---
+UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
+{
+	if (!UChannel::IsKnownChannelType((INT)ChType))
+		appFailAssert("UChannel::IsKnownChannelType(ChType)", ".\\UnConn.cpp", 0x31E);
+
+	AssertValid();
+
+	INT iIdx = ChIndex;
+	if (ChIndex >= 0x400)
+	{
+		if (ChIndex == (INT)0x7FFFFFFF)
+		{
+			for (iIdx = 0x400; iIdx < 0x410; iIdx++)
+				if (*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) == NULL) break;
+			if (iIdx == 0x410) return NULL;
+		}
+		else if (ChIndex == (INT)0x7FFFFFFE)
+		{
+			for (iIdx = 0x410; iIdx < 0x50F; iIdx++)
+				if (*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) == NULL) break;
+			if (iIdx == 0x50F) return NULL;
+		}
+		if (iIdx >= 0x50F)
+			appFailAssert("ChIndex<MAX_CHANNELS+NUM_ARMPATCH_CHANNELS", ".\\UnConn.cpp", 0x36A);
+	}
+
+	if (iIdx == -1)
+	{
+		iIdx = (ChType == CHTYPE_Control) ? 0 : 1;
+		while (iIdx < 0x3FF && *(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) != NULL)
+			iIdx++;
+		if (iIdx == 0x3FF) return NULL;
+	}
+
+	if (ChIndex < 0x400)
+	{
+		if (iIdx >= 0x3FF)
+			appFailAssert("ChIndex<MAX_CHANNELS", ".\\UnConn.cpp", 0x36E);
+	}
+	else
+	{
+		if (iIdx >= 0x50F)
+			appFailAssert("ChIndex<MAX_CHANNELS+NUM_ARMPATCH_CHANNELS", ".\\UnConn.cpp", 0x36A);
+	}
+
+	if (*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) != NULL)
+		appFailAssert("Channels[ChIndex]==NULL", ".\\UnConn.cpp", 0x373);
+
+	// Construct the channel object for this channel type.
+	UClass* Class = UChannel::ChannelClasses[ChType];
+	check(Class->IsChildOf(UChannel::StaticClass()));
+	UChannel* Ch = (UChannel*)UObject::StaticConstructObject(
+		Class, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL);
+	Ch->Init(this, iIdx, bOpenedLocally);
+
+	// Register in the fixed-size Channels array.
+	*(UChannel**)((BYTE*)this + iIdx * 4 + 0xEB0) = Ch;
+
+	// Append to OpenChannels dynamic list (TArray<UChannel*> at this+0x4B7C).
+	INT arrIdx = ((FArray*)((BYTE*)this + 0x4B7C))->Add(1, sizeof(UChannel*));
+	*(UChannel**)(*(BYTE**)((BYTE*)this + 0x4B7C) + arrIdx * sizeof(UChannel*)) = Ch;
+
+	return Ch;
+}
+void UNetConnection::PostSend()
+{
+	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
+	FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
+	INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
+	if (Out.GetNumBits() > MaxPacket * 8)
+		appFailAssert("Out.GetNumBits()<=MaxPacket*8", ".\\UnConn.cpp", 0x2B6);
+	if (Out.GetNumBits() == MaxPacket * 8)
+		FlushNet();
+}
+UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
+{
+	guard(UDemoRecConnection::UDemoRecConnection);
+	unguard;
+}
+void UDemoRecConnection::StaticConstructor() {}
+FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
+FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
+void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
+	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
+	if (Driver->ServerConnection == NULL) {
+		FArchive* FileAr = *(FArchive**)((BYTE*)Driver + 0xB4);
+		FileAr->ByteOrderSerialize((BYTE*)Driver + 0xCC, 4);    // FrameNum (INT)
+		FileAr->ByteOrderSerialize((BYTE*)Driver + 0x48, 8);    // DemoFrameTime (DOUBLE)
+		FileAr->ByteOrderSerialize(&Count, 4);                  // packet size
+		FileAr->Serialize(Data, Count);                          // packet data
+	}
+}
+
+// Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
+// JNZ path: if ServerConnection != NULL, cross-function-jump to UNetConnection::FlushNet.
+void UDemoRecConnection::FlushNet() {
+	if (Driver->ServerConnection != NULL)
+		UNetConnection::FlushNet();
+}
+INT UDemoRecConnection::IsNetReady(INT) { return 1; }
+void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
+UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
+INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
+// Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
+INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }

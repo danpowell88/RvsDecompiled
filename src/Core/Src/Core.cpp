@@ -273,5 +273,42 @@ FLOAT FInterpCurve::Eval( FLOAT Input )
 // Note: DllMain, hInstance, and GPackage are provided by IMPLEMENT_PACKAGE(Core) above.
 
 /*-----------------------------------------------------------------------------
+	__FUNC_NAME__ external linkage workaround.
+	MSVC 2019 emits guard() function-local statics with internal linkage,
+	but the retail Core.def exports them as external symbols (MSVC 7.1
+	behavior). We define global extern "C" arrays with the same string
+	content and use /alternatename to redirect the mangled symbols.
+-----------------------------------------------------------------------------*/
+extern "C" {
+__declspec(dllexport) const unsigned short _gfn_Reverse[]        = {'F','S','t','r','i','n','g',':',':','R','e','v','e','r','s','e',0};
+__declspec(dllexport) const unsigned short _gfn_ParseIntoArray[] = {'F','S','t','r','i','n','g',':',':','P','a','r','s','e','I','n','t','o','A','r','r','a','y',0};
+__declspec(dllexport) const unsigned short _gfn_AddDependency[]  = {'U','C','l','a','s','s',':',':','A','d','d','D','e','p','e','n','d','e','n','c','y',0};
+__declspec(dllexport) const unsigned short _gfn_SerializeExp[]   = {'F','O','b','j','e','c','t','E','x','p','o','r','t',':',':','S','e','r','i','a','l','i','z','e',0};
+__declspec(dllexport) const unsigned short _gfn_SerializeImp[]   = {'F','O','b','j','e','c','t','I','m','p','o','r','t',':',':','S','e','r','i','a','l','i','z','e',0};
+__declspec(dllexport) const unsigned short _gfn_OpDelete[]       = {'U','O','b','j','e','c','t',':',':','o','p','e','r','a','t','o','r',' ','d','e','l','e','t','e',0};
+}
+// Force emission of the above arrays (compiler may optimize away unused consts).
+static volatile const void* _gfnRefs[] = {_gfn_Reverse, _gfn_ParseIntoArray, _gfn_AddDependency, _gfn_SerializeExp, _gfn_SerializeImp, _gfn_OpDelete};
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Reverse@FString@@QAE?AV2@XZ@4QBGB=__gfn_Reverse")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??ParseIntoArray@FString@@QAEHPBGPAV?$TArray@VFString@@@@@Z@4QBGB=__gfn_ParseIntoArray")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??AddDependency@UClass@@QAEXPAV2@H@Z@4QBGB=__gfn_AddDependency")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectExport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeExp")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectImport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeImp")
+#pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???3UObject@@SAXPAXI@Z@4QBGB=__gfn_OpDelete")
+
+/*-----------------------------------------------------------------------------
+	Force inline functions to emit out-of-line copies for .def export.
+	appFloor/appRound are defined inline with ASM in UnVcWin32.h.
+	appDebugBreak is defined inline in UnVcWin32.h.
+	Taking their address forces the compiler to emit symbols.
+-----------------------------------------------------------------------------*/
+
+typedef INT  (*PFN_IntFloat)(FLOAT);
+typedef void (*PFN_Void)();
+static PFN_IntFloat _forceEmit_appFloor     = &appFloor;
+static PFN_IntFloat _forceEmit_appRound     = &appRound;
+static PFN_Void    _forceEmit_appDebugBreak = &appDebugBreak;
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

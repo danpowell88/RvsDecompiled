@@ -111,5 +111,73 @@ CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 }
 
 /*-----------------------------------------------------------------------------
+	FArchiveCountMem class.
+-----------------------------------------------------------------------------*/
+
+FArchiveCountMem::FArchiveCountMem( UObject* Src )
+: Num(0), Max(0)
+{
+	guard(FArchiveCountMem::FArchiveCountMem);
+	if( Src )
+		Src->Serialize( *this );
+	unguard;
+}
+
+FArchiveCountMem::FArchiveCountMem( const FArchiveCountMem& Other )
+: FArchive(Other), Num(Other.Num), Max(Other.Max)
+{
+}
+
+FArchiveCountMem::~FArchiveCountMem()
+{
+}
+
+void FArchiveCountMem::CountBytes( SIZE_T InNum, SIZE_T InMax )
+{
+	Num += InNum;
+	Max += InMax;
+}
+
+DWORD FArchiveCountMem::GetNum()
+{
+	return (DWORD)Num;
+}
+
+DWORD FArchiveCountMem::GetMax()
+{
+	return (DWORD)Max;
+}
+
+FArchiveCountMem& FArchiveCountMem::operator=( const FArchiveCountMem& Other )
+{
+	Num = Other.Num;
+	Max = Other.Max;
+	return *this;
+}
+
+/*-----------------------------------------------------------------------------
+	FArchiveDummySave class.
+-----------------------------------------------------------------------------*/
+
+FArchiveDummySave::FArchiveDummySave()
+{
+	ArIsSaving = 1;
+}
+
+FArchiveDummySave::FArchiveDummySave( const FArchiveDummySave& Other )
+: FArchive(Other)
+{
+}
+
+FArchiveDummySave::~FArchiveDummySave()
+{
+}
+
+FArchiveDummySave& FArchiveDummySave::operator=( const FArchiveDummySave& Other )
+{
+	return *this;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

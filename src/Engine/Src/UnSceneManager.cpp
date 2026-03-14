@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnSceneManager.cpp: Matinee scene manager and sub-action system
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -853,3 +853,149 @@ ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 	appMemcpy(this, &Other, 24);
 	return *this;
 }
+
+// --- Moved from EngineStubs.cpp ---
+// ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
+// Ghidra: returns CurrentAction (offset 0x44).
+UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
+
+// ?GetNextAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
+// Ghidra: GetActionIdx, return [idx+1] wrapping to [0].
+UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Current)
+{
+	if (!Scene) return NULL;
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+	INT Count = Actions.Num();
+	if (Count == 0) return NULL;
+	INT Idx = GetActionIdx(Scene, Current);
+	return Actions((Idx + 1) % Count);
+}
+
+// ?GetNextMovementAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
+// Ghidra: calls GetNextAction in a loop until the action IsA(UActionMoveCamera).
+UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAction * Current)
+{
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+	INT Count = Actions.Num();
+	if (Count == 0) return NULL;
+	UMatAction* Candidate = GetNextAction(Scene, Current);
+	INT Guard = Count; // prevent infinite loop if no move action exists
+	while (Guard-- > 0 && Candidate && Candidate != Current)
+	{
+		if (Candidate->IsA(UActionMoveCamera::StaticClass()))
+			return Candidate;
+		Candidate = GetNextAction(Scene, Candidate);
+	}
+	return NULL;
+}
+
+// ?GetPrevAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
+// Ghidra: GetActionIdx, return [idx-1] wrapping to [last].
+UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Current)
+{
+	if (!Scene) return NULL;
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+	INT Count = Actions.Num();
+	if (Count == 0) return NULL;
+	INT Idx = GetActionIdx(Scene, Current);
+	INT Prev = (Idx <= 0) ? Count - 1 : Idx - 1;
+	return Actions(Prev);
+}
+
+// ?SetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@PAV2@@Z
+// Ghidra: sets CurrentAction, primes CurrentSubAction from SubActions[0] if available.
+UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
+{
+	CurrentAction = Action;
+	if (Action)
+	{
+		TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)((BYTE*)Action + 0x48);
+		CurrentSubAction = SubActions.Num() > 0 ? SubActions(0) : NULL;
+	}
+	else
+	{
+		CurrentSubAction = NULL;
+	}
+	return CurrentAction;
+}
+
+// ?GetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@XZ
+// Ghidra: returns CurrentSubAction (offset 0x48).
+UMatSubAction * FMatineeTools::GetCurrentSubAction() { return CurrentSubAction; }
+
+// ?SetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@PAV2@@Z
+// Ghidra: stores SubAction at this+0x48 and returns it.
+UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
+{
+	CurrentSubAction = SubAction;
+	return SubAction;
+}
+
+
+// ?GetActionIdx@FMatineeTools@@QAEHPAVASceneManager@@PAVUMatAction@@@Z
+int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
+{
+	if (!SM)
+		return -1;
+	// ASceneManager + 0x3A8 = TArray<UMatAction*> Actions
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)SM + 0x3A8);
+	for (INT i = 0; i < Actions.Num(); i++)
+	{
+		if (Actions(i) == Action)
+			return i;
+	}
+	return -1;
+}
+
+// ?GetPathStyle@FMatineeTools@@QAEHPAVUMatAction@@@Z
+int FMatineeTools::GetPathStyle(UMatAction* Action)
+{
+	if (Action)
+	{
+		if (Action->IsA(UActionPause::StaticClass()))
+			return 0;
+		if (Action->IsA(UActionMoveCamera::StaticClass()))
+			return *((BYTE*)Action + 0x90);
+	}
+	return *((BYTE*)Action + 0x90);
+}
+
+// ?GetSubActionIdx@FMatineeTools@@QAEHPAVUMatSubAction@@@Z
+int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
+{
+	if (!CurrentAction)
+		return -1;
+	// UMatAction + 0x48 = TArray<UMatSubAction*> SubActions
+	TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)((BYTE*)CurrentAction + 0x48);
+	for (INT i = 0; i < SubActions.Num(); i++)
+	{
+		if (SubActions(i) == SubAction)
+			return i;
+	}
+	return -1;
+}
+// ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
+void ECLipSynchData::m_vStartLipsynch()
+{
+	bPlaying = 1;
+}
+
+// ?m_vStopLipsynch@ECLipSynchData@@QAEXXZ
+void ECLipSynchData::m_vStopLipsynch() {}
+
+// ?m_vUpdateBonesCompressed@ECLipSynchData@@QAEXH@Z
+void ECLipSynchData::m_vUpdateBonesCompressed(int p0) {}
+
+// ?m_vUpdateBonesCompressed_BoneView@ECLipSynchData@@QAEXH@Z
+void ECLipSynchData::m_vUpdateBonesCompressed_BoneView(int p0) {}
+
+// ?m_vUpdateBonesCompressed_PhonemsSeq@ECLipSynchData@@QAEXH@Z
+void ECLipSynchData::m_vUpdateBonesCompressed_PhonemsSeq(int p0) {}
+
+// ?m_vUpdateLipSynch@ECLipSynchData@@QAEXM@Z
+void ECLipSynchData::m_vUpdateLipSynch(float p0) {}
+// ?GetSamples@FMatineeTools@@QAEXPAVASceneManager@@PAVUMatAction@@PAV?$TArray@VFVector@@@@@Z
+void FMatineeTools::GetSamples(ASceneManager * p0, UMatAction * p1, TArray<FVector> * p2) {}
+
+// ?Init@FMatineeTools@@QAEXXZ
+void FMatineeTools::Init() {}

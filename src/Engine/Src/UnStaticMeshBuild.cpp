@@ -317,3 +317,36 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
+
+// --- Moved from EngineStubs.cpp ---
+extern ENGINE_API FRebuildTools GRebuildTools;
+
+// ?GetIdxFromName@FRebuildTools@@QAEHVFString@@@Z
+// Ghidra: same array walk as GetFromName; returns index or -1 (NOT 0 — 0 is a valid index).
+int FRebuildTools::GetIdxFromName(FString p0)
+{
+	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
+	INT count = *(INT*)((BYTE*)this + 8);
+	for (INT i = 0; i < count; i++)
+	{
+		FRebuildOptions* opt = (FRebuildOptions*)((BYTE*)data + i * 0x2C);
+		if (opt->Name == p0)
+			return i;
+	}
+	return -1;
+}
+// ?Delete@FRebuildTools@@QAEXVFString@@@Z
+void FRebuildTools::Delete(FString p0) {}
+
+// ?Init@FRebuildTools@@QAEXXZ
+void FRebuildTools::Init() {}
+
+// ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z
+void FRebuildTools::SetCurrent(FString p0) {}
+
+// ?Shutdown@FRebuildTools@@QAEXXZ
+void FRebuildTools::Shutdown() {}
+INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
+	C[0].Type = 4; C[0].Function = 3;
+	return 1;
+}
