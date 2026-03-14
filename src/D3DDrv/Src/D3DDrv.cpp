@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	D3DDrv.cpp: D3DDrv package — Direct3D 8 rendering driver.
 	Reconstructed for Ravenshield decompilation project — Phase 9A.
 
@@ -1388,21 +1388,15 @@ FD3DVertexShader* UD3DRenderDevice::GetVertexShader(EVertexShader Shader, FShade
 	Called when SetRes encounters a fatal error. Cleans up any partially
 	created D3D objects and returns 0 (failure).
 =============================================================================*/
-IMPL_DIVERGE("Ghidra 0x1000f350: retail only logs and returns 0 — does NOT release D3D objects. Our version also cleans up GDepthStencil/GBackBuffer/GDirect3DDevice8/GDirect3D8.")
+IMPL_MATCH("D3DDrv.dll", 0x1000ac90)
 INT UD3DRenderDevice::UnSetRes(const TCHAR* Reason, LONG hResult)
 {
 	guard(UD3DRenderDevice::UnSetRes);
-
-	debugf(NAME_Warning, TEXT("D3DDrv: SetRes failed — %s (hr=0x%08X)"), Reason, (DWORD)hResult);
-
-	// Clean up any partially created resources.
-	if( GDepthStencil )  { GDepthStencil->Release();   GDepthStencil  = NULL; }
-	if( GBackBuffer )    { GBackBuffer->Release();     GBackBuffer    = NULL; }
-	if( GDirect3DDevice8 ) { GDirect3DDevice8->Release(); GDirect3DDevice8 = NULL; }
-	if( GDirect3D8 )     { GDirect3D8->Release();      GDirect3D8     = NULL; }
-
+	// Retail (132B): logs only when Reason != NULL, then returns 0.
+	// Does NOT release any D3D objects — cleanup is the caller's responsibility.
+	if (Reason != NULL)
+		debugf(NAME_Warning, TEXT("D3DDrv: SetRes failed — %s (hr=0x%08X)"), Reason, (DWORD)hResult);
 	return 0;
-
 	unguard;
 }
 
