@@ -600,13 +600,13 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKWake );
 
 /*-- AVolume -----------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x101254d0: retail does not null-check Other; reads Location components separately")
+IMPL_MATCH("Engine.dll", 0x104254d0)
 void AVolume::execEncompasses( FFrame& Stack, RESULT_DECL )
 {
 	guard(AVolume::execEncompasses);
 	P_GET_OBJECT(AActor,Other);
 	P_FINISH;
-	*(DWORD*)Result = Other ? Encompasses( Other->Location ) : 0;
+	*(DWORD*)Result = Encompasses( Other->Location );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AVolume, INDEX_NONE, execEncompasses );
@@ -894,36 +894,45 @@ IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execWatermark );
 
 /*-- AR6ColBox ---------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x10476c80: retail reads 3 script args and calls EnableCollision(this,...)")
+IMPL_MATCH("Engine.dll", 0x10476c80)
 void AR6ColBox::execEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6ColBox::execEnableCollision);
-	P_GET_UBOOL(bEnable);
+	P_GET_UBOOL(bNewCollideActors);
+	P_GET_UBOOL(bNewBlockActors);
+	P_GET_UBOOL(bNewBlockPlayers);
 	P_FINISH;
-	SetCollision( bEnable, bBlockActors, bBlockPlayers );
+	EnableCollision( bNewCollideActors, bNewBlockActors, bNewBlockPlayers );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6ColBox, 1503, execEnableCollision );
 
 /*-- AR6DecalGroup & AR6DecalManager -----------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x104776f0: retail calls ActivateGroup(this); decal system not implemented")
+IMPL_MATCH("Engine.dll", 0x104776f0)
 void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execActivateGroup);
 	P_FINISH;
+	ActivateGroup();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2904, execActivateGroup );
 
-IMPL_DIVERGE("Ghidra 0x10477530: retail adds decal to group; decal system not implemented")
+IMPL_DIVERGE("Ghidra 0x10477530: retail AddDecal(vec,rot,tex,type,4xfloat)->INT; decal system not implemented")
 void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execAddDecal);
 	P_GET_VECTOR(HitLocation);
 	P_GET_ROTATOR(HitRotation);
-	P_GET_FLOAT_OPTX(DecalSize,1.f);
+	P_GET_OBJECT(UTexture,Tex);
+	P_GET_INT(Type);
+	P_GET_FLOAT(f1);
+	P_GET_FLOAT(f2);
+	P_GET_FLOAT(f3);
+	P_GET_FLOAT(f4);
 	P_FINISH;
+	*(INT*)Result = 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2902, execAddDecal );
@@ -946,14 +955,21 @@ void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2903, execKillDecal );
 
-IMPL_DIVERGE("Ghidra 0x10477a90: retail adds decal to manager; decal system not implemented")
+IMPL_DIVERGE("Ghidra 0x10477a90: retail AddDecal(vec,rot,tex,byte,type,4xfloat)->INT; decal system not implemented")
 void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execAddDecal);
 	P_GET_VECTOR(HitLocation);
 	P_GET_ROTATOR(HitRotation);
-	P_GET_FLOAT_OPTX(DecalSize,1.f);
+	P_GET_OBJECT(UTexture,Tex);
+	P_GET_BYTE(DecalType);
+	P_GET_INT(Type);
+	P_GET_FLOAT(f1);
+	P_GET_FLOAT(f2);
+	P_GET_FLOAT(f3);
+	P_GET_FLOAT(f4);
 	P_FINISH;
+	*(INT*)Result = 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6DecalManager, 2900, execAddDecal );
