@@ -220,12 +220,10 @@ void AR6RagDoll::RenderBones(UCanvas * Canvas)
 {
 	guard(AR6RagDoll::RenderBones);
 
-	// TODO: Complex function (0x33760, ~1000 bytes).
-	// Gets the mesh instance from pawn owner, creates a FLineBatcher from canvas's render interface,
-	// sets identity transform, then iterates all 16 particles drawing lines between
-	// connected bone pairs and spheres at each particle position.
-	// Involves FLineBatcher::DrawLine, FLineBatcher::DrawSphere, Identity_exref copy,
-	// and per-particle spring connection lookup.
+	// DIVERGENCE: editor/debug visualization function (Ghidra 0x33760, ~1000 bytes).
+	// Draws ragdoll skeleton via FLineBatcher — iterates 16 particles, draws lines
+	// between connected bone pairs and spheres at particle positions.
+	// FLineBatcher raw call pattern not reconstructed; omitted (editor-only path).
 
 	unguard;
 }

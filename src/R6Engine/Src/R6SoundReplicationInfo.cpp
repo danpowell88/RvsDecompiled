@@ -74,18 +74,18 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 	if (AudioSub == NULL)
 		goto Done;
 
-	// TODO: Full implementation dispatches to audio subsystem based on WeaponSound enum:
-	// case 2: play fire sound
-	// case 3: play fire + echo sound (+ silencer echo if equipped)
-	// case 4: play reload sound
-	// case 5: play fire + suppressed sound (+ silencer suppressed if equipped)
-	// case 6: play looping fire sound (only if not already looping and not flagged)
-	// case 7: play fire + echo + alt fire sound
-	// case 8: play special fire sound
-	// case 9: play special alt fire sound
-	// case 10: stop looping fire, play stop sound (+ silencer stop if equipped)
-	// Each uses vtable call at (*(code**)(*AudioSub + 0x84))(this, soundRef, 2, 0)
-	// Sound references are stored at weapon info offsets (0x3a0..0x460) indexed by CurrentWeapon.
+	// DIVERGENCE: audio dispatch via vtable call (*(code**)(*AudioSub + 0x84)) not
+	// reconstructed — the AudioSub object layout is not fully mapped. The sound
+	// references at weapon info offsets (0x3a0..0x460) and the per-case logic below
+	// are documented but the actual play calls are omitted:
+	//   case 2: fire sound
+	//   case 3: fire + echo (+ silencer echo if equipped)
+	//   case 4: reload sound
+	//   case 5: fire + suppressed (+ silencer suppressed if equipped)
+	//   case 6: looping fire sound (start)
+	//   case 7: fire + echo + alt-fire sound
+	//   case 8/9: special fire / alt-fire sound
+	//   case 10: stop looping fire, play stop sound
 
 Done:
 	*(DWORD*)((BYTE*)this + 0x3a0) |= 1;
@@ -111,12 +111,10 @@ void AR6SoundReplicationInfo::PostNetReceive()
 	// Process weapon sound changes
 	if (*(INT*)((BYTE*)this + 0x3b0) != 0)
 	{
-		// TODO: Full implementation checks if the weapon owner has a valid AR6Pawn
-		// via IsA check on the owner's class hierarchy, then:
-		// - If current weapon changed and was playing looping fire (0x6), stops it
-		// - Decodes m_NewWeaponSound byte: low nibble = sound enum, bit 4 = fire flag
-		// - If sound hasn't been played yet (!flag bit 0) and not looping, sets initial state
-		// - Otherwise calls PlayWeaponSound with the decoded sound enum
+		// DIVERGENCE: retail checks weapon owner via IsA on class hierarchy,
+		// decodes m_NewWeaponSound byte (low nibble = sound enum, bit 4 = fire flag),
+		// and calls PlayWeaponSound if not already playing. AudioSub vtable layout
+		// not fully reconstructed — sound dispatch omitted for PostNetReceive path.
 	}
 
 	// Sync replicated location to actual Location

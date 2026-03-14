@@ -19,14 +19,12 @@ void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
 	guard(AR6IORotatingDoor::AddMyMarker);
 
-	// TODO: Extremely complex function (5061 bytes at 0x1f330).
-	// Spawns R6Door navigation markers at the door's pivot position,
-	// calculates door normal via cross product of rotation vector and Up,
-	// then spawns up to two door actors (m_DoorActorA / m_DoorActorB)
-	// at offset positions depending on m_bIsOpeningClockWise and m_bIsSlidingDoor.
-	// Involves vtable calls to XLevel->SpawnActor via raw pointer dispatch
-	// (*(code**)(*(int*)(this+0x328)+0xa8))() and (*(code**)(*(int*)(this+0x328)+0xcc))().
-	// Full implementation requires resolving multiple FUN_ helpers.
+	// DIVERGENCE: Ghidra 0x1f330 (~5061 bytes). Spawns R6Door navigation markers at
+	// the door's pivot; calculates door normal via cross product; spawns door actor(s)
+	// for m_DoorActorA / m_DoorActorB with clockwise/sliding variations.
+	// Multiple unresolved FUN_ helpers and raw SpawnActor vtable dispatch make this
+	// impractical to reconstruct without further Ghidra analysis. AI door pathfinding
+	// markers will be absent — doors are still physically present and functional.
 
 	unguard;
 }

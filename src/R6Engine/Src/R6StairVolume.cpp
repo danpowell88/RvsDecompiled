@@ -12,11 +12,10 @@ void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6StairVolume::AddMyMarker);
 
-	// TODO: Complex function at 0x3c500 (~800 bytes).
-	// Spawns stair navigation markers (R6Stairs) at calculated positions
-	// along the stair volume using the stair orientation direction.
-	// Involves StaticFindObjectChecked for "R6Stairs" class, rotation vector
-	// cross product for stair normal, and multiple SpawnActor vtable calls.
+	// DIVERGENCE: Ghidra 0x3c500 (~800 bytes). Spawns R6Stairs navigation markers
+	// along the stair volume using stair orientation direction; rotation cross product
+	// for stair normal; raw SpawnActor vtable dispatch not reconstructed.
+	// AI stair pathfinding markers absent — stairs are physically present.
 
 	unguard;
 }

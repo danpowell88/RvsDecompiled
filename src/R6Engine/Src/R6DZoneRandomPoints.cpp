@@ -170,7 +170,9 @@ INT AR6DZoneRandomPoints::GetNbOfTerroristToSpawn()
 	// Get count from GRI or GameInfo depending on network mode
 	if (Level->NetMode == 0) // NETMODE_Standalone
 	{
-		// TODO: deep GEngine chain: Engine+0x44 -> +0x30 -> **int -> +0x38 -> +0x34 -> +0x2c -> +0x39c
+		// Deep GEngine pointer chain to GRI->m_iNbOfTerroristToSpawn:
+		// GEngine+0x44 -> ViewportManager -> +0x30 -> GameClient -> deref x2
+		// -> +0x38 -> +0x34 -> +0x2c -> +0x39c = replicated terrorist count
 		INT A  = *(INT*)((BYTE*)GEngine + 0x44);
 		INT B  = *(INT*)(A + 0x30);
 		INT C  = *(INT*)(*(INT*)B);   // double deref
@@ -181,12 +183,12 @@ INT AR6DZoneRandomPoints::GetNbOfTerroristToSpawn()
 	}
 	else
 	{
-		Count = *(INT*)((BYTE*)Level->Game + 0x4d8); // GameInfo->m_iNbOfTerrorist (TODO: no typed name)
+		Count = *(INT*)((BYTE*)Level->Game + 0x4d8); // AGameInfo::m_iNbOfTerrorist (raw offset)
 	}
 
 NbCap:
 	{
-		INT MaxCap = *(INT*)((BYTE*)this + 0x4a4); // m_iNbOfTerroristMax (TODO: no typed field name)
+		INT MaxCap = *(INT*)((BYTE*)this + 0x4a4); // m_iNbOfTerroristMax (raw offset)
 		if (MaxCap < Count)
 		{
 			GLog->Logf(TEXT("%s: NbOfTerrorist capped at %d"), GetName(), MaxCap);

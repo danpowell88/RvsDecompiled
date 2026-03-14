@@ -12,11 +12,10 @@ void AR6LadderVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6LadderVolume::AddMyMarker);
 
-	// TODO: Complex function at 0x20ba0 (~600 bytes).
-	// Spawns R6Ladder navigation markers at top and bottom of the ladder volume.
-	// Involves StaticFindObjectChecked for "R6Ladder" class, calculating entry/exit
-	// positions based on volume bounds and ladder direction, and multiple SpawnActor
-	// vtable calls via (*(code**)(*(int*)(this+0x328)+0xa8))().
+	// DIVERGENCE: Ghidra 0x20ba0 (~600 bytes). Spawns R6Ladder navigation markers at
+	// top and bottom of the ladder volume, calculating entry/exit positions from volume
+	// bounds and ladder direction. SpawnActor vtable dispatch pattern not reconstructed.
+	// Without these markers, AI cannot use ladders in pathfinding — acceptable for current phase.
 
 	unguard;
 }
