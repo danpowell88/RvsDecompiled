@@ -661,81 +661,78 @@ void USkeletalMesh::NormalizeInfluences(int)
 	unguard;
 }
 
-IMPL_DIVERGE("face stores wedge indices (two-level lookup via this+0xc4 wedge table → this+0x1b8 positions); our code uses face indices directly as position indices; retail 0x10441560 (634b)")
+IMPL_MATCH("Engine.dll", 0x10441560)
 void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 {
 	guard(USkeletalMesh::CalculateNormals);
-	// Ghidra 0x141560: if Normals array is non-empty, return immediately.
-	// Otherwise accumulate per-face cross-product normals into a temp array, then
-	// normalize each vertex normal and optionally (param2 != 0) add it to the vertex
-	// position as a displacement.
-	// DIVERGENCE: SEH frame differs; FUN_10324640 (temp-array destructor thunk) differs.
+	// Ghidra 0x141560, 634b.
+	// Accumulate per-face cross-product normals into a per-vertex temp buffer, then
+	// normalise and optionally (param2 != 0) add to vertex positions.
+	// Face data at this+0xAC uses wedge indices; wedge table at this+0xC4 maps to
+	// vertex position indices; positions at this+0x1B8.
+	// SEH frame and FUN_10324640 destructor thunk are handled by C++ TArray RAII.
 	if (Normals.Num() != 0) return;
 
 	FArray* vertArr = (FArray*)((BYTE*)this + 0x1b8);
 	INT vertCount = vertArr->Num();
 	if (vertCount == 0) return;
 
-	// Allocate temp per-vertex normal accumulation buffer (zeroed FVectors).
-	// Ghidra: FArray::AddZeroed(local_44, 0xc, iVar1) where iVar1 = vertCount.
 	TArray<FVector> tempNormals;
 	tempNormals.AddZeroed(vertCount);
 
-	BYTE* vertData = (BYTE*)*(INT*)vertArr;          // position array, stride 0xC
+	BYTE* vertData  = (BYTE*)*(INT*)vertArr;
+	BYTE* wedgeData = (BYTE*)*(INT*)((BYTE*)this + 0xc4); // wedge table, stride 0xC, USHORT vert-idx at [0]
 	FArray* faceArr = (FArray*)((BYTE*)this + 0xac);
 	INT faceCount = faceArr->Num();
-	BYTE* faceData = (BYTE*)*(INT*)faceArr;          // face array, stride 8
+	BYTE* faceData = (BYTE*)*(INT*)faceArr;               // face array, stride 8, 4 x USHORT wedge-idx
 
-	// Face loop: accumulate face-normal contributions per vertex.
-	// Each face entry is 8 bytes: 3 x uint16 vertex indices at byte offsets 0, 2, 4.
-	// Ghidra: (iVar2 + iVar1*4)*2 where iVar2=0,1,2 gives byte offsets 0,2,4 within face iVar1.
 	for (INT fi = 0; fi < faceCount; fi++)
 	{
-		_WORD vi0 = *(_WORD*)(faceData + fi * 8 + 0);
-		_WORD vi1 = *(_WORD*)(faceData + fi * 8 + 2);
-		_WORD vi2 = *(_WORD*)(faceData + fi * 8 + 4);
+		// Ghidra: (iVar2 + iVar1*4)*2 with iVar1=fi, iVar2=0..2 → wedge indices
+		_WORD w0 = *(_WORD*)(faceData + (0 + fi * 4) * 2);
+		_WORD w1 = *(_WORD*)(faceData + (1 + fi * 4) * 2);
+		_WORD w2 = *(_WORD*)(faceData + (2 + fi * 4) * 2);
 
-		// Vertex positions: stride 0xC = sizeof(FVector)
-		BYTE* pv0 = vertData + vi0 * 0xC;
-		BYTE* pv1 = vertData + vi1 * 0xC;
-		BYTE* pv2 = vertData + vi2 * 0xC;
-		FLOAT p0x = *(FLOAT*)(pv0 + 0); FLOAT p0y = *(FLOAT*)(pv0 + 4); FLOAT p0z = *(FLOAT*)(pv0 + 8);
-		FLOAT p1x = *(FLOAT*)(pv1 + 0); FLOAT p1y = *(FLOAT*)(pv1 + 4); FLOAT p1z = *(FLOAT*)(pv1 + 8);
-		FLOAT p2x = *(FLOAT*)(pv2 + 0); FLOAT p2y = *(FLOAT*)(pv2 + 4); FLOAT p2z = *(FLOAT*)(pv2 + 8);
+		// Two-level lookup: wedge → vertex position index (first USHORT of 12-byte wedge entry)
+		_WORD vi0 = *(_WORD*)(wedgeData + (DWORD)w0 * 0xc);
+		_WORD vi1 = *(_WORD*)(wedgeData + (DWORD)w1 * 0xc);
+		_WORD vi2 = *(_WORD*)(wedgeData + (DWORD)w2 * 0xc);
 
-		// edge1 = p2 - p0 (local_5c/58/54 in Ghidra)
-		// edge2 = p0 - p1 (local_68/64/60 in Ghidra)
-		// cross = edge2 ^ edge1  (Ghidra: FVector::operator^(this=&local_68, ...) with this=edge2)
-		FLOAT e1x = p2x - p0x, e1y = p2y - p0y, e1z = p2z - p0z;
-		FLOAT e2x = p0x - p1x, e2y = p0y - p1y, e2z = p0z - p1z;
-		FLOAT cx = e2y * e1z - e2z * e1y;
-		FLOAT cy = e2z * e1x - e2x * e1z;
-		FLOAT cz = e2x * e1y - e2y * e1x;
+		BYTE* pv0 = vertData + vi0 * 0xc;
+		BYTE* pv1 = vertData + vi1 * 0xc;
+		BYTE* pv2 = vertData + vi2 * 0xc;
+		FLOAT p0x = *(FLOAT*)(pv0+0), p0y = *(FLOAT*)(pv0+4), p0z = *(FLOAT*)(pv0+8);
+		FLOAT p1x = *(FLOAT*)(pv1+0), p1y = *(FLOAT*)(pv1+4), p1z = *(FLOAT*)(pv1+8);
+		FLOAT p2x = *(FLOAT*)(pv2+0), p2y = *(FLOAT*)(pv2+4), p2z = *(FLOAT*)(pv2+8);
+
+		// edge1 = p2 - p0 (local_5c/58/54), edge2 = p0 - p1 (local_68/64/60)
+		// cross = edge2 ^ edge1
+		FLOAT e1x = p2x-p0x, e1y = p2y-p0y, e1z = p2z-p0z;
+		FLOAT e2x = p0x-p1x, e2y = p0y-p1y, e2z = p0z-p1z;
+		FLOAT cx = e2y*e1z - e2z*e1y;
+		FLOAT cy = e2z*e1x - e2x*e1z;
+		FLOAT cz = e2x*e1y - e2y*e1x;
 
 		tempNormals(vi0).X += cx; tempNormals(vi0).Y += cy; tempNormals(vi0).Z += cz;
 		tempNormals(vi1).X += cx; tempNormals(vi1).Y += cy; tempNormals(vi1).Z += cz;
 		tempNormals(vi2).X += cx; tempNormals(vi2).Y += cy; tempNormals(vi2).Z += cz;
 	}
 
-	// Resize output array and write normalised results.
-	// Ghidra: FArray::Add(param_1, vertCount, 0xC) then per-vertex normalize + optional blend.
+	// Normalise and optionally displace vertex positions.
 	Normals.Add(vertCount);
 	for (INT vi = 0; vi < vertCount; vi++)
 	{
 		FVector& n = tempNormals(vi);
 		FLOAT sqLen = n.SizeSquared();
-		// Ghidra: appSqrt(sqLen + 0.001) used as divisor; avoids zero-length normals.
-		FLOAT invLen = (FLOAT)(1.0 / appSqrt((DOUBLE)(sqLen + 0.001f)));
-		FLOAT nx = n.X * invLen, ny = n.Y * invLen, nz = n.Z * invLen;
+		FLOAT divisor = appSqrt(sqLen + 0.001f);
+		FLOAT nx = n.X / divisor, ny = n.Y / divisor, nz = n.Z / divisor;
 
 		if (param2 != 0)
 		{
-			// Ghidra: when param2 != 0, the normalised vector is added to the vertex
-			// position (this+0x1b8) as a displacement, then stored to Normals.
-			BYTE* pv = vertData + vi * 0xC;
-			nx += *(FLOAT*)(pv + 0);
-			ny += *(FLOAT*)(pv + 4);
-			nz += *(FLOAT*)(pv + 8);
+			BYTE* pv = vertData + vi * 0xc;
+			nx += *(FLOAT*)(pv+0);
+			ny += *(FLOAT*)(pv+4);
+			nz += *(FLOAT*)(pv+8);
 		}
 
 		Normals(vi).X = nx;
