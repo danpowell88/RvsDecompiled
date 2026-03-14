@@ -948,7 +948,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x104361a0 (438b) builds bone pivot list from skeleton data")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -1000,7 +1000,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x10436390 (933b) draws debug cylinders for bone collision shapes")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1666,7 +1666,7 @@ int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x1043da80 (6631b) full skeletal mesh rendering pipeline")
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(USkeletalMeshInstance::Render);
@@ -2241,7 +2241,7 @@ float USkeletalMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("retail 0x10435b80 (43b) checks animation group membership; stub returns 0")
 int USkeletalMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 {
 	// Retail: 37b. Has direct call — not fully implemented (complex relative call).
@@ -2490,7 +2490,7 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Ghidra decompilation failed at 0x10439f40 (10776b); encoding error prevents decompilation")
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(USkeletalMeshInstance::GetFrame);
@@ -2617,7 +2617,7 @@ int USkeletalMeshInstance::WasSkeletonUpdated()
 	return (UpdateStamp >= GTicks - 1) ? 1 : 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x10441f40 (516b) computes bounding box/sphere from bone vertices")
 void USkeletalMeshInstance::MeshBuildBounds()
 {
 	guard(USkeletalMeshInstance::MeshBuildBounds);
@@ -2837,7 +2837,7 @@ int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x10474f70 (2307b) full vertex mesh rendering pipeline")
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UVertMeshInstance::Render);
@@ -3181,7 +3181,7 @@ float UVertMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("retail 0x10473bf0 (34b) checks animation group; stub returns 0")
 int UVertMeshInstance::AnimIsInGroup(void*, FName)
 {
 	// Retail: 48b. Has complex sub-call — stub returns 0.
@@ -3271,7 +3271,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x10473c20 (2457b) transforms vertex mesh frames")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3295,7 +3295,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x10474b10 (593b) extracts transformed vertex positions")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
@@ -3362,7 +3362,7 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 
 // --- UVertMeshInstance ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("stub only; retail 0x10474850 (637b) builds bounding box/sphere over all frames")
 void UVertMeshInstance::MeshBuildBounds()
 {
 	guard(UVertMeshInstance::MeshBuildBounds);
