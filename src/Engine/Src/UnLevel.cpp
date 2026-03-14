@@ -1427,8 +1427,20 @@ void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, c
 }
 
 // Non-virtual methods.
-IMPL_DIVERGE("null returns instead of asserting; retail at Ghidra 0x1031bf30")
-ABrush* ULevel::Brush() { return (Actors.Num()>=2 && Actors(1)) ? (ABrush*)Actors(1) : NULL; }
+IMPL_MATCH("Engine.dll", 0x1031bf30)
+ABrush* ULevel::Brush()
+{
+	if ( Actors.Num() < 2 )
+		appFailAssert("Actors.Num()>=2", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x19a);
+	if ( Actors(1) == NULL )
+		appFailAssert("Actors(1)!=NULL", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x19b);
+	if ( *(ABrush**)((BYTE*)Actors(1) + 0x178) == NULL )
+	{
+		appFailAssert("Actors(1)->Brush!=NULL", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x19c);
+		return (ABrush*)Actors(1);
+	}
+	return (ABrush*)Actors(1);
+}
 IMPL_DIVERGE("stub; retail EditorDestroyActor has navigation point handling at Ghidra 0x103b8100")
 INT ULevel::EditorDestroyActor( AActor* Actor ) { return DestroyActor( Actor ); }
 IMPL_DIVERGE("returns INDEX_NONE instead of asserting via GError; retail at Ghidra 0x1031bfb0")
@@ -1441,8 +1453,18 @@ INT ULevel::GetActorIndex( AActor* Actor )
 	GError->Logf( TEXT("GetActorIndex: %s not found"), Actor ? Actor->GetName() : TEXT("NULL") );
 	return INDEX_NONE;
 }
-IMPL_DIVERGE("null returns instead of asserting; retail at Ghidra 0x1031c080")
-ALevelInfo* ULevel::GetLevelInfo() { return (Actors.Num()>0 && Actors(0)) ? (ALevelInfo*)Actors(0) : NULL; }
+IMPL_MATCH("Engine.dll", 0x1031c080)
+ALevelInfo* ULevel::GetLevelInfo()
+{
+	if ( Actors(0) == NULL )
+		appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1ad);
+	if ( !Actors(0)->IsA(ALevelInfo::StaticClass()) )
+	{
+		appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1ae);
+		return (ALevelInfo*)Actors(0);
+	}
+	return (ALevelInfo*)Actors(0);
+}
 IMPL_MATCH("Engine.dll", 0x1031c0e0)
 AZoneInfo* ULevel::GetZoneActor( INT iZone )
 {
@@ -1661,34 +1683,38 @@ IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddEncodedWritableMapStrip );
 =============================================================================*/
 
 // GetNetworkNumber() - returns the network version number string.
-IMPL_DIVERGE("partial; retail checks NetDriver before returning URL; Ghidra 0x12b3b0")
+IMPL_DIVERGE("temporary FString state-tracking differs; retail at Ghidra 0x1042b3b0")
 void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetNetworkNumber);
 	P_FINISH;
-	*(FString*)Result = XLevel->URL.Host;
+	if ( !XLevel->NetDriver )
+		*(FString*)Result = FString(TEXT(""));
+	else
+		*(FString*)Result = XLevel->NetDriver->LowLevelGetNetworkNumber();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execGetNetworkNumber );
 
 // GetCurrentMapNum() - returns the current map index from the map list.
-IMPL_DIVERGE("stub; retail reads g_pEngine+0x22c; Ghidra 0xa0170")
+IMPL_MATCH("Engine.dll", 0x103a0170)
 void AGameInfo::execGetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetCurrentMapNum);
 	P_FINISH;
-	*(INT*)Result = 0;
+	*(INT*)Result = *(INT*)((BYTE*)GEngine + 0x22c);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execGetCurrentMapNum );
 
 // SetCurrentMapNum() - sets the current map index.
-IMPL_DIVERGE("stub; retail sets g_pEngine+0x22c; Ghidra 0xa0240")
+IMPL_MATCH("Engine.dll", 0x103a0240)
 void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execSetCurrentMapNum);
 	P_GET_INT(MapNum);
 	P_FINISH;
+	*(INT*)((BYTE*)GEngine + 0x22c) = MapNum;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execSetCurrentMapNum );
@@ -1719,11 +1745,12 @@ void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execProcessR6Availabilty );
 
 // AbortScoreSubmission() - aborts an in-progress score submission.
-IMPL_DIVERGE("stub; retail calls vtable method to abort submission; Ghidra 0xa0330")
+IMPL_MATCH("Engine.dll", 0x103a0330)
 void AGameInfo::execAbortScoreSubmission( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execAbortScoreSubmission);
 	P_FINISH;
+	AbortScoreSubmission();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execAbortScoreSubmission );

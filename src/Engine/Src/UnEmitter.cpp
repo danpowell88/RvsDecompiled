@@ -289,7 +289,7 @@ void AEmitter::PostScriptDestroyed()
 				typedef void(__thiscall* DestroyFn)(BYTE*, INT);
 				((DestroyFn)vtbl[3])(em, 1);
 			}
-			*slot = nullptr;
+			*slot = NULL;
 		}
 	}
 }

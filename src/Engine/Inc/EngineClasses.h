@@ -6,6 +6,9 @@
 	This file deliberately omits member variables (sizeof will be minimal).
 	The runtime .u package metadata overrides PropertiesSize at load time.
 ===========================================================================*/
+#pragma once
+#ifndef ENGINECLASSES_H
+#define ENGINECLASSES_H
 
 #ifndef ENGINE_API
 #define ENGINE_API DLL_IMPORT
@@ -24,7 +27,13 @@ struct MdtBaseConstraint;
 class MotionChunk;
 class UDemoRecDriver;
 class FSpriteParticleVertex;
-enum eDecalType : int;
+enum eDecalType {
+    DECAL_Footstep,
+    DECAL_Bullet,
+    DECAL_BloodSplats,
+    DECAL_BloodBaths,
+    DECAL_GrenadeDecals
+};
 
 
 /*==========================================================================
@@ -7043,3 +7052,4 @@ public:
 #endif
 #endif // _INC_ENGINE_CLASSES_DECLS
 #endif // NAMES_ONLY
+#endif // ENGINECLASSES_H
