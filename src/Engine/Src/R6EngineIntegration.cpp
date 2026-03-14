@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AR6AbstractCircumstantialActionQuery ---
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("Ghidra 0x77620: 1245-byte property-replication body; this stub delegates to parent as placeholder")
 INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -30,7 +30,7 @@ void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynam
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; delegates to AActor::CheckForErrors then warns on null Anchor")
+IMPL_DIVERGE("Ghidra 0x984a0: uses GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via debugf instead")
 void AR6ActionSpot::CheckForErrors()
 {
 	guard(AR6ActionSpot::CheckForErrors);
@@ -45,7 +45,7 @@ void AR6ActionSpot::CheckForErrors()
 
 
 // --- AR6ColBox ---
-IMPL_APPROX("No Ghidra RVA; owner-activation-radius/collision-flags guard then owner vtable ShouldTrace dispatch")
+IMPL_MATCH("Engine.dll", 0x1766d0)
 int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 {
 	guard(AR6ColBox::ShouldTrace);
@@ -78,16 +78,14 @@ int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 	unguard;
 }
 
-IMPL_APPROX("Retail byte-count verified (21b); null-base guard then delegates to AActor::SetBase")
+IMPL_MATCH("Engine.dll", 0x176ae0)
 void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 {
-	// Retail: 21b. If NewBase is NULL, calls error handler (3x null push + call).
-	// If non-NULL, cross-function-jumps to AActor::SetBase.
-	if (!NewBase) return;
+	if (!NewBase) { EnableCollision(0, 0, 0); return; }
 	AActor::SetBase(NewBase, FloorNormal, bNotifyActor);
 }
 
-IMPL_APPROX("No Ghidra RVA; collision-flags/step-height comparison using owner CollisionHeight at +0x23c")
+IMPL_MATCH("Engine.dll", 0x176bf0)
 int AR6ColBox::CanStepUp(FVector vec)
 {
 	guard(AR6ColBox::CanStepUp);
@@ -122,7 +120,7 @@ void AR6ColBox::EnableCollision(int,int,int)
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; projects location from owner's rotation+height, falls back to zero")
+IMPL_MATCH("Engine.dll", 0x1764b0)
 void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 {
 	guard(AR6ColBox::GetColBoxLocationFromOwner);
@@ -147,7 +145,7 @@ void AR6ColBox::GetDestination(FVector &,FRotator &)
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; collision-flags/owner guard, terrain-aware stepHeight, returns 33.0 default or computed step")
+IMPL_MATCH("Engine.dll", 0x176b20)
 float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 {
 	guard(AR6ColBox::GetMaxStepUp);
@@ -184,7 +182,7 @@ float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; activation-radius guard selects vtable[0x6c] vs vtable[0x68] on owner for GetPawn dispatch")
+IMPL_MATCH("Engine.dll", 0x1767c0)
 APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 {
 	guard(AR6ColBox::GetPawnOrColBoxOwner);
@@ -210,7 +208,7 @@ APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; owner+flags guard then dispatches owner vtable IsBlockedBy")
+IMPL_MATCH("Engine.dll", 0x1766a0)
 int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 {
 	guard(AR6ColBox::IsBlockedBy);
@@ -256,7 +254,7 @@ void AR6DecalGroup::ActivateGroup()
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; active-flag/texture guard, cyclic decal slot index, group-type dispatch with documented divergences")
+IMPL_DIVERGE("Ghidra 0x176fb0: GIsNightmare global, blood-decal FName/scale init, and appSeconds() expiry not available")
 int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, int param_4,
 	float param_5, float param_6, float param_7, float param_8, int param_9)
 {
@@ -337,7 +335,7 @@ void AR6DecalManager::Spawned()
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; active-flag guard, FindGroup dispatch, type-1 distance-cull deferred")
+IMPL_DIVERGE("Ghidra 0x177880: type-1 viewport/global-counter distance-cull requires inaccessible Engine internals")
 int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, eDecalType param_4,
 	int param_5, float param_6, float param_7, float param_8, float param_9, int param_10)
 {
@@ -384,7 +382,7 @@ AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 
 
 // --- AR6DecalsBase ---
-IMPL_APPROX("No Ghidra RVA; zone team-byte + level visibility table relevancy check")
+IMPL_MATCH("Engine.dll", 0x1781b0)
 int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2, FVector param_3)
 {
 	guard(AR6DecalsBase::IsNetRelevantFor);
@@ -422,7 +420,7 @@ int AR6EngineWeapon::GetHeartBeatStatus()
 
 
 // --- AR6RainbowStartInfo ---
-IMPL_APPROX("No Ghidra RVA; serialises 10+ FString fields plus version-guarded mission-type field")
+IMPL_MATCH("Engine.dll", 0x70940)
 void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 {
 	guard(AR6RainbowStartInfo::TransferFile);
@@ -597,7 +595,7 @@ AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 
 
 // --- UR6FileManager ---
-IMPL_APPROX("No Ghidra RVA; GFileManager vtable[1] CreateFileReader probe to check file existence")
+IMPL_MATCH("Engine.dll", 0x6cdf0)
 int UR6FileManager::FindFile(FString* param_1)
 {
 	guard(UR6FileManager::FindFile);
@@ -624,7 +622,7 @@ int UR6FileManager::FindFile(FString* param_1)
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; capitalises FString from TArray at +0x2c indexed by param_1")
+IMPL_MATCH("Engine.dll", 0x6cff0)
 void UR6FileManager::GetFileName(int param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetFileName);
@@ -634,7 +632,7 @@ void UR6FileManager::GetFileName(int param_1, FString* param_2)
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; builds wildcard pattern, calls GFileManager->FindFiles, caches results in TArray at +0x2c")
+IMPL_MATCH("Engine.dll", 0x6d480)
 int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetNbFile);
