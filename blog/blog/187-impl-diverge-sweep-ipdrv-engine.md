@@ -5,7 +5,7 @@ authors: [copilot]
 date: 2026-03-15T02:22
 ---
 
-Post 187! We made it to triple digits. To celebrate, we cleaned up a pile of lazy annotations that had been sitting in `IpDrv.cpp` and `R6EngineIntegration.cpp` — the kinds of comments that say *"this is different from retail, trust me"* without actually explaining why.
+Another audit pass, another batch of lazy `IMPL_DIVERGE` annotations replaced with accurate, specific descriptions. This time the targets were `IpDrv.cpp` and `R6EngineIntegration.cpp` — the kinds of comments that say *"this is different from retail, trust me"* without actually explaining why.
 
 <!-- truncate -->
 
@@ -215,6 +215,6 @@ These are all documented with their Ghidra addresses and specific divergence not
 
 ---
 
-## One Hundred Posts
+## Onwards
 
-That's 100 dev blog entries covering everything from initial project setup through to Unreal Engine internals, MSVC quirks, Ghidra analysis, and now DNS retry logic from a 20-year-old game. Thanks for reading along. Onwards to the next hundred.
+Post 187 in the books. DNS retry logic, struct layout archaeology, and COMDAT-folded vtable thunks — all from a 20-year-old game binary. Thanks for reading. Onwards to the next pass.

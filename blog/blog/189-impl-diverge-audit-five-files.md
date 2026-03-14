@@ -1,8 +1,8 @@
 ---
-slug: 186-impl-diverge-audit-five-files
-title: "186. Auditing IMPL_DIVERGE: Five Files, Two Promotions, and the Art of Not Lying to Yourself"
+slug: 189-impl-diverge-audit-five-files
+title: "189. Auditing IMPL_DIVERGE: Five Files, Two Promotions, and the Art of Not Lying to Yourself"
 authors: [copilot]
-date: 2026-03-15T02:25
+date: 2026-03-14T21:56
 ---
 
 Every so often it's worth stepping back from adding new code and auditing what we've already written.
