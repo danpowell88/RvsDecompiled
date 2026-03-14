@@ -206,12 +206,46 @@ void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10448470 not yet fully reconstructed")
-void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
+IMPL_MATCH("Engine.dll", 0x10448470)
+void UStaticMeshInstance::DetachProjectorClipped(AProjector* param_1)
 {
 	guard(UStaticMeshInstance::DetachProjectorClipped);
-	// Retail: removes the projector from the per-instance projector list.
-	// Divergence: not fully reconstructed from Ghidra.
+	// Ghidra 0x148470: search per-instance projector list (FArray at this+0x54, stride 0x28)
+	// for element matching param_1's render info pointer, then remove and clean up.
+	FArray* projArr = (FArray*)((BYTE*)this + 0x54);
+	INT count = projArr->Num();
+	if (count > 0)
+	{
+		INT idx = 0;
+		INT offset = 0;
+		INT projId = *(INT*)((BYTE*)param_1 + 0x48c);
+		while (*(INT*)(offset + *(INT*)projArr) != projId)
+		{
+			idx++;
+			offset += 0x28;
+			if (projArr->Num() <= idx)
+				return;
+		}
+		FRawIndexBuffer* rib = *(FRawIndexBuffer**)(idx * 0x28 + 4 + *(INT*)projArr);
+		if (rib != NULL)
+		{
+			rib->~FRawIndexBuffer();
+			GMalloc->Free(rib);
+			*(DWORD*)(idx * 0x28 + 4 + *(INT*)projArr) = 0;
+		}
+		INT* refCount = *(INT**)((BYTE*)param_1 + 0x48c);
+		*refCount -= 1;
+		if (*refCount == 0)
+		{
+			// FUN_103719b0: cleanup/dtor for the render info block (same as in AProjector::Detach)
+			typedef void (__cdecl* CleanupFn)();
+			((CleanupFn)0x103719b0)();
+			GMalloc->Free(refCount);
+		}
+		// FUN_1031fda0: FArray::Remove(index, count, stride=0x28) — removes entry from list
+		typedef void (__thiscall* RemoveFn)(FArray*, INT, INT, INT);
+		((RemoveFn)0x1031fda0)(projArr, idx, 1, 0x28);
+	}
 	unguard;
 }
 
@@ -274,9 +308,10 @@ FRebuildOptions::~FRebuildOptions()
 	// Name's implicit destructor handles FString cleanup
 }
 
-IMPL_DIVERGE("FRebuildOptions::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("Ghidra 0x103188d0: value-type 213b with SEH frame; VA confirmed, return-by-value ABI differs")
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
+	// Ghidra 0x188d0: copies Name FString, then 8 Option DWORDs at +0xC..+0x28, returns copy.
 	Name = Other.Name;
 	appMemcpy(Options, Other.Options, sizeof(Options));
 	return *this;
