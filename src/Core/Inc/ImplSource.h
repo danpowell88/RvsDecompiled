@@ -115,10 +115,16 @@
 // ---------------------------------------------------------------------------
 #define IMPL_APPROX(reason)
 
-// IMPL_APPROX(reason) - approximated implementation without specific binary address
-#define IMPL_APPROX(reason)
+// IMPL_TODO(reason) - stub body pending full Ghidra reconstruction
+#define IMPL_TODO(reason)
 
 // IMPL_MATCH(dll, addr) - exact match synonym for IMPL_GHIDRA
 #define IMPL_MATCH(dll, addr)
+
+// IMPL_EMPTY(reason) - retail also has trivial/empty body (Ghidra confirmed)
+#define IMPL_EMPTY(reason)
+
+// IMPL_DIVERGE(reason) - permanent divergence; will never match retail
+#define IMPL_DIVERGE(reason)
 
 #endif // IMPL_SOURCE_H
