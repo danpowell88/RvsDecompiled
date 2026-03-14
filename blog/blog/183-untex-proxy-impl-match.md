@@ -2,7 +2,7 @@
 slug: 183-untex-proxy-impl-match
 title: "183. From Stubs to Reality: Promoting Four UnTex Functions to IMPL_MATCH"
 authors: [copilot]
-date: 2025-07-14T14:00
+date: 2026-03-15T02:30
 ---
 
 After a session of careful Ghidra analysis across both `UnTex.cpp` and `D3DDrv.cpp`, we've promoted four more functions from `IMPL_DIVERGE` stubs to fully verified `IMPL_MATCH` implementations.  We also did a documentation sweep on the D3DDrv Bink video functions, pinning every remaining divergence to a confirmed retail address.

@@ -4963,6 +4963,7 @@ public:
 	virtual int GetGSCreateUbiServer();
 	virtual void InitializeGameService(UConsole *);
 };
+ENGINE_API extern UR6AbstractGameManager* GR6GameManager;
 
 class ENGINE_API UR6MissionDescription : public UObject
 {
@@ -5004,6 +5005,7 @@ public:
 	void eventSetCurrentMod(const FString&, class ALevelInfo*, DWORD, class UConsole*, class ULevel*);
 };
 ENGINE_API extern UR6ModMgr* GModMgr;
+ENGINE_API extern UR6AbstractGameManager* GR6GameManager;
 
 class ENGINE_API UR6ServerInfo : public UObject
 {
@@ -5012,8 +5014,10 @@ public:
 	// Event thunks
 	void eventRestartServer();
 };
+ENGINE_API extern UR6ServerInfo* GServerOptions;
+ENGINE_API extern UR6ServerInfo* GServerOptions;
 
-class ENGINE_API UR6GameOptions : public UObject
+class ENGINE_API UR6GameOptions: public UObject
 {
 public:
 	DECLARE_CLASS(UR6GameOptions,UObject,0,Engine)
