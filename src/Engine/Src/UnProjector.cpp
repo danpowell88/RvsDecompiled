@@ -13,9 +13,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
 #include "EngineDecls.h"
-#if _MSC_VER > 1310
 #include <intrin.h>
-#endif
 
 // DAT_10780140 in retail: the singleton UProjectorPrimitive instance.
 static UPrimitive* GProjectorPrimitive = NULL;
@@ -333,18 +331,19 @@ FBox UProjectorPrimitive::GetCollisionBoundingBox(AActor const *) const
 	return *(FBox*)((BYTE*)this + 0x470);
 }
 
-IMPL_DIVERGE("UProjectorPrimitive::GetEncroachCenter not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1046ccb0)
 FVector UProjectorPrimitive::GetEncroachCenter(AActor* Actor)
 {
-	// Retail: 41b. Allocates temp FBox, calls virtual GetCollisionBoundingBox(Actor),
-	// then calls FBox::GetCenter() on the result. Mirrors UStaticMesh::GetEncroachCenter.
+	// Ghidra 0x16ccb0: calls vtable[0x74/4]=GetCollisionBoundingBox(Actor), then FBox::GetCenter()
+	// shares address with UModel::GetEncroachCenter and UStaticMesh::GetEncroachCenter
 	return GetCollisionBoundingBox(Actor).GetCenter();
 }
 
-IMPL_DIVERGE("UProjectorPrimitive::GetEncroachExtent not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10304990)
 FVector UProjectorPrimitive::GetEncroachExtent(AActor* Actor)
 {
-	// Retail: 41b. Same pattern as GetEncroachCenter but calls FBox::GetExtent().
+	// Ghidra 0x4990: calls vtable[0x74/4]=GetCollisionBoundingBox(Actor), then FBox::GetExtent()
+	// shares address with UModel::GetEncroachExtent and UStaticMesh::GetEncroachExtent
 	return GetCollisionBoundingBox(Actor).GetExtent();
 }
 
