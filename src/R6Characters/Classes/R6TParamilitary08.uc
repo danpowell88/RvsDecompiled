@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TParamilitary08.uc : (add small description)
+//  R6TParamilitary08.uc : Terrorist pawn variant: eighth paramilitary skin built on the militant01 base.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

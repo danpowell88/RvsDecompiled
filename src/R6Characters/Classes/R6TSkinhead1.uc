@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TSkinhead1.uc : (add small description)
+//  R6TSkinhead1.uc : Terrorist pawn variant: first skinhead extremist enemy skin.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

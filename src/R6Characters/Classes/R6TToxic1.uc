@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TToxic1.uc : (add small description)
+//  R6TToxic1.uc : Terrorist pawn variant: a hazmat/toxic-suited enemy skin.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
