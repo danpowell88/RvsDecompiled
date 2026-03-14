@@ -292,3 +292,28 @@ void FTags::Init()
 }
 
 
+
+// ============================================================================
+// FRebuildTools implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
+FRebuildOptions * FRebuildTools::GetCurrent() { return *(FRebuildOptions**)this; }
+
+// ?GetFromName@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
+FRebuildOptions * FRebuildTools::GetFromName(FString p0)
+{
+	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
+	INT count = *(INT*)((BYTE*)this + 8);
+	for (INT i = 0; i < count; i++)
+	{
+		FRebuildOptions* opt = (FRebuildOptions*)((BYTE*)data + i * 0x2C);
+		if (opt->Name == p0)
+			return opt;
+	}
+	return NULL;
+}
+
+// ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
+FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }

@@ -795,3 +795,61 @@ void AInterpolationPoint::PostEditMove()
 }
 
 
+
+// ============================================================================
+// FMatineeTools simple implementations / ECLipSynchData
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??1FMatineeTools@@UAE@XZ
+FMatineeTools::~FMatineeTools() {}
+
+// ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
+ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
+
+// ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@PAV2@@Z
+ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
+{
+	CurrentScene = Scene;
+	if (Scene)
+	{
+		TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
+		if (Actions.Num() > 0)
+			SetCurrentAction(Actions(0));
+		else
+		{
+			CurrentAction = NULL;
+			CurrentSubAction = NULL;
+		}
+	}
+	else
+	{
+		CurrentAction = NULL;
+		CurrentSubAction = NULL;
+	}
+	return Scene;
+}
+
+// ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
+ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
+{
+	for (INT i = 0; i < Level->Actors.Num(); i++)
+	{
+		AActor* Actor = Level->Actors(i);
+		if (Actor && Actor->IsA(ASceneManager::StaticClass()))
+		{
+			if (FString(Actor->GetName()) == Name)
+				return SetCurrent(Engine, Level, (ASceneManager*)Actor);
+		}
+	}
+	return SetCurrent(Engine, Level, (ASceneManager*)NULL);
+}
+
+// ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
+FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
+
+// ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
+ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
+	appMemcpy(this, &Other, 24);
+	return *this;
+}

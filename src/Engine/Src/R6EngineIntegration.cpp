@@ -603,3 +603,11 @@ int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 	unguard;
 }
 
+
+// ============================================================================
+// UR6AbstractTerroristMgr constructor
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??0UR6AbstractTerroristMgr@@QAE@XZ
+UR6AbstractTerroristMgr::UR6AbstractTerroristMgr() {}

@@ -437,3 +437,202 @@ IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+
+// ============================================================================
+// FSceneNode / FLevelSceneNode / scene subclass implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??0FSceneNode@@QAE@PAV0@@Z
+FSceneNode::FSceneNode(FSceneNode * p0)
+{
+	appMemcpy(((BYTE*)this) + 4, ((BYTE*)p0) + 4, 0x1B4);
+}
+
+// ??0FSceneNode@@QAE@ABV0@@Z
+FSceneNode::FSceneNode(FSceneNode const & p0)
+{
+	appMemcpy(((BYTE*)this) + 4, ((const BYTE*)&p0) + 4, 0x1B4);
+}
+
+// ??0FSceneNode@@QAE@PAVUViewport@@@Z
+FSceneNode::FSceneNode(UViewport * Viewport)
+{
+	appMemzero(((BYTE*)this) + 4, 0x1B4);
+	*(UViewport**)(((BYTE*)this) + 0x04) = Viewport;
+}
+
+// ??1FSceneNode@@UAE@XZ
+FSceneNode::~FSceneNode() {}
+
+// ?GetActorSceneNode@FSceneNode@@UAEPAVFActorSceneNode@@XZ
+FActorSceneNode * FSceneNode::GetActorSceneNode() { return NULL; }
+
+// ?GetCameraSceneNode@FSceneNode@@UAEPAVFCameraSceneNode@@XZ
+FCameraSceneNode * FSceneNode::GetCameraSceneNode() { return NULL; }
+
+// ?GetLevelSceneNode@FSceneNode@@UAEPAVFLevelSceneNode@@XZ
+FLevelSceneNode * FSceneNode::GetLevelSceneNode() { return NULL; }
+
+// ?GetMirrorSceneNode@FSceneNode@@UAEPAVFMirrorSceneNode@@XZ
+FMirrorSceneNode * FSceneNode::GetMirrorSceneNode() { return NULL; }
+
+// ?GetSkySceneNode@FSceneNode@@UAEPAVFSkySceneNode@@XZ
+FSkySceneNode * FSceneNode::GetSkySceneNode() { return NULL; }
+
+// ?GetWarpZoneSceneNode@FSceneNode@@UAEPAVFWarpZoneSceneNode@@XZ
+FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
+
+// ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
+FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
+
+// ?Deproject@FSceneNode@@QAE?AVFVector@@VFPlane@@@Z
+FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
+
+// ??4FSceneNode@@QAEAAV0@ABV0@@Z
+FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+
+// ??1FLevelSceneNode@@UAE@XZ
+FLevelSceneNode::~FLevelSceneNode() {}
+
+// ??4FLevelSceneNode@@QAEAAV0@ABV0@@Z
+FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+
+// =============================================================================
+// UVertexStream class implementations.
+// =============================================================================
+UVertexStreamBase::UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType)
+: ElementSize(InElementSize), StreamFlags(InFlags), StreamType(InType) {}
+void UVertexStreamBase::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+	if (Ar.Ver() >= 75)
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+}
+void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
+	DWORD OldFlags = StreamFlags;
+	StreamFlags = Flags;
+	if( OldFlags != Flags )
+		Revision++;
+}
+
+UVertexBuffer::UVertexBuffer()
+: UVertexStreamBase(0x2C, 0, 4) {}
+UVertexBuffer::UVertexBuffer(DWORD InFlags)
+: UVertexStreamBase(0x2C, InFlags, 0) {}
+void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexBuffer::GetData() { return Data.GetData(); }
+INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
+
+UVertexStreamCOLOR::UVertexStreamCOLOR()
+: UVertexStreamBase(4, 0, 2) {}
+UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
+: UVertexStreamBase(4, InFlags, 2) {}
+void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
+INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
+
+UVertexStreamPosNormTex::UVertexStreamPosNormTex()
+: UVertexStreamBase(0x28, 0, 5) {}
+UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
+: UVertexStreamBase(0x28, InFlags, 5) {}
+void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
+INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
+
+UVertexStreamUV::UVertexStreamUV()
+: UVertexStreamBase(8, 0, 3) {}
+UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
+: UVertexStreamBase(8, InFlags, 3) {}
+void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamUV::GetData() { return Data.GetData(); }
+INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
+
+UVertexStreamVECTOR::UVertexStreamVECTOR()
+: UVertexStreamBase(0xC, 0, 1) {}
+UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
+: UVertexStreamBase(0xC, InFlags, 1) {}
+void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+void* UVertexStreamVECTOR::GetData() { return Data.GetData(); }
+INT UVertexStreamVECTOR::GetDataSize() { return Data.Num() * 0xC; }
+
+// =============================================================================
+// FColor constructor from FPlane
+// =============================================================================
+FColor::FColor(const FPlane& P)
+:	R((BYTE)Clamp(appFloor(P.X*255.f),0,255))
+,	G((BYTE)Clamp(appFloor(P.Y*255.f),0,255))
+,	B((BYTE)Clamp(appFloor(P.Z*255.f),0,255))
+,	A((BYTE)Clamp(appFloor(P.W*255.f),0,255))
+{}
+
+// ============================================================================
+// FDbgVectorInfo
+// ============================================================================
+FDbgVectorInfo::FDbgVectorInfo() { appMemzero(this, sizeof(*this)); }
+FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+FDbgVectorInfo::~FDbgVectorInfo() {}
+FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+
+// ============================================================================
+// FRenderInterface
+// ============================================================================
+FRenderInterface::FRenderInterface() { appMemzero(RIPad, sizeof(RIPad)); }
+FRenderInterface::FRenderInterface(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+
+// ============================================================================
+// FSceneNode subclasses
+// ============================================================================
+
+// FActorSceneNode
+void FActorSceneNode::Render(FRenderInterface*) {}
+FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
+
+// FCameraSceneNode
+void FCameraSceneNode::Render(FRenderInterface*) {}
+FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
+void FCameraSceneNode::UpdateMatrices() {}
+
+// FMirrorSceneNode
+FMirrorSceneNode::FMirrorSceneNode(FLevelSceneNode* Parent, FPlane Mirror, INT a, INT b)
+	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
+FMirrorSceneNode* FMirrorSceneNode::GetMirrorSceneNode() { return this; }
+
+// FSkySceneNode
+FSkySceneNode::FSkySceneNode(FLevelSceneNode* Parent, INT Zone)
+	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
+FSkySceneNode* FSkySceneNode::GetSkySceneNode() { return this; }
+
+// FWarpZoneSceneNode
+FWarpZoneSceneNode::FWarpZoneSceneNode(FLevelSceneNode* Parent, AWarpZoneInfo*)
+	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
+FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
+
+// FLevelSceneNode
+FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
+
+// FLightMapSceneNode
+extern ENGINE_API FRebuildTools GRebuildTools;
+void FLightMapSceneNode::Render(FRenderInterface*) {}
+INT FLightMapSceneNode::FilterActor(AActor* Actor)
+{
+	if ((GRebuildTools.Pad[0x10] & 0x10) && (*(DWORD*)((BYTE*)Actor + 0xAC) & 0x1800))
+		return 0;
+	return (*(DWORD*)((BYTE*)Actor + 0xA4) >> 30) & 1;
+}
+
+// FDirectionalLightMapSceneNode
+FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
+
+// FPointLightMapSceneNode
+FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
+
+// ============================================================================
+// HCoords
+// ============================================================================
+HCoords::HCoords(FCameraSceneNode*) {}

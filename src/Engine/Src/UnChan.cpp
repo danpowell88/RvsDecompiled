@@ -415,3 +415,37 @@ unguard;
 }
 
 // ---------------------------------------------------------------------------
+
+// ============================================================================
+// FInBunch / FOutBunch implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ============================================================================
+// FInBunch
+// ============================================================================
+// DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
+//             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
+//             that reference allocated memory may alias incorrectly at runtime.
+FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
+// DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
+//             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
+FInBunch::FInBunch(UNetConnection*) : FBitReader() { appMemzero(Pad, sizeof(Pad)); }
+FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
+FArchive& FInBunch::operator<<(FName& N) { return *this; }
+
+// ============================================================================
+// FOutBunch
+// ============================================================================
+// DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
+FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
+// DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
+//             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
+FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+// DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
+//             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
+FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
+FOutBunch::~FOutBunch() {}
+FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
+FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }

@@ -1065,3 +1065,45 @@ void AAIScript::AddMyMarker(AActor* param_1)
 }
 
 
+
+// ============================================================================
+// FSortedPathList::findEndAnchor / findStartAnchor / FPathBuilder::operator=
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
+ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVector EndVec, INT bAllowFallback)
+{
+	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
+	INT Count = *(INT*)(Pad + 0x100);
+	ANavigationPoint* Best = NULL;
+	for (INT i = 0; i < Count; i++)
+	{
+		ANavigationPoint* Nav = Paths[i];
+		if (!Nav) continue;
+		if ((*(DWORD*)((BYTE*)Nav + 0x3a4)) & 0x200) continue;
+		if (!Scout->actorReachable(Nav, 1, 1)) continue;
+		INT EndReachable = End ? Scout->actorReachable(End, 1, 1) : Scout->pointReachable(EndVec, 1);
+		if (EndReachable) return Nav;
+		if (bAllowFallback && !Best) Best = Nav;
+	}
+	return Best;
+}
+
+// ?findStartAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@@Z
+ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
+{
+	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
+	INT Count = *(INT*)(Pad + 0x100);
+	for (INT i = 0; i < Count; i++)
+	{
+		ANavigationPoint* Nav = Paths[i];
+		if (!Nav) continue;
+		if ((*(DWORD*)((BYTE*)Nav + 0x3a4)) & 0x200) continue;
+		if (Scout->actorReachable(Nav, 1, 1)) return Nav;
+	}
+	return NULL;
+}
+
+// ??4FPathBuilder@@QAEAAV0@ABV0@@Z
+FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; }

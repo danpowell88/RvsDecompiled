@@ -1444,3 +1444,24 @@ void AGameInfo::execAbortScoreSubmission( FFrame& Stack, RESULT_DECL )
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execAbortScoreSubmission );
+
+// ============================================================================
+// FPointRegion implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??4FPointRegion@@QAEAAV0@ABV0@@Z
+FPointRegion& FPointRegion::operator=(const FPointRegion& Other)
+{
+	Zone = Other.Zone;
+	iLeaf = Other.iLeaf;
+	ZoneNumber = Other.ZoneNumber;
+	return *this;
+}
+
+// ??0FPointRegion@@QAE@XZ
+FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
+// ??0FPointRegion@@QAE@PAVAZoneInfo@@@Z
+FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE), ZoneNumber(0) {}
+// ??0FPointRegion@@QAE@PAVAZoneInfo@@HE@Z
+FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}

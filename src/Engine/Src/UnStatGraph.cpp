@@ -57,3 +57,133 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 	return this == &Other;
 }
 
+
+// ============================================================================
+// FStatGraph / FStats / FEngineStats implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??0FStatGraph@@QAE@ABV0@@Z
+FStatGraph::FStatGraph(FStatGraph const & p0) {}
+
+// ??1FStatGraph@@QAE@XZ
+FStatGraph::~FStatGraph() {}
+
+// ??4FStatGraph@@QAEAAV0@ABV0@@Z
+FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
+	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+	return *this;
+}
+
+// ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
+int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
+
+// ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
+void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {}
+
+// ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
+void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {}
+
+// ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
+void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {}
+
+// ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
+void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
+
+// ?Reset@FStatGraph@@QAEXXZ
+void FStatGraph::Reset() {}
+
+// ============================================================================
+// FStats
+// ============================================================================
+FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+FStats::~FStats() {}
+void FStats::UpdateString(FString&, INT) {}
+void FStats::Render(UViewport*, UEngine*) {}
+INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
+	FString StatName, FString DisplayName, EStatsUnit Unit)
+{
+	INT SlotIdx = -1;
+
+	if (DataType == (EStatsDataType)0)
+	{
+		SlotIdx = ((FArray*)((BYTE*)this + 0x1C))->AddZeroed(4);
+		((FArray*)((BYTE*)this + 0x28))->AddZeroed(4);
+		INT ni = ((FArray*)((BYTE*)this + 0x34))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x34) + ni * sizeof(FString)) = StatName;
+		INT di = ((FArray*)((BYTE*)this + 0x40))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x40) + di * sizeof(FString)) = DisplayName + StatName;
+	}
+	else if (DataType == (EStatsDataType)1)
+	{
+		SlotIdx = ((FArray*)((BYTE*)this + 0x4C))->AddZeroed(4);
+		((FArray*)((BYTE*)this + 0x58))->AddZeroed(4);
+		INT ni = ((FArray*)((BYTE*)this + 0x64))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x64) + ni * sizeof(FString)) = StatName;
+		INT di = ((FArray*)((BYTE*)this + 0x70))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x70) + di * sizeof(FString)) = DisplayName + StatName;
+	}
+	else if (DataType == (EStatsDataType)2)
+	{
+		SlotIdx = ((FArray*)((BYTE*)this + 0x7C))->AddZeroed(sizeof(FString));
+		((FArray*)((BYTE*)this + 0x88))->AddZeroed(sizeof(FString));
+		INT ni = ((FArray*)((BYTE*)this + 0x94))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0x94) + ni * sizeof(FString)) = StatName;
+		INT di = ((FArray*)((BYTE*)this + 0xA0))->AddZeroed(sizeof(FString));
+		*(FString*)(*(BYTE**)((BYTE*)this + 0xA0) + di * sizeof(FString)) = DisplayName + StatName;
+	}
+	else
+	{
+		return -1;
+	}
+	INT ri = ((FArray*)((BYTE*)this + (INT)StatType * 12 + 0xAC))->Add(1, 12);
+	INT* pRec = (INT*)(*(BYTE**)((BYTE*)this + (INT)StatType * 12 + 0xAC) + ri * 12);
+	pRec[0] = SlotIdx;
+	pRec[1] = (INT)DataType;
+	pRec[2] = (INT)Unit;
+	return SlotIdx;
+}
+void FStats::CalcMovingAverage(INT, DWORD) {}
+void FStats::Clear()
+{
+	BYTE* Base = (BYTE*)this;
+	INT*   IntData     = *(INT**)(Base + 0x1C);
+	INT    IntNum      = *(INT*)(Base + 0x20);
+	INT*   PrevIntData = *(INT**)(Base + 0x28);
+	INT*   FloatData     = *(INT**)(Base + 0x4C);
+	INT    FloatNum      = *(INT*)(Base + 0x50);
+	INT*   PrevFloatData = *(INT**)(Base + 0x58);
+	BYTE*  StrData      = *(BYTE**)(Base + 0x7C);
+	INT    StrNum       = *(INT*)(Base + 0x80);
+	BYTE*  PrevStrData  = *(BYTE**)(Base + 0x88);
+	if (IntNum > 0)
+		appMemcpy(PrevIntData, IntData, IntNum * 4);
+	if (FloatNum > 0)
+		appMemcpy(PrevFloatData, FloatData, FloatNum * 4);
+	for (INT i = 0; i < StrNum; i++)
+	{
+		FString* Dst = (FString*)(PrevStrData + i * 0xC);
+		FString* Src = (FString*)(StrData + i * 0xC);
+		*Dst = *Src;
+	}
+	if (IntNum > 0)
+		appMemzero(IntData, IntNum * 4);
+	if (FloatNum > 0)
+		appMemzero(FloatData, FloatNum * 4);
+	for (INT i = 0; i < StrNum; i++)
+	{
+		FString* Str = (FString*)(StrData + i * 0xC);
+		*Str = TEXT("");
+	}
+}
+
+// ============================================================================
+// FEngineStats
+// ============================================================================
+FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
+{
+	appMemcpy(this, &Other, 99 * 4);
+	return *this;
+}
+
+void FEngineStats::Init() {}

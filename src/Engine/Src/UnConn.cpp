@@ -260,3 +260,11 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
+
+// ============================================================================
+// UPackageMapLevel constructor
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
+UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}

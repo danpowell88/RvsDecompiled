@@ -295,3 +295,34 @@ void UReachSpec::Init()
 	End = NULL;
 }
 
+
+// ============================================================================
+// FCollisionHash / FCollisionOctree / FOctreeNode simple implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??1FCollisionHash@@UAE@XZ
+FCollisionHash::~FCollisionHash() {}
+
+// ??4FCollisionHash@@QAEAAV0@ABV0@@Z
+FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) {
+	appMemcpy(Buckets, p0.Buckets, sizeof(Buckets));
+	FreeList = p0.FreeList;
+	AllocatedPools = p0.AllocatedPools;
+	return *this;
+}
+
+// ??1FCollisionOctree@@UAE@XZ
+FCollisionOctree::~FCollisionOctree() {}
+
+// ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
+FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & Other) {
+	appMemcpy(Pad, Other.Pad, sizeof(Pad));
+	return *this;
+}
+
+// ??4FOctreeNode@@QAEAAV0@ABV0@@Z
+FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) {
+	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+	return *this;
+}

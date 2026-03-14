@@ -133,3 +133,219 @@ void USoundGen::Serialize(FArchive &Ar)
 	unguard;
 }
 
+
+// ============================================================================
+// FWaveModInfo / FSoundData implementations
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??0FWaveModInfo@@QAE@XZ
+FWaveModInfo::FWaveModInfo() : SampleLoopsNum(0), NoiseGate(0) {}
+
+// ??4FWaveModInfo@@QAEAAV0@ABV0@@Z
+FWaveModInfo & FWaveModInfo::operator=(FWaveModInfo const & Other) { appMemcpy(this, &Other, 64); return *this; }
+
+// ?ReadWaveInfo@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
+INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
+	guard(FWaveModInfo::ReadWaveInfo);
+
+	BYTE* Start = &WavData(0);
+	INT Len = WavData.Num();
+	WaveDataEnd = Start + Len;
+
+	if( *(DWORD*)(Start + 8) != 0x45564157 )
+		return 0;
+	pMasterSize = (DWORD*)(Start + 4);
+
+	BYTE* Ptr;
+	DWORD ChunkSize;
+
+	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x20746d66; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
+	if( *(DWORD*)Ptr != 0x20746d66 )
+		return 0;
+
+	BYTE* FmtData = Ptr + 8;
+	pBitsPerSample  = (_WORD*)(Ptr + 0x16);
+	pSamplesPerSec  = (DWORD*)(Ptr + 12);
+	pAvgBytesPerSec = (DWORD*)(Ptr + 16);
+	pBlockAlign     = (_WORD*)(Ptr + 20);
+	pChannels       = (_WORD*)(Ptr + 10);
+
+	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x61746164; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
+	if( *(DWORD*)Ptr != 0x61746164 )
+		return 0;
+
+	SampleDataStart = Ptr + 8;
+	pWaveDataSize   = (DWORD*)(Ptr + 4);
+	SampleDataSize  = *(DWORD*)(Ptr + 4);
+	OldBitsPerSample = (DWORD)*(_WORD*)(FmtData + 0x0E);
+	SampleDataEnd   = SampleDataStart + SampleDataSize;
+	NewDataSize     = SampleDataSize;
+
+	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x6C706D73; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
+	if( Ptr + 4 < WaveDataEnd && *(DWORD*)Ptr == 0x6C706D73 )
+	{
+		BYTE SmplHeader[36];
+		appMemcpy(SmplHeader, Ptr + 8, 36);
+		SampleLoopsNum = *(INT*)(SmplHeader + 28);
+		pSampleLoop    = (FSampleLoop*)(Ptr + 8 + 36);
+	}
+
+	return 1;
+	unguard;
+}
+
+// ?UpdateWaveData@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
+INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
+{
+	if (NewDataSize < SampleDataSize) {
+		DWORD delta = Pad16Bit(SampleDataSize) - Pad16Bit(NewDataSize);
+		*pWaveDataSize     = NewDataSize;
+		*pMasterSize      -= delta;
+		*pBlockAlign       = (_WORD)(*pChannels * (*pBitsPerSample >> 3));
+		*pAvgBytesPerSec   = (DWORD)(*pBlockAlign) * *pSamplesPerSec;
+		if (SampleLoopsNum > 0) {
+			FSampleLoop* pLoop = pSampleLoop;
+			DWORD scaleNum = (DWORD)*pBitsPerSample * SampleDataSize / NewDataSize;
+			for (INT i = 0; i < SampleLoopsNum; i++, pLoop++) {
+				pLoop->dwStart = (DWORD)((DWORD)pLoop->dwStart * OldBitsPerSample) / scaleNum;
+				pLoop->dwEnd   = (DWORD)((DWORD)pLoop->dwEnd   * OldBitsPerSample) / scaleNum;
+			}
+		}
+		INT afterSize = (INT)(WaveDataEnd - SampleDataEnd);
+		for (INT i = 0; i < afterSize; i++)
+			*(SampleDataEnd - delta + i) = *(SampleDataEnd + i);
+		WavData.Remove(WavData.Num() - delta, delta);
+	}
+	return 1;
+}
+
+// ?Pad16Bit@FWaveModInfo@@QAEKK@Z
+DWORD FWaveModInfo::Pad16Bit(DWORD InVal) { return (InVal + 1) & ~1; }
+
+// ?HalveData@FWaveModInfo@@QAEXXZ
+void FWaveModInfo::HalveData()
+{
+	if (*pBitsPerSample == 16)
+	{
+		DWORD DataSize = SampleDataSize;
+		short* Data = (short*)SampleDataStart;
+		INT Accum = 0;
+		INT Prev = Data[0];
+		for (DWORD i = 0; i < DataSize >> 2; i++)
+		{
+			INT Cur = Data[i * 2 + 1];
+			Accum = Accum + Prev + 0x20000 + Data[i * 2] * 2 + Cur;
+			DWORD Val = (Accum + 2) & 0x3FFFC;
+			if (Val > 0x3FFFC) Val = 0x3FFFC;
+			Data[i] = (short)((INT)Val >> 2) - 0x8000;
+			Accum = Accum - Val;
+			Prev = Cur;
+		}
+		NewDataSize = (DataSize >> 2) << 1;
+		*pSamplesPerSec >>= 1;
+	}
+	else if (*pBitsPerSample == 8)
+	{
+		DWORD DataSize = SampleDataSize;
+		BYTE* Data = SampleDataStart;
+		INT Accum = 0;
+		DWORD Prev = Data[0];
+		for (DWORD i = 0; i < DataSize >> 1; i++)
+		{
+			BYTE Next = Data[i * 2 + 1];
+			Accum = Accum + Prev + Data[i * 2] * 2 + Next;
+			DWORD Val = (Accum + 2) & 0x3FC;
+			if (Val > 0x3FC) Val = 0x3FC;
+			Data[i] = (BYTE)(Val >> 2);
+			Accum = Accum - Val;
+			Prev = Next;
+		}
+		NewDataSize = DataSize >> 1;
+		*pSamplesPerSec >>= 1;
+	}
+}
+
+// ?HalveReduce16to8@FWaveModInfo@@QAEXXZ
+void FWaveModInfo::HalveReduce16to8()
+{
+	DWORD DataSize = SampleDataSize;
+	short* Data16 = (short*)SampleDataStart;
+	BYTE* Data8 = SampleDataStart;
+	INT Accum = 0;
+	INT Prev = Data16[0];
+	for (DWORD i = 0; i < DataSize >> 2; i++)
+	{
+		INT Cur = Data16[i * 2 + 1];
+		Accum = Accum + Prev + 0x20000 + Data16[i * 2] * 2 + Cur;
+		DWORD Val = (Accum + 0x200) & 0xFFFFFC00;
+		if ((INT)Val > 0x3FC00) Val = 0x3FC00;
+		Data8[i] = (BYTE)(Val >> 10);
+		Accum = Accum - Val;
+		Prev = Cur;
+	}
+	NewDataSize = DataSize >> 2;
+	*pBitsPerSample = 8;
+	*pSamplesPerSec >>= 1;
+	NoiseGate = 1;
+}
+
+// ?NoiseGateFilter@FWaveModInfo@@QAEXXZ
+void FWaveModInfo::NoiseGateFilter()
+{
+	BYTE* Data = SampleDataStart;
+	INT TotalSamples = *pWaveDataSize;
+	DWORD Rate = *pSamplesPerSec;
+	INT SilenceStart = 0;
+	for (INT i = 0; i < TotalSamples; i++)
+	{
+		INT Amp = (INT)Data[i] - 0x80;
+		if (Amp < 0) Amp = -Amp;
+		UBOOL IsLoud = (Amp >= 0x12);
+		if (IsLoud && SilenceStart > 0 && (i - SilenceStart) < (INT)((Rate / 0x2B11) << 5))
+			IsLoud = 0;
+		if (SilenceStart == 0)
+		{
+			if (!IsLoud)
+				SilenceStart = i;
+		}
+		else if (IsLoud || i == TotalSamples - 1)
+		{
+			if ((i - SilenceStart) >= (INT)((Rate / 0x2B11) * 0x35C))
+			{
+				for (INT j = SilenceStart; j < i; j++)
+					Data[j] = 0x80;
+			}
+			SilenceStart = 0;
+		}
+	}
+}
+
+// ?Reduce16to8@FWaveModInfo@@QAEXXZ
+void FWaveModInfo::Reduce16to8()
+{
+	DWORD DataSize = SampleDataSize;
+	short* Data16 = (short*)SampleDataStart;
+	BYTE* Data8 = SampleDataStart;
+	INT Error = 0;
+	for (DWORD i = 0; i < DataSize >> 1; i++)
+	{
+		Error = Error + 0x8000 + (INT)Data16[i];
+		INT Quantized = (Error + 0x7F) & 0xFFFFFF00;
+		if (Quantized > 0xFF00)
+			Quantized = 0xFF00;
+		Data8[i] = (BYTE)(Quantized >> 8);
+		Error = Error - Quantized;
+	}
+	NewDataSize = DataSize >> 1;
+	*pBitsPerSample = 8;
+	NoiseGate = 1;
+}
+
+// ============================================================================
+// FSoundData
+// ============================================================================
+FSoundData::FSoundData(USound*) { appMemzero(this, sizeof(*this)); }
+FSoundData::~FSoundData() {}
+void FSoundData::Load() {}
+FLOAT FSoundData::GetPeriod() { return 0.0f; }

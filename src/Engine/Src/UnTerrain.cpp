@@ -793,3 +793,14 @@ int UTerrainMaterial::HasFallback()
 	unguard;
 }
 
+
+// ============================================================================
+// UTerrainSector / UTerrainPrimitive constructors
+// (moved from EngineStubs.cpp)
+// ============================================================================
+
+// ??0UTerrainSector@@QAE@PAVATerrainInfo@@HHHH@Z
+UTerrainSector::UTerrainSector(ATerrainInfo*, INT, INT, INT, INT) {}
+
+// ??0UTerrainPrimitive@@QAE@PAVATerrainInfo@@@Z
+UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
