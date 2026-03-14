@@ -104,14 +104,15 @@ DWORD UeviLPatchService::GetPatchServiceState()
 			if (puVar3 == NULL)
 				PatchServiceHandle = NULL;
 			else
-				// TODO: FUN_10035870 — construct patch service object
+				// FUN_10035870 = EviLPatchService_Create() — construct patch service COM object.
+				// DIVERGENCE: Ubi.com patch service defunct; stub returns NULL.
 				PatchServiceHandle = FUN_10035870(puVar3);
 
-			// TODO: FUN_10035960 — set poll interval (0xfa = 250ms)
+			// FUN_10035960 = EviLPatchService_SetPollInterval() — set 250ms poll interval.
 			FUN_10035960(PatchServiceHandle, 0xfa);
-			// TODO: FUN_100358e0 — set window title
+			// FUN_100358e0 = EviLPatchService_SetWindowTitle() — set "RavenShield" as title.
 			FUN_100358e0(PatchServiceHandle, (TCHAR*)L"RavenShield");
-			// TODO: FUN_10035af0 — launch upgrade executable
+			// FUN_10035af0 = EviLPatchService_LaunchUpgrader() — start UpgradeLauncher.exe.
 			FUN_10035af0(PatchServiceHandle, L"./UpgradeLauncher.exe", NULL, NULL);
 
 			goto LAB_GetPatchState;
@@ -131,7 +132,7 @@ DWORD UeviLPatchService::GetPatchServiceState()
 			PatchState = 5;
 			if (PatchServiceHandle != NULL)
 			{
-				// TODO: FUN_10035ad0 — destroy patch service object
+				// FUN_10035ad0 = EviLPatchService_Destroy() — destroy patch service COM object.
 				FUN_10035ad0(PatchServiceHandle);
 				GMalloc->Free(piVar1);
 			}
@@ -142,12 +143,13 @@ DWORD UeviLPatchService::GetPatchServiceState()
 
 LAB_GetPatchState:
 	if ((PatchServiceHandle != NULL) && (PatchState != 5) &&
-	    // TODO: FUN_10035920 — query current state
+	    // FUN_10035920 = EviLPatchService_GetState() — query current patch state (5 = done/error).
 	    (PatchState = FUN_10035920(PatchServiceHandle), PatchState == 5))
 	{
-		// TODO: FUN_10035930 — get download progress
+		// FUN_10035930 = EviLPatchService_GetProgress() — get download progress (0–100).
 		DownloadProgress = FUN_10035930(PatchServiceHandle);
-		// TODO: FUN_10004b40 — notify caller (unaff_EDI saved register)
+		// FUN_10004b40 = EviLPatchService_NotifyCompletion() — callback on patch complete.
+		// DIVERGENCE: unaff_EDI (saved register context) not recoverable; passes NULL.
 		FUN_10004b40(NULL);
 	}
 
