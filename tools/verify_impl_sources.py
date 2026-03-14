@@ -7,8 +7,7 @@ given source directory and verifies that every function definition is
 immediately preceded by exactly one IMPL_xxx macro from ImplSource.h.
 
 Exits with code 1 if any unannotated functions are found, or if any function
-uses IMPL_TODO (which is a stub placeholder that must be replaced before
-committing).
+uses IMPL_TODO or IMPL_APPROX (both are forbidden in a fully-attributed build).
 
 Usage:
     python verify_impl_sources.py <source_dir> [--warn-only] [--report <file>]
@@ -31,24 +30,26 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 IMPL_MACROS = {
-    # Current 4-macro parity system
+    # Current final-state macros
     "IMPL_MATCH",
-    "IMPL_APPROX",
     "IMPL_EMPTY",
     "IMPL_DIVERGE",
-    # Legacy aliases (kept for backward compatibility)
+    # Canonical long-form aliases
+    "IMPL_INTENTIONALLY_EMPTY",
+    "IMPL_PERMANENT_DIVERGENCE",
     "IMPL_GHIDRA",
+    # Forbidden — cause build failure
+    "IMPL_APPROX",
+    "IMPL_TODO",
+    # Removed macros (kept so scanner can detect and reject them)
     "IMPL_GHIDRA_APPROX",
     "IMPL_SDK",
     "IMPL_SDK_MODIFIED",
     "IMPL_INFERRED",
-    "IMPL_INTENTIONALLY_EMPTY",
-    "IMPL_PERMANENT_DIVERGENCE",
-    "IMPL_TODO",
 }
 
-# IMPL_TODO is a stub — treated as an unimplemented function
-STUB_MACROS = {"IMPL_TODO"}
+# These macros are forbidden — every function using them is a build failure
+STUB_MACROS = {"IMPL_TODO", "IMPL_APPROX"}
 
 # Patterns for function definitions (not declarations):
 # Matches lines like:
@@ -158,7 +159,7 @@ def scan_file(path: Path) -> list[dict]:
                 "file": str(path),
                 "line": idx + 1,
                 "function": func_name,
-                "issue": "todo",
+                "issue": "forbidden",
                 "macro": macro,
             })
 
@@ -179,7 +180,7 @@ def scan_directory(source_dir: Path) -> list[dict]:
 
 def print_report(issues: list[dict], source_dir: Path) -> None:
     missing = [i for i in issues if i["issue"] == "missing"]
-    todo    = [i for i in issues if i["issue"] == "todo"]
+    todo    = [i for i in issues if i["issue"] == "forbidden"]
 
     base = str(source_dir)
 
@@ -194,16 +195,19 @@ def print_report(issues: list[dict], source_dir: Path) -> None:
 
     if todo:
         print(f"\n{'='*70}")
-        print(f"  IMPL_TODO (stub — not yet implemented) ({len(todo)} function(s))")
+        print(f"  FORBIDDEN MACROS (must be replaced) ({len(todo)} function(s))")
+        print(f"  IMPL_TODO  = unimplemented stub — must be replaced before commit")
+        print(f"  IMPL_APPROX = approximation — must be verified and promoted to")
+        print(f"                IMPL_MATCH, IMPL_EMPTY, or IMPL_DIVERGE")
         print(f"{'='*70}")
         for i in todo:
             rel = os.path.relpath(i["file"], base)
-            print(f"  {rel}:{i['line']}  {i['function']}")
+            print(f"  [{i['macro']:15}]  {rel}:{i['line']}  {i['function']}")
         print()
 
     total = len(missing) + len(todo)
     if total:
-        print(f"TOTAL FAILURES: {total}  ({len(missing)} unannotated + {len(todo)} stubs)\n")
+        print(f"TOTAL FAILURES: {total}  ({len(missing)} unannotated + {len(todo)} forbidden macros)\n")
     else:
         cpp_count = sum(1 for _ in source_dir.rglob("*.cpp"))
         print(f"OK — all functions in {cpp_count} .cpp file(s) are attributed.")
