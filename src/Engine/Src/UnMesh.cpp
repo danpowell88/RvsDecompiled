@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnMesh.cpp: UMesh, ULodMesh, USkeletalMesh, UStaticMesh registration.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -688,9 +688,9 @@ void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 	// Ghidra: (iVar2 + iVar1*4)*2 where iVar2=0,1,2 gives byte offsets 0,2,4 within face iVar1.
 	for (INT fi = 0; fi < faceCount; fi++)
 	{
-		WORD vi0 = *(WORD*)(faceData + fi * 8 + 0);
-		WORD vi1 = *(WORD*)(faceData + fi * 8 + 2);
-		WORD vi2 = *(WORD*)(faceData + fi * 8 + 4);
+		_WORD vi0 = *(_WORD*)(faceData + fi * 8 + 0);
+		_WORD vi1 = *(_WORD*)(faceData + fi * 8 + 2);
+		_WORD vi2 = *(_WORD*)(faceData + fi * 8 + 4);
 
 		// Vertex positions: stride 0xC = sizeof(FVector)
 		BYTE* pv0 = vertData + vi0 * 0xC;
