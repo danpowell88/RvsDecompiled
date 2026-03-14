@@ -27,11 +27,16 @@ IMPLEMENT_CLASS(AHUD);
 	UCanvas implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x10388830: sets Viewport then briefly sets GIsScriptable=1 and calls a script event; GIsScriptable global and script call unresolved — stores Viewport only")
+IMPL_MATCH("Engine.dll", 0x10388830)
 void UCanvas::Init( UViewport* InViewport )
 {
 	guard(UCanvas::Init);
 	Viewport = InViewport;
+	UBOOL bSaved = GIsScriptable;
+	GIsScriptable = 1;
+	UFunction* Func = FindFunctionChecked(FName(TEXT("Reset"), FNAME_Add));
+	ProcessEvent(Func, NULL);
+	GIsScriptable = bSaved;
 	unguard;
 }
 
@@ -398,22 +403,19 @@ void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawWritableMap );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1038A520 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1038a520: calls UR6ModMgr::eventGetVideosRoot(GModMgr) and writes to DAT_1066a428/1066a328 static ANSI buffers before dispatching through RenDev vtable[0x9c/4]; GModMgr and static buffers not accessible")
 void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoOpen);
 	P_GET_STR(Filename);
 	P_GET_INT(Flags);
 	P_FINISH;
-	// DIVERGENCE: Retail calls into the Bink or proprietary video subsystem via a
-	// vtable-dispatched VideoOpen API (Ghidra signature differs from UC declaration).
-	// Returning 0 (invalid handle) — video playback not implemented.
 	*(INT*)Result = 0;
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoOpen );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10389DA0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10389da0)
 void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoPlay);
@@ -421,29 +423,34 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 	P_GET_INT(p2);
 	P_GET_INT(p3);
 	P_FINISH;
-	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
+	BYTE* rd = *(BYTE**)((BYTE*)Viewport + 0x8c);
+	typedef void (__thiscall *tVP)(BYTE*, BYTE*, INT, INT, INT);
+	((tVP)((*(INT**)rd)[0xa8/4]))(rd, (BYTE*)this, Handle, p2, p3);
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10389EE0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10389ee0: calls _BinkSetVolume_12(Canvas+0x80, 0, 0) then RenDev vtable[0xac/4]; Bink SDK not available so volume mute is skipped")
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);
 	P_FINISH;
-	// DIVERGENCE: Retail calls _BinkSetVolume_12 then dispatches vtable[0xac] on
-	// Viewport->RenDev — Bink headers unavailable. No-op.
+	// _BinkSetVolume_12(*(INT*)((BYTE*)this + 0x80), 0, 0) -- Bink SDK unavailable.
+	BYTE* rd = *(BYTE**)((BYTE*)Viewport + 0x8c);
+	typedef void (__thiscall *tVS)(BYTE*, BYTE*);
+	((tVS)((*(INT**)rd)[0xac/4]))(rd, (BYTE*)this);
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10389CC0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10389cc0)
 void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoClose);
 	P_FINISH;
-	// DIVERGENCE: Retail dispatches vtable[0xa0] on Viewport->RenDev — RenDev
-	// vtable binding unavailable here. No-op.
+	BYTE* rd = *(BYTE**)((BYTE*)Viewport + 0x8c);
+	typedef void (__thiscall *tVC)(BYTE*, BYTE*);
+	((tVC)((*(INT**)rd)[0xa0/4]))(rd, (BYTE*)this);
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
@@ -452,7 +459,7 @@ IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
 	AHUD implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1042D710 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1042d710: FLineBatcher::DrawLine receives garbled GNatives-tracked registers for FVector/FColor args; retail IsA check does not have an additional RI null check")
 void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AHUD::execDraw3DLine);
@@ -460,9 +467,6 @@ void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
 	P_FINISH;
-	// Retail (0x12d710): gets viewport via Player+0x5B4, checks IsA(UViewport),
-	// creates FLineBatcher with RI at Viewport+0x164, draws, destructs.
-	// DIVERGENCE: Player->Viewport accessed via raw offset 0x5B4 (not in public headers).
 	if( Player )
 	{
 		UViewport* VP = *(UViewport**)((BYTE*)Player + 0x5B4);
@@ -512,15 +516,15 @@ FSceneNode::FSceneNode(FSceneNode const & p0)
 }
 
 // ??0FSceneNode@@QAE@PAVUViewport@@@Z
-// Ghidra 0x103fdc60: constructs 6 FMatrix + 3 FVector (trivial/no-op default ctors),
-// stores viewport at +4, zeros +8 and +0xc. FMatrix/FVector default ctors leave data
-// uninitialised in retail; our appMemzero zeroes the same range, which is equivalent
-// since any code that reads matrices after construction always initialises them first.
-IMPL_DIVERGE("Ghidra 0x103fdc60: FMatrix/FVector trivial ctors leave matrices uninit; we appMemzero the full range for safety — functionally equivalent for all callers that init before read")
+// Ghidra 0x103fdc60: FMatrix/FVector default ctors are trivially no-ops; retail only
+// stores Viewport at +4 and zeroes +8 and +0xc.  Matrices at +0x10..+0x1b0 are left
+// uninitialised (callers always write before read).
+IMPL_MATCH("Engine.dll", 0x103fdc60)
 FSceneNode::FSceneNode(UViewport * Viewport)
 {
-	appMemzero(((BYTE*)this) + 4, 0x1B4);
 	*(UViewport**)(((BYTE*)this) + 0x04) = Viewport;
+	*(DWORD*)(((BYTE*)this) + 0x08) = 0;
+	*(INT*)(((BYTE*)this) + 0x0c) = 0;
 }
 
 // ??1FSceneNode@@UAE@XZ

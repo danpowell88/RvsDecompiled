@@ -1092,16 +1092,14 @@ void APawn::PreNetReceive()
 IMPL_DIVERGE("Ghidra 0x10307190: retail calls appFailAssert(\"false\", APawn.h, 0x9a) then returns 0; our build string literals differ")
 DWORD APawn::R6LineOfSightTo( AActor* Other, INT bUnused )
 {
-	// Retail intentionally asserts — this method must be overridden in derived pawns.
-	appFailAssert( "false", "d:\\ravenshield\\412\\engine\\inc\\APawn.h", 0x9a );
+	appFailAssert( "false", __FILE__, __LINE__ );
 	return 0;
 }
 
 IMPL_DIVERGE("Ghidra 0x10307170: retail calls appFailAssert(\"false\", APawn.h, 0x99) then returns 0; our build string literals differ")
 DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 {
-	// Retail intentionally asserts — this method must be overridden in derived pawns.
-	appFailAssert( "false", "d:\\ravenshield\\412\\engine\\inc\\APawn.h", 0x99 );
+	appFailAssert( "false", __FILE__, __LINE__ );
 	return 0;
 }
 
