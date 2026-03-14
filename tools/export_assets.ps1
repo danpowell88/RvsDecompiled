@@ -1,16 +1,31 @@
 
 # export_assets.ps1
-# Unpacks all retail UE2 binary packages into raw source asset files
-# under content/ mirroring the structure Red Storm would have had.
+# Unpacks retail UE2 binary packages into raw source asset files under content/.
 #
-# Supported:
-#   textures/   *.utx  -> content/textures/<Package>/*.bmp   (BMP; TGA/DXT fails in this UCC build)
-#   sounds/     *.uax  -> content/sounds/<Package>/*.wav
-#   staticmeshes/*.usx -> content/staticmeshes/<Package>/*.t3d
-#   maps/       *.rsm  -> content/maps/*.rsm  (copied as-is; .rsm is R6-proprietary, not UCC-exportable)
+# !! IMPORTANT - UCC LIMITATIONS !!
+# The retail UCC.exe cannot properly export most of this game's asset formats:
+#
+#   Textures:     DXT1/3/5 compressed textures export as 0-byte files silently.
+#                 Only a handful of uncompressed (paletted/RGB) textures work.
+#
+#   Sounds:       .uax packages are tiny wrappers; actual audio is stored in the
+#                 proprietary DARE audio format (.SB0 files). UCC exports 0-byte
+#                 placeholder .wav files with no audio data.
+#
+#   StaticMeshes: DXT-compressed geometry silently exports as 0-byte T3D files.
+#
+# THE CORRECT TOOL for full extraction is UModel by Gildor:
+#   https://www.gildor.org/en/projects/umodel
+# UModel handles DXT decompression, DARE audio, and skeletal meshes (PSK/PSA).
+#
+# What this script CAN reliably do:
+#   maps/   *.rsm -> content/maps/*.rsm   (verbatim copy, these are valid)
+#
+# The broken export sections (textures/sounds/staticmeshes) are left here
+# for reference / future use once a better extraction tool is integrated.
 #
 # NOT supported by this UCC build (requires ActorX UnrealEd plugin):
-#   animations/ *.ukx  -> PSK (mesh) + PSA (animation) -- skipped, originals left in retail/animations/
+#   animations/ *.ukx -> PSK + PSA -- skipped, originals in retail/animations/
 #
 # Usage: .\tools\export_assets.ps1 [[-Force]]
 param([switch]$Force)
