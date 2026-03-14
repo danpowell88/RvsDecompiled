@@ -1271,19 +1271,19 @@ INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_DIVERGE("partial stub; retail TickDemoPlayback at Ghidra 0x103c65a0")
+IMPL_MATCH("Engine.dll", 0x103c65a0)
 INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoPlayback);
 	ALevelInfo* info = GetLevelInfo();
-	UEngine* eng     = *(UEngine**)((BYTE*)this + 0x44);
+	BYTE* eng  = *(BYTE**)((BYTE*)this + 0x44);
 	// DemoRecDriver->ServerConnection->State
 	INT state = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)this + 0x8c) + 0x3c) + 0x80);
 	if ( *(BYTE*)((BYTE*)info + 0x928) == 3 && state != 2 )
 	{
 		*(BYTE*)((BYTE*)info + 0x928) = 0;
 		// ServerTravel("","",0) — vtable slot 0xb0/4 on UEngine
-		typedef void (__thiscall* ServerTravelFn)(UEngine*, const TCHAR*, const TCHAR*, INT);
+		typedef void (__thiscall* ServerTravelFn)(void*, const TCHAR*, const TCHAR*, INT);
 		((ServerTravelFn)(*(DWORD*)(*(DWORD*)eng + 0xb0)))(eng, TEXT(""), TEXT(""), 0);
 	}
 	if ( state == 1 )
@@ -1291,7 +1291,12 @@ INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
 		if ( nVP == 0 )
 			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x527);
-		// TODO: BrowseLevel to ?entry (requires UEngine::Browse)
+		// Browse to "?entry": Engine->vtable[0xa4/4=41](firstViewport, "?entry", 0, 0)
+		// firstViewport = Engine->Client->Viewports.Data[0]
+		BYTE* client  = *(BYTE**)(eng + 0x44);
+		void* vp0     = *(void**)(*(BYTE**)(client + 0x30));
+		typedef INT (__thiscall* BrowseFn)(void*, void*, const TCHAR*, INT, INT);
+		((BrowseFn)(*(DWORD*)(*(DWORD*)eng + 0xa4)))(eng, vp0, TEXT("?entry"), 0, 0);
 	}
 	return 1;
 	unguard;
@@ -1912,8 +1917,22 @@ APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 	}
 	return CachedVol;
 }
-IMPL_DIVERGE("partial; retail searches display name table at this+0x5d0; Ghidra 0xb7ab0")
-FString ALevelInfo::GetDisplayAs(FString s) { return s; }
+IMPL_MATCH("Engine.dll", 0x103b7ab0)
+FString ALevelInfo::GetDisplayAs(FString s)
+{
+	// Ghidra 0xb7ab0 (191 bytes): walks a table of display-name entries at this+0x5d0.
+	// Each entry is 0x98 bytes: an FString key at offset 0, display FString at offset 0xc.
+	// Returns the matching display name, or "RGM_AllMode" if not found.
+	BYTE* data = *(BYTE**)((BYTE*)this + 0x5d0);      // FArray.Data
+	INT   n    = *(INT*) ((BYTE*)this + 0x5d0 + 4);   // FArray.ArrayNum
+	for ( INT i = 0; i < n; i++ )
+	{
+		FString* key = (FString*)(data + i * 0x98);
+		if ( *key == s )
+			return *(FString*)(data + i * 0x98 + 0xc);
+	}
+	return FString(TEXT("RGM_AllMode"));
+}
 
 // ?GetPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@VFVector@@PAVAActor@@H@Z  (0x0BBА00, 346 bytes)
 // Walks the PhysicsVolume linked list to find the highest-priority volume
