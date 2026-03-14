@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListButtonItem.uc : (add small description)
+//  R6WindowListButtonItem.uc : List-box row item that embeds an R6WindowButton widget.
+//  Allows a list control to present a clickable button inside each row entry.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

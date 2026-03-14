@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListRadioButton.uc : (add small description)
+//  R6WindowListRadioButton.uc : Horizontal radio-button bar whose items can be de-selected.
+//  Extends R6WindowTextListRadio with per-item width, vertical padding, and optional unselect.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

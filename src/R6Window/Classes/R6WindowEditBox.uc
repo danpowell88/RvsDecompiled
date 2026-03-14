@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowEditBox.uc : (add small description)
+//  R6WindowEditBox.uc : Ravenshield-styled single-line text edit box.
+//  Thin R6 wrapper over UWindowEditBox applying the game's look-and-feel.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

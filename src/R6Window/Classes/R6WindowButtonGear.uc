@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowButtonGear.uc : (add small description)
+//  R6WindowButtonGear.uc : Icon/gear button with highlight texture and alpha blending.
+//  Extends R6WindowButton to add a rollover highlight effect and forced mouse-over state.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

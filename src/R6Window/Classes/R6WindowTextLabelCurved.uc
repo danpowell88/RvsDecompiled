@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowTextLabelCurved.uc : (add small description)
+//  R6WindowTextLabelCurved.uc : Text label with curved corner decorations.
+//  Extends R6WindowTextLabel by adding skinned left-curve and top-left corner regions.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

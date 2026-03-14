@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowWrappedTextArea.uc : (add small description)
+//  R6WindowWrappedTextArea.uc : Word-wrapping text area with R6-styled decorative borders.
+//  Extends UWindowWrappedTextArea and adds skinned vertical and horizontal border regions.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6WindowListAreaItem.uc : (add small description)
+//  R6WindowListAreaItem.uc : List-box row item that embeds an R6WindowArea panel widget.
+//  Extends UWindowListBoxItem and holds a reference to the hosted area sub-window.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
