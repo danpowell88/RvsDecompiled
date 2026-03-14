@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	R6IORotatingDoor.cpp
 =============================================================================*/
 
@@ -19,12 +19,10 @@ void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
 	guard(AR6IORotatingDoor::AddMyMarker);
 
-	// DIVERGENCE: Ghidra 0x1f330 (~5061 bytes). Spawns R6Door navigation markers at
-	// the door's pivot; calculates door normal via cross product; spawns door actor(s)
-	// for m_DoorActorA / m_DoorActorB with clockwise/sliding variations.
-	// Multiple unresolved FUN_ helpers and raw SpawnActor vtable dispatch make this
-	// impractical to reconstruct without further Ghidra analysis. AI door pathfinding
-	// markers will be absent — doors are still physically present and functional.
+	// TODO: implement AR6IORotatingDoor::AddMyMarker (Ghidra 0x1f330, ~5061 bytes: spawns R6Door
+	// navigation markers at door pivot; calculates door normal via cross product; spawns door actors
+	// for m_DoorActorA / m_DoorActorB. Multiple unresolved FUN_ helpers and raw SpawnActor vtable
+	// dispatch make this impractical without further Ghidra analysis; AI door pathfinding absent)
 
 	unguard;
 }

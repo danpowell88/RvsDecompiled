@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnPawn.cpp: APawn, AController, APlayerController, AAIController.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -1115,7 +1115,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
-	// DIVERGENCE: APawn::UpdateMovementAnimation not yet implemented.
+	// TODO: implement APawn::UpdateMovementAnimation (retail: reads Velocity magnitude and Physics state to select animation blend weights)
 	// GHIDRA REF: reads Velocity magnitude and Physics state to select animation
 	// blend weights. Requires animation blend tree integration not yet reconstructed.
 	unguard;

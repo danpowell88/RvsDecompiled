@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnScript.cpp: Engine-side animation notify system (UAnimNotify*)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -26,7 +26,7 @@ void UAnimNotify::PostEditChange()
 }
 
 
-// DIVERGENCE: UAnimNotify_DestroyEffect::Notify not yet implemented.
+// DIVERGENCE: UAnimNotify_DestroyEffect::Notify — bExpireParticles path calls DestroyActor instead of AEmitter vtable[0x63] (cannot safely cast without full AEmitter vtable layout).
 // GHIDRA REF: 0x136ec0 — iterates XLevel->Actors, destroys/expires particle actors
 // owned by Owner whose Tag matches DestroyTag. Complex actor iteration + conditional
 // ULevel::DestroyActor / UParticleEmitter::expire dispatch not yet reconstructed.
@@ -70,7 +70,7 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
-	// DIVERGENCE: UAnimNotify_Effect::Notify not yet implemented.
+	// TODO: implement UAnimNotify_Effect::Notify (retail 0x136b20, 875 bytes: spawns Effect actor at Owner's location using FCoords rotation + SpawnActor)
 	// GHIDRA REF: 0x136b20 — 875 bytes. Spawns the Effect actor (this->Effect at +0x40)
 	// at Owner's location/rotation using FCoords rotation math and SpawnActor.
 	// Full reconstruction requires FCoords helpers not yet available.
@@ -78,13 +78,13 @@ void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 }
 
 
-// DIVERGENCE: UAnimNotify_MatSubAction::Notify not yet implemented.
+// TODO: implement UAnimNotify_MatSubAction::Notify (retail 0x136fe0: finds live ASceneManager in XLevel->Actors, starts SubAction)
 // GHIDRA REF: 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts
 // the SubAction on it, adjusting start/end times from scene manager position.
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
-	// DIVERGENCE: see comment above.
+	// TODO: see TODO above
 	unguard;
 }
 

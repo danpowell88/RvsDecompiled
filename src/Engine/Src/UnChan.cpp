@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 UnChan.cpp: Network channel implementations (UChannel hierarchy)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -35,14 +35,14 @@ unguard;
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
-// Divergence: 453-byte file-sending tick not implemented.
+// TODO: implement UFileChannel::Tick (retail 453 bytes: file-sending tick)
 unguard;
 }
 
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
-// Divergence: 1243-byte receive handler not implemented.
+// TODO: implement UFileChannel::ReceivedBunch (retail 1243 bytes: receive handler)
 unguard;
 }
 
@@ -110,7 +110,7 @@ unguard;
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
-// Divergence: complex actor replication receive not implemented.
+// TODO: implement UActorChannel::ReceivedBunch (complex actor replication receive)
 unguard;
 }
 
@@ -125,14 +125,14 @@ unguard;
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
-// Divergence: complex actor replication not implemented.
+// TODO: implement UActorChannel::ReplicateActor (complex actor replication)
 unguard;
 }
 
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
-// Divergence: actor channel setup not implemented.
+// TODO: implement UActorChannel::SetChannelActor (actor channel setup)
 unguard;
 }
 
@@ -188,7 +188,7 @@ void UActorChannel::Destroy()
 			if (*(INT*)((BYTE*)this + 0x6C) != 0 && *(INT*)((BYTE*)this + 0x30) == 0)
 			{
 				// FUN_103db080 = UActorChannel_CleanupActorRef() — zero actor ref and deregister from level.
-				// DIVERGENCE: full actor-channel teardown sequence not implemented; actor ref
+				// TODO: implement actor-channel teardown (FUN_103db080 = UActorChannel_CleanupActorRef); actor ref
 				// leaks on client-side channel destroy (safe since level is being torn down).
 			}
 		}
@@ -237,14 +237,14 @@ unguard;
 void UControlChannel::ReceivedBunch(FInBunch&)
 {
 guard(UControlChannel::ReceivedBunch);
-// Divergence: complex control message handling not implemented.
+// TODO: implement UControlChannel::ReceivedBunch (complex control message handling)
 unguard;
 }
 
 void UControlChannel::Serialize(const TCHAR*, EName)
 {
 guard(UControlChannel::Serialize);
-// Divergence: complex control serialization not implemented.
+// TODO: implement UControlChannel::Serialize (complex control serialization)
 unguard;
 }
 
@@ -294,7 +294,7 @@ void UChannel::SetClosingFlag() { Closing = 1; }
 void UChannel::Close()
 {
 guard(UChannel::Close);
-// Divergence: 252-byte close bunch creation not implemented.
+// TODO: implement UChannel::Close (retail 252 bytes: close bunch creation)
 unguard;
 }
 
@@ -324,7 +324,7 @@ unguard;
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
-// Divergence: 247-byte resend timer logic not implemented.
+// TODO: implement UChannel::Tick (retail 247 bytes: resend timer logic)
 unguard;
 }
 
@@ -365,14 +365,14 @@ unguard;
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
-// Divergence: 244-byte acked-bunch cleanup not implemented.
+// TODO: implement UChannel::ReceivedAcks (retail 244 bytes: acked-bunch cleanup)
 unguard;
 }
 
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
-// Divergence: complex raw bunch routing not implemented.
+// TODO: implement UChannel::ReceivedRawBunch (complex raw bunch routing)
 unguard;
 }
 

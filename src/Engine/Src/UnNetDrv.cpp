@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 UnNetDrv.cpp: Network driver (UNetDriver, UDemoRecDriver)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -77,7 +77,7 @@ void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 guard(UNetDriver::NotifyActorDestroyed);
 // Ghidra 0x18c2d0: for each client connection, if actor has open channel
 // (ServerConnection or ClientConnections TArray at +0x30), close it.
-// Divergence: actor channel tracking via FUN_103b7b70 not implemented.
+// TODO: resolve FUN_103b7b70 for actor channel tracking in NotifyActorDestroyed
 (void)Actor;
 unguard;
 }
@@ -145,7 +145,7 @@ unguard;
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
-// Divergence: complex demo playback not implemented.
+// TODO: implement UDemoRecDriver::TickDispatch (complex demo playback)
 unguard;
 }
 
@@ -315,14 +315,14 @@ unguard;
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
-// Divergence: 1146-byte function -- complex packet assembly not implemented.
+// TODO: implement UNetConnection::FlushNet (retail 1146 bytes: complex packet assembly)
 unguard;
 }
 
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
-// Divergence: 1628-byte function -- complex tick not implemented.
+// TODO: implement UNetConnection::Tick (retail 1628 bytes: complex tick)
 unguard;
 }
 
@@ -389,7 +389,7 @@ unguard;
 void UNetConnection::ReceivedPacket(FBitReader& Reader)
 {
 guard(UNetConnection::ReceivedPacket);
-// Divergence: very complex packet processing not implemented.
+// TODO: implement UNetConnection::ReceivedPacket (very complex packet processing)
 unguard;
 }
 
@@ -415,7 +415,7 @@ unguard;
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
 guard(UNetConnection::SetActorDirty);
-// Divergence: FUN_103b7b70 (actor channel lookup) not reimplemented.
+// TODO: resolve FUN_103b7b70 (actor channel lookup) to implement SetActorDirty
 (void)Actor;
 unguard;
 }

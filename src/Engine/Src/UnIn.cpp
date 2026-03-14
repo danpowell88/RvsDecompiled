@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnIn.cpp: Input subsystem (UInputPlanning)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -24,7 +24,7 @@ const TCHAR* UInputPlanning::StaticConfigName()
 void UInputPlanning::StaticInitInput()
 {
 	guard(UInputPlanning::StaticInitInput);
-	// DIVERGENCE: Full UInput property schema registration not implemented.
+	// TODO: implement UInputPlanning::StaticInitInput (retail 0xb47c0: registers Alias UStruct with FName/FString properties on UInput)
 	// GHIDRA REF: 0xb47c0 ?StaticInitInput@UInput@@SAXXZ — builds Alias UStruct with
 	// FName "Alias" and FString "Command" properties, then registers "Aliases"
 	// array property on UInput. Called once at engine startup.

@@ -1,4 +1,4 @@
-#pragma optimize("", off)
+﻿#pragma optimize("", off)
 #include "EnginePrivate.h"
 
 // Ghidra labels 80-bit x87 float returns as FLOAT10; treat as double for compilation.
@@ -883,7 +883,7 @@ void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
 	// Retail 0x1361a0: builds bone pivot list from skeleton data.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement BuildPivotsList (retail 0x1361a0: builds bone pivot list from skeleton data)
 	unguard;
 }
 
@@ -932,7 +932,7 @@ void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
 	// Retail 0x10436390 (933b): draws debug cylinders for bone collision shapes.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement DrawCollisionCylinders (retail 0x10436390, 933 bytes: draws debug cylinders for bone collision shapes)
 	unguard;
 }
 
@@ -1577,7 +1577,7 @@ void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 {
 	guard(USkeletalMeshInstance::Render);
 	// Retail 0x174f70: full skeletal mesh rendering pipeline.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement USkeletalMeshInstance::Render (retail 0x174f70: full skeletal mesh rendering pipeline)
 	unguard;
 }
 
@@ -2369,7 +2369,7 @@ void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,in
 {
 	guard(USkeletalMeshInstance::GetFrame);
 	// Retail 0x10439f40 (10776b): Ghidra decompilation failed (encoding error).
-	// Divergence: stub pending decompilation.
+	// TODO: implement USkeletalMeshInstance::GetFrame (retail 0x10439f40, 10776 bytes: Ghidra decompilation failed; pending re-analysis)
 	unguard;
 }
 
@@ -2486,7 +2486,7 @@ void USkeletalMeshInstance::MeshBuildBounds()
 {
 	guard(USkeletalMeshInstance::MeshBuildBounds);
 	// Retail 0x141f40: computes bounding box/sphere by iterating bone vertices.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement USkeletalMeshInstance::MeshBuildBounds (retail 0x141f40: computes bounding box/sphere by iterating bone vertices)
 	unguard;
 }
 
@@ -2701,7 +2701,7 @@ void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicL
 {
 	guard(UVertMeshInstance::Render);
 	// Retail 0x174f70: full vertex mesh rendering pipeline.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement UVertMeshInstance::Render (retail 0x174f70: full vertex mesh rendering pipeline)
 	unguard;
 }
 
@@ -3114,7 +3114,7 @@ void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,
 {
 	guard(UVertMeshInstance::GetFrame);
 	// Retail 0x10473c20 (2457b): transforms vertex mesh frames.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement UVertMeshInstance::GetFrame (retail 0x10473c20, 2457 bytes: transforms vertex mesh frames)
 	unguard;
 }
 
@@ -3136,7 +3136,7 @@ void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
 	// Retail: transforms and returns vertex mesh world-space positions.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement UVertMeshInstance::GetMeshVerts (retail: extracts transformed vertex positions)
 	unguard;
 }
 
@@ -3196,7 +3196,7 @@ void UVertMeshInstance::MeshBuildBounds()
 {
 	guard(UVertMeshInstance::MeshBuildBounds);
 	// Retail 0x174850: computes bounding box/sphere over all vertex mesh frames.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement UVertMeshInstance::MeshBuildBounds (retail 0x174850: computes bounding box/sphere over all vertex mesh frames)
 	unguard;
 }
 

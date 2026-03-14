@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	R6Matinee.cpp — UR6SubActionAnimSequence
 =============================================================================*/
 
@@ -251,7 +251,7 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 
 	if (GIsEditor)
 	{
-		// DIVERGENCE: editor animation preview uses raw mesh vtable calls — not implemented.
+		// TODO: editor animation preview (raw mesh vtable calls not reconstructed; returns 1 as safe fallback)
 		return 1;
 	}
 

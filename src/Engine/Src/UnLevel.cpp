@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnLevel.cpp: ULevel, ALevelInfo, AGameInfo and related classes.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -73,11 +73,11 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	//          DIVERGENCE: TMap hash tables left empty; game TMap usage rare at startup.
 	// Phase 3 (runtime init):
 	SetFlags( RF_Transactional );
-	// DIVERGENCE: UModel allocation via StaticAllocateObject not yet implemented.
-	// DIVERGENCE: ALevelInfo spawn via FRotator(0,0,0)+SpawnActor not yet implemented.
-	// DIVERGENCE: SpawnBrush and brush/model RF flag setup not yet implemented.
-	// DIVERGENCE: GetDefaultPhysicsVolume call not yet implemented.
-	// DIVERGENCE: GScriptCycles/GScriptEntryTag zero-init and level flags not yet set.
+	// TODO: UModel allocation via StaticAllocateObject
+	// TODO: ALevelInfo spawn via FRotator(0,0,0)+SpawnActor
+	// TODO: SpawnBrush and brush/model RF flag setup
+	// TODO: GetDefaultPhysicsVolume call
+	// TODO: GScriptCycles/GScriptEntryTag zero-init and level flags
 	unguard;
 }
 
@@ -158,7 +158,7 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
-	// DIVERGENCE: full ULevel::Tick not implemented (actor iteration, physics, script events, timer firing).
+	// TODO: implement ULevel::Tick (actor iteration, physics, script events, timer firing)
 	unguard;
 }
 
@@ -205,14 +205,14 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 void ULevel::TickNetServer( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetServer);
-	// DIVERGENCE: full TickNetServer not implemented (replication, channel ticking, player updates).
+	// TODO: implement ULevel::TickNetServer (replication, channel ticking, player updates)
 	unguard;
 }
 
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
-	// DIVERGENCE: full ServerTickClient not implemented (per-connection channel processing).
+	// TODO: implement ULevel::ServerTickClient (per-connection channel processing)
 	return 0;
 	unguard;
 }
@@ -329,7 +329,7 @@ void ULevel::RememberActors()
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
-	// DIVERGENCE: full Exec command dispatch not implemented (stat, show, flush, etc.).
+	// TODO: implement ULevel::Exec command dispatch (stat, show, flush, etc.)
 	return 0;
 	unguard;
 }
@@ -383,7 +383,7 @@ INT ULevel::Listen( FString& Error )
 	guard(ULevel::Listen);
 	if ( !*(INT*)((BYTE*)this + 0x40) ) // NetDriver == NULL
 	{
-		// DIVERGENCE: Create UNetDriver + InitListen + GameInfo spawn not implemented.
+		// TODO: Create UNetDriver + InitListen + GameInfo spawn
 		return 1;
 	}
 	Error = LocalizeError(TEXT("NetAlready"), TEXT("Engine"), NULL);
@@ -403,7 +403,7 @@ INT ULevel::IsServer()
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
-	// DIVERGENCE: full MoveActor sweep/collision not implemented.
+	// TODO: implement ULevel::MoveActor sweep/collision
 	return 1;
 	unguard;
 }
@@ -424,7 +424,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
 	// Remove from hash before move
 	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
 		hash->RemoveActor(Actor);
-	// DIVERGENCE: full FarMoveActor sweep and blocked-movement logic not implemented.
+	// TODO: implement full FarMoveActor sweep and blocked-movement logic
 	// Re-add to hash after move
 	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
 		hash->AddActor(Actor);
@@ -902,14 +902,14 @@ ABrush* ULevel::SpawnBrush()
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
-	// DIVERGENCE: SpawnViewActor not implemented (spawns per-viewport camera actor, sets ViewTarget).
+	// TODO: implement ULevel::SpawnViewActor (spawns per-viewport camera actor, sets ViewTarget)
 	unguard;
 }
 
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
-	// DIVERGENCE: SpawnPlayActor not implemented (creates PlayerController, sets up connection replication).
+	// TODO: implement ULevel::SpawnPlayActor (creates PlayerController, sets up connection replication)
 	return NULL;
 	unguard;
 }
@@ -917,7 +917,7 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
-	// DIVERGENCE: FindSpot not implemented (BSP + actor collision-free spawn point search).
+	// TODO: implement ULevel::FindSpot (BSP + actor collision-free spawn point search)
 	return 1;
 	unguard;
 }
@@ -925,7 +925,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
-	// DIVERGENCE: CheckSlice not implemented (vertical slab adjustment for player capsule fitting).
+	// TODO: implement ULevel::CheckSlice (vertical slab adjustment for player capsule fitting)
 	return 0;
 	unguard;
 }
@@ -933,7 +933,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
-	// DIVERGENCE: CheckEncroachment not implemented (collision check for actor placement validity).
+	// TODO: implement ULevel::CheckEncroachment (collision check for actor placement validity)
 	return 0;
 	unguard;
 }
@@ -1017,7 +1017,7 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
-	// DIVERGENCE: MultiPointCheck not implemented (returns all actors/BSP overlapping a box).
+	// TODO: implement ULevel::MultiPointCheck (returns all actors/BSP overlapping a box)
 	return NULL;
 	unguard;
 }
@@ -1025,7 +1025,7 @@ FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
-	// DIVERGENCE: MultiLineCheck not implemented (returns linked list of all hits along a ray).
+	// TODO: implement ULevel::MultiLineCheck (returns linked list of all hits along a ray)
 	return NULL;
 	unguard;
 }
@@ -1064,7 +1064,7 @@ INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 	guard(ULevel::TickDemoRecord);
 	if ( !*(INT*)((BYTE*)this + 0x8c) ) // DemoRecDriver == NULL
 		return 0;
-	// DIVERGENCE: DemoRecDriver actor replication not implemented.
+	// TODO: implement DemoRecDriver actor replication
 	return 1;
 	unguard;
 }
@@ -1088,7 +1088,7 @@ INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
 		if ( nVP == 0 )
 			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x527);
-		// DIVERGENCE: BrowseLevel to ?entry not implemented (requires UEngine::Browse).
+		// TODO: BrowseLevel to ?entry (requires UEngine::Browse)
 	}
 	return 1;
 	unguard;
@@ -1129,7 +1129,7 @@ void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 {
 	guard(ULevel::WelcomePlayer);
 	// Copy driver's package map into connection's package map
-	// DIVERGENCE: UPackageMap::Copy(Connection+0xC8, Driver+0x44) not implemented — package map not synced.
+	// TODO: UPackageMap::Copy(Connection+0xC8, Driver+0x44) — package map not synced
 	Connection->SendPackageMap();
 	ALevelInfo* info = GetLevelInfo();
 	UObject* outer   = GetOuter();
@@ -1245,7 +1245,7 @@ void ULevel::UpdateTerrainArrays()
 			((SetCollisionFn)(*(DWORD*)(*(DWORD*)this + 0x10c)))((AActor*)Actors(0), 1, 0);
 			// FUN_10481dd0 = terrain zone registration helper: links ATerrainInfo to its
 			// zone actor and populates the Terrains TArray.
-			// DIVERGENCE: terrain zone registration not implemented.
+			// TODO: implement terrain zone registration (FUN_10481dd0 = terrain zone registration helper)
 		}
 	}
 

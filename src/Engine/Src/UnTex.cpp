@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnTex.cpp: Texture and material system (UTexture hierarchy)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -971,7 +971,7 @@ int UTexModifier::GetValidated()
 FMatrix * UTexOscillator::GetMatrix(float)
 {
 	guard(UTexOscillator::GetMatrix);
-	// Retail: 0x4720 shared null-stub. DIVERGENCE: oscillating UV matrix not implemented.
+	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV oscillation not implemented in retail either
 	return NULL;
 	unguard;
 }
@@ -981,7 +981,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 FMatrix * UTexPanner::GetMatrix(float)
 {
 	guard(UTexPanner::GetMatrix);
-	// Retail: 0x4720 shared null-stub. DIVERGENCE: panning UV matrix not implemented.
+	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV panning not implemented in retail either
 	return NULL;
 	unguard;
 }
@@ -1004,7 +1004,7 @@ void UTexRotator::PostLoad()
 FMatrix * UTexRotator::GetMatrix(float)
 {
 	guard(UTexRotator::GetMatrix);
-	// Retail: 0x4720 shared null-stub. DIVERGENCE: rotating UV matrix not implemented.
+	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV rotation not implemented in retail either
 	return NULL;
 	unguard;
 }
@@ -1014,7 +1014,7 @@ FMatrix * UTexRotator::GetMatrix(float)
 FMatrix * UTexScaler::GetMatrix(float)
 {
 	guard(UTexScaler::GetMatrix);
-	// Retail: 0x4720 shared null-stub. DIVERGENCE: scaling UV matrix not implemented.
+	// INTENTIONALLY EMPTY: retail 0x4720 shared null-stub; UV scaling not implemented in retail either
 	return NULL;
 	unguard;
 }

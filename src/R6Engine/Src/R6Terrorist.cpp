@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	R6Terrorist.cpp
 	AR6Terrorist — terrorist pawn with net replication and special animations.
 =============================================================================*/
@@ -51,14 +51,10 @@ void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 {
 	guard(AR6Terrorist::UpdateAiming);
 
-	// DIVERGENCE: Ghidra at 0x29590 (~2500 bytes). Interpolates m_iCurrentHeadYaw toward
-	// m_wWantedHeadYaw*256 and m_iCurrentAimingPitch toward m_wWantedAimingPitch*256, then
-	// distributes the result across bones "R6 Neck", "R6 Spine", "R6 Spine1", "R6 Spine2",
-	// "R6 L Forearm", "R6 L Hand", "R6 R Hand" via SetBoneRotation with Alpha=0.1f.
-	// The per-frame step amounts are computed as (INT)(DeltaTime * RATE) where RATE is a
-	// compile-time constant loaded onto the x87 FPU before calling FUN_10042934 (__ftol).
-	// The hidden x87 ST0 argument prevents Ghidra from showing it; exact rate constants
-	// are unknown until disassembly is analysed. Left as stub.
+	// TODO: implement AR6Terrorist::UpdateAiming (Ghidra 0x29590, ~2500 bytes: interpolates
+	// m_iCurrentHeadYaw/m_iCurrentAimingPitch and distributes across bones "R6 Neck", "R6 Spine",
+	// "R6 Spine1", "R6 Spine2", "R6 L Forearm", "R6 L Hand", "R6 R Hand" via SetBoneRotation;
+	// exact rate constants unknown pending full disassembly analysis)
 
 	unguard;
 }

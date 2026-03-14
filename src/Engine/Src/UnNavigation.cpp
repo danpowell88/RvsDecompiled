@@ -1,4 +1,4 @@
-#pragma optimize("", off)
+﻿#pragma optimize("", off)
 #include "EnginePrivate.h"
 // --- AJumpDest ---
 void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
@@ -599,7 +599,7 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 int AScout::findStart(FVector)
 {
 	guard(AScout::findStart);
-	// DIVERGENCE: AScout::findStart not yet implemented.
+	// TODO: implement AScout::findStart (retail 0xe0940: calls FarMoveActor + walkability test; many internal FUN_ helpers not resolved)
 	// GHIDRA REF: 0xe0940 — calls FarMoveActor (Level vtable[0x9c/4]) to try placing
 	// the scout at the requested position, then tests walkability and adjusts collision.
 	// Many internal FUN_ helpers (path-graph queries, collision trace helpers) not yet

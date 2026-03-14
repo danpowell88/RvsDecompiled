@@ -683,15 +683,15 @@ INT AR6Pawn::IsOverLedge(AActor* param_1, FVector ledgePoint, FLOAT ledgeRadius)
 
 INT AR6Pawn::IsRelevantToPawnHeartBeat(APawn *)
 {
-	// DIVERGENCE: remains stub — depends on FUN_1001bc10/FUN_1001bc70/FUN_1001bc40,
-	// which are internal R6 gadget/sensor accessor functions not yet decompiled.
+	// TODO: resolve FUN_1001bc10/FUN_1001bc70/FUN_1001bc40 (internal R6 gadget/sensor
+	// accessor functions) to implement AR6Pawn::IsRelevantToPawnHeartBeat
 	return 0;
 }
 
 INT AR6Pawn::IsRelevantToPawnHeatVision(APawn *)
 {
-	// DIVERGENCE: remains stub — depends on same unresolved gadget accessor functions
-	// (FUN_1001bc10, FUN_1001bc70, FUN_1001bc40) as IsRelevantToPawnHeartBeat.
+	// TODO: resolve FUN_1001bc10/FUN_1001bc70/FUN_1001bc40 (same gadget/sensor
+	// accessor functions) to implement AR6Pawn::IsRelevantToPawnHeatVision
 	return 0;
 }
 

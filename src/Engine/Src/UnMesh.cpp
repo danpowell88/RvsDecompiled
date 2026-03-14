@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnMesh.cpp: UMesh, ULodMesh, USkeletalMesh, UStaticMesh registration.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -567,8 +567,8 @@ int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 	guard(USkeletalMesh::SetAttachmentLocation);
 	// Retail: reads bone transforms from SkeletalMeshInstance (via GetMeshInstance on param_2)
 	// and applies the world-space bone transform to param_3's Location/Rotation.
-	// DIVERGENCE: stub — requires a fully implemented USkeletalMeshInstance::GetTagCoords
-	// and bone-transform-to-world conversion, neither of which is complete.
+	// TODO: implement USkeletalMesh::SetAttachmentLocation — requires USkeletalMeshInstance::GetTagCoords
+	// and bone-transform-to-world conversion
 	return 0;
 	unguard;
 }

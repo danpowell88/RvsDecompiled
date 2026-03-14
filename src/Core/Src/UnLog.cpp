@@ -112,7 +112,7 @@ void FFrame::Serialize( const TCHAR* V, EName Event )
 {
 	guard(FFrame::Serialize);
 	// Retail 0x1bd50: logs script frame context to GLog or GError.
-	// Divergence: stub, pending full implementation.
+	// TODO: implement FFrame::Serialize (retail 0x1bd50: logs script frame context to GLog/GError)
 	unguard;
 }
 

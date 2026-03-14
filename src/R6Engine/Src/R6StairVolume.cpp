@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	R6StairVolume.cpp
 =============================================================================*/
 
@@ -12,10 +12,9 @@ void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6StairVolume::AddMyMarker);
 
-	// DIVERGENCE: Ghidra 0x3c500 (~800 bytes). Spawns R6Stairs navigation markers
-	// along the stair volume using stair orientation direction; rotation cross product
-	// for stair normal; raw SpawnActor vtable dispatch not reconstructed.
-	// AI stair pathfinding markers absent — stairs are physically present.
+	// TODO: implement AR6StairVolume::AddMyMarker (Ghidra 0x3c500, ~800 bytes: spawns R6Stairs
+	// navigation markers along stair volume; rotation cross product for stair normal;
+	// raw SpawnActor vtable dispatch not reconstructed; AI stair pathfinding absent)
 
 	unguard;
 }

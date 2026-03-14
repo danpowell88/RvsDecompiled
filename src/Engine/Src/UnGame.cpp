@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnGame.cpp: Engine and game-engine core (UEngine, UGameEngine)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -21,7 +21,7 @@ int UGameEngine::ReplaceTexture(FString,UTexture *)
 	// Ghidra 0x9fc90: loads a BMP/TGA from disk, validates dimensions match UTexture,
 	// decodes pixel data (RGB24/RGBA32) and uploads to render surface.
 	// FUN_10316cb0 = render target upload helper; GFileManager vtable used for file I/O.
-	// DIVERGENCE: texture replacement not implemented; returns 0.
+	// TODO: implement UGameEngine::ReplaceTexture (retail 0x9fc90: load BMP/TGA, validate dimensions, upload to render surface)
 	return 0;
 	unguard;
 }
@@ -31,7 +31,7 @@ int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 	guard(UGameEngine::LoadBackgroundImage);
 	// Ghidra 0x9f730: load a background image file and decode into one or two UTextures.
 	// FUN_10316cb0 = render target upload; GFileManager vtable used for file open/read.
-	// DIVERGENCE: file I/O and texture decode not implemented; returns 0.
+	// TODO: implement UGameEngine::LoadBackgroundImage (retail 0x9f730: load background image file and decode into UTexture)
 	return 0;
 	unguard;
 }
@@ -64,7 +64,7 @@ void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewp
 	// lazily constructs two UFinalBlend materials cached in global statics
 	// (DAT_10671748 and DAT_10671744), adjusts blend flags, then runs full-screen passes.
 	// FUN_10385b30 = UFinalBlend lazy construction helper (creates via StaticConstructObject).
-	// DIVERGENCE: UFinalBlend construction and full-screen render pass omitted.
+	// TODO: implement UGameEngine::PostRenderFullScreenEffects (retail 0x103a5c00: creates FCanvasUtil, lazily constructs UFinalBlend materials, runs full-screen passes)
 	unguard;
 }
 
@@ -239,7 +239,7 @@ void UEngine::StaticConstructor()
 	GFileManager->MakeDirectory(TEXT("..\\ArmPatches\\Cache"), false);
 	// FUN_103949aa = identity unknown; called after MakeDirectory, likely triggers
 	// a file-system refresh or ARM cache validation step.
-	// DIVERGENCE: FUN_103949aa call omitted.
+	// TODO: resolve FUN_103949aa and add call here
 	unguard;
 }
 
@@ -293,7 +293,7 @@ int UEngine::CacheArmPatch(FGuid *,DWORD *)
 	guard(UEngine::CacheArmPatch);
 	// Ghidra 0x1a5c0: validates ARM copy-protection patch — loads patch data,
 	// calls crypto verification. Very complex with many unresolved FUN_ calls.
-	// DIVERGENCE: ARM patch verification not implemented; returns 0.
+	// TODO: implement UEngine::CacheArmPatch (retail 0x1a5c0: ARM copy-protection patch validation; many unresolved FUN_ calls)
 	return 0;
 	unguard;
 }
@@ -319,7 +319,7 @@ int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UEngine::ExecServerProf);
 	// Ghidra 0x31b20: server profiling exec command handler.
-	// DIVERGENCE: FUN_ profiling-data calls unresolved; command not handled; returns 0.
+	// TODO: implement UEngine::ExecServerProf (retail 0x31b20: server profiling command handler; FUN_ profiling-data calls unresolved)
 	return 0;
 	unguard;
 }

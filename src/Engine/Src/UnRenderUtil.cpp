@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnRenderUtil.cpp: Render buffers, lighting, and BSP geometry helpers
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -513,7 +513,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
-	// DIVERGENCE: stub only.
+	// TODO: implement FLineBatcher::DrawConvexVolume (Ghidra 0x115560: FPoly + plane iteration)
 }
 
 // (merged from earlier occurrence)
@@ -555,7 +555,7 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
 	// Ghidra 0x114e50: too complex to fully decompile; left empty.
-	// DIVERGENCE: stub only.
+	// TODO: implement FLineBatcher::DrawCylinder (Ghidra 0x114e50)
 }
 
 void FLineBatcher::DrawDirectionalArrow(FVector Origin, FRotator Rotation, FColor Color, FLOAT ArrowSize)
@@ -598,13 +598,13 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
-	// DIVERGENCE: stub only.
+	// TODO: implement FLineBatcher::DrawSphere (Ghidra 0x114b90: complex FMatrix rotation per ring)
 }
 
 void FLineBatcher::Flush(DWORD Flags)
 {
 	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
-	// DIVERGENCE: stub only.
+	// TODO: implement FLineBatcher::Flush (Ghidra 0x1172a0: GCache + UProxyBitmapMaterial + vertex stream)
 }
 unsigned __int64 FLineBatcher::GetCacheId()
 {
@@ -1020,7 +1020,7 @@ int FStaticLightMapTexture::GetRevision()
 }
 void FStaticLightMapTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
-	// Ghidra: retail implementation deferred (complex lazy-load + DXT decode). DIVERGENCE: stub only.
+	// TODO: implement FStaticLightMapTexture::GetTextureData (Ghidra: complex lazy-load + DXT decode pipeline)
 }
 ETexClampMode FStaticLightMapTexture::GetUClamp()
 {
@@ -1204,7 +1204,7 @@ int FStaticTexture::GetRevision()
 }
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
-	// Ghidra: retail implementation deferred (complex lazy-load path). DIVERGENCE: stub only.
+	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
 }
 ETexClampMode FStaticTexture::GetUClamp()
 {
@@ -1341,7 +1341,7 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
-	// DIVERGENCE: stub only.
+	// INTENTIONALLY EMPTY: rendering dispatched via UMeshInstance::Render vtable; FDynamicActor::Render has no per-type render logic
 }
 
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
@@ -1736,7 +1736,7 @@ void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 void UConvexVolume::Serialize(FArchive& Ar)
 {
 	// Ghidra: trivial serialize stub; no persistent data beyond UObject base.
-	// DIVERGENCE: stub only.
+	// INTENTIONALLY EMPTY: retail trivial serialize stub; no persistent data beyond UObject base
 }
 
 FBox UConvexVolume::GetRenderBoundingBox(AActor const *)
