@@ -1020,7 +1020,7 @@ AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRota
 	unguard;
 }
 
-IMPL_DIVERGE("explicit zero args omitted; retail SpawnBrush at Ghidra 0x103b6fb0")
+IMPL_MATCH("Engine.dll", 0x103b6fb0)
 ABrush* ULevel::SpawnBrush()
 {
 	guard(ULevel::SpawnBrush);
@@ -1498,8 +1498,29 @@ ABrush* ULevel::Brush()
 	}
 	return (ABrush*)Actors(1);
 }
-IMPL_DIVERGE("stub; retail EditorDestroyActor has navigation point handling at Ghidra 0x103b8100")
-INT ULevel::EditorDestroyActor( AActor* Actor ) { return DestroyActor( Actor ); }
+IMPL_MATCH("Engine.dll", 0x103b8100)
+INT ULevel::EditorDestroyActor( AActor* Actor )
+{
+	guard(ULevel::EditorDestroyActor);
+	if ( !Actor )
+		appFailAssert("ThisActor", ".\\UnLevAct.cpp", 0xce);
+	if ( !Actor->IsValid() )
+		appFailAssert("ThisActor->IsValid()", ".\\UnLevAct.cpp", 0xcf);
+	// If actor does not have both "hidden in editor" and "has script" flags set,
+	// check if it is a navigation point and clear bPathsRebuilt from LevelInfo.
+	// Ghidra: param_1+0xac & 0x20000, param_1+0xa8 & 0x2000
+	if ( ((*(DWORD*)((BYTE*)Actor + 0xac) & 0x20000) == 0) ||
+	     ((*(DWORD*)((BYTE*)Actor + 0xa8) & 0x2000) == 0) )
+	{
+		if ( Actor->IsA(ANavigationPoint::StaticClass()) )
+		{
+			ALevelInfo* li = GetLevelInfo();
+			*(DWORD*)((BYTE*)li + 0x450) &= 0xfffff7ffu; // clear bPathsRebuilt
+		}
+	}
+	return DestroyActor( Actor, 0 );
+	unguard;
+}
 IMPL_DIVERGE("returns INDEX_NONE instead of asserting via GError; retail at Ghidra 0x1031bfb0")
 INT ULevel::GetActorIndex( AActor* Actor )
 {
