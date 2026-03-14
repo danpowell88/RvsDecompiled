@@ -498,8 +498,8 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 		else if (idx >= n) idx = n - 1;
 		*(INT*)((BYTE*)this + 0x40) = idx;
 	}
-	// TODO: SpawnParticles call and main particle tick loop.
-	// DIVERGENCE: particle spawning and per-particle physics not implemented.
+	// DIVERGENCE: SpawnParticles and main particle tick loop (~300 lines Ghidra) unresolved.
+	// Particle spawning and per-particle physics/lifetime updates not implemented.
 	return iVar20;
 	unguard;
 }
@@ -705,7 +705,8 @@ int USpriteEmitter::UpdateParticles(float DeltaTime)
 int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USpriteEmitter::RenderParticles);
-	// TODO: complex sprite particle rendering (~700 lines in Ghidra)
+	// DIVERGENCE: sprite particle render loop (~700 lines Ghidra) unresolved.
+	// Per-particle billboarding, UV selection, and vertex upload not implemented.
 	UParticleEmitter::RenderParticles(param_1, param_2, param_3, param_4);
 	return 0;
 	unguard;
@@ -732,7 +733,8 @@ void USpriteEmitter::CleanUp()
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
-	// TODO: complex vertex buffer fill (Ghidra line 166974)
+	// DIVERGENCE: vertex buffer fill for sprite particles (~400 lines Ghidra line 166974)
+	// unresolved. Transforms each live particle to camera-facing quad, uploads UV/color data.
 	return 0;
 	unguard;
 }

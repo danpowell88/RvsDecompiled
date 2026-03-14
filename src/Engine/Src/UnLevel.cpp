@@ -69,14 +69,15 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	// Phase 1 (compiler-generated): FArray::FArray() on all TArray/TMap member fields.
 	// Phase 2 (TMap hash-table setup): many pairs of (ptr[+0xC]=0, ptr[+0x10]=8, FUN_103*())
 	//          at offsets 0xdc, 0x10150, 0x10164, 0x101ac, 0x101e4, 0x101f8, 0x1020c, …
-	//          TODO: implement FUN_1031f850/f990/fa30/fb80/fc20 (TMap rehash, 8 initial buckets).
+	//          FUN_1031f850/f990/fa30/fb80/fc20 = TMap hash-table rehash helpers (8 initial buckets).
+	//          DIVERGENCE: TMap hash tables left empty; game TMap usage rare at startup.
 	// Phase 3 (runtime init):
 	SetFlags( RF_Transactional );
-	// TODO: allocate Model via StaticAllocateObject/UModel ctor at this+0x90, set RF_Transactional.
-	// TODO: FRotator(0,0,0) + SpawnActor(ALevelInfo::PrivateStaticClass).
-	// TODO: SpawnBrush(); assign Brush->Brush; SetFlags on brush/model RF_Transactional|RF_Public|….
-	// TODO: GetLevelInfo()->GetDefaultPhysicsVolume().
-	// TODO: zero GScriptCycles, GScriptEntryTag; set this[0x10178]=1, this[0x1017c]=1; zero 0x1011c-0x10128.
+	// DIVERGENCE: UModel allocation via StaticAllocateObject not yet implemented.
+	// DIVERGENCE: ALevelInfo spawn via FRotator(0,0,0)+SpawnActor not yet implemented.
+	// DIVERGENCE: SpawnBrush and brush/model RF flag setup not yet implemented.
+	// DIVERGENCE: GetDefaultPhysicsVolume call not yet implemented.
+	// DIVERGENCE: GScriptCycles/GScriptEntryTag zero-init and level flags not yet set.
 	unguard;
 }
 
@@ -157,7 +158,7 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
-	/* TODO: Full ULevel::Tick implementation */
+	// DIVERGENCE: full ULevel::Tick not implemented (actor iteration, physics, script events, timer firing).
 	unguard;
 }
 
@@ -196,7 +197,7 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
 		if ( nVP == 0 )
 			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x2fa);
-		/* TODO: Browse to ?failed */
+		// DIVERGENCE: BrowseLevel to ?failed not implemented (requires UEngine::Browse).
 	}
 	unguard;
 }
@@ -204,14 +205,14 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 void ULevel::TickNetServer( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetServer);
-	/* TODO: Full TickNetServer implementation */
+	// DIVERGENCE: full TickNetServer not implemented (replication, channel ticking, player updates).
 	unguard;
 }
 
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
-	/* TODO: Full ServerTickClient implementation */
+	// DIVERGENCE: full ServerTickClient not implemented (per-connection channel processing).
 	return 0;
 	unguard;
 }
@@ -328,7 +329,7 @@ void ULevel::RememberActors()
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
-	/* TODO: Full Exec implementation */
+	// DIVERGENCE: full Exec command dispatch not implemented (stat, show, flush, etc.).
 	return 0;
 	unguard;
 }
@@ -382,7 +383,7 @@ INT ULevel::Listen( FString& Error )
 	guard(ULevel::Listen);
 	if ( !*(INT*)((BYTE*)this + 0x40) ) // NetDriver == NULL
 	{
-		/* TODO: Create UNetDriver, call InitListen, spawn GameInfo actors */
+		// DIVERGENCE: Create UNetDriver + InitListen + GameInfo spawn not implemented.
 		return 1;
 	}
 	Error = LocalizeError(TEXT("NetAlready"), TEXT("Engine"), NULL);
@@ -402,7 +403,7 @@ INT ULevel::IsServer()
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
-	/* TODO: Full MoveActor implementation */
+	// DIVERGENCE: full MoveActor sweep/collision not implemented.
 	return 1;
 	unguard;
 }
@@ -423,7 +424,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
 	// Remove from hash before move
 	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
 		hash->RemoveActor(Actor);
-	/* TODO: Full movement / sweep logic */
+	// DIVERGENCE: full FarMoveActor sweep and blocked-movement logic not implemented.
 	// Re-add to hash after move
 	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
 		hash->AddActor(Actor);
@@ -450,12 +451,15 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 			return 1;
 
 		// Network: if client, non-Authority actors normally can't be destroyed
-		// (simplified — full net logic omitted, TODO: FUN_103b7b70 check)
+		// (simplified — full net logic omitted; DIVERGENCE: FUN_103b7b70 = server-driven
+		// network destruction check; unresolved, destruction is permitted unconditionally here)
 		ALevelInfo* li = GetLevelInfo();
 		if ( li && *(BYTE*)((BYTE*)li + 0x425) == 3 && // NM_Client
 		     NetDriver && NetDriver->ServerConnection )
 		{
-			// TODO: FUN_103b7b70 — server-driven destruction check
+			// DIVERGENCE: FUN_103b7b70 performs a server-side network role check before
+			// allowing the actor to be destroyed on the client. Unresolved; skipping allows
+			// local actor destruction regardless of network authority.
 		}
 
 		// Role check: if not Authority and no bNetForce/bHiddenEd/bBegunPlay
@@ -530,7 +534,9 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 					a->SetOwner(NULL);
 					if ( Actor->bDeleteMe ) return 1;
 				}
-				// TODO: FUN_1037a010 — touching check + EndTouch
+				// DIVERGENCE: FUN_1037a010 = actor-touching check followed by EndTouch events.
+			// Determines if Actor is in the touching list of 'a', calls eventEndTouch.
+			// Unresolved — touch notifications not sent for destroyed actor's touchees.
 			}
 
 			// LostChild notification to base
@@ -795,7 +801,9 @@ AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRota
 	Actor->SetOwner(SpawnTag);
 	Actor->Instigator = Instigator;
 
-	// TODO: FUN_10359790 — actor zone/BSP-leaf initialisation helper
+	// DIVERGENCE: FUN_10359790 = actor zone/BSP-leaf initialisation helper (Ghidra 0x359790).
+	// Determines which zone and BSP leaf the spawned actor is in and sets related fields.
+	// Unresolved — actor starts outside any zone (zone info zeroed by constructor).
 
 	// InitExecution and SetBase (base=NULL)
 	typedef void (__thiscall* VoidFn)(void*);
@@ -1152,8 +1160,8 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 		appFailAssert("NetDriver!=NULL",".\\UnLevel.cpp",0x348);
 	if( *(UNetConnection**)((BYTE*)NetDriver + 0x3c) != NULL )
 		appFailAssert("NetDriver->ServerConnection==NULL",".\\UnLevel.cpp",0x349);
-	// TODO: Call Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68),
-	//       then log to DevNet via GLog. See Ghidra 0xbf2a0.
+	// DIVERGENCE: retail calls Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68)
+	// and logs to DevNet. Ghidra 0xbf2a0. Omitted — no-op here.
 	unguard;
 }
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
@@ -1161,9 +1169,9 @@ ULevel* ULevel::NotifyGetLevel() { return this; }
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
-	// TODO: Full network command dispatch (HELLO/NETSPEED/HAVE/JOIN/FILEREQ/WELCOME/
-	//       UPGRADE/FAILURE etc.) — 3802 bytes of network protocol handling in retail.
-	//       See Ghidra 0xc1d30 ?NotifyReceivedText@ULevel@@UAEXPAVUNetConnection@@PBG@Z
+	// DIVERGENCE: retail full network command dispatch (HELLO/NETSPEED/HAVE/JOIN/FILEREQ/
+	// WELCOME/UPGRADE/FAILURE etc.) — 3802 bytes of network protocol handling (Ghidra 0xc1d30).
+	// Unresolved — accepting connections will not progress through the handshake.
 	unguard;
 }
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
