@@ -15,7 +15,7 @@ public:
     INT LineIntersection(const FVector& Start, const FVector& End, FLOAT* const HitTime) const;
 };
 // --- ULodMeshInstance ---
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
@@ -54,7 +54,7 @@ AActor * ULodMeshInstance::GetActor()
 	return Actor;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14730)
+IMPL_MATCH("Engine.dll", 0x14730)
 void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(ULodMeshInstance::GetFrame);
@@ -62,7 +62,7 @@ void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,D
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x6c990)
+IMPL_MATCH("Engine.dll", 0x6c990)
 UMaterial * ULodMeshInstance::GetMaterial(int,AActor *)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
@@ -75,7 +75,7 @@ UMesh * ULodMeshInstance::GetMesh()
 	return Mesh;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14770)
+IMPL_MATCH("Engine.dll", 0x14770)
 void ULodMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(ULodMeshInstance::GetMeshVerts);
@@ -91,7 +91,7 @@ INT ULodMeshInstance::GetStatus()
 
 
 // --- UMeshInstance ---
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::StopAnimating(int)
 {
 	guard(UMeshInstance::StopAnimating);
@@ -100,7 +100,7 @@ int UMeshInstance::StopAnimating(int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::UpdateAnimation(float)
 {
 	guard(UMeshInstance::UpdateAnimation);
@@ -109,7 +109,7 @@ int UMeshInstance::UpdateAnimation(float)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14770)
+IMPL_MATCH("Engine.dll", 0x14770)
 void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UMeshInstance::Render);
@@ -141,7 +141,7 @@ void UMeshInstance::SetScale(FVector)
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1651d0)
+IMPL_MATCH("Engine.dll", 0x1651d0)
 void UMeshInstance::SetStatus(int)
 {
 	guard(UMeshInstance::SetStatus);
@@ -149,7 +149,7 @@ void UMeshInstance::SetStatus(int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14650)
+IMPL_MATCH("Engine.dll", 0x14650)
 int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector Start,FVector Extent,DWORD ExtraNodeFlags,DWORD TraceFlags)
 {
 	guard(UMeshInstance::LineCheck);
@@ -161,7 +161,7 @@ int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14580)
+IMPL_MATCH("Engine.dll", 0x14580)
 int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 {
 	guard(UMeshInstance::PlayAnim);
@@ -170,7 +170,7 @@ int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x145f0)
+IMPL_MATCH("Engine.dll", 0x145f0)
 int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVector Extent,DWORD TraceFlags)
 {
 	guard(UMeshInstance::PointCheck);
@@ -182,7 +182,7 @@ int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVec
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x33a0)
+IMPL_MATCH("Engine.dll", 0x33a0)
 int UMeshInstance::AnimForcePose(FName,float,float,int)
 {
 	guard(UMeshInstance::AnimForcePose);
@@ -191,7 +191,7 @@ int UMeshInstance::AnimForcePose(FName,float,float,int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14590)
+IMPL_MATCH("Engine.dll", 0x14590)
 float UMeshInstance::AnimGetFrameCount(void *)
 {
 	// Retail 0x14590: shared null-stub, no SEH frame.
@@ -210,7 +210,7 @@ FName UMeshInstance::AnimGetName(void *)
 	return FName(NAME_None);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::AnimGetNotifyCount(void *)
 {
 	guard(UMeshInstance::AnimGetNotifyCount);
@@ -219,7 +219,7 @@ int UMeshInstance::AnimGetNotifyCount(void *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x6c990)
+IMPL_MATCH("Engine.dll", 0x6c990)
 UAnimNotify * UMeshInstance::AnimGetNotifyObject(void *,int)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
@@ -233,7 +233,7 @@ const TCHAR* UMeshInstance::AnimGetNotifyText(void *,int)
 	return TEXT("");
 }
 
-IMPL_GHIDRA("Engine.dll", 0x145b0)
+IMPL_MATCH("Engine.dll", 0x145b0)
 float UMeshInstance::AnimGetNotifyTime(void *,int)
 {
 	// Retail 0x145b0: shared null-stub, no SEH frame.
@@ -247,7 +247,7 @@ float UMeshInstance::AnimGetRate(void *)
 	return 15.0f;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x6c990)
+IMPL_MATCH("Engine.dll", 0x6c990)
 int UMeshInstance::AnimIsInGroup(void *,FName)
 {
 	guard(UMeshInstance::AnimIsInGroup);
@@ -256,7 +256,7 @@ int UMeshInstance::AnimIsInGroup(void *,FName)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::AnimStopLooping(int)
 {
 	guard(UMeshInstance::AnimStopLooping);
@@ -271,7 +271,7 @@ void UMeshInstance::ClearChannel(int)
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_GHIDRA("Engine.dll", 0x6c990)
+IMPL_MATCH("Engine.dll", 0x6c990)
 int UMeshInstance::FreezeAnimAt(float,int)
 {
 	guard(UMeshInstance::FreezeAnimAt);
@@ -280,14 +280,14 @@ int UMeshInstance::FreezeAnimAt(float,int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14590)
+IMPL_MATCH("Engine.dll", 0x14590)
 float UMeshInstance::GetActiveAnimFrame(int)
 {
 	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14590)
+IMPL_MATCH("Engine.dll", 0x14590)
 float UMeshInstance::GetActiveAnimRate(int)
 {
 	// Retail 0x14590: shared null-stub, no SEH frame.
@@ -300,14 +300,14 @@ FName UMeshInstance::GetActiveAnimSequence(int)
 	return FName(NAME_None);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 AActor * UMeshInstance::GetActor()
 {
 	// Retail 0x114310: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 int UMeshInstance::GetAnimCount()
 {
 	guard(UMeshInstance::GetAnimCount);
@@ -316,14 +316,14 @@ int UMeshInstance::GetAnimCount()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 void * UMeshInstance::GetAnimIndexed(int)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 void * UMeshInstance::GetAnimNamed(FName)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
@@ -337,7 +337,7 @@ FBox UMeshInstance::GetCollisionBoundingBox(const AActor* Owner)
 	return GetMesh()->GetCollisionBoundingBox(Owner);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14730)
+IMPL_MATCH("Engine.dll", 0x14730)
 void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UMeshInstance::GetFrame);
@@ -345,14 +345,14 @@ void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWOR
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x6c990)
+IMPL_MATCH("Engine.dll", 0x6c990)
 UMaterial * UMeshInstance::GetMaterial(int,AActor *)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 UMesh * UMeshInstance::GetMesh()
 {
 	// Retail 0x114310: shared null-stub, no SEH frame.
@@ -373,7 +373,7 @@ FSphere UMeshInstance::GetRenderBoundingSphere(const AActor* Owner)
 	return GetMesh()->GetRenderBoundingSphere(Owner);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 int UMeshInstance::GetStatus()
 {
 	guard(UMeshInstance::GetStatus);
@@ -382,7 +382,7 @@ int UMeshInstance::GetStatus()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimating(int)
 {
 	guard(UMeshInstance::IsAnimating);
@@ -391,7 +391,7 @@ int UMeshInstance::IsAnimating(int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimLooping(int)
 {
 	guard(UMeshInstance::IsAnimLooping);
@@ -400,7 +400,7 @@ int UMeshInstance::IsAnimLooping(int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimPastLastFrame(int)
 {
 	guard(UMeshInstance::IsAnimPastLastFrame);
@@ -409,7 +409,7 @@ int UMeshInstance::IsAnimPastLastFrame(int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimTweening(int)
 {
 	guard(UMeshInstance::IsAnimTweening);
@@ -421,7 +421,7 @@ int UMeshInstance::IsAnimTweening(int)
 
 
 // --- USkeletalMeshInstance ---
-IMPL_GHIDRA("Engine.dll", 0x12FF20)
+IMPL_MATCH("Engine.dll", 0x12FF20)
 int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start, FVector const& End, FVector const& DirNorm, float const& Extent)
 {
 	// Retail: 0x12FF20, 96b. Casts a line from Start toward End with the given half-extent
@@ -434,7 +434,7 @@ int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start,
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x134EF0)
+IMPL_MATCH("Engine.dll", 0x134EF0)
 void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float DeltaTime)
 {
 	// Retail: 0x134EF0, 160b.
@@ -462,7 +462,7 @@ void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float Del
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x130F40)
+IMPL_MATCH("Engine.dll", 0x130F40)
 int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 {
 	// Retail: 0x130F40, 92b. Bounds-check channel [0..255]. If TArray at this+0x10C
@@ -476,7 +476,7 @@ int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x134A90)
+IMPL_MATCH("Engine.dll", 0x134A90)
 void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 {
 	// Disasm: 0x134A90, 240b.
@@ -571,7 +571,7 @@ void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 	*(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50) = clamped;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1326B0)
+IMPL_MATCH("Engine.dll", 0x1326B0)
 int USkeletalMeshInstance::SetBlendParams(INT Channel, FLOAT Alpha, FLOAT UScale, FLOAT VScale, FName BoneRef, INT bBlend)
 {
 	// Retail: 0x1326B0. Validates channel, then stores blend params into channel slot.
@@ -598,7 +598,7 @@ int USkeletalMeshInstance::SetBlendParams(INT Channel, FLOAT Alpha, FLOAT UScale
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131A90)
+IMPL_MATCH("Engine.dll", 0x131A90)
 int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
 {
 	// Retail: 0x131A90, 32b. Returns 0 if bone override array (this+0x130) is at
@@ -609,7 +609,7 @@ int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1317A0)
+IMPL_MATCH("Engine.dll", 0x1317A0)
 int USkeletalMeshInstance::SetBoneLocation(FName BoneName, FVector Location, FLOAT Scale)
 {
 	// Retail: 0x1317A0. Faithfully decompiled from Ghidra.
@@ -652,7 +652,7 @@ int USkeletalMeshInstance::SetBoneLocation(FName BoneName, FVector Location, FLO
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131BA0)
+IMPL_MATCH("Engine.dll", 0x131BA0)
 int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector Loc, FLOAT Scale)
 {
 	// Retail: 0x131BA0. Faithfully decompiled from Ghidra.
@@ -696,7 +696,7 @@ int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131890)
+IMPL_MATCH("Engine.dll", 0x131890)
 int USkeletalMeshInstance::SetBoneRotation(FName BoneName, FRotator NewRot, INT bNotifyOwner, FLOAT BlendTarget, FLOAT BlendSpeed)
 {
 	// Retail: 0x131890. Faithfully decompiled from Ghidra.
@@ -779,7 +779,7 @@ int USkeletalMeshInstance::SetBoneRotation(FName BoneName, FRotator NewRot, INT 
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131620)
+IMPL_MATCH("Engine.dll", 0x131620)
 int USkeletalMeshInstance::SetBoneScale(INT BoneChannel, FLOAT Scale, FName BoneName)
 {
 	// Retail: 0x131620. Faithfully decompiled from Ghidra.
@@ -885,7 +885,7 @@ int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x130D40)
+IMPL_MATCH("Engine.dll", 0x130D40)
 int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 {
 	// Disasm: 0x130D40, 256b.
@@ -931,7 +931,7 @@ int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 	return -1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1351B0)
+IMPL_MATCH("Engine.dll", 0x1351B0)
 void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT DeltaTime)
 {
 	// Retail: 0x1351B0, ~130b.
@@ -957,7 +957,7 @@ void USkeletalMeshInstance::BuildPivotsList()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x13D860)
+IMPL_MATCH("Engine.dll", 0x13D860)
 void USkeletalMeshInstance::ClearSkelAnims()
 {
 	// Disasm: 0x13D860, 128b.
@@ -974,7 +974,7 @@ void USkeletalMeshInstance::ClearSkelAnims()
 	AnimArr->Empty(0x18);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x134980)
+IMPL_MATCH("Engine.dll", 0x134980)
 void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 {
 	// Retail: 0x134980, ~200b.
@@ -1009,7 +1009,7 @@ void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1338B0)
+IMPL_MATCH("Engine.dll", 0x1338B0)
 int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 {
 	// Retail: 0x1338B0, ~130b.
@@ -1022,7 +1022,7 @@ int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x134B80)
+IMPL_MATCH("Engine.dll", 0x134B80)
 void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
 {
 	// Retail: 0x134B80, 96b. Stores Rate at channel element+0x0C in TArray at this+0x10C
@@ -1055,7 +1055,7 @@ float USkeletalMeshInstance::GetAnimFrame(INT Channel)
 	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x10);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x135B20)
+IMPL_MATCH("Engine.dll", 0x135B20)
 float USkeletalMeshInstance::GetAnimRateOnChannel(INT Channel)
 {
 	// Disasm: 0x135B20, 96b.
@@ -1168,7 +1168,7 @@ int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133680)
+IMPL_MATCH("Engine.dll", 0x133680)
 FName USkeletalMeshInstance::GetBoneName(FName BoneName)
 {
 	// Disasm: 0x133680, 128b.
@@ -1197,7 +1197,7 @@ FName USkeletalMeshInstance::GetBoneName(FName BoneName)
 	return FName(NAME_None);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133520)
+IMPL_MATCH("Engine.dll", 0x133520)
 FRotator USkeletalMeshInstance::GetBoneRotation(DWORD boneIndex, INT Space)
 {
 	// Retail: 0x133520, 320b. Same skeleton update guard as GetBoneCoords.
@@ -1253,7 +1253,7 @@ FRotator USkeletalMeshInstance::GetBoneRotation(DWORD boneIndex, INT Space)
 	return result;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133610)
+IMPL_MATCH("Engine.dll", 0x133610)
 FRotator USkeletalMeshInstance::GetBoneRotation(FName BoneName, INT Space)
 {
 	// Retail: 0x133610, 64b. Call MatchRefBone to get index then forward to GetBoneRotation(DWORD,int).
@@ -1263,7 +1263,7 @@ FRotator USkeletalMeshInstance::GetBoneRotation(FName BoneName, INT Space)
 	return GetBoneRotation((DWORD)boneIndex, Space);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12F8F0)
+IMPL_MATCH("Engine.dll", 0x12F8F0)
 FVector USkeletalMeshInstance::GetRootLocation()
 {
 	// Disasm: 0x12F8F0, 96b.
@@ -1279,7 +1279,7 @@ FVector USkeletalMeshInstance::GetRootLocation()
 	return *(FVector*)((BYTE*)this + 0x1C8);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133790)
+IMPL_MATCH("Engine.dll", 0x133790)
 FVector USkeletalMeshInstance::GetRootLocationDelta()
 {
 	// Disasm: 0x133790, 288b.
@@ -1310,7 +1310,7 @@ FVector USkeletalMeshInstance::GetRootLocationDelta()
 	return FVector(dX, dY, dZ);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12F950)
+IMPL_MATCH("Engine.dll", 0x12F950)
 FRotator USkeletalMeshInstance::GetRootRotation()
 {
 	// Disasm: 0x12F950, 96b. Same pattern as GetRootLocation but reads this+0x1D4.
@@ -1322,7 +1322,7 @@ FRotator USkeletalMeshInstance::GetRootRotation()
 	return *(FRotator*)((BYTE*)this + 0x1D4);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12F9B0)
+IMPL_MATCH("Engine.dll", 0x12F9B0)
 FRotator USkeletalMeshInstance::GetRootRotationDelta()
 {
 	// Disasm: 0x12F9B0, 224b.
@@ -1348,7 +1348,7 @@ FRotator USkeletalMeshInstance::GetRootRotationDelta()
 	return FRotator(0, Current.Yaw - Prev.Yaw, 0);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x135BF0)
+IMPL_MATCH("Engine.dll", 0x135BF0)
 FCoords USkeletalMeshInstance::GetTagCoords(FName TagName)
 {
 	// Retail: 0x135BF0, 120b.
@@ -1373,7 +1373,7 @@ FCoords USkeletalMeshInstance::GetTagCoords(FName TagName)
 	return FCoords();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133700)
+IMPL_MATCH("Engine.dll", 0x133700)
 FCoords USkeletalMeshInstance::GetTagPosition(FName TagName)
 {
 	// Retail: 0x133700, ~140b.
@@ -1404,7 +1404,7 @@ FCoords USkeletalMeshInstance::GetTagPosition(FName TagName)
 	return result;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x135800)
+IMPL_MATCH("Engine.dll", 0x135800)
 int USkeletalMeshInstance::StopAnimating(int bClearAll)
 {
 	// Retail: 0x135800. Clear animation play state for all channels.
@@ -1437,7 +1437,7 @@ int USkeletalMeshInstance::StopAnimating(int bClearAll)
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x132d10)
+IMPL_MATCH("Engine.dll", 0x132d10)
 int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 {
 	guard(USkeletalMeshInstance::UpdateAnimation);
@@ -1707,7 +1707,7 @@ void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 	*(FLOAT*)(data + Channel * 0x74 + 0x10) = Frame;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x135AA0)
+IMPL_MATCH("Engine.dll", 0x135AA0)
 void USkeletalMeshInstance::SetMesh(UMesh* NewMesh)
 {
 	// Disasm: 0x135AA0, ~60b.
@@ -1729,7 +1729,7 @@ void USkeletalMeshInstance::SetMesh(UMesh* NewMesh)
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x130E40)
+IMPL_MATCH("Engine.dll", 0x130E40)
 void USkeletalMeshInstance::SetScale(FVector Scale)
 {
 	// Disasm: 0x130E40, 96b.
@@ -1745,7 +1745,7 @@ void USkeletalMeshInstance::SetScale(FVector Scale)
 	if (*DrawScale < 0.0f) *DrawScale = -*DrawScale;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133b50)
+IMPL_MATCH("Engine.dll", 0x133b50)
 int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
 	guard(USkeletalMeshInstance::LineCheck);
@@ -1828,7 +1828,7 @@ void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131D50)
+IMPL_MATCH("Engine.dll", 0x131D50)
 int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
 	// Retail: 0x131D50, ~700b. Faithfully decompiled from Ghidra.
@@ -2062,7 +2062,7 @@ int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOA
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133960)
+IMPL_MATCH("Engine.dll", 0x133960)
 int USkeletalMeshInstance::ActiveVertStreamSize()
 {
 	// Disasm: 0x133960, 48b.
@@ -2077,7 +2077,7 @@ int USkeletalMeshInstance::ActiveVertStreamSize()
 	return *(INT*)(LODData + LODIdx * 0x11C + 0x18);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x135A30)
+IMPL_MATCH("Engine.dll", 0x135A30)
 void USkeletalMeshInstance::ActualizeAnimLinkups()
 {
 	// Retail: 0x135A30. Iterates AnimObjects TArray at this+0xAC (stride 0x18).
@@ -2265,7 +2265,7 @@ int USkeletalMeshInstance::AnimStopLooping(INT channel)
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x132500)
+IMPL_MATCH("Engine.dll", 0x132500)
 void USkeletalMeshInstance::ClearChannel(INT Channel)
 {
 	// Retail: 0x132500, 141b. If Channel is within the channel TArray (this+0x10C,
@@ -2314,7 +2314,7 @@ UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 	return *(UMeshAnimation**)((BYTE*)MeshPtr + 0x1DC);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12f640)
+IMPL_MATCH("Engine.dll", 0x12f640)
 void USkeletalMeshInstance::Destroy()
 {
 	// Retail: 0x12f640. Calls FUN_10367df0(this) to release bone geometry arrays
@@ -2325,7 +2325,7 @@ void USkeletalMeshInstance::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x132A50)
+IMPL_MATCH("Engine.dll", 0x132A50)
 UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 {
 	// Disasm: 0x132A50, 112b.
@@ -2356,7 +2356,7 @@ UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131040)
+IMPL_MATCH("Engine.dll", 0x131040)
 int USkeletalMeshInstance::FreezeAnimAt(FLOAT Frame, INT Channel)
 {
 	// Disasm: 0x131040, 200b.
@@ -2428,7 +2428,7 @@ FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 	return *(FName*)(data + Channel * 0x74 + 0x08);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x132810)
+IMPL_MATCH("Engine.dll", 0x132810)
 int USkeletalMeshInstance::GetAnimCount()
 {
 	// Retail: 0x132810. Iterate anim object slots in TArray at this+0xAC (stride 0x18).
@@ -2464,7 +2464,7 @@ void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
 	return data + Index * 0x2C;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1328D0)
+IMPL_MATCH("Engine.dll", 0x1328D0)
 void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 {
 	// Retail: 0x1328D0. Calls FUN_10432640 (RefreshAnimObjects) to populate AnimObjects
@@ -2539,7 +2539,7 @@ FSphere USkeletalMeshInstance::GetRenderBoundingSphere(const AActor*)
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x130FB0)
+IMPL_MATCH("Engine.dll", 0x130FB0)
 int USkeletalMeshInstance::IsAnimating(int Channel)
 {
 	// Retail: 0x130FB0, 133 bytes. Returns 1 if the animation channel has a non-None
@@ -2587,7 +2587,7 @@ int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 	return (*(FLOAT*)(elem + 0x10) >= *(FLOAT*)(elem + 0x14)) ? 1 : 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x131110)
+IMPL_MATCH("Engine.dll", 0x131110)
 int USkeletalMeshInstance::IsAnimTweening(int Channel)
 {
 	// Retail: 0x131110, 117 bytes. Returns 1 if channel's current frame < 0 and vtbl
@@ -2607,7 +2607,7 @@ int USkeletalMeshInstance::IsAnimTweening(int Channel)
 
 
 // --- USkeletalMeshInstance ---
-IMPL_GHIDRA("Engine.dll", 0x12F8B0)
+IMPL_MATCH("Engine.dll", 0x12F8B0)
 int USkeletalMeshInstance::WasSkeletonUpdated()
 {
 	// Disasm: 0x12F8B0, 64b.
@@ -2672,7 +2672,7 @@ int UVertMeshInstance::StopAnimating(INT Channel)
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x172950)
+IMPL_MATCH("Engine.dll", 0x172950)
 int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 {
 	guard(UVertMeshInstance::UpdateAnimation);
@@ -2868,7 +2868,7 @@ void UVertMeshInstance::SetAnimFrame(int, float Frame)
 	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x173500)
+IMPL_MATCH("Engine.dll", 0x173500)
 void UVertMeshInstance::SetScale(FVector Scale)
 {
 	guard(UVertMeshInstance::SetScale);
@@ -3096,7 +3096,7 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1724f0)
+IMPL_MATCH("Engine.dll", 0x1724f0)
 int UVertMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(UVertMeshInstance::AnimForcePose);
@@ -3321,7 +3321,7 @@ FSphere UVertMeshInstance::GetRenderBoundingSphere(const AActor*)
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1725d0)
+IMPL_MATCH("Engine.dll", 0x1725d0)
 int UVertMeshInstance::IsAnimating(int Channel)
 {
 	// Retail: 0x1725d0, 74b. Only channel 0 supported on vertex meshes.
@@ -3389,3 +3389,4 @@ void UMeshInstance::MeshBuildBounds() {}
 IMPL_MATCH("Engine.dll", 0x10314740)
 FMatrix UMeshInstance::MeshToWorld() { // Retail: 36b. Copies FMatrix::Identity (from Core.dll IAT) to return buffer.
  return FMatrix::Identity; }
+
