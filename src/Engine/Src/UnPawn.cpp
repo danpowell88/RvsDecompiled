@@ -796,18 +796,20 @@ INT APawn::IsPlayer()
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5600: 34 bytes; parity fails — IsA vtable dispatch or calling convention differs from retail")
+IMPL_DIVERGE("Ghidra 0x103e5600: 34b — IsA(APlayerController) matches Ghidra logic but call-site differs; retail uses direct &PrivateStaticClass ref")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
 }
 
-IMPL_DIVERGE("Ghidra 0x103e4fd0: calls vtable[0x19C] on Controller (AController::IsLocallyControlled virtual); AController::IsLocallyControlled not declared in headers")
+IMPL_DIVERGE("Ghidra 0x103e4fd0: 34b — retail calls LocalPlayerController() via vtable+0x19c, guard/unguard overhead causes parity failure")
 INT APawn::IsLocallyControlled()
 {
-	// Retail calls AController::IsLocallyControlled() (virtual at vtable+0x19c).
-	// We approximate with IsA(APlayerController) which is correct for local play.
-	return Controller && Controller->IsA(APlayerController::StaticClass());
+	guard(APawn::IsLocallyControlled);
+	if( Controller && Controller->LocalPlayerController() )
+		return 1;
+	return 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0xE5350)
@@ -1014,21 +1016,31 @@ INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVec
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5700; 79b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103e5700)
 void APawn::NotifyAnimEnd( INT Channel )
 {
 	guard(APawn::NotifyAnimEnd);
-	AActor::NotifyAnimEnd( Channel );
+	if( Controller && Controller->IsProbing(ENGINE_AnimEnd) )
+	{
+		Controller->eventAnimEnd( Channel );
+		return;
+	}
+	eventAnimEnd( Channel );
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103b7420; 63b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103b7420)
 void APawn::NotifyBump( AActor* Other )
 {
 	guard(APawn::NotifyBump);
-	if( Controller )
-		Controller->eventNotifyBump( Other );
-	AActor::NotifyBump( Other );
+	// If Other has a m_CurrentVolumeSound actor and that actor has an AntiPortal,
+	// redirect the bump to the volume sound actor (R6 sound zone collision redirect).
+	AActor* bump_actor = Other->m_CurrentVolumeSound;
+	if( bump_actor && bump_actor->AntiPortal )
+		Other = bump_actor;
+	if( Controller && Controller->eventNotifyBump( Other ) != 0 )
+		return;
+	AActor::eventBump( Other );
 	unguard;
 }
 
