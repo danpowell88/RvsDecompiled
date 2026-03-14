@@ -418,21 +418,19 @@ void ULevel::ReconcileActors()
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail RememberActors at Ghidra 0x103bf8b0")
+IMPL_MATCH("Engine.dll", 0x103bf8b0)
 void ULevel::RememberActors()
 {
 	guard(ULevel::RememberActors);
-	UEngine* eng = *(UEngine**)((BYTE*)this + 0x44);
-	BYTE* client = *(BYTE**)((BYTE*)eng + 0x44);
+	BYTE* client = *(BYTE**)(*(BYTE**)((BYTE*)this + 0x44) + 0x44);
 	if ( client )
 	{
-		FArray* vpArr = (FArray*)(client + 0x30);
-		INT nVP = *(INT*)((BYTE*)vpArr + 4);
+		INT nVP = *(INT*)(client + 0x30 + 4);
 		for ( INT vi = 0; vi < nVP; vi++ )
 		{
-			BYTE* vp    = *(BYTE**)(*(BYTE**)vpArr + vi * 4);
+			BYTE* vp    = *(BYTE**)(*(BYTE**)(client + 0x30) + vi * 4);
 			BYTE* actor = *(BYTE**)(vp + 0x34);
-			if ( actor && *(ULevel**)((BYTE*)actor + 0x328) == this )
+			if ( *(ULevel**)((BYTE*)actor + 0x328) == this )
 			{
 				*(INT*)(vp + 0x190) = *(INT*)(actor + 0x558);
 				*(INT*)(vp + 0x194) = *(INT*)(actor + 0x3b0);
@@ -1132,43 +1130,77 @@ INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator Tes
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail SinglePointCheck(with source) at Ghidra 0x103b7460")
+IMPL_MATCH("Engine.dll", 0x103b75f0)
 INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
 	FMemMark Mark(GMem);
-	FCheckResult* res = MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, bActors, 0, 0, NULL);
-	if ( !res ) { Mark.Pop(); return 1; }
-	appMemcpy(&Hit, res, sizeof(FCheckResult));
-	// Walk list to find closest to Location (skip SourceActor)
-	for ( FCheckResult* cur = res->GetNext(); cur; cur = cur->GetNext() )
+	DWORD* res = (DWORD*)MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, bActors, 0, 0, NULL);
+	if ( res )
 	{
-		if ( cur->Actor == SourceActor ) continue;
-		FVector dCur = cur->Location - Location;
-		FVector dHit = Hit.Location - Location;
-		if ( dCur.SizeSquared() < dHit.SizeSquared() )
-			appMemcpy(&Hit, cur, sizeof(FCheckResult));
+		DWORD* puVar3 = res;
+		if ( (AActor*)res[1] == SourceActor )
+		{
+			if ( !*(DWORD*)res ) { Mark.Pop(); return 1; }
+			if ( (AActor*)res[1] == SourceActor )
+				puVar3 = (DWORD*)*res;
+		}
+		DWORD* dst = (DWORD*)&Hit;
+		for ( INT i = 0xc; i != 0; i-- )
+			*dst++ = *puVar3++;
+		for ( DWORD* cur = (DWORD*)*res; cur; cur = (DWORD*)*cur )
+		{
+			if ( (AActor*)cur[1] != SourceActor )
+			{
+				FLOAT dCurX = (FLOAT)cur[2] - Location.X;
+				FLOAT dCurY = (FLOAT)cur[3] - Location.Y;
+				FLOAT dCurZ = (FLOAT)cur[4] - Location.Z;
+				FLOAT dHitX = (FLOAT)((DWORD*)&Hit)[2] - Location.X;
+				FLOAT dHitY = (FLOAT)((DWORD*)&Hit)[3] - Location.Y;
+				FLOAT dHitZ = (FLOAT)((DWORD*)&Hit)[4] - Location.Z;
+				if ( FVector(dCurX, dCurY, dCurZ).SizeSquared() < FVector(dHitX, dHitY, dHitZ).SizeSquared() )
+				{
+					puVar3 = cur;
+					dst = (DWORD*)&Hit;
+					for ( INT j = 0xc; j != 0; j-- )
+						*dst++ = *puVar3++;
+				}
+			}
+		}
+		Mark.Pop();
+		return 0;
 	}
 	Mark.Pop();
-	return 0;
+	return 1;
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail SinglePointCheck(no source) at Ghidra 0x103b75f0")
+IMPL_MATCH("Engine.dll", 0x103b7460)
 INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
 	FMemMark Mark(GMem);
-	FCheckResult* res = MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, bActors, 0, 0, NULL);
+	DWORD* res = (DWORD*)MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, bActors, 0, 0, NULL);
 	if ( !res ) { Mark.Pop(); return 1; }
-	appMemcpy(&Hit, res, sizeof(FCheckResult));
-	// Walk list to find closest to Location
-	for ( FCheckResult* cur = res->GetNext(); cur; cur = cur->GetNext() )
+	DWORD* src = res;
+	DWORD* dst = (DWORD*)&Hit;
+	for ( INT i = 0xc; i != 0; i-- )
+		*dst++ = *src++;
+	for ( res = (DWORD*)*res; res; res = (DWORD*)*res )
 	{
-		FVector dCur = cur->Location - Location;
-		FVector dHit = Hit.Location - Location;
-		if ( dCur.SizeSquared() < dHit.SizeSquared() )
-			appMemcpy(&Hit, cur, sizeof(FCheckResult));
+		FLOAT dCurX = (FLOAT)res[2] - Location.X;
+		FLOAT dCurY = (FLOAT)res[3] - Location.Y;
+		FLOAT dCurZ = (FLOAT)res[4] - Location.Z;
+		FLOAT dHitX = (FLOAT)((DWORD*)&Hit)[2] - Location.X;
+		FLOAT dHitY = (FLOAT)((DWORD*)&Hit)[3] - Location.Y;
+		FLOAT dHitZ = (FLOAT)((DWORD*)&Hit)[4] - Location.Z;
+		if ( FVector(dCurX, dCurY, dCurZ).SizeSquared() < FVector(dHitX, dHitY, dHitZ).SizeSquared() )
+		{
+			src = res;
+			dst = (DWORD*)&Hit;
+			for ( INT j = 0xc; j != 0; j-- )
+				*dst++ = *src++;
+		}
 	}
 	Mark.Pop();
 	return 0;
@@ -1195,18 +1227,21 @@ INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVect
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail EncroachingWorldGeometry at Ghidra 0x103b6d60")
+IMPL_MATCH("Engine.dll", 0x103b6d60)
 INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, AActor* Actor )
 {
 	guard(ULevel::EncroachingWorldGeometry);
 	FMemMark Mark(GMem);
-	FCheckResult* res = MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, 1, 1, 1, Actor);
+	DWORD* res = (DWORD*)MultiPointCheck(GMem, Location, Extent, ExtraNodeFlags, Level, 1, 1, 1, Actor);
 	if ( !res )
 	{
 		Mark.Pop();
 		return 0;
 	}
-	appMemcpy(&Hit, res, sizeof(FCheckResult));
+	DWORD* src = res;
+	DWORD* dst = (DWORD*)&Hit;
+	for ( INT i = 0xc; i != 0; i-- )
+		*dst++ = *src++;
 	Mark.Pop();
 	return 1;
 	unguard;
