@@ -105,4 +105,14 @@
     #define COMPILE_CHECK(expr, tag) static_assert(expr, #tag)
 #endif
 
+// ---------------------------------------------------------------------------
+// noexcept compatibility
+//   MSVC 7.1 (1310) predates C++11 and does not have the noexcept keyword.
+//   Use the C++98 empty throw() specification as an equivalent.
+//   Modern compilers have noexcept as a keyword, so no macro is needed there.
+// ---------------------------------------------------------------------------
+#if _MSC_VER <= 1310
+    #define noexcept throw()
+#endif
+
 #endif // IMPL_SOURCE_H
