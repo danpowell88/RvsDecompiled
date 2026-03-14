@@ -163,7 +163,7 @@ UD3DRenderDevice::UD3DRenderDevice()
 	appMemzero( &GRenderCaps, sizeof(GRenderCaps) );
 }
 
-IMPL_DIVERGE("Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header")
+IMPL_DIVERGE("Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header — Ghidra 0x10001cc0")
 UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	: URenderDevice(Other)
 	, UsePrecaching(Other.UsePrecaching)
@@ -904,7 +904,7 @@ static BinkCopyToBufferFunc GBinkCopyToBuffer = NULL;
 static BinkNextFrameFunc    GBinkNextFrame    = NULL;
 static BinkWaitFunc         GBinkWait         = NULL;
 
-IMPL_DIVERGE("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically but binkw32.lib is unavailable")
+IMPL_DIVERGE("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically (binkw32.lib unavailable) — no Ghidra address (static helper not exported)")
 static UBOOL LoadBinkDLL()
 {
 	if( GBinkDLL )
@@ -935,7 +935,7 @@ static UBOOL LoadBinkDLL()
 #define BINKSURFACE32    3
 #define BINKCOPYALL      0x80000000L
 
-IMPL_DIVERGE("Opens a Bink video file via dynamically loaded binkw32.dll and creates a D3D texture to receive decoded frames")
+IMPL_DIVERGE("Ghidra 0x10009850: retail stores Bink handle in Canvas+0x80 and texture in Canvas+0x84; we use GBinkHandle/GBinkTexture globals. Also loads DLL dynamically vs retail's static import.")
 INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTrack, INT Flags)
 {
 	guard(UD3DRenderDevice::OpenVideo);
@@ -983,7 +983,7 @@ INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTra
 	unguard;
 }
 
-IMPL_DIVERGE("Releases GBinkTexture and closes GBinkHandle via BinkClose; resets Bink state")
+IMPL_DIVERGE("Ghidra 0x10009a30: retail reads HBINK from Canvas+0x80 (not a global) and zeroes Canvas+0x80 and Canvas+0x84 after BinkClose; our version uses GBinkHandle/GBinkTexture globals")
 void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::CloseVideo);
@@ -1004,7 +1004,7 @@ void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 	unguard;
 }
 
-IMPL_DIVERGE("Decodes the current Bink frame into GBinkTexture via BinkDoFrame/BinkCopyToBuffer and sets it on D3D texture stage 0")
+IMPL_DIVERGE("Ghidra 0x1000c6f0: retail reads Canvas+0x80/Canvas+0x84 for Bink handle/texture; our version uses globals. Frame decode path matches structurally.")
 void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 {
 	guard(UD3DRenderDevice::DisplayVideo);
@@ -1053,7 +1053,7 @@ void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Fl
 	unguard;
 }
 
-IMPL_DIVERGE("Delegates video teardown to CloseVideo; distinction from CloseVideo exists for audio track cueing in other drivers")
+IMPL_DIVERGE("Ghidra 0x10009ad0: retail is 17 bytes — only zeroes Canvas+0x84 (the texture ptr), does NOT call CloseVideo. We call CloseVideo which releases GBinkTexture and GBinkHandle.")
 void UD3DRenderDevice::StopVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::StopVideo);
@@ -1106,11 +1106,11 @@ void UD3DRenderDevice::Draw3DLine(FVector Start, FVector End, FColor Color, UTex
 /*=============================================================================
 	ChangeDrawingSurface — switch between on-screen and off-screen targets.
 
-	Retail address: 0x1000ca50 (Ghidra)
+	Retail address: 0x1000c890 (Ghidra)
 
 	Used for render-to-texture effects (scope overlays, camera feeds).
 =============================================================================*/
-IMPL_DIVERGE("Off-screen render target path deferred pending further Ghidra analysis; only the default back buffer restore path is implemented")
+IMPL_DIVERGE("Ghidra 0x1000c890: off-screen render target path deferred; only the default back buffer restore path is implemented")
 void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(UD3DRenderDevice::ChangeDrawingSurface);
@@ -1134,12 +1134,12 @@ void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 /*=============================================================================
 	HandleFullScreenEffects — post-process overlay effects.
 
-	Retail address: 0x1000cb00 (Ghidra)
+	Retail address: 0x10009b00 (Ghidra)
 
 	Handles full-screen effects like flashbang, gas, and night vision.
 	The Param1/Param2 encode effect type and intensity.
 =============================================================================*/
-IMPL_DIVERGE("Full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
+IMPL_DIVERGE("Ghidra 0x10009b00: full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
 void UD3DRenderDevice::HandleFullScreenEffects(INT Param1, INT Param2)
 {
 	guard(UD3DRenderDevice::HandleFullScreenEffects);
@@ -1383,7 +1383,7 @@ FD3DVertexShader* UD3DRenderDevice::GetVertexShader(EVertexShader Shader, FShade
 	Called when SetRes encounters a fatal error. Cleans up any partially
 	created D3D objects and returns 0 (failure).
 =============================================================================*/
-IMPL_DIVERGE("Error-path helper for SetRes: logs failure reason, releases partially-created D3D objects, and returns 0")
+IMPL_DIVERGE("Ghidra 0x1000f350: retail only logs and returns 0 — does NOT release D3D objects. Our version also cleans up GDepthStencil/GBackBuffer/GDirect3DDevice8/GDirect3D8.")
 INT UD3DRenderDevice::UnSetRes(const TCHAR* Reason, LONG hResult)
 {
 	guard(UD3DRenderDevice::UnSetRes);

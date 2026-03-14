@@ -159,7 +159,8 @@ static INT GWSAInitialized = 0;
 static UINT GDrvSocket = 0;
 
 // Helper: initialise WinSock if not already done.
-IMPL_DIVERGE("static helper; inlined in retail Init/socket-open paths; no standalone DLL address")
+// Corresponds to inline WSAStartup call sites in Init/socket-open paths; not a standalone export.
+IMPL_DIVERGE("static helper; inlined across multiple retail call sites; not a standalone DLL export")
 static INT InitWSA(FString& Error)
 {
 	if (!GWSAInitialized)
@@ -177,7 +178,8 @@ static INT InitWSA(FString& Error)
 }
 
 // Helper: set socket non-blocking. Returns ioctlsocket error code (0 = OK).
-IMPL_DIVERGE("static helper; inlined in retail socket-creation paths; no standalone DLL address")
+// Corresponds to FUN_1070e0a0 / inline ioctlsocket call in socket-creation paths.
+IMPL_DIVERGE("static helper; retail equivalent inlined or small unregistered function; not a standalone DLL export")
 static INT SetNonBlocking(SOCKET s)
 {
 	u_long NonBlocking = 1;
@@ -185,24 +187,28 @@ static INT SetNonBlocking(SOCKET s)
 }
 
 // Helper: return true if socket handle is valid.
-IMPL_DIVERGE("static helper; inlined in retail socket-check paths; no standalone DLL address")
+// Inlined at each socket-creation call site in retail.
+IMPL_DIVERGE("static helper; inlined at call sites in retail; not a standalone DLL export")
 static bool IsValidSocket(SOCKET s)
 {
 	return s != INVALID_SOCKET;
 }
 
-// Helper: get local IP for binding (INADDR_ANY = all interfaces).
-// In the original binary this is FUN_10701be0 which returns the configured bind address.
-IMPL_DIVERGE("static helper; inlined in retail bind paths; no standalone DLL address")
+// Helper: get local IP for binding.
+// In the retail binary this is FUN_10701be0 (in _unnamed.cpp) which reads the configured bind
+// address from the output-device/log path.  We return INADDR_ANY for all-interfaces binding.
+IMPL_DIVERGE("static helper; retail FUN_10701be0 reads bind address from config; we return INADDR_ANY")
 static UINT GetLocalBindIP()
 {
 	return INADDR_ANY; // host order = 0
 }
 
 // Helper: bind socket and update address with assigned port.
-// mask=1 → bind once; mask=10 → cycle through successive ports (for client reuse).
-// Returns assigned port (host order) on success, 0 on failure.
-IMPL_DIVERGE("static helper; inlined in retail socket-bind paths; no standalone DLL address")
+// Retail equivalent is FUN_10701810 (_unnamed.cpp, 0x10701810): signature is
+//   u_short FUN_10701810(SOCKET s, sockaddr* addr, int num_attempts, int port_increment).
+// Our wrapper has different parameter semantics (mask flags + bReuseAddr vs attempt count +
+// port increment) and calls setsockopt(SO_REUSEADDR) which retail does not.
+IMPL_DIVERGE("static helper; retail FUN_10701810 uses attempt-count/increment params; our version uses flag/reuseaddr params")
 static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 {
 	if (bReuseAddr)
@@ -234,7 +240,8 @@ static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 }
 
 // Helper: set post-bind socket options. Always succeeds in this implementation.
-IMPL_DIVERGE("static helper; inlined in retail socket-option paths; no standalone DLL address")
+// Corresponds to small helper(s) inlined after bind at various call sites in retail.
+IMPL_DIVERGE("static helper; retail post-bind setsockopt calls inlined at each bind site; this stub is a no-op")
 static bool SetSocketOptions(SOCKET s)
 {
 	(void)s;
@@ -243,7 +250,8 @@ static bool SetSocketOptions(SOCKET s)
 
 // Helper: format IP (stored network-byte-order in a DWORD) as FString.
 // For 1.2.3.4 stored as 0x04030201 on LE: b1=1, b2=2, b3=3, b4=4.
-IMPL_DIVERGE("static helper; inlined in retail IP-formatting paths; no standalone DLL address")
+// Retail equivalent is FUN_1070df40 which also reads from a small cached buffer.
+IMPL_DIVERGE("static helper; retail IP-formatting helper FUN_1070df40 uses a cached buffer; we reconstruct the string each call")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);
