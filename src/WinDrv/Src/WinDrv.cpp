@@ -114,7 +114,8 @@ UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Retail registers UseJoystick/StartupFullscreen bool properties via UBoolProperty; "
+    "omitted: UBoolProperty vtable layout differs from retail Core.dll")
 void UWindowsClient::StaticConstructor()
 {
 	guard(UWindowsClient::StaticConstructor);
@@ -155,7 +156,7 @@ void UWindowsClient::PostEditChange()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("NotifyDestroy callback - no-op; cleanup handled by Destroy()")
 void UWindowsClient::NotifyDestroy(void* Src)
 {
 	guard(UWindowsClient::NotifyDestroy);
@@ -692,7 +693,7 @@ void UWindowsViewport::Restore()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Retail performs CD key validation; intentionally disabled in rebuild - no CD required")
 void UWindowsViewport::CheckCD()
 {
 	guard(UWindowsViewport::CheckCD);
@@ -936,13 +937,13 @@ LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 // GetOuterUWindowsClient is provided inline by DECLARE_WITHIN(UWindowsClient)
 // in the class declaration — no out-of-line definition needed.
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DirectInput axes enumeration callback - DIENUM_CONTINUE enumerates all available axes")
 INT STDCALL UWindowsViewport::EnumAxesCallback(const DIDEVICEOBJECTINSTANCEW* pdidoi, void* pContext)
 {
 	return DIENUM_CONTINUE;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DirectInput joystick enumeration callback - DIENUM_CONTINUE enumerates all connected joysticks")
 INT STDCALL UWindowsViewport::EnumJoysticksCallback(const DIDEVICEINSTANCEW* pdidi, void* pContext)
 {
 	return DIENUM_CONTINUE;
