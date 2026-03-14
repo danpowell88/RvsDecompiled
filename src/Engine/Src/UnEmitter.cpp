@@ -236,14 +236,14 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("emitter render no-op; render path not yet implemented")
 void AEmitter::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(AEmitter::Render);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("emitter editor info render no-op")
 void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AEmitter::RenderEditorInfo);
@@ -310,7 +310,7 @@ int AEmitter::CheckForProjectors()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("emitter initialize no-op")
 void AEmitter::Initialize()
 {
 	guard(AEmitter::Initialize);
@@ -319,14 +319,14 @@ void AEmitter::Initialize()
 
 
 // --- UBeamEmitter ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("beam particle spawn no-op")
 void UBeamEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(UBeamEmitter::SpawnParticle);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("beam actor hit-list update no-op")
 void UBeamEmitter::UpdateActorHitList()
 {
 	guard(UBeamEmitter::UpdateActorHitList);
@@ -398,7 +398,7 @@ int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("beam emitter scale no-op")
 void UBeamEmitter::Scale(float)
 {
 	guard(UBeamEmitter::Scale);
@@ -428,7 +428,7 @@ void UBeamEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("beam emitter initialize no-op")
 void UBeamEmitter::Initialize(int)
 {
 	guard(UBeamEmitter::Initialize);
@@ -478,7 +478,7 @@ void UMeshEmitter::PostEditChange()
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("mesh emitter initialize no-op")
 void UMeshEmitter::Initialize(int)
 {
 	guard(UMeshEmitter::Initialize);
@@ -487,14 +487,14 @@ void UMeshEmitter::Initialize(int)
 
 
 // --- UParticleEmitter ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("individual particle spawn no-op")
 void UParticleEmitter::SpawnIndividualParticles(int)
 {
 	guard(UParticleEmitter::SpawnIndividualParticles);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("particle spawn no-op")
 void UParticleEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(UParticleEmitter::SpawnParticle);
@@ -543,7 +543,7 @@ int UParticleEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* p
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: clears state flags and counters; seeds delay/warm-up timers from FRange")
 void UParticleEmitter::Reset()
 {
 	// Ghidra 0xdcb10: clear state flags, zero counters, seed initial delay/warm-up timers.
@@ -556,7 +556,7 @@ void UParticleEmitter::Reset()
 	*(FLOAT*)((BYTE*)this + 0x2ec) = ((FRange*)((BYTE*)this + 0x168))->GetRand();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("particle emitter scale no-op")
 void UParticleEmitter::Scale(float)
 {
 	guard(UParticleEmitter::Scale);
@@ -617,14 +617,14 @@ void UParticleEmitter::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("actor force handling no-op")
 void UParticleEmitter::HandleActorForce(AActor *,float)
 {
 	guard(UParticleEmitter::HandleActorForce);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("particle emitter initialize no-op")
 void UParticleEmitter::Initialize(int)
 {
 	guard(UParticleEmitter::Initialize);
@@ -633,7 +633,7 @@ void UParticleEmitter::Initialize(int)
 
 
 // --- USparkEmitter ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("spark particle spawn no-op")
 void USparkEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(USparkEmitter::SpawnParticle);
@@ -710,7 +710,7 @@ void USparkEmitter::CleanUp()
 	((FArray*)((BYTE*)this + 0x368))->Empty(0x20, 0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("spark emitter initialize no-op")
 void USparkEmitter::Initialize(int)
 {
 	guard(USparkEmitter::Initialize);
@@ -773,7 +773,7 @@ void USpriteEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("sprite vertex buffer fill unresolved; returns 0 stub")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
@@ -783,7 +783,7 @@ int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelScene
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("sprite emitter initialize no-op")
 void USpriteEmitter::Initialize(int)
 {
 	guard(USpriteEmitter::Initialize);

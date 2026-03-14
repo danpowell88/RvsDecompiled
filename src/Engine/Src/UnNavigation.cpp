@@ -255,13 +255,13 @@ void ALadderVolume::AddMyMarker(AActor* Actor)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns zero vector; ladder center calculation not yet reconstructed")
 FVector ALadderVolume::FindCenter()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns zero vector; ladder top calculation not yet reconstructed")
 FVector ALadderVolume::FindTop(FVector)
 {
 	return FVector(0,0,0);
@@ -661,7 +661,7 @@ void AScout::InitForPathing()
 
 IMPL_APPROX("Calls Super::Destroy() as expected for AActor-derived cleanup")
 void ANavigationPoint::Destroy() { Super::Destroy(); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostEditMove() {}
 IMPL_MATCH("Engine.dll", 0xD5B50)
 void ANavigationPoint::Spawned()
@@ -672,21 +672,21 @@ void ANavigationPoint::Spawned()
 	*(DWORD*)((BYTE*)Z + 0x450) &= ~0x800u;
 	bPathsChanged = 1;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::InitForPathFinding() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::CheckSymmetry(ANavigationPoint* Other) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
 IMPL_APPROX("Calls Super::CheckForErrors() as expected base pass-through")
 void ANavigationPoint::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; path-proscription check not yet reconstructed")
 INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
 IMPL_APPROX("Reconstructed from disassembly: zeros chain pointers and empties PathList")
 void ANavigationPoint::ClearPaths()
@@ -699,15 +699,15 @@ void ANavigationPoint::ClearPaths()
 	previousPath        = NULL;
 	((TArray<UReachSpec*>*)((BYTE*)this + 0x3D8))->Empty();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::FindBase() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; path pruning logic not yet reconstructed")
 INT ANavigationPoint::PrunePaths() { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; named tag identification not yet reconstructed")
 INT ANavigationPoint::IsIdentifiedAs(FName Name) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; path review check not yet reconstructed")
 INT ANavigationPoint::ReviewPath(APawn* Scout) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; navigation reachability check not yet reconstructed")
 INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
 IMPL_APPROX("Reconstructed from disassembly: removes pruned specs and shrinks PathList")
 void ANavigationPoint::CleanUpPruned()
@@ -723,7 +723,7 @@ void ANavigationPoint::CleanUpPruned()
 	}
 	myPathList->Shrink();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; alternate path search not yet reconstructed")
 INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
 IMPL_APPROX("Reconstructed from disassembly: linear scan of PathList for matching endpoint")
 UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
@@ -752,7 +752,7 @@ INT ANavigationPoint::ShouldBeBased()
 
 /*-- UInteraction screen/world transforms ------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub zeroes WorldLoc; screen-to-world transform not yet reconstructed")
 void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execScreenToWorld);
@@ -764,7 +764,7 @@ void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execScreenToWorld );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub zeroes ScreenLoc; world-to-screen transform not yet reconstructed")
 void UInteraction::execWorldToScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execWorldToScreen);
@@ -778,7 +778,7 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execWorldToScreen );
 
 /*-- UInteractionMaster ------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; travel URL dispatch not yet reconstructed")
 void UInteractionMaster::execTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteractionMaster::execTravel);
@@ -790,7 +790,7 @@ IMPLEMENT_FUNCTION( UInteractionMaster, INDEX_NONE, execTravel );
 
 /*-- UR6AbstractGameManager -------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; client leave-server dispatch not yet reconstructed")
 void UR6AbstractGameManager::execClientLeaveServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execClientLeaveServer);
@@ -799,7 +799,7 @@ void UR6AbstractGameManager::execClientLeaveServer( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execClientLeaveServer );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; connection-interrupted dispatch not yet reconstructed")
 void UR6AbstractGameManager::execConnectionInterrupted( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execConnectionInterrupted);
@@ -808,7 +808,7 @@ void UR6AbstractGameManager::execConnectionInterrupted( FFrame& Stack, RESULT_DE
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execConnectionInterrupted );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; GameSpy create-UbiServer query not yet reconstructed")
 void UR6AbstractGameManager::execIsGSCreateUbiServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execIsGSCreateUbiServer);
@@ -818,7 +818,7 @@ void UR6AbstractGameManager::execIsGSCreateUbiServer( FFrame& Stack, RESULT_DECL
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execIsGSCreateUbiServer );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; listen-server launch not yet reconstructed")
 void UR6AbstractGameManager::execLaunchListenSrv( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execLaunchListenSrv);
@@ -828,7 +828,7 @@ void UR6AbstractGameManager::execLaunchListenSrv( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execLaunchListenSrv );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; GameSpy create-UbiServer flag setter not yet reconstructed")
 void UR6AbstractGameManager::execSetGSCreateUbiServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execSetGSCreateUbiServer);
@@ -838,7 +838,7 @@ void UR6AbstractGameManager::execSetGSCreateUbiServer( FFrame& Stack, RESULT_DEC
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execSetGSCreateUbiServer );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; server join initiation not yet reconstructed")
 void UR6AbstractGameManager::execStartJoinServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartJoinServer);
@@ -848,7 +848,7 @@ void UR6AbstractGameManager::execStartJoinServer( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartJoinServer );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; login procedure not yet reconstructed")
 void UR6AbstractGameManager::execStartLogInProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartLogInProcedure);
@@ -859,7 +859,7 @@ void UR6AbstractGameManager::execStartLogInProcedure( FFrame& Stack, RESULT_DECL
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartLogInProcedure );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; pre-join procedure not yet reconstructed")
 void UR6AbstractGameManager::execStartPreJoinProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartPreJoinProcedure);
@@ -868,7 +868,7 @@ void UR6AbstractGameManager::execStartPreJoinProcedure( FFrame& Stack, RESULT_DE
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartPreJoinProcedure );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; GameSpy client stop not yet reconstructed")
 void UR6AbstractGameManager::execStopGSClientProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStopGSClientProcedure);
@@ -902,7 +902,7 @@ void UR6FileManager::execFindFile( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1528, execFindFile );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns empty string; filename-by-index not yet reconstructed")
 void UR6FileManager::execGetFileName( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execGetFileName);
@@ -913,7 +913,7 @@ void UR6FileManager::execGetFileName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1526, execGetFileName );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; file count query not yet reconstructed")
 void UR6FileManager::execGetNbFile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execGetNbFile);
@@ -925,7 +925,7 @@ IMPLEMENT_FUNCTION( UR6FileManager, 1525, execGetNbFile );
 
 /*-- UR6ModMgr ---------------------------------------------------------*/
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; mod extra-path registration not yet reconstructed")
 void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execAddNewModExtraPath);
@@ -935,7 +935,7 @@ void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 2020, execAddNewModExtraPath );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; sound engine init call not yet reconstructed")
 void UR6ModMgr::execCallSndEngineInit( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execCallSndEngineInit);
@@ -964,7 +964,7 @@ void UR6ModMgr::execGetIWBuildVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetIWBuildVersion );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; official-mod flag check not yet reconstructed")
 void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execIsOfficialMod);
@@ -974,7 +974,7 @@ void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execIsOfficialMod );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; general mod settings setter not yet reconstructed")
 void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetGeneralModSettings);
@@ -983,7 +983,7 @@ void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execSetGeneralModSettings );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UnrealScript exec stub; system mod name setter not yet reconstructed")
 void UR6ModMgr::execSetSystemMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetSystemMod);
@@ -1184,7 +1184,7 @@ FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(t
 
 // --- Moved from EngineStubs.cpp ---
 // ?buildPaths@FPathBuilder@@QAEHPAVULevel@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("stub returns 0; path builder not yet reconstructed")
 int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z

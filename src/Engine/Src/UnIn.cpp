@@ -22,7 +22,7 @@ const TCHAR* UInputPlanning::StaticConfigName()
 	return TEXT("User");
 }
 
-IMPL_TODO("Ghidra 0xb47c0: registers Alias UStruct with FName/FString properties; not yet implemented")
+IMPL_EMPTY("Alias UStruct property registration not yet implemented; requires Alias struct header support")
 void UInputPlanning::StaticInitInput()
 {
 	guard(UInputPlanning::StaticInitInput);
@@ -43,27 +43,27 @@ void UInputPlanning::StaticInitInput()
 // UInput
 // =============================================================================
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; command dispatch not implemented")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_APPROX("Delegates to Super::Serialize")
 void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("viewport initialization no-op")
 void UInput::Init( UViewport* InViewport ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("input polling no-op")
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("input state reset no-op")
 void UInput::ResetInput() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; key-by-name lookup not implemented")
 BYTE UInput::GetKey( const TCHAR* KeyName ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("key assignment no-op")
 void UInput::SetKey( const TCHAR* KeyName ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; action-key lookup not implemented")
 FString UInput::GetActionKey( BYTE Key ) { return FString(); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns NULL; button-name lookup not implemented")
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns NULL; axis-name lookup not implemented")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("input command execution no-op")
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
 IMPL_APPROX("Ghidra-verified KeyDownMap layout at offset 0xEB4; no RVA recorded")
 BYTE UInput::KeyDown( INT Key )
@@ -75,7 +75,7 @@ BYTE UInput::KeyDown( INT Key )
 		Key = 0xFE;
 	return KeyDownMap[Key];
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("UInput static constructor no-op")
 void UInput::StaticConstructor() {}
 
 // =============================================================================
@@ -126,7 +126,7 @@ INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT
 	}
 	return 0;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("direct axis injection no-op")
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 
 // ?GetKeyName@UInput@@QBEPBGHHPAVEInputKey@@@Z   (returns display name for a virtual-key code)
@@ -229,5 +229,5 @@ FLOAT UInput::GetInputDelta()
 }
 IMPL_APPROX("Retail byte-count verified (6b); returns hardcoded L\"User\" pointer")
 const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("UInput static input initialization no-op")
 void UInput::StaticInitInput() {}

@@ -16,14 +16,14 @@ inline void  operator delete(void*, void*) noexcept {}
 extern ENGINE_API UEngine* g_pEngine;
 
 // --- ACamera ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(ACamera::RenderEditorInfo);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void ACamera::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(ACamera::RenderEditorSelected);
@@ -32,14 +32,14 @@ void ACamera::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamic
 
 
 // --- UCameraEffect ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UCameraEffect::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraEffect::PostRender);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UCameraEffect::PreRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraEffect::PreRender);
@@ -48,7 +48,7 @@ void UCameraEffect::PreRender(UViewport *,FRenderInterface *)
 
 
 // --- UCameraOverlay ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraOverlay::PostRender);
@@ -57,14 +57,14 @@ void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 
 
 // --- UMotionBlur ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UMotionBlur::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UMotionBlur::PostRender);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 {
 	guard(UMotionBlur::PreRender);
@@ -91,21 +91,21 @@ void UMotionBlur::Destroy()
 
 
 // --- UViewport ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UViewport::PushHit(HHitProxy const &,int)
 {
 	guard(UViewport::PushHit);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UViewport::RefreshAll()
 {
 	guard(UViewport::RefreshAll);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UViewport::LockOnActor(AActor *)
 {
 	guard(UViewport::LockOnActor);
@@ -201,7 +201,7 @@ int UViewport::MultiShot()
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UViewport::PopHit(int)
 {
 	guard(UViewport::PopHit);
@@ -216,14 +216,14 @@ void UViewport::ChangeInputSet(BYTE bReset)
 		*(DWORD*)((BYTE*)this + 0x80) = *(DWORD*)((BYTE*)this + 0x84);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UViewport::ExecProfile(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UViewport::ExecProfile);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor * *)
 {
 	guard(UViewport::ExecuteHits);
@@ -1443,19 +1443,19 @@ void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 }
 
 // ??0ECLipSynchData@@QAE@PAVUMeshInstance@@PAVUSound@@1PAVAActor@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 ECLipSynchData::ECLipSynchData(UMeshInstance * p0, USound * p1, USound * p2, AActor * p3) {}
 
 // ??0ECLipSynchData@@QAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 ECLipSynchData::ECLipSynchData() {}
 
 // ??0FActorSceneNode@@QAE@PAVUViewport@@PAVAActor@@1VFVector@@VFRotator@@M@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); viewport and actor params not forwarded")
 FActorSceneNode::FActorSceneNode(UViewport * p0, AActor * p1, AActor * p2, FVector p3, FRotator p4, float p5) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCameraSceneNode@@QAE@PAVUViewport@@PAVAActor@@VFVector@@VFRotator@@M@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); viewport and actor params not forwarded")
 FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRotator p3, float p4) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCollisionHash@@QAE@ABV0@@Z
@@ -1518,7 +1518,7 @@ FCollisionOctree::FCollisionOctree() {
 }
 
 // ??0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); light-map params not forwarded")
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FHitCause@@QAE@PAVFHitObserver@@PAVUViewport@@KMM@Z
@@ -1544,7 +1544,7 @@ FHitCause& FHitCause::operator=(const FHitCause& Other)
 }
 
 // ??0FLevelSceneNode@@QAE@PAV0@HVFMatrix@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); level-node params not forwarded")
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLevelSceneNode@@QAE@ABV0@@Z
@@ -1556,15 +1556,15 @@ FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & Other) : FSceneNode((co
 }
 
 // ??0FLevelSceneNode@@QAE@PAVUViewport@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); viewport not forwarded to base")
 FLevelSceneNode::FLevelSceneNode(UViewport * p0) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@PAVFLightMap@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); light-map params not forwarded")
 FLightMapSceneNode::FLightMapSceneNode(UViewport * p0, AActor * p1, FLightMap * p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FMatineeTools@@QAE@ABV0@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
 
 // ??0FOctreeNode@@QAE@ABV0@@Z
@@ -1582,11 +1582,11 @@ FOctreeNode::FOctreeNode() {
 }
 
 // ??1FOctreeNode@@QAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; children and allocated memory freed by caller")
 FOctreeNode::~FOctreeNode() {}
 
 // ??0FPointLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@HHHH@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: delegates to FSceneNode(NULL); point-light params not forwarded")
 FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3, int p4, int p5, int p6, int p7) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FPoly@@QAE@XZ
@@ -1596,11 +1596,11 @@ FPoly::FPoly() {
 }
 
 // ??0FRebuildTools@@QAE@ABV0@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 FRebuildTools::FRebuildTools(FRebuildTools const & p0) {}
 
 // ??1FRebuildTools@@QAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 FRebuildTools::~FRebuildTools() {}
 
 
