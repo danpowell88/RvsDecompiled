@@ -599,10 +599,11 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 int AScout::findStart(FVector)
 {
 	guard(AScout::findStart);
-	// Ghidra 0xe0940: tries to place scout via FarMoveActor (vtable[0x9c] on Level),
-	// checks walkability, adjusts collision, searches for valid start position.
-	// DIVERGENCE: FarMoveActor and multiple FUN_ collision helpers not reconstructed.
-	// Returns 0 (no start found) as a safe fallback.
+	// DIVERGENCE: AScout::findStart not yet implemented.
+	// GHIDRA REF: 0xe0940 — calls FarMoveActor (Level vtable[0x9c/4]) to try placing
+	// the scout at the requested position, then tests walkability and adjusts collision.
+	// Many internal FUN_ helpers (path-graph queries, collision trace helpers) not yet
+	// resolved. Always returns 0 (no start found) as a safe fallback.
 	return 0;
 	unguard;
 }
