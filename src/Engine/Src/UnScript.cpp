@@ -28,11 +28,12 @@ void UAnimNotify::PostEditChange()
 }
 
 
-// DIVERGENCE: UAnimNotify_DestroyEffect::Notify — bExpireParticles path calls DestroyActor instead of AEmitter vtable[0x63] (cannot safely cast without full AEmitter vtable layout).
-// GHIDRA REF: 0x136ec0 — iterates XLevel->Actors, destroys/expires particle actors
-// owned by Owner whose Tag matches DestroyTag. Complex actor iteration + conditional
-// ULevel::DestroyActor / UParticleEmitter::expire dispatch not yet reconstructed.
-IMPL_DIVERGE("body incomplete — Ghidra 0x10436EC0 not yet fully reconstructed")
+// Ghidra 0x10436EC0 — iterates XLevel->Actors, destroys/expires particle actors owned
+// by Owner whose Tag matches DestroyTag.  bExpireParticles path: retail uses
+// FUN_1037a3e0 to cast to AEmitter* then calls vtable[0x18C/4] to let the emitter
+// expire naturally.  We replicate using IsA(AEmitter) + raw vtable dispatch, which
+// is semantically identical but differs at the machine-code level.
+IMPL_DIVERGE("IsA replaces retail FUN_1037a3e0 cast; vtable[0x18C/4] not symbol-identified")
 void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_DestroyEffect::Notify);
@@ -51,45 +52,86 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 		if (Actor->Owner != Owner) continue;
 		if (Actor->Tag != DestroyTag) continue;
 
-		if (bExpireParticles)
+		if (bExpireParticles && Actor->IsA(AEmitter::StaticClass()))
 		{
-			// DIVERGENCE: retail casts to AEmitter (FUN_1037a3e0) and calls
-			// vtable[0x63] to let the emitter finish its cycle.  We fall back to
-			// immediate DestroyActor because we cannot safely cast without the full
-			// AEmitter vtable layout.
-			Level->DestroyActor(Actor, 0);
+			// Retail: FUN_1037a3e0(actor) casts to AEmitter*, then calls vtable[0x18C/4]
+			// (expire method) to let the emitter finish its cycle rather than destroying it.
+			typedef void (__thiscall* EmitterExpireFn)(AActor*);
+			void** vtbl = *(void***)Actor;
+			EmitterExpireFn fn = (EmitterExpireFn)(vtbl[0x18C / sizeof(void*)]);
+			fn(Actor);
+			continue;
 		}
-		else
-		{
-			Level->DestroyActor(Actor, 0);
-		}
+		Level->DestroyActor(Actor, 0);
 	}
 
 	unguard;
 }
 
 
-// --- UAnimNotify_Effect ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x10436B20 not yet fully reconstructed")
+// Retail 0x10436B20 (875 bytes): returns early if this->Effect (+0x40) is null.
+// In editor: logs the effect class name.  At runtime: copies Owner's Location/Rotation,
+// checks if MI is a USkeletalMeshInstance; if BoneName (+0x38) != NAME_None, transforms
+// the spawn offset (+0x44) through bone FCoords, otherwise through GMath.UnitCoords.
+// Then calls Level->SpawnActor.  Full reconstruction pending: FCoords bone helpers,
+// SpawnActor param mapping, and rotation-from-FCoords math not yet reconstructed.
+IMPL_DIVERGE("875-byte spawn function; FCoords math + SpawnActor not yet reconstructed")
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
-	// TODO: implement UAnimNotify_Effect::Notify (retail 0x136b20, 875 bytes: spawns Effect actor at Owner's location using FCoords rotation + SpawnActor)
-	// GHIDRA REF: 0x136b20 — 875 bytes. Spawns the Effect actor (this->Effect at +0x40)
-	// at Owner's location/rotation using FCoords rotation math and SpawnActor.
-	// Full reconstruction requires FCoords helpers not yet available.
 	unguard;
 }
 
 
-// TODO: implement UAnimNotify_MatSubAction::Notify (retail 0x136fe0: finds live ASceneManager in XLevel->Actors, starts SubAction)
-// GHIDRA REF: 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts
-// the SubAction on it, adjusting start/end times from scene manager position.
-IMPL_DIVERGE("body incomplete — Ghidra 0x10436FE0 not yet fully reconstructed")
-void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
+// --- UAnimNotify_MatSubAction ---
+// Retail 0x10436FE0 (418 bytes): skips in editor.  Finds the first live, active
+// ASceneManager in XLevel->Actors (forward scan: skips null / bDeleteMe / !IsA /
+// !bActive actors).  If found, appends SubAction to SceneMgr->SubActions (at +0x3F0),
+// then sets SubAction startPct (+0x4C), endPct (+0x50) and length (+0x54) from
+// SceneMgr->curTime (+0x3D0) and SceneMgr->duration (+0x3CC), and marks
+// SubAction->state (+0x2C) = 1.  Retail also logs the three object names via Logf.
+IMPL_DIVERGE("log format string at retail 0x2F8 omitted; field offsets raw")
+void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
-	// TODO: see TODO above
+
+	if (GIsEditor)
+		return;
+	if (!SubAction || !Owner || !Owner->XLevel)
+		return;
+
+	ULevel* Level = Owner->XLevel;
+
+	// Forward scan: find first live, active ASceneManager.
+	ASceneManager* SceneMgr = NULL;
+	for (INT i = 0; i < Level->Actors.Num(); i++)
+	{
+		AActor* a = Level->Actors(i);
+		if (!a) continue;
+		if (*(BYTE*)((BYTE*)a + 0xa0) & 0x80) continue;          // bDeleteMe
+		if (!a->IsA(ASceneManager::StaticClass())) continue;
+		if (!(*(BYTE*)((BYTE*)a + 0x3c0) & 0x02)) continue;      // !bActive
+		SceneMgr = (ASceneManager*)a;
+		break;
+	}
+
+	if (SceneMgr)
+	{
+		TArray<UMatSubAction*>& SubActions = *(TArray<UMatSubAction*>*)((BYTE*)SceneMgr + 0x3F0);
+		INT idx = SubActions.Add(1);
+		SubActions(idx) = SubAction;
+
+		FLOAT curTime  = *(FLOAT*)((BYTE*)SceneMgr + 0x3D0);   // SceneMgr->curTime
+		FLOAT duration = *(FLOAT*)((BYTE*)SceneMgr + 0x3CC);   // SceneMgr->duration
+		FLOAT subDur   = *(FLOAT*)((BYTE*)SubAction + 0x34);   // SubAction->duration
+
+		*(FLOAT*)((BYTE*)SubAction + 0x4C) = curTime / duration;
+		*(FLOAT*)((BYTE*)SubAction + 0x50) = (subDur + curTime) / duration;
+		*(FLOAT*)((BYTE*)SubAction + 0x54) = *(FLOAT*)((BYTE*)SubAction + 0x50)
+		                                   - *(FLOAT*)((BYTE*)SubAction + 0x4C);
+		*(BYTE*) ((BYTE*)SubAction + 0x2C) = 1;                // state = in-range
+	}
+
 	unguard;
 }
 

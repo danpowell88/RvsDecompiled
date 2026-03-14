@@ -670,14 +670,15 @@ IMPLEMENT_FUNCTION( AWarpZoneInfo, 315, execUnWarp );
 
 /*-- AFluidSurfaceInfo -------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1039b290: retail calls into FluidSurface Pling implementation")
+IMPL_MATCH("Engine.dll", 0x1039b290)
 void AFluidSurfaceInfo::execPling( FFrame& Stack, RESULT_DECL )
 {
 	guard(AFluidSurfaceInfo::execPling);
 	P_GET_VECTOR(Position);
 	P_GET_FLOAT(Strength);
-	P_GET_INT(Radius);
+	P_GET_FLOAT(Radius);
 	P_FINISH;
+	Pling(Position, Strength, Radius);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AFluidSurfaceInfo, INDEX_NONE, execPling );
@@ -715,12 +716,12 @@ IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKUpdateConstraintParams );
 
 /*-- ASceneManager -----------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1041df80: retail calls GetTotalSceneTime(this); scene time tracking not implemented")
+IMPL_MATCH("Engine.dll", 0x1041df80)
 void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execGetTotalSceneTime);
 	P_FINISH;
-	*(FLOAT*)Result = 0.f;
+	*(FLOAT*)Result = GetTotalSceneTime();
 	unguard;
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
@@ -791,12 +792,12 @@ void AStatLog::execExecuteWorldLogBatcher( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execExecuteWorldLogBatcher );
 
-IMPL_DIVERGE("Ghidra 0x10317b40: retail returns formatted GMT timestamp; stat system not implemented")
+IMPL_MATCH("Engine.dll", 0x10317b40)
 void AStatLog::execGetGMTRef( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetGMTRef);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	*(FString*)Result = appGetGMTRef();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetGMTRef );
