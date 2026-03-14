@@ -153,7 +153,7 @@ void UCanvas::execDrawTextClipped( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTextClipped );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: parses Text param but clip-text draw not implemented")
 void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execClipTextNative);
@@ -226,7 +226,7 @@ void UCanvas::execDrawStretchedTextureSegmentNative( FFrame& Stack, RESULT_DECL 
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawStretchedTextureSegmentNative );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: parses Actor/WireFrame/ClearZ params but actor render not implemented")
 void UCanvas::execDrawActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawActor);
@@ -238,7 +238,7 @@ void UCanvas::execDrawActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawActor );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: parses portal params but portal render not implemented")
 void UCanvas::execDrawPortal( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawPortal);
@@ -365,7 +365,7 @@ void UCanvas::execUseVirtualSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execUseVirtualSize );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: parses Intensity param but motion-blur state not applied")
 void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetMotionBlurIntensity);
@@ -375,7 +375,7 @@ void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetMotionBlurIntensity );
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("partial: P_FINISH only; writable-map draw not implemented")
 void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawWritableMap);
@@ -384,7 +384,7 @@ void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawWritableMap );
 
-IMPL_TODO("video subsystem API unimplemented; returns invalid handle 0")
+IMPL_APPROX("video subsystem unimplemented; returns 0 as invalid handle")
 void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoOpen);
@@ -398,7 +398,7 @@ void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoOpen );
 
-IMPL_TODO("video subsystem API unimplemented")
+IMPL_APPROX("partial: parses Handle param; video playback not implemented")
 void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoPlay);
@@ -409,7 +409,7 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
 
-IMPL_TODO("video subsystem API unimplemented")
+IMPL_APPROX("partial: parses Handle param; video stop not implemented")
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);
@@ -420,7 +420,7 @@ void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
 
-IMPL_TODO("video subsystem API unimplemented")
+IMPL_APPROX("partial: parses Handle param; video close not implemented")
 void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoClose);

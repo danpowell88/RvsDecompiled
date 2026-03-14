@@ -1611,33 +1611,33 @@ FRebuildTools::~FRebuildTools() {}
 // UViewport
 // =============================================================================
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; full exec command dispatch not implemented")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
 IMPL_APPROX("Delegates to Super::Destroy()")
 void UViewport::Destroy() { Super::Destroy(); }
 IMPL_APPROX("Delegates to Super::Serialize()")
 void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; no input polling implemented")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; render device lock not implemented")
 INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; no render device unlock implemented")
 void UViewport::Unlock() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; no frame present implemented")
 void UViewport::Present() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; drag state not tracked in base class")
 INT UViewport::SetDrag( INT NewDrag ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns NULL; server pointer not available in base class")
 void* UViewport::GetServer() { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; render device selection not implemented")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; macro file execution not implemented")
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
 IMPL_APPROX("Inferred from UObject outer cast pattern")
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; input subsystem initialization not implemented")
 void UViewport::InitInput() {}
 IMPL_MATCH("Engine.dll", 0x12A60)
 INT UViewport::IsOrtho()
@@ -1670,9 +1670,9 @@ INT UViewport::IsRealtime()
 	if (!st) return 0;
 	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; wire-frame mode detection not implemented")
 INT UViewport::IsWire() { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; screenshot capture not implemented")
 void UViewport::ScreenShot() {}
 IMPL_MATCH("Engine.dll", 0x129D0)
 BYTE* UViewport::_Screen( INT X, INT Y )

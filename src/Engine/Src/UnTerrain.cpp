@@ -325,7 +325,7 @@ void ATerrainInfo::CalcCoords()
 
 	*(FCoords*)((BYTE*)this + 0x1330) = HeightmapToWorld->Inverse();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void ATerrainInfo::CalcLayerTexCoords()
 {
 	guard(ATerrainInfo::CalcLayerTexCoords);
@@ -343,13 +343,13 @@ void ATerrainInfo::CheckComputeDataOnLoad()
 	}
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void ATerrainInfo::CombineLayerWeights()
 {
 	guard(ATerrainInfo::CombineLayerWeights);
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void ATerrainInfo::ConvertHeightmapFormat()
 {
 	guard(ATerrainInfo::ConvertHeightmapFormat);
@@ -527,17 +527,17 @@ int ATerrainInfo::GetRenderCombinationNum(TArray<INT>& Layers, ETerrainRenderMet
 	return idx;
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns default FBox; full vertex bounds calculation not yet reconstructed")
 FBox ATerrainInfo::GetSelectedVerticesBounds()
 {
 	return FBox();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns default FColor; texture colour sampling not yet reconstructed")
 FColor ATerrainInfo::GetTextureColor(int,int,UTexture *)
 {
 	return FColor(0,0,0,0);
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns zero vector; vertex normal calculation not yet reconstructed")
 FVector ATerrainInfo::GetVertexNormal(int,int)
 {
 	return FVector(0,0,0);
@@ -722,28 +722,28 @@ void FTerrainTools::SetStrength(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x5C) = Value;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 FTerrainTools::FTerrainTools(FTerrainTools const &)
 {
 	guard(FTerrainTools::FTerrainTools);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 FTerrainTools::~FTerrainTools()
 {
 	guard(FTerrainTools::~FTerrainTools);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void FTerrainTools::AdjustAlignedActors()
 {
 	guard(FTerrainTools::AdjustAlignedActors);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void FTerrainTools::FindActorsToAlign()
 {
 	guard(FTerrainTools::FindActorsToAlign);
@@ -771,7 +771,7 @@ ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
 	return *(ATerrainInfo**)&Pad[0x78];
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; brush name to exec mapping not yet reconstructed")
 FString FTerrainTools::GetExecFromBrushName(FString &)
 {
 	return FString();

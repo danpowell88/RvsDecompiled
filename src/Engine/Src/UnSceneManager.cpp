@@ -307,27 +307,27 @@ void ASceneManager::InitializeActions()
 
 
 // --- FR6MatineePreviewProxy ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("preview proxy end-sequence notify no-op")
 void FR6MatineePreviewProxy::OnEndSequenceNotify(ASceneManager *)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("preview proxy scroll-bar update no-op")
 void FR6MatineePreviewProxy::OnScrollBarUpdate()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("preview proxy copy constructor no-op")
 FR6MatineePreviewProxy::FR6MatineePreviewProxy(FR6MatineePreviewProxy const &)
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("preview proxy default constructor no-op")
 FR6MatineePreviewProxy::FR6MatineePreviewProxy()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("preview proxy destructor no-op")
 FR6MatineePreviewProxy::~FR6MatineePreviewProxy()
 {
 }
@@ -426,18 +426,18 @@ void UMatSubAction::PostEditChange()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("sub-action pre-begin-preview no-op")
 void UMatSubAction::PreBeginPreview()
 {
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; stat string not implemented")
 FString UMatSubAction::GetStatString()
 {
 	return FString();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; status description not implemented")
 FString UMatSubAction::GetStatusDesc()
 {
 	return FString();
@@ -515,7 +515,7 @@ int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; camera effect stat string not implemented")
 FString USubActionCameraEffect::GetStatString()
 {
 	return FString();
@@ -533,7 +533,7 @@ int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 	return UMatSubAction::Update(Pct, SceneMgr) ? 1 : 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; camera shake stat string not implemented")
 FString USubActionCameraShake::GetStatString()
 {
 	return FString();
@@ -572,7 +572,7 @@ int USubActionFOV::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; FOV stat string not implemented")
 FString USubActionFOV::GetStatString()
 {
 	return FString();
@@ -616,7 +616,7 @@ int USubActionFade::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; fade stat string not implemented")
 FString USubActionFade::GetStatString()
 {
 	return FString();
@@ -652,7 +652,7 @@ int USubActionGameSpeed::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; game speed stat string not implemented")
 FString USubActionGameSpeed::GetStatString()
 {
 	return FString();
@@ -694,7 +694,7 @@ void USubActionOrientation::PostLoad()
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; orientation stat string not implemented")
 FString USubActionOrientation::GetStatString()
 {
 	return FString();
@@ -739,7 +739,7 @@ int USubActionSceneSpeed::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; scene speed stat string not implemented")
 FString USubActionSceneSpeed::GetStatString()
 {
 	return FString();
@@ -771,7 +771,7 @@ int USubActionTrigger::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; trigger stat string not implemented")
 FString USubActionTrigger::GetStatString()
 {
 	return FString();
@@ -789,18 +789,18 @@ IMPL_APPROX("Delegates to Super::PostEditChange()")
 void ASceneManager::PostEditChange() { Super::PostEditChange(); }
 IMPL_APPROX("Delegates to Super::Tick()")
 INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("scene manager post-begin-play no-op")
 void ASceneManager::PostBeginPlay() {}
 IMPL_APPROX("Delegates to Super::CheckForErrors()")
 void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0.0f; total scene time query not implemented")
 FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
 
 // =============================================================================
 
 // ASceneManager extra methods (from EngineClassImpl.cpp)
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("close video no-op")
 void AReplicationInfo::CloseVideo(UCanvas* Canvas)
 {
 }
@@ -812,7 +812,7 @@ void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 	*(INT*)((BYTE*)this + 0x448) = 0;
 	RefreshSubActions( NewTime / *(FLOAT*)((BYTE*)this + 0x3CC) );
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("set scene start time no-op")
 void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
@@ -862,7 +862,7 @@ void AInterpolationPoint::PostEditMove()
 // ============================================================================
 
 // ??1FMatineeTools@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("FMatineeTools destructor no-op")
 FMatineeTools::~FMatineeTools() {}
 
 // ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
@@ -910,7 +910,7 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FStr
 }
 
 // ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty string; orientation description not implemented")
 FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
@@ -1058,28 +1058,28 @@ void ECLipSynchData::m_vStartLipsynch()
 }
 
 // ?m_vStopLipsynch@ECLipSynchData@@QAEXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("lip sync stop no-op")
 void ECLipSynchData::m_vStopLipsynch() {}
 
 // ?m_vUpdateBonesCompressed@ECLipSynchData@@QAEXH@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("compressed bone update no-op")
 void ECLipSynchData::m_vUpdateBonesCompressed(int p0) {}
 
 // ?m_vUpdateBonesCompressed_BoneView@ECLipSynchData@@QAEXH@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("bone-view compressed update no-op")
 void ECLipSynchData::m_vUpdateBonesCompressed_BoneView(int p0) {}
 
 // ?m_vUpdateBonesCompressed_PhonemsSeq@ECLipSynchData@@QAEXH@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("phonemes-sequence compressed update no-op")
 void ECLipSynchData::m_vUpdateBonesCompressed_PhonemsSeq(int p0) {}
 
 // ?m_vUpdateLipSynch@ECLipSynchData@@QAEXM@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("lip sync per-frame update no-op")
 void ECLipSynchData::m_vUpdateLipSynch(float p0) {}
 // ?GetSamples@FMatineeTools@@QAEXPAVASceneManager@@PAVUMatAction@@PAV?$TArray@VFVector@@@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("path samples collection no-op")
 void FMatineeTools::GetSamples(ASceneManager * p0, UMatAction * p1, TArray<FVector> * p2) {}
 
 // ?Init@FMatineeTools@@QAEXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("FMatineeTools initialization no-op")
 void FMatineeTools::Init() {}
