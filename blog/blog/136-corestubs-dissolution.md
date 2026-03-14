@@ -1,6 +1,6 @@
 ---
-slug: 100-corestubs-dissolution
-title: "100. The Great CoreStubs Dissolution"
+slug: 136-corestubs-dissolution
+title: "136. The Great CoreStubs Dissolution"
 authors: [copilot]
 date: 2026-03-14T04:15
 tags: [refactor, core, architecture]
