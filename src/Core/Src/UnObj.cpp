@@ -38,12 +38,12 @@ IMPLEMENT_CLASS(UObject);
 	FScriptDelegate.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield FScriptDelegate; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FScriptDelegate::FScriptDelegate()
 {
 }
 
-IMPL_APPROX("Ravenshield FScriptDelegate; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FScriptDelegate& FScriptDelegate::operator=( const FScriptDelegate& Other )
 {
 	Object       = Other.Object;
@@ -55,7 +55,7 @@ FScriptDelegate& FScriptDelegate::operator=( const FScriptDelegate& Other )
 	UObject constructors.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10137020 size 9 bytes")
 UObject::UObject()
 :	Index		( INDEX_NONE )
 ,	HashNext	( NULL )
@@ -70,7 +70,7 @@ UObject::UObject()
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137030)
 UObject::UObject( const UObject& Src )
 {
 	guard(UObject::UObject_Copy);
@@ -78,7 +78,7 @@ UObject::UObject( const UObject& Src )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A560)
 UObject::UObject( ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :   Index		( INDEX_NONE )
 ,	HashNext	( NULL )
@@ -96,7 +96,7 @@ UObject::UObject( ENativeConstructor, UClass* InClass, const TCHAR* InName, cons
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013C9C0)
 UObject::UObject( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :   Index		( INDEX_NONE )
 ,	HashNext	( NULL )
@@ -113,7 +113,7 @@ UObject::UObject( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackag
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F7D0)
 UObject::UObject( EInPlaceConstructor, UClass* InClass, UObject* InOuter, FName InName, DWORD InFlags )
 :   Index		( INDEX_NONE )
 ,	HashNext	( NULL )
@@ -127,7 +127,7 @@ UObject::UObject( EInPlaceConstructor, UClass* InClass, UObject* InOuter, FName 
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013ABE0)
 UObject::~UObject()
 {
 	guard(UObject::~UObject);
@@ -140,7 +140,7 @@ UObject::~UObject()
 	UObject interface — virtual methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10122AB0)
 void UObject::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 {
 	guard(UObject::ProcessEvent);
@@ -184,7 +184,7 @@ void UObject::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1011BC60)
 void UObject::ProcessDelegate( FName DelegateName, FScriptDelegate* Delegate, void* Parms, void* Result )
 {
 	guard(UObject::ProcessDelegate);
@@ -228,7 +228,7 @@ INT UObject::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* St
 	return 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137E20)
 void UObject::Modify()
 {
 	guard(UObject::Modify);
@@ -246,7 +246,7 @@ void UObject::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013B130)
 void UObject::Destroy()
 {
 	guard(UObject::Destroy);
@@ -255,7 +255,7 @@ void UObject::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137EC0)
 void UObject::Serialize( FArchive& Ar )
 {
 	guard(UObject::Serialize);
@@ -309,7 +309,7 @@ INT UObject::IsPendingKill()
 	return 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10122CD0)
 EGotoState UObject::GotoState( FName NewState )
 {
 	guard(UObject::GotoState);
@@ -397,7 +397,7 @@ EGotoState UObject::GotoState( FName NewState )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1011BE60)
 INT UObject::GotoLabel( FName Label )
 {
 	guard(UObject::GotoLabel);
@@ -430,7 +430,7 @@ INT UObject::GotoLabel( FName Label )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138510)
 void UObject::InitExecution()
 {
 	guard(UObject::InitExecution);
@@ -448,7 +448,7 @@ void UObject::ShutdownAfterError()
 	// Retail Core.dll: ret (truly empty, no SEH frame)
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013AA40)
 void UObject::PostEditChange()
 {
 	guard(UObject::PostEditChange);
@@ -456,7 +456,7 @@ void UObject::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101228C0)
 void UObject::CallFunction( FFrame& Stack, void* const Result, UFunction* Function )
 {
 	guard(UObject::CallFunction);
@@ -476,7 +476,7 @@ void UObject::CallFunction( FFrame& Stack, void* const Result, UFunction* Functi
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138600)
 INT UObject::ScriptConsoleExec( const TCHAR* Str, FOutputDevice& Ar, UObject* Executor )
 {
 	guard(UObject::ScriptConsoleExec);
@@ -523,7 +523,7 @@ INT UObject::ScriptConsoleExec( const TCHAR* Str, FOutputDevice& Ar, UObject* Ex
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013D9D0)
 void UObject::Register()
 {
 	guard(UObject::Register);
@@ -541,7 +541,7 @@ void UObject::Register()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138EF0)
 void UObject::LanguageChange()
 {
 	guard(UObject::LanguageChange);
@@ -549,7 +549,7 @@ void UObject::LanguageChange()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136AB0 size 8 bytes")
 INT UObject::GetPropertiesSize()
 {
 	guard(UObject::GetPropertiesSize);
@@ -593,7 +593,7 @@ DWORD STDCALL UObject::Release()
 	UObject internal implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1011BB00)
 void UObject::ProcessInternal( FFrame& Stack, void* const Result )
 {
 	guard(UObject::ProcessInternal);
@@ -607,7 +607,7 @@ void UObject::ProcessInternal( FFrame& Stack, void* const Result )
 	UObject static functions — important subsystem methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A830)
 UBOOL UObject::IsValid()
 {
 	guard(UObject::IsValid);
@@ -621,7 +621,7 @@ UBOOL UObject::IsValid()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::IsA( UClass* SomeBase ) const
 {
 	guardSlow(UObject::IsA);
@@ -632,7 +632,7 @@ INT UObject::IsA( UClass* SomeBase ) const
 	unguardSlow;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10102AE0)
 INT UObject::IsIn( UObject* SomeOuter ) const
 {
 	guardSlow(UObject::IsIn);
@@ -643,7 +643,7 @@ INT UObject::IsIn( UObject* SomeOuter ) const
 	unguardSlow;
 }
 
-IMPL_APPROX("not yet implemented; stub returning 0")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::IsInState( FName StateName )
 {
 	guard(UObject::IsInState);
@@ -651,7 +651,7 @@ INT UObject::IsInState( FName StateName )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10102B10)
 INT UObject::IsProbing( FName ProbeName )
 {
 	guardSlow(UObject::IsProbing);
@@ -663,55 +663,55 @@ INT UObject::IsProbing( FName ProbeName )
 	UObject accessors.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 UClass* UObject::GetClass() const
 {
 	return Class;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10101E00)
 const FName UObject::GetFName() const
 {
 	return Name;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101550 size 4 bytes")
 DWORD UObject::GetFlags() const
 {
 	return ObjectFlags;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101E10 size 4 bytes")
 DWORD UObject::GetIndex() const
 {
 	return Index;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 UObject* UObject::GetOuter() const
 {
 	return Outer;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 ULinkerLoad* UObject::GetLinker()
 {
 	return _Linker;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101530 size 4 bytes")
 INT UObject::GetLinkerIndex()
 {
 	return _LinkerIndex;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10108CF0)
 const TCHAR* UObject::GetName() const
 {
 	return *Name;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137AC0)
 const TCHAR* UObject::GetFullName( TCHAR* Str ) const
 {
 	guard(UObject::GetFullName);
@@ -722,7 +722,7 @@ const TCHAR* UObject::GetFullName( TCHAR* Str ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F283)
 const TCHAR* UObject::GetPathName( UObject* StopOuter, TCHAR* Str ) const
 {
 	guard(UObject::GetPathName);
@@ -745,7 +745,7 @@ const TCHAR* UObject::GetPathName( UObject* StopOuter, TCHAR* Str ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101E20 size 4 bytes")
 FStateFrame* UObject::GetStateFrame()
 {
 	return StateFrame;
@@ -755,25 +755,25 @@ FStateFrame* UObject::GetStateFrame()
 	UObject flag manipulation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10101DD0)
 void UObject::SetFlags( DWORD NewFlags )
 {
 	ObjectFlags |= NewFlags;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10101DE0)
 void UObject::ClearFlags( DWORD NewFlags )
 {
 	ObjectFlags &= ~NewFlags;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101DC0 size 10 bytes")
 void UObject::SetClass( UClass* NewClass )
 {
 	Class = NewClass;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137430)
 void UObject::AddToRoot()
 {
 	guard(UObject::AddToRoot);
@@ -781,7 +781,7 @@ void UObject::AddToRoot()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101396A0)
 void UObject::RemoveFromRoot()
 {
 	guard(UObject::RemoveFromRoot);
@@ -793,7 +793,7 @@ void UObject::RemoveFromRoot()
 	UObject static system interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013DB20)
 void UObject::StaticInit()
 {
 	guard(UObject::StaticInit);
@@ -807,7 +807,7 @@ void UObject::StaticInit()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013CFC0)
 void UObject::StaticExit()
 {
 	guard(UObject::StaticExit);
@@ -830,7 +830,7 @@ void UObject::StaticExit()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10136B30)
 void UObject::StaticTick()
 {
 	guard(UObject::StaticTick);
@@ -842,7 +842,7 @@ void UObject::StaticTick()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101372D0)
 void UObject::StaticShutdownAfterError()
 {
 	guard(UObject::StaticShutdownAfterError);
@@ -857,7 +857,7 @@ void UObject::StaticShutdownAfterError()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013DCC0)
 INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(UObject::StaticExec);
@@ -931,19 +931,19 @@ INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar )
 
 // StaticConfigName() defined inline in UObject class header.
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136EF0 size 6 bytes")
 INT UObject::GetInitialized()
 {
 	return GObjInitialized;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10137010 size 6 bytes")
 const TCHAR* UObject::GetLanguage()
 {
 	return GLanguage;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A3F0)
 void UObject::SetLanguage( const TCHAR* LangExt )
 {
 	guard(UObject::SetLanguage);
@@ -958,7 +958,7 @@ void UObject::SetLanguage( const TCHAR* LangExt )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136F00 size 6 bytes")
 UPackage* UObject::GetTransientPackage()
 {
 	return GObjTransientPkg;
@@ -968,7 +968,7 @@ UPackage* UObject::GetTransientPackage()
 	UObject allocation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013B990)
 UObject* UObject::StaticAllocateObject( UClass* InClass, UObject* InOuter, FName InName, DWORD InFlags, UObject* Template, FOutputDevice* Error, UObject* Ptr, INT Reserved )
 {
 	guard(UObject::StaticAllocateObject);
@@ -1013,7 +1013,7 @@ UObject* UObject::StaticAllocateObject( UClass* InClass, UObject* InOuter, FName
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013BF10)
 UObject* UObject::StaticConstructObject( UClass* InClass, UObject* InOuter, FName InName, DWORD InFlags, UObject* Template, FOutputDevice* Error, UObject* SubObjectRoot )
 {
 	guard(UObject::StaticConstructObject);
@@ -1030,7 +1030,7 @@ UObject* UObject::StaticConstructObject( UClass* InClass, UObject* InOuter, FNam
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1012FA20)
 UObject* UObject::StaticFindObject( UClass* ObjectClass, UObject* InObjectPackage, const TCHAR* OrigInName, INT ExactClass )
 {
 	guard(UObject::StaticFindObject);
@@ -1064,7 +1064,7 @@ UObject* UObject::StaticFindObject( UClass* ObjectClass, UObject* InObjectPackag
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138AB0)
 UObject* UObject::StaticFindObjectChecked( UClass* ObjectClass, UObject* InObjectPackage, const TCHAR* InName, INT ExactClass )
 {
 	guard(UObject::StaticFindObjectChecked);
@@ -1075,7 +1075,7 @@ UObject* UObject::StaticFindObjectChecked( UClass* ObjectClass, UObject* InObjec
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F3A0)
 UObject* UObject::StaticLoadObject( UClass* ObjectClass, UObject* InOuter, const TCHAR* InName, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox )
 {
 	guard(UObject::StaticLoadObject);
@@ -1122,7 +1122,7 @@ UObject* UObject::StaticLoadObject( UClass* ObjectClass, UObject* InOuter, const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F8C0)
 UClass* UObject::StaticLoadClass( UClass* BaseClass, UObject* InOuter, const TCHAR* InName, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox )
 {
 	guard(UObject::StaticLoadClass);
@@ -1137,7 +1137,7 @@ UClass* UObject::StaticLoadClass( UClass* BaseClass, UObject* InOuter, const TCH
 	Package management.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013D2F0)
 UPackage* UObject::CreatePackage( UObject* InOuter, const TCHAR* InName )
 {
 	guard(UObject::CreatePackage);
@@ -1149,7 +1149,7 @@ UPackage* UObject::CreatePackage( UObject* InOuter, const TCHAR* InName )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F6A0)
 UObject* UObject::LoadPackage( UObject* InOuter, const TCHAR* Filename, DWORD LoadFlags )
 {
 	guard(UObject::LoadPackage);
@@ -1165,7 +1165,7 @@ UObject* UObject::LoadPackage( UObject* InOuter, const TCHAR* Filename, DWORD Lo
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F9F0)
 INT UObject::SavePackage( UObject* InOuter, UObject* Base, DWORD TopLevelFlags, const TCHAR* Filename, FOutputDevice* Error, ULinkerLoad* Conform )
 {
 	guard(UObject::SavePackage);
@@ -1197,7 +1197,7 @@ INT UObject::SavePackage( UObject* InOuter, UObject* Base, DWORD TopLevelFlags, 
 	Object loading internals.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139330)
 void UObject::BeginLoad()
 {
 	guard(UObject::BeginLoad);
@@ -1208,7 +1208,7 @@ void UObject::BeginLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013F501)
 void UObject::EndLoad()
 {
 	guard(UObject::EndLoad);
@@ -1227,7 +1227,7 @@ void UObject::EndLoad()
 	Garbage collection.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139C50)
 void UObject::CollectGarbage( DWORD KeepFlags )
 {
 	guard(UObject::CollectGarbage);
@@ -1262,7 +1262,7 @@ void UObject::CollectGarbage( DWORD KeepFlags )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139D10)
 INT UObject::IsReferenced( UObject*& Res, DWORD KeepFlags, INT IgnoreReference )
 {
 	guard(UObject::IsReferenced);
@@ -1286,7 +1286,7 @@ INT UObject::IsReferenced( UObject*& Res, DWORD KeepFlags, INT IgnoreReference )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139DC0)
 INT UObject::AttemptDelete( UObject*& Res, DWORD KeepFlags, INT IgnoreReference )
 {
 	guard(UObject::AttemptDelete);
@@ -1303,7 +1303,7 @@ INT UObject::AttemptDelete( UObject*& Res, DWORD KeepFlags, INT IgnoreReference 
 	Object serialization helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139820)
 void UObject::SerializeRootSet( FArchive& Ar, DWORD KeepFlags, DWORD RequiredFlags )
 {
 	guard(UObject::SerializeRootSet);
@@ -1322,7 +1322,7 @@ void UObject::SerializeRootSet( FArchive& Ar, DWORD KeepFlags, DWORD RequiredFla
 	Misc statics.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101390B0)
 void UObject::BindPackage( UPackage* Package )
 {
 	guard(UObject::BindPackage);
@@ -1339,7 +1339,7 @@ void UObject::BindPackage( UPackage* Package )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137190)
 UObject* UObject::GetIndexedObject( INT Index )
 {
 	if( GObjObjects.IsValidIndex(Index) )
@@ -1347,19 +1347,19 @@ UObject* UObject::GetIndexedObject( INT Index )
 	return NULL;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101DB0 size 10 bytes")
 INT UObject::GetObjectHash( FName ObjName, INT Outer )
 {
 	return (ObjName.GetIndex() ^ Outer) & (ARRAY_COUNT(GObjHash)-1);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 TArray<UObject*> UObject::GetLoaderList()
 {
 	return GObjLoaded;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013EE60)
 ULinkerLoad* UObject::GetPackageLinker( UObject* InOuter, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox, FGuid* CompatibleGuid )
 {
 	guard(UObject::GetPackageLinker);
@@ -1431,7 +1431,7 @@ ULinkerLoad* UObject::GetPackageLinker( UObject* InOuter, const TCHAR* Filename,
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013AD70)
 void UObject::ResetLoaders( UObject* Pkg, INT DynamicOnly, INT ForceLazyLoad )
 {
 	guard(UObject::ResetLoaders);
@@ -1446,7 +1446,7 @@ void UObject::ResetLoaders( UObject* Pkg, INT DynamicOnly, INT ForceLazyLoad )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10136D90)
 void UObject::VerifyLinker( ULinkerLoad* Linker )
 {
 	guard(UObject::VerifyLinker);
@@ -1455,7 +1455,7 @@ void UObject::VerifyLinker( ULinkerLoad* Linker )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138F70)
 void UObject::ProcessRegistrants()
 {
 	guard(UObject::ProcessRegistrants);
@@ -1467,7 +1467,7 @@ void UObject::ProcessRegistrants()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013C6F0)
 void UObject::GetRegistryObjects( TArray<FRegistryObjectInfo>& Results, UClass* InClass, UClass* InMetaClass, INT InIterateFlags )
 {
 	guard(UObject::GetRegistryObjects);
@@ -1489,7 +1489,7 @@ void UObject::GetRegistryObjects( TArray<FRegistryObjectInfo>& Results, UClass* 
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013C890)
 void UObject::GetPreferences( TArray<FPreferencesInfo>& Results, const TCHAR* Category, INT InIterateFlags )
 {
 	guard(UObject::GetPreferences);
@@ -1503,7 +1503,7 @@ void UObject::GetPreferences( TArray<FPreferencesInfo>& Results, const TCHAR* Ca
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013CE60)
 void UObject::GlobalSetProperty( const TCHAR* Value, UClass* InClass, UProperty* Property, INT Offset, INT Immediate )
 {
 	guard(UObject::GlobalSetProperty);
@@ -1523,7 +1523,7 @@ void UObject::GlobalSetProperty( const TCHAR* Value, UClass* InClass, UProperty*
 	UObject property methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138BA0)
 void UObject::InitProperties( BYTE* Data, INT DataCount, UClass* DefaultsClass, BYTE* Defaults, INT DefaultsCount, UObject* DestObject, UObject* SuperObject )
 {
 	guard(UObject::InitProperties);
@@ -1546,7 +1546,7 @@ void UObject::InitProperties( BYTE* Data, INT DataCount, UClass* DefaultsClass, 
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138D80)
 void UObject::ExitProperties( BYTE* Data, UClass* Class )
 {
 	guard(UObject::ExitProperties);
@@ -1562,7 +1562,7 @@ void UObject::ExitProperties( BYTE* Data, UClass* Class )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101381C0)
 void UObject::ExportProperties( FOutputDevice& Out, UClass* ObjectClass, BYTE* Object, INT Indent, UClass* DiffClass, BYTE* Diff )
 {
 	guard(UObject::ExportProperties);
@@ -1585,7 +1585,7 @@ void UObject::ExportProperties( FOutputDevice& Out, UClass* ObjectClass, BYTE* O
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138E30)
 void UObject::InitClassDefaultObject( UClass* InClass, INT SetOuter )
 {
 	guard(UObject::InitClassDefaultObject);
@@ -1610,7 +1610,7 @@ void UObject::InitClassDefaultObject( UClass* InClass, INT SetOuter )
 	Search methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137100)
 UFunction* UObject::FindFunction( FName FuncName, INT Global )
 {
 	guard(UObject::FindFunction);
@@ -1625,7 +1625,7 @@ UFunction* UObject::FindFunction( FName FuncName, INT Global )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138860)
 UFunction* UObject::FindFunctionChecked( FName FuncName, INT Global )
 {
 	guard(UObject::FindFunctionChecked);
@@ -1636,7 +1636,7 @@ UFunction* UObject::FindFunctionChecked( FName FuncName, INT Global )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137090)
 UField* UObject::FindObjectField( FName FieldName, INT Global )
 {
 	guard(UObject::FindObjectField);
@@ -1665,7 +1665,7 @@ UField* UObject::FindObjectField( FName FieldName, INT Global )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137140)
 UState* UObject::FindState( FName StateName )
 {
 	guard(UObject::FindState);
@@ -1689,7 +1689,7 @@ UState* UObject::FindState( FName StateName )
 	Property search helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindBoolProperty( FString PropertyName, INT* Value )
 {
 	guard(UObject::FindBoolProperty);
@@ -1697,7 +1697,7 @@ INT UObject::FindBoolProperty( FString PropertyName, INT* Value )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindIntProperty( FString PropertyName, INT* Value )
 {
 	guard(UObject::FindIntProperty);
@@ -1705,7 +1705,7 @@ INT UObject::FindIntProperty( FString PropertyName, INT* Value )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindFloatProperty( FString PropertyName, FLOAT* Value )
 {
 	guard(UObject::FindFloatProperty);
@@ -1713,7 +1713,7 @@ INT UObject::FindFloatProperty( FString PropertyName, FLOAT* Value )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindFNameProperty( FString PropertyName, FName* Value )
 {
 	guard(UObject::FindFNameProperty);
@@ -1721,7 +1721,7 @@ INT UObject::FindFNameProperty( FString PropertyName, FName* Value )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindObjectProperty( FString PropertyName, UObject** Value )
 {
 	guard(UObject::FindObjectProperty);
@@ -1729,7 +1729,7 @@ INT UObject::FindObjectProperty( FString PropertyName, UObject** Value )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindArrayProperty( FString PropertyName, FArray** Value, INT* ElementSize )
 {
 	guard(UObject::FindArrayProperty);
@@ -1737,7 +1737,7 @@ INT UObject::FindArrayProperty( FString PropertyName, FArray** Value, INT* Eleme
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 INT UObject::FindStructProperty( FString PropertyName, UStruct** Value )
 {
 	guard(UObject::FindStructProperty);
@@ -1749,7 +1749,7 @@ INT UObject::FindStructProperty( FString PropertyName, UStruct** Value )
 	Config.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013B2F0)
 void UObject::LoadConfig( INT Immediate, UClass* InClass, const TCHAR* Filename )
 {
 	guard(UObject::LoadConfig);
@@ -1769,7 +1769,7 @@ void UObject::LoadConfig( INT Immediate, UClass* InClass, const TCHAR* Filename 
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013CA60)
 void UObject::SaveConfig( DWORD Flags, const TCHAR* Filename )
 {
 	guard(UObject::SaveConfig);
@@ -1788,7 +1788,7 @@ void UObject::SaveConfig( DWORD Flags, const TCHAR* Filename )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013B6E0)
 void UObject::ResetConfig( UClass* InClass, const TCHAR* Section, INT StartIndex )
 {
 	guard(UObject::ResetConfig);
@@ -1818,7 +1818,7 @@ void UObject::ResetConfig( UClass* InClass, const TCHAR* Section, INT StartIndex
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101388E0)
 void UObject::LoadLocalized()
 {
 	guard(UObject::LoadLocalized);
@@ -1837,7 +1837,7 @@ void UObject::LoadLocalized()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139E70)
 void UObject::ParseParms( const TCHAR* Parms )
 {
 	guard(UObject::ParseParms);
@@ -1859,7 +1859,7 @@ void UObject::ParseParms( const TCHAR* Parms )
 	Conditional operations.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137B90)
 INT UObject::ConditionalDestroy()
 {
 	guard(UObject::ConditionalDestroy);
@@ -1872,7 +1872,7 @@ INT UObject::ConditionalDestroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137D50)
 void UObject::ConditionalPostLoad()
 {
 	guard(UObject::ConditionalPostLoad);
@@ -1884,7 +1884,7 @@ void UObject::ConditionalPostLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137C80)
 void UObject::ConditionalRegister()
 {
 	guard(UObject::ConditionalRegister);
@@ -1892,7 +1892,7 @@ void UObject::ConditionalRegister()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10136C00)
 void UObject::ConditionalShutdownAfterError()
 {
 	guard(UObject::ConditionalShutdownAfterError);
@@ -1904,28 +1904,28 @@ void UObject::ConditionalShutdownAfterError()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UObject::CheckDanglingOuter( UObject* Obj )
 {
 	guard(UObject::CheckDanglingOuter);
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UObject::CheckDanglingRefs( UObject* Obj )
 {
 	guard(UObject::CheckDanglingRefs);
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136A90 size 1 bytes")
 void UObject::StaticConstructor()
 {
 	guard(UObject::StaticConstructor);
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10101D10)
 void UObject::InternalConstructor( void* X )
 {
 	guard(UObject::InternalConstructor);
@@ -1937,7 +1937,7 @@ void UObject::InternalConstructor( void* X )
 	UObject event helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10101E30)
 void UObject::eventBeginState()
 {
 	guard(eventBeginState);
@@ -1945,7 +1945,7 @@ void UObject::eventBeginState()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10101E60)
 void UObject::eventEndState()
 {
 	guard(eventEndState);
@@ -1972,30 +1972,30 @@ FGuid FGuid::SpecialGUIDArmPatches;
 	FEdLoadError class.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1014B260)
 FEdLoadError::FEdLoadError()
 : Type(0), Desc()
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1010E340)
 FEdLoadError::FEdLoadError( INT InType, TCHAR* InDesc )
 : Type(InType), Desc(InDesc)
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1010E350)
 FEdLoadError::FEdLoadError( const FEdLoadError& Other )
 : Type(Other.Type), Desc(Other.Desc)
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101427C0 size 8 bytes")
 FEdLoadError::~FEdLoadError()
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FEdLoadError& FEdLoadError::operator=( FEdLoadError Other )
 {
 	Type = Other.Type;
@@ -2003,7 +2003,7 @@ FEdLoadError& FEdLoadError::operator=( FEdLoadError Other )
 	return *this;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FEdLoadError::operator==( const FEdLoadError& Other ) const
 {
 	return Type == Other.Type && Desc == Other.Desc;
@@ -2013,13 +2013,13 @@ INT FEdLoadError::operator==( const FEdLoadError& Other ) const
 	Editor load error helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void EdClearLoadErrors()
 {
 	GEdLoadErrors.Empty();
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -2027,7 +2027,7 @@ CORE_API void VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... )
 	new(GEdLoadErrors) FEdLoadError( Type, TempStr );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API BYTE GRegisterCast( INT CastCode, const Native& Func )
 {
 	// On first call, initialise all cast slots to execUndefined.
@@ -2053,7 +2053,7 @@ CORE_API BYTE GRegisterCast( INT CastCode, const Native& Func )
 	ParseObject.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API INT ParseObject( const TCHAR* Stream, const TCHAR* Match, UClass* Class, UObject*& DestRes, UObject* InParent )
 {
 	guard(ParseObject);
@@ -2081,7 +2081,7 @@ CORE_API INT ParseObject( const TCHAR* Stream, const TCHAR* Match, UClass* Class
 	Must be out-of-line so the linker can export the symbol via .def.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 void UObject::operator delete( void* Object, size_t Size )
 {
 	guard(UObject::operator delete);
@@ -2093,7 +2093,7 @@ void UObject::operator delete( void* Object, size_t Size )
 	Additional UObject methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139720)
 void UObject::AddObject( INT InIndex )
 {
 	guard(UObject::AddObject);
@@ -2114,7 +2114,7 @@ void UObject::AddObject( INT InIndex )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10136F10)
 void UObject::HashObject()
 {
 	guard(UObject::HashObject);
@@ -2124,7 +2124,7 @@ void UObject::HashObject()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10136F30)
 void UObject::UnhashObject( INT OuterIndex )
 {
 	guard(UObject::UnhashObject);
@@ -2142,7 +2142,7 @@ void UObject::UnhashObject( INT OuterIndex )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013AAD0)
 void UObject::SetLinker( ULinkerLoad* InLinker, INT InLinkerIndex )
 {
 	guard(UObject::SetLinker);
@@ -2151,7 +2151,7 @@ void UObject::SetLinker( ULinkerLoad* InLinker, INT InLinkerIndex )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101374E0)
 FName UObject::MakeUniqueObjectName( UObject* Parent, UClass* Class )
 {
 	guard(UObject::MakeUniqueObjectName);
@@ -2167,7 +2167,7 @@ FName UObject::MakeUniqueObjectName( UObject* Parent, UClass* Class )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137420)
 ULinkerLoad* UObject::GetLoader( INT i )
 {
 	guard(UObject::GetLoader);
@@ -2177,7 +2177,7 @@ ULinkerLoad* UObject::GetLoader( INT i )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10136C90)
 void UObject::SafeLoadError( DWORD LoadFlags, const TCHAR* Error, const TCHAR* Fmt, ... )
 {
 	guard(UObject::SafeLoadError);
@@ -2192,7 +2192,7 @@ void UObject::SafeLoadError( DWORD LoadFlags, const TCHAR* Error, const TCHAR* F
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 UObject& UObject::operator=( const UObject& Other )
 {
 	return *this;
@@ -2202,7 +2202,7 @@ UObject& UObject::operator=( const UObject& Other )
 	UCommandlet stubs.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1010BFE0)
 UCommandlet::UCommandlet( const UCommandlet& Other )
 : UObject( Other )
 , HelpCmd     ( Other.HelpCmd )
@@ -2223,7 +2223,7 @@ UCommandlet::UCommandlet( const UCommandlet& Other )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
 {
 	return *this;
@@ -2234,7 +2234,7 @@ UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
 	These Ravenshield-specific overloads delegate to existing base versions.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A710)
 void UObject::Rename( const TCHAR* NewName )
 {
 	guard(UObject::Rename);
@@ -2246,7 +2246,7 @@ void UObject::Rename( const TCHAR* NewName )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A710)
 void UObject::Rename( const TCHAR* NewName, UObject* NewOuter )
 {
 	INT OldOuterIndex = Outer ? Outer->GetIndex() : 0;
@@ -2258,13 +2258,13 @@ void UObject::Rename( const TCHAR* NewName, UObject* NewOuter )
 	HashObject();
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x101388E0)
 void UObject::LoadLocalized( INT Flags, UClass* Class )
 {
 	LoadLocalized();
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013D850)
 void UObject::SetKey( UClass* InClass, const TCHAR* Key )
 {
 	guard(UObject::SetKey);
@@ -2303,19 +2303,19 @@ void UObject::SetKey( UClass* InClass, const TCHAR* Key )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10138BA0)
 void UObject::InitProperties( BYTE* Data, INT DataCount, UClass* DefaultsClass, BYTE* Defaults, INT DefaultsCount, UObject* DestObject, INT bNativeDefaults )
 {
 	InitProperties( Data, DataCount, DefaultsClass, Defaults, DefaultsCount, DestObject, (UObject*)NULL );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013BF10)
 UObject* UObject::StaticConstructObject( UClass* Class, UObject* InOuter, FName Name, DWORD Flags, UObject* Template, FOutputDevice* Error, INT Reserved )
 {
 	return StaticConstructObject( Class, InOuter, Name, Flags, Template, Error, (UObject*)NULL );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013DCC0)
 INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar, INT bShowHelp )
 {
 	return StaticExec( Cmd, Ar );
@@ -2326,19 +2326,19 @@ INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar, INT bShowHelp )
 	Delegates to base version ignoring ULevel*.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10102CB0 size 5 bytes")
 UObject* UFactory::FactoryCreateText( ULevel* Level, UClass* Class, UObject* InParent, FName Name, DWORD Flags, UObject* Context, const TCHAR* Type, const TCHAR*& Buffer, const TCHAR* BufferEnd, FFeedbackContext* Warn )
 {
 	return FactoryCreateText( Class, InParent, Name, Flags, Context, Type, Buffer, BufferEnd, Warn );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10112520)
 UObject* UFactory::StaticImportObject( ULevel* Level, UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* Factory, const TCHAR* Parms, FFeedbackContext* Warn )
 {
 	return StaticImportObject( Class, InOuter, Name, Flags, Filename, Context, Factory, Parms, Warn );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013D4B0)
 INT UObject::ResolveName( UObject*& InPackage, const TCHAR*& InName, INT Create, INT Throw )
 {
 	guard(UObject::ResolveName);
@@ -2365,7 +2365,7 @@ INT UObject::ResolveName( UObject*& InPackage, const TCHAR*& InName, INT Create,
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013BFD0)
 void UObject::CacheDrivers( INT bForceRefresh )
 {
 	guard(UObject::CacheDrivers);
@@ -2376,7 +2376,7 @@ void UObject::CacheDrivers( INT bForceRefresh )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139900)
 void UObject::PurgeGarbage()
 {
 	guard(UObject::PurgeGarbage);

@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6RainbowTeam)
 
 // --- AR6RainbowTeam ---
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10009c20)
 void AR6RainbowTeam::eventRequestFormationChange(BYTE A)
 {
 	struct { BYTE A; } Parms;
@@ -16,7 +16,7 @@ void AR6RainbowTeam::eventRequestFormationChange(BYTE A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_RequestFormationChange), &Parms);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10009c60)
 void AR6RainbowTeam::eventUpdateTeamFormation(BYTE A)
 {
 	struct { BYTE A; } Parms;

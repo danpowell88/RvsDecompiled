@@ -26,7 +26,7 @@ UPackage::UPackage()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013B240)
 void UPackage::Destroy()
 {
 	guard(UPackage::Destroy);
@@ -39,7 +39,7 @@ void UPackage::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A2A0)
 void UPackage::Serialize( FArchive& Ar )
 {
 	guard(UPackage::Serialize);
@@ -48,7 +48,7 @@ void UPackage::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x10137880)
 void* UPackage::GetDllExport( const TCHAR* ExportName, UBOOL Checked )
 {
 	guard(UPackage::GetDllExport);
@@ -101,7 +101,7 @@ UTextBuffer::UTextBuffer( const TCHAR* InText )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x10139FD0)
 void UTextBuffer::Serialize( FArchive& Ar )
 {
 	guard(UTextBuffer::Serialize);
@@ -110,7 +110,7 @@ void UTextBuffer::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A070)
 void UTextBuffer::Serialize( const TCHAR* Data, EName Event )
 {
 	guard(UTextBuffer::Serialize_OutputDevice);
@@ -150,7 +150,7 @@ UCommandlet::~UCommandlet()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013AFF0)
 INT UCommandlet::Main( const TCHAR* Parms )
 {
 	guard(UCommandlet::Main);
@@ -158,7 +158,7 @@ INT UCommandlet::Main( const TCHAR* Parms )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1013A1D0)
 void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCommandlet::execMain);
@@ -169,7 +169,7 @@ void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCommandlet, 0, execMain );
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1010F360)
 INT UCommandlet::eventMain( const FString& InParms )
 {
 	UCommandlet_eventMain_Parms Parms;
@@ -224,7 +224,7 @@ void USystem::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x1014BAC0)
 UBOOL USystem::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(USystem::Exec);
@@ -281,7 +281,7 @@ UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
+IMPL_MATCH("Core.dll", 0x101161B0)
 void UConst::Serialize( FArchive& Ar )
 {
 	guard(UConst::Serialize);

@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6StairVolume)
 
 // --- AR6StairVolume ---
 
-IMPL_APPROX("Navigation marker spawning: spawns R6Stairs markers along volume; rotation cross product for stair normal; SpawnActor vtable not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x1003b210)
 void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6StairVolume::AddMyMarker);
@@ -20,7 +20,7 @@ void AR6StairVolume::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
-IMPL_APPROX("Validates stair orientation marker placement and uniqueness; logs editor warnings for misconfiguration")
+IMPL_DIVERGE("retail format strings are in data sections; approximate text used.")
 void AR6StairVolume::CheckForErrors()
 {
 	guard(AR6StairVolume::CheckForErrors);
@@ -77,7 +77,7 @@ void AR6StairVolume::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Safely destroys associated stair orientation actor on script cleanup")
+IMPL_MATCH("R6Engine.dll", 0x1003b080)
 void AR6StairVolume::PostScriptDestroyed()
 {
 	guard(AR6StairVolume::PostScriptDestroyed);
@@ -85,7 +85,7 @@ void AR6StairVolume::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Propagates bDirectional flag from volume to stair orientation marker for editor rendering")
+IMPL_MATCH("R6Engine.dll", 0x1003af40)
 void AR6StairVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6StairVolume::RenderEditorInfo);
@@ -96,7 +96,7 @@ void AR6StairVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterfa
 	unguard;
 }
 
-IMPL_APPROX("Spawns and links a paired AR6StairOrientation actor when this volume is created")
+IMPL_MATCH("R6Engine.dll", 0x1003b100)
 void AR6StairVolume::Spawned()
 {
 	guard(AR6StairVolume::Spawned);

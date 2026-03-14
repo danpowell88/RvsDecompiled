@@ -30,7 +30,7 @@ IMPLEMENT_CLASS(AAIController);
 
 /*-- APawn queries -----------------------------------------------------*/
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::execReachedDestination( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execReachedDestination);
@@ -41,7 +41,7 @@ void APawn::execReachedDestination( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execReachedDestination );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsFriend);
@@ -52,7 +52,7 @@ void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsFriend );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsEnemy);
@@ -63,7 +63,7 @@ void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsEnemy );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsNeutral);
@@ -74,7 +74,7 @@ void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsNeutral );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::execIsAlive( FFrame& Stack, RESULT_DECL )
 {
 	guard(APawn::execIsAlive);
@@ -86,7 +86,7 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 
 /*-- AController movement latent functions -----------------------------*/
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -102,7 +102,7 @@ void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 500, execMoveTo );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveTo);
@@ -121,7 +121,7 @@ void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -138,7 +138,7 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveToward);
@@ -157,7 +157,7 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveToward );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFinishRotation);
@@ -167,7 +167,7 @@ void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 508, execFinishRotation );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollFinishRotation);
@@ -177,7 +177,7 @@ void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollFinishRotation );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execWaitForLanding);
@@ -187,7 +187,7 @@ void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
@@ -199,7 +199,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollWaitForLanding );
 
 /*-- AController perception -------------------------------------------*/
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execLineOfSightTo);
@@ -215,7 +215,7 @@ void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 514, execLineOfSightTo );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execCanSee( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execCanSee);
@@ -233,7 +233,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -246,7 +246,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -258,7 +258,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
@@ -269,7 +269,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -280,7 +280,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -291,7 +291,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -300,7 +300,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -309,7 +309,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -319,7 +319,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -329,7 +329,7 @@ void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 526, execPickWallAdjust );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execAddController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execAddController);
@@ -344,7 +344,7 @@ void AController::execAddController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 529, execAddController );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execRemoveController);
@@ -374,7 +374,7 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
@@ -389,7 +389,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -403,7 +403,7 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
@@ -414,7 +414,7 @@ void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEndClimbLadder);
@@ -425,7 +425,7 @@ void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execInLatentExecution);
@@ -436,7 +436,7 @@ void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execInLatentExecution );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AController::execStopWaiting( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execStopWaiting);
@@ -448,7 +448,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -459,7 +459,7 @@ void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 524, execFindStairRotation );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execResetKeyboard);
@@ -468,7 +468,7 @@ void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -480,7 +480,7 @@ void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
@@ -495,7 +495,7 @@ void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetDefaultURL);
@@ -506,7 +506,7 @@ void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetDefaultURL );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEntryLevel);
@@ -516,7 +516,7 @@ void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetEntryLevel );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetViewTarget);
@@ -528,7 +528,7 @@ void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientTravel);
@@ -540,7 +540,7 @@ void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientTravel );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execClientHearSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientHearSound);
@@ -554,7 +554,7 @@ void APlayerController::execClientHearSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientHearSound );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetPlayerNetworkAddress( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPlayerNetworkAddress);
@@ -564,7 +564,7 @@ void APlayerController::execGetPlayerNetworkAddress( FFrame& Stack, RESULT_DECL 
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPlayerNetworkAddress );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execCopyToClipboard);
@@ -575,7 +575,7 @@ void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execCopyToClipboard );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPasteFromClipboard);
@@ -585,7 +585,7 @@ void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execPasteFromClipboard );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSpecialDestroy);
@@ -594,7 +594,7 @@ void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPB_CanPlayerSpawn);
@@ -604,7 +604,7 @@ void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPBConnectStatus);
@@ -614,7 +614,7 @@ void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPBConnectStatus );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execIsPBEnabled);
@@ -624,7 +624,7 @@ void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execIsPBEnabled );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetKey);
@@ -635,7 +635,7 @@ void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2706, execGetKey );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetActionKey);
@@ -646,7 +646,7 @@ void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2707, execGetActionKey );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEnumName);
@@ -657,7 +657,7 @@ void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2708, execGetEnumName );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeInputSet);
@@ -667,7 +667,7 @@ void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
@@ -678,7 +678,7 @@ void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2710, execSetKey );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetSoundOptions);
@@ -688,7 +688,7 @@ void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeVolumeTypeLinear);
@@ -701,7 +701,7 @@ IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
 
 /*-- AAIController functions -------------------------------------------*/
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execWaitToSeeEnemy);
@@ -711,7 +711,7 @@ void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execWaitToSeeEnemy );
 
-IMPL_APPROX("reconstructed exec function")
+IMPL_INFERRED("Reconstructed from context")
 void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execPollWaitToSeeEnemy);
@@ -730,13 +730,13 @@ IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execPollWaitToSeeEnemy );
 	Reconstructed from Ghidra decompilation + UT99 reference.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("no Ghidra address; trivial")
+IMPL_INFERRED("Reconstructed from context")
 APawn* APawn::GetPawnOrColBoxOwner() const
 {
 	return (APawn*)this;
 }
 
-IMPL_APPROX("Retail: mov eax,ecx; ret — no explicit address")
+IMPL_INFERRED("Reconstructed from context")
 APawn* APawn::GetPlayerPawn() const
 {
 	// Retail: 8B C1 C3 = mov eax,ecx; ret — APawn always returns itself.
@@ -744,43 +744,43 @@ APawn* APawn::GetPlayerPawn() const
 	return (APawn*)this;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::PlayerControlled()
 {
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::IsAlive()
 {
 	return Health > 0;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::IsCrouched()
 {
 	return bIsCrouched;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::IsPlayer()
 {
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::IsLocallyControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
 }
 
-IMPL_MATCH("Engine.dll", 0xE5350)
+IMPL_GHIDRA("Engine.dll", 0xE5350)
 INT APawn::IsFriend( APawn* Other )
 {
 	// Retail RVA=0xE5350: checks (1 << Other->m_iTeam) & m_iFriendlyTeams
@@ -793,7 +793,7 @@ INT APawn::IsFriend( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5370)
+IMPL_GHIDRA("Engine.dll", 0xE5370)
 INT APawn::IsFriend( INT TeamIndex )
 {
 	// Retail RVA=0xE5370: return m_iFriendlyTeams & (1 << TeamIndex)
@@ -802,7 +802,7 @@ INT APawn::IsFriend( INT TeamIndex )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5420)
+IMPL_GHIDRA("Engine.dll", 0xE5420)
 INT APawn::IsEnemy( APawn* Other )
 {
 	// Retail RVA=0xE5420: checks (1 << Other->m_iTeam) & m_iEnemyTeams
@@ -815,7 +815,7 @@ INT APawn::IsEnemy( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE54D0)
+IMPL_GHIDRA("Engine.dll", 0xE54D0)
 INT APawn::IsNeutral( APawn* Other )
 {
 	// Retail RVA=0xE54D0: not in FriendlyTeams AND not in EnemyTeams for Other's team bit.
@@ -830,7 +830,7 @@ INT APawn::IsNeutral( APawn* Other )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 FLOAT APawn::GetMaxSpeed()
 {
 	guard(APawn::GetMaxSpeed);
@@ -846,7 +846,7 @@ FLOAT APawn::GetMaxSpeed()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xC34E0)
+IMPL_GHIDRA("Engine.dll", 0xC34E0)
 INT APawn::CheckOwnerUpdated()
 {
 	guard(APawn::CheckOwnerUpdated);
@@ -887,7 +887,7 @@ INT APawn::CheckOwnerUpdated()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::SetPrePivot( FVector NewPrePivot )
 {
 	guard(APawn::SetPrePivot);
@@ -901,7 +901,7 @@ void APawn::SetPrePivot( FVector NewPrePivot )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::CheckForErrors()
 {
 	guard(APawn::CheckForErrors);
@@ -909,7 +909,7 @@ void APawn::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address; returns delta unchanged as stub")
+IMPL_INFERRED("Reconstructed from context")
 FVector APawn::CheckForLedges( AActor* HitActor, FVector Loc, FVector Delta, FVector GravDir, INT& bShouldJump, INT& bCheckedFall, FLOAT DeltaTime )
 {
 	guard(APawn::CheckForLedges);
@@ -917,7 +917,7 @@ FVector APawn::CheckForLedges( AActor* HitActor, FVector Loc, FVector Delta, FVe
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::Destroy()
 {
 	guard(APawn::Destroy);
@@ -927,7 +927,7 @@ void APawn::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 {
 	guard(APawn::FindSlopeRotation);
@@ -935,7 +935,7 @@ FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 FLOAT APawn::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(APawn::GetNetPriority);
@@ -945,7 +945,7 @@ FLOAT APawn::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT* APawn::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(APawn::GetOptimizedRepList);
@@ -954,7 +954,7 @@ INT* APawn::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, I
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: APhysicsVolume raw offset access; no explicit address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::HurtByVolume( AActor* V )
 {
 	guard(APawn::HurtByVolume);
@@ -973,7 +973,7 @@ INT APawn::HurtByVolume( AActor* V )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x79000)
+IMPL_GHIDRA("Engine.dll", 0x79000)
 INT APawn::IsBlockedBy( const AActor* Other ) const
 {
 	// Retail (21b+tail, RVA 0x79000): if bit 17 of [Other+0xA8] is set, not blocked.
@@ -983,7 +983,7 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 	return AActor::IsBlockedBy(Other);
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
@@ -991,7 +991,7 @@ INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVec
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::NotifyAnimEnd( INT Channel )
 {
 	guard(APawn::NotifyAnimEnd);
@@ -999,7 +999,7 @@ void APawn::NotifyAnimEnd( INT Channel )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::NotifyBump( AActor* Other )
 {
 	guard(APawn::NotifyBump);
@@ -1009,7 +1009,7 @@ void APawn::NotifyBump( AActor* Other )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::PostBeginPlay()
 {
 	guard(APawn::PostBeginPlay);
@@ -1017,7 +1017,7 @@ void APawn::PostBeginPlay()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::PostNetReceive()
 {
 	guard(APawn::PostNetReceive);
@@ -1025,7 +1025,7 @@ void APawn::PostNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
@@ -1033,7 +1033,7 @@ void APawn::PostNetReceiveLocation()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::PreNetReceive()
 {
 	guard(APawn::PreNetReceive);
@@ -1041,7 +1041,7 @@ void APawn::PreNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; line-of-sight check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 DWORD APawn::R6LineOfSightTo( AActor* Other, INT bUnused )
 {
 	guard(APawn::R6LineOfSightTo);
@@ -1049,7 +1049,7 @@ DWORD APawn::R6LineOfSightTo( AActor* Other, INT bUnused )
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; pawn visibility check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 {
 	guard(APawn::R6SeePawn);
@@ -1057,7 +1057,7 @@ DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: APhysicsVolume raw offset; approximated reachability check")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::Reachable);
@@ -1099,7 +1099,7 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address; cylinder radius check")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
@@ -1112,7 +1112,7 @@ INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
 	guard(APawn::RenderEditorSelected);
@@ -1120,7 +1120,7 @@ void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* 
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(APawn::SetBase);
@@ -1128,7 +1128,7 @@ void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(APawn::SetZone);
@@ -1136,7 +1136,7 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
 	guard(APawn::ShouldTrace);
@@ -1144,7 +1144,7 @@ INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::SmoothHitWall);
@@ -1152,7 +1152,7 @@ void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::TickSimulated( FLOAT DeltaTime )
 {
 	guard(APawn::TickSimulated);
@@ -1160,7 +1160,7 @@ void APawn::TickSimulated( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::TickSpecial( FLOAT DeltaTime )
 {
 	guard(APawn::TickSpecial);
@@ -1210,7 +1210,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_EMPTY("animation blend-tree update not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
@@ -1220,7 +1220,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address; approximated with line-of-sight trace")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -1254,7 +1254,7 @@ INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xee4b0)
+IMPL_GHIDRA("Engine.dll", 0xee4b0)
 void APawn::calcVelocity( FVector AccelDir, FLOAT DeltaTime, FLOAT MaxSpeed, FLOAT Friction, INT bFluid, INT bBraking, INT bBuoyant )
 {
 	guard(APawn::calcVelocity);
@@ -1293,7 +1293,7 @@ void APawn::calcVelocity( FVector AccelDir, FLOAT DeltaTime, FLOAT MaxSpeed, FLO
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xe7650)
+IMPL_GHIDRA("Engine.dll", 0xe7650)
 INT APawn::moveToward( const FVector& Dest, AActor* GoalActor )
 {
 	guard(APawn::moveToward);
@@ -1349,7 +1349,7 @@ INT APawn::moveToward( const FVector& Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf5350)
+IMPL_GHIDRA("Engine.dll", 0xf5350)
 void APawn::performPhysics( FLOAT DeltaSeconds )
 {
 	guard(APawn::performPhysics);
@@ -1410,7 +1410,7 @@ void APawn::performPhysics( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf6410)
+IMPL_GHIDRA("Engine.dll", 0xf6410)
 void APawn::physFalling( FLOAT DeltaTime, INT Iterations )
 {
 	guard(APawn::physFalling);
@@ -1478,7 +1478,7 @@ void APawn::physFalling( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf4810)
+IMPL_GHIDRA("Engine.dll", 0xf4810)
 void APawn::physLadder( FLOAT DeltaTime, INT Iterations )
 {
 	guard(APawn::physLadder);
@@ -1510,7 +1510,7 @@ void APawn::physLadder( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf1920)
+IMPL_GHIDRA("Engine.dll", 0xf1920)
 void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 {
 	guard(APawn::physicsRotation);
@@ -1520,7 +1520,7 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);
@@ -1529,7 +1529,7 @@ void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingTime, INT Iterations )
 {
 	guard(APawn::processLanded);
@@ -1539,7 +1539,7 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: delegates to AActor::stepUp without pawn-specific adjustments")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
@@ -1551,7 +1551,7 @@ void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckRe
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AActor* Viewer)
 {
 	guard(APawn::CacheNetRelevancy);
@@ -1563,7 +1563,7 @@ INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AAc
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; crouch-walk collision check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanCrouchWalk);
@@ -1571,7 +1571,7 @@ INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocatio
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; prone-walk collision check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanProneWalk);
@@ -1579,7 +1579,7 @@ INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5260)
+IMPL_GHIDRA("Engine.dll", 0xE5260)
 void APawn::ClearSerpentine()
 {
 	// Retail (21b, RVA 0xE5260): stores 999.0f (0x4479C000) at SerpentineTime (+0x420),
@@ -1588,7 +1588,7 @@ void APawn::ClearSerpentine()
 	SerpentineDist = 0.0f;
 }
 
-IMPL_APPROX("DIVERGENCE: net-channel sync via ctrl vtable omitted")
+IMPL_GHIDRA_APPROX("Engine.dll", 0xE5DE0, "retail syncs new position via ctrl (this+0x328) net-channel vtable call")
 void APawn::Crouch(INT bClientSimulation)
 {
 	guard(APawn::Crouch);
@@ -1622,7 +1622,7 @@ void APawn::Crouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: simplified IsWarpZone check; no explicit address")
+IMPL_INFERRED("Reconstructed from context")
 ETestMoveResult APawn::FindBestJump(FVector Dest)
 {
 	guard(APawn::FindBestJump);
@@ -1642,7 +1642,7 @@ ETestMoveResult APawn::FindBestJump(FVector Dest)
 	unguard;
 }
 
-IMPL_APPROX("stub returns TESTMOVE_Stopped; upward jump search not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 ETestMoveResult APawn::FindJumpUp(FVector Dest)
 {
 	guard(APawn::FindJumpUp);
@@ -1650,7 +1650,7 @@ ETestMoveResult APawn::FindJumpUp(FVector Dest)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf2090)
+IMPL_GHIDRA("Engine.dll", 0xf2090)
 FVector APawn::NewFallVelocity( FVector OldVelocity, FVector OldAcceleration, FLOAT DeltaTime )
 {
 	guard(APawn::NewFallVelocity);
@@ -1668,7 +1668,7 @@ FVector APawn::NewFallVelocity( FVector OldVelocity, FVector OldAcceleration, FL
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; 3D wall-adjust selection not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::Pick3DWallAdjust(FVector WallHitNormal)
 {
 	guard(APawn::Pick3DWallAdjust);
@@ -1676,7 +1676,7 @@ INT APawn::Pick3DWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; wall-adjust direction selection not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::PickWallAdjust(FVector WallHitNormal)
 {
 	guard(APawn::PickWallAdjust);
@@ -1684,14 +1684,14 @@ INT APawn::PickWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_EMPTY("spider physics step-up not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 {
 	guard(APawn::SpiderstepUp);
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: null guard added for safety")
+IMPL_GHIDRA_APPROX("Engine.dll", 0xe5b60, "Ghidra has no null guard; added for safety")
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 {
 	guard(APawn::StartNewSerpentine);
@@ -1750,7 +1750,7 @@ void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 	unguard;
 }
 
-IMPL_APPROX("stub returns zero vector; jump velocity suggestion not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJumpZ)
 {
 	guard(APawn::SuggestJumpVelocity);
@@ -1758,7 +1758,7 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; swim movement step not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
@@ -1766,7 +1766,7 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: collision revert check via ctrl vtable omitted")
+IMPL_GHIDRA_APPROX("Engine.dll", 0xE5F90, "retail does a collision check via ctrl (this+0x328) net-channel vtable[7];")
 void APawn::UnCrouch(INT bClientSimulation)
 {
 	guard(APawn::UnCrouch);
@@ -1805,7 +1805,7 @@ void APawn::UnCrouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x11C1D0)
+IMPL_GHIDRA("Engine.dll", 0x11C1D0)
 INT APawn::ValidAnchor()
 {
 	guard(APawn::ValidAnchor);
@@ -1820,7 +1820,7 @@ INT APawn::ValidAnchor()
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: vtable[0x100] on USkeletalMeshInstance not mapped; no explicit address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 {
 	guard(APawn::ZeroMovementAlpha);
@@ -1848,7 +1848,7 @@ void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 	unguard;
 }
 
-IMPL_APPROX("stub returns NULL; breadth-first path search not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), ANavigationPoint* Start, INT MaxPathLength, FLOAT* Weight)
 {
 	guard(APawn::breadthPathTo);
@@ -1856,7 +1856,7 @@ ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::calcMoveFlags()
 {
 	guard(APawn::calcMoveFlags);
@@ -1873,7 +1873,7 @@ INT APawn::calcMoveFlags()
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 {
 	guard(APawn::checkFloor);
@@ -1890,7 +1890,7 @@ INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::clearPath(ANavigationPoint* Node)
 {
 	guard(APawn::clearPath);
@@ -1903,7 +1903,7 @@ void APawn::clearPath(ANavigationPoint* Node)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x11C170)
+IMPL_GHIDRA("Engine.dll", 0x11C170)
 void APawn::clearPaths()
 {
 	// Retail 0x11C170: walk the level's NavigationPointList and reset pathfinding state
@@ -1921,7 +1921,7 @@ void APawn::clearPaths()
 	}
 }
 
-IMPL_APPROX("stub returns 0; floor detection during falling not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);
@@ -1929,7 +1929,7 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; A* path search not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -1937,7 +1937,7 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 	unguard;
 }
 
-IMPL_APPROX("stub returns zero vector; water surface trace not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
@@ -1945,7 +1945,7 @@ FVector APawn::findWaterLine(FVector Start, FVector End)
 	unguard;
 }
 
-IMPL_APPROX("stub returns TESTMOVE_Stopped; flying movement step not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::flyMove);
@@ -1953,7 +1953,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; flying reachability check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::flyReachable);
@@ -1961,7 +1961,7 @@ INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_APPROX("stub returns TESTMOVE_Stopped; jump landing simulation not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 {
 	guard(APawn::jumpLanding);
@@ -1969,7 +1969,7 @@ ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address; uses jumpLanding + walkReachable")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::jumpReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::jumpReachable);
@@ -1983,7 +1983,7 @@ INT APawn::jumpReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: ALadder field raw offset access; no explicit address")
+IMPL_INFERRED("Reconstructed from context")
 INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::ladderReachable);
@@ -2007,35 +2007,35 @@ INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_EMPTY("flying physics tick not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physFlying);
 	unguard;
 }
 
-IMPL_EMPTY("spider physics tick not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSpider);
 	unguard;
 }
 
-IMPL_EMPTY("swimming physics tick not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSwimming);
 	unguard;
 }
 
-IMPL_EMPTY("walking physics tick not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physWalking);
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; point reachability check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
@@ -2043,14 +2043,14 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_EMPTY("pawn rotation-toward logic not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 	guard(APawn::rotateToward);
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: bIsCrouched/bIsWalking via named bitfields; no explicit address")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::setMoveTimer(FLOAT DeltaTime)
 {
 	guard(APawn::setMoveTimer);
@@ -2081,7 +2081,7 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address; dispatch switch")
+IMPL_INFERRED("Reconstructed from context")
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::startNewPhysics);
@@ -2102,14 +2102,14 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_EMPTY("swim entry transition not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
 	guard(APawn::startSwimming);
 	unguard;
 }
 
-IMPL_APPROX("stub returns TESTMOVE_Stopped; swim movement step not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::swimMove);
@@ -2117,7 +2117,7 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; swim reachability check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::swimReachable);
@@ -2125,7 +2125,7 @@ INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_APPROX("stub returns TESTMOVE_Stopped; walk movement step not yet reconstructed")
+IMPL_INFERRED("Reconstructed from context")
 ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::walkMove);
@@ -2133,7 +2133,7 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; walk reachability check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT APawn::walkReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::walkReachable);
@@ -2145,7 +2145,7 @@ INT APawn::walkReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	AController — Virtual methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT* AController::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AController::GetOptimizedRepList);
@@ -2154,21 +2154,21 @@ INT* AController::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Ret
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_GHIDRA("Engine.dll", 0x114310)
 AActor* AController::GetTeamManager()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_GHIDRA("Engine.dll", 0x114310)
 INT AController::LocalPlayerController()
 {
 	// Ghidra 0x114310: shared stub; returns 0.
 	return 0;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
@@ -2176,14 +2176,14 @@ INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 	unguard;
 }
 
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(AController::AdjustFromWall);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1209E0)
+IMPL_GHIDRA("Engine.dll", 0x1209E0)
 void AController::StartAnimPoll()
 {
 	// Retail RVA 0x1209E0.
@@ -2205,7 +2205,7 @@ void AController::StartAnimPoll()
 			GetStateFrame()->LatentAction = EPOLL_FinishAnim;
 }
 
-IMPL_APPROX("no Ghidra address; stub returns 1")
+IMPL_INFERRED("Reconstructed from context")
 INT AController::CheckAnimFinished( INT Channel )
 {
 	guard(AController::CheckAnimFinished);
@@ -2213,14 +2213,14 @@ INT AController::CheckAnimFinished( INT Channel )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x4720)
+IMPL_GHIDRA("Engine.dll", 0x4720)
 INT AController::AcceptNearbyPath( AActor* Goal )
 {
 	// Ghidra 0x4720: shared stub; returns 0.
 	return 0;
 }
 
-IMPL_APPROX("stub returns 0; hearing detection not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
 {
 	guard(AController::CanHear);
@@ -2228,7 +2228,7 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 	unguard;
 }
 
-IMPL_APPROX("DIVERGENCE: Pawn->Location passed as listener location")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x12cc70, "Ghidra passes Pawn->Location as first FVector arg to CanHearSound,")
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
 	guard(AController::CheckHearSound);
@@ -2245,7 +2245,7 @@ void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 AActor* AController::GetViewTarget()
 {
 	guard(AController::GetViewTarget);
@@ -2253,7 +2253,7 @@ AActor* AController::GetViewTarget()
 	unguard;
 }
 
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::SetAdjustLocation( FVector NewLoc )
 {
 	guard(AController::SetAdjustLocation);
@@ -2264,14 +2264,14 @@ void AController::SetAdjustLocation( FVector NewLoc )
 	AController — Non-virtual methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::ShowSelf()
 {
 	guard(AController::ShowSelf);
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 {
 	guard(AController::SeePawn);
@@ -2281,7 +2281,7 @@ DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 	unguard;
 }
 
-IMPL_APPROX("stub returns NULL; path selection logic not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 AActor* AController::SetPath( INT bInitialPath )
 {
 	guard(AController::SetPath);
@@ -2289,14 +2289,14 @@ AActor* AController::SetPath( INT bInitialPath )
 	unguard;
 }
 
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("Needs Ghidra analysis")
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
 	guard(AController::SetRouteCache);
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 {
 	guard(AController::LineOfSightTo);
@@ -2306,7 +2306,7 @@ DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 	unguard;
 }
 
-IMPL_APPROX("stub returns 0; sound audibility check not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudness, FVector& OutNoiseLoc )
 {
 	guard(AController::CanHearSound);
@@ -2314,7 +2314,7 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address")
+IMPL_INFERRED("Reconstructed from context")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
@@ -2327,7 +2327,7 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_APPROX("stub returns NULL; A* pathfinding not yet reconstructed")
+IMPL_TODO("Needs Ghidra analysis")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);
@@ -2335,7 +2335,7 @@ AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 	unguard;
 }
 
-IMPL_APPROX("no Ghidra address; pass-through")
+IMPL_INFERRED("Reconstructed from context")
 AActor* AController::HandleSpecial( AActor* BestPath )
 {
 	guard(AController::HandleSpecial);

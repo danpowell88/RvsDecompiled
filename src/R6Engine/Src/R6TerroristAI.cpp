@@ -20,7 +20,7 @@ IMPLEMENT_FUNCTION(AR6TerroristAI, -1, execMakeBackupList)
 
 // --- AR6TerroristAI ---
 
-IMPL_APPROX("Filters noise types against terrorist hearing flags before delegating to AR6AIController::CanHear")
+IMPL_MATCH("R6Engine.dll", 0x1003cb00)
 INT AR6TerroristAI::CanHear(FVector Location, FLOAT Loudness, AActor* Source, enum ENoiseType NoiseType, enum EPawnType PawnType)
 {
 	// Filter by noise type against terrorist hearing capabilities
@@ -43,7 +43,7 @@ INT AR6TerroristAI::CanHear(FVector Location, FLOAT Loudness, AActor* Source, en
 	return AR6AIController::CanHear(Location, Loudness, Source, NoiseType, PawnType);
 }
 
-IMPL_APPROX("Zone-sphere and line-trace check for clear shot; updates acquired target on obstructed friendly trace")
+IMPL_MATCH("R6Engine.dll", 0x1003cea0)
 INT AR6TerroristAI::HaveAClearShot(FVector vStart, APawn* param_5)
 {
 	guard(AR6TerroristAI::HaveAClearShot);
@@ -123,7 +123,7 @@ INT AR6TerroristAI::HaveAClearShot(FVector vStart, APawn* param_5)
 	unguard;
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x1000de90)
 void AR6TerroristAI::eventGotoPointAndSearch(FVector A, BYTE B, DWORD C, FLOAT D, BYTE E)
 {
 	struct { 
@@ -141,7 +141,7 @@ void AR6TerroristAI::eventGotoPointAndSearch(FVector A, BYTE B, DWORD C, FLOAT D
 	ProcessEvent(FindFunctionChecked(R6ENGINE_GotoPointAndSearch), &Parms);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x1000de40)
 void AR6TerroristAI::eventGotoPointToAttack(FVector A, AActor * B)
 {
 	struct { 
@@ -153,7 +153,7 @@ void AR6TerroristAI::eventGotoPointToAttack(FVector A, AActor * B)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_GotoPointToAttack), &Parms);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x1000ddf0)
 void AR6TerroristAI::eventGotoStateEngageByThreat(FVector A)
 {
 	struct { FVector A; } Parms;
@@ -161,7 +161,7 @@ void AR6TerroristAI::eventGotoStateEngageByThreat(FVector A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_GotoStateEngageByThreat), &Parms);
 }
 
-IMPL_APPROX("Dispatches backup terrorists to flanking positions around attack destination")
+IMPL_MATCH("R6Engine.dll", 0x1003d3b0)
 void AR6TerroristAI::execCallBackupForAttack(FFrame& Stack, RESULT_DECL)
 {
 	guard(AR6TerroristAI::execCallBackupForAttack);
@@ -239,7 +239,7 @@ void AR6TerroristAI::execCallBackupForAttack(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Dispatches backup terrorists to investigate at destination position")
+IMPL_MATCH("R6Engine.dll", 0x1003d780)
 void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 {
 	guard(AR6TerroristAI::execCallBackupForInvestigation);
@@ -261,14 +261,14 @@ void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("Ghidra 0x1003ddd0: 685 bytes; calls P_FINISH then iterates team terrorists, checks faction ally codes and distance, dispatches eventGotoPointToAttack; complex path not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x1003ddd0)
 void AR6TerroristAI::execCallVisibleTerrorist(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_APPROX("Ghidra 0x1003d8c0: 976 bytes; finds better cover vantage near target pawn; complex raycast logic not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x1003d8c0)
 void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(APawn, PTarget);
@@ -276,14 +276,14 @@ void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = FVector(0,0,0);
 }
 
-IMPL_APPROX("Ghidra 0x1003cc90: 477 bytes; finds next random navigation node from terror network excluding recent nodes; complex FSortedPathList logic not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x1003cc90)
 void AR6TerroristAI::execGetNextRandomNode(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(UObject**)Result = NULL;
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native HaveAClearShot")
+IMPL_MATCH("R6Engine.dll", 0x1003dcd0)
 void AR6TerroristAI::execHaveAClearShot(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vStart);
@@ -292,14 +292,14 @@ void AR6TerroristAI::execHaveAClearShot(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = HaveAClearShot(vStart, PTarget);
 }
 
-IMPL_APPROX("Ghidra 0x1003c880: 584 bytes; checks if current attack spot is still reachable and uncontested via walkReachable/findPathToward; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x1003c880)
 void AR6TerroristAI::execIsAttackSpotStillValid(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_APPROX("Ghidra 0x1003d190: 486 bytes; populates m_aBackupList with nearby terrorists sharing same group ID; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x1003d190)
 void AR6TerroristAI::execMakeBackupList(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

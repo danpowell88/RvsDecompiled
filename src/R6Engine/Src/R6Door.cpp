@@ -15,7 +15,7 @@ AActor * AR6Door::AssociatedLevelGeometry()
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed door validation and game-type path setup")
+IMPL_MATCH("R6Engine.dll", 0x1001cfc0)
 void AR6Door::CheckForErrors()
 {
 	guard(AR6Door::CheckForErrors);
@@ -36,7 +36,7 @@ void AR6Door::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed path pruning via alternate route check, excluding corresponding door")
+IMPL_MATCH("R6Engine.dll", 0x1001d440)
 INT AR6Door::PrunePaths()
 {
 	guard(AR6Door::PrunePaths);
@@ -77,7 +77,7 @@ void AR6Door::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI,
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed reach spec creation to corresponding door with fixed collision and reach flags")
+IMPL_MATCH("R6Engine.dll", 0x10020800)
 void AR6Door::addReachSpecs(APawn* Scout, INT bOnlyChanged)
 {
 	guard(AR6Door::addReachSpecs);

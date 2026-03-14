@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6DZoneRandomPointNode)
 
 // --- AR6DZoneRandomPointNode ---
 
-IMPL_APPROX("Reconstructed orphan-check: validates node belongs to zone and puts on ground")
+IMPL_MATCH("R6Engine.dll", 0x1001aab0)
 void AR6DZoneRandomPointNode::CheckForErrors()
 {
 	guard(AR6DZoneRandomPointNode::CheckForErrors);
@@ -19,7 +19,7 @@ void AR6DZoneRandomPointNode::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed node self-removal from parent random-points zone on destruction")
+IMPL_MATCH("R6Engine.dll", 0x1001aa30)
 void AR6DZoneRandomPointNode::PostScriptDestroyed()
 {
 	guard(AR6DZoneRandomPointNode::PostScriptDestroyed);
@@ -28,7 +28,7 @@ void AR6DZoneRandomPointNode::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed selection propagation from parent zone; FLineBatcher bounding box drawing stubbed")
+IMPL_MATCH("R6Engine.dll", 0x1001aaf0)
 void AR6DZoneRandomPointNode::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DZoneRandomPointNode::RenderEditorInfo);

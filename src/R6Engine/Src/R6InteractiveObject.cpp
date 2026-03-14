@@ -11,7 +11,7 @@ static FLOAT GInteractiveObject_OldNetDamagePercentage;
 
 // --- AR6InteractiveObject ---
 
-IMPL_APPROX("Validates StaticMesh tags referenced in the interactive object state list")
+IMPL_MATCH("R6Engine.dll", 0x1001c490)
 void AR6InteractiveObject::CheckForErrors()
 {
 	guard(AR6InteractiveObject::CheckForErrors);
@@ -48,7 +48,7 @@ void AR6InteractiveObject::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Fires damage state event on net damage change; syncs replicated skins to Skins array")
+IMPL_MATCH("R6Engine.dll", 0x1001c390)
 void AR6InteractiveObject::PostNetReceive()
 {
 	guard(AR6InteractiveObject::PostNetReceive);
@@ -82,7 +82,7 @@ void AR6InteractiveObject::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Caches net damage percentage before net receive for change detection in PostNetReceive")
+IMPL_MATCH("R6Engine.dll", 0x1001c1a0)
 void AR6InteractiveObject::PreNetReceive()
 {
 	guard(AR6InteractiveObject::PreNetReceive);
@@ -91,7 +91,7 @@ void AR6InteractiveObject::PreNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("Draws a debug sphere at the object's trigger radius location when selected in the editor")
+IMPL_MATCH("R6Engine.dll", 0x1001c080)
 void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6InteractiveObject::RenderEditorInfo);
@@ -118,7 +118,7 @@ void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderI
 	unguard;
 }
 
-IMPL_APPROX("R6-specific trace filter: checks shot-through, see-through, bullet/pawn pass-through, and corona visibility flags")
+IMPL_MATCH("R6Engine.dll", 0x1001bf60)
 INT AR6InteractiveObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6InteractiveObject::ShouldTrace);
@@ -160,7 +160,7 @@ INT AR6InteractiveObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10008e10)
 void AR6InteractiveObject::eventSetNewDamageState(FLOAT A)
 {
 	struct { FLOAT A; } Parms;

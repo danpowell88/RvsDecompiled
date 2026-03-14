@@ -59,17 +59,17 @@ INT          FFileStream::MaxStreams  = 0;
 INT          FFileStream::StreamIndex = 0;
 FStream*     FFileStream::Streams    = NULL;
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FFileStream::FFileStream()
 {
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FFileStream::~FFileStream()
 {
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E190)
 FFileStream* FFileStream::Init( INT InMaxStreams )
 {
 	// Ghidra: Instance is allocated with GMalloc->Malloc(sizeof(FFileStream)).
@@ -106,7 +106,7 @@ void FFileStream::Destroy()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10149D50)
 INT FFileStream::Create( INT StreamId, const TCHAR* Filename )
 {
 	guard(FFileStream::Create);
@@ -163,7 +163,7 @@ INT FFileStream::Create( INT StreamId, const TCHAR* Filename )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E260)
 INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumChunks, void* Buffer, EFileStreamType Type, void* Callback )
 {
 	guard(FFileStream::CreateStream);
@@ -199,7 +199,7 @@ INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumCh
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012F1A0)
 INT FFileStream::Destroy( INT StreamId )
 {
 	guard(FFileStream::Destroy_Stream);
@@ -230,7 +230,7 @@ INT FFileStream::Destroy( INT StreamId )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E3C0)
 void FFileStream::DestroyStream( INT StreamId, INT bForce )
 {
 	guard(FFileStream::DestroyStream);
@@ -251,7 +251,7 @@ void FFileStream::DestroyStream( INT StreamId, INT bForce )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E200)
 void FFileStream::Enter( INT StreamId )
 {
 	guard(FFileStream::Enter);
@@ -263,7 +263,7 @@ void FFileStream::Enter( INT StreamId )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E240)
 void FFileStream::Leave( INT StreamId )
 {
 	guard(FFileStream::Leave);
@@ -272,7 +272,7 @@ void FFileStream::Leave( INT StreamId )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E4C0)
 INT FFileStream::QueryStream( INT StreamId, INT& OutStatus )
 {
 	guard(FFileStream::QueryStream);
@@ -358,7 +358,7 @@ INT FFileStream::Read( INT StreamId, INT NumBytes )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1012E450)
 void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 {
 	guard(FFileStream::RequestChunks);
@@ -376,7 +376,7 @@ void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific streaming file manager; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FFileStream& FFileStream::operator=( const FFileStream& Other )
 {
 	return *this;
@@ -386,7 +386,7 @@ FFileStream& FFileStream::operator=( const FFileStream& Other )
 	FString constructors and methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x1010B1A0)
 FString::FString( BYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -397,7 +397,7 @@ FString::FString( BYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x1010B210)
 FString::FString( SBYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -408,7 +408,7 @@ FString::FString( SBYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x1010B690)
 FString::FString( _WORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -419,7 +419,7 @@ FString::FString( _WORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x101316B0)
 FString::FString( SWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -430,7 +430,7 @@ FString::FString( SWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x101316C0)
 FString::FString( INT Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -441,7 +441,7 @@ FString::FString( INT Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x101316D0)
 FString::FString( DWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -452,7 +452,7 @@ FString::FString( DWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x101316E0)
 FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 : TArray<TCHAR>()
 {
@@ -463,7 +463,7 @@ FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x101316F0)
 FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 : TArray<TCHAR>()
 {
@@ -474,14 +474,14 @@ FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x10132D10)
 FString FString::Chr( TCHAR Ch )
 {
 	TCHAR Buf[2] = { Ch, 0 };
 	return FString( Buf );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x10132F20)
 FString FString::Printf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -489,14 +489,14 @@ FString FString::Printf( const TCHAR* Fmt, ... )
 	return FString( TempStr );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x1010F200)
 FString FString::FormatAsNumber( INT InNumber )
 {
 	FString Number( InNumber, 0 );
 	return Number;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x10132D40)
 FString FString::LeftPad( INT ChCount )
 {
 	guard(FString::LeftPad);
@@ -513,7 +513,7 @@ FString FString::LeftPad( INT ChCount )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x10132E30)
 FString FString::RightPad( INT ChCount )
 {
 	guard(FString::RightPad);
@@ -528,7 +528,7 @@ FString FString::RightPad( INT ChCount )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x1010F0A0)
 FString FString::Reverse()
 {
 	guard(FString::Reverse);
@@ -539,7 +539,7 @@ FString FString::Reverse()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_MATCH("Core.dll", 0x1010EE90)
 INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 {
 	guard(FString::ParseIntoArray);
@@ -565,7 +565,7 @@ INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 	FArchive << FString operator.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 {
 	if( Ar.IsLoading() )
@@ -613,7 +613,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 	Explicit template instantiations for .def export.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 {
@@ -622,7 +622,7 @@ TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 	return *this;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+=( const TArray<TCHAR>& Other )
 {

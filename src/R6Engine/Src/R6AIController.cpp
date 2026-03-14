@@ -27,7 +27,7 @@ IMPLEMENT_FUNCTION(AR6AIController, -1, execPollMoveToPosition)
 
 // --- AR6AIController ---
 
-IMPL_APPROX("Reconstructed with divergences: retail door-navigation side-check and AdjustLoc calculation unresolved")
+IMPL_DIVERGE("retail calculates which side of the door the pawn is on and")
 void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 {
 	guard(AR6AIController::AdjustFromWall);
@@ -154,7 +154,7 @@ INT AR6AIController::CanHear(FVector SoundLoc, FLOAT Volume, AActor* SoundActor,
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000c710)
 INT AR6AIController::CanWalkTo(FVector Dest, INT bIgnoreActors)
 {
 	guard(AR6AIController::CanWalkTo);
@@ -200,7 +200,7 @@ INT AR6AIController::CanWalkTo(FVector Dest, INT bIgnoreActors)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10001000)
 void AR6AIController::ClearActionSpot()
 {
 	guard(AR6AIController::ClearActionSpot);
@@ -212,7 +212,7 @@ void AR6AIController::ClearActionSpot()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000b2b0)
 AR6ActionSpot * AR6AIController::FindNearestActionSpot(FLOAT Radius, FVector Center, INT (CDECL*Callback)(AR6Pawn *, AR6ActionSpot *, struct STActionSpotCheck &), struct STActionSpotCheck & CheckData)
 {
 	guard(AR6AIController::FindNearestActionSpot);
@@ -268,7 +268,7 @@ AR6ActionSpot * AR6AIController::FindNearestActionSpot(FLOAT Radius, FVector Cen
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000bd20)
 void AR6AIController::FollowPath(enum eMovementPace Pace, FName Label, INT bResetIndex)
 {
 	if (Pawn == NULL)
@@ -324,7 +324,7 @@ void AR6AIController::FollowPath(enum eMovementPace Pace, FName Label, INT bRese
 	Pawn->moveToward(Destination, MoveTarget);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000cbc0)
 void AR6AIController::GotoOpenDoorState(AActor* NavPointToOpenFrom)
 {
 	guard(AR6AIController::GotoOpenDoorState);
@@ -360,7 +360,7 @@ void AR6AIController::GotoOpenDoorState(AActor* NavPointToOpenFrom)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000bff0)
 INT AR6AIController::HearingCheck(FVector SourcePos, FVector TargetPos)
 {
 	guard(AR6AIController::HearingCheck);
@@ -370,7 +370,7 @@ INT AR6AIController::HearingCheck(FVector SourcePos, FVector TargetPos)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000e680)
 INT AR6AIController::NeedToOpenDoor(AActor* TestActor)
 {
 	guard(AR6AIController::NeedToOpenDoor);
@@ -408,7 +408,7 @@ INT AR6AIController::NeedToOpenDoor(AActor* TestActor)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10001190)
 INT AR6AIController::SetDestinationToNextInCache()
 {
 	m_iCurrentRouteCache++;
@@ -430,7 +430,7 @@ INT AR6AIController::SetDestinationToNextInCache()
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10007e00)
 DWORD AR6AIController::eventCanOpenDoor(AR6IORotatingDoor * A)
 {
 	struct {
@@ -443,13 +443,13 @@ DWORD AR6AIController::eventCanOpenDoor(AR6IORotatingDoor * A)
 	return Parms.ReturnValue;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10007dd0)
 void AR6AIController::eventOpenDoorFailed()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_OpenDoorFailed), NULL);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10007e50)
 void AR6AIController::eventR6SetMovement(BYTE A)
 {
 	struct { BYTE A; } Parms;
@@ -457,7 +457,7 @@ void AR6AIController::eventR6SetMovement(BYTE A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_R6SetMovement), &Parms);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10001440)
 void AR6AIController::execActorReachableFromLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, Target);
@@ -469,7 +469,7 @@ void AR6AIController::execActorReachableFromLocation(FFrame& Stack, RESULT_DECL)
 		*(DWORD*)Result = 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000e580)
 void AR6AIController::execCanWalkTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vDestination);
@@ -478,7 +478,7 @@ void AR6AIController::execCanWalkTo(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = CanWalkTo(vDestination, bDebug);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000c910)
 void AR6AIController::execFindGrenadeDirectionToHitActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, aTarget);
@@ -488,7 +488,7 @@ void AR6AIController::execFindGrenadeDirectionToHitActor(FFrame& Stack, RESULT_D
 	*(FRotator*)Result = FRotator(0,0,0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000ba00)
 void AR6AIController::execFindInvestigationPoint(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iSearchIndex);
@@ -499,7 +499,7 @@ void AR6AIController::execFindInvestigationPoint(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000cd80)
 void AR6AIController::execFindNearbyWaitSpot(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, Node);
@@ -508,7 +508,7 @@ void AR6AIController::execFindNearbyWaitSpot(FFrame& Stack, RESULT_DECL)
 	*vWaitLocation = FVector(0,0,0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000b8d0)
 void AR6AIController::execFindPlaceToFire(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, PTarget);
@@ -518,7 +518,7 @@ void AR6AIController::execFindPlaceToFire(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000b7b0)
 void AR6AIController::execFindPlaceToTakeCover(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vThreatLocation);
@@ -527,7 +527,7 @@ void AR6AIController::execFindPlaceToTakeCover(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000e020)
 void AR6AIController::execFollowPath(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_BYTE(ePace);
@@ -537,7 +537,7 @@ void AR6AIController::execFollowPath(FFrame& Stack, RESULT_DECL)
 	FollowPath((enum eMovementPace)ePace, returnLabel, bContinuePath);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("retail calls XLevel vtable[39] on vDestination before FindPath.")
 void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vDestination);
@@ -578,7 +578,7 @@ void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 	FollowPath((enum eMovementPace)ePace, NAME_None, 0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000e8a0)
 void AR6AIController::execGotoOpenDoorState(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, navPointToOpenFrom);
@@ -586,14 +586,14 @@ void AR6AIController::execGotoOpenDoorState(FFrame& Stack, RESULT_DECL)
 	GotoOpenDoorState(navPointToOpenFrom);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x1000aec0)
 void AR6AIController::execMakePathToRun(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("clear unknown bitfield (bit 0x2000) at Pawn+0x3E0.")
 void AR6AIController::execMoveToPosition(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, VPosition);
@@ -628,7 +628,7 @@ void AR6AIController::execMoveToPosition(FFrame& Stack, RESULT_DECL)
 	((AR6Pawn*)Pawn)->moveToPosition(Destination);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10010ba0)
 void AR6AIController::execNeedToOpenDoor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, Target);
@@ -636,7 +636,7 @@ void AR6AIController::execNeedToOpenDoor(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = NeedToOpenDoor(Target);
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
 void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, pActor);
@@ -670,7 +670,7 @@ void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 	// (FUN_10007b80) required to fully reconstruct — deferred.
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x10001280)
 void AR6AIController::execPollFollowPathBlocked(FFrame& Stack, RESULT_DECL)
 {
 	// Poll function — no bytecode params; called by VM each tick while latent wait is active.
@@ -682,7 +682,7 @@ void AR6AIController::execPollFollowPathBlocked(FFrame& Stack, RESULT_DECL)
 		GetStateFrame()->LatentAction = 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("R6Engine.dll", 0x100010f0)
 void AR6AIController::execPollMoveToPosition(FFrame& Stack, RESULT_DECL)
 {
 	if (!Pawn)

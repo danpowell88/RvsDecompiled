@@ -12,7 +12,7 @@
 	FBitWriter.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x1010E180)
 FBitWriter::FBitWriter( INT InMaxBits )
 :	Num( 0 )
 ,	Max( InMaxBits )
@@ -22,7 +22,7 @@ FBitWriter::FBitWriter( INT InMaxBits )
 	ArIsSaving = 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113820)
 void FBitWriter::SerializeBits( void* Src, INT LengthBits )
 {
 	if( Num + LengthBits > Max )
@@ -34,13 +34,13 @@ void FBitWriter::SerializeBits( void* Src, INT LengthBits )
 		WriteBit( ((BYTE*)Src)[i>>3] & GShift[i&7] ? 1 : 0 );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x101138F0)
 void FBitWriter::SerializeInt( DWORD& Value, DWORD Max )
 {
 	WriteInt( Value, Max );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113970)
 void FBitWriter::WriteInt( DWORD Result, DWORD ValueMax )
 {
 	check(ValueMax>=2);
@@ -49,7 +49,7 @@ void FBitWriter::WriteInt( DWORD Result, DWORD ValueMax )
 		WriteBit( (Result&Mask) ? 1 : 0 );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x101139F0)
 void FBitWriter::WriteBit( BYTE In )
 {
 	if( Num >= Max )
@@ -61,31 +61,31 @@ void FBitWriter::WriteBit( BYTE In )
 	Num++;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x101138A0)
 void FBitWriter::Serialize( void* Src, INT LengthBytes )
 {
 	SerializeBits( Src, LengthBytes*8 );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113A40 size 4 bytes")
 BYTE* FBitWriter::GetData()
 {
 	return &Buffer(0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101134B0 size 10 bytes")
 INT FBitWriter::GetNumBytes()
 {
 	return (Num+7)>>3;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101134C0 size 4 bytes")
 INT FBitWriter::GetNumBits()
 {
 	return Num;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101134D0 size 8 bytes")
 void FBitWriter::SetOverflowed()
 {
 	ArIsError = 1;
@@ -95,7 +95,7 @@ void FBitWriter::SetOverflowed()
 	FBitWriterMark.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113A50)
 void FBitWriterMark::Pop( FBitWriter& Writer )
 {
 	checkSlow(Num<=Writer.Num);
@@ -107,7 +107,7 @@ void FBitWriterMark::Pop( FBitWriter& Writer )
 	FBitReader.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x1010E2A0)
 FBitReader::FBitReader( BYTE* Src, INT CountBits )
 :	Num( CountBits )
 ,	Pos( 0 )
@@ -122,7 +122,7 @@ FBitReader::FBitReader( BYTE* Src, INT CountBits )
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113DF0)
 void FBitReader::SetData( FBitReader& Src, INT CountBits )
 {
 	Num    = CountBits;
@@ -135,7 +135,7 @@ void FBitReader::SetData( FBitReader& Src, INT CountBits )
 		appMemcpy( &Buffer(0), &Src.Buffer(0), ByteCount );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113AD0)
 void FBitReader::SerializeBits( void* Dest, INT LengthBits )
 {
 	appMemzero( Dest, (LengthBits+7)>>3 );
@@ -144,13 +144,13 @@ void FBitReader::SerializeBits( void* Dest, INT LengthBits )
 			((BYTE*)Dest)[i>>3] |= GShift[i&7];
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113B70)
 void FBitReader::SerializeInt( DWORD& Value, DWORD Max )
 {
 	Value = ReadInt( Max );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x101134E0)
 DWORD FBitReader::ReadInt( DWORD Max )
 {
 	check(Max>=2);
@@ -161,7 +161,7 @@ DWORD FBitReader::ReadInt( DWORD Max )
 	return Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113500)
 BYTE FBitReader::ReadBit()
 {
 	if( Pos >= Num )
@@ -174,43 +174,43 @@ BYTE FBitReader::ReadBit()
 	return Bit;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113520)
 void FBitReader::Serialize( void* Dest, INT LengthBytes )
 {
 	SerializeBits( Dest, LengthBytes*8 );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113BE0 size 4 bytes")
 BYTE* FBitReader::GetData()
 {
 	return &Buffer(0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_MATCH("Core.dll", 0x10113530)
 UBOOL FBitReader::AtEnd()
 {
 	return ArIsError || Pos >= Num;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113550 size 8 bytes")
 void FBitReader::SetOverflowed()
 {
 	ArIsError = 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113560 size 10 bytes")
 INT FBitReader::GetNumBytes()
 {
 	return (Num+7)>>3;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113570 size 4 bytes")
 INT FBitReader::GetNumBits()
 {
 	return Num;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnBits.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113580 size 4 bytes")
 INT FBitReader::GetPosBits()
 {
 	return Pos;
@@ -221,7 +221,7 @@ INT FBitReader::GetPosBits()
 	The copy ctor and operator= are implicitly declared but must be
 	exported (CORE_API on the struct).  MSVC only emits them when used.
 -----------------------------------------------------------------------------*/
-IMPL_APPROX("link-time emission helper for FBitReader special members")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 void _ForceFBitReaderEmit() {
 	FBitReader a;
 	FBitReader b(a);

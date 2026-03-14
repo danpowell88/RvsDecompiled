@@ -184,7 +184,7 @@ private:
 	HANDLE Heap;
 };
 
-IMPL_APPROX("Core pre-init CRC table bootstrap; Ravenshield-specific")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 static void appInitPreloadCRCTable()
 {
 	for( DWORD iCRC=0; iCRC<256; iCRC++ )
@@ -196,7 +196,7 @@ static void appInitPreloadCRCTable()
 	}
 }
 
-IMPL_APPROX("Core pre-init allocator factory; Ravenshield-specific")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 static FCoreBootstrapMalloc& GetCorePreInitMalloc()
 {
 	static FCoreBootstrapMalloc Malloc;
@@ -224,7 +224,7 @@ static FCorePreInit GCorePreInit;
 	FArray::Remove.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/Core.cpp")
+IMPL_MATCH("Core.dll", 0x1012F370)
 void FArray::Remove( INT Index, INT Count, INT ElementSize )
 {
 	guardSlow(FArray::Remove);
@@ -245,7 +245,7 @@ void FArray::Remove( INT Index, INT Count, INT ElementSize )
 	FArray::Realloc.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/Core.cpp")
+IMPL_MATCH("Core.dll", 0x10130760)
 void FArray::Realloc( INT ElementSize )
 {
 	guardSlow(FArray::Realloc);
@@ -257,7 +257,7 @@ void FArray::Realloc( INT ElementSize )
 	FInterpCurve implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/Core.cpp")
+IMPL_MATCH("Core.dll", 0x1012CED0)
 FLOAT FInterpCurve::Eval( FLOAT Input )
 {
 	if( Points.Num() == 0 )

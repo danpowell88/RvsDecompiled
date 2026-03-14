@@ -13,7 +13,7 @@
 	FFieldNetCache.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchive& operator<<( FArchive& Ar, FFieldNetCache& F )
 {
 	return Ar << F.Field << F.FieldNetIndex << F.ConditionIndex;
@@ -55,7 +55,7 @@ FClassNetCache::FClassNetCache( UClass* InClass )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchive& operator<<( FArchive& Ar, FClassNetCache& Cache )
 {
 	return Ar << Cache.FieldsBase << Cache.RepConditionCount << Cache.Fields;
@@ -65,7 +65,7 @@ FArchive& operator<<( FArchive& Ar, FClassNetCache& Cache )
 	FPackageInfo.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield extension to UPackageMap; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1010BC50)
 FPackageInfo::FPackageInfo( ULinkerLoad* InLinker )
 :	Linker          ( InLinker )
 ,	Parent          ( InLinker ? InLinker->LinkerRoot : NULL )
@@ -83,7 +83,7 @@ FPackageInfo::FPackageInfo( ULinkerLoad* InLinker )
 		URL = InLinker->Filename;
 }
 
-IMPL_APPROX("Ravenshield extension to UPackageMap; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchive& operator<<( FArchive& Ar, FPackageInfo& I )
 {
 	return Ar << I.URL << I.Parent << I.Guid << I.FileSize
@@ -97,7 +97,7 @@ FArchive& operator<<( FArchive& Ar, FPackageInfo& I )
 	UPackageMap.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011AA50)
 void UPackageMap::Serialize( FArchive& Ar )
 {
 	guard(UPackageMap::Serialize);
@@ -106,7 +106,7 @@ void UPackageMap::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011AB80)
 void UPackageMap::Destroy()
 {
 	guard(UPackageMap::Destroy);
@@ -118,7 +118,7 @@ void UPackageMap::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x10119B50)
 UBOOL UPackageMap::CanSerializeObject( UObject* Obj )
 {
 	guard(UPackageMap::CanSerializeObject);
@@ -127,7 +127,7 @@ UBOOL UPackageMap::CanSerializeObject( UObject* Obj )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x10119BE0)
 UBOOL UPackageMap::SerializeObject( FArchive& Ar, UClass* Class, UObject*& Obj )
 {
 	guard(UPackageMap::SerializeObject);
@@ -146,7 +146,7 @@ UBOOL UPackageMap::SerializeObject( FArchive& Ar, UClass* Class, UObject*& Obj )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x10119DB0)
 UBOOL UPackageMap::SerializeName( FArchive& Ar, FName& Name )
 {
 	guard(UPackageMap::SerializeName);
@@ -165,7 +165,7 @@ UBOOL UPackageMap::SerializeName( FArchive& Ar, FName& Name )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011A280)
 INT UPackageMap::ObjectToIndex( UObject* Object )
 {
 	guard(UPackageMap::ObjectToIndex);
@@ -179,7 +179,7 @@ INT UPackageMap::ObjectToIndex( UObject* Object )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x10119EF0)
 UObject* UPackageMap::IndexToObject( INT Index, UBOOL Load )
 {
 	guard(UPackageMap::IndexToObject);
@@ -205,7 +205,7 @@ UObject* UPackageMap::IndexToObject( INT Index, UBOOL Load )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011A110)
 INT UPackageMap::AddLinker( ULinkerLoad* Linker )
 {
 	guard(UPackageMap::AddLinker);
@@ -219,7 +219,7 @@ INT UPackageMap::AddLinker( ULinkerLoad* Linker )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011A370)
 void UPackageMap::Compute()
 {
 	guard(UPackageMap::Compute);
@@ -235,7 +235,7 @@ void UPackageMap::Compute()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011A6D0)
 FClassNetCache* UPackageMap::GetClassNetCache( UClass* Class )
 {
 	guard(UPackageMap::GetClassNetCache);
@@ -254,7 +254,7 @@ FClassNetCache* UPackageMap::GetClassNetCache( UClass* Class )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x10119EC0)
 UBOOL UPackageMap::SupportsPackage( UObject* InOuter )
 {
 	guard(UPackageMap::SupportsPackage);
@@ -265,7 +265,7 @@ UBOOL UPackageMap::SupportsPackage( UObject* InOuter )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x1011A600)
 void UPackageMap::Copy( UPackageMap* Other )
 {
 	guard(UPackageMap::Copy);
@@ -277,7 +277,7 @@ void UPackageMap::Copy( UPackageMap* Other )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnNet.cpp")
+IMPL_MATCH("Core.dll", 0x10119D10)
 void UPackageMap::CopyLinkers( UPackageMap* Other )
 {
 	guard(UPackageMap::CopyLinkers);

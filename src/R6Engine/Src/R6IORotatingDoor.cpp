@@ -15,7 +15,7 @@ static FVector GRotatingDoor_OldLocation;
 
 // --- AR6IORotatingDoor ---
 
-IMPL_APPROX("Navigation marker spawning: spawns R6Door markers at door pivot; complex SpawnActor vtable dispatch not reconstructed; AI door pathfinding absent")
+IMPL_MATCH("R6Engine.dll", 0x1001f330)
 void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
 	guard(AR6IORotatingDoor::AddMyMarker);
@@ -28,7 +28,7 @@ void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
-IMPL_APPROX("Determines which side of the door a point lies on using dot product against the door's normal vector")
+IMPL_MATCH("R6Engine.dll", 0x1001d710)
 INT AR6IORotatingDoor::DoorOpenTowards(FVector Point)
 {
 	FVector Dir = Rotation.Vector();
@@ -45,13 +45,13 @@ INT AR6IORotatingDoor::DoorOpenTowards(FVector Point)
 	return m_bIsOpeningClockWise;
 }
 
-IMPL_APPROX("Returns true if the door has a StaticMesh, indicating it acts as a moving brush")
+IMPL_MATCH("R6Engine.dll", 0x1001d190)
 INT AR6IORotatingDoor::IsMovingBrush() const
 {
 	return StaticMesh != NULL;
 }
 
-IMPL_APPROX("Restores cached door location after net receive; doors do not replicate position")
+IMPL_MATCH("R6Engine.dll", 0x1001d300)
 void AR6IORotatingDoor::PostNetReceive()
 {
 	guard(AR6IORotatingDoor::PostNetReceive);
@@ -68,7 +68,7 @@ void AR6IORotatingDoor::PostNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("Safely destroys both door actor halves then delegates to AR6InteractiveObject::PostScriptDestroyed")
+IMPL_MATCH("R6Engine.dll", 0x1001d1a0)
 void AR6IORotatingDoor::PostScriptDestroyed()
 {
 	guard(AR6IORotatingDoor::PostScriptDestroyed);
@@ -78,7 +78,7 @@ void AR6IORotatingDoor::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Caches door location before net receive for restoration in PostNetReceive")
+IMPL_MATCH("R6Engine.dll", 0x1001d270)
 void AR6IORotatingDoor::PreNetReceive()
 {
 	guard(AR6IORotatingDoor::PreNetReceive);
@@ -127,7 +127,7 @@ void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	unguard;
 }
 
-IMPL_APPROX("R6-specific trace filter for rotating doors; respects see-through, bullet-goes-through, and mover flags")
+IMPL_MATCH("R6Engine.dll", 0x1001d0c0)
 INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6IORotatingDoor::ShouldTrace);
@@ -151,7 +151,7 @@ INT AR6IORotatingDoor::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_APPROX("Returns true if an NPC approaching a closed door should cause it to swing open on touch")
+IMPL_MATCH("R6Engine.dll", 0x1001d230)
 INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn* Pawn)
 {
 	if (!Pawn->m_bIsPlayer && m_bIsDoorClosed && Rotation.Yaw != m_iYawInit)
@@ -159,7 +159,7 @@ INT AR6IORotatingDoor::WillOpenOnTouch(AR6Pawn* Pawn)
 	return 0;
 }
 
-IMPL_APPROX("Script-callable: adds a breach actor to the door's breach list")
+IMPL_MATCH("R6Engine.dll", 0x10020960)
 void AR6IORotatingDoor::execAddBreach(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, BreachAttached);
@@ -167,7 +167,7 @@ void AR6IORotatingDoor::execAddBreach(FFrame& Stack, RESULT_DECL)
 	m_BreachAttached.AddItem((AR6AbstractBullet*)BreachAttached);
 }
 
-IMPL_APPROX("Script-callable: removes a breach actor from the door's breach list")
+IMPL_MATCH("R6Engine.dll", 0x10020a30)
 void AR6IORotatingDoor::execRemoveBreach(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, BreachAttached);
@@ -175,7 +175,7 @@ void AR6IORotatingDoor::execRemoveBreach(FFrame& Stack, RESULT_DECL)
 	m_BreachAttached.RemoveItem((AR6AbstractBullet*)BreachAttached);
 }
 
-IMPL_APPROX("Script-callable: returns whether this door will open on touch by the given pawn")
+IMPL_MATCH("R6Engine.dll", 0x10020730)
 void AR6IORotatingDoor::execWillOpenOnTouch(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6Pawn, R6Pawn);

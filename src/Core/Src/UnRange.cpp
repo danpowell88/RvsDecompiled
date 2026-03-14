@@ -12,14 +12,14 @@
 	FRange.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104520)
 FRange::FRange()
 :	Min( 0.f )
 ,	Max( 0.f )
 {
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101094B0)
 FRange::FRange( FLOAT InVal )
 :	Min( InVal )
 ,	Max( InVal )
@@ -34,55 +34,55 @@ FRange::FRange( FLOAT InMin, FLOAT InMax )
 	// Ghidra 0x94b0: sorts inputs so Min <= Max.
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101046E0)
 FLOAT FRange::GetCenter() const
 {
 	return (Min + Max) * 0.5f;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10109710)
 FLOAT FRange::GetMax() const
 {
 	return Max;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10109730)
 FLOAT FRange::GetMin() const
 {
 	return Min;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101046F0)
 FLOAT FRange::GetRand() const
 {
 	return Min + (Max - Min) * appFrand();
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104710)
 FLOAT FRange::GetSRand() const
 {
 	return Min + (Max - Min) * appSRand();
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10109750)
 FLOAT FRange::Size() const
 {
 	return Max - Min;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104770)
 INT FRange::Booleanize()
 {
 	return Min != 0.f || Max != 0.f;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10104760 size 10 bytes")
 FLOAT& FRange::Component( INT Index )
 {
 	return Index == 0 ? Min : Max;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101097E0)
 FRange FRange::GridSnap( const FRange& Grid )
 {
 	return FRange(
@@ -91,68 +91,68 @@ FRange FRange::GridSnap( const FRange& Grid )
 	);
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10109790)
 INT FRange::IsNearlyZero() const
 {
 	return Abs(Min) < KINDA_SMALL_NUMBER && Abs(Max) < KINDA_SMALL_NUMBER;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104730)
 INT FRange::IsZero() const
 {
 	return Min == 0.f && Max == 0.f;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator+( const FRange& R ) const
 {
 	return FRange( Min + R.Min, Max + R.Max );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator+( FLOAT F ) const
 {
 	return FRange( Min + F, Max + F );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator-( const FRange& R ) const
 {
 	return FRange( Min - R.Min, Max - R.Max );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator-( FLOAT F ) const
 {
 	return FRange( Min - F, Max - F );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator-() const
 {
 	return FRange( -Min, -Max );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator*( const FRange& R ) const
 {
 	return FRange( Min * R.Min, Max * R.Max );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator*( FLOAT F ) const
 {
 	return FRange( Min * F, Max * F );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator/( FLOAT F ) const
 {
 	FLOAT Inv = 1.f / F;
 	return FRange( Min * Inv, Max * Inv );
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator+=( const FRange& R )
 {
 	Min += R.Min;
@@ -160,7 +160,7 @@ FRange FRange::operator+=( const FRange& R )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator+=( FLOAT F )
 {
 	Min += F;
@@ -168,7 +168,7 @@ FRange FRange::operator+=( FLOAT F )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator-=( const FRange& R )
 {
 	Min -= R.Min;
@@ -176,7 +176,7 @@ FRange FRange::operator-=( const FRange& R )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator-=( FLOAT F )
 {
 	Min -= F;
@@ -184,7 +184,7 @@ FRange FRange::operator-=( FLOAT F )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator*=( const FRange& R )
 {
 	Min *= R.Min;
@@ -192,7 +192,7 @@ FRange FRange::operator*=( const FRange& R )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator*=( FLOAT F )
 {
 	Min *= F;
@@ -200,7 +200,7 @@ FRange FRange::operator*=( FLOAT F )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator/=( const FRange& R )
 {
 	Min /= R.Min;
@@ -208,7 +208,7 @@ FRange FRange::operator/=( const FRange& R )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange FRange::operator/=( FLOAT F )
 {
 	FLOAT Inv = 1.f / F;
@@ -217,19 +217,19 @@ FRange FRange::operator/=( FLOAT F )
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FRange::operator==( const FRange& R ) const
 {
 	return Min == R.Min && Max == R.Max;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FRange::operator!=( const FRange& R ) const
 {
 	return Min != R.Min || Max != R.Max;
 }
 
-IMPL_APPROX("Ravenshield-specific FRange type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRange& FRange::operator=( const FRange& R )
 {
 	Min = R.Min;
@@ -241,12 +241,12 @@ FRange& FRange::operator=( const FRange& R )
 	FRangeVector.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101047B0)
 FRangeVector::FRangeVector()
 {
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101047E0)
 FRangeVector::FRangeVector( FRange InX, FRange InY, FRange InZ )
 :	X( InX )
 ,	Y( InY )
@@ -254,7 +254,7 @@ FRangeVector::FRangeVector( FRange InX, FRange InY, FRange InZ )
 {
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101047E0)
 FRangeVector::FRangeVector( FVector V )
 :	X( V.X )
 ,	Y( V.Y )
@@ -262,31 +262,31 @@ FRangeVector::FRangeVector( FVector V )
 {
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104C70)
 FVector FRangeVector::GetCenter() const
 {
 	return FVector( X.GetCenter(), Y.GetCenter(), Z.GetCenter() );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1010A060)
 FVector FRangeVector::GetMax() const
 {
 	return FVector( X.GetMax(), Y.GetMax(), Z.GetMax() );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104CB0)
 FVector FRangeVector::GetRand() const
 {
 	return FVector( X.GetRand(), Y.GetRand(), Z.GetRand() );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104D10)
 FVector FRangeVector::GetSRand() const
 {
 	return FVector( X.GetSRand(), Y.GetSRand(), Z.GetSRand() );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10104DF0 size 10 bytes")
 FRange& FRangeVector::Component( INT Index )
 {
 	switch( Index )
@@ -297,141 +297,141 @@ FRange& FRangeVector::Component( INT Index )
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1010A130)
 FRangeVector FRangeVector::GridSnap( const FRangeVector& Grid )
 {
 	return FRangeVector( X.GridSnap(Grid.X), Y.GridSnap(Grid.Y), Z.GridSnap(Grid.Z) );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x1010A0C0)
 INT FRangeVector::IsNearlyZero() const
 {
 	return X.IsNearlyZero() && Y.IsNearlyZero() && Z.IsNearlyZero();
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10104D70)
 INT FRangeVector::IsZero() const
 {
 	return X.IsZero() && Y.IsZero() && Z.IsZero();
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator+( const FRangeVector& R ) const
 {
 	return FRangeVector( X+R.X, Y+R.Y, Z+R.Z );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator+( const FVector& V ) const
 {
 	return FRangeVector( X+V.X, Y+V.Y, Z+V.Z );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator-( const FRangeVector& R ) const
 {
 	return FRangeVector( X-R.X, Y-R.Y, Z-R.Z );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator-( const FVector& V ) const
 {
 	return FRangeVector( X-V.X, Y-V.Y, Z-V.Z );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator-() const
 {
 	return FRangeVector( -X, -Y, -Z );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator*( const FRangeVector& R ) const
 {
 	return FRangeVector( X*R.X, Y*R.Y, Z*R.Z );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator*( FLOAT F ) const
 {
 	return FRangeVector( X*F, Y*F, Z*F );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator/( FLOAT F ) const
 {
 	return FRangeVector( X/F, Y/F, Z/F );
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator+=( const FRangeVector& R )
 {
 	X += R.X; Y += R.Y; Z += R.Z;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator+=( const FVector& V )
 {
 	X += V.X; Y += V.Y; Z += V.Z;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator-=( const FRangeVector& R )
 {
 	X -= R.X; Y -= R.Y; Z -= R.Z;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator-=( const FVector& V )
 {
 	X -= V.X; Y -= V.Y; Z -= V.Z;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator*=( const FRangeVector& R )
 {
 	X *= R.X; Y *= R.Y; Z *= R.Z;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator*=( FLOAT F )
 {
 	X *= F; Y *= F; Z *= F;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator/=( const FRangeVector& R )
 {
 	X /= R.X; Y /= R.Y; Z /= R.Z;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector FRangeVector::operator/=( FLOAT F )
 {
 	X /= F; Y /= F; Z /= F;
 	return *this;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FRangeVector::operator==( const FRangeVector& R ) const
 {
 	return X==R.X && Y==R.Y && Z==R.Z;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FRangeVector::operator!=( const FRangeVector& R ) const
 {
 	return X!=R.X || Y!=R.Y || Z!=R.Z;
 }
 
-IMPL_APPROX("Ravenshield-specific FRangeVector type; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FRangeVector& FRangeVector::operator=( const FRangeVector& R )
 {
 	X = R.X;
