@@ -659,6 +659,7 @@ void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT New
 }
 
 IMPL_INFERRED("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_INFERRED("DIVERGENCE: HoldCount accessed via raw offset 0x214")
 void UWindowsViewport::Hold(INT Horiz)
 {
 	guard(UWindowsViewport::Hold);
@@ -669,6 +670,7 @@ void UWindowsViewport::Hold(INT Horiz)
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::Minimize()
 {
 	guard(UWindowsViewport::Minimize);
@@ -677,6 +679,7 @@ void UWindowsViewport::Minimize()
 	unguard;
 }
 
+IMPL_INFERRED("Reconstructed from context")
 IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::Maximize()
 {
@@ -687,6 +690,7 @@ void UWindowsViewport::Maximize()
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UWindowsViewport::Restore()
 {
 	guard(UWindowsViewport::Restore);
@@ -695,6 +699,7 @@ void UWindowsViewport::Restore()
 	unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 IMPL_TODO("Needs Ghidra analysis")
 void UWindowsViewport::CheckCD()
 {

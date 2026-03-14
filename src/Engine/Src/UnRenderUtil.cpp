@@ -1221,6 +1221,7 @@ IMPL_INFERRED("Returns Texture->Mips.Num(); no Ghidra address")
 int FStaticTexture::GetNumMips()
 }
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Ghidra describes lazy-load mip access; no standalone address")
 void * FStaticTexture::GetRawTextureData(int MipIndex)
 {
 	// Ghidra (149B): Access Mips array directly via raw offsets.
@@ -1249,9 +1250,8 @@ void * FStaticTexture::GetRawTextureData(int MipIndex)
 	return *(void**)(MipEntry + 0x1C);
 }
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Retail byte sequence describes bRealtimeChanged check; no standalone address")
 int FStaticTexture::GetRevision()
-{
-	// Retail: 8B 41 0C F6 80 94 00 00 00 40 74 0A FF 41 10 83 A0 94 00 00 00 BF 8B 41 10 C3
 	// If bRealtimeChanged flag (bit 6 = 0x40 in bitfield at UTexture+0x94) is set:
 	// increment Revision counter at this+0x10, clear the flag, then return Revision.
 	UTexture* Texture = *(UTexture**)&Pad[8];
@@ -1263,15 +1263,14 @@ int FStaticTexture::GetRevision()
 	return *(INT*)&Pad[12];
 }
 IMPL_TODO("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
 }
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Returns Texture->UClampMode; no Ghidra address")
 ETexClampMode FStaticTexture::GetUClamp()
-{
-	UTexture* Texture = *(UTexture**)&Pad[8];
-	return (ETexClampMode)Texture->UClampMode;
 }
 IMPL_INFERRED("Reconstructed from context")
 UTexture * FStaticTexture::GetUTexture()

@@ -30,6 +30,7 @@ unguard;
 
 // --- UFileChannel ---
 IMPL_TODO("Needs Ghidra analysis")
+IMPL_INFERRED("Sets ChType to CHTYPE_File")
 void UFileChannel::StaticConstructor()
 {
 guard(UFileChannel::StaticConstructor);
@@ -38,6 +39,7 @@ unguard;
 }
 
 IMPL_TODO("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
@@ -45,6 +47,7 @@ guard(UFileChannel::Tick);
 unguard;
 }
 
+IMPL_TODO("Needs Ghidra analysis")
 IMPL_TODO("Needs Ghidra analysis")
 void UFileChannel::ReceivedBunch(FInBunch&)
 {

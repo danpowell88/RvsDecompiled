@@ -59,6 +59,7 @@ void UMaterial::Serialize( FArchive& Ar )
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_INFERRED("Cycle detection via history traversal")
 UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UMaterial::CheckCircularReferences);
@@ -77,6 +78,7 @@ UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x3970)
 INT UMaterial::GetValidated()
 {
 	guard(UMaterial::GetValidated);
@@ -86,6 +88,7 @@ INT UMaterial::GetValidated()
 }
 
 IMPL_INFERRED("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x3980)
 void UMaterial::SetValidated( UBOOL InValidated )
 {
 	guard(UMaterial::SetValidated);
