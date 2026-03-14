@@ -2109,32 +2109,76 @@ void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1279, execSortFPlayerMenuInfo );
 
-IMPL_DIVERGE("parses bPlanMode but performs no action — planning mode not implemented")
+IMPL_MATCH("Engine.dll", 0x10379990)
 void AActor::execSetPlanningMode( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlanningMode);
 	P_GET_UBOOL(bPlanMode);
 	P_FINISH;
+	// Ghidra 0x79990: XLevel->Engine->Client->Viewports[0]->field_0x1f0 bit0 = bPlanMode
+	if( g_pEngine )
+	{
+		BYTE* pClient = *(BYTE**)((BYTE*)g_pEngine + 0x44);
+		if( pClient )
+		{
+			INT numViewports = *(INT*)(pClient + 0x34);
+			if( numViewports > 0 )
+			{
+				BYTE* pViewport = **(BYTE***)(pClient + 0x30);
+				DWORD& f = *(DWORD*)(pViewport + 0x1f0);
+				if( bPlanMode ) f |= 1u;
+				else            f &= ~1u;
+			}
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2011, execSetPlanningMode );
 
-IMPL_DIVERGE("parses Floor but performs no action — floor drawing not implemented")
+IMPL_MATCH("Engine.dll", 0x10379be0)
 void AActor::execSetFloorToDraw( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFloorToDraw);
 	P_GET_INT(Floor);
 	P_FINISH;
+	// Ghidra 0x79be0: XLevel->Engine->Client->Viewports[0]->field_0x1f4 (decimal 500) = Floor
+	if( g_pEngine )
+	{
+		BYTE* pClient = *(BYTE**)((BYTE*)g_pEngine + 0x44);
+		if( pClient )
+		{
+			INT numViewports = *(INT*)(pClient + 0x34);
+			if( numViewports > 0 )
+			{
+				BYTE* pViewport = **(BYTE***)(pClient + 0x30);
+				*(INT*)(pViewport + 500) = Floor;
+			}
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2012, execSetFloorToDraw );
 
-IMPL_DIVERGE("always returns 0 — planning mode not implemented")
+IMPL_MATCH("Engine.dll", 0x10379ac0)
 void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execInPlanningMode);
 	P_FINISH;
+	// Ghidra 0x79ac0: return XLevel->Engine->Client->Viewports[0]->field_0x1f0 & 1
 	*(DWORD*)Result = 0;
+	if( g_pEngine )
+	{
+		BYTE* pClient = *(BYTE**)((BYTE*)g_pEngine + 0x44);
+		if( pClient )
+		{
+			INT numViewports = *(INT*)(pClient + 0x34);
+			if( numViewports > 0 )
+			{
+				BYTE* pViewport = **(BYTE***)(pClient + 0x30);
+				*(DWORD*)Result = *(DWORD*)(pViewport + 0x1f0) & 1u;
+			}
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2014, execInPlanningMode );
@@ -3926,12 +3970,11 @@ void AActor::PutOnGround()
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: accesses MCD model via raw offset +0x48 into UKarmaParamsCollision confirmed by Ghidra")
+IMPL_MATCH("Engine.dll", 0x10361940)
 struct _McdModel* AActor::getKModel() const
 {
+    // Ghidra 0x61940: KParams at this+0x18c; return KParams->McdModel at KParams+0x48
     if( !KParams ) return NULL;
-    // DIVERGENCE: UKarmaParamsCollision exposes no named field for the MCD model pointer;
-    // raw offset +0x48 confirmed by Ghidra (matches UObject base of 0x2C + 4 pointers).
     return *( struct _McdModel** )( (BYTE*)KParams + 0x48 );
 }
 
@@ -4111,11 +4154,35 @@ INT AActor::IsJoinedTo( const AActor* Other ) const
     return 0;
 }
 
-IMPL_DIVERGE("Needs APlayerController field layout from Ghidra for full implementation")
+IMPL_MATCH("Engine.dll", 0x103e5750)
 INT AActor::TestCanSeeMe( APlayerController* Viewer )
 {
     guard(AActor::TestCanSeeMe);
-    // STUB: too complex (complex, needs APlayerController field layout)
+    if( !Viewer ) return 0;
+    // Ghidra 0xe5750: vtable[0x18c/4] = GetViewTarget()
+    AActor* viewerTarget = Viewer->GetViewTarget();
+    if( viewerTarget == this ) return 1;
+    // ViewTarget/camera origin actor at APlayerController+0x5b8
+    AActor* viewActor = *(AActor**)((BYTE*)Viewer + 0x5b8);
+    FLOAT dX = Location.X - viewActor->Location.X;
+    FLOAT dY = Location.Y - viewActor->Location.Y;
+    FLOAT dZ = Location.Z - viewActor->Location.Z;
+    FLOAT distSq = dX*dX + dY*dY + dZ*dZ;
+    // Sight range: (field_0xf8 + 3.6) * 100000 — field_0xf8 is a per-actor visibility modifier
+    if( distSq < (*(FLOAT*)((BYTE*)this + 0xf8) + 3.6f) * 100000.f )
+    {
+        // APlayerController+0x524 bit 0x20 = bBehindView-style flag; if clear, apply FOV check
+        if( !(*(BYTE*)((BYTE*)Viewer + 0x524) & 0x20) )
+        {
+            // Camera look direction from rotation at APlayerController+0x240
+            FVector camDir = (*(FRotator*)((BYTE*)Viewer + 0x240)).Vector();
+            FLOAT dot = dX * camDir.X + dY * camDir.Y + dZ * camDir.Z;
+            // Return 0 if actor is more than 60 degrees outside camera FOV
+            if( distSq * 0.25f > dot * dot )
+                return 0;
+        }
+        return Viewer->LineOfSightTo( this, 0 ) ? 1 : 0;
+    }
     return 0;
     unguard;
 }
