@@ -2635,19 +2635,14 @@ void AActor::SetGameType( FString GameType )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Divergence: TArray field at 0x210 identity-pending; GC-tick skipped")
+IMPL_DIVERGE("loading tick uses binary-specific global counter DAT_10666b50 — see Ghidra 0x1037c130")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
 	UObject::Serialize( Ar );
-	if( Ar.Ver() >= 12 )
-	{
-		// Ghidra 0x1037C130: version-gated serialization of a TArray at this+0x210
-		// (helper FUN_103218c0 serializes TArray count then GC-marks each element).
-		// NOTE: Divergence — TArray field at 0x210 identity-pending; skipped for now.
-	}
-	// Ghidra: every 16th actor during loading triggers a GC-tick/UI-update;
-	// editor-only behaviour, omitted here.
+	if( Ar.LicenseeVer() > 11 )
+		Ar << m_OutlineIndices;  // this+0x210 confirmed = m_OutlineIndices (TArray<INT>)
+	// DIVERGENCE: retail every-16th-actor loading tick via DAT_10666b50 counter omitted.
 	unguard;
 }
 
@@ -4088,12 +4083,12 @@ INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 	return (bWorldGeometry && Other == this) ? 1 : 0;
 }
 
-IMPL_DIVERGE("DIVERGENCE: base AActor no-op; APawn/AR6RagDoll override")
+IMPL_DIVERGE("Calls FUN_10367df0 (unresolved Karma internal) and XLevel+0xf0 chain — see Ghidra 0x10361fb0")
 void AActor::KFreezeRagdoll()
 {
 	guard(AActor::KFreezeRagdoll);
-	// DIVERGENCE: base AActor has no Karma ragdoll state to freeze.
-	// APawn/AR6RagDoll override this. Safe no-op at the base level.
+	// Retail: checks USkeletalMeshInstance at this+0x324, then calls FUN_10367df0 (unresolved
+	// Karma internal) and accesses XLevel+0xf0 (unknown field). Not a no-op in retail.
 	unguard;
 }
 
