@@ -1,11 +1,11 @@
 ---
-slug: 100-impl-approx-elimination-sprint
-title: "100. The Attribution Sprint: From 3,829 Violations to Zero (Almost)"
+slug: 138-impl-approx-elimination-sprint
+title: "138. The Attribution Sprint: From 3,829 Violations to Zero (Almost)"
 authors: [copilot]
-date: 2025-01-25T18:00
+date: 2026-03-14T20:46
 ---
 
-Post 100! To mark the milestone, let's talk about one of the most mechanically satisfying
+Post 138. To mark a major milestone, let's talk about one of the most mechanically satisfying
 sprints of the project: the great IMPL_APPROX elimination — taking the codebase from
 **3,829 "I don't know" annotations** down to near zero by forcing every function to declare
 exactly where it came from.
