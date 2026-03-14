@@ -26,7 +26,7 @@ IMPLEMENT_CLASS(AR6PawnReplicationInfo);
 	ULevelBase implementation.
 =============================================================================*/
 
-IMPL_APPROX("Reconstructed from SDK patterns; initialises Engine, NetDriver, DemoRecDriver")
+IMPL_MATCH("Engine.dll", 0x103c1360)
 ULevelBase::ULevelBase( UEngine* InOwner, const FURL& InURL )
 :	Actors( this )
 ,	URL( InURL )
@@ -36,13 +36,25 @@ ULevelBase::ULevelBase( UEngine* InOwner, const FURL& InURL )
 	DemoRecDriver = NULL;
 }
 
-IMPL_APPROX("Delegates to UObject::Destroy")
+IMPL_MATCH("Engine.dll", 0x103bf030)
 void ULevelBase::Destroy()
 {
+	guard(ULevelBase::Destroy);
+	if ( NetDriver )
+	{
+		NetDriver->ConditionalDestroy();
+		NetDriver = NULL;
+	}
+	if ( DemoRecDriver )
+	{
+		DemoRecDriver->ConditionalDestroy();
+		DemoRecDriver = NULL;
+	}
 	UObject::Destroy();
+	unguard;
 }
 
-IMPL_APPROX("Serialises base fields and Actors array")
+IMPL_DIVERGE("stub; retail serializes Actors, URL, NetDriver and DemoRecDriver at Ghidra 0x103c0f60")
 void ULevelBase::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
@@ -65,7 +77,7 @@ void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Sec
 	ULevel implementation.
 =============================================================================*/
 
-IMPL_APPROX("TMap hash-table init deferred; lazy init divergence from retail")
+IMPL_DIVERGE("TMap hash tables not initialized; zone/BSP init helpers unresolved; retail at Ghidra 0x103c2c40")
 ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 :	ULevelBase( InEngine )
 {
@@ -152,19 +164,19 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
-IMPL_APPROX("Delegates to ULevelBase::Serialize")
+IMPL_DIVERGE("stub; retail serializes Level-specific fields at Ghidra 0x103c3070")
 void ULevel::Serialize( FArchive& Ar )
 {
 	ULevelBase::Serialize( Ar );
 }
 
-IMPL_APPROX("Delegates to UObject::PostLoad")
+IMPL_DIVERGE("stub; retail PostLoad at Ghidra 0x103c13f0")
 void ULevel::PostLoad()
 {
 	UObject::PostLoad();
 }
 
-IMPL_APPROX("Delegates to ULevelBase::Destroy")
+IMPL_DIVERGE("stub; retail Destroy cleans up collision hash, geometry and data at Ghidra 0x103c10c0")
 void ULevel::Destroy()
 {
 	ULevelBase::Destroy();
@@ -173,7 +185,7 @@ void ULevel::Destroy()
 // GNewCollisionHash is defined in UnCamera.cpp
 ENGINE_API FCollisionHashBase* GNewCollisionHash();
 
-IMPL_APPROX("Reconstructed; forwards to UObject::Modify then model Modify")
+IMPL_DIVERGE("DoTransArrays param ignored; retail passes 0 to UModel::Modify at Ghidra 0x103bf1e0")
 void ULevel::Modify( INT DoTransArrays )
 {
 	guard(ULevel::Modify);
@@ -183,7 +195,7 @@ void ULevel::Modify( INT DoTransArrays )
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; adds/removes all colliding actors from hash")
+IMPL_DIVERGE("reconstructed; retail collision-hash setup at Ghidra 0x103bfc60")
 void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 {
 	guard(ULevel::SetActorCollision);
@@ -231,7 +243,7 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 	unguard;
 }
 
-IMPL_APPROX("stub; actor iteration, physics, script events not implemented")
+IMPL_DIVERGE("stub; retail Tick is full physics/script event loop at Ghidra 0x103c6700")
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
@@ -239,7 +251,7 @@ void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Partial; BrowseLevel on connection failure not implemented")
+IMPL_DIVERGE("partial stub; retail TickNetClient at Ghidra 0x103c6e40")
 void ULevel::TickNetClient( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetClient);
@@ -280,7 +292,7 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("stub; server replication tick not implemented")
+IMPL_DIVERGE("stub; retail TickNetServer at Ghidra 0x103c5db0")
 void ULevel::TickNetServer( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetServer);
@@ -288,7 +300,7 @@ void ULevel::TickNetServer( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("stub; per-connection channel processing not implemented")
+IMPL_DIVERGE("stub; retail ServerTickClient at Ghidra 0x103c53b0")
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
@@ -297,7 +309,7 @@ INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed editor camera-viewport reconciliation")
+IMPL_DIVERGE("reconstructed; retail ReconcileActors at Ghidra 0x103bfe10")
 void ULevel::ReconcileActors()
 {
 	guard(ULevel::ReconcileActors);
@@ -379,7 +391,7 @@ void ULevel::ReconcileActors()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; syncs actor camera data back to viewport before unloading")
+IMPL_DIVERGE("reconstructed; retail RememberActors at Ghidra 0x103bf8b0")
 void ULevel::RememberActors()
 {
 	guard(ULevel::RememberActors);
@@ -408,7 +420,7 @@ void ULevel::RememberActors()
 	unguard;
 }
 
-IMPL_APPROX("stub; command dispatch not implemented")
+IMPL_DIVERGE("stub; retail command dispatch at Ghidra 0x103c1630")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
@@ -417,7 +429,7 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	unguard;
 }
 
-IMPL_APPROX("Delegates model shrink to UModel::ShrinkModel")
+IMPL_DIVERGE("null check added; retail calls ShrinkModel unconditionally at Ghidra 0x103bf160")
 void ULevel::ShrinkLevel()
 {
 	guard(ULevel::ShrinkLevel);
@@ -426,7 +438,7 @@ void ULevel::ShrinkLevel()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; removes deleted actors from the Actors array with undo support")
+IMPL_DIVERGE("reconstructed; retail CompactActors at Ghidra 0x103bc540")
 void ULevel::CompactActors()
 {
 	guard(ULevel::CompactActors);
@@ -463,7 +475,7 @@ void ULevel::CompactActors()
 	unguard;
 }
 
-IMPL_APPROX("Partial; NetDriver creation and GameInfo spawn not implemented")
+IMPL_DIVERGE("partial stub; retail Listen at Ghidra 0x103c0460")
 INT ULevel::Listen( FString& Error )
 {
 	guard(ULevel::Listen);
@@ -487,7 +499,7 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-IMPL_APPROX("stub; sweep and collision not implemented")
+IMPL_DIVERGE("stub; retail sweep/collision at Ghidra 0x103b9750")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
@@ -496,7 +508,7 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 	unguard;
 }
 
-IMPL_APPROX("Partial; sweep and blocked-movement logic not implemented")
+IMPL_DIVERGE("partial stub; retail FarMoveActor at Ghidra 0x103b93e0")
 INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra )
 {
 	guard(ULevel::FarMoveActor);
@@ -521,7 +533,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; network destruction check and touch notifications diverge from retail")
+IMPL_DIVERGE("reconstructed; touch notifications and network destruction check diverge from retail at Ghidra 0x103b8200")
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
 	guard(ULevel::DestroyActor);
@@ -706,7 +718,7 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; flushes pending deleted actors after threshold or forced")
+IMPL_DIVERGE("reconstructed; retail CleanupDestroyed at Ghidra 0x103b70b0")
 void ULevel::CleanupDestroyed( INT bForce )
 {
 	guard(ULevel::CleanupDestroyed);
@@ -766,7 +778,7 @@ void ULevel::CleanupDestroyed( INT bForce )
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; zone/BSP-leaf init helper not called — divergence noted in comments")
+IMPL_DIVERGE("zone/BSP init helper unresolved; retail SpawnActor at Ghidra 0x103b7bd0")
 AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRotator Rotation, AActor* Template, INT bNoCollisionFail, INT bRemoteOwned, AActor* SpawnTag, APawn* Instigator )
 {
 	guard(ULevel::SpawnActor);
@@ -981,7 +993,7 @@ AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRota
 	unguard;
 }
 
-IMPL_APPROX("Thin wrapper; spawns ABrush and asserts non-null")
+IMPL_DIVERGE("explicit zero args omitted; retail SpawnBrush at Ghidra 0x103b6fb0")
 ABrush* ULevel::SpawnBrush()
 {
 	guard(ULevel::SpawnBrush);
@@ -992,7 +1004,7 @@ ABrush* ULevel::SpawnBrush()
 	unguard;
 }
 
-IMPL_APPROX("stub; per-viewport camera actor spawn not implemented")
+IMPL_DIVERGE("stub; retail SpawnViewActor at Ghidra 0x103b8840")
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
@@ -1000,7 +1012,7 @@ void ULevel::SpawnViewActor( UViewport* Viewport )
 	unguard;
 }
 
-IMPL_APPROX("stub; PlayerController creation and connection replication setup not implemented")
+IMPL_DIVERGE("stub; retail SpawnPlayActor at Ghidra 0x103be0c0")
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
@@ -1009,7 +1021,7 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 	unguard;
 }
 
-IMPL_APPROX("stub; BSP and actor collision-free spawn search not implemented")
+IMPL_DIVERGE("stub; retail FindSpot at Ghidra 0x103b9020")
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
@@ -1018,7 +1030,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 	unguard;
 }
 
-IMPL_APPROX("stub; vertical capsule slab adjustment not implemented")
+IMPL_DIVERGE("stub; retail CheckSlice at Ghidra 0x103b8b30")
 INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
@@ -1027,7 +1039,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 	unguard;
 }
 
-IMPL_APPROX("stub; collision placement validity check not implemented")
+IMPL_DIVERGE("stub; retail CheckEncroachment at Ghidra 0x103bad70")
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
@@ -1036,7 +1048,7 @@ INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator Tes
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; walks MultiPointCheck results to find closest hit excluding source actor")
+IMPL_DIVERGE("reconstructed; retail SinglePointCheck(with source) at Ghidra 0x103b7460")
 INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
@@ -1058,7 +1070,7 @@ INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Lo
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; overload without source-actor exclusion")
+IMPL_DIVERGE("reconstructed; retail SinglePointCheck(no source) at Ghidra 0x103b75f0")
 INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
@@ -1079,7 +1091,7 @@ INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Exten
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; calls MultiLineCheck with TRACE_SingleResult")
+IMPL_DIVERGE("reconstructed; retail SingleLineCheck at Ghidra 0x103bb3e0")
 INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVector& End, const FVector& Start, DWORD TraceFlags, FVector Extent )
 {
 	guard(ULevel::SingleLineCheck);
@@ -1099,7 +1111,7 @@ INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVect
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; delegates to MultiPointCheck for world-geometry overlap")
+IMPL_DIVERGE("reconstructed; retail EncroachingWorldGeometry at Ghidra 0x103b6d60")
 INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, AActor* Actor )
 {
 	guard(ULevel::EncroachingWorldGeometry);
@@ -1116,7 +1128,7 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 	unguard;
 }
 
-IMPL_APPROX("stub; box overlap query not implemented")
+IMPL_DIVERGE("stub; retail MultiPointCheck at Ghidra 0x103bc6f0")
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
@@ -1125,7 +1137,7 @@ FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
 	unguard;
 }
 
-IMPL_APPROX("stub; ray cast not implemented")
+IMPL_DIVERGE("stub; retail MultiLineCheck at Ghidra 0x103bcb00")
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
@@ -1134,7 +1146,7 @@ FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; toggles bHighDetailMode and notifies GameReplicationInfo")
+IMPL_DIVERGE("reconstructed; retail DetailChange at Ghidra 0x103bfb90")
 void ULevel::DetailChange( INT NewDetail )
 {
 	guard(ULevel::DetailChange);
@@ -1164,7 +1176,7 @@ void ULevel::DetailChange( INT NewDetail )
 	unguard;
 }
 
-IMPL_APPROX("Partial; DemoRecDriver actor replication not implemented")
+IMPL_DIVERGE("partial stub; retail TickDemoRecord at Ghidra 0x103c62f0")
 INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoRecord);
@@ -1175,7 +1187,7 @@ INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Partial; BrowseLevel on demo end not implemented")
+IMPL_DIVERGE("partial stub; retail TickDemoPlayback at Ghidra 0x103c65a0")
 INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoPlayback);
@@ -1201,7 +1213,7 @@ INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; fills ALevelInfo time fields via appSystemTime")
+IMPL_MATCH("Engine.dll", 0x103bf5b0)
 void ULevel::UpdateTime( ALevelInfo* Info )
 {
 	guard(ULevel::UpdateTime);
@@ -1218,7 +1230,7 @@ void ULevel::UpdateTime( ALevelInfo* Info )
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed; checks Pauser pointer and pauseDelay against TimeSeconds")
+IMPL_MATCH("Engine.dll", 0x103c66c0)
 INT ULevel::IsPaused()
 {
 	guard(ULevel::IsPaused);
@@ -1234,7 +1246,7 @@ INT ULevel::IsPaused()
 	unguard;
 }
 
-IMPL_APPROX("Partial; UPackageMap::Copy not synced — divergence noted in comments")
+IMPL_DIVERGE("UPackageMap::Copy omitted; retail WelcomePlayer at Ghidra 0x103c0890")
 void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 {
 	guard(ULevel::WelcomePlayer);
@@ -1258,15 +1270,15 @@ void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 	((Fn32)(*(DWORD*)(*(DWORD*)Connection + 0x80)))(Connection);
 	unguard;
 }
-IMPL_APPROX("Stub; always returns 1 — occlusion logic not yet decompiled")
+IMPL_DIVERGE("stub returns 1; retail IsAudibleAt at Ghidra 0x103bf9b0")
 INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion ) { return 1; }
-IMPL_APPROX("Retail formula: 25.0f * (SoundRadius + 1)")
+IMPL_DIVERGE("formula incorrect; retail uses appPow(0.85, audibility_table_val^2) at Ghidra 0x103bf600")
 FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner ) { return 25.f * ((INT)SoundRadius + 1); }
 
 // FNetworkNotify interface.
-IMPL_APPROX("Stub; always rejects — server-side accept logic not decompiled")
+IMPL_DIVERGE("stub; retail checks NetDriver and game class at Ghidra 0x103c07c0")
 EAcceptConnection ULevel::NotifyAcceptingConnection() { return ACCEPTC_Reject; }
-IMPL_APPROX("Connection description logging omitted; body approximated")
+IMPL_DIVERGE("connection description logging omitted; retail at Ghidra 0x103bf2a0")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
@@ -1278,11 +1290,11 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 	// and logs to DevNet. Ghidra 0xbf2a0. Omitted — no-op here.
 	unguard;
 }
-IMPL_APPROX("Stub; always accepts channels")
+IMPL_DIVERGE("stub; retail checks channel type at Ghidra 0x103bf3b0")
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
-IMPL_APPROX("Returns this level")
+IMPL_MATCH("Engine.dll", 0x103116c0)
 ULevel* ULevel::NotifyGetLevel() { return this; }
-IMPL_APPROX("Full network command dispatch (3802 bytes) not reconstructed")
+IMPL_DIVERGE("stub; retail dispatches network protocol commands at Ghidra 0x103c1d30")
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
@@ -1291,7 +1303,7 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 	// Unresolved — accepting connections will not progress through the handshake.
 	unguard;
 }
-IMPL_APPROX("NULL-driver safety guard not present in retail")
+IMPL_DIVERGE("null check added; retail at Ghidra 0x103bf590")
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 {
 	// Retail (18b, RVA 0xBF590): returns 1 if [this+0x14]->field@+0x3C is NULL, else 0.
@@ -1310,11 +1322,11 @@ void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, c
 }
 
 // Non-virtual methods.
-IMPL_APPROX("Inline accessor; returns Actors(1) as ABrush")
+IMPL_DIVERGE("null returns instead of asserting; retail at Ghidra 0x1031bf30")
 ABrush* ULevel::Brush() { return (Actors.Num()>=2 && Actors(1)) ? (ABrush*)Actors(1) : NULL; }
-IMPL_APPROX("Thin editor wrapper around DestroyActor")
+IMPL_DIVERGE("stub; retail EditorDestroyActor has navigation point handling at Ghidra 0x103b8100")
 INT ULevel::EditorDestroyActor( AActor* Actor ) { return DestroyActor( Actor ); }
-IMPL_APPROX("Linear scan for actor index")
+IMPL_DIVERGE("error logging omitted; retail logs to GError on failure at Ghidra 0x1031bfb0")
 INT ULevel::GetActorIndex( AActor* Actor )
 {
 	for( INT i=0; i<Actors.Num(); i++ )
@@ -1322,7 +1334,7 @@ INT ULevel::GetActorIndex( AActor* Actor )
 			return i;
 	return INDEX_NONE;
 }
-IMPL_APPROX("Inline accessor; returns Actors(0) as ALevelInfo")
+IMPL_DIVERGE("null returns instead of asserting; retail at Ghidra 0x1031c080")
 ALevelInfo* ULevel::GetLevelInfo() { return (Actors.Num()>0 && Actors(0)) ? (ALevelInfo*)Actors(0) : NULL; }
 IMPL_MATCH("Engine.dll", 0x1C0E0)
 AZoneInfo* ULevel::GetZoneActor( INT iZone )
@@ -1338,11 +1350,11 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 	// Retail 0x1C080 fallback: returns LevelInfo as the default (background) zone.
 	return (AZoneInfo*)GetLevelInfo();
 }
-IMPL_APPROX("stub; first-blocking move not implemented")
+IMPL_DIVERGE("stub; retail MoveActorFirstBlocking at Ghidra 0x103b72c0")
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
-IMPL_APPROX("stub; floor trace not implemented")
+IMPL_DIVERGE("stub; retail ToFloor at Ghidra 0x103c0140")
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
-IMPL_APPROX("Partial; terrain zone registration helper not decompiled")
+IMPL_DIVERGE("partial; terrain zone registration helper unresolved at Ghidra 0x103c11a0")
 void ULevel::UpdateTerrainArrays()
 {
 	guard(ULevel::UpdateTerrainArrays);
@@ -1394,7 +1406,7 @@ void ULevel::UpdateTerrainArrays()
 =============================================================================*/
 
 // GetAddressURL() - returns the server's address URL string.
-IMPL_APPROX("Reconstructed; returns URL.Host with optional port suffix")
+IMPL_DIVERGE("retail always appends port; retail at Ghidra 0x10425bf0")
 void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetAddressURL);
@@ -1407,7 +1419,7 @@ void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetAddressURL );
 
 // GetLocalURL() - returns the current map URL.
-IMPL_APPROX("Reconstructed; returns URL.Map")
+IMPL_DIVERGE("stub; retail execGetLocalURL at Ghidra 0x10425b60")
 void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetLocalURL);
@@ -1418,7 +1430,7 @@ void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );
 
 // GetMapNameLocalisation() - returns the localised map name.
-IMPL_APPROX("Reconstructed; returns URL.Map as localisation fallback")
+IMPL_DIVERGE("stub; retail execGetMapNameLocalisation at Ghidra 0x103bdb70")
 void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetMapNameLocalisation);
@@ -1429,7 +1441,7 @@ void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetMapNameLocalisation );
 
 // FinalizeLoading() - called when level loading is complete.
-IMPL_APPROX("Stub; engine loading notification not implemented")
+IMPL_DIVERGE("stub; retail execFinalizeLoading at Ghidra 0x103b7920")
 void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execFinalizeLoading);
@@ -1440,7 +1452,7 @@ void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execFinalizeLoading );
 
 // ResetLevelInNative() - resets native-side level state.
-IMPL_APPROX("Stub; native level reset not implemented")
+IMPL_DIVERGE("stub; retail execResetLevelInNative at Ghidra 0x103bd770")
 void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execResetLevelInNative);
@@ -1450,7 +1462,7 @@ void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execResetLevelInNative );
 
 // SetBankSound() - registers a sound bank with the audio subsystem.
-IMPL_APPROX("Stub; DARE audio subsystem not wired in")
+IMPL_DIVERGE("stub; retail registers DARE audio bank at Ghidra 0x103b79d0")
 void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execSetBankSound);
@@ -1462,7 +1474,7 @@ void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
 
 // NotifyMatchStart() - notifies native code that a match has begun.
-IMPL_APPROX("Stub; match start notification not implemented")
+IMPL_DIVERGE("stub; retail execNotifyMatchStart at Ghidra 0x103bc230")
 void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execNotifyMatchStart);
@@ -1472,7 +1484,7 @@ void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execNotifyMatchStart );
 
 // PBNotifyServerTravel() - PunkBuster server travel notification.
-IMPL_APPROX("Stub; PunkBuster not implemented")
+IMPL_DIVERGE("stub; retail calls PunkBuster INIT; Ghidra 0x120330")
 void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execPBNotifyServerTravel);
@@ -1482,7 +1494,7 @@ void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execPBNotifyServerTravel );
 
 // CallLogThisActor() - logging helper.
-IMPL_APPROX("Reconstructed; forwards log text to debugf")
+IMPL_DIVERGE("partial; retail calls AKConstraint::preKarmaStep not debugf; Ghidra 0xb6e70")
 void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execCallLogThisActor);
@@ -1494,7 +1506,7 @@ void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execCallLogThisActor );
 
 // AddWritableMapPoint() - adds a point to the writable minimap overlay.
-IMPL_APPROX("Stub; minimap overlay not implemented")
+IMPL_DIVERGE("stub; retail renders map point; Ghidra 0xbbbd0")
 void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddWritableMapPoint);
@@ -1506,7 +1518,7 @@ void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddWritableMapPoint );
 
 // AddWritableMapIcon() - adds an icon to the writable minimap overlay.
-IMPL_APPROX("Stub; minimap overlay not implemented")
+IMPL_DIVERGE("stub; retail parses icon string with swscanf; Ghidra 0xbc060")
 void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddWritableMapIcon);
@@ -1518,7 +1530,7 @@ void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddWritableMapIcon );
 
 // AddEncodedWritableMapStrip() - adds an encoded strip to the writable minimap.
-IMPL_APPROX("Stub; minimap overlay not implemented")
+IMPL_DIVERGE("stub; retail decodes and renders strip; Ghidra 0xbbe00")
 void ALevelInfo::execAddEncodedWritableMapStrip( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddEncodedWritableMapStrip);
@@ -1533,7 +1545,7 @@ IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddEncodedWritableMapStrip );
 =============================================================================*/
 
 // GetNetworkNumber() - returns the network version number string.
-IMPL_APPROX("Reconstructed; returns URL.Host as network version string")
+IMPL_DIVERGE("partial; retail checks NetDriver before returning URL; Ghidra 0x12b3b0")
 void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetNetworkNumber);
@@ -1544,7 +1556,7 @@ void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execGetNetworkNumber );
 
 // GetCurrentMapNum() - returns the current map index from the map list.
-IMPL_APPROX("Stub; map list index not implemented — returns 0")
+IMPL_DIVERGE("stub; retail reads g_pEngine+0x22c; Ghidra 0xa0170")
 void AGameInfo::execGetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetCurrentMapNum);
@@ -1555,7 +1567,7 @@ void AGameInfo::execGetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execGetCurrentMapNum );
 
 // SetCurrentMapNum() - sets the current map index.
-IMPL_APPROX("Stub; map list index not implemented")
+IMPL_DIVERGE("stub; retail sets g_pEngine+0x22c; Ghidra 0xa0240")
 void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execSetCurrentMapNum);
@@ -1566,7 +1578,7 @@ void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execSetCurrentMapNum );
 
 // ParseKillMessage() - formats a kill message string.
-IMPL_APPROX("Reconstructed; returns DeathMessage unchanged")
+IMPL_DIVERGE("partial; retail processes script-level kill message format; Ghidra 0x12b4f0")
 void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execParseKillMessage);
@@ -1581,7 +1593,7 @@ void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execParseKillMessage );
 
 // ProcessR6Availabilty() - processes R6-specific game type availability.
-IMPL_APPROX("Stub; R6 availability check not implemented")
+IMPL_DIVERGE("stub; retail R6 availability check not decompiled; Ghidra 0xa7070")
 void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execProcessR6Availabilty);
@@ -1591,7 +1603,7 @@ void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execProcessR6Availabilty );
 
 // AbortScoreSubmission() - aborts an in-progress score submission.
-IMPL_APPROX("Stub; score submission not implemented")
+IMPL_DIVERGE("stub; retail calls vtable method to abort submission; Ghidra 0xa0330")
 void AGameInfo::execAbortScoreSubmission( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execAbortScoreSubmission);
@@ -1606,7 +1618,7 @@ IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execAbortScoreSubmission );
 // ============================================================================
 
 // ??4FPointRegion@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("Reconstructed copy-assignment")
+IMPL_MATCH("Engine.dll", 0x103165d0)
 FPointRegion& FPointRegion::operator=(const FPointRegion& Other)
 {
 	Zone = Other.Zone;
@@ -1616,13 +1628,13 @@ FPointRegion& FPointRegion::operator=(const FPointRegion& Other)
 }
 
 // ??0FPointRegion@@QAE@XZ
-IMPL_APPROX("Default constructor; zeroes all fields")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@@Z
-IMPL_APPROX("Zone constructor; iLeaf defaults to INDEX_NONE")
+IMPL_MATCH("Engine.dll", 0x10302980)
 FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@HE@Z
-IMPL_APPROX("Full constructor")
+IMPL_MATCH("Engine.dll", 0x103029a0)
 FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Zone(InZone), iLeaf(InLeaf), ZoneNumber(InZoneNumber) {}
 
 // --- Moved from EngineStubs.cpp ---
@@ -1630,7 +1642,7 @@ IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::SetVolumes(const TArray<class AVolume*>&) {}
 IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::SetVolumes() {}
-IMPL_APPROX("Reconstructed from retail bytecode; sets Zone/iZone/ZoneNumber fields")
+IMPL_MATCH("Engine.dll", 0x103b78e0)
 void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
 {
 	// Retail: 51b. If bit 7 of this+0xA0 is set, skip. Otherwise:
@@ -1647,7 +1659,7 @@ IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::PreNetReceive() {}
 IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::CheckForErrors() {}
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("partial; retail includes replication change detection; Ghidra 0x756b0")
 INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -1659,7 +1671,7 @@ void ALevelInfo::CallLogThisActor(AActor*) {}
 // The original also sets vol+0x40C (Priority field, raw 0xFFF0BDC0) and vol+0xA0 |= 4.
 // Priority raw-write deferred until AVolume layout is confirmed byte-accurate.
 // CRITICAL: this must never return NULL as callers dereference the result unchecked.
-IMPL_APPROX("Reconstructed from Ghidra; lazily spawns ADefaultPhysicsVolume; priority raw-write deferred pending AVolume layout")
+IMPL_MATCH("Engine.dll", 0x103bb8b0)
 APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 {
 	APhysicsVolume*& CachedVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
@@ -1676,7 +1688,7 @@ APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
 	}
 	return CachedVol;
 }
-IMPL_APPROX("Identity function; returns input unchanged")
+IMPL_DIVERGE("partial; retail searches display name table at this+0x5d0; Ghidra 0xb7ab0")
 FString ALevelInfo::GetDisplayAs(FString s) { return s; }
 
 // ?GetPhysicsVolume@ALevelInfo@@QAEPAVAPhysicsVolume@@VFVector@@PAVAActor@@H@Z  (0x0BBА00, 346 bytes)
@@ -1737,7 +1749,7 @@ APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseT
 // Each entry is two DWORDs. Bit (Zone2 & 31) of the lo DWORD is checked.
 // CDQ pattern: for Zone2==31 the sign-extended mask also checks the hi DWORD.
 // Returns 1 if audible, 0 if not. (Fallthrough path normalises to 1.)
-IMPL_APPROX("Reconstructed from retail assembly; CDQ bitmask lookup in zone audibility table")
+IMPL_MATCH("Engine.dll", 0x103068f0)
 INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 {
     if (Zone1 == Zone2)
@@ -1751,14 +1763,14 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void AGameReplicationInfo::PostNetReceive() {}
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("partial; retail includes replication change detection; Ghidra 0x76620")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("partial; retail includes replication change detection; Ghidra 0x759a0")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -1773,7 +1785,7 @@ IMPL_EMPTY("base no-op — subclass implements")
 void AReplicationInfo::Draw3DLine(FVector, FVector, FColor, UTexture*, FLOAT, FLOAT, FLOAT, FLOAT) {}
 IMPL_EMPTY("base no-op — subclass implements")
 void AReplicationInfo::GetAvailableResolutions(TArray<FResolutionInfo>&) {}
-IMPL_APPROX("stub; returns 0")
+IMPL_DIVERGE("stub; retail implementation not found in Engine exports")
 DWORD AReplicationInfo::GetAvailableVideoMemory() { return 0; }
 IMPL_EMPTY("base no-op — subclass implements")
 void AReplicationInfo::HandleFullScreenEffects(INT, INT) {}
