@@ -690,8 +690,13 @@ IMPL_MATCH("Engine.dll", 0x10303240)
 FRenderInterface::FRenderInterface() { appMemzero(RIPad, sizeof(RIPad)); }
 IMPL_MATCH("Engine.dll", 0x10303240)
 FRenderInterface::FRenderInterface(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_DIVERGE("VA unconfirmed; trivial memcpy implementation")
-FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+// Ghidra 0x103032b0: copies 9 DWORDs from +4 to +0x24 (skips vtable at +0).
+IMPL_MATCH("Engine.dll", 0x103032b0)
+FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other)
+{
+	appMemcpy(((BYTE*)this) + 4, ((const BYTE*)&Other) + 4, 0x24);
+	return *this;
+}
 
 // ============================================================================
 // FSceneNode subclasses
