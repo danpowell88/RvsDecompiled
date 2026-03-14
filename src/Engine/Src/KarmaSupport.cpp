@@ -16,18 +16,22 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AKActor ---
-IMPL_APPROX("Karma body creation not implemented; calls super only")
+IMPL_MATCH("Engine.dll", 0x62160)
 void AKActor::Spawned()
 {
-// Ghidra 0x62160: if PhysicsVolume at this+0x18C is NULL, create Karma body
-// via FUN series. Divergence: Karma body creation not implemented; call super.
-// Karma physics will be unavailable for KActors.
-AActor::Spawned();
+// Ghidra 0x62160: if KParams (this+0x18C) is NULL and not an AKConstraint,
+// construct a new UKarmaParams via StaticConstructObject and assign to KParams.
+// Retail does NOT call AActor::Spawned() (super is empty at 0x176d60 anyway).
+guard(AKActor::Spawned);
+if (KParams == NULL && !IsA(AKConstraint::StaticClass()))
+    KParams = (UKarmaParamsCollision*)UObject::StaticConstructObject(
+        UKarmaParams::StaticClass(), GetOuter(), NAME_None, 0, NULL, GError, (INT)0);
+unguard;
 }
 
 
 // --- AKConeLimit ---
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma MeSDK not integrated: calls FUN_104969c0/e0/c0/a10 in Karma SDK range")
 void AKConeLimit::KUpdateConstraintParams()
 {
 guard(AKConeLimit::KUpdateConstraintParams);
@@ -36,10 +40,10 @@ unguard;
 
 
 // --- AKConstraint ---
-IMPL_APPROX("Reconstructed from Ghidra; field offset at 0x418")
+IMPL_MATCH("Engine.dll", 0x59d20)
 MdtBaseConstraint * AKConstraint::getKConstraint() const
 {
-// Retail: 7b. MOV EAX, [ECX+0x418]; RET — returns the Karma constraint pointer.
+// Retail 0x59d20: 7b. MOV EAX, [ECX+0x418]; RET — returns the Karma constraint pointer.
 return *(MdtBaseConstraint**)((BYTE*)this + 0x418);
 }
 
@@ -52,49 +56,49 @@ return NULL;
 unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma MeSDK not integrated: physKarma uses RDTSC profiling and Karma SDK calls (0x5a510)")
 void AKConstraint::physKarma(float)
 {
 guard(AKConstraint::physKarma);
 unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_EMPTY("Ghidra 0x176d60: retail body is empty (shared stub for many no-op virtuals)")
 void AKConstraint::postKarmaStep()
 {
-guard(AKConstraint::postKarmaStep);
-unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_EMPTY("Ghidra 0x1651d0: retail body is empty (shared stub for many no-op virtuals)")
 void AKConstraint::preKarmaStep(float)
 {
-guard(AKConstraint::preKarmaStep);
-unguard;
 }
 
-IMPL_APPROX("Karma editor rendering pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma MeSDK not integrated: editor constraint rendering requires Karma SDK (0x10c6c0)")
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 guard(AKConstraint::RenderEditorSelected);
 unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_EMPTY("Ghidra 0x176d60: retail body is empty (shared stub for many no-op virtuals)")
 void AKConstraint::KUpdateConstraintParams()
 {
-guard(AKConstraint::KUpdateConstraintParams);
-unguard;
 }
 
-IMPL_APPROX("PostEditChange callback - no-op in rebuild; Karma params not updated")
+IMPL_MATCH("Engine.dll", 0x59d30)
 void AKConstraint::PostEditChange()
 {
+// Ghidra 0x59d30: if GIsEditor, call vtable[+0x80]; always call vtable[+0x188].
+// Both are thiscall virtual dispatches through this's vtable.
 guard(AKConstraint::PostEditChange);
+typedef void (__thiscall *VFn)(AKConstraint*);
+if (GIsEditor)
+    ((VFn)(((DWORD*)*(DWORD*)this)[0x80/sizeof(DWORD)]))(this);
+((VFn)(((DWORD*)*(DWORD*)this)[0x188/sizeof(DWORD)]))(this);
 unguard;
 }
 
-IMPL_APPROX("PostEditMove callback - no-op in rebuild")
+IMPL_DIVERGE("Karma MeSDK not integrated: PostEditMove uses KU2METransform/KU2MEPosition/KME2UVecCopy to update constraint body transforms (0x5a710)")
 void AKConstraint::PostEditMove()
 {
 guard(AKConstraint::PostEditMove);
@@ -145,14 +149,14 @@ unguard;
 
 
 // --- AKHinge ---
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma MeSDK not integrated: preKarmaStep calls FUN_104935c0/FUN_10505fc0/FUN_10496720 in Karma SDK range (0x59c20)")
 void AKHinge::preKarmaStep(float)
 {
 guard(AKHinge::preKarmaStep);
 unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("Karma MeSDK not integrated: KUpdateConstraintParams calls FUN_104935c0/FUN_104961e0/FUN_10496120 in Karma SDK range (0x5a250)")
 void AKHinge::KUpdateConstraintParams()
 {
 guard(AKHinge::KUpdateConstraintParams);
@@ -171,24 +175,25 @@ new ((BYTE*)this + 0x18) TArray<FKCylinderElem>(*(const TArray<FKCylinderElem>*)
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>(*(const TArray<FKConvexElem>*)((const BYTE*)&Other + 0x24));
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x3caf0)
 FKAggregateGeom::FKAggregateGeom()
 {
-// Initialize all 4 TArrays to empty
+// Ghidra 0x3caf0: calls FArray::FArray (TArray default ctor) at +0,+0xC,+0x18,+0x24.
+// FKAggregateGeom has no named members; placement-new initialises each sub-array explicitly.
 new ((BYTE*)this + 0x00) TArray<FKSphereElem>();
 new ((BYTE*)this + 0x0C) TArray<FKBoxElem>();
 new ((BYTE*)this + 0x18) TArray<FKCylinderElem>();
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>();
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x3cb90)
 FKAggregateGeom::~FKAggregateGeom()
 {
-// Destroy 4 TArrays in reverse order
-((TArray<FKConvexElem>*)((BYTE*)this + 0x24))->~TArray();
+// Ghidra 0x3cb90: destroys the 4 TArrays in reverse construction order.
+((TArray<FKConvexElem>*)  ((BYTE*)this + 0x24))->~TArray();
 ((TArray<FKCylinderElem>*)((BYTE*)this + 0x18))->~TArray();
-((TArray<FKBoxElem>*)((BYTE*)this + 0x0C))->~TArray();
-((TArray<FKSphereElem>*)((BYTE*)this + 0x00))->~TArray();
+((TArray<FKBoxElem>*)     ((BYTE*)this + 0x0C))->~TArray();
+((TArray<FKSphereElem>*)  ((BYTE*)this + 0x00))->~TArray();
 }
 
 IMPL_MATCH("Engine.dll", 0x3cc80)
@@ -202,10 +207,10 @@ FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 return *this;
 }
 
-IMPL_APPROX("Reconstructed from Ghidra; retail 44 bytes")
+IMPL_MATCH("Engine.dll", 0x3cb60)
 void FKAggregateGeom::EmptyElements()
 {
-// Retail: 44b. Calls TArray::Empty(0) on each sub-array.
+// Ghidra 0x3cb60: calls TArray::Empty on each sub-array.
 // Retail order: boxes (0x0C), convex (0x24), cylinders (0x18), spheres (0x00).
 ((TArray<FKBoxElem>*)     ((BYTE*)this + 0x0C))->Empty();
 ((TArray<FKConvexElem>*)  ((BYTE*)this + 0x24))->Empty();
@@ -213,8 +218,8 @@ void FKAggregateGeom::EmptyElements()
 ((TArray<FKSphereElem>*)  ((BYTE*)this + 0x00))->Empty();
 }
 
-// Ghidra: sum of 4 TArray Num() at offsets 0x00, 0x0C, 0x18, 0x24
-IMPL_APPROX("Reconstructed from Ghidra")
+// Ghidra 0x4b50: sum of FArray::Num() for 4 TArrays at offsets 0x00, 0x0C, 0x18, 0x24.
+IMPL_MATCH("Engine.dll", 0x4b50)
 int FKAggregateGeom::GetElementCount()
 {
 INT* Counts = (INT*)this;
@@ -225,39 +230,43 @@ return Counts[1] + Counts[4] + Counts[7] + Counts[10];
 
 
 // --- FKBoxElem ---
-IMPL_APPROX("Reconstructed from Ghidra")
+IMPL_MATCH("Engine.dll", 0x4ab0)
 FKBoxElem::FKBoxElem(float InSize)
 {
-// Ghidra: FMatrix::FMatrix() + set all 3 dims to same value
+// Ghidra 0x4ab0: FMatrix::FMatrix(this) + set TM+0x40/0x44/0x48 = InSize.
+// C++ auto-calls TM.FMatrix() as member initialiser before this body.
 X = InSize;
 Y = InSize;
 Z = InSize;
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x4ad0)
 FKBoxElem::FKBoxElem(float InX, float InY, float InZ)
 {
+// Ghidra 0x4ad0: FMatrix::FMatrix(this) + set TM+0x40=InX, +0x44=InY, +0x48=InZ.
 X = InX;
 Y = InY;
 Z = InZ;
 }
 
-IMPL_APPROX("Reconstructed from Ghidra")
+IMPL_MATCH("Engine.dll", 0x4a60)
 FKBoxElem::FKBoxElem()
 {
-// Ghidra: just calls FMatrix::FMatrix() (default FMatrix ctor is empty)
+// Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKCylinderElem/FKSphereElem default ctors.
+// C++ auto-calls TM.FMatrix() as member initialiser; body is intentionally empty.
 }
 
-IMPL_APPROX("Karma box elem destructor - no-op, no resources to free without Karma SDK")
+IMPL_MATCH("Engine.dll", 0x4b40)
 FKBoxElem::~FKBoxElem()
 {
-guard(FKBoxElem::~FKBoxElem);
-unguard;
+// Ghidra 0x4b40: FMatrix::~FMatrix(this); shared stub with FKCylinderElem/FKSphereElem dtors.
+// C++ auto-calls TM.~FMatrix() after this body; body is intentionally empty.
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x4b00)
 FKBoxElem& FKBoxElem::operator=(const FKBoxElem& Other)
 {
+// Ghidra 0x4b00: loop copying 0x13 DWORDs (76 bytes = sizeof FKBoxElem).
 appMemcpy( this, &Other, sizeof(FKBoxElem) );
 return *this;
 }
@@ -273,20 +282,23 @@ new ((BYTE*)this + 0x40) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)
 new ((BYTE*)this + 0x4C) TArray<INT>(*(const TArray<INT>*)((const BYTE*)&Other + 0x4C));
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x27c20)
 FKConvexElem::FKConvexElem()
 {
-// Initialize TArray<FVector> at +0x40 and TArray<INT> at +0x4C to empty
-new ((BYTE*)this + 0x40) TArray<FVector>();
-new ((BYTE*)this + 0x4C) TArray<INT>();
+// Ghidra 0x27c20: FMatrix::FMatrix(this) + FArray::FArray at +0x40 + FArray::FArray at +0x4C.
+// FKConvexElem has no named members; explicit placement-new required for all sub-objects.
+new ((void*)this)         FMatrix();
+new ((BYTE*)this + 0x40)  TArray<FVector>();
+new ((BYTE*)this + 0x4C)  TArray<INT>();
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x27c80)
 FKConvexElem::~FKConvexElem()
 {
-// Destroy TArray<INT> at +0x4C then TArray<FVector> at +0x40 (reverse order)
-((TArray<INT>*)((BYTE*)this + 0x4C))->~TArray();
+// Ghidra 0x27c80: destroy TArray<INT> at +0x4C, then TArray<FVector> at +0x40, then FMatrix.
+((TArray<INT>*)   ((BYTE*)this + 0x4C))->~TArray();
 ((TArray<FVector>*)((BYTE*)this + 0x40))->~TArray();
+((FMatrix*)(void*)this)->~FMatrix();
 }
 
 IMPL_MATCH("Engine.dll", 0x27d50)
@@ -302,70 +314,74 @@ return *this;
 
 
 // --- FKCylinderElem ---
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x4b20)
 FKCylinderElem::FKCylinderElem(float InRadius, float InLength)
 {
+// Ghidra 0x4b20: FMatrix::FMatrix(this) + set TM+0x40=InRadius, +0x44=InLength.
+// C++ auto-calls TM.FMatrix() as member initialiser.
 Radius = InRadius;
 Length = InLength;
 }
 
-IMPL_APPROX("Karma cylinder elem default constructor")
+IMPL_MATCH("Engine.dll", 0x4a60)
 FKCylinderElem::FKCylinderElem()
 {
-guard(FKCylinderElem::FKCylinderElem);
-unguard;
+// Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKBoxElem/FKSphereElem default ctors.
 }
 
-IMPL_APPROX("Karma cylinder elem destructor - no-op")
+IMPL_MATCH("Engine.dll", 0x4b40)
 FKCylinderElem::~FKCylinderElem()
 {
-guard(FKCylinderElem::~FKCylinderElem);
-unguard;
+// Ghidra 0x4b40: FMatrix::~FMatrix(this); shared stub with FKBoxElem/FKSphereElem dtors.
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x9810)
 FKCylinderElem& FKCylinderElem::operator=(const FKCylinderElem& Other)
 {
+// Ghidra 0x9810: loop copying 0x12 DWORDs (72 bytes = sizeof FKCylinderElem).
 appMemcpy( this, &Other, sizeof(FKCylinderElem) );
 return *this;
 }
 
 
 // --- FKSphereElem ---
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x4a70)
 FKSphereElem::FKSphereElem(float InRadius)
 {
+// Ghidra 0x4a70: FMatrix::FMatrix(this) + set TM+0x40=InRadius.
+// C++ auto-calls TM.FMatrix() as member initialiser.
 Radius = InRadius;
 }
 
-IMPL_APPROX("Karma sphere elem default constructor")
+IMPL_MATCH("Engine.dll", 0x4a60)
 FKSphereElem::FKSphereElem()
 {
-guard(FKSphereElem::FKSphereElem);
-unguard;
+// Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKBoxElem/FKCylinderElem default ctors.
 }
 
-IMPL_APPROX("Karma sphere elem destructor - no-op")
+IMPL_MATCH("Engine.dll", 0x4b40)
 FKSphereElem::~FKSphereElem()
 {
-guard(FKSphereElem::~FKSphereElem);
-unguard;
+// Ghidra 0x4b40: FMatrix::~FMatrix(this); shared stub with FKBoxElem/FKCylinderElem dtors.
 }
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x4a90)
 FKSphereElem& FKSphereElem::operator=(const FKSphereElem& Other)
 {
+// Ghidra 0x4a90: loop copying 0x11 DWORDs (68 bytes = sizeof FKSphereElem).
 appMemcpy( this, &Other, sizeof(FKSphereElem) );
 return *this;
 }
 
 
 // --- UKMeshProps ---
-IMPL_APPROX("TArray at +0x50 (FKConvexElem array) not serialized")
+IMPL_DIVERGE("FKAggregateGeom serialization helpers (FUN_10322930/ab0/c70/4f570) not available; TArray at +0x50 not serialized (Ghidra 0x501b0 serializes it)")
 void UKMeshProps::Serialize(FArchive& Ar)
 {
 // Ghidra 0x501b0: UObject::Serialize + 9 FLOAT fields at +0x2C..+0x4C (mass props),
-// then TArray of FKConvexElem at +0x50 (divergence: not serialized, insufficient type info).
+// then calls FUN_10350130(Ar, this+0x50) to serialize the FKAggregateGeom at +0x50.
+// DIVERGENCE: FUN_10350130 is an inline FKAggregateGeom serializer using private TArray
+// serialization helpers (FUN_10322930 etc.) that are not yet available; omitted.
 UObject::Serialize(Ar);
 Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 Ar.ByteOrderSerialize((BYTE*)this + 0x30, 4);
@@ -376,7 +392,6 @@ Ar.ByteOrderSerialize((BYTE*)this + 0x40, 4);
 Ar.ByteOrderSerialize((BYTE*)this + 0x44, 4);
 Ar.ByteOrderSerialize((BYTE*)this + 0x48, 4);
 Ar.ByteOrderSerialize((BYTE*)this + 0x4C, 4);
-// NOTE: Divergence — TArray at +0x50 (FKConvexElem array) not serialized.
 }
 
 IMPL_DIVERGE("Karma mesh props draw - editor visualization requires Karma SDK")
@@ -388,7 +403,7 @@ unguard;
 
 
 // --- UKarmaParams ---
-IMPL_APPROX("PostEditChange callback - no-op; Karma not updating params")
+IMPL_DIVERGE("Karma MeSDK not integrated: PostEditChange updates live Karma body params via FUN_104c3660 and MdtBody API (0x62210)")
 void UKarmaParams::PostEditChange()
 {
 guard(UKarmaParams::PostEditChange);

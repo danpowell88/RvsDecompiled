@@ -49,7 +49,7 @@ IMPLEMENT_CLASS(UPlayerLight);
 	UMaterial implementation.
 =============================================================================*/
 
-IMPL_APPROX("Delegates to UObject::Serialize")
+IMPL_DIVERGE("Ghidra 0x103c78b0: retail checks GUglyHackFlags bit 3 before calling UObject::Serialize; we always serialize")
 void UMaterial::Serialize( FArchive& Ar )
 {
 	guard(UMaterial::Serialize);
@@ -57,7 +57,7 @@ void UMaterial::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("Cycle detection via history traversal")
+IMPL_MATCH("Engine.dll", 0x103c8a60)
 UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UMaterial::CheckCircularReferences);
@@ -120,14 +120,14 @@ INT UMaterial::MaterialVSize()
 	unguard;
 }
 
-IMPL_APPROX("Direct return 0; retail 33 C0 C3 without calling IsTransparent")
+IMPL_MATCH("Engine.dll", 0x10414310)
 UBOOL UMaterial::RequiresSorting()
 {
 	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
 	return 0;
 }
 
-IMPL_APPROX("Returns 1 UV stream")
+IMPL_MATCH("Engine.dll", 0x103039a0)
 BYTE UMaterial::RequiredUVStreams()
 {
 	return 1;
@@ -145,14 +145,14 @@ UMaterial* UMaterial::CheckFallback()
 	unguard;
 }
 
-IMPL_APPROX("Returns whether FallbackMaterial is set")
+IMPL_MATCH("Engine.dll", 0x103039b0)
 UBOOL UMaterial::HasFallback()
 {
 	// Retail: 8B 51 2C 33 C0 85 D2 0F 95 C0 C3 = return FallbackMaterial != NULL
 	return FallbackMaterial != NULL;
 }
 
-IMPL_APPROX("Returns this")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 UMaterial* UMaterial::GetDiffuse()
 {
 	return this;
@@ -162,13 +162,13 @@ UMaterial* UMaterial::GetDiffuse()
 	UBitmapMaterial implementation.
 =============================================================================*/
 
-IMPL_APPROX("Returns USize texture dimension")
+IMPL_MATCH("Engine.dll", 0x10303d20)
 INT UBitmapMaterial::MaterialUSize()
 {
 	return USize;
 }
 
-IMPL_APPROX("Returns VSize texture dimension")
+IMPL_MATCH("Engine.dll", 0x10303d30)
 INT UBitmapMaterial::MaterialVSize()
 {
 	return VSize;
@@ -178,7 +178,7 @@ INT UBitmapMaterial::MaterialVSize()
 	UTexture implementation.
 =============================================================================*/
 
-IMPL_APPROX("Calls Super::PostLoad and processes mipmap chain")
+IMPL_DIVERGE("Ghidra 0x1046b790: retail initializes default palette, clamps mip indices, and stamps RDTSC timestamp; simplified to Super::PostLoad only")
 void UTexture::PostLoad()
 {
 	guard(UTexture::PostLoad);
@@ -186,7 +186,7 @@ void UTexture::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("Destroys texture resources")
+IMPL_DIVERGE("Ghidra 0x10467b90: retail frees GMalloc-allocated render data at this+0xcc before calling Super::Destroy; simplified")
 void UTexture::Destroy()
 {
 	guard(UTexture::Destroy);
@@ -194,7 +194,7 @@ void UTexture::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Serialises texture data and mips")
+IMPL_DIVERGE("Ghidra 0x1046c940: complex serialization with mip-chain, flags and version-gated fields not yet implemented")
 void UTexture::Serialize( FArchive& Ar )
 {
 	guard(UTexture::Serialize);
@@ -202,7 +202,7 @@ void UTexture::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("Returns whether blending mode requires sorting")
+IMPL_MATCH("Engine.dll", 0x103044c0)
 UBOOL UTexture::RequiresSorting()
 {
 	// Retail: F6 41 34 04 74 03 33 C0 C3 8B 81 94 00 00 00 D1 E8 83 E0 01 C3
@@ -211,7 +211,7 @@ UBOOL UTexture::RequiresSorting()
 	return bAlphaTexture ? 1 : 0;
 }
 
-IMPL_APPROX("Returns whether blending mode is transparent")
+IMPL_MATCH("Engine.dll", 0x103044e0)
 UBOOL UTexture::IsTransparent()
 {
 	return bAlphaTexture || bMasked;
@@ -221,7 +221,7 @@ UBOOL UTexture::IsTransparent()
 	UShader implementation.
 =============================================================================*/
 
-IMPL_APPROX("Calls Super::PostEditChange")
+IMPL_DIVERGE("Ghidra 0x103c7a80: retail also walks Outer chain and marks containing package dirty; simplified to call Super only")
 void UShader::PostEditChange()
 {
 	guard(UShader::PostEditChange);
@@ -229,7 +229,7 @@ void UShader::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("Cycle detection across all shader inputs")
+IMPL_MATCH("Engine.dll", 0x103c8b40)
 UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UShader::CheckCircularReferences);
@@ -248,7 +248,7 @@ UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
-IMPL_APPROX("Returns Diffuse material U size or 0")
+IMPL_MATCH("Engine.dll", 0x103c7a40)
 INT UShader::MaterialUSize()
 {
 	// Retail: try Diffuse first, then SelfIllumination (at 0x70), else 0
@@ -259,7 +259,7 @@ INT UShader::MaterialUSize()
 	return 0;
 }
 
-IMPL_APPROX("Returns Diffuse material V size or 0")
+IMPL_MATCH("Engine.dll", 0x103c7a60)
 INT UShader::MaterialVSize()
 {
 	// Retail: try Diffuse first, then SelfIllumination (at 0x70), else 0
@@ -270,7 +270,7 @@ INT UShader::MaterialVSize()
 	return 0;
 }
 
-IMPL_APPROX("Delegates to opacity material")
+IMPL_MATCH("Engine.dll", 0x103c7a00)
 UBOOL UShader::RequiresSorting()
 {
 	// Retail: F6 41 34 04 75 1E 8A 41 58 84 C0 75 07 8B 51 64 85 D2 75 13
@@ -285,14 +285,14 @@ UBOOL UShader::RequiresSorting()
 	        OutputBlending == OB_Brighten  || OutputBlending == OB_Darken);
 }
 
-IMPL_APPROX("Delegates to opacity material")
+IMPL_MATCH("Engine.dll", 0x103c7a30)
 UBOOL UShader::IsTransparent()
 {
 	// Retail: 8B 01 FF 60 78 — tail-call JMP vtable[30] = RequiresSorting.
 	return RequiresSorting();
 }
 
-IMPL_APPROX("OR-combines UV stream requirements from all shader inputs")
+IMPL_MATCH("Engine.dll", 0x103c7960)
 BYTE UShader::RequiredUVStreams()
 {
 	// Retail: aggregates all 7 material slots with OR.
@@ -331,13 +331,13 @@ UMaterial* UShader::CheckFallback()
 	unguard;
 }
 
-IMPL_APPROX("Returns whether FallbackMaterial is set")
+IMPL_MATCH("Engine.dll", 0x103c7b30)
 UBOOL UShader::HasFallback()
 {
 	return (FallbackMaterial != NULL) || (Diffuse != NULL);
 }
 
-IMPL_APPROX("Returns Diffuse material")
+IMPL_MATCH("Engine.dll", 0x10303d20)
 UMaterial* UShader::GetDiffuse()
 {
 	return Diffuse;
@@ -347,7 +347,7 @@ UMaterial* UShader::GetDiffuse()
 	UModifier implementation.
 =============================================================================*/
 
-IMPL_APPROX("Calls Super::PostEditChange")
+IMPL_DIVERGE("Ghidra 0x103c7cc0: retail also walks Outer chain and marks containing package dirty; simplified to call Super only")
 void UModifier::PostEditChange()
 {
 	guard(UModifier::PostEditChange);
@@ -355,7 +355,7 @@ void UModifier::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("Passes to Material input; cycle detection")
+IMPL_MATCH("Engine.dll", 0x103c8f50)
 UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UModifier::CheckCircularReferences);
@@ -369,31 +369,31 @@ UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
-IMPL_APPROX("Delegates to Material input")
+IMPL_MATCH("Engine.dll", 0x1030a480)
 INT UModifier::MaterialUSize()
 {
 	return Material ? Material->MaterialUSize() : 0;
 }
 
-IMPL_APPROX("Delegates to Material input")
+IMPL_MATCH("Engine.dll", 0x1030a4a0)
 INT UModifier::MaterialVSize()
 {
 	return Material ? Material->MaterialVSize() : 0;
 }
 
-IMPL_APPROX("Delegates to Material input")
+IMPL_MATCH("Engine.dll", 0x1030a440)
 UBOOL UModifier::RequiresSorting()
 {
 	return Material ? Material->RequiresSorting() : 0;
 }
 
-IMPL_APPROX("Delegates to Material input")
+IMPL_MATCH("Engine.dll", 0x1030a460)
 UBOOL UModifier::IsTransparent()
 {
 	return Material ? Material->IsTransparent() : 0;
 }
 
-IMPL_APPROX("Delegates to Material input")
+IMPL_MATCH("Engine.dll", 0x1030a420)
 BYTE UModifier::RequiredUVStreams()
 {
 	// Retail (21b): returns 0 when Material is null
@@ -404,7 +404,7 @@ BYTE UModifier::RequiredUVStreams()
 	UCombiner implementation.
 =============================================================================*/
 
-IMPL_APPROX("Calls Super::PostEditChange")
+IMPL_DIVERGE("Ghidra 0x103c7c10: retail also walks Outer chain and marks containing package dirty; simplified to call Super only")
 void UCombiner::PostEditChange()
 {
 	guard(UCombiner::PostEditChange);
@@ -412,7 +412,7 @@ void UCombiner::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("Checks both Material1 and Material2 for cycles")
+IMPL_MATCH("Engine.dll", 0x103c8c90)
 UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UCombiner::CheckCircularReferences);
@@ -427,7 +427,7 @@ UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
-IMPL_APPROX("Returns Material1 U size")
+IMPL_MATCH("Engine.dll", 0x1031aa70)
 INT UCombiner::MaterialUSize()
 {
 	// Retail: max(Material2->MaterialUSize(), Material1->MaterialUSize())
@@ -436,7 +436,7 @@ INT UCombiner::MaterialUSize()
 	return usize2 > usize1 ? usize2 : usize1;
 }
 
-IMPL_APPROX("Returns Material1 V size")
+IMPL_MATCH("Engine.dll", 0x1031aab0)
 INT UCombiner::MaterialVSize()
 {
 	// Retail: max(Material2->MaterialVSize(), Material1->MaterialVSize())
@@ -454,7 +454,7 @@ UBOOL UCombiner::IsTransparent()
 	unguard;
 }
 
-IMPL_APPROX("Direct return 0; retail 33 C0 C3")
+IMPL_MATCH("Engine.dll", 0x10414310)
 UBOOL UCombiner::RequiresSorting()
 {
 	// Retail: 33 C0 C3 — direct return 0, does NOT call IsTransparent().
@@ -475,7 +475,7 @@ BYTE UCombiner::RequiredUVStreams()
 	UFinalBlend implementation.
 =============================================================================*/
 
-IMPL_APPROX("Delegates to UModifier::PostEditChange")
+IMPL_DIVERGE("Ghidra 0x103c83d0: retail calls UModifier::PostEditChange then walks Outer chain and marks containing package dirty; simplified")
 void UFinalBlend::PostEditChange()
 {
 	guard(UFinalBlend::PostEditChange);
@@ -483,7 +483,7 @@ void UFinalBlend::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("Delegates to Material->GetValidated or returns 1")
+IMPL_MATCH("Engine.dll", 0x103c7e10)
 INT UFinalBlend::GetValidated()
 {
 	// Retail: delegate to Material->GetValidated() if present, else return 1.
@@ -491,7 +491,7 @@ INT UFinalBlend::GetValidated()
 	return Material ? Material->GetValidated() : 1;
 }
 
-IMPL_APPROX("Delegates to Material->SetValidated")
+IMPL_MATCH("Engine.dll", 0x103c8480)
 void UFinalBlend::SetValidated( UBOOL InValidated )
 {
 	// Retail: delegate to Material->SetValidated() if present.
@@ -500,7 +500,7 @@ void UFinalBlend::SetValidated( UBOOL InValidated )
 		Material->SetValidated(InValidated);
 }
 
-IMPL_APPROX("Returns 1 if FrameBufferBlending in modulate-brighten range")
+IMPL_MATCH("Engine.dll", 0x103c83a0)
 UBOOL UFinalBlend::RequiresSorting()
 {
 	// Retail: if m_bForceNoSort → return 0;
@@ -510,7 +510,7 @@ UBOOL UFinalBlend::RequiresSorting()
 	return (fb >= FB_Modulate && fb <= FB_Brighten) ? 1 : 0;
 }
 
-IMPL_APPROX("Tail-calls RequiresSorting")
+IMPL_MATCH("Engine.dll", 0x103c7a30)
 UBOOL UFinalBlend::IsTransparent()
 {
 	// Retail: JMP vtable[30] = tail-call to RequiresSorting()
@@ -521,7 +521,7 @@ UBOOL UFinalBlend::IsTransparent()
 	UPalette implementation.
 =============================================================================*/
 
-IMPL_APPROX("Serialises colour palette array")
+IMPL_DIVERGE("Ghidra 0x1046adf0: retail also fixes alpha channel for palette entries when loading old file format (ver < 0x42); simplified")
 void UPalette::Serialize( FArchive& Ar )
 {
 	guard(UPalette::Serialize);
@@ -540,7 +540,7 @@ void UPalette::Serialize( FArchive& Ar )
 
 // UMaterial
 // ---------------------------------------------------------------------------
-IMPL_APPROX("Calls Super::PostEditChange")
+IMPL_DIVERGE("Not found in Ghidra exports; calls Super::PostEditChange")
 void UMaterial::PostEditChange()
 {
 	Super::PostEditChange();
