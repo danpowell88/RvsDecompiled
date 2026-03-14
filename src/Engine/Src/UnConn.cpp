@@ -246,9 +246,9 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 			// Final: nested pointer chain through PC+0x328→+0x44→+0x2c
 			INT nested = *(INT*)(*(INT*)(inp + 0x44) + 0x2c);
 			typedef int (__thiscall* ExecFn2)(void*, const TCHAR*, FOutputDevice&);
-			// Note: Ghidra shows **(code**) suggesting one extra vtable dereference.
-			// Current form calls the function pointer at [nested], which matches the
-			// observed pattern for UObject::Exec-style dispatch (vtbl[0] = Exec).
+			// DIVERGENCE: Ghidra shows **(code**) at this call site, suggesting one extra
+			// vtable-style dereference. The current reconstruction dereferences once.
+			// If Exec dispatch misbehaves, this may need: ((ExecFn2)**(INT**)nested)(...)
 			r = ((ExecFn2)(*(INT*)nested))((void*)nested, Cmd, Ar);
 			return r != 0;
 		}
