@@ -283,7 +283,12 @@ FLOAT FInterpCurve::Eval( FLOAT Input )
 	but the retail Core.def exports them as external symbols (MSVC 7.1
 	behavior). We define global extern "C" arrays with the same string
 	content and use /alternatename to redirect the mangled symbols.
+
+	When compiling with MSVC 7.1 (_MSC_VER == 1310) this whole block is
+	skipped because the compiler already emits the statics with external
+	linkage — exactly as the retail binary was built.
 -----------------------------------------------------------------------------*/
+#if _MSC_VER > 1310
 extern "C" {
 __declspec(dllexport) const unsigned short _gfn_Reverse[]        = {'F','S','t','r','i','n','g',':',':','R','e','v','e','r','s','e',0};
 __declspec(dllexport) const unsigned short _gfn_ParseIntoArray[] = {'F','S','t','r','i','n','g',':',':','P','a','r','s','e','I','n','t','o','A','r','r','a','y',0};
@@ -300,6 +305,7 @@ static volatile const void* _gfnRefs[] = {_gfn_Reverse, _gfn_ParseIntoArray, _gf
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectExport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeExp")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectImport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeImp")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???3UObject@@SAXPAXI@Z@4QBGB=__gfn_OpDelete")
+#endif // _MSC_VER > 1310
 
 /*-----------------------------------------------------------------------------
 	Force inline functions to emit out-of-line copies for .def export.

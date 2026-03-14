@@ -410,7 +410,7 @@ int FLightMap::GetWidth()
 
 
 // --- FLightMapTexture ---
-IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x10320e50 is 117 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10320e50 (117b): FLightMapTexture copy ctor; copies DWORD@+4, TArray<FLOAT>@+8, FStaticLightMapTexture@+14, 3 DWORDs@+60")
 FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 {
 	// Ghidra 0x20e50: vtable set by compiler; copy DWORD at +4; copy TArray<FLOAT> at +8;
@@ -421,7 +421,7 @@ FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 	appMemcpy((BYTE*)this + 0x60, (const BYTE*)&Other + 0x60, 0x0C); // 3 DWORDs
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10320e50 is 117 bytes, not fully reconstructed")
+IMPL_DIVERGE("VA unconfirmed; ULevel* ctor inits TArray<FLOAT>@+8 and FStaticLightMapTexture@+14, stores Level@+4")
 FLightMapTexture::FLightMapTexture(ULevel* Level)
 {
 	// Ghidra 0x110bd0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4
@@ -430,7 +430,7 @@ FLightMapTexture::FLightMapTexture(ULevel* Level)
 	*(ULevel**)((BYTE*)this + 0x04) = Level;
 }
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10320e50 is 117 bytes, not fully reconstructed")
+IMPL_DIVERGE("VA unconfirmed; default ctor inits TArray<FLOAT>@+8 and FStaticLightMapTexture@+14")
 FLightMapTexture::FLightMapTexture()
 {
 	// Ghidra 0x279b0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14
@@ -1492,13 +1492,13 @@ BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 	return Result;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10413f90 is 165 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10413f90 (165b): FConvexVolume::ClipPolygon iterates half-space planes; FPoly class incomplete")
 FPoly FConvexVolume::ClipPolygon(FPoly)
 {
 	return FPoly();
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10414040 is 165 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10414040 (165b): FConvexVolume::ClipPolygonPrecise — same as ClipPolygon with higher-precision plane tests; FPoly incomplete")
 FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 {
 	return FPoly();
@@ -1506,21 +1506,21 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 
 
 // --- FDynamicActor ---
-IMPL_DIVERGE("stub body (0 line(s)) — Ghidra 0x104038b0 is 11290 bytes, not fully reconstructed")
+IMPL_DIVERGE("retail 0x104038b0 (11290b): FDynamicActor::Render — full per-mesh render dispatch; pending complete decompilation")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
 	// INTENTIONALLY EMPTY: rendering dispatched via UMeshInstance::Render vtable; FDynamicActor::Render has no per-type render logic
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103135d0 is 135 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103135d0 (135b): FDynamicActor copy ctor; flat memcpy 0x80 bytes; body correct but VA unconfirmed via symbol search")
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 {
 	// Ghidra 0x135d0: no vtable; flat copy of 0x80 bytes (same as operator= at 0x13660)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x103135d0 is 135 bytes, not fully reconstructed")
+IMPL_DIVERGE("VA unconfirmed; AActor* ctor inits FMatrix@+4, FBox@+48, FSphere@+64, stores actor; transform/bounds setup incomplete (unresolved FUN_* helpers)")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
@@ -1626,13 +1626,13 @@ float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 	return 0.0f;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104104f0 is 102 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x104104f0 (102b): FDynamicLight::SampleLight — scales color by SampleIntensity; FColor computation not yet reconstructed")
 FColor FDynamicLight::SampleLight(FVector,FVector)
 {
 	return FColor(0,0,0,0);
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10313540 is 100 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10313540 (100b): FDynamicLight copy ctor; flat memcpy of full object; body correct but VA unconfirmed via symbol search")
 FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 {
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );

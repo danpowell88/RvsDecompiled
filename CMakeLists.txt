@@ -62,18 +62,29 @@ endif()
 
 # --- Compiler flags ---
 if(MSVC)
-    add_compile_options(/Zc:wchar_t-)   # Match MSVC 7.1 behavior
+    # /Zc:wchar_t- (disable wchar_t as built-in type) was only added as a
+    # negative-suffix switch in MSVC 8.0 (1400). MSVC 7.1 defaults to the
+    # typedef mode we want, so no flag is needed there.
+    if(MSVC_VERSION GREATER 1310)
+        add_compile_options(/Zc:wchar_t-)   # Match MSVC 7.1 behavior
+    endif()
     add_compile_options(/W3)            # Warning level 3
     add_compile_options(/GR)            # RTTI enabled (Unreal uses it)
     add_compile_options(/GS-)           # Disable stack cookies (not needed with guard disabled)
     # Use async exception handling so SEH exceptions are visible to C++ code.
-    string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    # Suppress SDK-origin warnings we cannot fix (legacy Unreal SDK headers):
+    # MSVC 7.1 (1310) uses /EHsc — the /EHsc→/EHa replacement is VS2019-only.
+    if(MSVC_VERSION GREATER 1310)
+        string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    endif()
+    # Suppress SDK-origin warnings we cannot fix (legacy Unreal SDK headers).
+    # These warning codes only exist in MSVC 2015+ (version 1900+).
     #   C4595 — non-member operator new/delete defined inline (UnFile.h SDK)
     #   C4661 — template instantiation without definition (UnTemplate.h SDK)
     #   C4073 — initializers put in library initialization area (SDK pattern)
     #   C4477 — format string type mismatch in SDK headers
-    add_compile_options(/wd4595 /wd4661 /wd4073 /wd4477)
+    if(MSVC_VERSION GREATER 1310)
+        add_compile_options(/wd4595 /wd4661 /wd4073 /wd4477)
+    endif()
 endif()
 
 # Disable guard/unguard try/catch blocks. Cross-CRT exception handling between
@@ -83,16 +94,22 @@ endif()
 add_definitions(-DDO_GUARD=0 -D_UNICODE -DUNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS)
 
 # --- Global include directories ---
-# Available to all modules: core Unreal headers + R6 SDK headers
+# Available to all modules: core Unreal headers + R6 SDK headers + era-correct platform headers.
 # NOTE: src/Core/Inc is included globally so ImplSource.h (and other
 # hand-crafted shim headers) are available to all modules without duplication.
 # It is listed AFTER the SDK paths so per-module BEFORE overrides still win.
+#
+# WINSDK_INC and DXSDK_INC come from the toolchain file (msvc71.cmake) when
+# building with MSVC 7.1, or from the cache when building with VS 2019.
+# They default to the bundled era-correct SDKs under tools/toolchain/.
 include_directories(
     ${CSDK_CORE_INC}
     ${UT99_CORE_INC}
     ${UT99_ENGINE_INC}
     ${CSDK_INC}
     ${PROJECT_SOURCE_DIR}/src/Core/Inc
+    ${WINSDK_INC}
+    ${DXSDK_INC}
 )
 
 # =============================================================================
