@@ -192,17 +192,16 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_DIVERGE("Ghidra 0x10449bb0: FUN_10449a90 (old color stream) and FUN_10448de0 (index buffer) unresolved")
+IMPL_DIVERGE("Ghidra 0x10449BB0: FUN_10449a90 (legacy color stream, Ver<0x70) and FUN_10448de0 (index buffer, Ver>0x6D) unresolved")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
 	UObject::Serialize(Ar);
-	// Ghidra: version < 0x70 uses legacy format via FUN_10449a90 (unresolved).
-	// Version >= 0x70: serialize color stream at this+0x38.
+	// Ghidra (163b): Ver < 0x70 → legacy format via FUN_10449a90 (unresolved).
+	// Ver >= 0x70 → serialize FRawColorStream at this+0x38.
 	if (Ar.Ver() >= 0x70)
 		Ar << *(FRawColorStream*)((BYTE*)this + 0x38);
-	// Ghidra: version > 0x6d (0x6e+): serialize index buffer at this+0x2c via FUN_10448de0.
-	// DIVERGENCE: FUN_10448de0 unresolved — index buffer skipped.
+	// Ghidra: Ver > 0x6D (i.e. >= 0x6E) → index buffer at this+0x2C via FUN_10448de0 (unresolved).
 	unguard;
 }
 
