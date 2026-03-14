@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnLinker.cpp: ULinker, ULinkerLoad, ULinkerSave — package file
 	loading/saving, export/import tables, object resolution.
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
@@ -64,13 +64,13 @@ FObjectImport::FObjectImport( UObject* InObject )
 	FGenerationInfo / FPackageFileSummary constructors.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not individually exported from Core.dll; trivial struct initializer, functionally correct")
 FGenerationInfo::FGenerationInfo( INT InExportCount, INT InNameCount )
 :	ExportCount( InExportCount )
 ,	NameCount  ( InNameCount )
 {}
 
-IMPL_DIVERGE("Not exported from Core.dll")
+IMPL_DIVERGE("Not individually exported from Core.dll; trivial struct initializer, functionally correct")
 FPackageFileSummary::FPackageFileSummary()
 :	Tag          ( PACKAGE_FILE_TAG )
 ,	FileVersion  ( PACKAGE_FILE_VERSION )
