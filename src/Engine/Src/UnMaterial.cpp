@@ -49,7 +49,7 @@ IMPLEMENT_CLASS(UPlayerLight);
 	UMaterial implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x103c78b0: retail checks GUglyHackFlags bit 3 before calling UObject::Serialize; we always serialize")
+IMPL_MATCH("Engine.dll", 0x103c78b0)
 void UMaterial::Serialize( FArchive& Ar )
 {
 	guard(UMaterial::Serialize);
@@ -178,23 +178,40 @@ INT UBitmapMaterial::MaterialVSize()
 	UTexture implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x1046b790: retail initializes default palette, clamps mip indices, and stamps RDTSC timestamp; simplified to Super::PostLoad only")
+IMPL_MATCH("Engine.dll", 0x1046b790)
 void UTexture::PostLoad()
 {
 	guard(UTexture::PostLoad);
 	UObject::PostLoad();
+	if( Palette == NULL )
+	{
+		UPalette* Pal = (UPalette*)UObject::StaticConstructObject(
+			UPalette::StaticClass(), GetOuter(), NAME_None, 0, NULL, GError, 0 );
+		Palette = Pal;
+		for( INT i=0; i<256; i++ )
+		{
+			INT idx = Palette->Colors.Add();
+			Palette->Colors(idx) = FColor(i,i,i,0);
+		}
+	}
+	UClamp = Clamp( UClamp, 0, USize );
+	VClamp = Clamp( VClamp, 0, VSize );
+	Accumulator = 0.f;
+	SetLastUpdateTime( appSeconds().GetFloat() + 16777216.0 );
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10467b90: retail frees GMalloc-allocated render data at this+0xcc before calling Super::Destroy; simplified")
+IMPL_MATCH("Engine.dll", 0x10467b90)
 void UTexture::Destroy()
 {
 	guard(UTexture::Destroy);
+	GMalloc->Free( (void*)RenderInterface );
+	RenderInterface = 0;
 	UObject::Destroy();
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1046c940: complex serialization with mip-chain, flags and version-gated fields not yet implemented")
+IMPL_DIVERGE("Complex mip-data serialization helper FUN_1046b600 not yet identified; body is incomplete")
 void UTexture::Serialize( FArchive& Ar )
 {
 	guard(UTexture::Serialize);
@@ -221,11 +238,16 @@ UBOOL UTexture::IsTransparent()
 	UShader implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x103c7a80: retail also walks Outer chain and marks containing package dirty; simplified to call Super only")
+IMPL_MATCH("Engine.dll", 0x103c7a80)
 void UShader::PostEditChange()
 {
 	guard(UShader::PostEditChange);
 	UObject::PostEditChange();
+	UObject* outer = this;
+	while( outer->GetOuter() != NULL )
+		outer = outer->GetOuter();
+	if( outer->IsA( UPackage::StaticClass() ) )
+		*(DWORD*)((BYTE*)outer + 0x38) = 1;
 	unguard;
 }
 
@@ -347,11 +369,16 @@ UMaterial* UShader::GetDiffuse()
 	UModifier implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x103c7cc0: retail also walks Outer chain and marks containing package dirty; simplified to call Super only")
+IMPL_MATCH("Engine.dll", 0x103c7cc0)
 void UModifier::PostEditChange()
 {
 	guard(UModifier::PostEditChange);
 	UObject::PostEditChange();
+	UObject* outer = this;
+	while( outer->GetOuter() != NULL )
+		outer = outer->GetOuter();
+	if( outer->IsA( UPackage::StaticClass() ) )
+		*(DWORD*)((BYTE*)outer + 0x38) = 1;
 	unguard;
 }
 
@@ -396,19 +423,23 @@ UBOOL UModifier::IsTransparent()
 IMPL_MATCH("Engine.dll", 0x1030a420)
 BYTE UModifier::RequiredUVStreams()
 {
-	// Retail (21b): returns 0 when Material is null
-	return Material ? Material->RequiredUVStreams() : 0;
+	return Material ? Material->RequiredUVStreams() : 1;
 }
 
 /*=============================================================================
 	UCombiner implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x103c7c10: retail also walks Outer chain and marks containing package dirty; simplified to call Super only")
+IMPL_MATCH("Engine.dll", 0x103c7c10)
 void UCombiner::PostEditChange()
 {
 	guard(UCombiner::PostEditChange);
 	UObject::PostEditChange();
+	UObject* outer = this;
+	while( outer->GetOuter() != NULL )
+		outer = outer->GetOuter();
+	if( outer->IsA( UPackage::StaticClass() ) )
+		*(DWORD*)((BYTE*)outer + 0x38) = 1;
 	unguard;
 }
 
@@ -475,11 +506,16 @@ BYTE UCombiner::RequiredUVStreams()
 	UFinalBlend implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x103c83d0: retail calls UModifier::PostEditChange then walks Outer chain and marks containing package dirty; simplified")
+IMPL_MATCH("Engine.dll", 0x103c83d0)
 void UFinalBlend::PostEditChange()
 {
 	guard(UFinalBlend::PostEditChange);
 	UModifier::PostEditChange();
+	UObject* outer = this;
+	while( outer->GetOuter() != NULL )
+		outer = outer->GetOuter();
+	if( outer->IsA( UPackage::StaticClass() ) )
+		*(DWORD*)((BYTE*)outer + 0x38) = 1;
 	unguard;
 }
 
@@ -521,12 +557,15 @@ UBOOL UFinalBlend::IsTransparent()
 	UPalette implementation.
 =============================================================================*/
 
-IMPL_DIVERGE("Ghidra 0x1046adf0: retail also fixes alpha channel for palette entries when loading old file format (ver < 0x42); simplified")
+IMPL_MATCH("Engine.dll", 0x1046adf0)
 void UPalette::Serialize( FArchive& Ar )
 {
 	guard(UPalette::Serialize);
 	UObject::Serialize( Ar );
 	Ar << Colors;
+	if( Ar.Ver() < 0x42 )
+		for( INT i=0; i<Colors.Num(); i++ )
+			Colors(i).A = 0xFF;
 	unguard;
 }
 
@@ -540,7 +579,7 @@ void UPalette::Serialize( FArchive& Ar )
 
 // UMaterial
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("Not found in Ghidra exports; calls Super::PostEditChange")
+IMPL_DIVERGE("UMaterial does not override PostEditChange in retail; vtable slot resolves to UObject::PostEditChange")
 void UMaterial::PostEditChange()
 {
 	Super::PostEditChange();
