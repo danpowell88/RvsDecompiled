@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DemolitionsUnit.uc : (add small description)
+//  R6DemolitionsUnit.uc : Base world-unit actor for placed demolitions devices.
+//  Extends R6Grenade; shared logic for arming, timer countdown, and explosion.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

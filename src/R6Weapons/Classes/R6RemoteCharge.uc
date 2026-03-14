@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RemoteCharge.uc : (add small description)
+//  R6RemoteCharge.uc : Remote-detonated explosive gadget actor — placed charge, triggered by player.
+//  Extends R6AbstractGadget; detonation on command rather than by timer or proximity.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

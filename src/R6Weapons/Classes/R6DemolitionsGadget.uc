@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DemolitionsGadget.uc : (add small description)
+//  R6DemolitionsGadget.uc : Abstract base for demolitions gadget inventory items.
+//  Extends R6Gadget; subclassed by R6BreachingChargeGadget, R6ClaymoreGadget, R6RemoteChargeGadget.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

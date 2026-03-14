@@ -1,5 +1,6 @@
 //=============================================================================
-//  R61stHandsGripBreach.uc : (add small description)
+//  R61stHandsGripBreach.uc : First-person hand/grip animation for breaching charge placement.
+//  Extends R6AbstractFirstPersonHands; drives the FiringWeapon state during charge deployment.
 //=============================================================================
 class R61stHandsGripBreach extends R6AbstractFirstPersonHands;
 
