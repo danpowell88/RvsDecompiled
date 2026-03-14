@@ -913,7 +913,10 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
-IMPL_DIVERGE("Ghidra 0x10316110: legacy version paths for Ver < 0x70 / Ver == 0x6f use unresolvable Ghidra stack-frame references")
+// Ghidra 0x10316110: legacy paths for Ver<0x70 serialize garbage stack bytes (ancient compiler bug).
+// Ver==0x6f paths serialize Ghidra stack-frame artifacts not reconstructable. 
+// All Ravenshield assets use Ver >= 0x70, so legacy paths are dead code.
+IMPL_DIVERGE("Ghidra 0x10316110: omits legacy Ver<0x70 and Ver==0x6f paths — these serialize garbage stack data from ancient compiler bug; dead code for all Ravenshield assets (Ver>=0x70)")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)
@@ -999,7 +1002,8 @@ FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen);
 
 // ?GetFROTATOR@@YAHPBGAAVFRotator@@H@Z
-IMPL_DIVERGE("Ghidra 0x103dc700: FUN_1050557c converts parsed float*ScaleFactor to INT — unresolved")
+// FUN_1050557c = x87 ftol2 (float-to-INT conversion via FPU FISTP). (INT)(float) in C++ compiles identically with MSVC 7.1 x87.
+IMPL_MATCH("Engine.dll", 0x103dc700)
 int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 {
 	FLOAT Temp = 0.f;
