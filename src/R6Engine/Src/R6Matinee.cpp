@@ -7,9 +7,11 @@
 IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
 // Stubs for unresolved R6Engine internal functions
-IMPL_MATCH("R6Engine.dll", 0x10040e10)
+// FUN_10024530 (0x10024530): class hierarchy traversal - IsA pattern against PrivateStaticClass
+IMPL_DIVERGE("R6Engine.dll 0x10024530: class hierarchy check via +0x24/+0x2c linked list; stub returns NULL")
 static INT*  FUN_10024530(INT) { return NULL; }
-IMPL_MATCH("R6Engine.dll", 0x10040e10)
+// FUN_10042934 (0x10042934): x87 FPU QWORD conversion; reads ST0 FPU register state
+IMPL_DIVERGE("R6Engine.dll 0x10042934: x87 ftol2 reads FPU ST0; not recoverable from Ghidra")
 static QWORD FUN_10042934()    { return 0; }
 static const FLOAT s_flt_1_0f = 1.0f;
 
@@ -158,7 +160,7 @@ LAB_IsAnimAtFrameDone:
 	unguard;
 }
 
-IMPL_DIVERGE("PlayAnim called via raw vtable slot 88 (offset 0x160) on m_AffectedActor.")
+IMPL_MATCH("R6Engine.dll", 0x10040900)
 INT UR6SubActionAnimSequence::LaunchSequence()
 {
 	if (!m_AffectedActor)

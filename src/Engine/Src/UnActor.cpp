@@ -3503,23 +3503,54 @@ void AActor::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x103bb5a0)
+IMPL_MATCH("Engine.dll", 0x103bb740)
 void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 {
 	guard(AActor::SetVolumes);
-	// Called from ANavigationPoint and volume-intersection sweeps; for base AActor
-	// we don't store the volume list separately — PhysicsVolume is updated by SetZone.
-	// Derived classes (ANavigationPoint) have their own override.
+	for( INT i = 0; i < NewVolumes.Num(); i++ )
+	{
+		AVolume* Vol = NewVolumes(i);
+		if( !Vol )
+			continue;
+		APhysicsVolume* PVol = Vol->IsA(APhysicsVolume::StaticClass()) ? (APhysicsVolume*)Vol : NULL;
+		UBOOL bBothCollide = (bCollideWorld && Vol->bCollideWorld);
+		if( (bBothCollide || PVol) && Vol->Encompasses(Location) )
+		{
+			if( bBothCollide )
+			{
+				Vol->Touching.AddItem(this);
+				Touching.AddItem(Vol);
+			}
+			if( PVol && PVol->Priority > PhysicsVolume->Priority )
+				PhysicsVolume = PVol;
+		}
+	}
 	unguard;
 }
 
-IMPL_DIVERGE("stub pending volume system finalisation")
+IMPL_MATCH("Engine.dll", 0x103bb5a0)
 void AActor::SetVolumes()
 {
 	guard(AActor::SetVolumes_void);
-	// Recalculate volumes: iterate the level's PhysicsVolume list and call the
-	// array form. Requires ULevel::PhysicsVolumeList (ALevelInfo line 3633) which
-	// is populated at map-load time.  Deferred until volume system is finalised.
+	for( INT i = 0; i < XLevel->Actors.Num(); i++ )
+	{
+		AActor* A = XLevel->Actors(i);
+		if( !A || !A->IsA(AVolume::StaticClass()) )
+			continue;
+		AVolume* Vol = (AVolume*)A;
+		APhysicsVolume* PVol = A->IsA(APhysicsVolume::StaticClass()) ? (APhysicsVolume*)A : NULL;
+		UBOOL bBothCollide = (bCollideWorld && Vol->bCollideWorld);
+		if( (bBothCollide || PVol) && Vol->Encompasses(Location) )
+		{
+			if( bBothCollide )
+			{
+				Vol->Touching.AddItem(this);
+				Touching.AddItem(Vol);
+			}
+			if( PVol && PVol->Priority > PhysicsVolume->Priority )
+				PhysicsVolume = PVol;
+		}
+	}
 	unguard;
 }
 
