@@ -749,11 +749,13 @@ void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, 2909, execSceneDestroyed );
 
-IMPL_DIVERGE("Ghidra 0x1041d870 (118 bytes): this[0x3d0] += *(float*)(*(int*)(this+0x3d8)+0x34); raw-offset time accumulation needs private ASceneManager fields")
+IMPL_MATCH("Engine.dll", 0x1041d870)
 void ASceneManager::execTerminateAIAction( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execTerminateAIAction);
 	P_FINISH;
+	// Accumulates time: this->TimeField(+0x3d0) += *(this->OwnerPtr(+0x3d8))->TimeBase(+0x34)
+	*(FLOAT*)((BYTE*)this + 0x3d0) += *(FLOAT*)(*(INT*)((BYTE*)this + 0x3d8) + 0x34);
 	unguard;
 }
 IMPLEMENT_FUNCTION( ASceneManager, 2906, execTerminateAIAction );
@@ -951,11 +953,13 @@ void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2902, execAddDecal );
 
-IMPL_DIVERGE("Ghidra 0x10476d70 (112 bytes): *(uint*)(this+0x3a0) &= ~1; clears bActive bitfield; needs AR6DecalGroup BITFIELD member layout")
+IMPL_MATCH("Engine.dll", 0x10476d70)
 void AR6DecalGroup::execDeActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execDeActivateGroup);
 	P_FINISH;
+	// Clears bActive bit (bit 0) of BITFIELD at this+0x3a0
+	*(DWORD*)((BYTE*)this + 0x3a0) &= ~1u;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2905, execDeActivateGroup );

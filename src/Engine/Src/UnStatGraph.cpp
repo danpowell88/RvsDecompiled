@@ -33,24 +33,23 @@ FStatGraphLine::FStatGraphLine()
 	new ((BYTE*)this + 0x18) FString();
 }
 
-IMPL_DIVERGE("Ghidra 0x1032c3c0: calls FString::~FString(this+0x18) then FUN_10322eb0 (unresolved TArray<FLOAT> dtor helper)")
+// FUN_10322eb0 = TArray<FLOAT>::~TArray() instantiation (ECX = this+0x04 before the call)
+IMPL_MATCH("Engine.dll", 0x1032c3c0)
 FStatGraphLine::~FStatGraphLine()
 {
-	// Destroy FString at +0x18, then TArray<FLOAT> at +4 via FUN_10322eb0 (unresolved).
 	((FString*)((BYTE*)this + 0x18))->~FString();
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("Ghidra 0x10321790: copies fields using FUN_1031f660 for TArray<FLOAT> at +4; FUN_ unresolved")
+// FUN_1031f660 = TArray<FLOAT> copy assignment (copies 4-byte elements via FArray::Add loop)
+IMPL_MATCH("Engine.dll", 0x10321790)
 FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 {
-	// Ghidra 0x21790: DWORD at +0, TArray<FLOAT> at +4 (FUN_1031f660=4-byte data points),
-	// 2 DWORDs at +10,+14, FString at +18, 4 DWORDs at +24..+30
 	*(DWORD*)((BYTE*)this + 0x00) = *(const DWORD*)((const BYTE*)&Other + 0x00);
 	*(TArray<FLOAT>*)((BYTE*)this + 0x04) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x04);
-	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 8); // 2 DWORDs
+	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 8);
 	*(FString*)((BYTE*)this + 0x18) = *(const FString*)((const BYTE*)&Other + 0x18);
-	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
+	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10);
 	return *this;
 }
 
@@ -66,19 +65,27 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // (moved from EngineStubs.cpp)
 // ============================================================================
 
+// FStatGraph layout (from Ghidra copy-ctor 0x103518f0 + AddLine analysis):
+// +0x00: DWORD, +0x04: DWORD
+// +0x08: TArray (stride unknown — FUN_1033b2a0 copies it)
+// +0x1c: TArray<FStatGraphLine> (stride 0x34 confirmed from AddLine FArray::Add call)
+// +0x28: TArray (stride unknown — FUN_1031ce50 copies it)
+// +0x34..+0x4c: 7 DWORDs
+// +0x54: FString
+
 // ??0FStatGraph@@QAE@ABV0@@Z
-IMPL_DIVERGE("Ghidra 0x103518f0: copy ctor copies 2 DWORDs then calls FUN_1033b2a0/FUN_1032dff0/FUN_1031ce50 for TArrays, copies scalar fields, then FString copy at +0x54; FUN_ unresolved")
+IMPL_DIVERGE("Ghidra 0x103518f0: copy ctor — FUN_1033b2a0/FUN_1032dff0/FUN_1031ce50 are per-type TArray copy helpers not yet resolvable to named types for +0x08/+0x1c/+0x28")
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
-IMPL_DIVERGE("Ghidra 0x10446960: calls FString::~FString(this+0x54) then FUN_10322eb0/FUN_1034fa30/FUN_1033b300 (TArray dtors, unresolved)")
+IMPL_DIVERGE("Ghidra 0x10446960: dtor destroys FString@+0x54 then TArray@+0x28/+0x1c/+0x08 via per-type helpers; element dtors needed for TArray<FStatGraphLine>@+0x1c")
 FStatGraph::~FStatGraph() {
 	((FString*)((BYTE*)this + 0x54))->~FString();
-	// FUN_10322eb0/FUN_1034fa30/FUN_1033b300 (TArray element dtors) -- pending extraction
+	// TArray<FStatGraphLine> at +0x1c requires per-element ~FStatGraphLine() before freeing
 }
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("Ghidra 0x103519b0: copies 2 DWORDs then FUN_10326110/FUN_1031fea0/FUN_1034fa80/FUN_1031f660 for TArrays; FUN_ unresolved")
+IMPL_DIVERGE("Ghidra 0x103519b0: assigns 2 DWORDs then TArray@+0x08/+0x1c/+0x28 via per-type copy helpers; FStatGraphLine has non-trivial copy ctor")
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
