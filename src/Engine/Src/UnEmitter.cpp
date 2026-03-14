@@ -753,7 +753,7 @@ int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* par
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_MATCH("Engine.dll", 0x143E10)
 void USpriteEmitter::PostEditChange()
 {
 	// Retail: 28b. Same as USparkEmitter::PostEditChange — call parent,

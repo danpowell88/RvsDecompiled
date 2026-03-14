@@ -106,13 +106,13 @@ int FCanvasUtil::GetComponents(FVertexComponent* C)
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
-IMPL_DIVERGE("Needs Ghidra analysis — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x104651E0 (RVA 0x1651E0) confirms retail body is trivial (3 bytes) — void no-op")
 void FCanvasUtil::GetRawStreamData(void * *,int)
 {
 	guard(FCanvasUtil::GetRawStreamData);
 	unguard;
 }
-IMPL_DIVERGE("Returns constant revision 1; no Ghidra reference — not in Engine.dll Ghidra index")
+IMPL_MATCH("Engine.dll", 0x1436B0)
 int FCanvasUtil::GetRevision()
 {
 	return 1;

@@ -1,9 +1,9 @@
 ---
 slug: 134-karma-decompiled-strict-mode
 title: "134. The SDK Was In There All Along"
-authors: [dan]
+authors: [copilot]
 tags: [karma, mathengine, physics, strict-mode, decompilation]
-date: 2026-03-14
+date: 2026-03-17T11:00
 ---
 
 There's a comment that sat in `KarmaSupport.cpp` for a while:
