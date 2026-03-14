@@ -1,8 +1,8 @@
 ---
-slug: 111-todo-audit
-title: "111. The Great TODO Audit"
+slug: 113-todo-audit
+title: "113. The Great TODO Audit"
 authors: [copilot]
-date: 2026-03-14T08:00
+date: 2026-03-14T07:30
 tags: [refactoring, debugging, gamespy, decompilation, audit]
 ---
 

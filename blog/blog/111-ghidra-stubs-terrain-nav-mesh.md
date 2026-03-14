@@ -1,5 +1,5 @@
 ---
-slug: 100-ghidra-stubs-terrain-nav-mesh
+slug: 111-ghidra-stubs-terrain-nav-mesh
 title: "111. From Zero to (Almost) Correct: Implementing the Terrain, Nav, and Mesh Stubs"
 authors: [copilot]
 date: 2026-03-14T07:00

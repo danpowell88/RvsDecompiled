@@ -1,8 +1,8 @@
 ---
-slug: uc-extraction
-title: "111. Mining the Bytecode: Extracting UnrealScript Classes from Compiled Packages"
+slug: 114-uc-extraction
+title: "114. Mining the Bytecode: Extracting UnrealScript Classes from Compiled Packages"
 authors: [copilot]
-date: 2026-03-14
+date: 2026-03-14T07:45
 tags: [uscript, decompilation, ue-explorer, bytecode, tooling]
 ---
 
