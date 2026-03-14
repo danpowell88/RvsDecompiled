@@ -255,16 +255,68 @@ void ALadderVolume::AddMyMarker(AActor* Actor)
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103E0450 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x103E0450)
 FVector ALadderVolume::FindCenter()
 {
-	return FVector(0,0,0);
+	// Ghidra 0xe0450: average of polygon centroids from the brush model.
+	// this+0x178=Brush(UModel*), Brush+0x58=Polys(UPolys*), Polys+0x2c=Element array ptr.
+	// FPoly: Vertex[] at +0x30 (12-byte stride, pfVar3 starts at +0x38), NumVertices at +0x100, size 0x15c.
+	FLOAT sumX = 0.0f, sumY = 0.0f, sumZ = 0.0f;
+	INT polyCount = 0;
+	FArray* polyFArray = (FArray*)(*(INT*)(*(INT*)(this + 0x178) + 0x58) + 0x2c);
+	INT numPolys = polyFArray->Num();
+	if (numPolys > 0)
+	{
+		INT byteOffset = 0;
+		do {
+			BYTE* poly = (BYTE*)(*(void**)polyFArray) + byteOffset;
+			FLOAT cx = 0.0f, cy = 0.0f, cz = 0.0f;
+			INT numVerts = *(INT*)(poly + 0x100);
+			if (numVerts > 0)
+			{
+				FLOAT* pfVar3 = (FLOAT*)(poly + 0x38);  // Z of vertex 0; pfVar3[-2]=X, pfVar3[-1]=Y
+				for (INT j = 0; j < numVerts; j++, pfVar3 += 3)
+				{
+					cx += pfVar3[-2];
+					cy += pfVar3[-1];
+					cz += pfVar3[0];
+				}
+				FVector centroid(cx, cy, cz);
+				centroid /= (FLOAT)numVerts;
+				cx = centroid.X; cy = centroid.Y; cz = centroid.Z;
+			}
+			sumX += cx; sumY += cy; sumZ += cz;
+			polyCount++;
+			byteOffset += 0x15c;
+			numPolys = polyFArray->Num();
+		} while (polyCount < numPolys);
+	}
+	FVector result(sumX, sumY, sumZ);
+	if (polyCount > 0)
+		result /= (FLOAT)polyCount;
+	return result;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103E05B0 not yet fully reconstructed")
-FVector ALadderVolume::FindTop(FVector)
+IMPL_DIVERGE("calls vtable[0xC0] on this (unknown level/interface getter) and vtable[0x68] on result (unknown trace call)")
+FVector ALadderVolume::FindTop(FVector InLoc)
 {
-	return FVector(0,0,0);
+	// Ghidra 0xe05b0: recursive search — if InLoc is inside the volume, step along the
+	// volume's up-direction by 500 units and recurse. Otherwise perform a geometry trace
+	// via vtable[0xC0](this) → some object, then that object's vtable[0x68] → trace.
+	// this+0x4a4/+0x4a8/+0x4ac hold the volume's direction unit vector.
+	if (AVolume::Encompasses(InLoc))
+	{
+		FVector next(
+			InLoc.X + *(FLOAT*)(this + 0x4a4) * 500.0f,
+			InLoc.Y + *(FLOAT*)(this + 0x4a8) * 500.0f,
+			InLoc.Z + *(FLOAT*)(this + 0x4ac) * 500.0f
+		);
+		return FindTop(next);
+	}
+	// Else: vtable[0xC0] on this returns a trace-interface; vtable[0x68] on that runs
+	// a line trace from InLoc − dir*10000 to InLoc; result stored in local FHitResult.
+	// Diverge: vtable slots unresolved.
+	return InLoc;
 }
 
 
@@ -614,15 +666,14 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x103E0940 not yet fully reconstructed")
-int AScout::findStart(FVector)
+IMPL_DIVERGE("calls XLevel vtable[0x9C] (FarMoveActor-like) and vtable[0x98] (MoveActor-like) on XLevel; also AActor::TwoWallAdjust; 787-byte body not fully translated")
+int AScout::findStart(FVector Loc)
 {
 	guard(AScout::findStart);
-	// TODO: implement AScout::findStart (retail 0xe0940: calls FarMoveActor + walkability test; many internal FUN_ helpers not resolved)
-	// GHIDRA REF: 0xe0940 — calls FarMoveActor (Level vtable[0x9c/4]) to try placing
-	// the scout at the requested position, then tests walkability and adjusts collision.
-	// Many internal FUN_ helpers (path-graph queries, collision trace helpers) not yet
-	// resolved. Always returns 0 (no start found) as a safe fallback.
+	// Ghidra 0xe0940: tries to place the Scout at Loc via XLevel vtable[0x9c] (FarMoveActor),
+	// then iterates wall-slide adjustments using XLevel vtable[0x98] and AActor::TwoWallAdjust.
+	// Returns 1 if a valid collision-free start was found, 0 otherwise.
+	// Diverge: XLevel vtable[0x9c] and vtable[0x98] method names unresolved.
 	return 0;
 	unguard;
 }
@@ -659,8 +710,45 @@ void AScout::InitForPathing()
 // ANavigationPoint
 // =============================================================================
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103d8a30 is 277 bytes, not fully reconstructed")
-void ANavigationPoint::Destroy() { Super::Destroy(); }
+IMPL_MATCH("Engine.dll", 0x103D8A30)
+void ANavigationPoint::Destroy()
+{
+	// Ghidra 0xd8a30 277B. Call super, then in editor-mode:
+	// clear bPathsChanged on Region.Zone, null out Start in all outgoing specs,
+	// then scan level actors and prune any incoming specs pointing to this node.
+	guard(ANavigationPoint::Destroy);
+	Super::Destroy();
+	if (GIsEditor)
+	{
+		*(DWORD*)((BYTE*)Region.Zone + 0x450) &= ~0x800u;
+		for (INT i = 0; i < PathList.Num(); i++)
+		{
+			UReachSpec* Spec = PathList(i);
+			if (Spec)
+				Spec->Start = NULL;
+		}
+		for (INT i = 0; i < XLevel->Actors.Num(); i++)
+		{
+			AActor* Actor = XLevel->Actors(i);
+			if (Actor && Actor->IsA(ANavigationPoint::StaticClass()))
+			{
+				ANavigationPoint* Nav = (ANavigationPoint*)Actor;
+				TArray<UReachSpec*>& NavPaths = *(TArray<UReachSpec*>*)((BYTE*)Nav + 0x3D8);
+				for (INT j = 0; j < NavPaths.Num(); j++)
+				{
+					UReachSpec* Spec = NavPaths(j);
+					if (Spec && Spec->End == this)
+					{
+						Spec->bPruned = 1;
+						Spec->End = NULL;
+					}
+				}
+				Nav->CleanUpPruned();
+			}
+		}
+	}
+	unguard;
+}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostEditMove() {}
 IMPL_MATCH("Engine.dll", 0x103d5b50)
@@ -680,10 +768,45 @@ IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103983d0 is 149 bytes, not fully reconstructed")
-void ANavigationPoint::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D5B70 not yet fully reconstructed")
-INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav) { return 0; }
+IMPL_DIVERGE("GWarn vtable slot 0x28 (MapCheck_Add) not declared — uses debugf as substitute")
+void ANavigationPoint::CheckForErrors()
+{
+	// Ghidra 0x983d0 149B. Call super, then if PathList is empty, warn about the node.
+	guard(ANavigationPoint::CheckForErrors);
+	Super::CheckForErrors();
+	if (PathList.Num() == 0)
+		debugf(NAME_Warning, TEXT("No paths from %s"), GetName());
+	unguard;
+}
+IMPL_DIVERGE("vtable slot 0x1a4 on Nav (ProscribedPaths matching) not yet resolved")
+INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav)
+{
+	// Ghidra 0xd5b70 317B. Returns 0 (not proscribed), 1 (proscribed by direction/distance),
+	// or 2 (proscribed by matching tag in ProscribedPaths array at this+0x3B8).
+	guard(ANavigationPoint::ProscribedPathTo);
+
+	// bDirectional (bit 3 of flags at 0x3A4): if set, check that Nav is in front of this
+	if ((*(DWORD*)((BYTE*)this + 0x3A4)) & 8)
+	{
+		FVector diff = Nav->Location - Location;
+		FVector facing = FRotator(*(INT*)((BYTE*)this + 0x240),
+		                          *(INT*)((BYTE*)this + 0x244),
+		                          *(INT*)((BYTE*)this + 0x248)).Vector();
+		FLOAT dot = diff.X * facing.X + diff.Y * facing.Y + diff.Z * facing.Z;
+		if (dot < 0.0f)
+			return 1;
+	}
+
+	// Distance check: if >1200 units away, proscribe
+	FVector delta = Location - Nav->Location;
+	if (delta.SizeSquared() > 1440000.0f)
+		return 1;
+
+	// Check ProscribedPaths tags (4 entries at this+0x3B8).
+	// DIVERGE: vtable[0x1a4/4] on Nav not identified; tags not verified.
+	unguard;
+	return 0;
+}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
@@ -701,13 +824,67 @@ void ANavigationPoint::ClearPaths()
 }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::FindBase() {}
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D8930 not yet fully reconstructed")
-INT ANavigationPoint::PrunePaths() { return 0; }
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D5CE0 not yet fully reconstructed")
-INT ANavigationPoint::IsIdentifiedAs(FName Name) { return 0; }
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D62F0 not yet fully reconstructed")
-INT ANavigationPoint::ReviewPath(APawn* Scout) { return 0; }
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D61F0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x103D8930)
+INT ANavigationPoint::PrunePaths()
+{
+	// Ghidra 0xd8930 197B. For each outer spec (candidate), for each inner spec
+	// (not pruned): if inner <= outer and inner->End has an alternate path, prune outer.
+	guard(ANavigationPoint::PrunePaths);
+	INT count = 0;
+	TArray<UReachSpec*>* myPaths = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+	for (INT i = 0; i < myPaths->Num(); i++)
+	{
+		for (INT j = 0; j < myPaths->Num(); j++)
+		{
+			if (i == j) continue;
+			UReachSpec* specJ = (*myPaths)(j);
+			if (!specJ || specJ->bPruned) continue;
+			UReachSpec* specI = (*myPaths)(i);
+			if (!specI) continue;
+			if (*specJ <= *specI)
+			{
+				INT found = specJ->End->FindAlternatePath(specI, specJ->Distance);
+				if (found)
+				{
+					specI->bPruned = 1;
+					count++;
+				}
+			}
+		}
+	}
+	CleanUpPruned();
+	return count;
+	unguard;
+}
+IMPL_MATCH("Engine.dll", 0x103D5CE0)
+INT ANavigationPoint::IsIdentifiedAs(FName Name)
+{
+	// Ghidra 0xd5ce0 79B. Compare our actor name with the provided Name.
+	return Name == GetFName();
+}
+IMPL_DIVERGE("GWarn vtable slot 0x28 (MapCheck_Add) not declared — uses debugf as substitute")
+INT ANavigationPoint::ReviewPath(APawn* Scout)
+{
+	// Ghidra 0xd62f0 223B. If bMustBeReachable, verify all nav points can reach this
+	// one via CanReach; warn for any that cannot. Always returns 1.
+	guard(ANavigationPoint::ReviewPath);
+	if (bMustBeReachable)
+	{
+		// Walk NavigationPointList from Zone
+		ANavigationPoint* First = *(ANavigationPoint**)((BYTE*)Region.Zone + 0x4D0);
+		for (ANavigationPoint* Nav = First; Nav; Nav = Nav->nextNavigationPoint)
+		{
+			// Reset visitedWeight for all nav points before each reachability check
+			for (ANavigationPoint* N2 = First; N2; N2 = N2->nextNavigationPoint)
+				*(DWORD*)((BYTE*)N2 + 0x394) = 0;
+			if (!Nav->CanReach(this, 1.0e7f))
+				debugf(NAME_Warning, TEXT("Cannot reach %s from this node!"), GetName());
+		}
+	}
+	unguard;
+	return 1;
+}
+IMPL_DIVERGE("calls FUN_1050557c (unresolved — returns unique path-search timestamp for cycle prevention)")
 INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
 IMPL_MATCH("Engine.dll", 0x103d7080)
 void ANavigationPoint::CleanUpPruned()
@@ -723,8 +900,67 @@ void ANavigationPoint::CleanUpPruned()
 	}
 	myPathList->Shrink();
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x103D6DB0 not yet fully reconstructed")
-INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
+IMPL_MATCH("Engine.dll", 0x103D6DB0)
+INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT CostSoFar)
+{
+	// Ghidra 0xd6db0 545B. Two-phase path pruning check.
+	// Phase 1: check if any direct spec from this reaches Spec->End with better cost.
+	// Phase 2: recursive multi-hop search through specs that trend toward Spec->End.
+	guard(ANavigationPoint::FindAlternatePath);
+
+	ANavigationPoint* specStart = Spec->Start;
+	ANavigationPoint* specEnd   = Spec->End;
+	FLOAT dirX = specEnd->Location.X - specStart->Location.X;
+	FLOAT dirY = specEnd->Location.Y - specStart->Location.Y;
+	FLOAT dirZ = specEnd->Location.Z - specStart->Location.Z;
+
+	TArray<UReachSpec*>* myPaths = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
+
+	// Phase 1: direct connection to specEnd
+	for (INT i = 0; i < myPaths->Num(); i++)
+	{
+		UReachSpec* s = (*myPaths)(i);
+		if (!s || s->bPruned) continue;
+		if (s->End == specEnd)
+		{
+			FLOAT dot = (specEnd->Location.X - Location.X) * dirX
+			          + dirY * (specEnd->Location.Y - Location.Y)
+			          + dirZ * (specEnd->Location.Z - Location.Z);
+			if (dot >= 0.0f
+			    && s->Distance > 0
+			    && (FLOAT)(s->Distance + CostSoFar) < (FLOAT)Spec->Distance * 1.2f
+			    && (*s <= *Spec) != 0
+			    && s->End != specStart)
+			{
+				return 1;
+			}
+			return 0;
+		}
+	}
+
+	// Phase 2: recursive multi-hop
+	for (INT j = 0; j < myPaths->Num(); j++)
+	{
+		UReachSpec* s = (*myPaths)(j);
+		if (!s || s->bPruned) continue;
+		if (s->Distance > 0
+		    && (FLOAT)(s->Distance + CostSoFar) < (FLOAT)Spec->Distance * 1.2f
+		    && (*s <= *Spec) != 0
+		    && s->End != specStart)
+		{
+			FLOAT dot = (s->End->Location.X - Location.X) * dirX
+			          + dirY * (s->End->Location.Y - Location.Y)
+			          + dirZ * (s->End->Location.Z - Location.Z);
+			if (dot > 0.0f
+			    && s->End->FindAlternatePath(Spec, s->Distance + CostSoFar) != 0)
+			{
+				return 1;
+			}
+		}
+	}
+	unguard;
+	return 0;
+}
 IMPL_MATCH("Engine.dll", 0x103d6610)
 UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 {
@@ -752,7 +988,7 @@ INT ANavigationPoint::ShouldBeBased()
 
 /*-- UInteraction screen/world transforms ------------------------------*/
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103B6300 not yet fully reconstructed")
+IMPL_DIVERGE("complex FCanvasUtil/FMatrix/FCameraSceneNode camera un-projection — unresolved")
 void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execScreenToWorld);
@@ -764,7 +1000,7 @@ void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execScreenToWorld );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103B60E0 not yet fully reconstructed")
+IMPL_DIVERGE("complex FCanvasUtil/FMatrix/FCameraSceneNode world-to-screen projection — unresolved")
 void UInteraction::execWorldToScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execWorldToScreen);
@@ -778,217 +1014,256 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execWorldToScreen );
 
 /*-- UInteractionMaster ------------------------------------------------*/
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103B6690 not yet fully reconstructed")
+IMPL_DIVERGE("accesses Interaction list via raw offsets 0x140/0x144/0x150 — unresolved")
 void UInteractionMaster::execTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteractionMaster::execTravel);
 	P_GET_STR(URL);
 	P_FINISH;
+	// Ghidra 0xb6690 231B: reads optional UBOOL from bytecode, then sets
+	// TravelURL (at InteractionList[0]+0x144) and clears TravelType fields.
+	// Raw offsets unresolved — no-op stub.
 	unguard;
 }
 IMPLEMENT_FUNCTION( UInteractionMaster, INDEX_NONE, execTravel );
 
 /*-- UR6AbstractGameManager -------------------------------------------*/
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047CD60 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047CD60)
 void UR6AbstractGameManager::execClientLeaveServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execClientLeaveServer);
 	P_FINISH;
+	ClientLeaveServer();
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execClientLeaveServer );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047CC90 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047CC90)
 void UR6AbstractGameManager::execConnectionInterrupted( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execConnectionInterrupted);
+	P_GET_INT(Type);
 	P_FINISH;
+	ConnectionInterrupted(Type);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execConnectionInterrupted );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047D280 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047D280)
 void UR6AbstractGameManager::execIsGSCreateUbiServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execIsGSCreateUbiServer);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(INT*)Result = GetGSCreateUbiServer();
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execIsGSCreateUbiServer );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047CE00 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047CE00)
 void UR6AbstractGameManager::execLaunchListenSrv( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execLaunchListenSrv);
-	P_GET_STR(URL);
+	P_GET_STR(URL1);
+	P_GET_STR(URL2);
 	P_FINISH;
+	LaunchListenSrv(URL1, URL2);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execLaunchListenSrv );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047D330 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047D330)
 void UR6AbstractGameManager::execSetGSCreateUbiServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execSetGSCreateUbiServer);
 	P_GET_UBOOL(bCreate);
+	SetGSCreateUbiServer(bCreate);
 	P_FINISH;
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execSetGSCreateUbiServer );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047CF30 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047CF30)
 void UR6AbstractGameManager::execStartJoinServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartJoinServer);
-	P_GET_STR(URL);
+	P_GET_STR(URL1);
+	P_GET_STR(URL2);
+	P_GET_INT(bLAN);
 	P_FINISH;
+	StartJoinServer(URL1, URL2, bLAN);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartJoinServer );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047D120 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047D120)
 void UR6AbstractGameManager::execStartLogInProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartLogInProcedure);
-	P_GET_STR(Username);
-	P_GET_STR(Password);
 	P_FINISH;
+	StartLogInProcedure();
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartLogInProcedure );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047D080 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047D080)
 void UR6AbstractGameManager::execStartPreJoinProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartPreJoinProcedure);
 	P_FINISH;
+	StartPreJoinProcedure(0); // Ghidra passes hardcoded 0 — no UScript param
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartPreJoinProcedure );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1047D1C0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1047D1C0)
 void UR6AbstractGameManager::execStopGSClientProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStopGSClientProcedure);
 	P_FINISH;
+	// Ghidra 0x17d1c0: set bit 2, clear bit 5 of ObjectFlags; call SetGSCreateUbiServer(0); clear bit 6
+	*(DWORD*)((BYTE*)this + 0x2C) = (*(DWORD*)((BYTE*)this + 0x2C) & ~0x20u) | 4u;
+	SetGSCreateUbiServer(0);
+	*(DWORD*)((BYTE*)this + 0x2C) &= ~0x40u;
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStopGSClientProcedure );
 
 /*-- UR6FileManager ----------------------------------------------------*/
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1036d1f0 is 234 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1036D1F0)
 void UR6FileManager::execDeleteFile( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x6d1f0 234B: P_GET_STR(Filename), then GFileManager->Delete(*Filename, 0, 0)
 	guard(UR6FileManager::execDeleteFile);
 	P_GET_STR(Filename);
 	P_FINISH;
-	*(DWORD*)Result = GFileManager->Delete( *Filename );
+	*(INT*)Result = GFileManager->Delete( *Filename, 0, 0 );
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1527, execDeleteFile );
 
-IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x1036d340 is 218 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1036D340)
 void UR6FileManager::execFindFile( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x6d340 218B: P_GET_STR(Pattern), calls FindFile(&Pattern) at vtable+0x6C
 	guard(UR6FileManager::execFindFile);
 	P_GET_STR(Pattern);
 	P_FINISH;
-	TArray<FString> Files = GFileManager->FindFiles( *Pattern, 1, 0 );
-	*(INT*)Result = Files.Num();
+	*(INT*)Result = FindFile(&Pattern);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1528, execFindFile );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1036D090 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1036D090)
 void UR6FileManager::execGetFileName( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x6d090 242B: P_GET_INT(Index), P_GET_STR_REF(OutName), calls GetFileName(Index, OutName)
 	guard(UR6FileManager::execGetFileName);
 	P_GET_INT(Index);
+	P_GET_STR_REF(OutName);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	GetFileName(Index, OutName);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1526, execGetFileName );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1036CEB0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1036CEB0)
 void UR6FileManager::execGetNbFile( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x6ceb0 224B: P_GET_STR(Ext), P_GET_STR(Type), calls GetNbFile(&Ext, &Type)
 	guard(UR6FileManager::execGetNbFile);
+	P_GET_STR(Ext);
+	P_GET_STR(Type);
 	P_FINISH;
-	*(INT*)Result = 0;
+	*(INT*)Result = GetNbFile(&Ext, &Type);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1525, execGetNbFile );
 
 /*-- UR6ModMgr ---------------------------------------------------------*/
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10395B00 not yet fully reconstructed")
+IMPL_DIVERGE("uses unnamed DAT_1066f414 counter and FUN_1031efc0/FUN_10393490/FUN_10321830 — unresolved")
 void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execAddNewModExtraPath);
-	P_GET_STR(Path);
+	P_GET_INT(Type);
+	P_GET_INT(PathPtr);
 	P_FINISH;
+	// Ghidra 0x95b00 291B: reads two INT params, manages a static init-count for GSys paths,
+	// then calls FUN_10393490/FUN_10321830 to add the path. FUNs unresolved — no-op.
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 2020, execAddNewModExtraPath );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10392990 not yet fully reconstructed")
+IMPL_DIVERGE("navigates opaque sub-object chain via raw offsets 0x44/0x48 — unresolved vtable call")
 void UR6ModMgr::execCallSndEngineInit( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execCallSndEngineInit);
+	P_GET_INT(AudioMgr);
 	P_FINISH;
+	// Ghidra 0x92990 190B: if AudioMgr != 0 and AudioMgr->0x44 != 0 and
+	// AudioMgr->0x44->0x48 != 0, call vtable[0x88/4](1) on that sub-object.
+	// Field layout not resolved.
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 3003, execCallSndEngineInit );
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10392b90 is 104 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10392B90)
 void UR6ModMgr::execGetASBuildVersion( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x92b90 104B: no params, returns INT 0x10 (= build 16, Athena Sword)
 	guard(UR6ModMgr::execGetASBuildVersion);
 	P_FINISH;
-	*(FString*)Result = TEXT("1.60");
+	*(INT*)Result = 0x10;
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetASBuildVersion );
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10392c30 is 104 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10392C30)
 void UR6ModMgr::execGetIWBuildVersion( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x92c30 104B: no params, returns INT 0 (Iron Wrath build version not set)
 	guard(UR6ModMgr::execGetIWBuildVersion);
 	P_FINISH;
-	*(FString*)Result = TEXT("1.60");
+	*(INT*)Result = 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetIWBuildVersion );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10392A80 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10392A80)
 void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra 0x92a80 216B: P_GET_STR(ModKey), compare with official mod names
 	guard(UR6ModMgr::execIsOfficialMod);
+	P_GET_STR(ModKey);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(INT*)Result = (ModKey == TEXT("RAVENSHIELD") ||
+	                ModKey == TEXT("ATHENASWORD") ||
+	                ModKey == TEXT("IRONWRATH")) ? 1 : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execIsOfficialMod );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10393220 not yet fully reconstructed")
+IMPL_DIVERGE("uses unnamed DAT_10529f90 string constant and unresolved GConfig vtable calls")
 void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetGeneralModSettings);
+	P_GET_INT(ModObj);
 	P_FINISH;
+	// Ghidra 0x93220 566B: reads INT (ModObj pointer), constructs profile path from
+	// GConfig + DAT_10529f90 (unnamed string), then saves config. Not fully resolvable.
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execSetGeneralModSettings );
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10395C60 not yet fully reconstructed")
+IMPL_DIVERGE("calls FUN_1031f060, FUN_10393490, FUN_10321830 — path-list manipulation helpers unresolved")
 void UR6ModMgr::execSetSystemMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetSystemMod);
-	P_GET_STR(ModName);
 	P_FINISH;
+	// Ghidra 0x95c60 203B: calls FUN_1031f060(0), then adds this->ModPaths to GSys paths
+	// via FUN_10393490 / FUN_10321830. FUNs unresolved.
 	unguard;
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 2021, execSetSystemMod );
@@ -1184,8 +1459,30 @@ FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(t
 
 // --- Moved from EngineStubs.cpp ---
 // ?buildPaths@FPathBuilder@@QAEHPAVULevel@@@Z
-IMPL_DIVERGE("body incomplete — Ghidra 0x103E4E00 not yet fully reconstructed")
-int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
+IMPL_MATCH("Engine.dll", 0x103E4E00)
+int FPathBuilder::buildPaths(ULevel* Level)
+{
+	// Ghidra 0xe4e00 381B. Build all navigation paths in the level.
+	*(ULevel**)Pad = Level;
+	definePaths(Level);
+	getScout();
+	APawn* Scout = *(APawn**)(Pad + sizeof(void*));
+	Scout->SetCollision(1, 1, 1);
+	*(DWORD*)((BYTE*)Scout + 0xA8) |= 0x1000u;       // collision flag
+	*(DWORD*)((BYTE*)Scout + 0x43C) = 0xBF800000u;   // MaxStepHeight = -1.0f
+	*(DWORD*)((BYTE*)Scout + 0x428) = 0x44160000u;   // JumpZVelocity = 600.0f
+	definePaths(Level);
+	SetPathCollision(1);
+	INT result = createPaths();
+	SetPathCollision(0);
+	// Destroy the scout's AI controller and then the scout itself
+	AActor* AICtrl = *(AActor**)((BYTE*)Scout + 0x4EC);
+	if (AICtrl) Level->DestroyActor(AICtrl);
+	Level->DestroyActor(Scout);
+	definePaths(Level);
+	debugf(NAME_Log, TEXT("Path build complete"));
+	return result;
+}
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
 // Ghidra: iterate actors, destroy auto-built navigation points, clear bPathsTransient on LevelInfo
