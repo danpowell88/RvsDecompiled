@@ -3002,14 +3002,12 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 		if (*(FLOAT*)((BYTE*)this + 0xCC) < 0.0f)
 		{
 			FLOAT speed = ((FVector*)(owner + 0x24C))->Size();
-			// FUN_103808e0(rate*0.5, speed*cc*-1.0) = TweenRate safe-divide helper.
-			// Ghidra: result stored as tween frame-rate at this+0xC8(=200).
-			// Approximation: (rate*0.5) / (speed*|cc|); clamped to avoid div-by-zero.
-			// DIVERGENCE: FUN_103808e0 body unresolved — approximated as safe-divide.
+			// FUN_103808e0 = max(param_1, param_2) — retail 0x103808e0 (25b).
+			// Both non-looping and looping CC<0 paths share LAB_10473188: max(rate*0.5, speed*|cc|).
 			{
 				FLOAT a = *(FLOAT*)((BYTE*)this + 0xBC) * 0.5f;
 				FLOAT b = speed * (*(FLOAT*)((BYTE*)this + 0xCC)) * -1.0f;
-				*(FLOAT*)((BYTE*)this + 200) = (b > 0.0f) ? (a / b) : 0.0f;
+				*(FLOAT*)((BYTE*)this + 200) = (a >= b) ? a : b;
 			}
 			goto LAB_VertPlayAnim_End;
 		}
@@ -3078,12 +3076,12 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 		if (*(FLOAT*)((BYTE*)this + 0xCC) < 0.0f)
 		{
 			FLOAT speed = ((FVector*)(owner + 0x24C))->Size();
-			// FUN_103808e0(rate*0.5, speed*cc*-1.0) — see non-looping branch above.
-			// DIVERGENCE: approximated as safe-divide.
+			// FUN_103808e0 = max(a,b). Looping path shares LAB_10473188 with non-looping.
+			// Uses this+0xBC (already updated rate) not ifc. Retail 0x103808e0 (25b).
 			{
-				FLOAT a = ifc * 0.5f;
+				FLOAT a = *(FLOAT*)((BYTE*)this + 0xBC) * 0.5f;
 				FLOAT b = speed * (*(FLOAT*)((BYTE*)this + 0xCC)) * -1.0f;
-				*(FLOAT*)((BYTE*)this + 200) = (b > 0.0f) ? (a / b) : 0.0f;
+				*(FLOAT*)((BYTE*)this + 200) = (a >= b) ? a : b;
 			}
 			goto LAB_VertPlayAnim_End;
 		}
