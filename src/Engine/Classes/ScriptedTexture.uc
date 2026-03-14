@@ -1,32 +1,38 @@
 //=============================================================================
+// ScriptedTexture - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // ScriptedTexture: A scriptable Unreal texture
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class ScriptedTexture extends Texture
-    noexport;
+    safereplace
+    hidecategories(Object);
 
-// --- Variables ---
 // A SciptedTexture calls its Script's Render() method to draw to the texture at
 // runtime
 var Actor NotifyActor;
-var Texture SourceTexture;
-// ^ NEW IN 1.60
-// C++ stuff
-var transient const int Junk1;
-// C++ stuff
-var transient const int Junk2;
-// C++ stuff
-var transient const int Junk3;
-// C++ stuff
-var transient const float LocalTime;
+var() Texture SourceTexture;
+var const transient int Junk1;  // C++ stuff
+var const transient int Junk2;  // C++ stuff
+var const transient int Junk3;  // C++ stuff
+var const transient float LocalTime;  // C++ stuff
 
-// --- Functions ---
-final native function DrawTile(bool bMasked, Texture Tex, float VL, float UL, float V, float U, float YL, float XL, float Y, float X) {}
-final native function DrawText(Font Font, string Text, float Y, float X) {}
-final native function DrawColoredText(Color FontColor, Font Font, string Text, float Y, float X) {}
-final native function ReplaceTexture(Texture Tex) {}
-final native function TextSize(Font Font, out float YL, out float XL, string Text) {}
+// Export UScriptedTexture::execDrawTile(FFrame&, void* const)
+native(473) final function DrawTile(float X, float Y, float XL, float YL, float U, float V, float UL, float VL, Texture Tex, bool bMasked);
 
-defaultproperties
-{
-}
+// Export UScriptedTexture::execDrawText(FFrame&, void* const)
+native(472) final function DrawText(float X, float Y, string Text, Font Font);
+
+// Export UScriptedTexture::execDrawColoredText(FFrame&, void* const)
+native(474) final function DrawColoredText(float X, float Y, string Text, Font Font, Color FontColor);
+
+// Export UScriptedTexture::execReplaceTexture(FFrame&, void* const)
+native(475) final function ReplaceTexture(Texture Tex);
+
+// Export UScriptedTexture::execTextSize(FFrame&, void* const)
+native(476) final function TextSize(string Text, out float XL, out float YL, Font Font);
+

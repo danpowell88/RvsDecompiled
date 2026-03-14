@@ -1,3 +1,9 @@
+//=============================================================================
+// Interaction - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 // ====================================================================
 //  Class:  Engine.Interaction
 //  
@@ -18,72 +24,198 @@
 class Interaction extends Interactions
     native;
 
-// --- Variables ---
-// Pointer to the ViewPort that "Owns" this interaction or none if it's Global
-var Player ViewportOwner;
-// Is this interaction being Displayed
-var bool bVisible;
-// Is this interaction Getting Input
-var bool bActive;
-// Pointer to the Interaction Master
-var InteractionMaster Master;
-// Does this interaction require game TICK
-var bool bRequiresTick;
+var bool bActive;  // Is this interaction Getting Input
+var bool bVisible;  // Is this interaction being Displayed
+var bool bRequiresTick;  // Does this interaction require game TICK
+var Player ViewportOwner;  // Pointer to the ViewPort that "Owns" this interaction or none if it's Global
+var InteractionMaster Master;  // Pointer to the Interaction Master
 
-// --- Functions ---
-function bool KeyType(out EInputKey Key) {}
-// ^ NEW IN 1.60
-function bool KeyEvent(out EInputKey Key, out EInputAction Action, float Delta) {}
-// ^ NEW IN 1.60
-function PostRender(Canvas Canvas) {}
-function Message(coerce string Msg, float MsgLife) {}
-native function bool ConsoleCommand(coerce string S) {}
-// ^ NEW IN 1.60
+// Export UInteraction::execInitialize(FFrame&, void* const)
+native function Initialize();
+
+// Export UInteraction::execConsoleCommand(FFrame&, void* const)
+native function bool ConsoleCommand(coerce string S);
+
+// Export UInteraction::execWorldToScreen(FFrame&, void* const)
 // ====================================================================
 // WorldToScreen - Returns the X/Y screen coordinates in to a viewport of a given vector
-// in the world.
+// in the world. 
 // ====================================================================
-native function Vector WorldToScreen(optional Rotator CameraRotation, optional Vector CameraLocation, Vector Location) {}
-// ^ NEW IN 1.60
+native function Vector WorldToScreen(Vector Location, optional Vector CameraLocation, optional Rotator CameraRotation);
+
+// Export UInteraction::execScreenToWorld(FFrame&, void* const)
 // ====================================================================
 // ScreenToWorld - Converts an X/Y screen coordinate in to a world vector
 // ====================================================================
-native function Vector ScreenToWorld(optional Rotator CameraRotation, optional Vector CameraLocation, Vector Location) {}
-// ^ NEW IN 1.60
+native function Vector ScreenToWorld(Vector Location, optional Vector CameraLocation, optional Rotator CameraRotation);
+
+event Initialized()
+{
+	return;
+}
+
+event ServerDisconnected()
+{
+	return;
+}
+
+//#ifdef R6CODE
+event UserDisconnected()
+{
+	return;
+}
+
+//#endif // #ifdef R6CODE
+event ConnectionFailed()
+{
+	return;
+}
+
+//#ifdef R6CODE
+event R6ConnectionFailed(string szError)
+{
+	return;
+}
+
+event R6ConnectionSuccess()
+{
+	return;
+}
+
+event R6ConnectionInterrupted()
+{
+	return;
+}
+
+event R6ConnectionInProgress()
+{
+	return;
+}
+
+event R6ProgressMsg(string _Str1, string _Str2, float Seconds)
+{
+	return;
+}
+
+function Object SetGameServiceLinks(PlayerController _localPlayer)
+{
+	return;
+}
+
+event NotifyLevelChange()
+{
+	return;
+}
+
+event NotifyAfterLevelChange()
+{
+	return;
+}
+
+event MenuLoadProfile(bool _bServerProfile)
+{
+	return;
+}
+
+event LaunchR6MainMenu()
+{
+	return;
+}
+
+// NEW IN 1.60
+event string GetStoreGamePwd()
+{
+	return;
+}
+
+function SendGoCode(Object.EGoCode eGo)
+{
+	return;
+}
+
+function Message(coerce string Msg, float MsgLife)
+{
+	return;
+}
+
+function bool KeyType(out Interactions.EInputKey Key)
+{
+	return false;
+	return;
+}
+
+function bool KeyEvent(out Interactions.EInputKey Key, out Interactions.EInputAction Action, float Delta)
+{
+	return false;
+	return;
+}
+
+function PreRender(Canvas Canvas)
+{
+	return;
+}
+
+function PostRender(Canvas Canvas)
+{
+	return;
+}
+
+function SetFocus()
+{
+	Master.SetFocusTo(self, ViewportOwner);
+	return;
+}
+
+function Tick(float DeltaTime)
+{
+	return;
+}
+
 //#ifdef R6CODE
 // ====================================================================
 // ConvertKeyToLocalisation: This is convert a key to the name of the key localization
 // Ex: english to french : A is A -- Space is Espace -- Backspace is reculer etc...
-//	   the localization is in R6Menu.int
+//	   the localization is in R6Menu.int 
 // ====================================================================
-event string ConvertKeyToLocalisation(byte _Key, string _szEnumKeyName) {}
-// ^ NEW IN 1.60
-native function Initialize() {}
-event Initialized() {}
-event ServerDisconnected() {}
-//#ifdef R6CODE
-event UserDisconnected() {}
-//#endif // #ifdef R6CODE
-event ConnectionFailed() {}
-//#ifdef R6CODE
-event R6ConnectionFailed(string szError) {}
-event R6ConnectionSuccess() {}
-event R6ConnectionInterrupted() {}
-event R6ConnectionInProgress() {}
-event R6ProgressMsg(string _Str1, string _Str2, float Seconds) {}
-function Object SetGameServiceLinks(PlayerController _localPlayer) {}
-// ^ NEW IN 1.60
-event NotifyLevelChange() {}
-event NotifyAfterLevelChange() {}
-event MenuLoadProfile(bool _bServerProfile) {}
-event LaunchR6MainMenu() {}
-event string GetStoreGamePwd() {}
-// ^ NEW IN 1.60
-function SendGoCode(EGoCode eGo) {}
-function PreRender(Canvas Canvas) {}
-function SetFocus() {}
-function Tick(float DeltaTime) {}
+event string ConvertKeyToLocalisation(byte _Key, string _szEnumKeyName)
+{
+	local string szResult;
+
+	// End:0x40
+	if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(48), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(57), 1))))
+	{
+		szResult = string(__NFUN_147__(int(_Key), int(48)));		
+	}
+	else
+	{
+		// End:0x7A
+		if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(65), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(90), 1))))
+		{
+			szResult = __NFUN_236__(int(_Key));			
+		}
+		else
+		{
+			// End:0xC2
+			if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(112), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(135), 1))))
+			{
+				szResult = __NFUN_112__("F", string(__NFUN_146__(__NFUN_147__(int(_Key), int(112)), 1)));				
+			}
+			else
+			{
+				szResult = Localize("Interactions", __NFUN_112__("IK_", _szEnumKeyName), "R6Menu");
+				// End:0x127
+				if(__NFUN_122__(szResult, Localize("Interactions", "IK_None", "R6Menu")))
+				{
+					szResult = "";
+				}
+			}
+		}
+	}
+	return szResult;
+	return;
+}
 
 defaultproperties
 {
+	bActive=true
 }

@@ -1,18 +1,41 @@
-// Scripted action that sets or clears a looping ambient sound on the controlled pawn.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_PlayAmbientSound extends ScriptedAction;
+//=============================================================================
+// ACTION_PlayAmbientSound - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_PlayAmbientSound extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var Sound AmbientSound;
-var byte SoundPitch;
-var float SoundRadius;
-var byte SoundVolume;
+var(Action) byte SoundVolume;
+var(Action) byte SoundPitch;
+var(Action) float SoundRadius;
+var(Action) Sound AmbientSound;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-function string GetActionString() {}
+function bool InitActionFor(ScriptedController C)
+{
+	// End:0x62
+	if(__NFUN_119__(AmbientSound, none))
+	{
+		C.SequenceScript.AmbientSound = AmbientSound;
+		C.SequenceScript.SoundPitch = SoundPitch;
+		C.SequenceScript.SoundRadius = SoundRadius;
+	}
+	return false;
+	return;
+}
+
+function string GetActionString()
+{
+	return __NFUN_168__(ActionString, string(AmbientSound));
+	return;
+}
 
 defaultproperties
 {
+	SoundVolume=128
+	SoundPitch=64
+	SoundRadius=64.0000000
+	ActionString="play ambient sound"
 }

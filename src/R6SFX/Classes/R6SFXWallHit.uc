@@ -1,3 +1,9 @@
+//=============================================================================
+// R6SFXWallHit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6SFXWallHit.uc 
 // Created By       
@@ -9,8 +15,3 @@
 class R6SFXWallHit extends R6WallHit
     abstract;
 
-#exec OBJ LOAD FILE="..\Textures\R6SFX_T.utx" PACKAGE=R6SFX_T
-
-defaultproperties
-{
-}

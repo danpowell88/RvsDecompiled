@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowListGeneralItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListBoxItem.uc : Class used to hold the values for the entries
 //  in the list of servers in the multi player menu.
 //
@@ -9,14 +15,10 @@
 //=============================================================================
 class R6WindowListGeneralItem extends UWindowListBoxItem;
 
-// --- Variables ---
-var R6WindowButtonBox m_pR6WindowButtonBox;
+// NEW IN 1.60
+var bool m_bFakeItem;
 //type of button to create?
 var R6WindowCounter m_pR6WindowCounter;
+var R6WindowButtonBox m_pR6WindowButtonBox;
 var R6WindowComboControl m_pR6WindowComboControl;
-var bool m_bFakeItem;
-// ^ NEW IN 1.60
 
-defaultproperties
-{
-}

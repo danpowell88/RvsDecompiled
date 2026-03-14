@@ -1,17 +1,42 @@
-// Latent scripted action that pauses the sequence for a fixed number of seconds.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_WaitForTimer extends LatentScriptedAction;
+//=============================================================================
+// ACTION_WaitForTimer - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_WaitForTimer extends LatentScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var float PauseTime;
+var(Action) float PauseTime;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-function bool CompleteWhenTriggered() {}
-function bool CompleteWhenTimer() {}
-function string GetActionString() {}
+function bool InitActionFor(ScriptedController C)
+{
+	C.CurrentAction = self;
+	C.__NFUN_280__(PauseTime, false);
+	return true;
+	return;
+}
+
+function bool CompleteWhenTriggered()
+{
+	return true;
+	return;
+}
+
+function bool CompleteWhenTimer()
+{
+	return true;
+	return;
+}
+
+function string GetActionString()
+{
+	return __NFUN_168__(ActionString, string(PauseTime));
+	return;
+}
 
 defaultproperties
 {
+	ActionString="Wait for timer"
 }

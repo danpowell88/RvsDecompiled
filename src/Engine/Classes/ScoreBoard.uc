@@ -1,16 +1,26 @@
 //=============================================================================
+// ScoreBoard - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // ScoreBoard
 //=============================================================================
-class ScoreBoard extends Info;
+class ScoreBoard extends Info
+    notplaceable
+    hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-// --- Variables ---
 var Font RegFont;
 var HUD OwnerHUD;
 
-// --- Functions ---
-function ShowScores(Canvas Canvas) {}
-function PreBeginPlay() {}
-
-defaultproperties
+function ShowScores(Canvas Canvas)
 {
+	return;
 }
+
+function PreBeginPlay()
+{
+	return;
+}
+

@@ -1,16 +1,31 @@
 //=============================================================================
+// UseTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UseTrigger: if a player stands within proximity of this trigger, and hits Use, 
 // it will send Trigger/UnTrigger to actors whose names match 'EventName'.
 //=============================================================================
-class UseTrigger extends Triggers;
+class UseTrigger extends Triggers
+    placeable;
 
-// --- Variables ---
-var localized string Message;
+var() localized string Message;
 
-// --- Functions ---
-function UsedBy(Pawn User) {}
-function Touch(Actor Other) {}
-
-defaultproperties
+function UsedBy(Pawn User)
 {
+	TriggerEvent(Event, self, User);
+	return;
 }
+
+function Touch(Actor Other)
+{
+	// End:0x3F
+	if(__NFUN_130__(__NFUN_123__(Message, ""), __NFUN_119__(Other.Instigator, none)))
+	{
+		Other.Instigator.ClientMessage(Message);
+	}
+	return;
+}
+

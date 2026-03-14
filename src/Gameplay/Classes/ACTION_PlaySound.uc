@@ -1,19 +1,34 @@
-// Scripted action that plays a 3D-positioned sound at the pawn's location, with
-// configurable volume, pitch, and attenuation.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_PlaySound extends ScriptedAction;
+//=============================================================================
+// ACTION_PlaySound - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_PlaySound extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var Sound Sound;
-var float Volume;
-var float Pitch;
-var bool bAttenuate;
+var(Action) bool bAttenuate;
+var(Action) float Volume;
+var(Action) float Pitch;
+var(Action) Sound Sound;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-function string GetActionString() {}
+function bool InitActionFor(ScriptedController C)
+{
+	return false;
+	return;
+}
+
+function string GetActionString()
+{
+	return __NFUN_168__(ActionString, string(Sound));
+	return;
+}
 
 defaultproperties
 {
+	bAttenuate=true
+	Volume=1.0000000
+	Pitch=1.0000000
+	ActionString="play sound"
 }

@@ -1,4 +1,10 @@
 //=============================================================================
+// R6Door - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6Door.uc : One of these actors should be placed on either side of each door
 //              used for detection of pawns and for maintaining info about the 
 //              surroundings.
@@ -9,31 +15,80 @@
 //=============================================================================
 class R6Door extends NavigationPoint
     native
-    notplaceable;
+    hidecategories(Lighting,LightColor,Karma,Force);
 
-#exec Texture Import File=Textures\S_DoorNavP.bmp Name=S_DoorNavP Mips=Off MASKED=1
-
-// --- Enums ---
 enum eRoomLayout
 {
-    // enum values not recoverable from binary — see 1.56 source
+	ROOM_OpensCenter,               // 0
+	ROOM_OpensLeft,                 // 1
+	ROOM_OpensRight,                // 2
+	ROOM_None                       // 3
 };
 
-// --- Variables ---
-var R6IORotatingDoor m_RotatingDoor;   // The interactive rotating door object attached to this door actor
-// ^ NEW IN 1.60
-var R6Door m_CorrespondingDoor;      // The paired door actor on the other side of a double door
-// ^ NEW IN 1.60
-var eRoomLayout m_eRoomLayout;       // Room layout hint used by AI pathfinding around this door
-// ^ NEW IN 1.60
-var Vector m_vLookDir;
+// NEW IN 1.60
+var() R6Door.eRoomLayout m_eRoomLayout;
 var bool m_bCloseOnUntouch;
+var() R6Door m_CorrespondingDoor;
+var() R6IORotatingDoor m_RotatingDoor;
+var Vector m_vLookDir;
 
-// --- Functions ---
-function UnTouch(Actor Other) {}
-function Touch(Actor Other) {}
-function PostBeginPlay() {}
+function PostBeginPlay()
+{
+	super(Actor).PostBeginPlay();
+	m_vLookDir = Vector(Rotation);
+	m_vLookDir = __NFUN_226__(m_vLookDir);
+	return;
+}
+
+function Touch(Actor Other)
+{
+	local R6Pawn Pawn;
+	local Rotator rPawnRot;
+
+	Pawn = R6Pawn(Other);
+	// End:0x1D
+	if(__NFUN_114__(Pawn, none))
+	{
+		return;
+	}
+	// End:0x53
+	if(__NFUN_132__(__NFUN_154__(int(Pawn.m_ePawnType), int(3)), __NFUN_154__(int(Pawn.m_ePawnType), int(2))))
+	{
+		return;
+	}
+	rPawnRot = Pawn.Rotation;
+	rPawnRot.Pitch = 0;
+	Pawn.PotentialOpenDoor(self);
+	super(Actor).Touch(Other);
+	return;
+}
+
+function UnTouch(Actor Other)
+{
+	local R6Pawn Pawn;
+
+	Pawn = R6Pawn(Other);
+	// End:0x1D
+	if(__NFUN_114__(Pawn, none))
+	{
+		return;
+	}
+	Pawn.RemovePotentialOpenDoor(self);
+	super(Actor).UnTouch(Other);
+	return;
+}
 
 defaultproperties
 {
+	ExtraCost=300
+	m_bExactMove=true
+	bCollideWhenPlacing=false
+	bCollideActors=true
+	bDirectional=true
+	CollisionRadius=96.0000000
+	CollisionHeight=90.0000000
+	Texture=Texture'R6Engine.S_DoorNavP'
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var eRoomLayout

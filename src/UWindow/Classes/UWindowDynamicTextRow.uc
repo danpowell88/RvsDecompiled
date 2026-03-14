@@ -1,12 +1,11 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// UWindowDynamicTextRow - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowDynamicTextRow extends UWindowList;
 
-// --- Variables ---
-var string Text;
-var UWindowDynamicTextRow WrapParent;
 var bool bRowDirty;
+var UWindowDynamicTextRow WrapParent;
+var string Text;
 
-defaultproperties
-{
-}

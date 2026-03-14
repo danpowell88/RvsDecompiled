@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6TMilitant03.uc : Terrorist pawn variant: third militant skin built on the militant01 base.
+// R6TMilitant03 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6TMilitant03.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -9,4 +15,7 @@ class R6TMilitant03 extends R6TMilitant01;
 
 defaultproperties
 {
+	m_eTerroType=5
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel254'
+	Skins=/* Array type was not detected. */
 }

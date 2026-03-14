@@ -1,18 +1,40 @@
-// Scripted action that displays a text message on the HUD.
-// When bBroadcast is true the message is sent to all connected players.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_DisplayMessage extends ScriptedAction;
+//=============================================================================
+// ACTION_DisplayMessage - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_DisplayMessage extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var string Message;
-var name messagetype;
-var bool bBroadcast;
+var(Action) bool bBroadcast;
+var(Action) name messagetype;
+var(Action) string Message;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-function string GetActionString() {}
+function bool InitActionFor(ScriptedController C)
+{
+	// End:0x46
+	if(bBroadcast)
+	{
+		C.Level.Game.Broadcast(C.GetInstigator(), Message, messagetype);		
+	}
+	else
+	{
+		C.GetInstigator().ClientMessage(Message, messagetype);
+	}
+	return false;
+	return;
+}
+
+function string GetActionString()
+{
+	return __NFUN_168__(ActionString, Message);
+	return;
+}
 
 defaultproperties
 {
+	messagetype="CriticalEvent"
+	ActionString="display message"
 }

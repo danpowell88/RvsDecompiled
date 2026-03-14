@@ -1,15 +1,19 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// MotionBlur - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class MotionBlur extends CameraEffect
     native
+	editinlinenew
+    collapsecategories
     noexport;
 
-// --- Variables ---
-var byte BlurAlpha;
-// ^ NEW IN 1.60
+var() byte BlurAlpha;
 var const int RenderTargets[2];
 var const float LastFrameTime;
 
 defaultproperties
 {
+	BlurAlpha=128
 }

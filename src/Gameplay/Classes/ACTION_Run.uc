@@ -1,11 +1,23 @@
-// Scripted action that sets the pawn to full running speed (disables crouch and walk).
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_Run extends ScriptedAction;
+//=============================================================================
+// ACTION_Run - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_Run extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
+function bool InitActionFor(ScriptedController C)
+{
+	C.Pawn.ShouldCrouch(false);
+	C.Pawn.SetWalking(false);
+	return false;
+	return;
+}
 
 defaultproperties
 {
+	bValidForTrigger=false
+	ActionString="Run"
 }

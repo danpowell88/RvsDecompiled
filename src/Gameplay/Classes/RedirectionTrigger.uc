@@ -1,13 +1,25 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// RedirectionTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class RedirectionTrigger extends Triggers;
 
-// --- Variables ---
-var name RedirectionEvent;
+var() name RedirectionEvent;
 
-// --- Functions ---
-function Trigger(Actor Other, Pawn EventInstigator) {}
-
-defaultproperties
+function Trigger(Actor Other, Pawn EventInstigator)
 {
+	local Pawn P;
+
+	// End:0x44
+	foreach __NFUN_313__(Class'Engine.Pawn', P, Event)
+	{
+		// End:0x43
+		if(__NFUN_151__(P.Health, 0))
+		{
+			P.TriggerEvent(RedirectionEvent, self, P);
+		}		
+	}	
+	return;
 }
+

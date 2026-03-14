@@ -1,13 +1,26 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// UWindowFrameCloseBox - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowFrameCloseBox extends UWindowButton;
 
-// --- Functions ---
-function Created() {}
-function Click(float X, float Y) {}
-// No keyboard support
-function KeyDown(int Key, float Y, float X) {}
-
-defaultproperties
+function Created()
 {
+	bNoKeyboard = true;
+	super.Created();
+	return;
 }
+
+function Click(float X, float Y)
+{
+	ParentWindow.Close();
+	return;
+}
+
+// No keyboard support
+function KeyDown(int Key, float X, float Y)
+{
+	return;
+}
+

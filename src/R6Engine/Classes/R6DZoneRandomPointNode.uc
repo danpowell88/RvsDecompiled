@@ -1,25 +1,35 @@
 //=============================================================================
-//  R6DZoneRandomPointNode.uc : A randomly-selectable waypoint within an R6DZoneRandomPoints zone.
-//  High-priority nodes (m_bHighPriority) are preferred over normal ones when picking at random.
+// R6DZoneRandomPointNode - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6DZoneRandomPointNode.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/06/26 * Created by Guillaume Borgia
 //=============================================================================
 class R6DZoneRandomPointNode extends Actor
-    native;
+    native
+    placeable;
 
-// --- Variables ---
-var bool m_bHighPriority;         // Prefer this node over normal-priority nodes during random selection
-// ^ NEW IN 1.60
-var EStance m_eStance;            // Required stance (stand/crouch/prone) when occupying this node
-// ^ NEW IN 1.60
-var int m_iGroupID;               // Group ID for coordinated multi-pawn positioning
-// ^ NEW IN 1.60
-var bool m_bAllowLeave;           // Allow AI to leave this node when reacting to threats
-// ^ NEW IN 1.60
+var(R6DZone) Actor.EStance m_eStance;
+var(R6DZone) int m_iGroupID;
+var(R6DZone) bool m_bHighPriority;
+// NEW IN 1.60
+var(R6DZone) bool m_bAllowLeave;
 var R6DZoneRandomPoints m_pZone;
 
 defaultproperties
 {
+	m_eStance=1
+	m_bAllowLeave=true
+	bHidden=true
+	m_bUseR6Availability=true
+	bDirectional=true
+	CollisionRadius=40.0000000
+	CollisionHeight=85.0000000
+	Texture=Texture'R6Engine_T.Icons.DZoneTer'
 }

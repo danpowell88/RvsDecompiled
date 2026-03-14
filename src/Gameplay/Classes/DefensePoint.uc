@@ -1,16 +1,16 @@
 //=============================================================================
-// DefensePoint
-// A navigation hint marking a position that an AI should defend.
-// FortTag links it to a fortification, Priority controls selection order, and
-// Team restricts it to a specific team (0 = any).
+// DefensePoint - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
 //=============================================================================
-class DefensePoint extends Ambushpoint;
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+// Defensepoint.
+//=============================================================================
+class DefensePoint extends Ambushpoint
+    hidecategories(Lighting,LightColor,Karma,Force);
 
-// --- Variables ---
-var name FortTag;
-var byte Priority;
-var byte Team;
+var() byte Team;
+var() byte Priority;
+var() name FortTag;  // optional associated fort (for assault game)
 
-defaultproperties
-{
-}

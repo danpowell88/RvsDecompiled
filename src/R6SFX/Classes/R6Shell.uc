@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6Shell.uc : Abstract base class for bullet/shell casing ejection effects.
-//  Extends R6SFX; subclassed per caliber to play the appropriate ejection particle effect.
+// R6Shell - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6Shell.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -11,4 +16,7 @@ class R6Shell extends R6SFX
 
 defaultproperties
 {
+	RemoteRole=0
+	m_bDrawFromBase=true
+	m_bTickOnlyWhenVisible=true
 }

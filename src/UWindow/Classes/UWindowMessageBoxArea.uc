@@ -1,15 +1,35 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// UWindowMessageBoxArea - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowMessageBoxArea extends UWindowWindow;
 
-// --- Variables ---
 var string Message;
 
-// --- Functions ---
-function float GetHeight(Canvas C) {}
-// ^ NEW IN 1.60
-function Paint(Canvas C, float X, float Y) {}
-
-defaultproperties
+function float GetHeight(Canvas C)
 {
+	local float tW, tH, H;
+	local int L;
+	local float OldWinHeight;
+
+	OldWinHeight = WinHeight;
+	WinHeight = 1000.0000000;
+	C.Font = Root.Fonts[0];
+	TextSize(C, "A", tW, tH);
+	L = WrapClipText(C, 0.0000000, 0.0000000, Message,,,, true);
+	H = __NFUN_171__(tH, float(L));
+	WinHeight = OldWinHeight;
+	return H;
+	return;
 }
+
+function Paint(Canvas C, float X, float Y)
+{
+	C.Font = Root.Fonts[0];
+	C.__NFUN_2626__(0, 0, 0);
+	WrapClipText(C, 0.0000000, 0.0000000, Message);
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	return;
+}
+

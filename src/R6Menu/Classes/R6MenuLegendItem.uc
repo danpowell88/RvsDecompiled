@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6MenuLegendItem.uc : List item entry in the legend panel; holds an icon texture and label for a single legend entry.
+// R6MenuLegendItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6MenuLegendItem.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -7,10 +13,6 @@
 //=============================================================================
 class R6MenuLegendItem extends R6WindowListButtonItem;
 
-// --- Variables ---
-var Texture m_pObjectIcon;
 var bool m_bOtherTextureHeight;
+var Texture m_pObjectIcon;
 
-defaultproperties
-{
-}

@@ -1,12 +1,20 @@
-// Latent scripted action that stalls the sequence until the pawn finishes its current
-// in-progress rotation (TurnToGoal returns true immediately, deferring to the tick loop).
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_FinishRotation extends LatentScriptedAction;
+//=============================================================================
+// ACTION_FinishRotation - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_FinishRotation extends LatentScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Functions ---
-function bool TurnToGoal() {}
+function bool TurnToGoal()
+{
+	return true;
+	return;
+}
 
 defaultproperties
 {
+	ActionString="Finish rotation"
 }

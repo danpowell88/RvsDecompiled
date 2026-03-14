@@ -1,13 +1,56 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// UWindowSmallButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowSmallButton extends UWindowButton;
 
-// --- Functions ---
-function Paint(Canvas C, float Y, float X) {}
-function BeforePaint(Canvas C, float Y, float X) {}
-function AutoWidth(Canvas C) {}
-function Created() {}
-
-defaultproperties
+function Created()
 {
+	bNoKeyboard = true;
+	super.Created();
+	ToolTipString = "";
+	SetText("");
+	SetFont(0);
+	WinHeight = 16.0000000;
+	return;
 }
+
+function AutoWidth(Canvas C)
+{
+	local float W, H;
+
+	C.Font = Root.Fonts[Font];
+	TextSize(C, RemoveAmpersand(Text), W, H);
+	// End:0x6A
+	if(__NFUN_176__(WinWidth, __NFUN_174__(W, float(10))))
+	{
+		WinWidth = __NFUN_174__(W, float(10));
+	}
+	return;
+}
+
+function BeforePaint(Canvas C, float X, float Y)
+{
+	local float W, H;
+
+	C.Font = Root.Fonts[Font];
+	TextSize(C, RemoveAmpersand(Text), W, H);
+	TextX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+	TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+	// End:0x91
+	if(bMouseDown)
+	{
+		__NFUN_184__(TextX, float(1));
+		__NFUN_184__(TextY, float(1));
+	}
+	return;
+}
+
+function Paint(Canvas C, float X, float Y)
+{
+	LookAndFeel.Button_DrawSmallButton(self, C);
+	super.Paint(C, X, Y);
+	return;
+}
+

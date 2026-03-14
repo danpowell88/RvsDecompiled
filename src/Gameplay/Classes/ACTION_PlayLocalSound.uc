@@ -1,16 +1,35 @@
-// Scripted action that plays a sound heard only by the local (first-person) player,
-// bypassing 3D attenuation.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_PlayLocalSound extends ScriptedAction;
+//=============================================================================
+// ACTION_PlayLocalSound - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_PlayLocalSound extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var Sound Sound;
+var(Action) Sound Sound;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-function string GetActionString() {}
+function bool InitActionFor(ScriptedController C)
+{
+	local PlayerController P;
+
+	// End:0x30
+	foreach C.__NFUN_313__(Class'Engine.PlayerController', P)
+	{
+		P.ClientPlaySound(Sound, 3);		
+	}	
+	return false;
+	return;
+}
+
+function string GetActionString()
+{
+	return __NFUN_168__(ActionString, string(Sound));
+	return;
+}
 
 defaultproperties
 {
+	ActionString="play sound"
 }

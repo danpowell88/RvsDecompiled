@@ -1,4 +1,10 @@
 //=============================================================================
+// Time - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 /// Time-management class.
 /// Not yet implemented.
 /// This is a built-in Unreal class and it shouldn't be modified.
@@ -30,6 +36,19 @@
 class Time extends Object
     transient;
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function GetGlobalTime
+// REMOVED IN 1.60: function GlobalToLocal
+// REMOVED IN 1.60: function LocalToGlobal
+// REMOVED IN 1.60: function GetNSecs
+// REMOVED IN 1.60: function GetUSecs
+// REMOVED IN 1.60: function GetMSecs
+// REMOVED IN 1.60: function GetSeconds
+// REMOVED IN 1.60: function GetMinutes
+// REMOVED IN 1.60: function GetHours
+// REMOVED IN 1.60: function GetDays
+// REMOVED IN 1.60: function DayOfWeek
+// REMOVED IN 1.60: function GetMonths
+// REMOVED IN 1.60: function GetYears
+// REMOVED IN 1.60: function SpanSeconds

@@ -1,18 +1,44 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// UWindowComboListItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowComboListItem extends UWindowList;
 
-// --- Variables ---
-var string Value;
 var int SortWeight;
-// A second, non-displayed value
-var string Value2;
 var bool bDisabled;
 var float ItemTop;
+var string Value;
+var string Value2;  // A second, non-displayed value
 
-// --- Functions ---
-function int Compare(UWindowList t, UWindowList B) {}
-
-defaultproperties
+function int Compare(UWindowList t, UWindowList B)
 {
+	local UWindowComboListItem TI, BI;
+	local string TS, BS;
+
+	TI = UWindowComboListItem(t);
+	BI = UWindowComboListItem(B);
+	// End:0x98
+	if(__NFUN_154__(TI.SortWeight, BI.SortWeight))
+	{
+		TS = __NFUN_235__(TI.Value);
+		BS = __NFUN_235__(BI.Value);
+		// End:0x7E
+		if(__NFUN_122__(TS, BS))
+		{
+			return 0;
+		}
+		// End:0x93
+		if(__NFUN_115__(TS, BS))
+		{
+			return -1;
+		}
+		return 1;		
+	}
+	else
+	{
+		return __NFUN_147__(TI.SortWeight, BI.SortWeight);
+	}
+	return;
 }
+

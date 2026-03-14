@@ -1,24 +1,21 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// TerrainMaterial - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class TerrainMaterial extends RenderedMaterial
-    native;
+    native
+    collapsecategories
+    hidecategories(Object);
 
-// --- Structs ---
 struct TerrainMaterialLayer
 {
-    var Material Texture;
-    var BitmapMaterial AlphaWeight;
-    var Matrix TextureMatrix;
+	var Material Texture;
+	var BitmapMaterial AlphaWeight;
+	var Matrix TextureMatrix;
 };
 
-// --- Variables ---
-// var ? AlphaWeight; // REMOVED IN 1.60
-// var ? Texture; // REMOVED IN 1.60
-// var ? TextureMatrix; // REMOVED IN 1.60
-var const array<array> Layers;
 var const byte RenderMethod;
 var const bool FirstPass;
+var const array<TerrainMaterialLayer> Layers;
 
-defaultproperties
-{
-}

@@ -1,19 +1,22 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// TexScaler - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class TexScaler extends TexModifier
-    native;
+    native
+	editinlinenew
+    collapsecategories
+    hidecategories(Object,Material);
 
-// --- Variables ---
+var() float UScale;
+var() float VScale;
+var() float UOffset;
+var() float VOffset;
 var Matrix M;
-var float UScale;
-// ^ NEW IN 1.60
-var float VScale;
-// ^ NEW IN 1.60
-var float UOffset;
-// ^ NEW IN 1.60
-var float VOffset;
-// ^ NEW IN 1.60
 
 defaultproperties
 {
+	UScale=1.0000000
+	VScale=1.0000000
 }

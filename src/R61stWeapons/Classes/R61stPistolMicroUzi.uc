@@ -1,11 +1,26 @@
+//=============================================================================
+// R61stPistolMicroUzi - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //===============================================================================
 //  [R61stPistolMicroUzi] 
 //===============================================================================
-class R61stPistolMicroUzi extends R6AbstractFirstPersonWeapon;
+class R61stPistolMicroUzi extends R6
+    AbstractFirstPersonWeapon;
 
-// --- Functions ---
-function PostBeginPlay() {}
+function PostBeginPlay()
+{
+	LinkSkelAnim(MeshAnimation'R61stPistol_UKX.R61stPistolMicroUziA');
+	super.PostBeginPlay();
+	m_smGun = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
+	m_smGun.SetStaticMesh(StaticMesh'R61stWeapons_SM.Pistols.R61stPistolMicroUziFrame');
+	AttachToBone(m_smGun, 'TagFrame');
+	return;
+}
 
 defaultproperties
 {
+	Mesh=SkeletalMesh'R61stPistol_UKX.R61stPistolMicroUzi'
 }

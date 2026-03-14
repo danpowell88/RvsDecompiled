@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6MenuWPDeleteAllTeamButton.uc : Button that removes all waypoint nodes belonging to the currently active team from the mission plan.
+// R6MenuWPDeleteAllTeamButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6MenuWPDeleteAllTeamButton.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -7,13 +13,60 @@
 //=============================================================================
 class R6MenuWPDeleteAllTeamButton extends R6WindowButton;
 
-// --- Functions ---
-simulated function Click(float Y, float X) {}
-function LMouseDown(float Y, float X) {}
-function Tick(float fDeltaTime) {}
-function BeforePaint(float Y, float X, Canvas C) {}
-function Created() {}
+function Created()
+{
+	bNoKeyboard = true;
+	return;
+}
+
+function BeforePaint(Canvas C, float X, float Y)
+{
+	return;
+}
+
+function Tick(float fDeltaTime)
+{
+	return;
+}
+
+function LMouseDown(float X, float Y)
+{
+	local R6PlanningCtrl OwnerCtrl;
+
+	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	super(UWindowWindow).LMouseDown(X, Y);
+	// End:0x2C
+	if(bDisabled)
+	{
+		return;
+	}
+	// End:0x116
+	if(__NFUN_132__(__NFUN_132__(__NFUN_155__(OwnerCtrl.m_pTeamInfo[0].GetNbActionPoint(), 0), __NFUN_155__(OwnerCtrl.m_pTeamInfo[1].GetNbActionPoint(), 0)), __NFUN_155__(OwnerCtrl.m_pTeamInfo[2].GetNbActionPoint(), 0)))
+	{
+		R6MenuRootWindow(Root).m_PlanningWidget.Hide3DAndLegend();
+		R6MenuRootWindow(Root).SimplePopUp(Localize("PlanningMenu", "WAYPOINTS", "R6Menu"), Localize("PlanningMenu", "DeleteAllTeam", "R6Menu"), 45);
+	}
+	return;
+}
+
+simulated function Click(float X, float Y)
+{
+	super(UWindowButton).Click(X, Y);
+	GetPlayerOwner().__NFUN_264__(R6PlanningCtrl(GetPlayerOwner()).m_PlanningBadClickSnd, 9);
+	return;
+}
 
 defaultproperties
 {
+	m_iDrawStyle=5
+	bUseRegion=true
+	m_bPlayButtonSnd=false
+	UpTexture=Texture'R6MenuTextures.Gui_03'
+	DownTexture=Texture'R6MenuTextures.Gui_03'
+	DisabledTexture=Texture'R6MenuTextures.Gui_03'
+	OverTexture=Texture'R6MenuTextures.Gui_03'
+	UpRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=14370,ZoneNumber=0)
+	DownRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=14370,ZoneNumber=0)
+	DisabledRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=14370,ZoneNumber=0)
+	OverRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=14370,ZoneNumber=0)
 }

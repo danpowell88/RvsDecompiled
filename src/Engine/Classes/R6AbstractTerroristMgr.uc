@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6TerroristMgr.uc : Abstract native base for R6TerroristMgr in R6Engine.
-//  Provides Initialization and ResetOriginalData hooks called by the native AI layer.
+// R6AbstractTerroristMgr - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6TerroristMgr.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:  Terrorist AI manager for interaction with hostage
@@ -9,10 +14,13 @@
 class R6AbstractTerroristMgr extends Object
     native;
 
-// --- Functions ---
-function Initialization(Actor dummy) {}
-function ResetOriginalData() {}
-
-defaultproperties
+function Initialization(Actor dummy)
 {
+	return;
 }
+
+function ResetOriginalData()
+{
+	return;
+}
+

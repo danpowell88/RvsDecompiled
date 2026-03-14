@@ -1,12 +1,27 @@
-// Latent scripted action that pathfinds the pawn to the nearest player's location.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_MoveToPlayer extends LatentScriptedAction;
+//=============================================================================
+// ACTION_MoveToPlayer - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_MoveToPlayer extends LatentScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Functions ---
-function Actor GetMoveTargetFor(ScriptedController C) {}
-function bool MoveToGoal() {}
+function bool MoveToGoal()
+{
+	return true;
+	return;
+}
+
+function Actor GetMoveTargetFor(ScriptedController C)
+{
+	return C.GetMyPlayer();
+	return;
+}
 
 defaultproperties
 {
+	bValidForTrigger=false
+	ActionString="Move to player"
 }

@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowListBoxAnchorButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListBoxAnchorButton.uc : These button will allow us 
 //                                      to make a list box automaticly
 //                                      scroll to a AnchoredElement element
@@ -9,9 +15,13 @@
 //=============================================================================
 class R6WindowListBoxAnchorButton extends R6WindowButton;
 
-// --- Variables ---
 var R6WindowListBoxItem AnchoredElement;
 
 defaultproperties
 {
+	bUseRegion=true
+	UpTexture=Texture'R6MenuTextures.Tab_Icon00'
+	DownTexture=Texture'R6MenuTextures.Tab_Icon00'
+	DisabledTexture=Texture'R6MenuTextures.Tab_Icon00'
+	OverTexture=Texture'R6MenuTextures.Tab_Icon00'
 }

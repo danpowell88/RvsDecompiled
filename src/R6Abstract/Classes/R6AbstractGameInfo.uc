@@ -1,4 +1,10 @@
 //=============================================================================
+// R6AbstractGameInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6AbstractGameInfo.uc : This is the abstract class for the R6GameInfo class.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,178 +12,625 @@
 //    august 8th, 2001 * Created by Chaouky Garram
 //=============================================================================
 class R6AbstractGameInfo extends GameInfo
+    abstract
     native
-    abstract;
+    config
+    hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-// --- Variables ---
-// var ? m_KickersName; // REMOVED IN 1.60
-// var ? m_fEndKickVoteTime; // REMOVED IN 1.60
+var int m_iNbOfRainbowAIToSpawn;
+var int m_iNbOfTerroristToSpawn;  // this is now set in the game info init
+var int m_iDiffLevel;  // The difficulty level of the terro -- in coop
+var int m_fTimerStartTime;  // Time at which we began counting down
+var bool m_bFriendlyFire;
+var bool m_bEndGameIgnoreGamePlayCheck;
+var bool m_bGameOverButAllowDeath;
+var bool m_bTimerStarted;  // Boolean to inticate that we have started the countdown
+var bool m_bInternetSvr;  // The server is a internet server
+var float m_fEndingTime;  // Time the round will end at in seconds.
+var float m_fTimeBetRounds;  // Time between round (seconds)
+// NEW IN 1.60
+var float m_fEndVoteTime;
+var PlayerController m_Player;  // AK: local player controller VALID *ONLY* FOR SINGLE PLAYER MODE!!!!!!!
+var R6AbstractNoiseMgr m_noiseMgr;  // Manager for the loudness of MakeNoise sound
 // the following flag can be used for to determine game mode
 var R6MissionObjectiveMgr m_missionMgr;
-// Time at which we began counting down
-var int m_fTimerStartTime;
-var int m_iNbOfRainbowAIToSpawn;
-var bool m_bEndGameIgnoreGamePlayCheck;
-// Boolean to inticate that we have started the countdown
-var bool m_bTimerStarted;
+var PlayerController m_PlayerKick;  // this is the player who may be kicked
+var PlayerController m_pCurPlayerCtrlMdfSrvInfo;  // the player controller who's modifying the server settings
 var UdpBeacon m_UdpBeacon;
-// The server is a internet server
-var bool m_bInternetSvr;
-// To have the right part of the name of the action planning. The left part is the name of the map.
-var string m_szDefaultActionPlan;
-// the player controller who's modifying the server settings
-var PlayerController m_pCurPlayerCtrlMdfSrvInfo;
-// this is the player who may be kicked
-var PlayerController m_PlayerKick;
+// NEW IN 1.60
 var string m_VoteInstigatorName;
-// ^ NEW IN 1.60
-var float m_fEndVoteTime;
-// ^ NEW IN 1.60
-// Time between round (seconds)
-var float m_fTimeBetRounds;
-// Time the round will end at in seconds.
-var float m_fEndingTime;
-// The difficulty level of the terro -- in coop
-var int m_iDiffLevel;
-var bool m_bGameOverButAllowDeath;
-var bool m_bFriendlyFire;
-// this is now set in the game info init
-var int m_iNbOfTerroristToSpawn;
-// Manager for the loudness of MakeNoise sound
-var R6AbstractNoiseMgr m_noiseMgr;
-// AK: local player controller VALID *ONLY* FOR SINGLE PLAYER MODE!!!!!!!
-var PlayerController m_Player;
+var string m_szDefaultActionPlan;  // To have the right part of the name of the action planning. The left part is the name of the map.
 
-// --- Functions ---
-//------------------------------------------------------------------
-// EndGameAndJumpToMapID
-//	set info to jump to a map, end game by aborting the mission without
-//  game stats effect
-//------------------------------------------------------------------
-function EndGameAndJumpToMapID(int iGotoMapId) {}
-function SetPawnTeamFriendlies(Pawn aPawn) {}
-function IObjectDestroyed(Actor anInteractiveObject, Pawn aPawn) {}
-function IObjectInteract(Actor anInteractiveObject, Pawn aPawn) {}
-function LeftExtractionZone(Actor Other) {}
-function EnteredExtractionZone(Actor Other) {}
-function PawnSecure(Pawn secured) {}
-function PawnHeard(Pawn witness, Pawn heard) {}
-function PawnSeen(Pawn witness, Pawn seen) {}
-function PawnKilled(Pawn killed) {}
-function ChangeTeams(optional bool bPrevTeam, optional Actor newRainbowTeam, PlayerController inPlayerController) {}
-function ChangeOperatives(PlayerController inPlayerController, int iTeamId, int iOperativeID) {}
-function InstructAllTeamsToHoldPosition() {}
-function InstructAllTeamsToFollowPlanning() {}
-function BroadcastGameMsg(string szLocFile, string szPreMsg, string szMsgID, optional Sound sndGameStatus, optional int iLifeTime) {}
-function R6AbstractNoiseMgr GetNoiseMgr() {}
-// ^ NEW IN 1.60
-function Object GetMultiCoopPlayerVoicesMgr(int iTeam) {}
-// ^ NEW IN 1.60
-function Object GetMultiCoopMemberVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetPreRecordedMsgVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetMultiCommonVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetRainbowPlayerVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetRainbowMemberVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetCommonRainbowPlayerVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetCommonRainbowMemberVoicesMgr() {}
-// ^ NEW IN 1.60
-function Object GetRainbowOtherTeamVoicesMgr(int iIDVoicesMgr) {}
-// ^ NEW IN 1.60
-function Object GetTerroristVoicesMgr(ETerroristNationality eNationality) {}
-// ^ NEW IN 1.60
-function Object GetHostageVoicesMgr(EHostageNationality eNationality, bool bIsFemale) {}
-// ^ NEW IN 1.60
-function bool ProcessKickVote(PlayerController _KickPlayer, string KickersName) {}
-// ^ NEW IN 1.60
-function bool ProcessChangeMapVote(string InstigatorName) {}
-// ^ NEW IN 1.60
-function ResetRound() {}
-function AdminResetRound() {}
-function ResetPenalty() {}
-function SetJumpingMaps(bool _flagSetting, int iNextMapIndex) {}
-function UpdateRepResArrays() {}
-function PauseCountDown() {}
-function UnPauseCountDown() {}
-function StartTimer() {}
-function bool IsTeamSelectionLocked() {}
-// ^ NEW IN 1.60
-function bool CanSwitchTeamMember() {}
-// ^ NEW IN 1.60
-function Actor GetRainbowAIFromTable() {}
-// ^ NEW IN 1.60
-function bool RainbowOperativesStillAlive() {}
-// ^ NEW IN 1.60
-function int GetNbOfRainbowAIToSpawn(PlayerController aController) {}
-// ^ NEW IN 1.60
-function CreateMissionObjectiveMgr() {}
-function BroadcastMissionObjMsg(string szLocMsg, string szPreMsg, string szMsgID, optional Sound sndGameStatus, optional int iLifeTime) {}
-function UpdateRepMissionObjectivesStatus() {}
-function UpdateRepMissionObjectives() {}
-function ResetRepMissionObjectives() {}
-function Find2DTexture(string TeamClass, out Material MenuTexture, out Region TextureRegion) {}
-function SpawnAIandInitGoInGame() {}
-function InitObjectives() {}
-function RemoveObjectives() {}
-function RemoveTerroFromList(Pawn toRemove) {}
-function Actor GetNewTeam(optional bool bNextTeam, Actor aCurrentTeam) {}
-// ^ NEW IN 1.60
-function Object GetRainbowTeam(int eTeamName) {}
-// ^ NEW IN 1.60
-function bool IsLastRoundOfTheMatch() {}
-// ^ NEW IN 1.60
+function Object GetRainbowTeam(int eTeamName)
+{
+	return;
+}
+
+function Actor GetNewTeam(Actor aCurrentTeam, optional bool bNextTeam)
+{
+	return;
+}
+
+function ChangeTeams(PlayerController inPlayerController, optional bool bPrevTeam, optional Actor newRainbowTeam)
+{
+	return;
+}
+
+function ChangeOperatives(PlayerController inPlayerController, int iTeamId, int iOperativeID)
+{
+	return;
+}
+
+function InstructAllTeamsToHoldPosition()
+{
+	return;
+}
+
+function InstructAllTeamsToFollowPlanning()
+{
+	return;
+}
+
+function BroadcastGameMsg(string szLocFile, string szPreMsg, string szMsgID, optional Sound sndGameStatus, optional int iLifeTime)
+{
+	return;
+}
+
+function R6AbstractNoiseMgr GetNoiseMgr()
+{
+	return;
+}
+
+function Object GetMultiCoopPlayerVoicesMgr(int iTeam)
+{
+	return;
+}
+
+function Object GetMultiCoopMemberVoicesMgr()
+{
+	return;
+}
+
+function Object GetPreRecordedMsgVoicesMgr()
+{
+	return;
+}
+
+function Object GetMultiCommonVoicesMgr()
+{
+	return;
+}
+
+function Object GetRainbowPlayerVoicesMgr()
+{
+	return;
+}
+
+function Object GetRainbowMemberVoicesMgr()
+{
+	return;
+}
+
+function Object GetCommonRainbowPlayerVoicesMgr()
+{
+	return;
+}
+
+function Object GetCommonRainbowMemberVoicesMgr()
+{
+	return;
+}
+
+function Object GetRainbowOtherTeamVoicesMgr(int iIDVoicesMgr)
+{
+	return;
+}
+
+function Object GetTerroristVoicesMgr(Actor.ETerroristNationality eNationality)
+{
+	return;
+}
+
+function Object GetHostageVoicesMgr(Actor.EHostageNationality eNationality, bool bIsFemale)
+{
+	return;
+}
+
+function bool ProcessKickVote(PlayerController _KickPlayer, string KickersName)
+{
+	return;
+}
+
+// NEW IN 1.60
+function bool ProcessChangeMapVote(string InstigatorName)
+{
+	return;
+}
+
+function ResetRound()
+{
+	return;
+}
+
+function AdminResetRound()
+{
+	return;
+}
+
+function ResetPenalty()
+{
+	return;
+}
+
+function SetJumpingMaps(bool _flagSetting, int iNextMapIndex)
+{
+	return;
+}
+
+function UpdateRepResArrays()
+{
+	return;
+}
+
+function PauseCountDown()
+{
+	return;
+}
+
+function UnPauseCountDown()
+{
+	return;
+}
+
+function StartTimer()
+{
+	return;
+}
+
+function bool IsTeamSelectionLocked()
+{
+	return;
+}
+
+function bool CanSwitchTeamMember()
+{
+	return true;
+	return;
+}
+
+function Actor GetRainbowAIFromTable()
+{
+	return none;
+	return;
+}
+
+function bool RainbowOperativesStillAlive()
+{
+	return false;
+	return;
+}
+
+function int GetNbOfRainbowAIToSpawn(PlayerController aController)
+{
+	return m_iNbOfRainbowAIToSpawn;
+	return;
+}
+
+function CreateMissionObjectiveMgr()
+{
+	// End:0x19
+	if(__NFUN_114__(m_missionMgr, none))
+	{
+		m_missionMgr = __NFUN_278__(Class'R6Abstract.R6MissionObjectiveMgr');
+	}
+	return;
+}
+
+function BroadcastMissionObjMsg(string szLocMsg, string szPreMsg, string szMsgID, optional Sound sndGameStatus, optional int iLifeTime)
+{
+	return;
+}
+
+function UpdateRepMissionObjectivesStatus()
+{
+	return;
+}
+
+function UpdateRepMissionObjectives()
+{
+	return;
+}
+
+function ResetRepMissionObjectives()
+{
+	return;
+}
+
+function Find2DTexture(string TeamClass, out Material MenuTexture, out Region TextureRegion)
+{
+	return;
+}
+
+function SpawnAIandInitGoInGame()
+{
+	return;
+}
+
+function InitObjectives()
+{
+	return;
+}
+
+function RemoveObjectives()
+{
+	m_missionMgr.RemoveObjectives();
+	return;
+}
+
+function PawnKilled(Pawn killed)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.PawnKilled(killed);
+	// End:0x34
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function RemoveTerroFromList(Pawn toRemove)
+{
+	return;
+}
+
+function PawnSeen(Pawn seen, Pawn witness)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.PawnSeen(seen, witness);
+	// End:0x39
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function PawnHeard(Pawn heard, Pawn witness)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.PawnHeard(heard, witness);
+	// End:0x39
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function PawnSecure(Pawn secured)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.PawnSecure(secured);
+	// End:0x34
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function bool IsLastRoundOfTheMatch()
+{
+	return;
+}
+
 //------------------------------------------------------------------
 // GetEndGamePauseTime
 //	return the time needed when the game is over and we still
 //  stay in game to see and heard the end of round result
 //------------------------------------------------------------------
-function float GetEndGamePauseTime() {}
-// ^ NEW IN 1.60
+function float GetEndGamePauseTime()
+{
+	// End:0x2B
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		return Level.m_fEndGamePauseTime;		
+	}
+	else
+	{
+		// End:0x5D
+		if(Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag))
+		{
+			return 6.0000000;			
+		}
+		else
+		{
+			// End:0x6F
+			if(IsLastRoundOfTheMatch())
+			{
+				return 6.0000000;				
+			}
+			else
+			{
+				return 4.0000000;
+			}
+		}
+	}
+	return;
+}
+
 //------------------------------------------------------------------
 // GetGameMsgLifeTime
 //	return the life time of game msg
 //------------------------------------------------------------------
-function float GetGameMsgLifeTime() {}
-// ^ NEW IN 1.60
-function BaseEndGame() {}
-function AbortMission() {}
-function CompleteMission() {}
-function TimerCountdown() {}
-function ResetPlayerTeam(Controller aPlayer) {}
-function RemoveController(Controller aPlayer) {}
+function float GetGameMsgLifeTime()
+{
+	// End:0x2D
+	if(__NFUN_130__(IsLastRoundOfTheMatch(), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+	{
+		return 10.0000000;		
+	}
+	else
+	{
+		return 5.0000000;
+	}
+	return;
+}
+
+function BaseEndGame()
+{
+	return;
+}
+
+//------------------------------------------------------------------
+// EndGameAndJumpToMapID
+//	set info to jump to a map, end game by aborting the mission without 
+//  game stats effect
+//------------------------------------------------------------------
+function EndGameAndJumpToMapID(int iGotoMapId)
+{
+	local R6ServerInfo pServerOptions;
+
+	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	// End:0x51
+	if(__NFUN_130__(__NFUN_119__(pServerOptions, none), __NFUN_119__(pServerOptions.m_ServerMapList, none)))
+	{
+		pServerOptions.m_ServerMapList.GetNextMap(iGotoMapId);
+	}
+	__NFUN_1210__();
+	SetJumpingMaps(true, iGotoMapId);
+	// End:0x81
+	if(__NFUN_132__(__NFUN_281__('InBetweenRoundMenu'), __NFUN_281__('PostBetweenRoundTime')))
+	{
+		RestartGameMgr();		
+	}
+	else
+	{
+		BaseEndGame();
+		m_bEndGameIgnoreGamePlayCheck = true;
+	}
+	return;
+}
+
+function AbortMission()
+{
+	m_missionMgr.AbortMission();
+	CheckEndGame(none, "");
+	EndGame(none, "");
+	m_bTimerStarted = true;
+	m_fTimerStartTime = int(__NFUN_175__(__NFUN_175__(Level.TimeSeconds, GetEndGamePauseTime()), float(1)));
+	m_fTimerStartTime = __NFUN_251__(m_fTimerStartTime, 0, int(Level.TimeSeconds));
+	return;
+}
+
+function CompleteMission()
+{
+	m_missionMgr.CompleteMission();
+	CheckEndGame(none, "");
+	EndGame(none, "");
+	return;
+}
+
+function EnteredExtractionZone(Actor Other)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.EnteredExtractionZone(Pawn(Other));
+	// End:0x39
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function LeftExtractionZone(Actor Other)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.ExitExtractionZone(Pawn(Other));
+	// End:0x39
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	// End:0x18
+	if(__NFUN_114__(m_missionMgr, none))
+	{
+		return;
+	}
+	m_missionMgr.IObjectInteract(aPawn, anInteractiveObject);
+	// End:0x46
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	m_missionMgr.IObjectDestroyed(aPawn, anInteractiveObject);
+	// End:0x39
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function TimerCountdown()
+{
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	// End:0x20
+	if(CheckEndGame(none, ""))
+	{
+		EndGame(none, "");
+	}
+	return;
+}
+
+function ResetPlayerTeam(Controller aPlayer)
+{
+	return;
+}
+
+function RemoveController(Controller aPlayer)
+{
+	return;
+}
+
+function SetPawnTeamFriendlies(Pawn aPawn)
+{
+	SetDefaultTeamFriendlies(aPawn);
+	return;
+}
+
 //------------------------------------------------------------------
 // SetDefaultTeamFriendlies: set the default value based on single
-//	player mode.
+//	player mode. 
 //------------------------------------------------------------------
-function SetDefaultTeamFriendlies(Pawn aPawn) {}
+function SetDefaultTeamFriendlies(Pawn aPawn)
+{
+	return;
+}
+
 // this function will decide if KillerPawn should be a spectator in the next round
-function SetTeamKillerPenalty(Pawn DeadPawn, Pawn KillerPawn) {}
-function ApplyTeamKillerPenalty(Pawn aPawn) {}
+function SetTeamKillerPenalty(Pawn DeadPawn, Pawn KillerPawn)
+{
+	return;
+}
+
+function ApplyTeamKillerPenalty(Pawn aPawn)
+{
+	return;
+}
+
  // if this function has not been defined then always return false
-function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason) {}
-// ^ NEW IN 1.60
-function PostBeginPlay() {}
-function PlayerReadySelected(PlayerController _Controller) {}
-function IncrementRoundsFired(Pawn Instigator, bool ForceIncrement) {}
+function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
+{
+	return false;
+	return;
+}
+
+function PostBeginPlay()
+{
+	__NFUN_280__(0.0000000, false);
+	return;
+}
+
+function PlayerReadySelected(PlayerController _Controller)
+{
+	return;
+}
+
+function IncrementRoundsFired(Pawn Instigator, bool ForceIncrement)
+{
+	return;
+}
+
 //------------------------------------------------------------------
 // NotifyMatchStart: fired when the round start
-//
+//	
 //------------------------------------------------------------------
-function NotifyMatchStart() {}
-function bool ProcessPlayerReadyStatus() {}
-// ^ NEW IN 1.60
-function bool IsUnlimitedPractice() {}
-// ^ NEW IN 1.60
-exec function SetUnlimitedPractice(bool bUnlimitedPractice, optional bool bSendMsg) {}
-function LogVoteInfo() {}
-function string GetIntelVideoName(R6MissionDescription Desc) {}
-// ^ NEW IN 1.60
+function NotifyMatchStart()
+{
+	return;
+}
+
+function bool ProcessPlayerReadyStatus()
+{
+	return;
+}
+
+function bool IsUnlimitedPractice()
+{
+	return;
+}
+
+exec function SetUnlimitedPractice(bool bUnlimitedPractice, optional bool bSendMsg)
+{
+	return;
+}
+
+function LogVoteInfo()
+{
+	return;
+}
+
+function string GetIntelVideoName(R6MissionDescription Desc)
+{
+	return "generic_intel";
+	return;
+}
 
 defaultproperties
 {
+	m_iNbOfTerroristToSpawn=1
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_fEndKickVoteTime
+// REMOVED IN 1.60: var m_KickersName

@@ -1,29 +1,90 @@
-// Abstract base class for all scripted actions used in ScriptedSequence/ScriptedTrigger chains.
-// Each subclass implements InitActionFor() to execute its specific behaviour when the
-// ScriptedController advances to that step in the sequence.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// ScriptedAction - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class ScriptedAction extends Object
-    abstract;
+    abstract
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var localized string ActionString;
 var bool bValidForTrigger;
+var localized string ActionString;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-// ^ NEW IN 1.60
-function string GetActionString() {}
-// ^ NEW IN 1.60
-function ProceedToNextAction(ScriptedController C) {}
-function ScriptedSequence GetScript(ScriptedSequence S) {}
-// ^ NEW IN 1.60
-function bool StartsSection() {}
-// ^ NEW IN 1.60
-function bool EndsSection() {}
-// ^ NEW IN 1.60
-function ProceedToSectionEnd(ScriptedController C) {}
+function bool InitActionFor(ScriptedController C)
+{
+	return false;
+	return;
+}
+
+function bool EndsSection()
+{
+	return false;
+	return;
+}
+
+function bool StartsSection()
+{
+	return false;
+	return;
+}
+
+function ScriptedSequence GetScript(ScriptedSequence S)
+{
+	return S;
+	return;
+}
+
+function ProceedToNextAction(ScriptedController C)
+{
+	__NFUN_161__(C.ActionNum, 1);
+	return;
+}
+
+function ProceedToSectionEnd(ScriptedController C)
+{
+	local int Nesting;
+	local ScriptedAction A;
+
+	J0x00:
+	// End:0xAD [Loop If]
+	if(__NFUN_150__(C.ActionNum, C.SequenceScript.Actions.Length))
+	{
+		A = C.SequenceScript.Actions[C.ActionNum];
+		// End:0x73
+		if(A.StartsSection())
+		{
+			__NFUN_165__(Nesting);			
+		}
+		else
+		{
+			// End:0x99
+			if(A.EndsSection())
+			{
+				__NFUN_166__(Nesting);
+				// End:0x99
+				if(__NFUN_150__(Nesting, 0))
+				{
+					return;
+				}
+			}
+		}
+		__NFUN_161__(C.ActionNum, 1);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	return;
+}
+
+function string GetActionString()
+{
+	return ActionString;
+	return;
+}
 
 defaultproperties
 {
+	bValidForTrigger=true
+	ActionString="unspecified action"
 }

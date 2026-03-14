@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6HWorkerAirport01.uc : Hostage pawn variant: first airport worker skin used in airport-themed missions.
+// R6HWorkerAirport01 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6HWorkerAirport01.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -7,8 +13,9 @@
 //=============================================================================
 class R6HWorkerAirport01 extends R6HostagePawn;
 
-#exec OBJ LOAD FILE=..\Animations\R6Hostage_UKX.ukx PACKAGE=R6Hostage_UKX
-
 defaultproperties
 {
+	Mesh=SkeletalMesh'R6Hostage_UKX.WorkerAirportMesh'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel207'
+	Skins=/* Array type was not detected. */
 }
