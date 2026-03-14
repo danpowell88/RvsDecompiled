@@ -27,7 +27,7 @@
 
 CORE_API DWORD GCRCTable[256];
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll (static internal function)")
 static void appInitCRCTable()
 {
 	for( DWORD iCRC=0; iCRC<256; iCRC++ )
@@ -52,7 +52,7 @@ static TCHAR GLanguage[64]   = TEXT("int");
 	Initialization.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131bd0)
 CORE_API void appInit( const TCHAR* InPackage, const TCHAR* InCmdLine, FMalloc* InMalloc, FOutputDevice* InLog, FOutputDeviceError* InError, FFeedbackContext* InWarn, FFileManager* InFileManager, FConfigCache*(*ConfigFactory)(), UBOOL RequireConfig )
 {
 	guard(appInit);
@@ -152,7 +152,7 @@ CORE_API void appInit( const TCHAR* InPackage, const TCHAR* InCmdLine, FMalloc* 
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130e50)
 CORE_API void appPreExit()
 {
 	guard(appPreExit);
@@ -161,7 +161,7 @@ CORE_API void appPreExit()
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130ef0)
 CORE_API void appExit()
 {
 	guard(appExit);
@@ -200,7 +200,7 @@ CORE_API void appExit()
 	Logging and critical errors.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10148ea0)
 CORE_API void appRequestExit( UBOOL Force )
 {
 	guard(appRequestExit);
@@ -218,7 +218,7 @@ CORE_API void appRequestExit( UBOOL Force )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131130)
 CORE_API void VARARGS appFailAssert( const ANSICHAR* Expr, const ANSICHAR* File, INT Line )
 {
 	TCHAR TempStr[1024];
@@ -226,7 +226,7 @@ CORE_API void VARARGS appFailAssert( const ANSICHAR* Expr, const ANSICHAR* File,
 	appErrorf( TEXT("%s"), TempStr );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void VARARGS appUnwindf( const TCHAR* Fmt, ... )
 {
 	TCHAR  TempStr[4096];
@@ -242,7 +242,7 @@ CORE_API void VARARGS appUnwindf( const TCHAR* Fmt, ... )
 	}
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const TCHAR* appGetSystemErrorMessage( INT Error )
 {
 	guard(appGetSystemErrorMessage);
@@ -271,7 +271,7 @@ CORE_API const TCHAR* appGetSystemErrorMessage( INT Error )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const void appDebugMessagef( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -279,7 +279,7 @@ CORE_API const void appDebugMessagef( const TCHAR* Fmt, ... )
 	MessageBox( NULL, TempStr, TEXT("appDebugMessagef"), MB_OK );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const void appMsgf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -287,13 +287,13 @@ CORE_API const void appMsgf( const TCHAR* Fmt, ... )
 	MessageBox( NULL, TempStr, TEXT("Message"), MB_OK );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const void appGetLastError( void )
 {
 	debugf( NAME_Warning, TEXT("GetLastError: %s"), appGetSystemErrorMessage() );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012dfa0)
 CORE_API void VARARGS appThrowf( const TCHAR* Fmt, ... )
 {
 	static TCHAR TempStr[4096];
@@ -305,25 +305,25 @@ CORE_API void VARARGS appThrowf( const TCHAR* Fmt, ... )
 	OS functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012e540)
 CORE_API const TCHAR* appCmdLine()
 {
 	return GCmdLine;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014a080)
 CORE_API const TCHAR* appBaseDir()
 {
 	return GBaseDir;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014a330)
 CORE_API const TCHAR* appPackage()
 {
 	return GPackageName;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014a190)
 CORE_API const TCHAR* appComputerName()
 {
 	static TCHAR Result[256] = TEXT("");
@@ -344,7 +344,7 @@ CORE_API const TCHAR* appComputerName()
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014a260)
 CORE_API const TCHAR* appUserName()
 {
 	static TCHAR Result[256] = TEXT("");
@@ -369,7 +369,7 @@ CORE_API const TCHAR* appUserName()
 	DLL handling.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014b0e0)
 CORE_API void* appGetDllHandle( const TCHAR* DllName )
 {
 	guard(appGetDllHandle);
@@ -377,7 +377,7 @@ CORE_API void* appGetDllHandle( const TCHAR* DllName )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101493e0)
 CORE_API void appFreeDllHandle( void* DllHandle )
 {
 	guard(appFreeDllHandle);
@@ -386,7 +386,7 @@ CORE_API void appFreeDllHandle( void* DllHandle )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void* appGetDllExport( void* DllHandle, const TCHAR* ExportName )
 {
 	guard(appGetDllExport);
@@ -401,7 +401,7 @@ CORE_API void* appGetDllExport( void* DllHandle, const TCHAR* ExportName )
 
 // appCycles is provided inline by UnVcWin32.h (ASM rdtsc).
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API DOUBLE appSecondsSlow()
 {
 	LARGE_INTEGER Cycles;
@@ -409,7 +409,7 @@ CORE_API DOUBLE appSecondsSlow()
 	return (DOUBLE)Cycles.QuadPart * GSecondsPerCycle;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10149850)
 CORE_API void appSystemTime( INT& Year, INT& Month, INT& DayOfWeek, INT& Day, INT& Hour, INT& Min, INT& Sec, INT& MSec )
 {
 	SYSTEMTIME st;
@@ -424,7 +424,7 @@ CORE_API void appSystemTime( INT& Year, INT& Month, INT& DayOfWeek, INT& Day, IN
 	MSec      = st.wMilliseconds;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const TCHAR* appTimestamp()
 {
 	static TCHAR Result[1024];
@@ -434,7 +434,7 @@ CORE_API const TCHAR* appTimestamp()
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10149830)
 CORE_API void appSleep( FLOAT Seconds )
 {
 	guard(appSleep);
@@ -446,7 +446,7 @@ CORE_API void appSleep( FLOAT Seconds )
 	String functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130fb0)
 CORE_API const ANSICHAR* appToAnsi( const TCHAR* Str )
 {
 #if UNICODE
@@ -461,7 +461,7 @@ CORE_API const ANSICHAR* appToAnsi( const TCHAR* Str )
 #endif
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012e550)
 CORE_API const UNICHAR* appToUnicode( const TCHAR* Str )
 {
 #if UNICODE
@@ -476,7 +476,7 @@ CORE_API const UNICHAR* appToUnicode( const TCHAR* Str )
 #endif
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131070)
 CORE_API const TCHAR* appFromAnsi( const ANSICHAR* Str )
 {
 #if UNICODE
@@ -491,7 +491,7 @@ CORE_API const TCHAR* appFromAnsi( const ANSICHAR* Str )
 #endif
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012e560)
 CORE_API const TCHAR* appFromUnicode( const UNICHAR* Str )
 {
 #if UNICODE
@@ -506,7 +506,7 @@ CORE_API const TCHAR* appFromUnicode( const UNICHAR* Str )
 #endif
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012dc90)
 CORE_API UBOOL appIsPureAnsi( const TCHAR* Str )
 {
 	for( ; *Str; Str++ )
@@ -515,67 +515,67 @@ CORE_API UBOOL appIsPureAnsi( const TCHAR* Str )
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101130d0)
 CORE_API TCHAR* appStrcpy( TCHAR* Dest, const TCHAR* Src )
 {
 	return (TCHAR*)_tcscpy( Dest, Src );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API INT appStrcpy( const TCHAR* String )
 {
 	return _tcsclen( String );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113070)
 CORE_API INT appStrlen( const TCHAR* String )
 {
 	return _tcsclen( String );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113080)
 CORE_API TCHAR* appStrstr( const TCHAR* String, const TCHAR* Find )
 {
 	return (TCHAR*)_tcsstr( String, Find );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113090)
 CORE_API TCHAR* appStrchr( const TCHAR* String, INT c )
 {
 	return (TCHAR*)_tcschr( String, c );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101130a0)
 CORE_API TCHAR* appStrcat( TCHAR* Dest, const TCHAR* Src )
 {
 	return (TCHAR*)_tcscat( Dest, Src );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101130b0)
 CORE_API INT appStrcmp( const TCHAR* String1, const TCHAR* String2 )
 {
 	return _tcscmp( String1, String2 );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101130c0)
 CORE_API INT appStricmp( const TCHAR* String1, const TCHAR* String2 )
 {
 	return _tcsicmp( String1, String2 );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113130)
 CORE_API INT appStrncmp( const TCHAR* String1, const TCHAR* String2, INT Count )
 {
 	return _tcsncmp( String1, String2, Count );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113140)
 CORE_API INT appStrnicmp( const TCHAR* A, const TCHAR* B, INT Count )
 {
 	return _tcsnicmp( A, B, Count );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f4d0)
 CORE_API TCHAR* appStaticString1024()
 {
 	// Rotating buffer of static strings.
@@ -586,7 +586,7 @@ CORE_API TCHAR* appStaticString1024()
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f500)
 CORE_API ANSICHAR* appAnsiStaticString1024()
 {
 	static ANSICHAR StaticString[32][1024];
@@ -596,7 +596,7 @@ CORE_API ANSICHAR* appAnsiStaticString1024()
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f620)
 CORE_API const TCHAR* appSpc( int Num )
 {
 	static TCHAR Result[256];
@@ -607,7 +607,7 @@ CORE_API const TCHAR* appSpc( int Num )
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113020)
 CORE_API TCHAR* appStrncpy( TCHAR* Dest, const TCHAR* Src, int Max )
 {
 	_tcsncpy( Dest, Src, Max );
@@ -615,7 +615,7 @@ CORE_API TCHAR* appStrncpy( TCHAR* Dest, const TCHAR* Src, int Max )
 	return Dest;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113300)
 CORE_API TCHAR* appStrncat( TCHAR* Dest, const TCHAR* Src, int Max )
 {
 	INT Len = appStrlen(Dest);
@@ -627,7 +627,7 @@ CORE_API TCHAR* appStrncat( TCHAR* Dest, const TCHAR* Src, int Max )
 	return Dest;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101130e0)
 CORE_API TCHAR* appStrupr( TCHAR* String )
 {
 	for( TCHAR* S=String; *S; S++ )
@@ -635,7 +635,7 @@ CORE_API TCHAR* appStrupr( TCHAR* String )
 	return String;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f510)
 CORE_API const TCHAR* appStrfind( const TCHAR* Str, const TCHAR* Find )
 {
 	if( !Find || !*Find )
@@ -649,7 +649,7 @@ CORE_API const TCHAR* appStrfind( const TCHAR* Str, const TCHAR* Find )
 	return NULL;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012dd90)
 CORE_API DWORD appStrCrc( const TCHAR* Data )
 {
 	DWORD CRC = 0xFFFFFFFF;
@@ -666,7 +666,7 @@ CORE_API DWORD appStrCrc( const TCHAR* Data )
 	return ~CRC;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012de00)
 CORE_API DWORD appStrCrcCaps( const TCHAR* Data )
 {
 	DWORD CRC = 0xFFFFFFFF;
@@ -683,25 +683,25 @@ CORE_API DWORD appStrCrcCaps( const TCHAR* Data )
 	return ~CRC;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101130f0)
 CORE_API INT appAtoi( const TCHAR* Str )
 {
 	return _tstoi( Str );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113100)
 CORE_API FLOAT appAtof( const TCHAR* Str )
 {
 	return (FLOAT)_tstof( Str );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113120)
 CORE_API INT appStrtoi( const TCHAR* Start, TCHAR** End, INT Base )
 {
 	return _tcstol( Start, End, Base );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101133a0)
 CORE_API INT appSprintf( TCHAR* Dest, const TCHAR* Fmt, ... )
 {
 	va_list ArgPtr;
@@ -712,7 +712,7 @@ CORE_API INT appSprintf( TCHAR* Dest, const TCHAR* Fmt, ... )
 }
 
 #if _MSC_VER
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113050)
 CORE_API INT appGetVarArgs( TCHAR* Dest, INT Count, const TCHAR*& Fmt )
 {
 	va_list ArgPtr;
@@ -725,7 +725,7 @@ CORE_API INT appGetVarArgs( TCHAR* Dest, INT Count, const TCHAR*& Fmt )
 }
 #endif
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f670)
 CORE_API void appTrimSpaces( ANSICHAR* String )
 {
 	// Trim trailing spaces.
@@ -734,7 +734,7 @@ CORE_API void appTrimSpaces( ANSICHAR* String )
 		String[--Len] = 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10113150)
 CORE_API void appQsort( void* Base, INT Num, INT Width, QSORT_COMPARE Compare )
 {
 	qsort( Base, Num, Width, Compare );
@@ -744,19 +744,19 @@ CORE_API void appQsort( void* Base, INT Num, INT Width, QSORT_COMPARE Compare )
 	Memory functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112fe0)
 CORE_API void* appMemmove( void* Dest, const void* Src, INT Count )
 {
 	return memmove( Dest, Src, Count );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112f90)
 CORE_API INT appMemcmp( const void* Buf1, const void* Buf2, INT Count )
 {
 	return memcmp( Buf1, Buf2, Count );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112fb0)
 CORE_API UBOOL appMemIsZero( const void* V, int Count )
 {
 	BYTE* B = (BYTE*)V;
@@ -766,7 +766,7 @@ CORE_API UBOOL appMemIsZero( const void* V, int Count )
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012dd50)
 CORE_API DWORD appMemCrc( const void* Data, INT Length, DWORD CRC )
 {
 	CRC = ~CRC;
@@ -775,7 +775,7 @@ CORE_API DWORD appMemCrc( const void* Data, INT Length, DWORD CRC )
 	return ~CRC;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void appMemswap( void* Ptr1, void* Ptr2, DWORD Size )
 {
 	// Swap using temporary buffer.
@@ -785,14 +785,14 @@ CORE_API void appMemswap( void* Ptr1, void* Ptr2, DWORD Size )
 	appMemcpy( Ptr2, Temp, Size );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112ff0)
 CORE_API void appMemset( void* Dest, INT C, INT Count )
 {
 	memset( Dest, C, Count );
 }
 
 #ifndef DEFINED_appMemcpy
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 {
 	memcpy( Dest, Src, Count );
@@ -800,7 +800,7 @@ CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 #endif
 
 #ifndef DEFINED_appMemzero
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void appMemzero( void* Dest, INT Count )
 {
 	memset( Dest, 0, Count );
@@ -811,60 +811,60 @@ CORE_API void appMemzero( void* Dest, INT Count )
 	Math functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112dc0)
 CORE_API DOUBLE appExp( DOUBLE Value )  { return exp(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112de0)
 CORE_API DOUBLE appLoge( DOUBLE Value ) { return log(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112df0)
 CORE_API DOUBLE appFmod( DOUBLE A, DOUBLE B ) { return fmod(A,B); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e00)
 CORE_API DOUBLE appSin( DOUBLE Value )  { return sin(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e20)
 CORE_API DOUBLE appCos( DOUBLE Value )  { return cos(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e30)
 CORE_API DOUBLE appAcos( DOUBLE Value ) { return acos(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e40)
 CORE_API DOUBLE appTan( DOUBLE Value )  { return tan(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e50)
 CORE_API DOUBLE appAtan( DOUBLE Value ) { return atan(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e60)
 CORE_API DOUBLE appAtan2( DOUBLE Y, DOUBLE X ) { return atan2(Y,X); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e70)
 CORE_API DOUBLE appSqrt( DOUBLE Value ) { return sqrt(Value); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e80)
 CORE_API DOUBLE appPow( DOUBLE A, DOUBLE B )   { return pow(A,B); }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112e90)
 CORE_API UBOOL appIsNan( DOUBLE Value )
 {
 	return _isnan(Value) != 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112ec0)
 CORE_API void appRandInit( INT Seed )
 {
 	srand( (unsigned)Seed );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112eb0)
 CORE_API INT appRand()
 {
 	return rand();
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112ed0)
 CORE_API FLOAT appFrand()
 {
 	return rand() / (FLOAT)RAND_MAX;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API FLOAT appRandRange( FLOAT Min, FLOAT Max )
 {
 	return Min + (Max - Min) * appFrand();
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API INT appRandRange( INT Min, INT Max )
 {
 	return Min + (appRand() % (Max - Min + 1));
@@ -872,13 +872,13 @@ CORE_API INT appRandRange( INT Min, INT Max )
 
 // appRound, appFloor are provided inline by UnVcWin32.h (ASM fld/fistp).
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10112f20)
 CORE_API INT appCeil( FLOAT Value )
 {
 	return (INT)ceil( Value );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012de80)
 CORE_API BYTE appCeilLogTwo( DWORD Arg )
 {
 	INT Bitmask = 0;
@@ -890,7 +890,7 @@ CORE_API BYTE appCeilLogTwo( DWORD Arg )
 	return (BYTE)Bitmask;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014a780)
 CORE_API void appEnableFastMath( UBOOL Enable )
 {
 	// On MSVC, control FPU precision.
@@ -904,7 +904,7 @@ CORE_API void appEnableFastMath( UBOOL Enable )
 	GUID creation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10149fc0)
 CORE_API FGuid appCreateGuid()
 {
 	FGuid Result;
@@ -916,7 +916,7 @@ CORE_API FGuid appCreateGuid()
 	Temp files.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130cf0)
 CORE_API void appCreateTempFilename( const TCHAR* Path, TCHAR* Result256 )
 {
 	guard(appCreateTempFilename);
@@ -927,7 +927,7 @@ CORE_API void appCreateTempFilename( const TCHAR* Path, TCHAR* Result256 )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void appCleanFileCache()
 {
 	guard(appCleanFileCache);
@@ -941,7 +941,7 @@ CORE_API void appCleanFileCache()
 	Clipboard.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101491c0)
 CORE_API void appClipboardCopy( const TCHAR* Str )
 {
 	guard(appClipboardCopy);
@@ -964,7 +964,7 @@ CORE_API void appClipboardCopy( const TCHAR* Str )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014aee0)
 CORE_API FString appClipboardPaste()
 {
 	guard(appClipboardPaste);
@@ -994,24 +994,24 @@ CORE_API FString appClipboardPaste()
 -----------------------------------------------------------------------------*/
 
 #if UNICODE && !defined(NO_UNICODE_OS_SUPPORT) && !defined(NO_ANSI_OS_SUPPORT)
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10148dd0)
 CORE_API ANSICHAR* winToANSI( ANSICHAR* ACh, const UNICHAR* InUCh, INT Count )
 {
 	WideCharToMultiByte( CP_ACP, 0, InUCh, -1, ACh, Count, NULL, NULL );
 	return ACh;
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10148e10)
 CORE_API INT winGetSizeANSI( const UNICHAR* InUCh )
 {
 	return WideCharToMultiByte( CP_ACP, 0, InUCh, -1, NULL, 0, NULL, NULL );
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10148e30)
 CORE_API UNICHAR* winToUNICODE( UNICHAR* UCh, const ANSICHAR* InACh, INT Count )
 {
 	MultiByteToWideChar( CP_ACP, 0, InACh, -1, UCh, Count );
 	return UCh;
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10148e70)
 CORE_API INT winGetSizeUNICODE( const ANSICHAR* InACh )
 {
 	return MultiByteToWideChar( CP_ACP, 0, InACh, -1, NULL, 0 );
@@ -1022,7 +1022,7 @@ CORE_API INT winGetSizeUNICODE( const ANSICHAR* InACh )
 	Parsing functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130380)
 CORE_API UBOOL ParseCommand( const TCHAR** Stream, const TCHAR* Match )
 {
 	while( (**Stream==' ') || (**Stream==9) )
@@ -1045,7 +1045,7 @@ CORE_API UBOOL ParseCommand( const TCHAR** Stream, const TCHAR* Match )
 	else return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f6c0)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, INT MaxLen )
 {
 	const TCHAR* Found = appStrfind( Stream, Match );
@@ -1075,7 +1075,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, INT
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012fc90)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, BYTE& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1087,7 +1087,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, BYTE& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012fd60)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SBYTE& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1099,7 +1099,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SBYTE& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012fe30)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, _WORD& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1111,7 +1111,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, _WORD& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012ff00)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SWORD& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1123,7 +1123,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SWORD& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130090)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, INT& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1135,7 +1135,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, INT& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012fbd0)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, DWORD& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1147,7 +1147,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, DWORD& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012ffd0)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FLOAT& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1159,7 +1159,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FLOAT& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FString& Value )
 {
 	TCHAR Temp[4096] = TEXT("");
@@ -1171,7 +1171,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FString& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131250)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, QWORD& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1183,7 +1183,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, QWORD& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SQWORD& Value )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1195,7 +1195,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, SQWORD& Value )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012fb10)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FName& Name )
 {
 	TCHAR Temp[NAME_SIZE] = TEXT("");
@@ -1207,7 +1207,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FName& Name )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130240)
 CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FGuid& Guid )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1232,7 +1232,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FGuid& Guid )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130140)
 CORE_API UBOOL ParseUBOOL( const TCHAR* Stream, const TCHAR* Match, UBOOL& OnOff )
 {
 	TCHAR Temp[256] = TEXT("");
@@ -1244,7 +1244,7 @@ CORE_API UBOOL ParseUBOOL( const TCHAR* Stream, const TCHAR* Match, UBOOL& OnOff
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130660)
 CORE_API UBOOL ParseLine( const TCHAR** Stream, TCHAR* Result, INT MaxLen, UBOOL Exact )
 {
 	INT i = 0;
@@ -1275,7 +1275,7 @@ CORE_API UBOOL ParseLine( const TCHAR** Stream, TCHAR* Result, INT MaxLen, UBOOL
 	return GotStream;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API UBOOL ParseLine( const TCHAR** Stream, FString& Result, UBOOL Exact )
 {
 	TCHAR Temp[4096];
@@ -1284,7 +1284,7 @@ CORE_API UBOOL ParseLine( const TCHAR** Stream, FString& Result, UBOOL Exact )
 	return GotLine;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130520)
 CORE_API UBOOL ParseToken( const TCHAR*& Str, TCHAR* Result, INT MaxLen, UBOOL UseEscape )
 {
 	INT Len = 0;
@@ -1320,7 +1320,7 @@ CORE_API UBOOL ParseToken( const TCHAR*& Str, TCHAR* Result, INT MaxLen, UBOOL U
 	return Len > 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130610)
 CORE_API UBOOL ParseToken( const TCHAR*& Str, FString& Arg, UBOOL UseEscape )
 {
 	TCHAR Temp[4096];
@@ -1332,7 +1332,7 @@ CORE_API UBOOL ParseToken( const TCHAR*& Str, FString& Arg, UBOOL UseEscape )
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131730)
 CORE_API FString ParseToken( const TCHAR*& Str, UBOOL UseEscape )
 {
 	TCHAR Temp[4096];
@@ -1341,7 +1341,7 @@ CORE_API FString ParseToken( const TCHAR*& Str, UBOOL UseEscape )
 	return FString(TEXT(""));
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101304c0)
 CORE_API void ParseNext( const TCHAR** Stream )
 {
 	// Skip over spaces, tabs, cr's, and lf's.
@@ -1349,7 +1349,7 @@ CORE_API void ParseNext( const TCHAR** Stream )
 		(*Stream)++;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f810)
 CORE_API UBOOL ParseParam( const TCHAR* Stream, const TCHAR* Param )
 {
 	const TCHAR* Start = Stream;
@@ -1368,7 +1368,7 @@ CORE_API UBOOL ParseParam( const TCHAR* Stream, const TCHAR* Param )
 	Localization.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const TCHAR* Localize( const TCHAR* Section, const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt, UBOOL Optional, UBOOL Optional2 )
 {
 	guard(Localize);
@@ -1402,52 +1402,52 @@ CORE_API const TCHAR* Localize( const TCHAR* Section, const TCHAR* Key, const TC
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130ac0)
 CORE_API const TCHAR* LocalizeError( const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return Localize( TEXT("Errors"), Key, Package, LangExt );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130af0)
 CORE_API const TCHAR* LocalizeProgress( const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return Localize( TEXT("Progress"), Key, Package, LangExt );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130b20)
 CORE_API const TCHAR* LocalizeQuery( const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return Localize( TEXT("Query"), Key, Package, LangExt );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130b50)
 CORE_API const TCHAR* LocalizeGeneral( const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return Localize( TEXT("General"), Key, Package, LangExt );
 }
 
 #if UNICODE
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101312d0)
 CORE_API const TCHAR* Localize( const ANSICHAR* Section, const ANSICHAR* Key, const TCHAR* Package, const TCHAR* LangExt, UBOOL Optional, UBOOL Optional2 )
 {
 	return Localize( ANSI_TO_TCHAR(Section), ANSI_TO_TCHAR(Key), Package, LangExt, Optional, Optional2 );
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131310)
 CORE_API const TCHAR* LocalizeError( const ANSICHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return LocalizeError( ANSI_TO_TCHAR(Key), Package, LangExt );
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131340)
 CORE_API const TCHAR* LocalizeProgress( const ANSICHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return LocalizeProgress( ANSI_TO_TCHAR(Key), Package, LangExt );
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10131370)
 CORE_API const TCHAR* LocalizeQuery( const ANSICHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return LocalizeQuery( ANSI_TO_TCHAR(Key), Package, LangExt );
 }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101313a0)
 CORE_API const TCHAR* LocalizeGeneral( const ANSICHAR* Key, const TCHAR* Package, const TCHAR* LangExt )
 {
 	return LocalizeGeneral( ANSI_TO_TCHAR(Key), Package, LangExt );
@@ -1458,7 +1458,7 @@ CORE_API const TCHAR* LocalizeGeneral( const ANSICHAR* Key, const TCHAR* Package
 	File utility functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012f3f0)
 CORE_API const TCHAR* appFExt( const TCHAR* Filename )
 {
 	const TCHAR* Dot = appStrchr( Filename, '.' );
@@ -1473,7 +1473,7 @@ CORE_API const TCHAR* appFExt( const TCHAR* Filename )
 	return TEXT("");
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130b80)
 CORE_API UBOOL appUpdateFileModTime( TCHAR* Filename )
 {
 	guard(appUpdateFileModTime);
@@ -1488,7 +1488,7 @@ CORE_API UBOOL appUpdateFileModTime( TCHAR* Filename )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101332e0)
 CORE_API UBOOL appFindPackageFile( const TCHAR* In, const FGuid* Guid, TCHAR* Out )
 {
 	guard(appFindPackageFile);
@@ -1521,7 +1521,7 @@ CORE_API UBOOL appFindPackageFile( const TCHAR* In, const FGuid* Guid, TCHAR* Ou
 	Array / file loading functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101313d0)
 CORE_API UBOOL appLoadFileToArray( TArray<BYTE>& Result, const TCHAR* Filename, FFileManager* FileManager )
 {
 	guard(appLoadFileToArray);
@@ -1537,7 +1537,7 @@ CORE_API UBOOL appLoadFileToArray( TArray<BYTE>& Result, const TCHAR* Filename, 
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101317a0)
 CORE_API UBOOL appLoadFileToString( FString& Result, const TCHAR* Filename, FFileManager* FileManager )
 {
 	guard(appLoadFileToString);
@@ -1556,7 +1556,7 @@ CORE_API UBOOL appLoadFileToString( FString& Result, const TCHAR* Filename, FFil
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130c30)
 CORE_API UBOOL appSaveArrayToFile( const TArray<BYTE>& Array, const TCHAR* Filename, FFileManager* FileManager )
 {
 	guard(appSaveArrayToFile);
@@ -1570,7 +1570,7 @@ CORE_API UBOOL appSaveArrayToFile( const TArray<BYTE>& Array, const TCHAR* Filen
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API UBOOL appSaveStringToFile( const FString& String, const TCHAR* Filename, FFileManager* FileManager )
 {
 	guard(appSaveStringToFile);
@@ -1593,7 +1593,7 @@ CORE_API UBOOL appSaveStringToFile( const FString& String, const TCHAR* Filename
 	FString format helper.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10132f70)
 CORE_API FString appFormat( FString Src, const TMultiMap<FString,FString>& Map )
 {
 	guard(appFormat);
@@ -1628,7 +1628,7 @@ CORE_API FString appFormat( FString Src, const TMultiMap<FString,FString>& Map )
 	Launch URL helper.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void appLaunchURL( const TCHAR* URL, const TCHAR* Parms, FString* Error )
 {
 	guard(appLaunchURL);
@@ -1644,7 +1644,7 @@ CORE_API void appLaunchURL( const TCHAR* URL, const TCHAR* Parms, FString* Error
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms, UBOOL bRealTime )
 {
 	guard(appCreateProc);
@@ -1669,7 +1669,7 @@ CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms, UBOOL bRealT
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10149b00)
 CORE_API UBOOL appGetProcReturnCode( void* ProcHandle, INT* ReturnCode )
 {
 	guard(appGetProcReturnCode);
@@ -1677,7 +1677,7 @@ CORE_API UBOOL appGetProcReturnCode( void* ProcHandle, INT* ReturnCode )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10130d90)
 CORE_API INT appIsPBInstalled()
 {
 	// Check for pb\pbsv.dll via GFileManager — returns 1 if present.
@@ -1686,7 +1686,7 @@ CORE_API INT appIsPBInstalled()
 	return 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -1696,7 +1696,7 @@ CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x101133c0)
 CORE_API FString appGetGMTRef()
 {
 	// Compute the local UTC offset as a "+HH:MM" / "-HH:MM" string.
@@ -1714,7 +1714,7 @@ CORE_API FString appGetGMTRef()
 	return FString( Buf );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012dfd0)
 CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD* Data, FFileManager* FileManager )
 {
 	guard(appCreateBitmap);
@@ -1788,7 +1788,7 @@ CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10149080)
 CORE_API TCHAR* appCharUpper( TCHAR* Str )
 {
 	if( Str )
@@ -1802,7 +1802,7 @@ CORE_API TCHAR* appCharUpper( TCHAR* Str )
 	return Str;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012dcc0)
 CORE_API TCHAR* appItoa( INT Num )
 {
 	static TCHAR Buf[64];
@@ -1810,7 +1810,7 @@ CORE_API TCHAR* appItoa( INT Num )
 	return Buf;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014d0e0)
 CORE_API TCHAR* winAnsiToTCHAR( char* Str )
 {
 	static TCHAR Buf[4096];
@@ -1826,7 +1826,7 @@ CORE_API TCHAR* winAnsiToTCHAR( char* Str )
 	return Buf;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 {
 	// Ghidra 0x149b40 (206 bytes): stat the file and compute age in whole days.
@@ -1858,7 +1858,7 @@ CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 	return (INT)(secs / 86400.0);
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API INT RegGet( FString Key, FString Name, FString& Value )
 {
 	// Read a REG_SZ value from HKEY_LOCAL_MACHINE\<Key>\<Name>.
@@ -1877,7 +1877,7 @@ CORE_API INT RegGet( FString Key, FString Name, FString& Value )
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API INT RegSet( FString Key, FString Name, FString Value )
 {
 	// Write a REG_SZ value to HKEY_LOCAL_MACHINE\<Key>\<Name>.
@@ -1896,13 +1896,13 @@ CORE_API INT RegSet( FString Key, FString Name, FString Value )
 	return ( Res == ERROR_SUCCESS ) ? 1 : 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014a790)
 CORE_API INT IsRavenShieldCDInDrive()
 {
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not exported from Core.dll")
 CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms )
 {
 	return appCreateProc( URL, Parms, 0 );

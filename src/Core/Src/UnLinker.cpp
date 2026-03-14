@@ -64,13 +64,13 @@ FObjectImport::FObjectImport( UObject* InObject )
 	FGenerationInfo / FPackageFileSummary constructors.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 FGenerationInfo::FGenerationInfo( INT InExportCount, INT InNameCount )
 :	ExportCount( InExportCount )
 ,	NameCount  ( InNameCount )
 {}
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 FPackageFileSummary::FPackageFileSummary()
 :	Tag          ( PACKAGE_FILE_TAG )
 ,	FileVersion  ( PACKAGE_FILE_VERSION )
@@ -151,7 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -218,7 +218,7 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
@@ -232,7 +232,7 @@ void ULinkerLoad::Verify()
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 FName ULinkerLoad::GetExportClassPackage( INT i )
 {
 	guard(ULinkerLoad::GetExportClassPackage);
@@ -246,7 +246,7 @@ FName ULinkerLoad::GetExportClassPackage( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 FName ULinkerLoad::GetExportClassName( INT i )
 {
 	guard(ULinkerLoad::GetExportClassName);
@@ -260,7 +260,7 @@ FName ULinkerLoad::GetExportClassName( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
@@ -283,7 +283,7 @@ void ULinkerLoad::VerifyImport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::LoadAllObjects()
 {
 	guard(ULinkerLoad::LoadAllObjects);
@@ -292,7 +292,7 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -309,7 +309,7 @@ INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName Obj
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoadFlags, UBOOL Checked )
 {
 	guard(ULinkerLoad::Create);
@@ -322,7 +322,7 @@ UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoa
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::Preload( UObject* Object )
 {
 	guard(ULinkerLoad::Preload);
@@ -342,7 +342,7 @@ void ULinkerLoad::Preload( UObject* Object )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 UObject* ULinkerLoad::CreateExport( INT Index )
 {
 	guard(ULinkerLoad::CreateExport);
@@ -384,7 +384,7 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -428,7 +428,7 @@ UObject* ULinkerLoad::CreateImport( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 UObject* ULinkerLoad::IndexToObject( INT Index )
 {
 	guard(ULinkerLoad::IndexToObject);
@@ -441,7 +441,7 @@ UObject* ULinkerLoad::IndexToObject( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::DetachExport( INT i )
 {
 	guard(ULinkerLoad::DetachExport);
@@ -455,7 +455,7 @@ void ULinkerLoad::DetachExport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::Serialize( FArchive& Ar )
 {
 	guard(ULinkerLoad::Serialize_FArchive);
@@ -463,7 +463,7 @@ void ULinkerLoad::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::Destroy()
 {
 	guard(ULinkerLoad::Destroy);
@@ -484,7 +484,7 @@ void ULinkerLoad::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::AttachLazyLoader);
@@ -493,7 +493,7 @@ void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);
@@ -501,7 +501,7 @@ void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 {
 	guard(ULinkerLoad::DetachAllLazyLoaders);
@@ -515,25 +515,25 @@ void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::Seek( INT InPos )
 {
 	Loader->Seek( InPos );
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 INT ULinkerLoad::Tell()
 {
 	return Loader->Tell();
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 INT ULinkerLoad::TotalSize()
 {
 	return Loader->TotalSize();
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerLoad::Serialize( void* V, INT Length )
 {
 	Loader->Serialize( V, Length );
@@ -545,7 +545,7 @@ IMPLEMENT_CLASS(ULinkerLoad);
 	ULinkerSave.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
@@ -557,7 +557,7 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerSave::Destroy()
 {
 	guard(ULinkerSave::Destroy);
@@ -568,7 +568,7 @@ void ULinkerSave::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 INT ULinkerSave::MapName( FName* Name )
 {
 	guard(ULinkerSave::MapName);
@@ -576,7 +576,7 @@ INT ULinkerSave::MapName( FName* Name )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 INT ULinkerSave::MapObject( UObject* Object )
 {
 	guard(ULinkerSave::MapObject);
@@ -584,19 +584,19 @@ INT ULinkerSave::MapObject( UObject* Object )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerSave::Seek( INT InPos )
 {
 	Saver->Seek( InPos );
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 INT ULinkerSave::Tell()
 {
 	return Saver->Tell();
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Not exported from Core.dll")
 void ULinkerSave::Serialize( void* V, INT Length )
 {
 	Saver->Serialize( V, Length );
