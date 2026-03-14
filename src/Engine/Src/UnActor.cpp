@@ -2545,7 +2545,7 @@ void AActor::SetGameType( FString GameType )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1037C130, "Divergence: TArray field at 0x210 identity-pending; GC-tick skipped")
+IMPL_APPROX("Divergence: TArray field at 0x210 identity-pending; GC-tick skipped")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
@@ -2912,7 +2912,7 @@ void AActor::UpdateTimers( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xC3460, "Divergence: retail uses FMemStack frame-arena allocator; we use appMalloc")
+IMPL_APPROX("Divergence: retail uses FMemStack frame-arena allocator; we use appMalloc")
 INT AActor::CheckOwnerUpdated()
 {
 	guard(AActor::CheckOwnerUpdated);
@@ -3356,7 +3356,7 @@ void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface*
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xbd2a0, "UModel::PointRegion stubbed; raw offset used for ULevel::Model at +0x90")
+IMPL_APPROX("UModel::PointRegion stubbed; raw offset used for ULevel::Model at +0x90")
 void AActor::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(AActor::SetZone);

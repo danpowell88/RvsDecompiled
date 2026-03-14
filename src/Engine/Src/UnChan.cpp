@@ -149,7 +149,7 @@ guard(UActorChannel::SetChannelActor);
 unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1821d0, "replication state flush not implemented")
+IMPL_APPROX("replication state flush not implemented")
 void UActorChannel::SetClosingFlag()
 {
 // Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
@@ -231,7 +231,7 @@ AActor* UActorChannel::GetActor()
 return *(AActor**)((BYTE*)this + 0x6C);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x180c90, "replication tracking fields zeroed instead of copying from level state")
+IMPL_APPROX("replication tracking fields zeroed instead of copying from level state")
 void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.

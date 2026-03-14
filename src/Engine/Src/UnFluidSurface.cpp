@@ -63,7 +63,7 @@ void AFluidSurfaceInfo::UpdateOscillatorList()
 	}
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x9a030, "actor intersection loop not reconstructed")
+IMPL_APPROX("actor intersection loop not reconstructed")
 void AFluidSurfaceInfo::RebuildClampedBitmap()
 {
 	// Retail: 0x9a030, 1114b.Iterate level actors and test their collision boxes
@@ -73,7 +73,7 @@ void AFluidSurfaceInfo::RebuildClampedBitmap()
 	// in the clamped bitmap. Actor intersection loop not reconstructed.
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x9abf0, "vertex/index buffer management and DrawMesh call not reconstructed")
+IMPL_APPROX("vertex/index buffer management and DrawMesh call not reconstructed")
 void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TList<FDynamicLight*>* Lights, FRenderInterface* RI)
 {
 	// Retail: 0x9abf0, 864b.Update vertex/index buffers then submit a DrawMesh call.
@@ -171,7 +171,7 @@ void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 	}
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x991e0, "per-vertex normal convolution and hex-offset row interleaving not reconstructed")
+IMPL_APPROX("per-vertex normal convolution and hex-offset row interleaving not reconstructed")
 void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 {
 	// Retail: 0x991e0, 2890b.Build per-vertex position + normal data for all grid points.

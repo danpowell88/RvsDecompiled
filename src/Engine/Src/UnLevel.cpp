@@ -65,7 +65,7 @@ void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Sec
 	ULevel implementation.
 =============================================================================*/
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xc2c40, "TMap hash-table init deferred; lazy init divergence from retail")
+IMPL_APPROX("TMap hash-table init deferred; lazy init divergence from retail")
 ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 :	ULevelBase( InEngine )
 {
@@ -1266,7 +1266,7 @@ FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner )
 // FNetworkNotify interface.
 IMPL_APPROX("Stub; always rejects — server-side accept logic not decompiled")
 EAcceptConnection ULevel::NotifyAcceptingConnection() { return ACCEPTC_Reject; }
-IMPL_GHIDRA_APPROX("Engine.dll", 0xbf2a0, "Connection description logging omitted; body approximated")
+IMPL_APPROX("Connection description logging omitted; body approximated")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
@@ -1282,7 +1282,7 @@ IMPL_APPROX("Stub; always accepts channels")
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
 IMPL_APPROX("Returns this level")
 ULevel* ULevel::NotifyGetLevel() { return this; }
-IMPL_GHIDRA_APPROX("Engine.dll", 0xc1d30, "Full network command dispatch (3802 bytes) not reconstructed")
+IMPL_APPROX("Full network command dispatch (3802 bytes) not reconstructed")
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
@@ -1291,7 +1291,7 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 	// Unresolved — accepting connections will not progress through the handshake.
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0xBF590, "NULL-driver safety guard not present in retail")
+IMPL_APPROX("NULL-driver safety guard not present in retail")
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 {
 	// Retail (18b, RVA 0xBF590): returns 1 if [this+0x14]->field@+0x3C is NULL, else 0.

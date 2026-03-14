@@ -19,9 +19,9 @@ inline void  operator delete(void*, void*) noexcept {}
 // DIVERGENCE: these helpers call StaticConstructObject with additional initialisation
 // that is not safe to replicate without full CDO layout knowledge; returning NULL
 // ensures ConvertPolyFlagsToMaterial gracefully falls back to the existing object.
-IMPL_GHIDRA_APPROX("Engine.dll", 0x103c89f0, "Returns NULL; full StaticConstructObject with CDO initialisation not reconstructed")
+IMPL_APPROX("Returns NULL; full StaticConstructObject with CDO initialisation not reconstructed")
 static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10386790, "Returns NULL; full StaticConstructObject with CDO initialisation not reconstructed")
+IMPL_APPROX("Returns NULL; full StaticConstructObject with CDO initialisation not reconstructed")
 static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
 
 // --- UMaterial ---
@@ -29,7 +29,7 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 
 
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xc97f0, "Loop body omitted; FUN_10318850 (GObj iterator) unresolved")
+IMPL_APPROX("Loop body omitted; FUN_10318850 (GObj iterator) unresolved")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
@@ -181,7 +181,7 @@ void UTexture::SetLastUpdateTime(double Time)
 	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
 	*(double*)((BYTE*)this + 0xD0) = Time;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x16c600, "DXT compression pipeline not yet implemented; returns 0")
+IMPL_APPROX("DXT compression pipeline not yet implemented; returns 0")
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
@@ -233,7 +233,7 @@ void UTexture::CreateColorRange()
 	}
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x16bac0, "Complex mip chain generation not yet implemented; format dispatch and colour conversion helpers unresolved")
+IMPL_APPROX("Complex mip chain generation not yet implemented; format dispatch and colour conversion helpers unresolved")
 void UTexture::CreateMips(int param1, int param2)
 {
 	guard(UTexture::CreateMips);
@@ -243,7 +243,7 @@ void UTexture::CreateMips(int param1, int param2)
 	(void)param1; (void)param2;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x16b0c0, "DXT1 block decompression not yet implemented; returns 0")
+IMPL_APPROX("DXT1 block decompression not yet implemented; returns 0")
 int UTexture::Decompress(ETextureFormat)
 {
 	guard(UTexture::Decompress);
@@ -761,7 +761,7 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 
 
 // --- UPalette ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x16aea0, "Returns NULL; FUN_10318850 (GObj iterator) unresolved")
+IMPL_APPROX("Returns NULL; FUN_10318850 (GObj iterator) unresolved")
 UPalette * UPalette::ReplaceWithExisting()
 {
 	// Retail: 0x16aea0, ~200b with SEH. Iterates GObjObjects to find a matching
@@ -902,7 +902,7 @@ void UShadowBitmapMaterial::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x12e3e0, "Shadow map rendering pipeline not yet implemented; returns NULL")
+IMPL_APPROX("Shadow map rendering pipeline not yet implemented; returns NULL")
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: 0x12e3e0, 2594b. Shadow map rendering pipeline — too complex to decompile.

@@ -64,7 +64,7 @@ typedef void (__thiscall* DestroyFn)(void*, INT);
 unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1048C210, "object-ref fields not serialized; transactor helper not yet identified")
+IMPL_APPROX("object-ref fields not serialized; transactor helper not yet identified")
 void UNetDriver::Serialize(FArchive &Ar)
 {
 guard(UNetDriver::Serialize);

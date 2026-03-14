@@ -115,7 +115,7 @@ static INT                  GBinkHeight      = 0;
 	The retail binary uses movntps streaming stores for large aligned copies.
 	This reconstruction uses appMemcpy as a functional equivalent.
 -----------------------------------------------------------------------------*/
-IMPL_GHIDRA_APPROX("D3DDrv.dll", 0x10001020, "Retail uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback")
+IMPL_APPROX("Retail uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback")
 static void D3DMemcpy( void* Dst, const void* Src, DWORD Count )
 {
 	appMemcpy( Dst, Src, Count );
@@ -161,7 +161,7 @@ UD3DRenderDevice::UD3DRenderDevice()
 	appMemzero( &GRenderCaps, sizeof(GRenderCaps) );
 }
 
-IMPL_GHIDRA_APPROX("D3DDrv.dll", 0x1cc0, "Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header")
+IMPL_APPROX("Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header")
 UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	: URenderDevice(Other)
 	, UsePrecaching(Other.UsePrecaching)
@@ -218,7 +218,7 @@ UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 	The retail binary registers all BITFIELD and INT config properties here.
 	This reconstruction follows the UT99 pattern adapted for R6's config set.
 =============================================================================*/
-IMPL_GHIDRA_APPROX("D3DDrv.dll", 0x10008c60, "Config property registration omitted; CPP_PROPERTY cannot take address of bitfield member in standard C++")
+IMPL_APPROX("Config property registration omitted; CPP_PROPERTY cannot take address of bitfield member in standard C++")
 void UD3DRenderDevice::StaticConstructor()
 {
 	guard(UD3DRenderDevice::StaticConstructor);
@@ -612,7 +612,7 @@ void UD3DRenderDevice::FlushResource(QWORD CacheID)
 
 	Retail address: 0x1000ad50 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA_APPROX("D3DDrv.dll", 0x1000ad50, "Retail reads brightness from Viewport->GetOuterUClient()->Brightness; hardcoded to 2.5f pending UViewport stub implementation")
+IMPL_APPROX("Retail reads brightness from Viewport->GetOuterUClient()->Brightness; hardcoded to 2.5f pending UViewport stub implementation")
 void UD3DRenderDevice::UpdateGamma(UViewport* Viewport)
 {
 	guard(UD3DRenderDevice::UpdateGamma);
@@ -1108,7 +1108,7 @@ void UD3DRenderDevice::Draw3DLine(FVector Start, FVector End, FColor Color, UTex
 
 	Used for render-to-texture effects (scope overlays, camera feeds).
 =============================================================================*/
-IMPL_GHIDRA_APPROX("D3DDrv.dll", 0x1000ca50, "Off-screen render target path deferred pending further Ghidra analysis; only the default back buffer restore path is implemented")
+IMPL_APPROX("Off-screen render target path deferred pending further Ghidra analysis; only the default back buffer restore path is implemented")
 void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(UD3DRenderDevice::ChangeDrawingSurface);
@@ -1137,7 +1137,7 @@ void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 	Handles full-screen effects like flashbang, gas, and night vision.
 	The Param1/Param2 encode effect type and intensity.
 =============================================================================*/
-IMPL_GHIDRA_APPROX("D3DDrv.dll", 0x1000cb00, "Full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
+IMPL_APPROX("Full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
 void UD3DRenderDevice::HandleFullScreenEffects(INT Param1, INT Param2)
 {
 	guard(UD3DRenderDevice::HandleFullScreenEffects);

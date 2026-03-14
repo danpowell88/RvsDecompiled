@@ -283,7 +283,7 @@ void UDownload::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x103b1d90, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 void UDownload::DownloadDone()
 {
 	// Retail: 0x18ae80, 1347b. Finalises the download: closes the temp file, moves it

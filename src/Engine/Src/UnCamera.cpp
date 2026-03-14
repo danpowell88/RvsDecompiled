@@ -848,7 +848,7 @@ FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFPosNormTexData@@@Z
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10304820, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
 	// 10 floats: offsets 0x00-0x24
 	for (INT i = 0; i < 10; i++)

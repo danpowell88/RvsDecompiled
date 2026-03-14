@@ -435,7 +435,7 @@ IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
 	AHUD implementation.
 =============================================================================*/
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x12d710, "Player->Viewport accessed via raw offset 0x5B4 not in public headers")
+IMPL_APPROX("Player->Viewport accessed via raw offset 0x5B4 not in public headers")
 void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AHUD::execDraw3DLine);

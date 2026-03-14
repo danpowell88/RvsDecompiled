@@ -53,7 +53,7 @@ WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewport
 	return *this;
 }
 
-IMPL_GHIDRA_APPROX("WinDrv.dll", 0x2300, "MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
+IMPL_APPROX("MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
 WWindowsViewportWindow::~WWindowsViewportWindow()
 {
 	guard(WWindowsViewportWindow::~WWindowsViewportWindow);

@@ -893,7 +893,7 @@ void FCollisionOctree::AddActor(AActor* Actor)
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
 // TODO: implement FCollisionOctree::CheckActorLocations (retail 0xdbec0: walks Level->Actors, tests geometry overlap per node)
-IMPL_GHIDRA_APPROX("Engine.dll", 0xdbec0, "Not yet implemented; retail walks Level->Actors to test geometry overlap per node")
+IMPL_APPROX("Not yet implemented; retail walks Level->Actors to test geometry overlap per node")
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
@@ -1188,7 +1188,7 @@ void FOctreeNode::CheckIsEmpty()
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
 // TODO: implement FOctreeNode::Draw (retail 0xdb6c0: draws node bounding box via GTempLineBatcher
 //       and recurses into children; requires FTempLineBatcher access)
-IMPL_GHIDRA_APPROX("Engine.dll", 0xdb6c0, "Not yet implemented; retail draws node bounding box via GTempLineBatcher")
+IMPL_APPROX("Not yet implemented; retail draws node bounding box via GTempLineBatcher")
 void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z

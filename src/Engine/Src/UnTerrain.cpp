@@ -134,7 +134,7 @@ void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisib
 	guard(ATerrainInfo::RenderDecorations);
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15cbf0, "Returns 0; vertex selection with symmetry mirrors deferred due to unresolved editor globals")
+IMPL_APPROX("Returns 0; vertex selection with symmetry mirrors deferred due to unresolved editor globals")
 int ATerrainInfo::SelectVertex(FVector)
 {
 	guard(ATerrainInfo::SelectVertex);
@@ -147,7 +147,7 @@ int ATerrainInfo::SelectVertex(FVector)
 	return 0;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15cac0, "FUN_1031fe20 (TArray element removal at index) unresolved; found entry not removed from selection list")
+IMPL_APPROX("FUN_1031fe20 (TArray element removal at index) unresolved; found entry not removed from selection list")
 int ATerrainInfo::SelectVertexX(int X, int Y)
 {
 	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
@@ -250,7 +250,7 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15c3c0, "Returns 1 (no hit); per-sector ray test FUN_1050557c unresolved")
+IMPL_APPROX("Returns 1 (no hit); per-sector ray test FUN_1050557c unresolved")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
@@ -260,7 +260,7 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 	return 1;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x15a480, "Returns 1 (no hit); per-quad ray intersection structures and FUN_ calls unresolved")
+IMPL_APPROX("Returns 1 (no hit); per-quad ray intersection structures and FUN_ calls unresolved")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);
@@ -355,7 +355,7 @@ void ATerrainInfo::ConvertHeightmapFormat()
 	guard(ATerrainInfo::ConvertHeightmapFormat);
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x157560, "OutY parameter not assigned per Ghidra decompiler artifact")
+IMPL_APPROX("OutY parameter not assigned per Ghidra decompiler artifact")
 int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX, int* OutY)
 {
 	// Ghidra 0x157560, 167b: transform world pos by WorldToHeightmap FCoords at this+0x1330,
@@ -420,7 +420,7 @@ _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 		return *((_WORD*)(texData + (USize * Y + X) * 2));
 	return 0;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x156de0, "Avoids FStaticTexture on stack; calls GetRawTextureData directly instead")
+IMPL_APPROX("Avoids FStaticTexture on stack; calls GetRawTextureData directly instead")
 BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 {
 	// Retail: 0x156de0, ~200b. Lookup layer alpha texture, optionally scale coords
@@ -548,7 +548,7 @@ FVector ATerrainInfo::HeightmapToWorld(FVector In)
 	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x164cf0, "Omits legacy version-gated serialization paths prior to version 0x53")
+IMPL_APPROX("Omits legacy version-gated serialization paths prior to version 0x53")
 void ATerrainInfo::Serialize(FArchive& Ar)
 {
 	// Retail: 0x164cf0. Calls AActor::Serialize then serializes terrain dimensions,
@@ -589,7 +589,7 @@ void ATerrainInfo::Destroy()
 	}
 	AActor::Destroy();
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x155c0, "Lazy creation of UTerrainPrimitive via StaticAllocateObject omitted")
+IMPL_APPROX("Lazy creation of UTerrainPrimitive via StaticAllocateObject omitted")
 UPrimitive * ATerrainInfo::GetPrimitive()
 {
 	// Retail: 0x155c0. If sector list at this+0x12C8 is empty, defer to AActor.

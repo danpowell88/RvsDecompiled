@@ -128,7 +128,7 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x175ab0, "R6 decoration-volume spawning deferred: undocumented struct layout at +0x3f8 not yet reconstructed")
+IMPL_APPROX("R6 decoration-volume spawning deferred: undocumented struct layout at +0x3f8 not yet reconstructed")
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
@@ -158,7 +158,7 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0xe12c0, "scout zone-resize fallback path deferred: unknown Level vtable slot 0x9c")
+IMPL_APPROX("scout zone-resize fallback path deferred: unknown Level vtable slot 0x9c")
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);

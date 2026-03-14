@@ -2,7 +2,7 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x12bc10, "physMovingBrush body incomplete; cubic/linear interpolation, encroach checking, and anim notify hooks not reconstructed")
+IMPL_APPROX("physMovingBrush body incomplete; cubic/linear interpolation, encroach checking, and anim notify hooks not reconstructed")
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
@@ -308,7 +308,7 @@ void AMover::PostLoad()
 	*(INT*)((BYTE*)this + 0x6C0) = 0x315;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x7da40, "mover position interpolation state not updated")
+IMPL_APPROX("mover position interpolation state not updated")
 void AMover::PostNetReceive()
 {
 	// Ghidra 0x7da40: AActor::PostNetReceive, then apply interpolated position
@@ -352,7 +352,7 @@ void AMover::PostRaytrace()
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x78100, "pre-receive position snapshot not stored")
+IMPL_APPROX("pre-receive position snapshot not stored")
 void AMover::PreNetReceive()
 {
 	// Ghidra 0x78100: snapshot current position this+0x6D0 to a static global,
@@ -361,7 +361,7 @@ void AMover::PreNetReceive()
 	AActor::PreNetReceive();
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xd5460, "DeltaPosition reset uses direct zero instead of external FVector0 reference")
+IMPL_APPROX("DeltaPosition reset uses direct zero instead of external FVector0 reference")
 void AMover::PreRaytrace()
 {
 	// Ghidra 0xd5460: copy FVector(0,0,0) from FVector0_exref into this+0x694..0x69C

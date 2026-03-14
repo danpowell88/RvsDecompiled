@@ -237,7 +237,7 @@ UClass * ULodMesh::MeshGetInstanceClass()
 
 
 // --- UMesh ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0xca570, "non-persistent path serializes mesh instance pointer; persistent path omits it")
+IMPL_APPROX("non-persistent path serializes mesh instance pointer; persistent path omits it")
 void UMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0xca570, 60b. Calls UPrimitive::Serialize, then if archive is not
@@ -247,7 +247,7 @@ void UMesh::Serialize(FArchive& Ar)
 		Ar << *(UObject**)((BYTE*)this + 0x58);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xca620, "no on-demand instance creation; simplified path only")
+IMPL_APPROX("no on-demand instance creation; simplified path only")
 UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
 	// Retail: 0xca620, 96b. Gets or creates a mesh instance for the actor.
@@ -272,7 +272,7 @@ UClass * UMesh::MeshGetInstanceClass()
 
 
 // --- UMeshAnimation ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x130b80, "FUN_10430990 not called — returns fixed stride 0x2C instead of true per-item footprint")
+IMPL_APPROX("FUN_10430990 not called — returns fixed stride 0x2C instead of true per-item footprint")
 int UMeshAnimation::SequenceMemFootprint(FName Name)
 {
 	// Retail: 0x130b80, ordinal 4365. Searches Sequences TArray (this+0x48, stride 0x2C)
@@ -299,7 +299,7 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	return 0;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x13fee0, "TArray helper calls unresolved; mesh animation data loaded from packages")
+IMPL_APPROX("TArray helper calls unresolved; mesh animation data loaded from packages")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
@@ -311,7 +311,7 @@ void UMeshAnimation::Serialize(FArchive& Ar)
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x130ae0, "FUN_10430990 not called — per-item footprint not accumulated; returns 0")
+IMPL_APPROX("FUN_10430990 not called — per-item footprint not accumulated; returns 0")
 int UMeshAnimation::MemFootprint()
 {
 	// Retail: 0x130ae0, ordinal 3775. Sums memory footprint across all entries in
@@ -330,7 +330,7 @@ int UMeshAnimation::MemFootprint()
 	return total;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x130a30, "FUN_103ca8f0 (lazy preload helper) not called; UE2 linker handles cross-ref loading")
+IMPL_APPROX("FUN_103ca8f0 (lazy preload helper) not called; UE2 linker handles cross-ref loading")
 void UMeshAnimation::PostLoad()
 {
 	// Ghidra 0x130a30: UObject::PostLoad, then iterate Sequences (this+0x48) once per
@@ -510,7 +510,7 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x172830, "FUN_103ca8f0 not called; UE2 linker handles cross-ref loading")
+IMPL_APPROX("FUN_103ca8f0 not called; UE2 linker handles cross-ref loading")
 void UVertMesh::PostLoad()
 {
 	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
@@ -643,7 +643,7 @@ void USkeletalMesh::NormalizeInfluences(int)
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1441e0, "full implementation deferred — requires stride constants from unidentified TArray serializers")
+IMPL_APPROX("full implementation deferred — requires stride constants from unidentified TArray serializers")
 void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 {
 	guard(USkeletalMesh::CalculateNormals);
@@ -686,7 +686,7 @@ void USkeletalMesh::FlipFaces()
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x142d40, "progressive mesh reduction helpers unresolved; LOD generation not implementable")
+IMPL_APPROX("progressive mesh reduction helpers unresolved; LOD generation not implementable")
 void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int param4, int param5)
 {
 	guard(USkeletalMesh::GenerateLodModel);
@@ -701,7 +701,7 @@ void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x142970, "LOD entry constructor and stream-copy helpers unresolved; no data copy")
+IMPL_APPROX("LOD entry constructor and stream-copy helpers unresolved; no data copy")
 void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float param3, int param4)
 {
 	guard(USkeletalMesh::InsertLodModel);
@@ -749,7 +749,7 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1043ffb0, "simplified to UObject::Serialize; skeletal mesh data loaded from .u package")
+IMPL_APPROX("simplified to UObject::Serialize; skeletal mesh data loaded from .u package")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0x1043ffb0. Calls ULodMesh::Serialize, then serializes bone ref pose (+0x1B8),
@@ -852,7 +852,7 @@ FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 
 
 // --- USkeletalMesh ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x141820, "stream-clear vtable calls and per-LOD copy loops reference unresolved helpers; body left empty")
+IMPL_APPROX("stream-clear vtable calls and per-LOD copy loops reference unresolved helpers; body left empty")
 void USkeletalMesh::ReconstructRawMesh()
 {
 	guard(USkeletalMesh::ReconstructRawMesh);
@@ -880,7 +880,7 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 	return USkeletalMeshInstance::StaticClass();
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x12f4b0, "LOD version check and auto-generation skipped; LOD data expected from package")
+IMPL_APPROX("LOD version check and auto-generation skipped; LOD data expected from package")
 void USkeletalMesh::PostLoad()
 {
 	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version at +0x5C < 2,

@@ -107,7 +107,7 @@ float USound::GetDuration()
 
 
 // --- UI3DL2Listener ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10301310, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 void UI3DL2Listener::PostEditChange()
 {
 	// Retail: 30b. Call UObject::PostEditChange via import, then mark dirty flag at this+0x64.
@@ -117,7 +117,7 @@ void UI3DL2Listener::PostEditChange()
 
 
 // --- USoundGen ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10301310, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 void USoundGen::Serialize(FArchive &Ar)
 {
 	guard(USoundGen::Serialize);

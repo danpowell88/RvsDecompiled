@@ -190,7 +190,7 @@ void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags
 	*(DWORD*)((BYTE*)this + 0xC8) = 0;
 	*(DWORD*)((BYTE*)this + 0xB8) = state;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x89fd0, "restore path reads both dims from same viewport offset; enable path recursive call approximated")
+IMPL_APPROX("restore path reads both dims from same viewport offset; enable path recursive call approximated")
 void UCanvas::UseVirtualSize(int bEnable, float SizeX, float SizeY)
 {
 	// Retail: 0x89fd0, ordinal 4960. Two modes:

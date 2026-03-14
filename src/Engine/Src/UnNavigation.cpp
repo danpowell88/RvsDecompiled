@@ -614,7 +614,7 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0xe0940, "Internal FUN_ helpers not yet resolved; returns 0 as safe fallback")
+IMPL_APPROX("Internal FUN_ helpers not yet resolved; returns 0 as safe fallback")
 int AScout::findStart(FVector)
 {
 	guard(AScout::findStart);

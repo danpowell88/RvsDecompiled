@@ -193,7 +193,7 @@ int FBspVertexStream::GetStride()
 
 
 // --- FLevelSceneNode ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x106670, "Ghidra reference only; body approximated")
+IMPL_APPROX("Ghidra reference only; body approximated")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
@@ -372,7 +372,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x110560, "Too complex to fully decompile; guard/unguard stub only")
+IMPL_APPROX("Too complex to fully decompile; guard/unguard stub only")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
@@ -564,7 +564,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x115560, "FPoly + plane iteration too complex to fully decompile; stub only")
+IMPL_APPROX("FPoly + plane iteration too complex to fully decompile; stub only")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
@@ -609,7 +609,7 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 	}
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x114e50, "Too complex to fully decompile; stub only")
+IMPL_APPROX("Too complex to fully decompile; stub only")
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
 	// Ghidra 0x114e50: too complex to fully decompile; left empty.
@@ -656,14 +656,14 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x114b90, "Complex FMatrix rotation per ring; stub only")
+IMPL_APPROX("Complex FMatrix rotation per ring; stub only")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
 	// TODO: implement FLineBatcher::DrawSphere (Ghidra 0x114b90: complex FMatrix rotation per ring)
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1172a0, "GCache + UProxyBitmapMaterial + vertex stream too complex; stub only")
+IMPL_APPROX("GCache + UProxyBitmapMaterial + vertex stream too complex; stub only")
 void FLineBatcher::Flush(DWORD Flags)
 {
 	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
@@ -843,7 +843,7 @@ return 4;
 
 
 // --- FRawIndexBuffer ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x116e70, "NvTriStrip not available; strip generation skipped; revision still bumped")
+IMPL_APPROX("NvTriStrip not available; strip generation skipped; revision still bumped")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
@@ -887,7 +887,7 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_GHIDRA_APPROX("Engine.dll", 0x116860, "NvTriStrip cache-optimiser not available; optimisation pass skipped")
+IMPL_APPROX("NvTriStrip cache-optimiser not available; optimisation pass skipped")
 void FRawIndexBuffer::CacheOptimize()
 {
 	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
@@ -1040,7 +1040,7 @@ FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Oth
 	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 0x18); // 6 DWORDs (+0x34..+0x4B)
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x27960, "CacheId left 0; retail uses global per-resource counter DAT_1060b564")
+IMPL_APPROX("CacheId left 0; retail uses global per-resource counter DAT_1060b564")
 FStaticLightMapTexture::FStaticLightMapTexture()
 {
 // cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
@@ -1101,7 +1101,7 @@ int FStaticLightMapTexture::GetNumMips()
 {
 return 2;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10FE60, "GIsEditor assertion removed; returns NULL when not editor-loaded")
+IMPL_APPROX("GIsEditor assertion removed; returns NULL when not editor-loaded")
 void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 {
 	// Retail: 0x10FE60, ~100b SEH. In editor only (asserts GIsEditor).

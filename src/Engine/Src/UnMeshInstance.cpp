@@ -492,7 +492,7 @@ void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 	*(INT*)(elem + 0x40) = (Rate > 0.0f) ? 1 : 0;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10431D00, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 {
 	// Disasm: 0x134FC0, 304b.
@@ -1348,7 +1348,7 @@ FRotator USkeletalMeshInstance::GetRootRotationDelta()
 	return FRotator(0, Current.Yaw - Prev.Yaw, 0);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10433680, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 FCoords USkeletalMeshInstance::GetTagCoords(FName TagName)
 {
 	// Retail: 0x135BF0, 120b.
@@ -2075,7 +2075,7 @@ int USkeletalMeshInstance::ActiveVertStreamSize()
 	return *(INT*)(LODData + LODIdx * 0x11C + 0x18);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x135A30, "calls hardcoded FUN_10435900 for bone channel linkup rebuild")
+IMPL_APPROX("calls hardcoded FUN_10435900 for bone channel linkup rebuild")
 void USkeletalMeshInstance::ActualizeAnimLinkups()
 {
 	// Retail: 0x135A30. Iterates AnimObjects TArray at this+0xAC (stride 0x18).
@@ -2099,7 +2099,7 @@ void USkeletalMeshInstance::ActualizeAnimLinkups()
 	}
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10431d00, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(USkeletalMeshInstance::AnimForcePose);
@@ -2312,7 +2312,7 @@ UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 	return *(UMeshAnimation**)((BYTE*)MeshPtr + 0x1DC);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x12f640, "calls hardcoded FUN_10367df0 for bone geometry cleanup")
+IMPL_APPROX("calls hardcoded FUN_10367df0 for bone geometry cleanup")
 void USkeletalMeshInstance::Destroy()
 {
 	// Retail: 0x12f640. Calls FUN_10367df0(this) to release bone geometry arrays
@@ -2462,7 +2462,7 @@ void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
 	return data + Index * 0x2C;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1328D0, "calls hardcoded FUN_10432640 for anim object refresh")
+IMPL_APPROX("calls hardcoded FUN_10432640 for anim object refresh")
 void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 {
 	// Retail: 0x1328D0. Calls FUN_10432640 (RefreshAnimObjects) to populate AnimObjects
@@ -2499,7 +2499,7 @@ void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,in
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10438ce0, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 {
 	// Retail: 49b. Identical implementation to UVertMeshInstance::GetMaterial.
@@ -2513,7 +2513,7 @@ UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x13d8e0, "FUN_10438ce0 identity unresolved; no vertex output produced.")
+IMPL_APPROX("FUN_10438ce0 identity unresolved; no vertex output produced.")
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(USkeletalMeshInstance::GetMeshVerts);

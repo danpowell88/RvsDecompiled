@@ -59,7 +59,7 @@ void UStaticMesh::Build()
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1c9f0, "fallback GetDefaultMaterial CDO (FUN_10317670) not resolved; returns NULL instead")
+IMPL_APPROX("fallback GetDefaultMaterial CDO (FUN_10317670) not resolved; returns NULL instead")
 UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
 	// Ghidra 0x1c9f0, 69b:call Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
@@ -94,7 +94,7 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10449de0, "simplified to UObject::Serialize only; version-conditional geometry arrays not reconstructed")
+IMPL_APPROX("simplified to UObject::Serialize only; version-conditional geometry arrays not reconstructed")
 void UStaticMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0x10449de0.Calls UPrimitive::Serialize (if version >= 0x55) or UObject::Serialize,
@@ -123,7 +123,7 @@ int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 	return 1;
 	unguard;
 }
-IMPL_GHIDRA_APPROX("Engine.dll", 0x104469d0, "FUN_103582d0 called via hardcoded address thunk")
+IMPL_APPROX("FUN_103582d0 called via hardcoded address thunk")
 void UStaticMesh::Destroy()
 {
 	// Retail: 0x104469d0.Calls FUN_103582d0(this) to release the static mesh collision
@@ -172,7 +172,7 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x149bb0, "simplified to UObject::Serialize; version-conditional color-stream/index-buffer serialization not reconstructed")
+IMPL_APPROX("simplified to UObject::Serialize; version-conditional color-stream/index-buffer serialization not reconstructed")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);

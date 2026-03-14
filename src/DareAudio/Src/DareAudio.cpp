@@ -286,7 +286,7 @@ m_pViewport = InViewport;
 return 1;
 }
 
-IMPL_GHIDRA_APPROX("DareAudio.dll", 0x6000, "uses FCoordsFromFMatrix instead of FMatrix::Coords() to avoid Core.dll link dependency")
+IMPL_APPROX("uses FCoordsFromFMatrix instead of FMatrix::Coords() to avoid Core.dll link dependency")
 void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
 {
 	guard(UDareAudioSubsystem::Update);

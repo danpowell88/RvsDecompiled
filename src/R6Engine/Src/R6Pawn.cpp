@@ -2380,7 +2380,7 @@ void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = (iResult < 0) ? 0 : iResult;
 }
 
-IMPL_GHIDRA_APPROX("R6Engine.dll", 0x10042934, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rHitDirection);

@@ -68,7 +68,7 @@ _WORD UFont::RemapChar(_WORD Char)
 	return Char; // divergence: remap table lookup not implemented
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x1039c090, "Ghidra reference; body approximated")
+IMPL_APPROX("Ghidra reference; body approximated")
 void UFont::Serialize(FArchive& Ar)
 {
 	guard(UFont::Serialize);

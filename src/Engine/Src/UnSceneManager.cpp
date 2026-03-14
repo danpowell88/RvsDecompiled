@@ -523,7 +523,7 @@ FString USubActionCameraEffect::GetStatString()
 
 
 // --- USubActionCameraShake ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x11da60, "FRangeVector::GetRand not implemented; calls parent and returns only")
+IMPL_APPROX("FRangeVector::GetRand not implemented; calls parent and returns only")
 int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11da60, 116b. Calls parent Update; if running, gets scene manager via
@@ -817,7 +817,7 @@ void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_GHIDRA_APPROX("Engine.dll", 0x10ba00, "FLineBatcher wireframe box not reconstructed; falls back to base class rendering")
+IMPL_APPROX("FLineBatcher wireframe box not reconstructed; falls back to base class rendering")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);

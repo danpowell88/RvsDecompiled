@@ -413,7 +413,7 @@ void UFireTexture::MoveSpark( FSpark* S )
 	}
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0xa280, "sine table approximated with appSin")
+IMPL_APPROX("sine table approximated with appSin")
 void UFireTexture::MoveSparkAngle( FSpark* S, BYTE Angle )
 {
 	// Ghidra at 0xa280: like MoveSpark but speed is derived from a
@@ -652,7 +652,7 @@ void UFireTexture::PostDrawSparks()
 	}
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x2c70, "cases 0x9/0xa DrawMode sub-variants simplified for readability")
+IMPL_APPROX("cases 0x9/0xa DrawMode sub-variants simplified for readability")
 void UFireTexture::AddSpark( INT X, INT Y )
 {
 	// Ghidra: 0x2c70, 12628 bytes.
@@ -883,7 +883,7 @@ void UFireTexture::AddSpark( INT X, INT Y )
 	}
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x3c20, "spark removal decrements i; loop-unrolled cases simplified")
+IMPL_APPROX("spark removal decrements i; loop-unrolled cases simplified")
 void UFireTexture::RedrawSparks()
 {
 	// Ghidra: 0x3c20, ~30000 bytes (heavily loop-unrolled spark simulation).
@@ -1738,7 +1738,7 @@ void UWaterTexture::DeleteDrops( INT X, INT Y, INT Z )
 	}
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x5160, "nearest-neighbour 2x2 upsampling instead of bilinear")
+IMPL_APPROX("nearest-neighbour 2x2 upsampling instead of bilinear")
 void UWaterTexture::CalculateWater()
 {
 	// Ghidra: 0x5160, ~4400 bytes (heavily loop-unrolled 2-D wave simulation).
@@ -1825,7 +1825,7 @@ void UWaterTexture::CalculateWater()
 	}
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x18e0, "PRNG approximated with RandByte")
+IMPL_APPROX("PRNG approximated with RandByte")
 void UWaterTexture::WaterRedrawDrops()
 {
 	// Ghidra: 0x18e0, ~2000 bytes — full drop-type switch.
@@ -2214,7 +2214,7 @@ void UFluidTexture::PostLoad()
 	UWaterTexture::PostLoad();
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x7600, "nearest-neighbour 2x2 upsampling instead of bilinear")
+IMPL_APPROX("nearest-neighbour 2x2 upsampling instead of bilinear")
 void UFluidTexture::CalculateFluid()
 {
 	// Ghidra: 0x7600, ~3600 bytes (heavily loop-unrolled 2-D wave simulation).
@@ -2403,7 +2403,7 @@ void UIceTexture::RenderIce( FLOAT Delta )
 	INT_AT(this, 0x130) = 0;
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x65c0, "skips vtable lock calls; assumes textures already loaded")
+IMPL_APPROX("skips vtable lock calls; assumes textures already loaded")
 void UIceTexture::BlitIceTex()
 {
 	// Ghidra: 0x65c0, 380 bytes.
@@ -2445,7 +2445,7 @@ void UIceTexture::BlitIceTex()
 	}
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x6400, "skips vtable lock calls")
+IMPL_APPROX("skips vtable lock calls")
 void UIceTexture::BlitTexIce()
 {
 	// Ghidra: 0x6400, 393 bytes.
@@ -2535,7 +2535,7 @@ void UWetTexture::Destroy()
 	UTexture::Destroy();
 }
 
-IMPL_GHIDRA_APPROX("Fire.dll", 0x62c0, "skips vtable lock; assumes source texture loaded")
+IMPL_APPROX("skips vtable lock; assumes source texture loaded")
 void UWetTexture::ApplyWetTexture()
 {
 	// Ghidra: 0x62c0, 269 bytes.

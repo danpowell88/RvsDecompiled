@@ -1588,7 +1588,7 @@ void APawn::ClearSerpentine()
 	SerpentineDist = 0.0f;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xE5DE0, "DIVERGENCE: net-channel sync via ctrl vtable omitted")
+IMPL_APPROX("DIVERGENCE: net-channel sync via ctrl vtable omitted")
 void APawn::Crouch(INT bClientSimulation)
 {
 	guard(APawn::Crouch);
@@ -1691,7 +1691,7 @@ void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xe5b60, "DIVERGENCE: null guard added for safety")
+IMPL_APPROX("DIVERGENCE: null guard added for safety")
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 {
 	guard(APawn::StartNewSerpentine);
@@ -1766,7 +1766,7 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0xE5F90, "DIVERGENCE: collision revert check via ctrl vtable omitted")
+IMPL_APPROX("DIVERGENCE: collision revert check via ctrl vtable omitted")
 void APawn::UnCrouch(INT bClientSimulation)
 {
 	guard(APawn::UnCrouch);
@@ -2228,7 +2228,7 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 	unguard;
 }
 
-IMPL_GHIDRA_APPROX("Engine.dll", 0x12cc70, "DIVERGENCE: Pawn->Location passed as listener location")
+IMPL_APPROX("DIVERGENCE: Pawn->Location passed as listener location")
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
 	guard(AController::CheckHearSound);
