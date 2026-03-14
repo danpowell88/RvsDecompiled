@@ -354,16 +354,12 @@ void UMatAction::PostEditChange()
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1041D750 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041d750)
 void UMatAction::PostLoad()
 {
-	// Retail: 89b. Call Super::PostLoad() then clear stale object reference.
-	// If the UObject* at this+0x40 has bit 7 set in its flags byte at obj+0xA0
-	// (indicating pending-delete), the reference is cleared to NULL.
 	Super::PostLoad();
-	UObject* ref = *(UObject**)((BYTE*)this + 0x40);
-	if (ref && (*(BYTE*)((BYTE*)ref + 0xA0) & 0x80))
-		*(UObject**)((BYTE*)this + 0x40) = NULL;
+	if (*(INT*)((BYTE*)this + 0x40) != 0 && *(SBYTE*)(*(INT*)((BYTE*)this + 0x40) + 0xa0) < 0)
+		*(INT*)((BYTE*)this + 0x40) = 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e880)
@@ -431,16 +427,32 @@ void UMatSubAction::PreBeginPreview()
 {
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e240 is 191 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041e240)
 FString UMatSubAction::GetStatString()
 {
-	return FString();
+	FString status = GetStatusDesc();
+	return FString::Printf(
+		TEXT("TYPE : %s, Status : %s, Delay : %1.1f, Duration : %1.1f"),
+		*(FString*)((BYTE*)this + 0x40),
+		*status,
+		*(FLOAT*)((BYTE*)this + 0x30),
+		*(FLOAT*)((BYTE*)this + 0x34));
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041d980 is 173 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041d980)
 FString UMatSubAction::GetStatusDesc()
 {
-	return FString();
+	BYTE state = *(BYTE*)((BYTE*)this + 0x2C);
+	switch (state)
+	{
+		case 0: return FString(TEXT("SASTATUS_Waiting"));
+		case 1: return FString(TEXT("SASTATUS_Running"));
+		case 2: return FString(TEXT("SASTATUS_Ending"));
+		case 3: return FString(TEXT("SASTATUS_Expired"));
+		default:
+			appFailAssert("0", ".\\UnSceneManager.cpp", 0x400);
+			return FString(TEXT("Unknown"));
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x1030ce50)
@@ -515,22 +527,30 @@ int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103862a0 is 84 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x103862a0)
 FString USubActionCameraEffect::GetStatString()
 {
-	return FString();
+	return FString(TEXT(""));
 }
 
 
 // --- USubActionCameraShake ---
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041da60 is 116 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041da60)
 int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 {
-	// Retail: 0x11da60, 116b. Calls parent Update; if running, gets scene manager via
-	// vtable+0x6C (slot 27 = GetSceneManager) and adds a random shake vector from the
-	// FRangeVector at this+0x58 to the scene manager's accumulator at +0x47C.
-	// FRangeVector::GetRand is a complex random-in-range function — stub: call parent and return.
-	return UMatSubAction::Update(Pct, SceneMgr) ? 1 : 0;
+	INT ran = UMatSubAction::Update(Pct, SceneMgr);
+	if (!ran)
+		return 0;
+	typedef ASceneManager* (__thiscall* GetMgrFn)(USubActionCameraShake*);
+	ASceneManager* mgr = ((GetMgrFn)(*(void***)this)[0x6c/4])(this);
+	if (mgr != NULL)
+	{
+		FVector shake = ((FRangeVector*)((BYTE*)this + 0x58))->GetRand();
+		*(FLOAT*)((BYTE*)SceneMgr + 0x47c) += shake.X;
+		*(FLOAT*)((BYTE*)SceneMgr + 0x480) += shake.Y;
+		*(FLOAT*)((BYTE*)SceneMgr + 0x484) += shake.Z;
+	}
+	return 1;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041dae0)
@@ -572,10 +592,15 @@ int USubActionFOV::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e3c0 is 187 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041e3c0)
 FString USubActionFOV::GetStatString()
 {
-	return FString();
+	FString result = UMatSubAction::GetStatString();
+	FString extra = FString::Printf(TEXT(", Start : %1.1f, End : %1.1f\n"),
+		*(FLOAT*)((BYTE*)this + 0x58),
+		*(FLOAT*)((BYTE*)this + 0x5c));
+	result += *extra;
+	return result;
 }
 
 
@@ -616,10 +641,18 @@ int USubActionFade::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e7b0 is 202 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041e7b0)
 FString USubActionFade::GetStatString()
 {
-	return FString();
+	FString result = UMatSubAction::GetStatString();
+	const TCHAR* dir = (*(BYTE*)((BYTE*)this + 0x58) & 1) ? TEXT("In") : TEXT("Out");
+	FString extra = FString::Printf(TEXT("Fade [%s], Color : %d,%d,%d\n"),
+		dir,
+		(UINT)((BYTE*)this)[0x5e],
+		(UINT)((BYTE*)this)[0x5d],
+		(UINT)((BYTE*)this)[0x5c]);
+	result += *extra;
+	return result;
 }
 
 
@@ -652,10 +685,15 @@ int USubActionGameSpeed::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_DIVERGE("USubActionGameSpeed::GetStatString not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1041e3c0)
 FString USubActionGameSpeed::GetStatString()
 {
-	return FString();
+	FString result = UMatSubAction::GetStatString();
+	FString extra = FString::Printf(TEXT(", Start : %1.1f, End : %1.1f\n"),
+		*(FLOAT*)((BYTE*)this + 0x58),
+		*(FLOAT*)((BYTE*)this + 0x5c));
+	result += *extra;
+	return result;
 }
 
 
@@ -694,10 +732,25 @@ void USubActionOrientation::PostLoad()
 	}
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e4e0 is 342 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041e4e0)
 FString USubActionOrientation::GetStatString()
 {
-	return FString();
+	FString result = UMatSubAction::GetStatString();
+	FString actorStr;
+	if (*(INT*)((BYTE*)this + 0x58) == 1)
+	{
+		const TCHAR* actorName = TEXT("");
+		UObject* actor = *(UObject**)((BYTE*)this + 0x5c);
+		if (actor)
+			actorName = actor->GetName();
+		actorStr = FString::Printf(TEXT(" Actor : %s,"), actorName);
+	}
+	extern ENGINE_API FMatineeTools GMatineeTools;
+	FString orientDesc = GMatineeTools.GetOrientationDesc(*(INT*)((BYTE*)this + 0x58));
+	FString extra = FString::Printf(TEXT(", Orientation : %s,%s EaseInTime : %1.1f\n"),
+		*orientDesc, *actorStr, *(FLOAT*)((BYTE*)this + 0x60));
+	result += *extra;
+	return result;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041db10)
@@ -739,10 +792,15 @@ int USubActionSceneSpeed::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_DIVERGE("USubActionSceneSpeed::GetStatString not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1041e3c0)
 FString USubActionSceneSpeed::GetStatString()
 {
-	return FString();
+	FString result = UMatSubAction::GetStatString();
+	FString extra = FString::Printf(TEXT(", Start : %1.1f, End : %1.1f\n"),
+		*(FLOAT*)((BYTE*)this + 0x58),
+		*(FLOAT*)((BYTE*)this + 0x5c));
+	result += *extra;
+	return result;
 }
 
 
@@ -771,10 +829,14 @@ int USubActionTrigger::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e300 is 181 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1041e300)
 FString USubActionTrigger::GetStatString()
 {
-	return FString();
+	FString result = UMatSubAction::GetStatString();
+	FString extra = FString::Printf(TEXT(", Event : %s\n"),
+		**(FName*)((BYTE*)this + 0x58));
+	result += *extra;
+	return result;
 }
 
 

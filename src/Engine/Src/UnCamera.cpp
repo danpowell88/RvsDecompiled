@@ -352,7 +352,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
 // FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
 // Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
-IMPL_APPROX("Decoded from Ghidra sub-function analysis; no direct RVA for this operator")
+IMPL_DIVERGE("Ghidra: no direct RVA; sub-function mapping via FUN_10323030/FUN_10446ec0 only")
 FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
 	FArray& Arr = *(FArray*)&V.Pad[4];
@@ -828,7 +828,7 @@ FArchive & operator<<(FArchive& Ar, FURL& U) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFBspVertex@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103045f0)
 FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
 	// Always serialize: offsets 0x00-0x08 (3 floats), 0x18-0x24 (4 floats)
 	Ar.ByteOrderSerialize(&V._Data[0x00], 4);
@@ -848,7 +848,7 @@ FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFPosNormTexData@@@Z
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_MATCH("Engine.dll", 0x10302570)
 FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
 	// 10 floats: offsets 0x00-0x24
 	for (INT i = 0; i < 10; i++)
@@ -878,7 +878,7 @@ FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionNode@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10316520: FUN_10301400 (FBox serialization helper) unresolved by name")
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 	// 4 FCompactIndex values at offsets 0x00, 0x04, 0x08, 0x0C
 	Ar << *(FCompactIndex*)&V._Data[0x00];
@@ -891,7 +891,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionTriangle@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316340)
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
 	// 16 floats (4 FPlanes) via ByteOrderSerialize
 	for (INT i = 0; i < 16; i++)
@@ -905,7 +905,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshUV@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316220)
 FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 	Ar.ByteOrderSerialize(&V._Data[0], 4);
 	Ar.ByteOrderSerialize(&V._Data[4], 4);
@@ -913,7 +913,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10316110: legacy version paths for Ver < 0x70 / Ver == 0x6f use unresolvable Ghidra stack-frame references")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)
@@ -923,7 +923,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFTerrainVertex@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103152a0)
 FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
 	// 6 floats at 0x00-0x14
 	for (INT i = 0; i < 6; i++)
@@ -940,7 +940,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUV2Data@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10316220)
 FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
 	Ar.ByteOrderSerialize(&D, 4);
 	Ar.ByteOrderSerialize((BYTE*)&D + 4, 4);
@@ -948,7 +948,7 @@ FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUntransformedVertex@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10302380)
 FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
 	// 11 floats: offsets 0x00-0x28
 	for (INT i = 0; i < 11; i++)
@@ -957,7 +957,7 @@ FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
 }
 
 // ?GNewCollisionHash@@YAPAVFCollisionHashBase@@XZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1036f700)
 FCollisionHashBase * GNewCollisionHash() {
 	if( !GIsEditor )
 		return new FCollisionOctree();
@@ -969,7 +969,7 @@ FCollisionHashBase * GNewCollisionHash() {
 // Converts Hue/Saturation/Value (each 0-255) to a normalised FPlane colour.
 // Ghidra: param_2 (S/Hue) selects one of three sectors; param_3 (V) scales
 // brightness; result has W=1.0f.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10468f30)
 FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 	FLOAT fR, fG, fB;
 	if (S < 0x56) {
@@ -999,7 +999,7 @@ FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen);
 
 // ?GetFROTATOR@@YAHPBGAAVFRotator@@H@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103dc700: FUN_1050557c converts parsed float*ScaleFactor to INT — unresolved")
 int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 {
 	FLOAT Temp = 0.f;
@@ -1025,7 +1025,7 @@ int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 }
 
 // ?GetFROTATOR@@YAHPBG0AAVFRotator@@H@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103dc8a0)
 int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int ScaleFactor)
 {
 	TCHAR Temp[80];
@@ -1035,7 +1035,7 @@ int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int
 }
 
 // ?GetFVECTOR@@YAHPBGAAVFVector@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103dc430)
 int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 {
 	int NumParsed = 0;
@@ -1060,7 +1060,7 @@ int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 }
 
 // ?GetFVECTOR@@YAHPBG0AAVFVector@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103dc650)
 int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 {
 	TCHAR Temp[80];
@@ -1070,22 +1070,28 @@ int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 }
 
 // ?GetSUBSTRING@@YAHPBG0PAGH@Z
-IMPL_APPROX("Reconstructed from context")
+// Ghidra 0x103dc570: locates Match in Stream, then expects the char immediately after
+// Match to be '(' — copies text up to the matching ')' into Value. Format: Match(value).
+IMPL_MATCH("Engine.dll", 0x103dc570)
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen)
 {
 	const TCHAR* Found = appStrfind( Stream, Match );
-	if( !Found )
-		return 0;
-	Found += appStrlen( Match );
-	int i = 0;
-	while( *Found && *Found != ' ' && *Found != '\t' && i < MaxLen - 1 )
-		Value[i++] = *Found++;
-	Value[i] = 0;
-	return 1;
+	if( Found )
+	{
+		INT MatchLen = appStrlen( Match );
+		if( Found[MatchLen] == TEXT('(') )
+		{
+			appStrncpy( Value, Found + MatchLen + 1, MaxLen );
+			TCHAR* End = appStrchr( Value, TEXT(')') );
+			if( End ) *End = 0;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 // ?getGameShutDown@@YAHXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1039eb50)
 int getGameShutDown() { return bGameShutDown; }
 
 // ?newPath@FPathBuilder@@AAEPAVANavigationPoint@@VFVector@@@Z
