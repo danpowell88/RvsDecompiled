@@ -20,11 +20,11 @@ enum EActionType
 };
 
 // --- Variables ---
-var Sound m_eSoundToPlay;
+var Sound m_eSoundToPlay;         // Sound played when this action begins
 // ^ NEW IN 1.60
-var Range m_SoundRange;
+var Range m_SoundRange;           // Volume/pitch variation range for the action sound
 // ^ NEW IN 1.60
-var Sound m_eSoundToPlayStop;
+var Sound m_eSoundToPlayStop;     // Sound played when this action ends
 // ^ NEW IN 1.60
 var EActionType m_eType;
 

@@ -49,7 +49,7 @@ var bool m_bGetOffLadder;
 // the time where the pawn was bumped
 var float m_fLastBump;
 var name m_StateAfterInteraction;
-var bool bShowLog;
+var bool bShowLog;               // Enable verbose AI controller debug logging
 // ^ NEW IN 1.60
 var Vector m_vPreviousPosition;
 // backup of the bool when entering a state
@@ -57,7 +57,7 @@ var bool m_bStateBackupAvoidFacingWalls;
 // return state when OpenDoor state is over
 var name m_openDoorNextState;
 var R6ClimbableObject m_climbingObject;
-var bool bShowInteractionLog;
+var bool bShowInteractionLog;    // Enable verbose interactive-action debug logging
 // ^ NEW IN 1.60
 var int m_iCurrentRouteCache;
 // return state when BumpBackUp state is over

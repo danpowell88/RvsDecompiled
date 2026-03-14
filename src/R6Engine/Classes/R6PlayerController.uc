@@ -105,9 +105,8 @@ var R6GameMenuCom m_MenuCommunication;
 // Action sent to the team (or to self)
 var R6CircumstantialActionQuery m_RequestedCircumstantialAction;
 var /* replicated */ bool m_bSkipBeginState;
-var bool bShowLog;
+var bool bShowLog;                // Enable verbose player controller debug logging
 // ^ NEW IN 1.60
-var /* replicated */ Rotator m_rCurrentShakeRotation;
 // Player action progress (0-100)
 var /* replicated */ int m_iPlayerCAProgress;
 var Rotator m_rTotalShake;
@@ -136,21 +135,21 @@ var int m_iTeamId;
 var float m_fStartSurrenderTime;
 // equal to the pawn which is arresting/rescuing this
 var R6Pawn m_pInteractingRainbow;
-var STImpactShake m_stImpactDazed;
+var STImpactShake m_stImpactDazed;  // Camera shake parameters for the dazed (near-miss) hit reaction
 // ^ NEW IN 1.60
 var Rotator m_rHitRotation;
-var STImpactShake m_stImpactKO;
+var STImpactShake m_stImpactKO;     // Camera shake parameters for the knock-out (stunning) hit reaction
 // ^ NEW IN 1.60
 var float m_fMaxShake;
 var bool m_bAttachCameraToEyes;
-var STImpactShake m_stImpactStun;
+var STImpactShake m_stImpactStun;   // Camera shake parameters for a stun-damage hit reaction
 // ^ NEW IN 1.60
-var STImpactShake m_stImpactHit;
+var STImpactShake m_stImpactHit;    // Camera shake parameters for a regular bullet-hit reaction
 // ^ NEW IN 1.60
 var float m_fShakeTime;
 //Time to recover from the intensity
 var float m_fBlurReturnTime;
-var float m_fLastVoteTime;
+var float m_fLastVoteTime;        // Timestamp of the last vote action to enforce vote cooldown
 // ^ NEW IN 1.60
 var float m_fShakeReturnTime;
 var R6InteractionInventoryMnu m_InteractionInventory;
@@ -244,11 +243,11 @@ var bool m_bAMenuIsDisplayed;
 //go to dead state after team selection
 var bool m_bDeadAfterTeamSel;
 var bool m_bWantTriggerLag;
-var float m_fLastUpdateServerCheckTime;
+var float m_fLastUpdateServerCheckTime;  // Last time the client checked for server update availability
 // ^ NEW IN 1.60
 // true if a self detonating bomb has been detected in the level (temporary? It's like a patch)
 var bool m_bBombSearched;
-var bool m_bQuitToUpdateServerDisplayed;
+var bool m_bQuitToUpdateServerDisplayed; // True when the 'quit to update server' prompt is already visible
 // ^ NEW IN 1.60
 var Sound m_sndUpdateWritableMap;
 // request if this player wants to apply penalty to team-mate killer
@@ -278,7 +277,7 @@ var config int m_iDoorSpeed;
 // also hides the circumstantial info during this time...
 var bool m_bCircumstantialActionInProgress;
 var byte m_bSpeedUpDoor;
-var float m_fOxygeneLevel;
+var float m_fOxygeneLevel;        // Current oxygen level (0.0-1.0) when in a gas/smoke area
 // ^ NEW IN 1.60
 var Sound m_sndMissionComplete;
 var Sound m_sndDeathMusic;
@@ -318,11 +317,11 @@ var float m_fCurrRetPosX;
 var float m_fRetLockPosY;
 // Desired Reticule X position on screen
 var float m_fRetLockPosX;
-var int m_iSpeedLevels[3];
+var int m_iSpeedLevels[3];        // Walk/crouch/run speed thresholds used for anti-cheat speed detection
 // ^ NEW IN 1.60
 // used for the
 var config float m_fTeamMoveToDistance;
-var float m_fCompteurFrameDetection;
+var float m_fCompteurFrameDetection; // Accumulated frame counter used for speed-hack detection
 // ^ NEW IN 1.60
 
 // --- Functions ---

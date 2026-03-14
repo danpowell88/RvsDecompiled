@@ -54,18 +54,18 @@ var /* replicated */ int m_iYawInit;
 var /* replicated */ int m_iYawMax;
 //Is the door open or not
 var /* replicated */ bool m_bIsDoorClosed;
-var bool m_bTreatDoorAsWindow;
+var bool m_bTreatDoorAsWindow;   // Treat this door like a window for breaching/line-of-sight purposes
 // ^ NEW IN 1.60
-var /* replicated */ bool m_bIsOpeningClockWise;
+var /* replicated */ bool m_bIsOpeningClockWise;  // True if the door swings clockwise when opening
 // ^ NEW IN 1.60
-var /* replicated */ bool m_bIsDoorLocked;
+var /* replicated */ bool m_bIsDoorLocked;  // True when the door is locked and cannot be opened normally
 // ^ NEW IN 1.60
 var /* replicated */ bool m_bInProcessOfOpening;
-var /* replicated */ R6Door m_DoorActorA;
+var /* replicated */ R6Door m_DoorActorA;  // First R6Door actor associated with this rotating door
 // ^ NEW IN 1.60
 //Determine how many degrees the door can open (In degrees)
 var /* replicated */ int m_iMaxOpening;
-var /* replicated */ R6Door m_DoorActorB;
+var /* replicated */ R6Door m_DoorActorB;  // Second R6Door actor (for double doors)
 // ^ NEW IN 1.60
 var bool m_bUseWheel;
 // Current Lock Hit Points
@@ -80,46 +80,46 @@ var Vector m_vDoorADir2D;
 var array<array> m_BreachAttached;
 //Opening of the door at level creation (In degrees)
 var /* replicated */ int m_iInitialOpening;
-var float m_fUnlockBaseTime;
+var float m_fUnlockBaseTime;      // Base time (seconds) to unlock this door with a lock-pick
 // ^ NEW IN 1.60
-var Sound m_OpeningWheelSound;
+var Sound m_OpeningWheelSound;   // Sound played while turning the door wheel/handle to open
 // ^ NEW IN 1.60
-var Sound m_MoveAmbientSoundStop;
+var Sound m_MoveAmbientSoundStop; // Sound played when door movement ambient loop stops
 // ^ NEW IN 1.60
-var Sound m_MoveAmbientSound;
+var Sound m_MoveAmbientSound;    // Ambient looping sound while the door is in motion
 // ^ NEW IN 1.60
 //The normal at the begining of the action
 var Vector m_vNormal;
 //-----------------------------------------------------------------------------
 // Editables.
 var bool sm_bIsDoorLocked;
-var Sound m_ClosingWheelSound;
+var Sound m_ClosingWheelSound;   // Sound played while turning the wheel to close the door
 // ^ NEW IN 1.60
-var Sound m_ClosingSound;
+var Sound m_ClosingSound;         // Sound played when the door finishes closing
 // ^ NEW IN 1.60
-var Sound m_OpeningSound;
+var Sound m_OpeningSound;         // Sound played when the door finishes opening
 // ^ NEW IN 1.60
-var float m_fWindowWidth;
+var float m_fWindowWidth;         // Width of the window pane within this door (for breaching)
 // ^ NEW IN 1.60
 // lock HP to open door with bullets or explosions.
 var int m_iLockHP;
-var Sound m_LockSound;
+var Sound m_LockSound;            // Sound played when the door is locked
 // ^ NEW IN 1.60
-var Sound m_UnlockSound;
+var Sound m_UnlockSound;          // Sound played when the door is unlocked
 // ^ NEW IN 1.60
-var Sound m_LockPickSound;
+var Sound m_LockPickSound;        // Sound played while lock-picking this door
 // ^ NEW IN 1.60
-var Sound m_LockPickSoundStop;
+var Sound m_LockPickSoundStop;    // Sound played when lock-picking finishes or is cancelled
 // ^ NEW IN 1.60
-var Sound m_ExplosionSound;
+var Sound m_ExplosionSound;       // Sound played when this door is blown open by an explosion
 // ^ NEW IN 1.60
-var /* replicated */ int m_iMaxOpeningDeg;
+var /* replicated */ int m_iMaxOpeningDeg;  // Maximum opening angle in degrees (replicated to clients)
 // ^ NEW IN 1.60
-var /* replicated */ int m_iInitialOpeningDeg;
+var /* replicated */ int m_iInitialOpeningDeg;  // Starting open angle in degrees at mission start
 // ^ NEW IN 1.60
-var bool bShowLog;
+var bool bShowLog;                // Enable verbose door-state debug logging
 // ^ NEW IN 1.60
-var bool m_bForceNoFormation;
+var bool m_bForceNoFormation;    // Disable formation stacking when AI moves through this door
 // ^ NEW IN 1.60
 
 // --- Functions ---

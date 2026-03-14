@@ -73,9 +73,8 @@ var /* replicated */ EStartingPosition m_ePosition;
 var /* replicated */ bool m_bFreed;
 // true when enter an extration zone
 var /* replicated */ bool m_bExtracted;
-var bool m_bClassicMissionCivilian;
+var bool m_bClassicMissionCivilian;  // Treat this hostage as a background civilian in classic mission mode
 // ^ NEW IN 1.60
-// type of personality
 var EHostagePersonality m_ePersonality;
 // deployment zone
 var R6DeploymentZone m_DZone;
@@ -84,7 +83,7 @@ var /* replicated */ STRepHostageAnim m_eCurrentRepHostageAnim;
 var /* replicated */ bool m_bFrozen;
 // in escorte mode
 var /* replicated */ bool m_bEscorted;
-var RandomTweenNum m_changeOrientationTween;
+var RandomTweenNum m_changeOrientationTween;  // Random timer controlling how often the hostage changes facing direction
 // ^ NEW IN 1.60
 // true when playing a reaction anim
 var bool m_bReactionAnim;
@@ -93,20 +92,20 @@ var bool m_bPatrolForward;
 var /* replicated */ bool m_bIsKneeling;
 var /* replicated */ bool m_bIsFoetus;
 var /* replicated */ byte m_bRepWaitAnimIndex;
-var RandomTweenNum m_sightRadiusTween;
+var RandomTweenNum m_sightRadiusTween;  // Random variation applied to the hostage's sight detection radius
 // ^ NEW IN 1.60
-var RandomTweenNum m_updatePaceTween;
+var RandomTweenNum m_updatePaceTween;   // Random timer for how often the hostage re-evaluates movement pace
 // ^ NEW IN 1.60
 // Used in the TerroristMgr to rapidely find an hostage already in the array
 var int m_iIndex;
 // true when play this anim
 var bool m_bCrouchToScaredStandBegin;
 var STRepHostageAnim m_eSavedRepHostageAnim;
-var RandomTweenNum m_stayCautiousGuardedStateTime;
+var RandomTweenNum m_stayCautiousGuardedStateTime;  // How long hostage stays in the cautious/guarded state
 // ^ NEW IN 1.60
-var RandomTweenNum m_patrolAreaWaitTween;
+var RandomTweenNum m_patrolAreaWaitTween;  // Random wait time between patrol area traversals
 // ^ NEW IN 1.60
-var RandomTweenNum m_waitingGoCrouchTween;
+var RandomTweenNum m_waitingGoCrouchTween;  // Random delay before hostage crouches while waiting
 // ^ NEW IN 1.60
 // start has a civilian
 var bool m_bStartAsCivilian;
@@ -115,9 +114,9 @@ var name m_NocsWaitingName;
 // used to check if we are in the GotoState('')
 var name m_globalState;
 var byte m_bSavedRepWaitAnimIndex;
-var RandomTweenNum m_stayInFoetusTime;
+var RandomTweenNum m_stayInFoetusTime;  // How long hostage stays curled up in the foetal/cowering position
 // ^ NEW IN 1.60
-var RandomTweenNum m_stayFrozenTime;
+var RandomTweenNum m_stayFrozenTime;    // How long hostage stays frozen with fear after being startled
 // ^ NEW IN 1.60
 // initialized by the template
 var string m_szUsedTemplate;
@@ -129,11 +128,11 @@ var bool m_bPoliceManHasWeapon;
 var bool m_bPoliceManCanSeeRainbows;
 //MissionPack1
 var name m_NocsSeeRainbowsName;
-var int m_iPrisonierTeam;
+var int m_iPrisonierTeam;          // Team ID for this hostage when used as a CTE prisoner
 // ^ NEW IN 1.60
 // true when we process the feedback
 var bool m_bFeedbackExtracted;
-var RandomTweenNum m_stayProneTime;
+var RandomTweenNum m_stayProneTime;     // How long the hostage remains prone after being told to get down
 // ^ NEW IN 1.60
 
 // --- Functions ---

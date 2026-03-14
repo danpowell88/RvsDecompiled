@@ -25,15 +25,15 @@ enum eDeviceCircumstantialAction
 };
 
 // --- Variables ---
-var /* replicated */ bool m_bIsActivated;
+var /* replicated */ bool m_bIsActivated;  // True when this device is currently activated/triggered
 // ^ NEW IN 1.60
-var eDeviceAnimToPlay m_eAnimToPlay;
+var eDeviceAnimToPlay m_eAnimToPlay;  // Which device animation the interacting pawn should play
 // ^ NEW IN 1.60
 // time the object started to be used. Only one pawn can interact with this object
 var float m_fLockObjectTime;
-var float m_fGainTimeWithElectronicsKit;
+var float m_fGainTimeWithElectronicsKit;  // Time reduction (seconds) when using an electronics kit
 // ^ NEW IN 1.60
-var bool m_bToggleType;
+var bool m_bToggleType;           // If true, interaction toggles the device on/off repeatedly
 // ^ NEW IN 1.60
 var eStateIOObejct m_ObjectState;
 var /* replicated */ bool sm_bIsActivated;

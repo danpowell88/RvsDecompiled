@@ -9,11 +9,11 @@ class R6DZoneRandomPoints extends R6DeploymentZone
     native;
 
 // --- Variables ---
-var bool m_bUseAllowLeave;
+var bool m_bUseAllowLeave;        // Propagate AllowLeave setting from zone to child nodes
 // ^ NEW IN 1.60
-var array<array> m_aNode;
+var array<array> m_aNode;         // List of random point nodes available in this zone
 // ^ NEW IN 1.60
-var bool m_bSelectNodeInEditor;
+var bool m_bSelectNodeInEditor;   // Preview node selection in the Unreal Editor
 // ^ NEW IN 1.60
 var bool m_bInInit;
 var const array<array> m_aTempHighPriorityNode;

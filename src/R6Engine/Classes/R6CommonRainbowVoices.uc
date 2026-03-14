@@ -3,9 +3,9 @@
 class R6CommonRainbowVoices extends R6Voices;
 
 // --- Variables ---
-var Sound m_sndSuffocation;
+var Sound m_sndSuffocation;      // Voice line played when the pawn is suffocating (smoke/gas)
 // ^ NEW IN 1.60
-var Sound m_sndCoughOxygene;
+var Sound m_sndCoughOxygene;     // Coughing voice line triggered when oxygen is low
 // ^ NEW IN 1.60
 var Sound m_sndEntersGas;
 var Sound m_sndGoesDown;

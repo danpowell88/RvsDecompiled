@@ -35,7 +35,7 @@ var /* replicated */ byte m_RotationYaw;
 var /* replicated */ Vector m_Location;
 // REPLICATED: Used to know that we need to start blinking
 var /* replicated */ byte m_BlinkCounter;
-var /* replicated */ int m_iTeamId;
+var /* replicated */ int m_iTeamId;   // Network team identifier for this member
 // ^ NEW IN 1.60
 // REPLICATED: Owners's health
 var /* replicated */ byte m_eHealth;
@@ -49,11 +49,11 @@ var float m_fLastCommunicationTime;
 var float m_fClientUpdateFrequency;
 //     SERVER: Last replication update
 var float m_fClientLastUpdate;
-var /* replicated */ bool m_bIsIntruder;
+var /* replicated */ bool m_bIsIntruder; // True when this member is the designated intruder in CTE mode
 // ^ NEW IN 1.60
-var /* replicated */ bool m_bHasFloppy;
+var /* replicated */ bool m_bHasFloppy;  // True when this member is carrying the floppy disk objective
 // ^ NEW IN 1.60
-var /* replicated */ float m_fCompteurFrameDetection;
+var /* replicated */ float m_fCompteurFrameDetection; // Replicated frame counter used for client-side speed-hack detection
 // ^ NEW IN 1.60
 
 defaultproperties

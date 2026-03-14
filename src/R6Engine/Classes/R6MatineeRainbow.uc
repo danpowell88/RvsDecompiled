@@ -11,21 +11,21 @@ class R6MatineeRainbow extends R6Rainbow
 // --- Variables ---
 // var ? m_Controller; // REMOVED IN 1.60
 var R6MatineeAttach m_MatineeAttach;
-var class<R6Rainbow> m_RainbowTemplate;
+var class<R6Rainbow> m_RainbowTemplate;  // Rainbow operator class to use when UseRainbowTemplate is enabled
 // ^ NEW IN 1.60
-var R6RainbowAI m_controller;
+var R6RainbowAI m_controller;    // The AI controller driving this matinee Rainbow actor
 // ^ NEW IN 1.60
-var bool m_bUseRainbowTemplate;
+var bool m_bUseRainbowTemplate;  // Override the level-placed Rainbow with the template class
 // ^ NEW IN 1.60
-var bool m_bActivateGadget;
+var bool m_bActivateGadget;      // Activate the operator's gadget at the start of this matinee sequence
 // ^ NEW IN 1.60
-var class<R6AbstractGadget> m_SecondaryGadget;
+var class<R6AbstractGadget> m_SecondaryGadget;  // Secondary gadget class assigned to this matinee operator
 // ^ NEW IN 1.60
-var class<R6AbstractGadget> m_PrimaryGadget;
+var class<R6AbstractGadget> m_PrimaryGadget;   // Primary gadget class assigned to this matinee operator
 // ^ NEW IN 1.60
-var class<R6AbstractWeapon> m_SecondaryWeapon;
+var class<R6AbstractWeapon> m_SecondaryWeapon;  // Secondary weapon class assigned to this matinee operator
 // ^ NEW IN 1.60
-var class<R6AbstractWeapon> m_PrimaryWeapon;
+var class<R6AbstractWeapon> m_PrimaryWeapon;   // Primary weapon class assigned to this matinee operator
 // ^ NEW IN 1.60
 
 // --- Functions ---

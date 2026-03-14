@@ -40,18 +40,18 @@ var R6Ladder m_BottomLadder;
 var R6Ladder m_TopLadder;
 var R6LadderCollision m_BottomCollision;
 var R6LadderCollision m_TopCollision;
-var bool bShowLog;
+var bool bShowLog;                // Enable verbose ladder-climbing debug logging
 // ^ NEW IN 1.60
 var float m_fBottomLadderActionRange;
-var Sound m_FootSound;
+var Sound m_FootSound;            // Footstep sound played when climbing this ladder
 // ^ NEW IN 1.60
-var Sound m_HandSound;
+var Sound m_HandSound;            // Hand-grip sound played during ladder climbing
 // ^ NEW IN 1.60
-var Sound m_SlideSoundStop;
+var Sound m_SlideSoundStop;       // Sound played when a pawn stops sliding down this ladder
 // ^ NEW IN 1.60
-var Sound m_SlideSound;
+var Sound m_SlideSound;           // Looping sound played while a pawn slides down this ladder
 // ^ NEW IN 1.60
-var eLadderEndDirection m_eLadderEndDirection;
+var eLadderEndDirection m_eLadderEndDirection;  // Which direction the pawn exits at the top of this ladder
 // ^ NEW IN 1.60
 
 // --- Functions ---

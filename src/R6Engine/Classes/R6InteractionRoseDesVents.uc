@@ -38,7 +38,7 @@ var bool bShowLog;
 var const int C_iMouseDelta;
 var Texture m_TexMNU;
 var Font m_Font;
-var Color m_color;
+var Color m_color;                // Display color of this compass rose widget
 // ^ NEW IN 1.60
 var Sound m_RoseOpenSnd;
 

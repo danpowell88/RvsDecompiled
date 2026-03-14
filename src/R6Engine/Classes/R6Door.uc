@@ -20,11 +20,11 @@ enum eRoomLayout
 };
 
 // --- Variables ---
-var R6IORotatingDoor m_RotatingDoor;
+var R6IORotatingDoor m_RotatingDoor;   // The interactive rotating door object attached to this door actor
 // ^ NEW IN 1.60
-var R6Door m_CorrespondingDoor;
+var R6Door m_CorrespondingDoor;      // The paired door actor on the other side of a double door
 // ^ NEW IN 1.60
-var eRoomLayout m_eRoomLayout;
+var eRoomLayout m_eRoomLayout;       // Room layout hint used by AI pathfinding around this door
 // ^ NEW IN 1.60
 var Vector m_vLookDir;
 var bool m_bCloseOnUntouch;

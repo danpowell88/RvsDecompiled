@@ -1,3 +1,7 @@
+// R6IOProvider - Interactive object that provides a resource or service over time.
+// Used for oxygen stations and similar timed-interaction devices introduced in MP2.
+// Tracks elapsed and remaining interaction time, augmentation rate per second,
+// and replicates the time-left value to clients for HUD progress display.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class R6IOProvider extends R6IOObject;

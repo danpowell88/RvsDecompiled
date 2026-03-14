@@ -28,7 +28,7 @@ enum eClimbableObjectCircumstantialAction
 var /* replicated */ Vector m_vClimbDir;
 var /* replicated */ R6ClimbablePoint m_climbablePoint;
 var R6ClimbablePoint m_insideClimbablePoint;
-var /* replicated */ EClimbHeight m_eClimbHeight;
+var /* replicated */ EClimbHeight m_eClimbHeight;  // Height variant of this climbable (short/tall)
 // ^ NEW IN 1.60
 
 // --- Functions ---

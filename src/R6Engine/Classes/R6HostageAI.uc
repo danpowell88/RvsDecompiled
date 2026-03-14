@@ -59,15 +59,14 @@ var bool m_bRunningToward;
 var R6Terrorist m_terrorist;
 // time since the hostage is no longer guarded
 var int m_iNotGuardedSince;
-var PathNode m_pCoverNode;
+var PathNode m_pCoverNode;        // Current cover node the hostage AI is moving toward
 // ^ NEW IN 1.60
 // used when Enemy can't be used (ie: for grenade)
 var Actor m_runAwayOfGrenade;
 // true when the rainbow tell him to stay here
 var bool m_bForceToStayHere;
-var array<array> m_pListOfCoverNodes;
+var array<array> m_pListOfCoverNodes;  // List of cover nodes available to this hostage
 // ^ NEW IN 1.60
-var PlaySndInfo m_aPlaySndInfo[12];
 // in follow mode, we may have to stop completly to do a transition
 var bool m_bStopDoTransition;
 // true when following someone walking in reverse
@@ -87,7 +86,7 @@ var int m_lastUpdatePaceTime;
 var bool m_bNeedToRunToCatchUp;
 // frequence to tick the AI Timer. m_fMin is used for quick AI update in the state code
 var RandomTweenNum m_AITickTime;
-var int m_iRandomNumber;
+var int m_iRandomNumber;          // Cached random value used for AI decision-making variation
 // ^ NEW IN 1.60
 // 3d point where the hostage looked/focused when reacted to SeePlayer in Guarded state
 var Vector m_vReactionDirection;

@@ -71,7 +71,7 @@ var float m_fPlayerCAStartTime;
 var Actor m_HearNoiseNoiseMaker;
 // SeePlayer buffering
 var Pawn m_SeePlayerPawn;
-var Actor m_RemoveCollisionFromActor;
+var Actor m_RemoveCollisionFromActor;  // Actor whose collision is disabled during the interaction sequence
 // ^ NEW IN 1.60
 var bool bShowLog;
 var int m_iActionIndex;
@@ -97,7 +97,7 @@ var bool m_bEndAction;
 var /* replicated */ float m_fNetDamagePercentage;
 // Original Hit Points
 var int m_iHitPoints;
-var array<array> m_AttachedActors;
+var array<array> m_AttachedActors;  // Actors that move/animate in sync with this interactive object
 // ^ NEW IN 1.60
 var bool m_bOriginalCollideActors;
 var bool m_bOriginalBlockActors;
@@ -107,16 +107,16 @@ var /* replicated */ Material m_aRepSkins[4];
 // save original skin
 var array<array> sm_aSkins;
 var StaticMesh sm_staticMesh;
-var float m_fProbability;
+var float m_fProbability;         // Probability (0.0-1.0) that AI will choose to interact with this object
 // ^ NEW IN 1.60
 var float m_fTimerInterval;
-var NavigationPoint m_Anchor;
+var NavigationPoint m_Anchor;    // Nav point where AI must stand to interact with this object
 // ^ NEW IN 1.60
-var name m_vEndActionAnimName;
+var name m_vEndActionAnimName;   // Animation played on the pawn when the interaction ends
 // ^ NEW IN 1.60
-var Actor m_vEndActionGoto;
+var Actor m_vEndActionGoto;      // Actor the pawn moves toward after completing the interaction
 // ^ NEW IN 1.60
-var array<array> m_ActionList;
+var array<array> m_ActionList;   // Ordered list of sub-actions that make up this interaction sequence
 // ^ NEW IN 1.60
 // HearNoise buffering
 var float m_HearNoiseLoudness;
@@ -127,12 +127,12 @@ var Material m_aOldSkins[4];
 var float m_fAIBreakNoiseRadius;
 var Sound sm_AmbientSound;
 var Sound sm_AmbientSoundStop;
-var float m_fRadius;
+var float m_fRadius;              // Detection radius; pawn must be within this range to interact
 // ^ NEW IN 1.60
-var float m_fActionInterval;
+var float m_fActionInterval;     // Delay in seconds between repeating action cycles
 // ^ NEW IN 1.60
 var R6Pawn m_User;
-var bool m_bBlockCoronas;
+var bool m_bBlockCoronas;         // Hide lens flare/corona effects while this object is active
 // ^ NEW IN 1.60
 var bool m_bBreakableByFlashBang;
 

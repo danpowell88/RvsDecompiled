@@ -49,11 +49,11 @@ var Vector m_vNoiseFocalPoint;
 var int m_iTurn;
 var bool m_bIsMovingBackwards;
 var bool m_bSlowedPace;
-var ePawnOrientation m_ePawnOrientation;
+var ePawnOrientation m_ePawnOrientation; // Intended facing orientation relative to the player/formation leader
 // ^ NEW IN 1.60
 var bool m_bIndividualAttacks;
 var R6CommonRainbowVoices m_CommonMemberVoicesMgr;
-var eFormation m_eFormation;
+var eFormation m_eFormation;      // Current formation slot assigned to this Rainbow AI
 // ^ NEW IN 1.60
 var Vector m_vDesiredLocation;
 var bool m_bReorganizationPending;
@@ -70,7 +70,7 @@ var bool m_bUseStaggeredFormation;
 var bool m_bAimingWeaponAtEnemy;
 var float m_fLastReactionToGas;
 var eRoomLayout m_eCurrentRoomLayout;
-var eCoverDirection m_eCoverDirection;
+var eCoverDirection m_eCoverDirection; // Direction the AI leans/peeks when taking cover
 // ^ NEW IN 1.60
 var name m_PostLockPickState;
 // Timer event, 0=no timer.

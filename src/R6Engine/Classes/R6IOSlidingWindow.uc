@@ -32,15 +32,15 @@ enum eWindowCircumstantialAction
 
 // --- Variables ---
 var float m_TotalMovement;
-var int m_iInitialOpening;
+var int m_iInitialOpening;        // Initial open position of the window (0 = closed, 100 = fully open)
 // ^ NEW IN 1.60
-var float m_iMaxOpening;
+var float m_iMaxOpening;          // Maximum travel distance of the sliding window panel
 // ^ NEW IN 1.60
-var bool m_bIsWindowLocked;
+var bool m_bIsWindowLocked;       // True when the window is locked and cannot be slid open
 // ^ NEW IN 1.60
 //Is the window Locked
 var bool sm_bIsWindowLocked;
-var EOpeningSide eOpening;
+var EOpeningSide eOpening;        // Which side the window slides open toward (left/right/up/down)
 // ^ NEW IN 1.60
 var int sm_iInitialOpening;
 var Vector sm_Location;

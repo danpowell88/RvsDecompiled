@@ -252,10 +252,10 @@ struct STWeaponAnim
 var /* replicated */ R6Ladder m_Ladder;
 var R6Door m_Door;
 var eMovementPace m_eMovementPace;
-var /* replicated */ eHands m_ePlayerIsUsingHands;
+var /* replicated */ eHands m_ePlayerIsUsingHands; // Which hand(s) the pawn is currently using (replicated)
 // ^ NEW IN 1.60
 var bool m_bPostureTransition;
-var int m_iID;
+var int m_iID;                    // Formation rank identifier for this pawn within its team
 // ^ NEW IN 1.60
 var /* replicated */ bool m_bIsClimbingLadder;
 var bool m_bAvoidFacingWalls;
@@ -275,7 +275,7 @@ var Emitter m_BreathingEmitter;
 var /* replicated */ R6Pawn m_KilledBy;
 // current bipod rotation
 var /* replicated */ float m_fBipodRotation;
-var eArmor m_eArmorType;
+var eArmor m_eArmorType;          // Equipped armor tier (None/Light/Medium/Heavy)
 // ^ NEW IN 1.60
 // -- gadgets -- //
 // Boolean to activate the heat vision and the black flag.
@@ -308,7 +308,7 @@ var /* replicated */ bool m_bEngaged;
 // R6CODE
 // used for radar replication
 var /* replicated */ R6TeamMemberReplicationInfo m_TeamMemberRepInfo;
-var float m_fGadgetSpeedMultiplier;
+var float m_fGadgetSpeedMultiplier; // Speed multiplier applied to gadget deployment actions
 // ^ NEW IN 1.60
 // -- movement speeds -- //
 var float m_fWalkingSpeed;
@@ -322,15 +322,15 @@ var name m_standDefaultAnimName;
 var bool m_bWeaponGadgetActivated;
 var name m_standWalkRightName;
 var name m_standWalkLeftName;
-var float m_fSkillStealth;
+var float m_fSkillStealth;        // Stealth skill level: reduces movement noise radius (0=7m, 100=1m)
 // ^ NEW IN 1.60
-var float m_fSkillSniper;
+var float m_fSkillSniper;         // Sniper skill level: affects scoped reticule convergence speed
 // ^ NEW IN 1.60
-var float m_fSkillElectronics;
+var float m_fSkillElectronics;    // Electronics skill: reduces time to plant/disable electronic devices
 // ^ NEW IN 1.60
-var float m_fSkillDemolitions;
+var float m_fSkillDemolitions;    // Demolitions skill: reduces time to plant and disarm explosives
 // ^ NEW IN 1.60
-var float m_fSkillAssault;
+var float m_fSkillAssault;        // Assault skill: affects hip-fire reticule convergence speed
 // ^ NEW IN 1.60
 // for replication m_fBipodRotation/C_iRotationOffsetBipod
 var /* replicated */ int m_iRepBipodRotationRatio;
@@ -338,26 +338,26 @@ var /* replicated */ int m_iForceStun;
 var Actor m_TrackActor;
 // true when prone and the gun have a bipod
 var bool m_bUsingBipod;
-var eStrafeDirection m_eStrafeDirection;
+var eStrafeDirection m_eStrafeDirection; // Current diagonal strafe direction for bone rotation
 // ^ NEW IN 1.60
-var int m_iPermanentID;
+var int m_iPermanentID;           // Permanent ID that persists across team reshuffles
 // ^ NEW IN 1.60
 // when m_bIsClimbingStairs is true, this var indicates whether pawn is facing up or down
 var bool m_bIsMovingUpStairs;
 var /* replicated */ int m_iPendingActionInt[5];
 var Actor m_FOV;
 var /* replicated */ byte m_iNetCurrentActionIndex;
-var /* replicated */ eDeviceAnimToPlay m_eDeviceAnim;
+var /* replicated */ eDeviceAnimToPlay m_eDeviceAnim; // Which device interaction animation to play (replicated)
 // ^ NEW IN 1.60
-var float m_fSkillObservation;
+var float m_fSkillObservation;    // Observation skill: increases chance to spot enemies
 // ^ NEW IN 1.60
-var float m_fSkillLeadership;
+var float m_fSkillLeadership;     // Leadership skill: reduces delay before team members respond to orders
 // ^ NEW IN 1.60
 // if prone: C_iRotationOffsetProne, otherwise C_iRotationOffsetNormal
 var int m_iMaxRotationOffset;
-var bool m_bDontHearPlayer;
+var bool m_bDontHearPlayer;       // Debug: pawn cannot hear player-generated sounds
 // ^ NEW IN 1.60
-var float m_fSkillSelfControl;
+var float m_fSkillSelfControl;    // Self-control skill: increases minimum hit-chance threshold before firing
 // ^ NEW IN 1.60
 //These variables are put here for network.
 // How much the weapon jumps when firing, set when changing weapon
@@ -386,9 +386,8 @@ var float m_fHBTime;
 var bool m_bHelmetWasHit;
 // default name for the anim
 var name m_crouchDefaultAnimName;
-var bool m_bDontSeePlayer;
+var bool m_bDontSeePlayer;        // Debug: pawn cannot visually detect the player
 // ^ NEW IN 1.60
-// distance to use when checking if wall is too close
 var float m_fWallCheckDistance;
 var bool m_bSoundChangePosture;
 // Used in Native function
@@ -430,7 +429,7 @@ var name m_standRunForwardName;
 var /* replicated */ Rotator m_rHitDirection;
 // Ragdoll controling the bone when dead
 var R6AbstractCorpse m_ragdoll;
-var bool m_bUseKarmaRagdoll;
+var bool m_bUseKarmaRagdoll;      // Debug: enable Karma physics ragdoll on death
 // ^ NEW IN 1.60
 var bool m_bWallAdjustmentDone;
 ////

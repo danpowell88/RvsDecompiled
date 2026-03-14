@@ -14,7 +14,7 @@ class R6SoundReplicationInfo extends Actor
 // var ? m_PawnState; // REMOVED IN 1.60
 // REPLICATED: What weapon they use righ now
 var /* replicated */ byte m_CurrentWeapon;
-var /* replicated */ R6Pawn m_pawnOwner;
+var /* replicated */ R6Pawn m_pawnOwner;  // The pawn that owns/plays these replicated sounds
 // ^ NEW IN 1.60
 // REPLICATED: PawnReplicationInfo for each in controller for each pawn
 var /* replicated */ R6PawnReplicationInfo m_PawnRepInfo;
@@ -30,7 +30,7 @@ var /* replicated */ byte m_Material;
 var float m_fClientUpdateFrequency;
 //     SERVER: Last replication update
 var float m_fClientLastUpdate;
-var byte m_pawnState;
+var byte m_pawnState;             // Encoded pawn state byte driving which sound cue to play
 // ^ NEW IN 1.60
 var byte m_TeamColor;
 var byte m_GunSoundType;

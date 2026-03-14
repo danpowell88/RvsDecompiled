@@ -6,16 +6,16 @@
 class R6IODevice extends R6IOObject;
 
 // --- Variables ---
-var float m_fPlantTimeMin;
+var float m_fPlantTimeMin;        // Minimum time (seconds) required to plant/interact with this device
 // ^ NEW IN 1.60
-var float m_fPlantTimeMax;
+var float m_fPlantTimeMax;        // Maximum time (seconds) required to plant/interact with this device
 // ^ NEW IN 1.60
-var bool bShowLog;
+var bool bShowLog;                // Enable verbose device-interaction debug logging
 // ^ NEW IN 1.60
 var Sound m_PhoneBuggingStopSnd;
-var Texture m_InteractionIcon;
+var Texture m_InteractionIcon;    // Icon shown in the HUD action prompt when near this device
 // ^ NEW IN 1.60
-var array<array> m_ArmedTextures;
+var array<array> m_ArmedTextures; // Texture set applied to the device mesh when it is in the armed state
 // ^ NEW IN 1.60
 var Sound m_PhoneBuggingSnd;
 var Vector m_vOffset;

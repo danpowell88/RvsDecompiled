@@ -71,7 +71,7 @@ var int m_iRandomNumber;
 // Where the terrorist think a threat is coming from
 var Vector m_vThreatLocation;
 var string m_sDebugString;
-var R6DZonePathNode m_currentNode;
+var R6DZonePathNode m_currentNode; // Current patrol path node the terrorist is heading toward
 // ^ NEW IN 1.60
 // In wich attack mode the terrorist is currently
 var EAttackMode m_eAttackMode;
@@ -88,7 +88,7 @@ var EEventState m_eStateForEvent;
 // Time that the terrorist stay in engaged by sound
 var float m_fSearchTime;
 var R6TerroristMgr m_Manager;
-var R6Pawn m_pawnToFollow;
+var R6Pawn m_pawnToFollow;        // Target pawn this terrorist is currently following or pursuing
 // ^ NEW IN 1.60
 var bool m_bWaiting;
 var R6DZonePath m_path;

@@ -9,13 +9,13 @@ class R6DZoneRandomPointNode extends Actor
     native;
 
 // --- Variables ---
-var bool m_bHighPriority;
+var bool m_bHighPriority;         // Prefer this node over normal-priority nodes during random selection
 // ^ NEW IN 1.60
-var EStance m_eStance;
+var EStance m_eStance;            // Required stance (stand/crouch/prone) when occupying this node
 // ^ NEW IN 1.60
-var int m_iGroupID;
+var int m_iGroupID;               // Group ID for coordinated multi-pawn positioning
 // ^ NEW IN 1.60
-var bool m_bAllowLeave;
+var bool m_bAllowLeave;           // Allow AI to leave this node when reacting to threats
 // ^ NEW IN 1.60
 var R6DZoneRandomPoints m_pZone;
 

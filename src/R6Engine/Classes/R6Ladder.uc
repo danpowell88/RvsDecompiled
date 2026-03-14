@@ -13,11 +13,11 @@ class R6Ladder extends Ladder
 #exec OBJ LOAD FILE=..\Textures\R6Planning.utx PACKAGE=R6Planning
 
 // --- Variables ---
-var /* replicated */ bool m_bIsTopOfLadder;
+var /* replicated */ bool m_bIsTopOfLadder;  // True for the topmost ladder actor in a multi-segment ladder
 // ^ NEW IN 1.60
 var R6Ladder m_pOtherFloor;
 var bool bShowLog;
-var bool m_bSingleFileFormationOnly;
+var bool m_bSingleFileFormationOnly;  // Force single-file AI queuing when climbing this ladder
 // ^ NEW IN 1.60
 
 // --- Functions ---

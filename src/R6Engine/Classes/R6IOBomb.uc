@@ -27,40 +27,38 @@ var ESoundBeepBomb m_eBeepState;
 var float m_fLastLevelTime;
 var Sound m_sndPlayBeepFaster;
 var Sound m_sndPlayBeepFast;
-var int m_iEnergy;
+var int m_iEnergy;                // Structural integrity; bomb detonates when this reaches zero via damage
 // ^ NEW IN 1.60
-var Emitter m_pEmmiter;
 var Sound m_sndStopBeepFaster;
 var Sound m_sndStopBeepFast;
 var float m_fTimeOfExplosion;
-var bool bShowLog;
+var bool bShowLog;                // Enable verbose bomb-state debug logging
 // ^ NEW IN 1.60
-var Sound m_sndStopBeepNormal;
 var Sound m_sndPlayBeepNormal;
-var float m_fKillBlastRadius;
+var float m_fKillBlastRadius;     // Inner radius of the explosion where damage is fatal
 // ^ NEW IN 1.60
-var float m_fDisarmBombTimeMax;
+var float m_fDisarmBombTimeMax;   // Maximum time (seconds) required to disarm this bomb
 // ^ NEW IN 1.60
-var float m_fDisarmBombTimeMin;
+var float m_fDisarmBombTimeMin;   // Minimum time (seconds) required to disarm this bomb
 // ^ NEW IN 1.60
-var string m_szMissionObjLocalization;
+var string m_szMissionObjLocalization;  // Localization key for the mission objective text tied to this bomb
 // ^ NEW IN 1.60
 var class<Light> m_pExplosionLight;
 var Sound m_sndEarthQuake;
 var Sound m_sndExplosion;
 var Sound m_sndActivationBomb;
-var float m_fExplosionRadius;
+var float m_fExplosionRadius;     // Radius of the damaging explosion when this bomb detonates
 // ^ NEW IN 1.60
-var Material m_ArmedTexture;
+var Material m_ArmedTexture;      // Texture displayed on the bomb mesh when it is armed
 // ^ NEW IN 1.60
 // msg shown:                 Bomb A
 var string m_szIdentity;
-var string m_szIdentityID;
+var string m_szIdentityID;        // Unique string identifier for this bomb, used by objectives/scripting
 // ^ NEW IN 1.60
 var Vector m_vOffset;
-var string m_szMsgArmedID;
+var string m_szMsgArmedID;        // Localization key for the HUD message shown when bomb is armed
 // ^ NEW IN 1.60
-var string m_szMsgDisarmedID;
+var string m_szMsgDisarmedID;     // Localization key for the HUD message shown when bomb is disarmed
 // ^ NEW IN 1.60
 
 // --- Functions ---

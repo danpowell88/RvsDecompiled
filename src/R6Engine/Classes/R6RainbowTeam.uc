@@ -64,9 +64,9 @@ var R6Pawn m_PawnControllingDoor;
 // used for temporary reorganisation of team; to keep track of who original lead was
 var int m_iIntermLeader;
 var R6MultiCoopVoices m_MultiCoopMemberVoicesMgr;
-var /* replicated */ eTeamState m_eTeamState;
+var /* replicated */ eTeamState m_eTeamState;  // Current operational state of the Rainbow team (replicated)
 // ^ NEW IN 1.60
-var ePlayerRoomEntry m_ePlayerRoomEntry;
+var ePlayerRoomEntry m_ePlayerRoomEntry; // Room-entry mode the player has ordered the team to use
 // ^ NEW IN 1.60
 // each bit is used by the client for the RoseDesVents.
 // and is examined to see if we have a team member with
@@ -115,7 +115,7 @@ var int m_iGrenadeThrower;
 var Actor m_LastActionPoint;
 var bool m_bSniperReady;
 var bool m_bPendingSnipeUntilGoCode;
-var eTeamState m_eBackupTeamState;
+var eTeamState m_eBackupTeamState;  // Saved team state used to restore after a temporary state override
 // ^ NEW IN 1.60
 var Vector m_vNoiseSource;
 var bool m_bFirstTimeInGas;

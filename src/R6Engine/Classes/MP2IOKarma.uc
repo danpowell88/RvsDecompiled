@@ -1,3 +1,7 @@
+// MP2IOKarma - Mission Pack 2 interactive object with Karma physics simulation.
+// Drives destructible/physics-reactive props in MP2 missions using the Karma engine.
+// Supports zone-damage-reaction (ZDR) events that trigger sounds and state changes
+// when objects are hit, thrown, or destroyed during a physics simulation.
 // Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
 // Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class MP2IOKarma extends R6InteractiveObject

@@ -5,12 +5,12 @@
 class R6ExplodingBarel extends R6InteractiveObject;
 
 // --- Variables ---
-var int m_iEnergy;
+var int m_iEnergy;                // Remaining structural integrity; reaches zero and the barrel explodes
 // ^ NEW IN 1.60
 var Emitter m_pEmmiter;
-var float m_fExplosionRadius;
+var float m_fExplosionRadius;     // Radius of the damaging explosion when this barrel detonates
 // ^ NEW IN 1.60
-var float m_fKillBlastRadius;
+var float m_fKillBlastRadius;     // Inner radius where explosion causes instant kill
 // ^ NEW IN 1.60
 var class<Light> m_pExplosionLight;
 

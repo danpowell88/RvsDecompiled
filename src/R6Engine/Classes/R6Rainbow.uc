@@ -65,7 +65,7 @@ enum eRainbowCircumstantialAction
 // --- Variables ---
 // escort
 var R6Hostage m_aEscortedHostage[4];
-var eEquipWeapon m_eEquipWeapon;
+var eEquipWeapon m_eEquipWeapon;   // Which weapon slot to equip at mission start
 // ^ NEW IN 1.60
 var /* replicated */ bool m_bIsSurrended;
 var int m_iCurrentWeapon;
@@ -89,7 +89,7 @@ var bool m_bWeaponIsSecured;
 var R6EngineWeapon m_preSwitchWeapon;
 // workaround the problem of tweening
 var bool m_bTweenFirstTimeOnly;
-var eLadderSlide m_eLadderSlide;
+var eLadderSlide m_eLadderSlide;   // Current ladder-slide state (not sliding / sliding down)
 // ^ NEW IN 1.60
 // set to false when getting off a ladder
 var bool m_bGettingOnLadder;
@@ -126,10 +126,10 @@ var int m_iBulletsHit;
 var int m_iBulletsFired;
 var int m_iKills;
 var Vector m_vStartLocation;
-var /* replicated */ bool m_bIsTheIntruder;
+var /* replicated */ bool m_bIsTheIntruder; // True when this Rainbow is the designated intruder in CTE mode
 // ^ NEW IN 1.60
 var byte m_u8CurrentPitch;
-var /* replicated */ bool m_bHasDataObject;
+var /* replicated */ bool m_bHasDataObject; // True when carrying the data object in a retrieval mission
 // ^ NEW IN 1.60
 
 // --- Functions ---

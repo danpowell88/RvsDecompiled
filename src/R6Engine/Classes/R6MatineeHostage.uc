@@ -14,9 +14,9 @@ class R6MatineeHostage extends R6Hostage
 // --- Variables ---
 //Private Variables:
 var R6MatineeAttach m_MatineeAttach;
-var class<R6Hostage> m_HostageTemplate;
+var class<R6Hostage> m_HostageTemplate;  // Hostage class to use when UseHostageTemplate is enabled
 // ^ NEW IN 1.60
-var bool m_bUseHostageTemplate;
+var bool m_bUseHostageTemplate;  // Override the level-placed hostage with the template class
 // ^ NEW IN 1.60
 
 // --- Functions ---

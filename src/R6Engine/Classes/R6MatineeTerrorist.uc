@@ -10,11 +10,11 @@ class R6MatineeTerrorist extends R6Terrorist
 
 // --- Variables ---
 var R6MatineeAttach m_MatineeAttach;
-var class<R6Terrorist> m_TerroristTemplate;
+var class<R6Terrorist> m_TerroristTemplate;  // Terrorist class to use when UseTerroristTemplate is enabled
 // ^ NEW IN 1.60
-var bool m_bUseTerroristTemplate;
+var bool m_bUseTerroristTemplate;  // Override the level-placed terrorist with the template class
 // ^ NEW IN 1.60
-var class<R6AbstractWeapon> m_PrimaryWeapon;
+var class<R6AbstractWeapon> m_PrimaryWeapon;   // Primary weapon class assigned to this matinee terrorist
 // ^ NEW IN 1.60
 
 // --- Functions ---

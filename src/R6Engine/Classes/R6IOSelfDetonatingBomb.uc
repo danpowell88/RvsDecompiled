@@ -7,7 +7,7 @@
 class R6IOSelfDetonatingBomb extends R6IOBomb;
 
 // --- Variables ---
-var float m_fSelfDetonationTime;
+var float m_fSelfDetonationTime;  // Countdown timer (seconds) before this bomb automatically detonates
 // ^ NEW IN 1.60
 // defused message shown for 3 secs
 var float m_fDefusedTimeMessage;

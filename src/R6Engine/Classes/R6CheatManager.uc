@@ -21,7 +21,7 @@ struct CommandInfo
 // var ? m_functionName; // REMOVED IN 1.60
 // var ? m_hostage; // REMOVED IN 1.60
 // var ? m_szDescription; // REMOVED IN 1.60
-var R6Hostage m_Hostage;
+var R6Hostage m_Hostage;         // Target hostage for cheat commands
 // ^ NEW IN 1.60
 var R6Pawn m_curPawn;
 var CommandInfo m_aCommandInfo[128];
