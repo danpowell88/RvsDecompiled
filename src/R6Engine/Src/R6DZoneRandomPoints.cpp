@@ -210,7 +210,7 @@ NbCap:
 
 // Ghidra 0x193c0: shared null stub — same address as HurtByVolume/R6DZonePath::IsPointInZone.
 // No SEH frame in binary; returns 0 (MSVC requires a return value in non-void functions).
-IMPL_MATCH("R6Engine.dll", 0x193c0)
+IMPL_MATCH("R6Engine.dll", 0x100193c0)
 INT AR6DZoneRandomPoints::IsPointInZone(FVector const &)
 {
 	return 0;

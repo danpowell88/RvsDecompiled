@@ -21,7 +21,7 @@ extern INT GHashExtraCount;
 extern CORE_API UBOOL GHideHiddenInEditor;
 
 // --- FAnimMeshVertexStream ---
-IMPL_MATCH("Engine.dll", 0x2b170)
+IMPL_MATCH("Engine.dll", 0x1032b170)
 FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 {
 	// Ghidra 0x2b170: vtable set by compiler; DWORD at +4; TArray<FStreamVert32> at +8 (stride 0x20); 6 DWORDs at +14..+28
@@ -36,14 +36,14 @@ FAnimMeshVertexStream::FAnimMeshVertexStream()
 	new ((BYTE*)this + 0x08) TArray<FStreamVert32>();
 }
 
-IMPL_MATCH("Engine.dll", 0x2b160)
+IMPL_MATCH("Engine.dll", 0x1032b160)
 FAnimMeshVertexStream::~FAnimMeshVertexStream()
 {
 	// Ghidra 0x2b160: destroy TArray<FStreamVert32> at +8 (stride 0x20, POD elements)
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x2b1c0)
+IMPL_MATCH("Engine.dll", 0x1032b1c0)
 FAnimMeshVertexStream& FAnimMeshVertexStream::operator=(const FAnimMeshVertexStream& Other)
 {
 	// Ghidra 0x2b1c0: skip vtable at +0, DWORD at +4, TArray<FStreamVert32> at +8
@@ -139,7 +139,7 @@ FBspVertexStream::~FBspVertexStream()
 	((TArray<FBspVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x27930)
+IMPL_MATCH("Engine.dll", 0x10327930)
 FBspVertexStream& FBspVertexStream::operator=(const FBspVertexStream& Other)
 {
 	// Ghidra 0x27930: skip vtable at +0, TArray<FBspVertex> at +4 (FUN_10324ae0=40-byte elems),
@@ -202,7 +202,7 @@ void FLevelSceneNode::Render(FRenderInterface *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x100E30)
+IMPL_MATCH("Engine.dll", 0x10400e30)
 int FLevelSceneNode::FilterActor(AActor* Actor)
 {
 	// Retail: 0x100E30, ~220b. Complex actor visibility filter used during scene rendering.
@@ -291,7 +291,7 @@ FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 
 
 // --- FLightMap ---
-IMPL_MATCH("Engine.dll", 0x3c910)
+IMPL_MATCH("Engine.dll", 0x1033c910)
 FLightMap::FLightMap(FLightMap const &Other)
 {
 	// Ghidra 0x3c910: vtable set by compiler; 34 DWORDs at +4..+8B; TArray<FLightMapSample52> at +0x8C; TArray<FLOAT> at +0x98
@@ -334,13 +334,13 @@ FLightMap& FLightMap::operator=(const FLightMap& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_MATCH("Engine.dll", 0x4750)
+IMPL_MATCH("Engine.dll", 0x10304750)
 unsigned __int64 FLightMap::GetCacheId()
 {
 	// Ghidra 0x4750: genuine stub; returns 0.
 	return 0;
 }
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 int FLightMap::GetFirstMip()
 {
 	// Ghidra 0x114310: shared stub; returns 0.
@@ -361,7 +361,7 @@ int FLightMap::GetNumMips()
 {
 	return 1;
 }
-IMPL_MATCH("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x10304720)
 void * FLightMap::GetRawTextureData(int)
 {
 	// Ghidra 0x4720: shared stub; returns NULL.
@@ -712,7 +712,7 @@ int FLineBatcher::GetStride()
 
 
 // --- FRaw32BitIndexBuffer ---
-IMPL_MATCH("Engine.dll", 0x209a0)
+IMPL_MATCH("Engine.dll", 0x103209a0)
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 {
 	// Ghidra 0x209a0: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
@@ -733,7 +733,7 @@ FRaw32BitIndexBuffer::~FRaw32BitIndexBuffer()
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x275b0)
+IMPL_MATCH("Engine.dll", 0x103275b0)
 FRaw32BitIndexBuffer& FRaw32BitIndexBuffer::operator=(const FRaw32BitIndexBuffer& Other)
 {
 	// Ghidra 0x275b0: skip vtable +0; +4=TArray<FLOAT> (FUN_1031f660); +0x10,+0x14,+0x18=3 DWORDs
@@ -773,7 +773,7 @@ return *(INT*)(Pad + 4) << 2;
 
 
 // --- FRawColorStream ---
-IMPL_MATCH("Engine.dll", 0x27570)
+IMPL_MATCH("Engine.dll", 0x10327570)
 FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 {
 	// Ghidra 0x27570: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
@@ -794,7 +794,7 @@ FRawColorStream::~FRawColorStream()
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x275b0)
+IMPL_MATCH("Engine.dll", 0x103275b0)
 FRawColorStream& FRawColorStream::operator=(const FRawColorStream& Other)
 {
 	// Ghidra 0x275b0: same body as FRaw32BitIndexBuffer::operator=
@@ -856,7 +856,7 @@ int FRawIndexBuffer::Stripify()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x18d80)
+IMPL_MATCH("Engine.dll", 0x10318d80)
 FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 {
 	// Ghidra 0x18d80: vtable set by compiler; TArray<_WORD> at +4 (stride 2); 3 DWORDs at +10..+18
@@ -877,7 +877,7 @@ FRawIndexBuffer::~FRawIndexBuffer()
 	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x18dc0)
+IMPL_MATCH("Engine.dll", 0x10318dc0)
 FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 {
 	// Ghidra 0x18dc0: skip vtable +0; +4=TArray<_WORD>; +0x10,+0x14,+0x18=3 DWORDs
@@ -927,7 +927,7 @@ int FRawIndexBuffer::GetSize()
 
 
 // --- FSkinVertexStream ---
-IMPL_MATCH("Engine.dll", 0x2b7d0)
+IMPL_MATCH("Engine.dll", 0x1032b7d0)
 FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &Other)
 {
 	// Ghidra 0x2b7d0: vtable set by compiler; 7 DWORDs at +4..+1c; TArray<FStreamVert32> at +20 (stride 0x20)
@@ -948,7 +948,7 @@ FSkinVertexStream::~FSkinVertexStream()
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x2b820)
+IMPL_MATCH("Engine.dll", 0x1032b820)
 FSkinVertexStream& FSkinVertexStream::operator=(const FSkinVertexStream& Other)
 {
 	// Ghidra 0x2b820: skip vtable at +0, 7 DWORDs at +4..+1C,
@@ -997,7 +997,7 @@ int FSkinVertexStream::GetSize()
 	FnType fn = (FnType)(*(void***)obj)[0x138 / sizeof(void*)];
 	return fn(obj) << 5; // vertex_count * 32
 }
-IMPL_MATCH("Engine.dll", 0x130c50)
+IMPL_MATCH("Engine.dll", 0x10430c50)
 void FSkinVertexStream::GetStreamData(void* Dest)
 {
 	// Retail: 0x130c50. Two paths:
@@ -1027,7 +1027,7 @@ int FSkinVertexStream::GetStride()
 
 
 // --- FStaticLightMapTexture ---
-IMPL_MATCH("Engine.dll", 0x20cf0)
+IMPL_MATCH("Engine.dll", 0x10320cf0)
 FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Other)
 {
 	// Ghidra 0x20cf0: vtable set by compiler; copy-construct 2 TLazyArray<BYTE> at +4 and +0x1C (stride 0x18);
@@ -1053,14 +1053,14 @@ FStaticLightMapTexture::FStaticLightMapTexture()
 	// DIVERGENCE: CacheId left 0; retail uses a global per-resource counter (DAT_1060b564).
 }
 
-IMPL_MATCH("Engine.dll", 0x20cd0)
+IMPL_MATCH("Engine.dll", 0x10320cd0)
 FStaticLightMapTexture::~FStaticLightMapTexture()
 {
 ((TArray<BYTE>*)((BYTE*)this + 0x28))->~TArray();
 	((TArray<BYTE>*)((BYTE*)this + 0x10))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x20d50)
+IMPL_MATCH("Engine.dll", 0x10320d50)
 FStaticLightMapTexture& FStaticLightMapTexture::operator=(const FStaticLightMapTexture& Other)
 {
 	// Ghidra 0x20d50: 2-iteration loop (stride 0x18); each: 2 DWORDs before TArray<BYTE>, then TArray<BYTE>.

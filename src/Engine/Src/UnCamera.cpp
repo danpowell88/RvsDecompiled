@@ -71,7 +71,7 @@ void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x86330)
+IMPL_MATCH("Engine.dll", 0x10386330)
 void UMotionBlur::Destroy()
 {
 	// Retail: 0x86330, ordinal 2491. Calls parent Destroy, then frees the two
@@ -112,7 +112,7 @@ void UViewport::LockOnActor(AActor *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x83d70)
+IMPL_MATCH("Engine.dll", 0x10383d70)
 int UViewport::MultiShot()
 {
 	// Ghidra 0x83d70: no SEH frame
@@ -208,7 +208,7 @@ void UViewport::PopHit(int)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x82DA0)
+IMPL_MATCH("Engine.dll", 0x10382da0)
 void UViewport::ChangeInputSet(BYTE bReset)
 {
 	// Retail: 23b. If bReset==0, restores input set ptr: copy this+0x84 to this+0x80.
@@ -230,7 +230,7 @@ void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor *
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x12AF0)
+IMPL_MATCH("Engine.dll", 0x10312af0)
 int UViewport::IsDepthComplexity()
 {
 	// Retail (25b, RVA 0x12AF0): RendMap == 0x08 → depth complexity view
@@ -239,7 +239,7 @@ int UViewport::IsDepthComplexity()
 	return (*(DWORD*)((BYTE*)st + 0x504) == 0x08) ? 1 : 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x12B90)
+IMPL_MATCH("Engine.dll", 0x10312b90)
 int UViewport::IsEditing()
 {
 	// Retail (74b, RVA 0x12B90): RendMap 0x0D/0x0E/0x0F or 1-8 -> editing view
@@ -251,7 +251,7 @@ int UViewport::IsEditing()
 	return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x12B60)
+IMPL_MATCH("Engine.dll", 0x10312b60)
 int UViewport::IsLit()
 {
 	// Retail (54b, RVA 0x12B60): RendMap 5,7,8,0x1E -> lit; RendMap 0x10 with [state+0x4FC] non-null
@@ -263,7 +263,7 @@ int UViewport::IsLit()
 	return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x12A70)
+IMPL_MATCH("Engine.dll", 0x10312a70)
 int UViewport::IsTopView()
 {
 	// Retail (25b, RVA 0x12A70): RendMap == 0x0D → top-down ortho view
@@ -383,7 +383,7 @@ FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 // Decoded from Ghidra Engine @ 0xcf6f0. Complex with ZoneMask (FUN_103cc610),
 // sub-struct pairs (FUN_103cba20), version-gated multi-branch INT serialization.
 // All internal functions fully decoded from _unnamed.cpp.
-IMPL_MATCH("Engine.dll", 0xcf6f0)
+IMPL_MATCH("Engine.dll", 0x103cf6f0)
 FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 	BYTE* P = (BYTE*)&V;
 
@@ -513,7 +513,7 @@ FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 // UObject* at +0x20, and version-gated INT override.
 // Layout: [0x00] vtable  [0x04] TArray<FBspVertex>  [0x18] INT  [0x1C] INT
 //         [0x20] UObject*  [0x24] INT  [0x28] INT (ver-gated default -1)
-IMPL_MATCH("Engine.dll", 0x27ad0)
+IMPL_MATCH("Engine.dll", 0x10327ad0)
 FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 	Ar << *(TArray<FBspVertex>*)&V.Pad[4];       // TArray<FBspVertex> at obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);      // INT at obj+0x18
@@ -532,7 +532,7 @@ FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSurf@@@Z
 // Decoded from Ghidra Engine @ 0xcbf50. Uses vtable+0x18 (UObject*), FCompactIndex,
 // ByteOrderSerialize, and Serialize. No FUN_xxx dependencies.
-IMPL_MATCH("Engine.dll", 0xcbf50)
+IMPL_MATCH("Engine.dll", 0x103cbf50)
 FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 	Ar << V.Texture;
 	Ar.ByteOrderSerialize((BYTE*)&V.PolyFlags, 4);
@@ -600,11 +600,11 @@ FArchive & operator<<(FArchive & Ar, FLightMap & p1) { return Ar; }
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMapTexture@@@Z
 // Ghidra @ 0x27a00: vtable[6] on Pad[4..8], FUN_103218c0, BOS at Pad[0x60]+8, Pad[0x68]+4;
 // if Ver()>0x73: recurse into FStaticLightMapTexture at Pad[0x14].
-IMPL_MATCH("Engine.dll", 0x27a00)
+IMPL_MATCH("Engine.dll", 0x10327a00)
 FArchive & operator<<(FArchive & Ar, FLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFPoly@@@Z
-IMPL_MATCH("Engine.dll", 0x27a00)
+IMPL_MATCH("Engine.dll", 0x10327a00)
 FArchive & operator<<(FArchive & Ar, FPoly & V) {
 	// NumVertices first (compact index)
 	Ar << *(FCompactIndex*)&V.NumVertices;
@@ -745,17 +745,17 @@ FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticLightMapTexture@@@Z
 // Ghidra @ 0x20c60: FUN_1031d450 on Pad[4..0x1c]; vtable[0] at Pad[0x34]+1;
 // BOS at Pad[0x38]+4, Pad[0x3c]+4, Pad[0x48]+4. Needs FTexture base size.
-IMPL_MATCH("Engine.dll", 0x20c60)
+IMPL_MATCH("Engine.dll", 0x10320c60)
 FArchive & operator<<(FArchive & Ar, FStaticLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshBatcherVertex@@@Z
-IMPL_MATCH("Engine.dll", 0x20c60)
+IMPL_MATCH("Engine.dll", 0x10320c60)
 FArchive & operator<<(FArchive & Ar, FStaticMeshBatcherVertex & p1) { return Ar; } // empty in original
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshLightInfo@@@Z
 // Decoded from Ghidra Engine @ 0x21750. UObject* at +0, TArray<BYTE> at +4
 // (FUN_1031cce0 = bulk byte array), INT at +0x10.
-IMPL_MATCH("Engine.dll", 0x21750)
+IMPL_MATCH("Engine.dll", 0x10321750)
 FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
 	Ar << V.LightObject;
 	Ar << V.LightData;
@@ -764,7 +764,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshMaterial@@@Z
-IMPL_MATCH("Engine.dll", 0x21750)
+IMPL_MATCH("Engine.dll", 0x10321750)
 FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 	Ar << *(UObject**)&V.Material;
 	Ar << *(FCompactIndex*)&V.Flags1;
@@ -775,7 +775,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshSection@@@Z
 // Ghidra @ 0x50f10: complex version-branched (pre-0x5c / 0x5c-0x70 / 0x70+) with SEH;
 // creates temp FStaticMeshVertexStream + FRawIndexBuffer locals. Needs deep decode.
-IMPL_MATCH("Engine.dll", 0x50f10)
+IMPL_MATCH("Engine.dll", 0x10350f10)
 FArchive & operator<<(FArchive & Ar, FStaticMeshSection & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshUVStream@@@Z
@@ -802,7 +802,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFTags@@@Z
 // Decoded from Ghidra Engine @ 0xcc180. Inlines FUN_103cbaa0 (12×4-byte flat serialize)
 // then serializes FString at offset 0x30.
-IMPL_MATCH("Engine.dll", 0xcc180)
+IMPL_MATCH("Engine.dll", 0x103cc180)
 FArchive & operator<<(FArchive & Ar, FTags & V) {
 	for (INT i = 0; i < 12; i++)
 		Ar.ByteOrderSerialize(V._Data + i * 4, 4);
@@ -1093,7 +1093,7 @@ int getGameShutDown() { return bGameShutDown; }
 // Spawns a PathNode at Location (adjusting Z upward if Scout's half-height < 85)
 // and sets the machine-placed flag bit 0x80 at NavigationPoint+0x3a4.
 // FPathBuilder layout: Pad[0..3]=ULevel*, Pad[4..7]=APawn* Scout.
-IMPL_MATCH("Engine.dll", 0xE07B0)
+IMPL_MATCH("Engine.dll", 0x103e07b0)
 ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout  = *(APawn**)((BYTE*)this + 4);
@@ -1126,7 +1126,7 @@ ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 // Retail ordinal 2514 (0x6d6f0).  Returns the signed distance along axis p1
 // to the far or near face of hash cell p0 (cell size = p3 unreal units,
 // world offset = 262144).  Returns 256000 when p1 is zero (no movement along axis).
-IMPL_MATCH("Engine.dll", 0x6D6F0)
+IMPL_MATCH("Engine.dll", 0x1036d6f0)
 float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT CellSize) {
 	if (Dir == 0.0f) return 256000.0f;
 	if (Dir > 0.0f)
@@ -1140,7 +1140,7 @@ float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT
 // Teleports the Scout pawn to Start, tests whether it can reach End via
 // APawn::pointReachable, then teleports Scout back to its original position.
 // FPathBuilder layout: Pad[0..3] = ULevel*, Pad[4..7] = APawn* Scout.
-IMPL_MATCH("Engine.dll", 0xE0060)
+IMPL_MATCH("Engine.dll", 0x103e0060)
 int FPathBuilder::TestReach(FVector Start, FVector End) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout = *(APawn**)((BYTE*)this + 4);
@@ -1168,7 +1168,7 @@ int FPathBuilder::TestReach(FVector Start, FVector End) {
 }
 
 // ?TestWalk@FPathBuilder@@AAEHVFVector@@UFCheckResult@@M@Z
-IMPL_MATCH("Engine.dll", 0xE0170)
+IMPL_MATCH("Engine.dll", 0x103e0170)
 int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 
 // ?ValidNode@FPathBuilder@@AAEHPAVANavigationPoint@@PAVAActor@@@Z
@@ -1177,7 +1177,7 @@ int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 //   - p1 is non-null and different from p0
 //   - p1 is not flagged as deleted (sign byte at 0xa0 >= 0)
 //   - p1 is a NavigationPoint but NOT a LiftCenter
-IMPL_MATCH("Engine.dll", 0xE0C90)
+IMPL_MATCH("Engine.dll", 0x103e0c90)
 int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 	if (Candidate && Candidate != (AActor*)NavPoint && *(SBYTE*)((BYTE*)Candidate + 0xa0) >= 0) {
 		if (((UObject*)Candidate)->IsA(ANavigationPoint::StaticClass())) {
@@ -1189,7 +1189,7 @@ int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 }
 
 // ?createPaths@FPathBuilder@@AAEHXZ
-IMPL_MATCH("Engine.dll", 0xE3EF0)
+IMPL_MATCH("Engine.dll", 0x103e3ef0)
 int FPathBuilder::createPaths() { return 0; }
 
 // ?StoreActor@FOctreeNode@@AAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
@@ -1197,7 +1197,7 @@ int FPathBuilder::createPaths() { return 0; }
 // this node in the actor's OctreeNodes list (actor+0x338) for fast removal.
 // If the node already has >2 actors and is large enough to subdivide it does so;
 // for simplicity we always use leaf storage (no subdivision).
-IMPL_MATCH("Engine.dll", 0xDB4E0)
+IMPL_MATCH("Engine.dll", 0x103db4e0)
 void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
 	// Add actor to this node's actor list (TArray<AActor*> at FOctreeNode offset 0)
@@ -1220,7 +1220,7 @@ void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane co
 //
 // NOTE: The retail SingleLineCheck has a 7th undeclared FLOAT parameter (ExtraParam = 16.0).
 // Passes 1 and 2 supply 16.0f for it via raw vtable call; pass 3 omits it (= 0).
-IMPL_MATCH("Engine.dll", 0xE0D50)
+IMPL_MATCH("Engine.dll", 0x103e0d50)
 void FPathBuilder::FindBlockingNormal(FVector& p0)
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1282,7 +1282,7 @@ void FPathBuilder::FindBlockingNormal(FVector& p0)
 }
 
 // ?Pass2From@FPathBuilder@@AAEXVFVector@@0M@Z
-IMPL_MATCH("Engine.dll", 0xE18D0)
+IMPL_MATCH("Engine.dll", 0x103e18d0)
 void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 
 // ?SetPathCollision@FPathBuilder@@AAEXH@Z
@@ -1296,7 +1296,7 @@ void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 //   the temp flag set.
 // Field actor+0x320 (800 decimal): custom scratch field used only during path
 //   building; bit 3 (0x8) = "collision was disabled for path test; restore it".
-IMPL_MATCH("Engine.dll", 0xE0300)
+IMPL_MATCH("Engine.dll", 0x103e0300)
 void FPathBuilder::SetPathCollision(int bDisable) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	INT Count = Level->Actors.Num();
@@ -1347,7 +1347,7 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 //   Scout+0xa8 |= 0x1000  (bPathBuilding flag)
 //   vtable[0x10c] and vtable[0x114] on Scout (SetPhysics-related calls)
 //   Scout->PhysicsVolume = Level->GetDefaultPhysicsVolume()
-IMPL_MATCH("Engine.dll", 0xE16B0)
+IMPL_MATCH("Engine.dll", 0x103e16b0)
 void FPathBuilder::getScout()
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1407,7 +1407,7 @@ void FPathBuilder::getScout()
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
 // Ghidra: call findStart on Scout; if Z matches within MaxStepHeight -> testPathwithRadius;
 // else retry findStart with Start.Z+20. If neither works, return.
-IMPL_MATCH("Engine.dll", 0xE3DE0)
+IMPL_MATCH("Engine.dll", 0x103e3de0)
 void FPathBuilder::testPathsFrom(FVector Start) {
 	AScout* Scout = *(AScout**)(Pad + 4);
 	if (Scout->findStart(Start)) {
@@ -1428,7 +1428,7 @@ void FPathBuilder::testPathsFrom(FVector Start) {
 
 // ?testPathwithRadius@FPathBuilder@@AAEXVFVector@@M@Z
 // Ghidra: resize Scout to Radius x 85, then probe 8 horizontal directions (±X, ±Y) at ±1 walk.
-IMPL_MATCH("Engine.dll", 0xE35C0)
+IMPL_MATCH("Engine.dll", 0x103e35c0)
 void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 	AActor* Scout = *(AActor**)(Pad + 4);
 	Scout->SetCollisionSize(Radius, 85.0f);
@@ -1451,18 +1451,18 @@ IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 ECLipSynchData::ECLipSynchData() {}
 
 // ??0FActorSceneNode@@QAE@PAVUViewport@@PAVAActor@@1VFVector@@VFRotator@@M@Z
-IMPL_MATCH("Engine.dll", 0x138A0)
+IMPL_MATCH("Engine.dll", 0x103138a0)
 FActorSceneNode::FActorSceneNode(UViewport * p0, AActor * p1, AActor * p2, FVector p3, FRotator p4, float p5) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCameraSceneNode@@QAE@PAVUViewport@@PAVAActor@@VFVector@@VFRotator@@M@Z
-IMPL_MATCH("Engine.dll", 0x137B0)
+IMPL_MATCH("Engine.dll", 0x103137b0)
 FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRotator p3, float p4) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCollisionHash@@QAE@ABV0@@Z
 // Copy constructor — rarely called; just default-init and leave buckets empty.
 // A proper implementation would clone the hash table from p0, but that involves
 // re-inserting all actors which requires level context we don't have here.
-IMPL_MATCH("Engine.dll", 0x6F370)
+IMPL_MATCH("Engine.dll", 0x1036f370)
 FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 	FreeList = NULL;
 	// AllocatedPools default-constructed to empty
@@ -1482,7 +1482,7 @@ FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 // Retail: ordinal 211 (0x6f440).  Size: ~700 bytes.
 // Sets up vftable, zeros pool/FArray, initialises permutation tables once via
 // Fisher-Yates shuffle (seeded by appRand), then NULLs all 0x4000 bucket heads.
-IMPL_MATCH("Engine.dll", 0x6f440)
+IMPL_MATCH("Engine.dll", 0x1036f440)
 FCollisionHash::FCollisionHash() {
 	FreeList = NULL;
 	// AllocatedPools is default-constructed (TArray ctor zeroes it)
@@ -1499,14 +1499,14 @@ FCollisionHash::FCollisionHash() {
 }
 
 // ??0FCollisionOctree@@QAE@ABV0@@Z
-IMPL_MATCH("Engine.dll", 0x6D7E0)
+IMPL_MATCH("Engine.dll", 0x1036d7e0)
 FCollisionOctree::FCollisionOctree(FCollisionOctree const& p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 }
 
 // ??0FCollisionOctree@@QAE@XZ
 // Ghidra: allocates a root FOctreeNode, zeroes counters, sets world bitmask.
-IMPL_MATCH("Engine.dll", 0xDB9F0)
+IMPL_MATCH("Engine.dll", 0x103db9f0)
 FCollisionOctree::FCollisionOctree() {
 	appMemzero(Pad, sizeof(Pad));
 	// Pad[0..3] = root FOctreeNode* (object offset +4, ref from Ghidra)
@@ -1518,11 +1518,11 @@ FCollisionOctree::FCollisionOctree() {
 }
 
 // ??0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z
-IMPL_MATCH("Engine.dll", 0xD1DA0)
+IMPL_MATCH("Engine.dll", 0x103d1da0)
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FHitCause@@QAE@PAVFHitObserver@@PAVUViewport@@KMM@Z
-IMPL_MATCH("Engine.dll", 0x128A0)
+IMPL_MATCH("Engine.dll", 0x103128a0)
 FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InButtons, float InMouseX, float InMouseY)
 :	Observer(InObserver)
 ,	Viewport(InViewport)
@@ -1532,7 +1532,7 @@ FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InBu
 {}
 
 // ??4FHitCause@@QAEAAU0@ABU0@@Z
-IMPL_MATCH("Engine.dll", 0x128D0)
+IMPL_MATCH("Engine.dll", 0x103128d0)
 FHitCause& FHitCause::operator=(const FHitCause& Other)
 {
 	Observer = Other.Observer;
@@ -1544,23 +1544,23 @@ FHitCause& FHitCause::operator=(const FHitCause& Other)
 }
 
 // ??0FLevelSceneNode@@QAE@PAV0@HVFMatrix@@@Z
-IMPL_MATCH("Engine.dll", 0x13680)
+IMPL_MATCH("Engine.dll", 0x10313680)
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLevelSceneNode@@QAE@ABV0@@Z
 // Ghidra: calls FSceneNode copy ctor, then copies 6 DWORDs at 0x1B8-0x1CC
-IMPL_MATCH("Engine.dll", 0xFE120)
+IMPL_MATCH("Engine.dll", 0x103fe120)
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & Other) : FSceneNode((const FSceneNode&)Other)
 {
 	appMemcpy(((BYTE*)this) + 0x1B8, ((const BYTE*)&Other) + 0x1B8, 24);
 }
 
 // ??0FLevelSceneNode@@QAE@PAVUViewport@@@Z
-IMPL_MATCH("Engine.dll", 0xFE1C0)
+IMPL_MATCH("Engine.dll", 0x103fe1c0)
 FLevelSceneNode::FLevelSceneNode(UViewport * p0) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@PAVFLightMap@@@Z
-IMPL_MATCH("Engine.dll", 0xD09B0)
+IMPL_MATCH("Engine.dll", 0x103d09b0)
 FLightMapSceneNode::FLightMapSceneNode(UViewport * p0, AActor * p1, FLightMap * p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FMatineeTools@@QAE@ABV0@@Z
@@ -1569,14 +1569,14 @@ FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
 
 // ??0FOctreeNode@@QAE@ABV0@@Z
 // Copy constructor — copy TArray (actors list at Pad[0..11]) and flag at Pad[12]
-IMPL_MATCH("Engine.dll", 0x6F330)
+IMPL_MATCH("Engine.dll", 0x1036f330)
 FOctreeNode::FOctreeNode(FOctreeNode const& p0) {
 	appMemcpy(Pad, p0.Pad, 16);
 }
 
 // ??0FOctreeNode@@QAE@XZ
 // Ghidra: FArray::FArray((FArray*)this) zeros first 12 bytes; *(this+0xc) = 0
-IMPL_MATCH("Engine.dll", 0xDB2C0)
+IMPL_MATCH("Engine.dll", 0x103db2c0)
 FOctreeNode::FOctreeNode() {
 	appMemzero(Pad, 16); // TArray<> at 0..11, flag at 12
 }
@@ -1586,11 +1586,11 @@ IMPL_EMPTY("body unanalyzed; children and allocated memory freed by caller")
 FOctreeNode::~FOctreeNode() {}
 
 // ??0FPointLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@HHHH@Z
-IMPL_MATCH("Engine.dll", 0xD0F40)
+IMPL_MATCH("Engine.dll", 0x103d0f40)
 FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3, int p4, int p5, int p6, int p7) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FPoly@@QAE@XZ
-IMPL_MATCH("Engine.dll", 0x2C30)
+IMPL_MATCH("Engine.dll", 0x10302c30)
 FPoly::FPoly() {
 	Init();
 }
@@ -1615,19 +1615,19 @@ IMPL_DIVERGE("returns 0; full exec command dispatch not implemented — not in E
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
-IMPL_MATCH("Engine.dll", 0x85BC0)
+IMPL_MATCH("Engine.dll", 0x10385bc0)
 void UViewport::Destroy() { Super::Destroy(); }
-IMPL_MATCH("Engine.dll", 0x82E10)
+IMPL_MATCH("Engine.dll", 0x10382e10)
 void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_EMPTY("body unanalyzed; no input polling implemented")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
-IMPL_MATCH("Engine.dll", 0x83480)
+IMPL_MATCH("Engine.dll", 0x10383480)
 INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no render device unlock implemented")
 void UViewport::Unlock() {}
 IMPL_EMPTY("body unanalyzed; no frame present implemented")
 void UViewport::Present() {}
-IMPL_MATCH("Engine.dll", 0x832B0)
+IMPL_MATCH("Engine.dll", 0x103832b0)
 INT UViewport::SetDrag( INT NewDrag ) { return 0; }
 IMPL_EMPTY("Ghidra VA 0x10414310 (RVA 0x114310) confirms retail body is trivial (3 bytes) — null return")
 void* UViewport::GetServer() { return NULL; }
@@ -1635,11 +1635,11 @@ IMPL_EMPTY("body unanalyzed; render device selection not implemented")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
 IMPL_EMPTY("body unanalyzed; macro file execution not implemented")
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
-IMPL_MATCH("Engine.dll", 0x12960)
+IMPL_MATCH("Engine.dll", 0x10312960)
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
 IMPL_EMPTY("body unanalyzed; input subsystem initialization not implemented")
 void UViewport::InitInput() {}
-IMPL_MATCH("Engine.dll", 0x12A60)
+IMPL_MATCH("Engine.dll", 0x10312a60)
 INT UViewport::IsOrtho()
 {
 	// Retail (34b, RVA 0x12A60): load state ptr at +0x34, check RendMap at +0x504
@@ -1649,7 +1649,7 @@ INT UViewport::IsOrtho()
 	INT rm = *(INT*)((BYTE*)st + 0x504);
 	return (rm == 0x0D || rm == 0x0E || rm == 0x0F) ? 1 : 0;
 }
-IMPL_MATCH("Engine.dll", 0x12A00)
+IMPL_MATCH("Engine.dll", 0x10312a00)
 INT UViewport::IsPerspective()
 {
 	// Retail (74b, RVA 0x12A00): same state ptr; RendMap 1-7 or 0x1E → perspective.
@@ -1662,7 +1662,7 @@ INT UViewport::IsPerspective()
 	if (rm == 0x10) return *(void**)((BYTE*)st + 0x4FC) != NULL ? 1 : 0;
 	return 0;
 }
-IMPL_MATCH("Engine.dll", 0x12A90)
+IMPL_MATCH("Engine.dll", 0x10312a90)
 INT UViewport::IsRealtime()
 {
 	// Retail (26b, RVA 0x12A90): state ptr at +0x34; flags at +0x4F8 bits 11,14.
@@ -1670,11 +1670,11 @@ INT UViewport::IsRealtime()
 	if (!st) return 0;
 	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
 }
-IMPL_MATCH("Engine.dll", 0x83380)
+IMPL_MATCH("Engine.dll", 0x10383380)
 INT UViewport::IsWire() { return 0; }
 IMPL_EMPTY("body unanalyzed; screenshot capture not implemented")
 void UViewport::ScreenShot() {}
-IMPL_MATCH("Engine.dll", 0x129D0)
+IMPL_MATCH("Engine.dll", 0x103129d0)
 BYTE* UViewport::_Screen( INT X, INT Y )
 {
 	// Retail (31b, RVA 0x129D0): return FrameBuffer + (Pitch * Y + X) * BytesPerPixel

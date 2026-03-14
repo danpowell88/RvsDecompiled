@@ -26,7 +26,7 @@ FRange::FRange( FLOAT InVal )
 {
 }
 
-IMPL_MATCH("Core.dll", 0x94b0)
+IMPL_MATCH("Core.dll", 0x101094b0)
 FRange::FRange( FLOAT InMin, FLOAT InMax )
 :	Min( InMin < InMax ? InMin : InMax )
 ,	Max( InMin < InMax ? InMax : InMin )

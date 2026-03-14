@@ -70,7 +70,7 @@ FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& O
 
 
 // --- FStaticMeshSection ---
-IMPL_MATCH("Engine.dll", 0x2bfb0)
+IMPL_MATCH("Engine.dll", 0x1032bfb0)
 FStaticMeshSection::FStaticMeshSection()
 {
 	*(DWORD*)((BYTE*)this + 0x00) = 0;       // +0x00

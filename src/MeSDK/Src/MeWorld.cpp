@@ -19,7 +19,7 @@
  * 'get handle' function where the handle IS the pointer cast to int.
  * Retail: 7 bytes.  MOV EAX,ECX; RET  (thiscall variant)
  */
-IMPL_MATCH("Engine.dll", 0x206380)
+IMPL_MATCH("Engine.dll", 0x10506380)
 int FUN_10506380(int param_1)
 {
     return param_1;
@@ -32,7 +32,7 @@ int FUN_10506380(int param_1)
  * world code to read a handle from an indirect pointer table.
  * Retail: 9 bytes.  MOV EAX,[ECX]; RET
  */
-IMPL_MATCH("Engine.dll", 0x1f3640)
+IMPL_MATCH("Engine.dll", 0x104f3640)
 int FUN_104f3640(int* param_1)
 {
     return *param_1;

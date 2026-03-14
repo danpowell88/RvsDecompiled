@@ -36,7 +36,7 @@ FBezier& FBezier::operator=(const FBezier&)
 	return *this;
 }
 
-IMPL_MATCH("Engine.dll", 0x203F0)
+IMPL_MATCH("Engine.dll", 0x103203f0)
 float FBezier::Evaluate(FVector *,int,TArray<FVector> *)
 {
 	return 0.0f;
@@ -49,14 +49,14 @@ float FBezier::Evaluate(FVector *,int,TArray<FVector> *)
 // ============================================================================
 
 // ??4FPoly@@QAEAAV0@ABV0@@Z
-IMPL_MATCH("Engine.dll", 0x2E00)
+IMPL_MATCH("Engine.dll", 0x10302e00)
 FPoly & FPoly::operator=(FPoly const & Other) {
 	appMemcpy(this, &Other, sizeof(FPoly));
 	return *this;
 }
 
 // ?GetTextureSize@FPoly@@QAE?AVFVector@@XZ
-IMPL_MATCH("Engine.dll", 0x9CB40)
+IMPL_MATCH("Engine.dll", 0x1039cb40)
 FVector FPoly::GetTextureSize()
 {
 	if( !Material )
@@ -66,7 +66,7 @@ FVector FPoly::GetTextureSize()
 
 // --- Moved from EngineStubs.cpp ---
 // ?Area@FPoly@@QAEMXZ
-IMPL_MATCH("Engine.dll", 0x9C510)
+IMPL_MATCH("Engine.dll", 0x1039c510)
 float FPoly::Area() {
 	FLOAT TotalArea = 0.f;
 	FVector Side1 = Vertex[1] - Vertex[0];
@@ -79,7 +79,7 @@ float FPoly::Area() {
 	return TotalArea;
 }
 // ?CalcNormal@FPoly@@QAEHH@Z
-IMPL_MATCH("Engine.dll", 0x9C780)
+IMPL_MATCH("Engine.dll", 0x1039c780)
 int FPoly::CalcNormal(int bSilent) {
 	Normal = FVector(0,0,0);
 	for( INT i=2; i<NumVertices; i++ )
@@ -94,7 +94,7 @@ int FPoly::CalcNormal(int bSilent) {
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z — Ghidra at 0x9E760.
 // Tests if a line segment intersects this polygon. Optionally returns the hit point.
-IMPL_MATCH("Engine.dll", 0x9E760)
+IMPL_MATCH("Engine.dll", 0x1039e760)
 int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection) {
 	FLOAT d1 = (Start - Vertex[0]) | Normal;
 	FLOAT d2 = (End   - Vertex[0]) | Normal;
@@ -114,7 +114,7 @@ int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection)
 }
 
 // ?Faces@FPoly@@QBEHABV1@@Z
-IMPL_MATCH("Engine.dll", 0x9E8E0)
+IMPL_MATCH("Engine.dll", 0x1039e8e0)
 int FPoly::Faces(FPoly const & Other) const {
 	if( IsCoplanar(Other) )
 		return 0;
@@ -134,7 +134,7 @@ int FPoly::Faces(FPoly const & Other) const {
 
 // ?Finalize@FPoly@@QAEHH@Z — Ghidra at 0x9e190.
 // Cleans up polygon: removes duplicate verts, validates, computes normal & texture vectors.
-IMPL_MATCH("Engine.dll", 0x9e190)
+IMPL_MATCH("Engine.dll", 0x1039e190)
 int FPoly::Finalize(int bSilent) {
 	Fix();
 	if( NumVertices < 3 )
@@ -168,7 +168,7 @@ int FPoly::Finalize(int bSilent) {
 }
 
 // ?Fix@FPoly@@QAEHXZ
-IMPL_MATCH("Engine.dll", 0x9CEC0)
+IMPL_MATCH("Engine.dll", 0x1039cec0)
 int FPoly::Fix()
 {
 	INT j = 0;
@@ -194,13 +194,13 @@ int FPoly::Fix()
 }
 
 // ?IsBackfaced@FPoly@@QBEHABVFVector@@@Z
-IMPL_MATCH("Engine.dll", 0x2CE0)
+IMPL_MATCH("Engine.dll", 0x10302ce0)
 int FPoly::IsBackfaced(FVector const & Point) const {
 	return ((Point - Base) | Normal) < 0.f;
 }
 
 // ?IsCoplanar@FPoly@@QBEHABV1@@Z
-IMPL_MATCH("Engine.dll", 0x18B80)
+IMPL_MATCH("Engine.dll", 0x10318b80)
 int FPoly::IsCoplanar(FPoly const & Other) const {
 	FLOAT d = (Base - Other.Base) | Normal;
 	if( d < 0.f ) d = -d;
@@ -214,7 +214,7 @@ int FPoly::IsCoplanar(FPoly const & Other) const {
 }
 
 // ?OnPlane@FPoly@@QAEHVFVector@@@Z
-IMPL_MATCH("Engine.dll", 0x9DE70)
+IMPL_MATCH("Engine.dll", 0x1039de70)
 int FPoly::OnPlane(FVector Point) {
 	FLOAT d = (Point - Vertex[0]) | Normal;
 	return (d > -0.1f && d < 0.1f) ? 1 : 0;
@@ -223,7 +223,7 @@ int FPoly::OnPlane(FVector Point) {
 // ?OnPoly@FPoly@@QAEHVFVector@@@Z
 // ?OnPoly@FPoly@@QAEHVFVector@@@Z — Ghidra at 0x9DD10.
 // Returns 1 if Point lies inside the polygon, 0 otherwise.
-IMPL_MATCH("Engine.dll", 0x9DD10)
+IMPL_MATCH("Engine.dll", 0x1039dd10)
 int FPoly::OnPoly(FVector Point) {
 	for( INT i=0; i<NumVertices; i++ )
 	{
@@ -239,7 +239,7 @@ int FPoly::OnPoly(FVector Point) {
 }
 
 // ?Split@FPoly@@QAEHABVFVector@@0H@Z
-IMPL_MATCH("Engine.dll", 0x9DEF0)
+IMPL_MATCH("Engine.dll", 0x1039def0)
 int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
 {
 	if (NoOverflow && NumVertices >= 14)
@@ -263,7 +263,7 @@ int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
 }
 
 // ?SplitPrecise@FPoly@@QAEHABVFVector@@0H@Z
-IMPL_MATCH("Engine.dll", 0x9E040)
+IMPL_MATCH("Engine.dll", 0x1039e040)
 int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverflow)
 {
 	if (NoOverflow && NumVertices >= 14)
@@ -297,7 +297,7 @@ int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverfl
 //   Model+0x8c = Points.Data (FVector array,  stride 0x0c)
 //   Model+0x9c = Surfs.Data  (FBspSurf array, stride 0x5c; vNormal INT at +0x0c)
 // FBspNode field offsets: iVertPool at +0x30, iSurf at +0x34
-IMPL_MATCH("Engine.dll", 0x9D610)
+IMPL_MATCH("Engine.dll", 0x1039d610)
 int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int p4) const
 {
 	const BYTE* NodesData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x5c);
@@ -322,7 +322,7 @@ int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int 
 // ?SplitWithPlane@FPoly@@QBEHABVFVector@@0PAV1@1H@Z
 // Same split logic as SplitWithPlaneFast but takes Base+Normal instead of FPlane.
 // bNormal flag (p4): if non-zero, calls CalcNormal on each output polygon.
-IMPL_MATCH("Engine.dll", 0x9CFE0)
+IMPL_MATCH("Engine.dll", 0x1039cfe0)
 int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FPoly * p3, int p4) const
 {
 	FPlane Plane(p1.X, p1.Y, p1.Z, p1 | p0);
@@ -339,7 +339,7 @@ int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FP
 // Splits this polygon against a plane using THRESH_SPLIT_POLY_WITH_PLANE (0.25).
 // Returns SP_Front, SP_Back, SP_Coplanar, or SP_Split.
 // Out-polys (FrontPoly/BackPoly) may be NULL when the result is one-sided.
-IMPL_MATCH("Engine.dll", 0x9D6D0)
+IMPL_MATCH("Engine.dll", 0x1039d6d0)
 int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 {
 	const FLOAT Thresh = THRESH_SPLIT_POLY_WITH_PLANE;
@@ -401,7 +401,7 @@ int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 
 // ?SplitWithPlaneFastPrecise@FPoly@@QBEHVFPlane@@PAV1@1@Z
 // Same as SplitWithPlaneFast but uses THRESH_SPLIT_POLY_PRECISELY (0.01).
-IMPL_MATCH("Engine.dll", 0x9D9F0)
+IMPL_MATCH("Engine.dll", 0x1039d9f0)
 int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
 {
 	const FLOAT Thresh = THRESH_SPLIT_POLY_PRECISELY;
@@ -458,7 +458,7 @@ int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
 }
 
 // ??9FPoly@@QAEHV0@@Z — Ghidra at 0x8bce0.
-IMPL_MATCH("Engine.dll", 0x8bce0)
+IMPL_MATCH("Engine.dll", 0x1038bce0)
 int FPoly::operator!=(FPoly Other) {
 	if( NumVertices != Other.NumVertices )
 		return 1;
@@ -469,7 +469,7 @@ int FPoly::operator!=(FPoly Other) {
 }
 
 // ??8FPoly@@QAEHV0@@Z — Ghidra at 0xb4b10.
-IMPL_MATCH("Engine.dll", 0xb4b10)
+IMPL_MATCH("Engine.dll", 0x103b4b10)
 int FPoly::operator==(FPoly Other) {
 	if( NumVertices != Other.NumVertices )
 		return 0;
@@ -479,7 +479,7 @@ int FPoly::operator==(FPoly Other) {
 	return 1;
 }
 // ?Init@FPoly@@QAEXXZ
-IMPL_MATCH("Engine.dll", 0x9CD40)
+IMPL_MATCH("Engine.dll", 0x1039cd40)
 void FPoly::Init() {
 	Base     = FVector(0,0,0);
 	Normal   = FVector(0,0,0);
@@ -504,7 +504,7 @@ void FPoly::Init() {
 
 // ?InsertVertex@FPoly@@QAEXHVFVector@@@Z
 // NOTE: Original uses temp TArray copy+insert+copyback. Simplified to in-place shift.
-IMPL_MATCH("Engine.dll", 0x9E9B0)
+IMPL_MATCH("Engine.dll", 0x1039e9b0)
 void FPoly::InsertVertex(int InPos, FVector InVtx)
 {
 	check(InPos <= NumVertices);
@@ -515,7 +515,7 @@ void FPoly::InsertVertex(int InPos, FVector InVtx)
 }
 
 // ?Reverse@FPoly@@QAEXXZ
-IMPL_MATCH("Engine.dll", 0x9C400)
+IMPL_MATCH("Engine.dll", 0x1039c400)
 void FPoly::Reverse() {
 	Normal *= -1.f;
 	for( INT i=0; i<NumVertices/2; i++ ) {
@@ -528,7 +528,7 @@ void FPoly::Reverse() {
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z — Ghidra at 0x9C640.
 // Splits a polygon in two halves along the vertex midpoint.
-IMPL_MATCH("Engine.dll", 0x9C640)
+IMPL_MATCH("Engine.dll", 0x1039c640)
 void FPoly::SplitInHalf(FPoly * OtherHalf) {
 	INT Half = NumVertices / 2;
 	if( NumVertices < 4 || NumVertices > 16 )
@@ -556,7 +556,7 @@ void FPoly::SplitInHalf(FPoly * OtherHalf) {
 // ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z
 // ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z — Ghidra at 0x9C8F0.
 // Transforms all polygon data by the given coordinate system.
-IMPL_MATCH("Engine.dll", 0x9C8F0)
+IMPL_MATCH("Engine.dll", 0x1039c8f0)
 void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, FVector const & PostAdd, float Orientation) {
 	// Transform texture mapping vectors by the contravariant (vector) transform.
 	TextureU = TextureU.TransformVectorBy( Coords.VectorXform );
@@ -587,7 +587,7 @@ void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, 
 // Removes collinear (in-line) vertices. A vertex is collinear if it lies within
 // THRESH_POINT_ON_SIDE of the line connecting its two neighbours.
 // Returns final vertex count.
-IMPL_MATCH("Engine.dll", 0x9E470)
+IMPL_MATCH("Engine.dll", 0x1039e470)
 INT FPoly::RemoveColinears()
 {
 	BYTE Colinear[16];

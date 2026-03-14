@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-IMPL_MATCH("Engine.dll", 0x1802C0)
+IMPL_MATCH("Engine.dll", 0x104802c0)
 INT UChannel::SendBunch(FOutBunch*, INT)
 {
 guard(UChannel::SendBunch);
@@ -26,7 +26,7 @@ unguard;
 
 
 // --- UFileChannel ---
-IMPL_MATCH("Engine.dll", 0x7A530)
+IMPL_MATCH("Engine.dll", 0x1037a530)
 void UFileChannel::StaticConstructor()
 {
 guard(UFileChannel::StaticConstructor);
@@ -34,7 +34,7 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x181460)
+IMPL_MATCH("Engine.dll", 0x10481460)
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
@@ -42,7 +42,7 @@ guard(UFileChannel::Tick);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x181890)
+IMPL_MATCH("Engine.dll", 0x10481890)
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -50,13 +50,13 @@ guard(UFileChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x181660)
+IMPL_MATCH("Engine.dll", 0x10481660)
 FString UFileChannel::Describe()
 {
 return FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x184100)
+IMPL_MATCH("Engine.dll", 0x10484100)
 void UFileChannel::Destroy()
 {
 // Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
@@ -91,7 +91,7 @@ UChannel::Destroy();
 }
 }
 
-IMPL_MATCH("Engine.dll", 0x180f30)
+IMPL_MATCH("Engine.dll", 0x10480f30)
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Retail: 0x180f30. Just delegates to UChannel::Init.
@@ -100,7 +100,7 @@ UChannel::Init(Conn, ChIndex, InType);
 
 
 // --- UActorChannel ---
-IMPL_MATCH("Engine.dll", 0x7A4A0)
+IMPL_MATCH("Engine.dll", 0x1037a4a0)
 void UActorChannel::StaticConstructor()
 {
 guard(UActorChannel::StaticConstructor);
@@ -108,7 +108,7 @@ guard(UActorChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x180D50)
+IMPL_MATCH("Engine.dll", 0x10480d50)
 void UActorChannel::Tick()
 {
 guard(UActorChannel::Tick);
@@ -116,7 +116,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1827F0)
+IMPL_MATCH("Engine.dll", 0x104827f0)
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -124,7 +124,7 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1824D0)
+IMPL_MATCH("Engine.dll", 0x104824d0)
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
@@ -133,7 +133,7 @@ UChannel::ReceivedNak(NakPacketId);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1834D0)
+IMPL_MATCH("Engine.dll", 0x104834d0)
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
@@ -141,7 +141,7 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x182590)
+IMPL_MATCH("Engine.dll", 0x10482590)
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
@@ -149,7 +149,7 @@ guard(UActorChannel::SetChannelActor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1821D0)
+IMPL_MATCH("Engine.dll", 0x104821d0)
 void UActorChannel::SetClosingFlag()
 {
 // Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
@@ -158,7 +158,7 @@ void UActorChannel::SetClosingFlag()
 UChannel::SetClosingFlag();
 }
 
-IMPL_MATCH("Engine.dll", 0x1813e0)
+IMPL_MATCH("Engine.dll", 0x104813e0)
 void UActorChannel::Close()
 {
 // Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
@@ -166,13 +166,13 @@ UChannel::Close();
 *(INT*)((BYTE*)this + 0x6C) = 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x180DC0)
+IMPL_MATCH("Engine.dll", 0x10480dc0)
 FString UActorChannel::Describe()
 {
 return FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x182260)
+IMPL_MATCH("Engine.dll", 0x10482260)
 void UActorChannel::Destroy()
 {
 	guard(UActorChannel::Destroy);
@@ -231,7 +231,7 @@ AActor* UActorChannel::GetActor()
 return *(AActor**)((BYTE*)this + 0x6C);
 }
 
-IMPL_MATCH("Engine.dll", 0x180C90)
+IMPL_MATCH("Engine.dll", 0x10480c90)
 void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
@@ -246,7 +246,7 @@ appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 
 
 // --- UControlChannel ---
-IMPL_MATCH("Engine.dll", 0x7A410)
+IMPL_MATCH("Engine.dll", 0x1037a410)
 void UControlChannel::StaticConstructor()
 {
 guard(UControlChannel::StaticConstructor);
@@ -254,7 +254,7 @@ guard(UControlChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1809E0)
+IMPL_MATCH("Engine.dll", 0x104809e0)
 void UControlChannel::ReceivedBunch(FInBunch&)
 {
 guard(UControlChannel::ReceivedBunch);
@@ -262,7 +262,7 @@ guard(UControlChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x180AD0)
+IMPL_MATCH("Engine.dll", 0x10480ad0)
 void UControlChannel::Serialize(const TCHAR*, EName)
 {
 guard(UControlChannel::Serialize);
@@ -270,13 +270,13 @@ guard(UControlChannel::Serialize);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x180BC0)
+IMPL_MATCH("Engine.dll", 0x10480bc0)
 FString UControlChannel::Describe()
 {
 return FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x182070)
+IMPL_MATCH("Engine.dll", 0x10482070)
 void UControlChannel::Destroy()
 {
 // Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.
@@ -286,7 +286,7 @@ if (RouteDestroy() == 0)
 UChannel::Destroy();
 }
 
-IMPL_MATCH("Engine.dll", 0x180960)
+IMPL_MATCH("Engine.dll", 0x10480960)
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 UChannel::Init(Conn, ChIndex, InType);
@@ -300,10 +300,10 @@ UChannel::Init(Conn, ChIndex, InType);
 // UChannel
 // =============================================================================
 
-IMPL_MATCH("Engine.dll", 0x181F20)
+IMPL_MATCH("Engine.dll", 0x10481f20)
 void UChannel::Destroy() { Super::Destroy(); }
 
-IMPL_MATCH("Engine.dll", 0x17FB60)
+IMPL_MATCH("Engine.dll", 0x1047fb60)
 void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
 {
 ChIndex = InChIndex;
@@ -316,10 +316,10 @@ OpenPacketId = INDEX_NONE;
 NegotiatedVer = 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x17FC50)
+IMPL_MATCH("Engine.dll", 0x1047fc50)
 void UChannel::SetClosingFlag() { Closing = 1; }
 
-IMPL_MATCH("Engine.dll", 0x1811F0)
+IMPL_MATCH("Engine.dll", 0x104811f0)
 void UChannel::Close()
 {
 guard(UChannel::Close);
@@ -327,7 +327,7 @@ guard(UChannel::Close);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1806C0)
+IMPL_MATCH("Engine.dll", 0x104806c0)
 FString UChannel::Describe()
 {
 guard(UChannel::Describe);
@@ -335,7 +335,7 @@ return FString();
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x180850)
+IMPL_MATCH("Engine.dll", 0x10480850)
 void UChannel::ReceivedNak(INT NakPacketId)
 {
 guard(UChannel::ReceivedNak);
@@ -352,7 +352,7 @@ Connection->SendRawBunch(*Out, 0);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x17FD90)
+IMPL_MATCH("Engine.dll", 0x1047fd90)
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
@@ -360,7 +360,7 @@ guard(UChannel::Tick);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x17FEC0)
+IMPL_MATCH("Engine.dll", 0x1047fec0)
 void UChannel::AssertInSequenced()
 {
 guard(UChannel::AssertInSequenced);
@@ -372,7 +372,7 @@ appFailAssert("In->Next->ChSequence>In->ChSequence", ".\\UnChan.cpp", 0x108);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x180820)
+IMPL_MATCH("Engine.dll", 0x10480820)
 INT CDECL UChannel::IsKnownChannelType(INT Type)
 {
 if (Type >= 0 && Type < 8 && UChannel::ChannelClasses[Type])
@@ -380,10 +380,10 @@ return 1;
 return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x180780)
+IMPL_MATCH("Engine.dll", 0x10480780)
 INT UChannel::IsNetReady( INT Saturate ) { return 1; }
 
-IMPL_MATCH("Engine.dll", 0x181320)
+IMPL_MATCH("Engine.dll", 0x10481320)
 INT UChannel::MaxSendBytes()
 {
 guard(UChannel::MaxSendBytes);
@@ -398,7 +398,7 @@ return bytes < 1 ? 0 : bytes;
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x17FC60)
+IMPL_MATCH("Engine.dll", 0x1047fc60)
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
@@ -406,7 +406,7 @@ guard(UChannel::ReceivedAcks);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x180070)
+IMPL_MATCH("Engine.dll", 0x10480070)
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
@@ -414,7 +414,7 @@ guard(UChannel::ReceivedRawBunch);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x17FF60)
+IMPL_MATCH("Engine.dll", 0x1047ff60)
 INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedSequencedBunch);
@@ -422,7 +422,7 @@ return 0;
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x17FB90)
+IMPL_MATCH("Engine.dll", 0x1047fb90)
 INT UChannel::RouteDestroy()
 {
 guard(UChannel::RouteDestroy);
@@ -472,38 +472,38 @@ unguard;
 // DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
 //             that reference allocated memory may alias incorrectly at runtime.
-IMPL_MATCH("Engine.dll", 0x6FA90)
+IMPL_MATCH("Engine.dll", 0x1036fa90)
 FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
 //             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
-IMPL_MATCH("Engine.dll", 0x17F6B0)
+IMPL_MATCH("Engine.dll", 0x1047f6b0)
 FInBunch::FInBunch(UNetConnection*) : FBitReader() { appMemzero(Pad, sizeof(Pad)); }
-IMPL_MATCH("Engine.dll", 0x6FAF0)
+IMPL_MATCH("Engine.dll", 0x1036faf0)
 FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
-IMPL_MATCH("Engine.dll", 0x17F6E0)
+IMPL_MATCH("Engine.dll", 0x1047f6e0)
 FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
-IMPL_MATCH("Engine.dll", 0x17F770)
+IMPL_MATCH("Engine.dll", 0x1047f770)
 FArchive& FInBunch::operator<<(FName& N) { return *this; }
 
 // ============================================================================
 // FOutBunch
 // ============================================================================
 // DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
-IMPL_MATCH("Engine.dll", 0x6F960)
+IMPL_MATCH("Engine.dll", 0x1036f960)
 FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
-IMPL_MATCH("Engine.dll", 0x17F800)
+IMPL_MATCH("Engine.dll", 0x1047f800)
 FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
-IMPL_MATCH("Engine.dll", 0x17F820)
+IMPL_MATCH("Engine.dll", 0x1047f820)
 FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
-IMPL_MATCH("Engine.dll", 0x6F950)
+IMPL_MATCH("Engine.dll", 0x1036f950)
 FOutBunch::~FOutBunch() {}
-IMPL_MATCH("Engine.dll", 0x17F930)
+IMPL_MATCH("Engine.dll", 0x1047f930)
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
-IMPL_MATCH("Engine.dll", 0x17F9C0)
+IMPL_MATCH("Engine.dll", 0x1047f9c0)
 FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
 
 // --- Moved from EngineStubs.cpp ---

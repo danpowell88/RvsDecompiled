@@ -36,7 +36,7 @@ void UTerrainBrush::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x15690)
+IMPL_MATCH("Engine.dll", 0x10315690)
 UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 {
 	// Ghidra 0x15690: vtable set by compiler; FString placement new at +4 and +10; 19 DWORDs at +1C..+64
@@ -53,7 +53,7 @@ UTerrainBrush::UTerrainBrush()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x165170)
+IMPL_MATCH("Engine.dll", 0x10465170)
 UTerrainBrush::~UTerrainBrush()
 {
 	// Ghidra 0x165170: ~FString at +10 then +4 (reverse order)
@@ -61,7 +61,7 @@ UTerrainBrush::~UTerrainBrush()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15770)
+IMPL_MATCH("Engine.dll", 0x10315770)
 UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 {
 	// Ghidra 0x15770: skip vtable +0; FString@+4, FString@+0x10, 19 DWORDs@+0x1C..+0x64
@@ -151,7 +151,7 @@ UTerrainBrushColor::~UTerrainBrushColor()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator= (shared by all 13 subclasses)
@@ -191,7 +191,7 @@ UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeTurn& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -237,7 +237,7 @@ UTerrainBrushFlatten::~UTerrainBrushFlatten()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -277,7 +277,7 @@ UTerrainBrushNoise::~UTerrainBrushNoise()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -317,7 +317,7 @@ UTerrainBrushPaint::~UTerrainBrushPaint()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -364,7 +364,7 @@ UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrainBrushPlanningPaint& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -418,7 +418,7 @@ UTerrainBrushSelect::~UTerrainBrushSelect()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -464,7 +464,7 @@ UTerrainBrushSmooth::~UTerrainBrushSmooth()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -511,7 +511,7 @@ UTerrainBrushTexPan::~UTerrainBrushTexPan()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -551,7 +551,7 @@ UTerrainBrushTexRotate::~UTerrainBrushTexRotate()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTexRotate& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -591,7 +591,7 @@ UTerrainBrushTexScale::~UTerrainBrushTexScale()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexScale& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -624,7 +624,7 @@ UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushVertexEdit& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=
@@ -657,7 +657,7 @@ UTerrainBrushVisibility::~UTerrainBrushVisibility()
 	((FString*)((BYTE*)this + 0x04))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x15b20)
+IMPL_MATCH("Engine.dll", 0x10315b20)
 UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushVisibility& Other)
 {
 	// Ghidra 0x15b20: delegates to UTerrainBrush::operator=

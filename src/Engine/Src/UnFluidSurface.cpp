@@ -31,7 +31,7 @@ static void RemoveOscillatorFromList(void* oscPtr)
 }
 
 // --- AFluidSurfaceInfo ---
-IMPL_MATCH("Engine.dll", 0x99f30)
+IMPL_MATCH("Engine.dll", 0x10399f30)
 void AFluidSurfaceInfo::UpdateOscillatorList()
 {
 	// Retail: 0x99f30, 208b.Scan the level actor list at Level+0x30 for
@@ -63,7 +63,7 @@ void AFluidSurfaceInfo::UpdateOscillatorList()
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x9A030)
+IMPL_MATCH("Engine.dll", 0x1039a030)
 void AFluidSurfaceInfo::RebuildClampedBitmap()
 {
 	// Retail: 0x9a030, 1114b.Iterate level actors and test their collision boxes
@@ -73,7 +73,7 @@ void AFluidSurfaceInfo::RebuildClampedBitmap()
 	// in the clamped bitmap. Actor intersection loop not reconstructed.
 }
 
-IMPL_MATCH("Engine.dll", 0x9ABF0)
+IMPL_MATCH("Engine.dll", 0x1039abf0)
 void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TList<FDynamicLight*>* Lights, FRenderInterface* RI)
 {
 	// Retail: 0x9abf0, 864b.Update vertex/index buffers then submit a DrawMesh call.
@@ -82,7 +82,7 @@ void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TL
 	// Vertex buffer management and D3D draw call pattern not reconstructed.
 }
 
-IMPL_MATCH("Engine.dll", 0x1065c0)
+IMPL_MATCH("Engine.dll", 0x104065c0)
 void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	// Retail: 0x1065c0, 127b.Draw base editor info then overlay the sprite icon.
@@ -96,7 +96,7 @@ void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x1cad0)
+IMPL_MATCH("Engine.dll", 0x1031cad0)
 void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 {
 	// Retail: 0x1cad0, 72b.Set or clear a single bit in the clamped-bitmap for (X, Y).
@@ -108,7 +108,7 @@ void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 	else       *word &= ~mask;
 }
 
-IMPL_MATCH("Engine.dll", 0x98a50)
+IMPL_MATCH("Engine.dll", 0x10398a50)
 void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 {
 	// Retail: 0x98a50, 648b.Fill the triangle index buffer for the fluid mesh.
@@ -171,7 +171,7 @@ void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x991E0)
+IMPL_MATCH("Engine.dll", 0x103991e0)
 void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 {
 	// Retail: 0x991e0, 2890b.Build per-vertex position + normal data for all grid points.
@@ -180,7 +180,7 @@ void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 	// convolution involve complex per-row pointer arithmetic not reconstructed.
 }
 
-IMPL_MATCH("Engine.dll", 0x1ca90)
+IMPL_MATCH("Engine.dll", 0x1031ca90)
 int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)
 {
 	// Ghidra 0x1ca90:bit-array lookup — (xSize * Y + X) into the clamp bitmap at this+0x404.
@@ -188,7 +188,7 @@ int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)
 	return (INT)((*(DWORD*)(*(INT*)((BYTE*)this + 0x404) + (idx >> 5) * 4) & (1u << ((BYTE)idx & 0x1f))) != 0);
 }
 
-IMPL_MATCH("Engine.dll", 0x990d0)
+IMPL_MATCH("Engine.dll", 0x103990d0)
 void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 {
 	// Retail: 0x990d0, 199b.Map a world-space position to the nearest grid indices.
@@ -214,7 +214,7 @@ void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 	Y = yi;
 }
 
-IMPL_MATCH("Engine.dll", 0x988A0)
+IMPL_MATCH("Engine.dll", 0x103988a0)
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 {
 	return FVector(0,0,0);
@@ -222,7 +222,7 @@ FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 
 
 // --- AFluidSurfaceOscillator ---
-IMPL_MATCH("Engine.dll", 0x9af90)
+IMPL_MATCH("Engine.dll", 0x1039af90)
 void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 {
 	// Retail: 0x9af90, 293b. Advance the oscillator's phase and call AFluidSurfaceInfo::Pling.
@@ -258,7 +258,7 @@ void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x9b0f0)
+IMPL_MATCH("Engine.dll", 0x1039b0f0)
 void AFluidSurfaceOscillator::PostEditChange()
 {
 	// Retail: 0x9b0f0, 215b.Re-register with the target fluid surface on property change.
@@ -291,7 +291,7 @@ void AFluidSurfaceOscillator::PostEditChange()
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x9b200)
+IMPL_MATCH("Engine.dll", 0x1039b200)
 void AFluidSurfaceOscillator::Destroy()
 {
 	// Retail: 0x9b200, 92b.Remove from the target surface's list then chain to base.
@@ -305,14 +305,14 @@ void AFluidSurfaceOscillator::Destroy()
 
 
 // --- UFluidSurfacePrimitive ---
-IMPL_MATCH("Engine.dll", 0x98820)
+IMPL_MATCH("Engine.dll", 0x10398820)
 void UFluidSurfacePrimitive::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x98820: delegates directly to UPrimitive::Serialize.
 	UPrimitive::Serialize(Ar);
 }
 
-IMPL_MATCH("Engine.dll", 0x98d90)
+IMPL_MATCH("Engine.dll", 0x10398d90)
 int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
 	// Ghidra 0x98d90:fluid surface line-check against AABB or flat plane.
@@ -370,7 +370,7 @@ int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVect
 	return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0x98560)
+IMPL_MATCH("Engine.dll", 0x10398560)
 int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
 {
 	// Ghidra 0x98560: point-vs-AABB overlap test using fluid surface bounding box.
@@ -394,20 +394,20 @@ int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVec
 	return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0x98800)
+IMPL_MATCH("Engine.dll", 0x10398800)
 FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 {
 	// Retail: 29b. REP MOVSD 7 DWORDs from *(this+0x58)+0x448.
 	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
-IMPL_MATCH("Engine.dll", 0x986B0)
+IMPL_MATCH("Engine.dll", 0x103986b0)
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
 {
 	return FBox();
 }
 
-IMPL_MATCH("Engine.dll", 0x98740)
+IMPL_MATCH("Engine.dll", 0x10398740)
 FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 {
 	return FSphere();
@@ -421,27 +421,27 @@ FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 // AFluidSurfaceInfo
 // =============================================================================
 
-IMPL_MATCH("Engine.dll", 0x9A7B0)
+IMPL_MATCH("Engine.dll", 0x1039a7b0)
 void AFluidSurfaceInfo::PostLoad() { Super::PostLoad(); }
-IMPL_MATCH("Engine.dll", 0x989A0)
+IMPL_MATCH("Engine.dll", 0x103989a0)
 void AFluidSurfaceInfo::Destroy() { Super::Destroy(); }
-IMPL_MATCH("Engine.dll", 0x9A830)
+IMPL_MATCH("Engine.dll", 0x1039a830)
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
-IMPL_MATCH("Engine.dll", 0x9BAF0)
+IMPL_MATCH("Engine.dll", 0x1039baf0)
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_MATCH("Engine.dll", 0x9A8B0)
+IMPL_MATCH("Engine.dll", 0x1039a8b0)
 void AFluidSurfaceInfo::PostEditMove() {}
-IMPL_MATCH("Engine.dll", 0x9A920)
+IMPL_MATCH("Engine.dll", 0x1039a920)
 void AFluidSurfaceInfo::Spawned() {}
-IMPL_MATCH("Engine.dll", 0x9A990)
+IMPL_MATCH("Engine.dll", 0x1039a990)
 UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
-IMPL_MATCH("Engine.dll", 0x9A4D0)
+IMPL_MATCH("Engine.dll", 0x1039a4d0)
 void AFluidSurfaceInfo::Init() {}
-IMPL_MATCH("Engine.dll", 0x9AA50)
+IMPL_MATCH("Engine.dll", 0x1039aa50)
 void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
-IMPL_MATCH("Engine.dll", 0x99EA0)
+IMPL_MATCH("Engine.dll", 0x10399ea0)
 void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
-IMPL_MATCH("Engine.dll", 0x9B3A0)
+IMPL_MATCH("Engine.dll", 0x1039b3a0)
 void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 
 // =============================================================================

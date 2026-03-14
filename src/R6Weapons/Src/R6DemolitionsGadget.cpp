@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6DemolitionsGadget)
 
 // --- AR6DemolitionsGadget ---
 
-IMPL_MATCH("R6Weapons.dll", 0x3cd0)
+IMPL_MATCH("R6Weapons.dll", 0x10003cd0)
 void AR6DemolitionsGadget::PreNetReceive()
 {
 	// Ghidra 0x3cd0: calls AR6AbstractWeapon::PreNetReceive directly, then saves snapshots.
@@ -22,7 +22,7 @@ void AR6DemolitionsGadget::PreNetReceive()
 	g_net_old_nbBullets = *(BYTE*)((BYTE*)this + 0x396);
 }
 
-IMPL_MATCH("R6Weapons.dll", 0x4d10)
+IMPL_MATCH("R6Weapons.dll", 0x10004d10)
 void AR6DemolitionsGadget::PostNetReceive()
 {
 	// Ghidra 0x4d10: calls AR6AbstractWeapon::PostNetReceive directly, skipping

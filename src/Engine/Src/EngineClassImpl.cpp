@@ -1029,7 +1029,7 @@ void AReplicationInfo::StopVideo(UCanvas* Canvas)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
 {
 	guard(AReplicationInfo::OpenVideo);

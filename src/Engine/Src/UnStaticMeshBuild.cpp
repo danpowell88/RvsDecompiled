@@ -77,7 +77,7 @@ UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 	// Retail returns a fallback default UMaterial; we return NULL here.
 	return pSkin;
 }
-IMPL_MATCH("Engine.dll", 0x1478b0)
+IMPL_MATCH("Engine.dll", 0x104478b0)
 FTags * UStaticMesh::GetTag(FString Name)
 {
 	guard(UStaticMesh::GetTag);
@@ -286,7 +286,7 @@ void FRebuildOptions::Init()
 
 
 // --- FTags ---
-IMPL_MATCH("Engine.dll", 0x2ed0)
+IMPL_MATCH("Engine.dll", 0x10302ed0)
 FTags::FTags(FTags const &Other)
 {
 	// Ghidra 0x2ed0:bitwise copy of first 0x30 bytes (TArrays here are shallow/borrowed), then FString copy at +0x30
@@ -309,7 +309,7 @@ FTags::~FTags()
 	((FString*)((BYTE*)this + 0x30))->~FString();
 }
 
-IMPL_MATCH("Engine.dll", 0x2f00)
+IMPL_MATCH("Engine.dll", 0x10302f00)
 FTags& FTags::operator=(const FTags& Other)
 {
 	// Ghidra 0x2f00:12 DWORDs at +0..+2F (no vtable), then FString at +0x30

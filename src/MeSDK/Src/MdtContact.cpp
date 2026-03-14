@@ -56,7 +56,7 @@ extern "C" {
  * +0x58 / node at +0x12c (offset 300 decimal).
  * Retail: 57 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x1953b0)
+IMPL_MATCH("Engine.dll", 0x104953b0)
 void FUN_104953b0(int param_1, int param_2, int param_3)
 {
     if (param_2 == 0)
@@ -101,7 +101,7 @@ void FUN_104949e0(int* param_1, int param_2)
  * FUN_10494a80 (primary and secondary normal restitution slots).
  * Retail: 29 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x194ad0)
+IMPL_MATCH("Engine.dll", 0x10494ad0)
 void FUN_10494ad0(int param_1, int param_2)
 {
     FUN_10494a30(param_1, param_2);
@@ -140,7 +140,7 @@ void FUN_10494b50(int param_1, float param_2)
  * whether the damping is essentially zero.
  * Retail: 51 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x194bb0)
+IMPL_MATCH("Engine.dll", 0x10494bb0)
 void FUN_10494bb0(int param_1, float param_2)
 {
     *(float*)(param_1 + 0x1c) = param_2;
@@ -163,7 +163,7 @@ void FUN_10494bb0(int param_1, float param_2)
  * sub-setters that mirror the pattern of FUN_10494cd0).
  * Retail: 29 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x194cb0)
+IMPL_MATCH("Engine.dll", 0x10494cb0)
 void FUN_10494cb0(int param_1, float param_2)
 {
     FUN_10494bf0(param_1, param_2);

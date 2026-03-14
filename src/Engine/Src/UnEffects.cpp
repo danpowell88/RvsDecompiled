@@ -26,7 +26,7 @@ IMPLEMENT_CLASS(UParticleEmitter);
 	Exec function implementations.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0xDF2A0)
+IMPL_MATCH("Engine.dll", 0x103df2a0)
 void AEmitter::execKill( FFrame& Stack, RESULT_DECL )
 {
 	guard(AEmitter::execKill);
@@ -37,7 +37,7 @@ void AEmitter::execKill( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AEmitter, INDEX_NONE, execKill );
 
-IMPL_MATCH("Engine.dll", 0xF85A0)
+IMPL_MATCH("Engine.dll", 0x103f85a0)
 void AProjector::execAbandonProjector( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execAbandonProjector);
@@ -47,7 +47,7 @@ void AProjector::execAbandonProjector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execAbandonProjector );
 
-IMPL_MATCH("Engine.dll", 0xFAE60)
+IMPL_MATCH("Engine.dll", 0x103fae60)
 void AProjector::execAttachActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execAttachActor);
@@ -57,7 +57,7 @@ void AProjector::execAttachActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execAttachActor );
 
-IMPL_MATCH("Engine.dll", 0xF8430)
+IMPL_MATCH("Engine.dll", 0x103f8430)
 void AProjector::execAttachProjector( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execAttachProjector);
@@ -66,7 +66,7 @@ void AProjector::execAttachProjector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execAttachProjector );
 
-IMPL_MATCH("Engine.dll", 0xFB030)
+IMPL_MATCH("Engine.dll", 0x103fb030)
 void AProjector::execDetachActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execDetachActor);
@@ -76,7 +76,7 @@ void AProjector::execDetachActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execDetachActor );
 
-IMPL_MATCH("Engine.dll", 0xF84D0)
+IMPL_MATCH("Engine.dll", 0x103f84d0)
 void AProjector::execDetachProjector( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execDetachProjector);
@@ -86,7 +86,7 @@ void AProjector::execDetachProjector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execDetachProjector );
 
-IMPL_MATCH("Engine.dll", 0xDCD40)
+IMPL_MATCH("Engine.dll", 0x103dcd40)
 void UParticleEmitter::execSpawnParticle( FFrame& Stack, RESULT_DECL )
 {
 	guard(UParticleEmitter::execSpawnParticle);

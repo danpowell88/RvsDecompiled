@@ -3,7 +3,7 @@
 
 // --- ATeleporter ---
 
-IMPL_MATCH("Engine.dll", 0xd7d70)
+IMPL_MATCH("Engine.dll", 0x103d7d70)
 void ATeleporter::addReachSpecs(APawn* Scout, INT bOnlyChanged)
 {
 	guard(ATeleporter::addReachSpecs);
