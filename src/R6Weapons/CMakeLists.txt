@@ -13,13 +13,15 @@ if(SOURCE_COUNT GREATER 0)
     add_library(R6Weapons MODULE ${R6WEAPONS_SOURCES} ${R6WEAPONS_SRC_DIR}/Src/R6Weapons.def)
     target_compile_definitions(R6Weapons PRIVATE R6WEAPONS_EXPORTS ThisPackage=R6Weapons)
     set(R6ABSTRACT_BUILT_LIB ${CMAKE_BINARY_DIR}/src/R6Abstract/Release/R6Abstract.lib)
+    set(R6ENGINE_BUILT_LIB   ${CMAKE_BINARY_DIR}/src/R6Engine/Release/R6Engine.lib)
     target_include_directories(R6Weapons BEFORE PRIVATE
         ${R6WEAPONS_SRC_DIR}/Inc
         ${PROJECT_SOURCE_DIR}/src/R6Abstract/Inc
+        ${PROJECT_SOURCE_DIR}/src/R6Engine/Inc
         ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
-    target_link_libraries(R6Weapons Core_Dep Engine_Dep ${R6ABSTRACT_BUILT_LIB})
-    add_dependencies(R6Weapons R6Abstract)
+    target_link_libraries(R6Weapons Core_Dep Engine_Dep ${R6ABSTRACT_BUILT_LIB} ${R6ENGINE_BUILT_LIB})
+    add_dependencies(R6Weapons R6Abstract R6Engine)
     add_impl_verification(R6Weapons ${R6WEAPONS_SRC_DIR}/Src)
 else()
     message(STATUS "R6Weapons: no source files yet — skipping")

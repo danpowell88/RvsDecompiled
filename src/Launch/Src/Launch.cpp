@@ -463,6 +463,7 @@ static void WriteLaunchDiagT( const TCHAR* Text )
 	Engine initialization — create the game engine object.
 -----------------------------------------------------------------------------*/
 
+IMPL_INFERRED("InitEngine: create engine from ini class, call Init(), enter main loop")
 static UEngine* InitEngine()
 {
 	guard(InitEngine);
