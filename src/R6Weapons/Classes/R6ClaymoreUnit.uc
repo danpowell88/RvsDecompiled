@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6ClaymoreUnit.uc : (add small description)
+//  R6ClaymoreUnit.uc : World unit (deployed actor) for a placed claymore mine.
+//  Extends R6DemolitionsUnit; manages the armed state and directional blast on trigger.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

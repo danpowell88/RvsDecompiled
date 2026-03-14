@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RemoteChargeUnit.uc : (add small description)
+//  R6RemoteChargeUnit.uc : World unit (deployed actor) for a placed remote charge.
+//  Extends R6DemolitionsUnit; waits for the player's detonator signal to explode.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

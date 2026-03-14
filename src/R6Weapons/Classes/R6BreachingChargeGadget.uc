@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6BreachingChargeGadget : (add small description)
+//  R6BreachingChargeGadget : Inventory item representing a breaching charge gadget slot.
+//  Extends R6DemolitionsGadget; spawns R6BreachingCharge actors when placed by the player.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

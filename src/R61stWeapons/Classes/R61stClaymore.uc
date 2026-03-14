@@ -1,5 +1,6 @@
 //=============================================================================
-//  R61stClaymore.uc : (add small description)
+//  R61stClaymore.uc : First-person view model for the claymore mine gadget.
+//  Handles the 1st-person placement animation when the player sets a claymore mine.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

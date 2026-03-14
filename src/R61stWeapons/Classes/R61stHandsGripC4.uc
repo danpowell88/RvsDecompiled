@@ -1,5 +1,6 @@
 //=============================================================================
-//  R61stHandsGripC4.uc : (add small description)
+//  R61stHandsGripC4.uc : First-person hand/grip animation for remote charge (C4) placement.
+//  Extends R6AbstractFirstPersonHands; drives the arming animation when placing a remote charge.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

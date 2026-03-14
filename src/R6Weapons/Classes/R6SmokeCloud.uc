@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6SmokeCloud.uc : (add small description)
+//  R6SmokeCloud.uc : Native actor simulating an expanding smoke cloud in the world.
+//  Spawned by smoke grenades; blocks visibility checks and triggers AI reactions.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

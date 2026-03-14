@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6BreachingChargeUnit.uc : (add small description)
+//  R6BreachingChargeUnit.uc : World unit (deployed actor) for an active breaching charge.
+//  Extends R6DemolitionsUnit; handles the placed-charge state, timer, and blast on detonation.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

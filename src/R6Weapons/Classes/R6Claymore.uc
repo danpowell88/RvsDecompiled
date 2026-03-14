@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6Claymore.uc : (add small description)
+//  R6Claymore.uc : Claymore mine gadget actor — a placed directional anti-personnel mine.
+//  Extends R6AbstractGadget; detonation and blast cone logic live in R6ClaymoreUnit.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
