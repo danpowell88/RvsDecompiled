@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6ActionSpot.uc : (add small description)
+//  R6ActionSpot.uc : Native actor that marks a tactical AI action position in a level.
+//  Stores cover stance, fire stance, and investigation state so AI can query and claim spots.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
