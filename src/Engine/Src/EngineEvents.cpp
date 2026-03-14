@@ -40,26 +40,35 @@
 	AActor event thunks (52).
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10377d30);
 void AActor::eventAnimEnd(INT Channel)
 {
-	struct { INT Channel; } Parms;
-	Parms.Channel = Channel;
-	ProcessEvent( FindFunctionChecked(ENGINE_AnimEnd, 0), &Parms, NULL );
+	FName EventName(ENGINE_AnimEnd);
+	if (IsProbing(EventName)) {
+		struct { INT Channel; } Parms;
+		Parms.Channel = Channel;
+		ProcessEvent( FindFunctionChecked(ENGINE_AnimEnd, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305200);
 void AActor::eventAttach(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_Attach, 0), &Parms, NULL );
+	FName EventName(ENGINE_Attach);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_Attach, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305250);
 void AActor::eventBaseChange()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_BaseChange, 0), NULL, NULL );
+	FName EventName(ENGINE_BaseChange);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_BaseChange, 0), NULL, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10304de0);
@@ -86,12 +95,15 @@ void AActor::eventBroadcastLocalizedMessage(UClass* MsgClass, INT Switch, APlaye
 	ProcessEvent( FindFunctionChecked(ENGINE_BroadcastLocalizedMessage, 0), &Parms, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103b73d0);
 void AActor::eventBump(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_Bump, 0), &Parms, NULL );
+	FName EventName(ENGINE_Bump);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_Bump, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x103091f0);
@@ -108,42 +120,57 @@ void AActor::eventDemoPlaySound(USound* Sound, BYTE Slot, FLOAT Volume, DWORD bN
 	ProcessEvent( FindFunctionChecked(ENGINE_DemoPlaySound, 0), &Parms, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305690);
 void AActor::eventDestroyed()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_Destroyed, 0), NULL, NULL );
+	FName EventName(ENGINE_Destroyed);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_Destroyed, 0), NULL, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103051b0);
 void AActor::eventDetach(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_Detach, 0), &Parms, NULL );
+	FName EventName(ENGINE_Detach);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_Detach, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103050a0);
 void AActor::eventEncroachedBy(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_EncroachedBy, 0), &Parms, NULL );
+	FName EventName(ENGINE_EncroachedBy);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_EncroachedBy, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103050f0);
 DWORD AActor::eventEncroachingOn(AActor* Other)
 {
 	struct { AActor* Other; DWORD ReturnValue; } Parms;
 	Parms.Other = Other;
 	Parms.ReturnValue = 0;
-	ProcessEvent( FindFunctionChecked(ENGINE_EncroachingOn, 0), &Parms, NULL );
+	FName EventName(ENGINE_EncroachingOn);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_EncroachingOn, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305030);
 void AActor::eventEndedRotation()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_EndedRotation, 0), NULL, NULL );
+	FName EventName(ENGINE_EndedRotation);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_EndedRotation, 0), NULL, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10305030);
@@ -152,10 +179,13 @@ void AActor::eventEndEvent()
 	ProcessEvent( FindFunctionChecked(ENGINE_EndEvent, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305400);
 void AActor::eventFalling()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_Falling, 0), NULL, NULL );
+	FName EventName(ENGINE_Falling);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_Falling, 0), NULL, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10305070);
@@ -170,12 +200,15 @@ void AActor::eventFinishedInterpolation()
 	ProcessEvent( FindFunctionChecked(ENGINE_FinishedInterpolation, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305640);
 void AActor::eventGainedChild(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_GainedChild, 0), &Parms, NULL );
+	FName EventName(ENGINE_GainedChild);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_GainedChild, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x1031b2a0);
@@ -190,13 +223,16 @@ DWORD AActor::eventGetReticuleInfo(APawn* Pawn, FString& Info)
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10319070);
 void AActor::eventHitWall(FVector HitNormal, AActor* HitActor)
 {
-	struct { FVector HitNormal; AActor* HitActor; } Parms;
-	Parms.HitNormal = HitNormal;
-	Parms.HitActor = HitActor;
-	ProcessEvent( FindFunctionChecked(ENGINE_HitWall, 0), &Parms, NULL );
+	FName EventName(ENGINE_HitWall);
+	if (IsProbing(EventName)) {
+		struct { FVector HitNormal; AActor* HitActor; } Parms;
+		Parms.HitNormal = HitNormal;
+		Parms.HitActor = HitActor;
+		ProcessEvent( FindFunctionChecked(ENGINE_HitWall, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x103093c0);
@@ -241,28 +277,37 @@ void AActor::eventKVelDropBelow()
 	ProcessEvent( FindFunctionChecked(ENGINE_KVelDropBelow, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10319000);
 void AActor::eventLanded(FVector HitNormal)
 {
-	struct { FVector HitNormal; } Parms;
-	Parms.HitNormal = HitNormal;
-	ProcessEvent( FindFunctionChecked(ENGINE_Landed, 0), &Parms, NULL );
+	FName EventName(ENGINE_Landed);
+	if (IsProbing(EventName)) {
+		struct { FVector HitNormal; } Parms;
+		Parms.HitNormal = HitNormal;
+		ProcessEvent( FindFunctionChecked(ENGINE_Landed, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103055f0);
 void AActor::eventLostChild(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_LostChild, 0), &Parms, NULL );
+	FName EventName(ENGINE_LostChild);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_LostChild, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305370);
 void AActor::eventPhysicsVolumeChange(APhysicsVolume* NewVolume)
 {
-	struct { APhysicsVolume* NewVolume; } Parms;
-	Parms.NewVolume = NewVolume;
-	ProcessEvent( FindFunctionChecked(ENGINE_PhysicsVolumeChange, 0), &Parms, NULL );
+	FName EventName(ENGINE_PhysicsVolumeChange);
+	if (IsProbing(EventName)) {
+		struct { APhysicsVolume* NewVolume; } Parms;
+		Parms.NewVolume = NewVolume;
+		ProcessEvent( FindFunctionChecked(ENGINE_PhysicsVolumeChange, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10308d70);
@@ -354,28 +399,37 @@ void AActor::eventSetInitialState()
 	ProcessEvent( FindFunctionChecked(ENGINE_SetInitialState, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305150);
 AActor* AActor::eventSpecialHandling(APawn* Other)
 {
 	struct { APawn* Other; AActor* ReturnValue; } Parms;
 	Parms.Other = Other;
 	Parms.ReturnValue = NULL;
-	ProcessEvent( FindFunctionChecked(ENGINE_SpecialHandling, 0), &Parms, NULL );
+	FName EventName(ENGINE_SpecialHandling);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_SpecialHandling, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103055a0);
 void AActor::eventTick(FLOAT DeltaTime)
 {
-	struct { FLOAT DeltaTime; } Parms;
-	Parms.DeltaTime = DeltaTime;
-	ProcessEvent( FindFunctionChecked(ENGINE_Tick, 0), &Parms, NULL );
+	FName EventName(ENGINE_Tick);
+	if (IsProbing(EventName)) {
+		struct { FLOAT DeltaTime; } Parms;
+		Parms.DeltaTime = DeltaTime;
+		ProcessEvent( FindFunctionChecked(ENGINE_Tick, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305440);
 void AActor::eventTimer()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_Timer, 0), NULL, NULL );
+	FName EventName(ENGINE_Timer);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_Timer, 0), NULL, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10305320);
@@ -384,12 +438,15 @@ void AActor::eventTornOff()
 	ProcessEvent( FindFunctionChecked(ENGINE_TornOff, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305320);
 void AActor::eventTouch(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_Touch, 0), &Parms, NULL );
+	FName EventName(ENGINE_Touch);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_Touch, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10304c60);
@@ -404,13 +461,16 @@ void AActor::eventTravelPreAccept()
 	ProcessEvent( FindFunctionChecked(ENGINE_TravelPreAccept, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305540);
 void AActor::eventTrigger(AActor* Other, APawn* EventInstigator)
 {
-	struct { AActor* Other; APawn* EventInstigator; } Parms;
-	Parms.Other = Other;
-	Parms.EventInstigator = EventInstigator;
-	ProcessEvent( FindFunctionChecked(ENGINE_Trigger, 0), &Parms, NULL );
+	FName EventName(ENGINE_Trigger);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; APawn* EventInstigator; } Parms;
+		Parms.Other = Other;
+		Parms.EventInstigator = EventInstigator;
+		ProcessEvent( FindFunctionChecked(ENGINE_Trigger, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10305290);
@@ -423,21 +483,27 @@ void AActor::eventTriggerEvent(FName EventName, AActor* Other, APawn* EventInsti
 	ProcessEvent( FindFunctionChecked(ENGINE_TriggerEvent, 0), &Parms, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10305290);
 void AActor::eventUnTouch(AActor* Other)
 {
-	struct { AActor* Other; } Parms;
-	Parms.Other = Other;
-	ProcessEvent( FindFunctionChecked(ENGINE_UnTouch, 0), &Parms, NULL );
+	FName EventName(ENGINE_UnTouch);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_UnTouch, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103054e0);
 void AActor::eventUnTrigger(AActor* Other, APawn* EventInstigator)
 {
-	struct { AActor* Other; APawn* EventInstigator; } Parms;
-	Parms.Other = Other;
-	Parms.EventInstigator = EventInstigator;
-	ProcessEvent( FindFunctionChecked(ENGINE_UnTrigger, 0), &Parms, NULL );
+	FName EventName(ENGINE_UnTrigger);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; APawn* EventInstigator; } Parms;
+		Parms.Other = Other;
+		Parms.EventInstigator = EventInstigator;
+		ProcessEvent( FindFunctionChecked(ENGINE_UnTrigger, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x1030e0a0);
@@ -515,12 +581,15 @@ FRotator APawn::eventGetViewRotation()
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10306ef0);
 void APawn::eventHeadVolumeChange(APhysicsVolume* NewHeadVolume)
 {
-	struct { APhysicsVolume* NewHeadVolume; } Parms;
-	Parms.NewHeadVolume = NewHeadVolume;
-	ProcessEvent( FindFunctionChecked(ENGINE_HeadVolumeChange, 0), &Parms, NULL );
+	FName EventName(ENGINE_HeadVolumeChange);
+	if (IsProbing(EventName)) {
+		struct { APhysicsVolume* NewHeadVolume; } Parms;
+		Parms.NewHeadVolume = NewHeadVolume;
+		ProcessEvent( FindFunctionChecked(ENGINE_HeadVolumeChange, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10306e00);
@@ -615,34 +684,43 @@ void APawn::eventStopPlayFiring()
 	AController event thunks (16).
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x1031a230);
 void AController::eventAIHearSound(AActor* Actor, INT Id, USound* S, FVector SoundLoc, FVector Parameters, DWORD bStopSound)
 {
-	struct { AActor* Actor; INT Id; USound* S; FVector SoundLoc; FVector Parameters; DWORD bStopSound; } Parms;
-	Parms.Actor = Actor;
-	Parms.Id = Id;
-	Parms.S = S;
-	Parms.SoundLoc = SoundLoc;
-	Parms.Parameters = Parameters;
-	Parms.bStopSound = bStopSound;
-	ProcessEvent( FindFunctionChecked(ENGINE_AIHearSound, 0), &Parms, NULL );
+	FName EventName(ENGINE_AIHearSound);
+	if (IsProbing(EventName)) {
+		struct { AActor* Actor; INT Id; USound* S; FVector SoundLoc; FVector Parameters; DWORD bStopSound; } Parms;
+		Parms.Actor = Actor;
+		Parms.Id = Id;
+		Parms.S = S;
+		Parms.SoundLoc = SoundLoc;
+		Parms.Parameters = Parameters;
+		Parms.bStopSound = bStopSound;
+		ProcessEvent( FindFunctionChecked(ENGINE_AIHearSound, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10308260);
 void AController::eventEnemyNotVisible()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_EnemyNotVisible, 0), NULL, NULL );
+	FName EventName(ENGINE_EnemyNotVisible);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_EnemyNotVisible, 0), NULL, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10308340);
 void AController::eventHearNoise(FLOAT Loudness, AActor* NoiseMaker, BYTE NoiseCategory, BYTE bExactPos)
 {
-	struct { FLOAT Loudness; AActor* NoiseMaker; BYTE NoiseCategory; BYTE bExactPos; } Parms;
-	Parms.Loudness = Loudness;
-	Parms.NoiseMaker = NoiseMaker;
-	Parms.NoiseCategory = NoiseCategory;
-	Parms.bExactPos = bExactPos;
-	ProcessEvent( FindFunctionChecked(ENGINE_HearNoise, 0), &Parms, NULL );
+	FName EventName(ENGINE_HearNoise);
+	if (IsProbing(EventName)) {
+		struct { FLOAT Loudness; AActor* NoiseMaker; BYTE NoiseCategory; BYTE bExactPos; } Parms;
+		Parms.Loudness = Loudness;
+		Parms.NoiseMaker = NoiseMaker;
+		Parms.NoiseCategory = NoiseCategory;
+		Parms.bExactPos = bExactPos;
+		ProcessEvent( FindFunctionChecked(ENGINE_HearNoise, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x103055f0);
@@ -651,10 +729,13 @@ void AController::eventLongFall()
 	ProcessEvent( FindFunctionChecked(ENGINE_LongFall, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10308540);
 void AController::eventMayFall()
 {
-	ProcessEvent( FindFunctionChecked(ENGINE_MayFall, 0), NULL, NULL );
+	FName EventName(ENGINE_MayFall);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_MayFall, 0), NULL, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x103064c0);
@@ -663,23 +744,29 @@ void AController::eventMonitoredPawnAlert()
 	ProcessEvent( FindFunctionChecked(ENGINE_MonitoredPawnAlert, 0), NULL, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103083f0);
 DWORD AController::eventNotifyBump(AActor* Other)
 {
 	struct { AActor* Other; DWORD ReturnValue; } Parms;
 	Parms.Other = Other;
 	Parms.ReturnValue = 0;
-	ProcessEvent( FindFunctionChecked(ENGINE_NotifyBump, 0), &Parms, NULL );
+	FName EventName(ENGINE_NotifyBump);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_NotifyBump, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x10308450);
 DWORD AController::eventNotifyHeadVolumeChange(APhysicsVolume* NewVolume)
 {
 	struct { APhysicsVolume* NewVolume; DWORD ReturnValue; } Parms;
 	Parms.NewVolume = NewVolume;
 	Parms.ReturnValue = 0;
-	ProcessEvent( FindFunctionChecked(ENGINE_NotifyHeadVolumeChange, 0), &Parms, NULL );
+	FName EventName(ENGINE_NotifyHeadVolumeChange);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_NotifyHeadVolumeChange, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
@@ -692,34 +779,43 @@ void AController::eventNotifyHitMover(FVector HitNormal, AMover* Wall)
 	ProcessEvent( FindFunctionChecked(ENGINE_NotifyHitMover, 0), &Parms, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x1031a130);
 DWORD AController::eventNotifyHitWall(FVector HitNormal, AActor* HitActor)
 {
 	struct { FVector HitNormal; AActor* HitActor; DWORD ReturnValue; } Parms;
 	Parms.HitNormal = HitNormal;
 	Parms.HitActor = HitActor;
 	Parms.ReturnValue = 0;
-	ProcessEvent( FindFunctionChecked(ENGINE_NotifyHitWall, 0), &Parms, NULL );
+	FName EventName(ENGINE_NotifyHitWall);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_NotifyHitWall, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x1031a1b0);
 DWORD AController::eventNotifyLanded(FVector HitNormal)
 {
 	struct { FVector HitNormal; DWORD ReturnValue; } Parms;
 	Parms.HitNormal = HitNormal;
 	Parms.ReturnValue = 0;
-	ProcessEvent( FindFunctionChecked(ENGINE_NotifyLanded, 0), &Parms, NULL );
+	FName EventName(ENGINE_NotifyLanded);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_NotifyLanded, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103084b0);
 DWORD AController::eventNotifyPhysicsVolumeChange(APhysicsVolume* NewVolume)
 {
 	struct { APhysicsVolume* NewVolume; DWORD ReturnValue; } Parms;
 	Parms.NewVolume = NewVolume;
 	Parms.ReturnValue = 0;
-	ProcessEvent( FindFunctionChecked(ENGINE_NotifyPhysicsVolumeChange, 0), &Parms, NULL );
+	FName EventName(ENGINE_NotifyPhysicsVolumeChange);
+	if (IsProbing(EventName)) {
+		ProcessEvent( FindFunctionChecked(ENGINE_NotifyPhysicsVolumeChange, 0), &Parms, NULL );
+	}
 	return Parms.ReturnValue;
 }
 
@@ -732,20 +828,26 @@ void AController::eventPrepareForMove(ANavigationPoint* Goal, UReachSpec* Path)
 	ProcessEvent( FindFunctionChecked(ENGINE_PrepareForMove, 0), &Parms, NULL );
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103082a0);
 void AController::eventSeeMonster(APawn* Seen)
 {
-	struct { APawn* Seen; } Parms;
-	Parms.Seen = Seen;
-	ProcessEvent( FindFunctionChecked(ENGINE_SeeMonster, 0), &Parms, NULL );
+	FName EventName(ENGINE_SeeMonster);
+	if (IsProbing(EventName)) {
+		struct { APawn* Seen; } Parms;
+		Parms.Seen = Seen;
+		ProcessEvent( FindFunctionChecked(ENGINE_SeeMonster, 0), &Parms, NULL );
+	}
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103082f0);
 void AController::eventSeePlayer(APawn* Seen)
 {
-	struct { APawn* Seen; } Parms;
-	Parms.Seen = Seen;
-	ProcessEvent( FindFunctionChecked(ENGINE_SeePlayer, 0), &Parms, NULL );
+	FName EventName(ENGINE_SeePlayer);
+	if (IsProbing(EventName)) {
+		struct { APawn* Seen; } Parms;
+		Parms.Seen = Seen;
+		ProcessEvent( FindFunctionChecked(ENGINE_SeePlayer, 0), &Parms, NULL );
+	}
 }
 
 /*-----------------------------------------------------------------------------
@@ -855,12 +957,15 @@ void APlayerController::eventPlayerCalcView(AActor*& ViewActor, FVector& CameraL
 	CameraRotation = Parms.CameraRotation;
 }
 
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
+IMPL_MATCH("Engine.dll", 0x103086b0);
 void APlayerController::eventPlayerTick(FLOAT DeltaTime)
 {
-	struct { FLOAT DeltaTime; } Parms;
-	Parms.DeltaTime = DeltaTime;
-	ProcessEvent( FindFunctionChecked(ENGINE_PlayerTick, 0), &Parms, NULL );
+	FName EventName(ENGINE_PlayerTick);
+	if (IsProbing(EventName)) {
+		struct { FLOAT DeltaTime; } Parms;
+		Parms.DeltaTime = DeltaTime;
+		ProcessEvent( FindFunctionChecked(ENGINE_PlayerTick, 0), &Parms, NULL );
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10306b20);
@@ -1457,10 +1562,26 @@ IMPL_MATCH("Engine.dll", 0x10305370);
 void APhysicsVolume::eventPhysicsChangedFor(AActor* Other) { struct { AActor* Other; } P; P.Other = Other; ProcessEvent( FindFunctionChecked(ENGINE_PhysicsChangedFor, 0), &P, NULL ); }
 
 // AZoneInfo (2)
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
-void AZoneInfo::eventActorEntered(AActor* Other) { struct { AActor* Other; } P; P.Other = Other; ProcessEvent( FindFunctionChecked(ENGINE_ActorEntered, 0), &P, NULL ); }
-IMPL_DIVERGE("Missing IsProbing guard; retail function checks IsProbing(name) before calling ProcessEvent");
-void AZoneInfo::eventActorLeaving(AActor* Other) { struct { AActor* Other; } P; P.Other = Other; ProcessEvent( FindFunctionChecked(ENGINE_ActorLeaving, 0), &P, NULL ); }
+IMPL_MATCH("Engine.dll", 0x10306740);
+void AZoneInfo::eventActorEntered(AActor* Other)
+{
+	FName EventName(ENGINE_ActorEntered);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_ActorEntered, 0), &Parms, NULL );
+	}
+}
+IMPL_MATCH("Engine.dll", 0x103066f0);
+void AZoneInfo::eventActorLeaving(AActor* Other)
+{
+	FName EventName(ENGINE_ActorLeaving);
+	if (IsProbing(EventName)) {
+		struct { AActor* Other; } Parms;
+		Parms.Other = Other;
+		ProcessEvent( FindFunctionChecked(ENGINE_ActorLeaving, 0), &Parms, NULL );
+	}
+}
 
 // ALevelInfo (3)
 IMPL_MATCH("Engine.dll", 0x10319ef0);

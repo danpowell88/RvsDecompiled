@@ -308,15 +308,17 @@ void AMover::PostLoad()
 	*(INT*)((BYTE*)this + 0x6C0) = 0x315;
 }
 
+// Static snapshot of mover's SimInterpolate position, set by PreNetReceive and read by
+// PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
+static FVector s_AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
+
 IMPL_DIVERGE("Ghidra 0x1037DA40: FUN_1050557c unresolved; BYTE fields +0x397/+0x398 and vtable +0x11c call not reproduced")
 void AMover::PostNetReceive()
 {
 	guard(AMover::PostNetReceive);
 	// DAT_10666730/34/38 is the static snapshot stored by PreNetReceive.
-	// Declared as file-static below PreNetReceive.
-	extern FVector AMoverNetRecvSnapshot;
 	AActor::PostNetReceive();
-	if (AMoverNetRecvSnapshot != *(FVector*)((BYTE*)this + 0x6D0))
+	if (s_AMoverNetRecvSnapshot != *(FVector*)((BYTE*)this + 0x6D0))
 	{
 		*(INT*)((BYTE*)this + 0x67C) = *(INT*)((BYTE*)this + 0x6C4);
 		*(float*)((BYTE*)this + 0x3D0) = *(float*)((BYTE*)this + 0x6D0) * 0.01f;
@@ -369,17 +371,14 @@ void AMover::PostRaytrace()
 	unguard;
 }
 
-// Static snapshot of mover's SimInterpolate position, set by PreNetReceive and read by
-// PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
-FVector AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
-
+// Static snapshot of mover's SimInterpolate position is defined before PostNetReceive above.
 IMPL_MATCH("Engine.dll", 0x10378100)
 void AMover::PreNetReceive()
 {
 	guard(AMover::PreNetReceive);
 	// Ghidra 0x78100: snapshot this+0x6D0..0x6D8 (SimInterpolate FVector) to global
 	// DAT_10666730/34/38 before the net receive updates the field.
-	AMoverNetRecvSnapshot = *(FVector*)((BYTE*)this + 0x6D0);
+	s_AMoverNetRecvSnapshot = *(FVector*)((BYTE*)this + 0x6D0);
 	AActor::PreNetReceive();
 	unguard;
 }

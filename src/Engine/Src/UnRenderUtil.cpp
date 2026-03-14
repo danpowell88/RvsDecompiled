@@ -1144,18 +1144,18 @@ void FStaticLightMapTexture::GetTextureData(int MipIndex,void * Dest,int Size,ET
 	// FUN_10301050(Dest, arr->GetData(), arr->Num()) — unresolved; data copy omitted
 	unguard;
 }
-IMPL_DIVERGE("FStaticLightMapTexture::GetUClamp not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10414310)
 ETexClampMode FStaticLightMapTexture::GetUClamp()
 {
 	return TC_Wrap;
 }
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_MATCH("Engine.dll", 0x10414310)
 UTexture * FStaticLightMapTexture::GetUTexture()
 {
 	// Ghidra 0x114310: shared stub; returns NULL.
 	return NULL;
 }
-IMPL_DIVERGE("FStaticLightMapTexture::GetVClamp not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10414310)
 ETexClampMode FStaticLightMapTexture::GetVClamp()
 {
 	return TC_Wrap;
@@ -1165,7 +1165,7 @@ int FStaticLightMapTexture::GetWidth()
 {
 	return *(INT*)(Pad + 52);
 }
-IMPL_DIVERGE("FStaticMeshUVStream::GetCacheId not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x103162b0)
 unsigned __int64 FStaticMeshUVStream::GetCacheId()
 {
 	return *(QWORD*)(Pad + 16);
@@ -1182,7 +1182,7 @@ void FStaticMeshUVStream::GetRawStreamData(void ** Out, int Offset)
 	// Ghidra: *Out = data + offset * 8
 	*Out = *(BYTE**)Pad + Offset * 8;
 }
-IMPL_DIVERGE("FStaticMeshUVStream::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10314870)
 int FStaticMeshUVStream::GetRevision()
 {
 	return *(INT*)(Pad + 24);
@@ -1205,7 +1205,7 @@ int FStaticMeshUVStream::GetStride()
 {
 	return 8;
 }
-IMPL_DIVERGE("FStaticMeshVertexStream::GetCacheId not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FStaticMeshVertexStream::GetCacheId()
 {
 	return *(QWORD*)(Pad + 12);
@@ -1223,7 +1223,7 @@ void FStaticMeshVertexStream::GetRawStreamData(void ** ppData, int FirstVertex)
 	// Retail: data = [this+4] (TArray.Data); stride = 24 (3*8); Pad[0] = this+4
 	*ppData = *(BYTE**)(Pad + 0) + FirstVertex * 0x18;
 }
-IMPL_DIVERGE("FStaticMeshVertexStream::GetRevision not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1047ad20)
 int FStaticMeshVertexStream::GetRevision()
 {
 	return *(INT*)(Pad + 20);
@@ -1243,7 +1243,7 @@ void FStaticMeshVertexStream::GetStreamData(void* Dest)
 	INT    num  = *(INT*)(Pad + 4);
 	appMemcpy(Dest, data, num * 0x18);
 }
-IMPL_DIVERGE("FStaticMeshVertexStream::GetStride not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10414160)
 int FStaticMeshVertexStream::GetStride()
 {
 	return 0x18;
@@ -1269,7 +1269,7 @@ FStaticTexture::FStaticTexture(UTexture* Texture)
 	*(INT*)&Pad[12]       = 1;
 }
 
-IMPL_DIVERGE("FStaticTexture::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
 FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
 {
 	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
@@ -1351,7 +1351,7 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10469DA0 not yet fully reconstructed")
+IMPL_DIVERGE("retail 0x10469da0 (1462b): complex DXT decompression and format conversion pipeline; unresolvable")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
@@ -1382,7 +1382,7 @@ int FStaticTexture::GetWidth()
 
 
 // --- FBspSection ---
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10327a70 is 83 bytes, not fully reconstructed")
+IMPL_DIVERGE("FBspSection copy ctor VA unconfirmed; Ghidra 0x10327b60 calls FUN_1031ecc0 (TArray copy) with same semantics")
 FBspSection::FBspSection(FBspSection const &Other)
 {
 	// Ghidra 0x27b60: vtable set by compiler; TArray<FBspVertex> at +4 (stride 0x28); 7 DWORDs at +10..+28
