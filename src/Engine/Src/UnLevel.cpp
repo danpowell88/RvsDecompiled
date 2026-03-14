@@ -1207,23 +1207,63 @@ INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Exten
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail SingleLineCheck at Ghidra 0x103bb3e0")
+IMPL_MATCH("Engine.dll", 0x103bb3e0)
 INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVector& End, const FVector& Start, DWORD TraceFlags, FVector Extent )
 {
 	guard(ULevel::SingleLineCheck);
 	FMemMark Mark(GMem);
 	ALevelInfo* traceLevel = (TraceFlags & TRACE_Level) ? GetLevelInfo() : NULL;
-	FCheckResult* res = MultiLineCheck(GMem, End, Start, Extent, traceLevel, TraceFlags | TRACE_SingleResult, SourceActor);
-	if ( !res )
+	DWORD* res = (DWORD*)MultiLineCheck(GMem, End, Start, Extent, traceLevel, TraceFlags | TRACE_SingleResult, SourceActor);
+	do
 	{
-		Hit.Time  = 1.0f;
-		Hit.Actor = NULL;
-		Mark.Pop();
-		return 1;
-	}
-	appMemcpy(&Hit, res, sizeof(FCheckResult));
-	Mark.Pop();
-	return 0;
+		if ( !res )
+		{
+			// No hit: set Time=1.0, Actor=NULL
+			((DWORD*)&Hit)[9] = 0x3f800000;
+			((DWORD*)&Hit)[1] = 0;
+			Mark.Pop();
+			return 1;
+		}
+
+		// Skip if result actor is SourceActor or any of SourceActor's owners
+		if ( SourceActor )
+		{
+			for ( AActor* a = SourceActor; a; a = *(AActor**)((BYTE*)a + 0x140) )
+				if ( (AActor*)res[1] == a )
+					goto next_result;
+		}
+
+		// Accept unless: BSP hit on LevelInfo with TRACE_ShadowCast(0x100) and actor is underground
+		{
+			ALevelInfo* li = GetLevelInfo();
+			if ( (INT)res[10] == -1 || (ALevelInfo*)res[1] != li || !(TraceFlags & TRACE_ShadowCast) ||
+				( *(signed char*)( *(BYTE**)( *(BYTE**)((BYTE*)this + 0x90) + 0x9c )
+					+ *(INT*)( *(BYTE**)( *(BYTE**)((BYTE*)this + 0x90) + 0x5c ) + (INT)res[10] * 0x90 + 0x34 )
+					* 0x5c + 4 ) >= 0 ) )
+			{
+				// Inner shadow-cast filter: skip non-shadow-casters when tracing shadows
+				if ( !(TraceFlags & TRACE_VisibleNonColliding) )
+				{
+					ALevelInfo* li2 = GetLevelInfo();
+					if ( (AActor*)res[1] != (AActor*)li2
+						 && (*(DWORD*)((BYTE*)res[1] + 0xa4) & 0x40000000) == 0
+						 && (TraceFlags & TRACE_ShadowCast) )
+						goto next_result;
+				}
+				// Copy result to Hit
+				DWORD* src = res;
+				DWORD* dst = (DWORD*)&Hit;
+				for ( INT i = 0xc; i != 0; i-- )
+					*dst++ = *src++;
+				Mark.Pop();
+				return 0;
+			}
+		}
+
+	next_result:
+		res = (DWORD*)*res;
+	} while ( true );
+
 	unguard;
 }
 
@@ -1747,13 +1787,20 @@ void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execResetLevelInNative );
 
 // SetBankSound() - registers a sound bank with the audio subsystem.
-IMPL_DIVERGE("stub; retail registers DARE audio bank at Ghidra 0x103b79d0")
+IMPL_MATCH("Engine.dll", 0x103b79d0)
 void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 {
+	// Ghidra: reads one BYTE from bytecode, then calls XLevel->Engine->Client+0x48 vtable[57]
 	guard(ALevelInfo::execSetBankSound);
-	P_GET_STR(BankName);
+	P_GET_BYTE(BankSound);
 	P_FINISH;
-	// Audio bank loading delegated to DARE audio subsystem.
+	// Chain: XLevel(+0x328) -> Engine(ULevel+0x44) -> Client(UEngine+0x44) -> Audio(Client+0x48)
+	void* audio = *(void**)(*(BYTE**)(*(BYTE**)((BYTE*)XLevel + 0x44) + 0x44) + 0x48);
+	if ( audio )
+	{
+		typedef void (__thiscall* Fn)(void*, BYTE);
+		((Fn)(*(DWORD*)(*(DWORD*)audio + 0xe4)))(audio, BankSound);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
