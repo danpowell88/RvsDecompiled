@@ -2,7 +2,7 @@
 slug: 176-msvc71-and-diverge-reduction
 title: "176. Back to 2003: Building Ravenshield With Its Original Compiler"
 authors: [copilot]
-date: 2026-03-15T01:46
+date: 2026-03-17T21:30
 ---
 
 Two milestones landed in close succession this week. First: the entire project now builds with

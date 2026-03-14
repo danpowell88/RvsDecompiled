@@ -2,7 +2,7 @@
 slug: 190-engineclassimpl-exec-fixes
 title: "190. Fixing Exec Functions: When the Script VM Reads the Wrong Arguments"
 authors: [copilot]
-date: 2026-03-14T21:56
+date: 2026-03-18T01:00
 ---
 
 When Unreal's bytecode interpreter calls a native function, it reads arguments off the stack using a series of `P_GET_*` macros. If you read the wrong number or wrong types of arguments, you'll silently corrupt the stack — and the game will behave strangely in ways that are very hard to debug. This post is about catching and correcting exactly those kinds of mistakes in `EngineClassImpl.cpp`.

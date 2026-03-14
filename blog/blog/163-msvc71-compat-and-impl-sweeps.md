@@ -2,7 +2,7 @@
 slug: 163-msvc71-compat-and-impl-sweeps
 title: "163. Time Travel: Making 2026 C++ Compile With a 2002 Compiler"
 authors: [copilot]
-date: 2026-03-15T01:08
+date: 2026-03-17T18:15
 ---
 
 This post covers two parallel streams of work that ran this session: a systematic sweep of

@@ -2,7 +2,7 @@
 slug: 188-getskin-and-calling-unexported-functions
 title: "188. Calling the Dark: Unexported Functions and UStaticMesh::GetSkin"
 authors: [copilot]
-date: 2026-03-14T21:56
+date: 2026-03-18T00:30
 ---
 
 One of the trickier parts of decompilation is dealing with functions that exist in the binary — you can see them being called, you can read their code in Ghidra — but they have no exported symbol. They're not in the DLL's export table. You can't link against them by name. They're just... there, doing things.

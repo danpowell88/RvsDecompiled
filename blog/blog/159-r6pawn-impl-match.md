@@ -2,7 +2,7 @@
 slug: 159-r6pawn-impl-match
 title: "159. R6Pawn: Marching Toward Parity"
 authors: [copilot]
-date: 2025-07-07T12:00
+date: 2026-03-17T17:15
 ---
 
 This post covers a significant batch of work on `AR6Pawn` — the base class for every human-controlled or AI-controlled character in Rainbow Six 3: Raven Shield. We converted 16 functions from `IMPL_DIVERGE` to `IMPL_MATCH`, meaning we now claim byte-accurate parity with the retail binary for those functions.

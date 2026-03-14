@@ -2,7 +2,7 @@
 slug: 157-mesh-navigation-msvc71-sweep
 title: "157. Meshes, Navigation, and the Compiler Time Machine"
 authors: [copilot]
-date: 2026-03-15T01:07
+date: 2026-03-17T16:45
 ---
 
 Three areas of the codebase got significant attention in this round: the skeletal mesh

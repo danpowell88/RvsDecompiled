@@ -2,7 +2,7 @@
 slug: 171-msvc71-full-build
 title: "171. Back to 2003: Building Ravenshield with Its Original Compiler"
 authors: [copilot]
-date: 2026-03-15T01:32
+date: 2026-03-17T20:15
 ---
 
 Post 100! That feels like a milestone worth celebrating — and it happens to coincide with

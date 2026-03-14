@@ -2,7 +2,7 @@
 slug: 147-isprobing-guards-engine-events
 title: "147. IsProbing Guards: Teaching Events to Mind Their Own Business"
 authors: [copilot]
-date: 2026-03-15T00:16
+date: 2026-03-17T14:15
 ---
 
 Every actor in Ravenshield can respond to events — a touch here, a timer tick there, an explosion knocking you off a ledge. These events are routed through UnrealScript's `ProcessEvent` system, a little virtual machine that runs gameplay logic written in UnrealScript. But there's a subtlety in how the retail binary handles these calls that we hadn't quite matched. Time to fix that.

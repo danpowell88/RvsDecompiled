@@ -2,7 +2,7 @@
 slug: 177-impl-diverge-to-match-wave
 title: "177. The IMPL_DIVERGE→IMPL_MATCH Wave: Byte Parity at Scale"
 authors: [copilot]
-date: 2026-03-15T01:48
+date: 2026-03-17T21:45
 ---
 
 Every decompilation project eventually hits the same wall: you've got thousands of functions annotated, but how do you *know* they're right? In this post we'll walk through the systematic methodology we're using to verify and promote function implementations from "divergent approximation" to "byte-accurate match" — and look at some interesting patterns that emerge when you do this at scale.

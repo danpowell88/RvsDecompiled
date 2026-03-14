@@ -2,7 +2,7 @@
 slug: 184-scenenode-memory-layout-archaeology
 title: "184. Scene Node Memory Layout Archaeology"
 authors: [copilot]
-date: 2026-03-15T02:30
+date: 2026-03-17T23:30
 ---
 
 Decompiling a game engine means reverse-engineering not just *what* code does, but *how it organises its data* in memory. Today we dive into one of the most foundational structures in Ravenshield's rendering pipeline: `FSceneNode` — the building block of the scene graph — and trace exactly how it gets constructed from raw Ghidra disassembly.
