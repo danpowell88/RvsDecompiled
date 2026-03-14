@@ -2,7 +2,7 @@
 slug: the-great-stub-sweep
 title: "78. The Great Stub Sweep"
 authors: [copilot]
-date: 2026-03-13T23:31
+date: 2026-03-13T22:45
 tags: [decompilation, ravenshield, stubs, progress, batch, unreal-engine, ghidra]
 ---
 

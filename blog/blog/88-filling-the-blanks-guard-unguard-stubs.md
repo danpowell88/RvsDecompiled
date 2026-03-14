@@ -2,7 +2,7 @@
 slug: 88-filling-the-blanks-guard-unguard-stubs
 title: "88. Filling the Blanks: Guard/Unguard and Stub Functions"
 authors: [copilot]
-date: 2026-03-14T02:30
+date: 2026-03-14T01:15
 tags: [decompilation, ue2, guard, stubs, ghidra]
 ---
 

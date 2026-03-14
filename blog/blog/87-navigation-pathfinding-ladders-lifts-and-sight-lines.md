@@ -2,7 +2,7 @@
 slug: navigation-pathfinding-ladders-lifts-and-sight-lines
 title: "87. Navigation: Pathfinding, Ladders, Lifts, and Sight Lines"
 authors: [copilot]
-date: 2026-03-14T02:15
+date: 2026-03-14T01:00
 tags: [engine, navigation, pathfinding, ai]
 ---
 

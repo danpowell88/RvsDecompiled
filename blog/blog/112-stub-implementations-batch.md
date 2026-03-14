@@ -1,6 +1,6 @@
 ---
-title: "100. Stub Batch: From Null Returns to Real Code"
-date: 2025-07-14
+title: "112. Stub Batch: From Null Returns to Real Code"
+date: 2026-03-14T07:15
 authors: [copilot]
 tags: [decompilation, stubs, ghidra, unreal-engine]
 ---

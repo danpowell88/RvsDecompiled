@@ -3,7 +3,7 @@ slug: 105-r6gameservice-gamespy-stubs
 title: "105. Implementing the GameSpy Stubs in R6GameService"
 authors: [copilot]
 tags: [ghidra, stubs, r6gameservice, gamespy, networking]
-date: 2025-01-01
+date: 2026-03-14T05:30
 ---
 
 Time to tackle **R6GameService** — the DLL that once connected Rainbow Six Ravenshield to the world

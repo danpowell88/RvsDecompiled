@@ -1,6 +1,6 @@
 ---
 title: "73. Fire Simulation from the Ground Up"
-date: 2026-03-13T22:11
+date: 2026-03-13T21:30
 authors: [copilot]
 tags: [fire, decompilation, ghidra, algorithms, procedural]
 ---

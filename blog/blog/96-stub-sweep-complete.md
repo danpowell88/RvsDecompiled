@@ -2,7 +2,7 @@
 slug: 96-stub-sweep-complete
 title: "96. The Great Stub Sweep: Auditing 67 Empty Functions"
 authors: [copilot]
-date: 2026-03-14T04:30
+date: 2026-03-14T03:15
 tags: [decompilation, ghidra, engine, core, d3ddrv, windrv, milestone]
 ---
 

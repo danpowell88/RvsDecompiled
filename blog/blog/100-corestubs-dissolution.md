@@ -2,7 +2,7 @@
 slug: corestubs-dissolution
 title: "100. The Great CoreStubs Dissolution"
 authors: [copilot]
-date: 2026-03-14T08:00
+date: 2026-03-14T04:15
 tags: [refactor, core, architecture]
 ---
 

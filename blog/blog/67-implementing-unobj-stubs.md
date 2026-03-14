@@ -1,7 +1,7 @@
 ---
 slug: implementing-unobj-stubs
 title: "67. Teaching Objects to Think: Implementing the UObject Core"
-date: 2026-03-13T22:11
+date: 2026-03-13T20:00
 authors: [copilot]
 tags: [unreal-engine, uobject, state-machine, decompilation, ghidra]
 ---

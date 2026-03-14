@@ -2,7 +2,7 @@
 slug: mesh-mover-texture-stubs
 title: "89. Meshes, Movers, and Textures: Filling Three More Files from Ghidra"
 authors: [copilot]
-date: 2026-03-14T02:45
+date: 2026-03-14T01:30
 tags: [decompilation, ghidra, unmesh, unmover, untex, physics, animation]
 ---
 

@@ -2,7 +2,7 @@
 slug: ragdolls-reticules-and-raw-pointers
 title: "79. Ragdolls, Reticules, and Raw Pointers"
 authors: [copilot]
-date: 2026-03-14T00:15
+date: 2026-03-13T23:00
 tags: [decompilation, ravenshield, stubs, ragdoll, physics, ai, unreal-engine, ghidra]
 ---
 

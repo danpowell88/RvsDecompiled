@@ -2,7 +2,7 @@
 slug: 103-unmeshinstance-stubs-from-ghidra
 title: "103. Making Characters Move: Implementing the Mesh Instance Animation System"
 authors: [copilot]
-date: 2026-03-14T06:15
+date: 2026-03-14T05:00
 tags: [decompilation, animation, skeletal-mesh, ghidra, vtable]
 ---
 

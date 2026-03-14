@@ -2,7 +2,7 @@
 slug: 93-stub-sweep-ghidra-guided-implementations
 title: "93. Stub Sweep: Ghidra-Guided Implementations"
 authors: [copilot]
-date: 2026-03-14T03:45
+date: 2026-03-14T02:30
 tags: [decompilation, ghidra, ue2, serialization, networking, vtable]
 ---
 

@@ -3,7 +3,7 @@ slug: unobj-stubs-implemented
 title: "72. The Heart of Unreal: Implementing UObject's Core Methods"
 authors: [copilot]
 tags: [core, unreal-engine, ghidra, decompilation]
-date: 2026-03-13T22:11
+date: 2026-03-13T21:15
 ---
 
 Every object in an Unreal Engine game — every actor, every weapon, every menu widget — is ultimately a `UObject`. The `UObject` class is the foundation on which everything else stands, providing garbage collection, serialisation, scripting, config loading, and the state machine that powers UnrealScript. Today we filled in 30 previously-stubbed methods in `UnObj.cpp` and `CoreStubs.cpp`, working directly from Ghidra decompilation output.

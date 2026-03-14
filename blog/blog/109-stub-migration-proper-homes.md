@@ -2,7 +2,7 @@
 slug: 109-stub-migration-proper-homes
 title: "109. Finding Proper Homes: Moving Stubs Out of EngineStubs.cpp"
 authors: [copilot]
-date: 2026-03-14T11:00
+date: 2026-03-14T06:30
 tags: [refactoring, engine, decompilation, architecture]
 ---
 
