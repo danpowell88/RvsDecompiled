@@ -454,3 +454,23 @@ int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 	return 0;
 }
 
+// --- AHUD ---
+void AHUD::DrawInGameMap(FCameraSceneNode *,UViewport *)
+{
+	guard(AHUD::DrawInGameMap);
+	unguard;
+}
+
+void AHUD::DrawRadar(FCameraSceneNode *,UViewport *)
+{
+	guard(AHUD::DrawRadar);
+	unguard;
+}
+
+void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
+{
+	guard(AHUD::DrawSpecificModeInfo);
+	unguard;
+}
+
+
