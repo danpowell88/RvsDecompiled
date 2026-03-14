@@ -225,19 +225,19 @@ IMPL_MATCH("Engine.dll", 0x1a90)
 FRotatorF::FRotatorF() {}
 IMPL_MATCH("Engine.dll", 0x1ae0)
 FRotator FRotatorF::Rotator() { return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x165d0)
 FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1b10)
 FRotatorF FRotatorF::operator*(float p0) const { return FRotatorF(Pitch*p0, Yaw*p0, Roll*p0); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1ba0)
 FRotatorF FRotatorF::operator*=(float p0) { Pitch*=p0; Yaw*=p0; Roll*=p0; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1b40)
 FRotatorF FRotatorF::operator+(FRotatorF p0) const { return FRotatorF(Pitch+p0.Pitch, Yaw+p0.Yaw, Roll+p0.Roll); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1be0)
 FRotatorF FRotatorF::operator+=(FRotatorF p0) { Pitch+=p0.Pitch; Yaw+=p0.Yaw; Roll+=p0.Roll; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1b70)
 FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(Pitch-p0.Pitch, Yaw-p0.Yaw, Roll-p0.Roll); }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1c20)
 FRotatorF FRotatorF::operator-=(FRotatorF p0) { Pitch-=p0.Pitch; Yaw-=p0.Yaw; Roll-=p0.Roll; return *this; }
 IMPL_MATCH("Engine.dll", 0x1c60)
 FVector FRotatorF::Vector()
@@ -590,7 +590,7 @@ int FURL::IsLocalInternal() const {
 	return IsInternal() && Host.Len()==0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x171770)
 int FURL::operator==(FURL const & Other) const {
 	if( Protocol!=Other.Protocol ) return 0;
 	if( Host!=Other.Host ) return 0;
