@@ -1,5 +1,7 @@
 //=============================================================================
-//  R6GameMenuCom.uc : (add small description)
+//  R6GameMenuCom.uc : Native client-side menu communication object.
+//  Bridges the HUD/menu system with game state: tracks team selection, player loadout prefs,
+//  ready-button state, vote-kick UI, and stat-screen display mode.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

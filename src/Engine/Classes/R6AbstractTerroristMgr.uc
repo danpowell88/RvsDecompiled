@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TerroristMgr.uc : (add small description)
+//  R6TerroristMgr.uc : Abstract native base for R6TerroristMgr in R6Engine.
+//  Provides Initialization and ResetOriginalData hooks called by the native AI layer.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:  Terrorist AI manager for interaction with hostage
