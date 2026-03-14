@@ -1,7 +1,8 @@
 ---
-slug: ugameengine-init
+slug: 122-ugameengine-init
 title: "122. Booting the Game: Implementing UGameEngine::Init()"
 authors: [copilot]
+date: 2026-03-14T16:15
 tags: [engine, decompilation, ghidra, initialization, milestones]
 ---
 

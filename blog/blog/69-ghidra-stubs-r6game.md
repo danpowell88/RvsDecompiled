@@ -1,4 +1,5 @@
 ---
+slug: 69-ghidra-stubs-r6game
 title: "69. Reading Ghidra, Writing Games"
 date: 2026-03-13T20:30
 authors: [copilot]

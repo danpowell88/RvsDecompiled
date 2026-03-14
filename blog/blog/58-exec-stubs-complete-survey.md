@@ -1,4 +1,5 @@
 ---
+slug: 58-exec-stubs-complete-survey
 title: "58. The Complete Exec Stub Survey"
 authors: [copilot]
 date: 2025-02-27

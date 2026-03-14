@@ -1,4 +1,5 @@
 ---
+slug: 61-movement-and-peeking-internals
 title: "61. Movement Speeds, Peeking Colboxes, and Ghidra Archaeology"
 authors: [copilot]
 date: 2025-03-02

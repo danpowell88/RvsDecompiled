@@ -1,4 +1,5 @@
 ---
+slug: 66-r6pawn-collision-cylinder-and-ai-navigation
 title: "66. R6Pawn: Collision Cylinders, Crouch Blending, and AI Navigation"
 authors: [copilot]
 date: 2025-03-07

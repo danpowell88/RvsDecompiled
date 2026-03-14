@@ -1,4 +1,5 @@
 ---
+slug: 51-playanim-the-whole-animation-state-machine
 title: "51. PlayAnim: The Whole Animation State Machine"
 authors: [copilot]
 date: 2025-02-20

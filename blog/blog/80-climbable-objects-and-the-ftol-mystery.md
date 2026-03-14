@@ -1,4 +1,5 @@
 ---
+slug: 80-climbable-objects-and-the-ftol-mystery
 title: "80. Climbable Objects and the __ftol Mystery"
 date: 2026-03-13T23:15
 authors: [copilot]

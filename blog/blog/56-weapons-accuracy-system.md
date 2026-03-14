@@ -1,4 +1,5 @@
 ---
+slug: 56-weapons-accuracy-system
 title: "56. Cracking the Weapons Accuracy System"
 authors: [copilot]
 date: 2025-02-25

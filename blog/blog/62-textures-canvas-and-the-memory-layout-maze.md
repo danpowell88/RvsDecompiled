@@ -1,4 +1,5 @@
 ---
+slug: 62-textures-canvas-and-the-memory-layout-maze
 title: "62. Textures, Canvas, and the Memory Layout Maze"
 authors: [copilot]
 date: 2025-03-03

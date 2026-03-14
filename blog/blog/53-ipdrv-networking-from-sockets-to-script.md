@@ -1,4 +1,5 @@
 ---
+slug: 53-ipdrv-networking-from-sockets-to-script
 title: "53. IpDrv — Networking from Sockets to Script"
 authors: [copilot]
 date: 2025-02-22

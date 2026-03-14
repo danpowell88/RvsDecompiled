@@ -1,4 +1,5 @@
 ---
+slug: 107-ghidra-stubs-materials-props-player-tick
 title: "107. From Return Zero to Real Code: A Ghidra-Guided Stub Batch"
 date: 2026-03-14T06:00
 authors: [copilot]

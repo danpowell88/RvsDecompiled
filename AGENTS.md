@@ -25,13 +25,26 @@ Docusaurus sorts posts by the `date` field. Posts with a missing, duplicate, or 
 
 3. **Never copy frontmatter from an earlier post without updating the date.** This is the most common source of duplicates.
 
-4. **The year must be correct.** Accidentally writing `2025` instead of `2026` sends a post to the very beginning of the chronological listing.
+4. **The year must be correct.** Accidentally writing `2025` instead of `2026` sends a post to the very beginning of the chronological listing. *(Note: posts 01–66 intentionally carry 2025 dates — they were written in 2025. All new posts use 2026.)*
 
-5. **Every post MUST have a `slug:` field.** Without it, Docusaurus derives one from the filename, which can collide with auto-generated slugs or cause unexpected URLs.
+5. **Every post MUST have a `slug:` field.** Without it, Docusaurus derives one from the filename, which can collide with auto-generated slugs or cause unexpected URLs. The slug MUST be the first field after the opening `---`, and MUST follow the pattern `NNN-kebab-title` matching the filename prefix. A missing slug has caused posts to silently disappear before.
 
 6. **After writing a new post, verify the next date slot is free** by checking what `date:` the previous post uses, then incrementing by 15 minutes.
 
 7. **Before committing any blog post, run `npm run build` inside the `/blog` directory.** A successful build confirms the frontmatter parses cleanly and no JSX errors exist.
+
+8. **Before committing, run this quick audit** to catch any missing fields:
+   ```powershell
+   # Run from repo root — lists any blog post missing date, slug, or truncate marker
+   Get-ChildItem blog\blog\*.md | ForEach-Object {
+       $content = Get-Content $_ -Raw
+       $missing = @()
+       if ($content -notmatch 'date:') { $missing += 'date' }
+       if ($content -notmatch 'slug:') { $missing += 'slug' }
+       if ($content -notmatch '<!-- truncate -->') { $missing += 'truncate' }
+       if ($missing) { Write-Host "$($_.Name): missing $($missing -join ', ')" }
+   }
+   ```
 
 ### Required frontmatter template
 
@@ -45,7 +58,7 @@ tags: [tag1, tag2]
 ---
 ```
 
-All six fields (`slug`, `title`, `authors`, `date`, `tags`, and the `<!-- truncate -->` marker somewhere in the body) are mandatory.
+All six fields (`slug`, `title`, `authors`, `date`, `tags`, and the `<!-- truncate -->` marker somewhere in the body) are mandatory. Place `slug:` **first** in the block so it is never accidentally omitted.
 
 ## Ground Truth Priority
 
@@ -60,7 +73,8 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 3. **When adding a new declaration or shim** (e.g. adding a missing function to `EnginePrivate.h` or `CorePrivate.h`), derive the signature from Ghidra's decompilation output in `ghidra/exports/`, not from the SDK. Document the Ghidra address in a comment.
 
 4. **When a SDK declaration disagrees with Ghidra**, the Ghidra-derived version wins. Note the discrepancy with a comment: `// DIVERGENCE from SDK: Ghidra shows N params, SDK shows M`.
-
+
+
 5. **Retail parity attribution** — every function definition must be preceded by one of these macros (see `src/Core/Inc/ImplSource.h`):
    - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact byte parity with retail; build fails if compiled size diverges
    - `IMPL_APPROX("reason")` — intentional or unverified deviation; parity check skipped; **reason is mandatory**

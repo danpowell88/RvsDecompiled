@@ -1,4 +1,5 @@
 ---
+slug: 112-stub-implementations-batch
 title: "112. Stub Batch: From Null Returns to Real Code"
 date: 2026-03-14T07:15
 authors: [copilot]

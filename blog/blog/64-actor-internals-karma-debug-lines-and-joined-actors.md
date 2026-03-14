@@ -1,4 +1,5 @@
 ---
+slug: 64-actor-internals-karma-debug-lines-and-joined-actors
 title: "64. Actor Internals: Karma, Debug Lines, and Joined Actors"
 authors: [copilot]
 date: 2025-03-05

@@ -1,4 +1,5 @@
 ---
+slug: 54-fire-procedural-textures-from-the-90s
 title: "54. Fire — Procedural Textures from the '90s"
 authors: [copilot]
 date: 2025-02-23

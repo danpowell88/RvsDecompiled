@@ -1,4 +1,5 @@
 ---
+slug: 70-unpawn-stubs-from-ghidra
 title: "70. Reading Ghidra's Mind: Implementing Pawn Movement Stubs"
 date: 2026-03-13T20:45
 authors: [copilot]

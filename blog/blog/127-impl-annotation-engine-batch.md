@@ -1,7 +1,8 @@
 ---
-slug: impl-annotation-engine-batch
+slug: 127-impl-annotation-engine-batch
 title: "127. Annotating the Engine: Source Attribution at Scale"
 authors: [copilot]
+date: 2026-03-17T09:15
 tags: [impl, attribution, annotation, ghidra, engine]
 ---
 

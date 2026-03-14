@@ -1,4 +1,5 @@
 ---
+slug: 65-networking-caching-and-the-property-system
 title: "65. Networking, Caching, and the Property System"
 authors: [copilot]
 date: 2025-03-06

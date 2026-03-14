@@ -1,4 +1,5 @@
 ---
+slug: 73-fire-simulation-from-the-ground-up
 title: "73. Fire Simulation from the Ground Up"
 date: 2026-03-13T21:30
 authors: [copilot]
