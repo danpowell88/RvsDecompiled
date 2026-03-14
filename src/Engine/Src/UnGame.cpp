@@ -25,7 +25,7 @@ extern ENGINE_API UEngine* g_pEngine;
 // GConfig server-ini section call uses GetSection; original vtable slot unclear.
 // GLevel vtable[0xb4] and vtable[0xdc] preserved via raw dispatch; identities unknown.
 // Audio vtable[0x78] setup signature approximated as (void*, FString&) -> INT.
-IMPL_APPROX("Multiple Ghidra-identified gaps; identity not established for omitted calls")
+IMPL_INFERRED("Multiple Ghidra-identified gaps; identity not established for omitted calls")
 void UGameEngine::Init()
 {
     guard(UGameEngine::Init);
@@ -82,7 +82,7 @@ void UGameEngine::Init()
         Cast<URenderDevice>(RenDevObj)->Init();
 
         // FUN_103563f0: post-init render resource setup (GIsClient guard confirmed).
-        // Identity unknown — omitted. See IMPL_APPROX annotation above.
+        // Identity unknown — omitted. See IMPL_INFERRED annotation above.
     }
 
     // Error string used throughout Browse / LoadMap.
@@ -262,7 +262,7 @@ int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10316cb0)
+IMPL_GHIDRA("Engine.dll", 0x10316cb0)
 void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 {
 	guard(UGameEngine::LoadRandomMenuBackgroundImage);
@@ -296,7 +296,7 @@ void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewp
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10385b30)
+IMPL_GHIDRA("Engine.dll", 0x10385b30)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -325,7 +325,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -362,7 +362,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -397,7 +397,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -460,8 +460,10 @@ void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 // --- UEngine ---
 // Ghidra 0x10393060 (UEngine::StaticConstructor):
 // Register two config properties and create the ArmPatches cache directory.
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UEngine::StaticConstructor()
+{
+	guard(UEngine::StaticConstructor)
 	new(GetClass(), TEXT("CacheSizeMegs"), RF_Public)
 		UIntProperty(EC_CppProperty, 0x84, TEXT("Settings"), CPF_Config);
 	new(GetClass(), TEXT("UseSound"), RF_Public)
@@ -483,7 +485,7 @@ int UEngine::ReplaceTexture(FString,UTexture *)
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UEngine::Serialize(FArchive &Ar)
 {
 	guard(UEngine::Serialize);
@@ -498,7 +500,7 @@ void UEngine::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UEngine::Key(UViewport*, EInputKey Key)
 {
 	guard(UEngine::Key);
@@ -513,7 +515,7 @@ int UEngine::Key(UViewport*, EInputKey Key)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	// Ghidra 0x103118e0: destructs FString by-value param, returns 1.
@@ -537,7 +539,7 @@ int UEngine::CacheArmPatch(FGuid *,DWORD *)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UEngine::Destroy()
 {
 	guard(UEngine::Destroy);
@@ -565,7 +567,7 @@ int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UEngine::InitAudio()
 {
 	guard(UEngine::InitAudio);
@@ -601,7 +603,7 @@ void UEngine::InitAudio()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action, float Delta)
 {
 	guard(UEngine::InputEvent);
@@ -731,13 +733,13 @@ void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void AGameInfo::AbortScoreSubmission() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void AGameInfo::MasterServerManager() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void AGameInfo::InitGameInfoGameService() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}

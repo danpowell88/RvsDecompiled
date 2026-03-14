@@ -51,30 +51,30 @@ IMPLEMENT_CLASS(AR6eviLTesting);
 	The vtable requires definitions for all declared virtuals.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Delegates to UObject::Serialize — base class serialization")
+IMPL_INFERRED("Delegates to UObject::Serialize — base class serialization")
 void UPrimitive::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
 }
-IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
 INT UPrimitive::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 { return 0; }
-IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
 INT UPrimitive::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD ExtraFlags )
 { return 0; }
-IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
 FBox UPrimitive::GetRenderBoundingBox( const AActor* Owner )
 { return FBox(0); }
-IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate sphere")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — returns degenerate sphere")
 FSphere UPrimitive::GetRenderBoundingSphere( const AActor* Owner )
 { return FSphere(0); }
-IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
 FBox UPrimitive::GetCollisionBoundingBox( const AActor* Owner ) const
 { return FBox(0); }
-IMPL_EMPTY("Base UPrimitive has no geometry — cylinder collision handled by derived classes")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — cylinder collision handled by derived classes")
 INT UPrimitive::UseCylinderCollision( const AActor* Owner )
 { return 0; }
-IMPL_EMPTY("Base UPrimitive has no illumination data")
+IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no illumination data")
 void UPrimitive::Illuminate( AActor* Owner, INT bDynamic )
 {}
 IMPL_GHIDRA("Engine.dll", 0xF78E0)
@@ -159,11 +159,11 @@ static_assert(sizeof(UGameEngine) == 0x4d0, "UGameEngine layout mismatch — adj
 // UGameEngine
 // =============================================================================
 
-IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_INFERRED("Delegates to super; Ghidra shows no additional behaviour beyond base class")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
-IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_INFERRED("Delegates to super; Ghidra shows no additional behaviour beyond base class")
 void UGameEngine::Destroy() { Super::Destroy(); }
-IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_INFERRED("Delegates to super; Ghidra shows no additional behaviour beyond base class")
 void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
@@ -186,7 +186,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
-IMPL_APPROX("Ghidra: 30b; mixes Challenge halfwords with prime multiply and XOR constant")
+IMPL_INFERRED("Ghidra: 30b; mixes Challenge halfwords with prime multiply and XOR constant")
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
