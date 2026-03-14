@@ -67,12 +67,14 @@ void UStaticMesh::Build()
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1031C9F0: FUN_10317670 (UMaterial CDO lookup via USubsystem chain) unresolved; fallback default material cannot be returned")
+IMPL_MATCH("Engine.dll", 0x1031C9F0)
 UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
-	// Ghidra 0x1c9f0 (69b): calls Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
-	// If NULL, falls back to Materials TArray at this+0xfc (stride 0x0c; UMaterial* at +0).
-	// If still NULL: FUN_10317670 fetches the default UMaterial from USubsystem chain.
+	guard(UStaticMesh::GetSkin);
+	// Ghidra 0x1c9f0, 69b.
+	// 1. Try Owner->GetSkin(SkinIndex) via vtable[0xa0/4 = 40].
+	// 2. Fallback: Materials TArray at this+0xfc, stride 0xc, UMaterial* at +0.
+	// 3. Final fallback: FUN_10317670(UMaterial CDO) → result+0x30 = engine default.
 	typedef UMaterial* (__thiscall* GetSkinFn)(AActor*, INT);
 	UMaterial* pSkin = ((GetSkinFn)(*(INT*)(*(INT*)Owner + 0xa0)))(Owner, SkinIndex);
 	if (pSkin == NULL)
@@ -81,8 +83,16 @@ UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 		if (materialsData != NULL)
 			pSkin = *(UMaterial**)(materialsData + SkinIndex * 0x0c);
 	}
-	// DIVERGENCE: FUN_10317670 (default UMaterial CDO path) is unresolved; returns NULL.
+	if (pSkin == NULL)
+	{
+		// Ghidra: GetDefaultObject(&UMaterial::PrivateStaticClass) + FUN_10317670 + read +0x30
+		UObject* defObj = UMaterial::StaticClass()->GetDefaultObject();
+		typedef INT (__thiscall *TFun10317670)(UObject*);
+		INT r = ((TFun10317670)0x10317670)(defObj);
+		pSkin = *(UMaterial**)(r + 0x30);
+	}
 	return pSkin;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104478b0)
 FTags * UStaticMesh::GetTag(FString Name)

@@ -376,7 +376,7 @@ void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("synthesized operator= for non-exported class; FFileStream::operator= absent from Core.dll Ghidra export")
 FFileStream& FFileStream::operator=( const FFileStream& Other )
 {
 	return *this;
@@ -565,7 +565,7 @@ INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 	FArchive << FString operator.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("found at Core.dll 0x101314d0; retail serialises via raw vtable calls; C++ virtual dispatch is functionally equivalent but not byte-identical")
 CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 {
 	if( Ar.IsLoading() )
@@ -613,7 +613,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 	Explicit template instantiations for .def export.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("found at Core.dll 0x1010a900; retail uses direct FArray::Realloc; AddItem loop is functionally equivalent but not byte-identical")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 {
@@ -622,7 +622,7 @@ TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("found at Core.dll 0x1010e520; retail calls operator+ then operator=(this,this); single-call equivalent is functionally identical")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+=( const TArray<TCHAR>& Other )
 {

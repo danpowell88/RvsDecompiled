@@ -2228,9 +2228,26 @@ UCommandlet::UCommandlet( const UCommandlet& Other )
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — FUN_10101000 (memcpy helper) not resolved; Core.dll VA 0x1010c140")
+IMPL_DIVERGE("found at 0x1010c140; retail uses FArray-level Realloc+memcpy; C++ member assignment is functionally equivalent, not byte-identical")
 UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
 {
+	if( this != &Other )
+	{
+		UObject::operator=( Other );
+		HelpCmd      = Other.HelpCmd;
+		HelpOneLiner = Other.HelpOneLiner;
+		HelpUsage    = Other.HelpUsage;
+		HelpWebLink  = Other.HelpWebLink;
+		for( INT i = 0; i < ARRAY_COUNT(HelpParm); i++ ) HelpParm[i] = Other.HelpParm[i];
+		for( INT i = 0; i < ARRAY_COUNT(HelpDesc); i++ ) HelpDesc[i] = Other.HelpDesc[i];
+		LogToStdout    = Other.LogToStdout;
+		IsServer       = Other.IsServer;
+		IsClient       = Other.IsClient;
+		IsEditor       = Other.IsEditor;
+		LazyLoad       = Other.LazyLoad;
+		ShowErrorCount = Other.ShowErrorCount;
+		ShowBanner     = Other.ShowBanner;
+	}
 	return *this;
 }
 

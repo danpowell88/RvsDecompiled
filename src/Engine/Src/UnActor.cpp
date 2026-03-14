@@ -19,7 +19,11 @@
 
 #include "EnginePrivate.h"
 
-// STDbgLine: debug line entry — 28 bytes matching binary layout (Ghidra 0x71250)
+// Globals defined in Engine.cpp
+extern ENGINE_API UR6AbstractGameManager* GR6GameManager;
+extern ENGINE_API UR6ServerInfo*          GServerOptions;
+
+// STDbgLine: debug line entry— 28 bytes matching binary layout (Ghidra 0x71250)
 struct STDbgLine
 {
     FVector Start;  // 0x00
