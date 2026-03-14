@@ -423,6 +423,32 @@ void AR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame& Stack, RESULT_D
 {
 	P_GET_STRUCT(FVector, vPoint);
 	P_FINISH;
+	// GHIDRA REF: 0x18a60
+	// Bubble-sort m_aTerrorist in ascending order of 2D (XY) distance to vPoint.
+	INT n = m_aTerrorist.Num();
+	if (n < 2) return;
+
+	TArray<FLOAT> Dists;
+	Dists.AddZeroed(n);
+	for (INT i = 0; i < n; i++)
+	{
+		AR6Terrorist* T = m_aTerrorist(i);
+		FLOAT dX = T->Location.X - vPoint.X;
+		FLOAT dY = T->Location.Y - vPoint.Y;
+		Dists(i) = dX * dX + dY * dY;
+	}
+	// O(n²) sort matching the Ghidra implementation
+	for (INT i = 0; i < n; i++)
+	{
+		for (INT j = 0; j < n; j++)
+		{
+			if (i != j && Dists(i) < Dists(j))
+			{
+				FLOAT  tmpD = Dists(i);          Dists(i)        = Dists(j);         Dists(j)        = tmpD;
+				AR6Terrorist* tmpT = m_aTerrorist(i); m_aTerrorist(i) = m_aTerrorist(j); m_aTerrorist(j) = tmpT;
+			}
+		}
+	}
 }
 
 INT AR6DeploymentZone::getChanceFromArrayTemplates(struct FSTTemplate *Templates, INT sizeOfArray)

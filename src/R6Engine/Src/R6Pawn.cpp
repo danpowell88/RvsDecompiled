@@ -198,8 +198,8 @@ INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 			FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f));
 		if (Hit.Actor != NULL && Hit.Actor != param_4 && Hit.Actor != param_6)
 		{
-			// TODO: distance/size checks and 4-point probe grid from param_5
-			// Ghidra: dist_sq(param_5, param_1->Location) <= 6.4e7f, then multi-probe
+			// DIVERGENCE: distance/size checks and 4-point probe grid from param_5 unresolved.
+			// Retail checks dist_sq(param_5, param_1->Location) <= 6.4e7f then does multi-probe.
 			return 0;
 		}
 	}
@@ -250,8 +250,8 @@ DWORD AR6Pawn::CheckSeePawn(AR6Pawn* param_1, FVector& param_2, INT param_3)
 	{
 		// this+0x6e8 = sight radius scale; this+0x400 = SightRadius
 		FLOAT fov = *(FLOAT*)((BYTE*)this + 0x6e8) * 0.5f + 0.75f;
-		// TODO: crouch/movement state adjustments to fov
-		// TODO: param_1 DrawScale byte and lighting adjustments
+		// DIVERGENCE: retail adjusts fov based on crouch/movement state, DrawScale byte,
+		// and lighting (see Ghidra); complex unresolved field lookups deferred.
 		FLOAT range = fov * *(FLOAT*)((BYTE*)this + 0x400);
 		if (distSq <= range * range)
 		{
@@ -439,7 +439,8 @@ BYTE AR6Pawn::GetCurrentMaterial()
 
 	// Walk ClassPrivate hierarchy (+0x24 = ClassPrivate, +0x2c = SuperClass chain).
 	// Looking for AR6SoundVolume (in R6Game.dll — cannot reference directly here).
-	// TODO: replace pSVClass with AR6SoundVolume::StaticClass() once accessible.
+	// DIVERGENCE: AR6SoundVolume is in R6Game.dll; referencing its StaticClass() from R6Engine
+	// would create a circular link dependency. pSVClass left NULL — sound volume check skipped.
 	UClass* pSVClass = NULL;
 
 walk_isA:
@@ -1846,7 +1847,8 @@ INT AR6Pawn::actorReachableFromLocation(AActor* param_1, FVector loc)
 
 	if (bIsNavPoint)
 	{
-		// TODO: IsA check for this pawn type (AR6Pawn subclass)
+		// DIVERGENCE: AR6Pawn subclass-specific IsA check (e.g. AR6RainbowMan) unresolved;
+		// treating all R6Pawn instances equally for nav-point reachability purposes.
 		FLOAT maxR = Max(CollisionRadius * 1.5f, JumpZ);
 		FLOAT combinedR = param_1->CollisionRadius + CollisionRadius + maxR;
 		if (distSq < combinedR * combinedR)
@@ -2308,8 +2310,10 @@ void AR6Pawn::execPawnCanBeHurtFrom(FFrame& Stack, RESULT_DECL)
 	if (Hit.Actor != NULL)
 	{
 		// Retry from world-space eye position
-		FVector* pEyeOff = (FVector*)APawn::eventEyePosition((APawn*)this);
-		FVector vEye(pEyeOff->X + Location.X, pEyeOff->Y + Location.Y, pEyeOff->Z + Location.Z);
+		FVector vEye = eventEyePosition();
+		vEye.X += Location.X;
+		vEye.Y += Location.Y;
+		vEye.Z += Location.Z;
 		SingleLineCheck(pXLevel, 0, &Hit, this, &vEye, &vLocation, 0x40086, vZero, vZero, vZero);
 	}
 	*(DWORD*)Result = (Hit.Actor == NULL) ? 1 : 0;
@@ -2370,7 +2374,7 @@ void AR6Pawn::execPlayVoices(FFrame& Stack, RESULT_DECL)
 		while (pPC != NULL)
 		{
 			if (pPC->IsA(AR6PlayerController::StaticClass()))
-				pPC->eventClientPlayVoices(m_AudioRepInfo, sndPlayVoice, (BYTE)eSlotUse, iPriority, (DWORD)bWaitToFinishSound, fTime);
+				pPC->eventClientPlayVoices(m_SoundRepInfo, sndPlayVoice, (BYTE)eSlotUse, iPriority, (DWORD)bWaitToFinishSound, fTime);
 			pPC = *(AR6PlayerController**)((BYTE*)pPC + 0x3dc);
 		}
 	}
@@ -2504,7 +2508,36 @@ void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(UTexture, pMaskTexture);
 	P_GET_OBJECT(UTexture, pAddTexture);
 	P_FINISH;
-	// TODO: applies/removes weapon-scope viewport overlay textures (see Ghidra)
+	// GHIDRA REF: 0x40120
+	// bit 0x4000000 = scope overlay active. Viewport mode 5 (shared with night vision).
+	BYTE* pLvl = (BYTE*)Level;
+	if (!bTurnItOn || !pMaskTexture || !pAddTexture)
+	{
+		*(DWORD*)(pLvl + 0x450) &= ~0x4000000u;
+		*(INT*)  (pLvl + 0x54c) = 0;
+		*(INT*)  (pLvl + 0x550) = 0;
+		INT Client = *(INT*)((BYTE*)*(INT*)g_pEngine + 0x44);
+		if (Client && *(INT*)(Client + 0x34))
+		{
+			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
+			if (Vp) *(INT*)(Vp + 0x504) = GR6Pawn_SavedScopeViewport;
+		}
+	}
+	else
+	{
+		*(DWORD*)(pLvl + 0x450) |= 0x4000000u;
+		*(INT*)  (pLvl + 0x54c) = (INT)pMaskTexture;
+		*(INT*)  (pLvl + 0x550) = (INT)pAddTexture;
+		INT Client = *(INT*)((BYTE*)*(INT*)g_pEngine + 0x44);
+		if (Client && *(INT*)(Client + 0x34))
+		{
+			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
+			// DIVERGENCE: original saves previous viewport state to DAT_10074550 before
+			// setting mode 5; that save step appears missing in Ghidra output for scope-on.
+			if (Vp) { GR6Pawn_SavedScopeViewport = *(INT*)(Vp + 0x504); *(INT*)(Vp + 0x504) = 5; }
+		}
+	}
+	GCompileMaterialsRevision++;
 }
 
 void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)
