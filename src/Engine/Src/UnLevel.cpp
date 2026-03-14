@@ -1230,32 +1230,20 @@ FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail DetailChange at Ghidra 0x103bfb90")
+IMPL_MATCH("Engine.dll", 0x103bfb90)
 void ULevel::DetailChange( INT NewDetail )
 {
 	guard(ULevel::DetailChange);
 	ALevelInfo* info = GetLevelInfo();
-	if ( !info ) return;
-	// Toggle bHighDetailMode (bit 7 of flags dword at 0x450)
-	{
-		DWORD& flags = *(DWORD*)((BYTE*)info + 0x450);
-		flags = flags ^ ((DWORD(NewDetail) << 7 ^ flags) & 0x80u);
-	}
+	*(DWORD*)((BYTE*)info + 0x450) ^= (DWORD(NewDetail) << 7 ^ *(DWORD*)((BYTE*)info + 0x450)) & 0x80u;
 	info = GetLevelInfo();
-	// Notify GameReplicationInfo if present (at offset 0x4cc)
-	UObject* gri = *(UObject**)((BYTE*)info + 0x4cc);
-	if ( gri )
+	if ( *(UObject**)((BYTE*)info + 0x4cc) )
 	{
-		static FName NAME_DetailChange(TEXT("DetailChange"), FNAME_Find);
-		if ( NAME_DetailChange != NAME_None )
-		{
-			UFunction* func = gri->FindFunctionChecked(NAME_DetailChange, 0);
-			if ( func )
-			{
-				typedef void (__thiscall* ProcessEventFn)(UObject*, UFunction*, void*, void*);
-				((ProcessEventFn)(*(DWORD*)(*(DWORD*)gri + 0x10)))(gri, func, NULL, NULL);
-			}
-		}
+		info = GetLevelInfo();
+		UObject* gri = *(UObject**)((BYTE*)info + 0x4cc);
+		UFunction* func = gri->FindFunctionChecked(ENGINE_DetailChange, 0);
+		typedef void (__thiscall* ProcessEventFn)(UObject*, UFunction*, void*, void*);
+		((ProcessEventFn)(*(DWORD*)(*(DWORD*)gri + 0x10)))(gri, func, NULL, NULL);
 	}
 	unguard;
 }
@@ -1562,8 +1550,49 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 	// Retail 0x1C080 fallback: returns LevelInfo as the default (background) zone.
 	return (AZoneInfo*)GetLevelInfo();
 }
-IMPL_DIVERGE("stub; retail MoveActorFirstBlocking at Ghidra 0x103b72c0")
-INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, FCheckResult* FirstHit, FCheckResult& Hit ) { return 0; }
+IMPL_MATCH("Engine.dll", 0x103b72c0)
+INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, FCheckResult* FirstHit, FCheckResult& Hit )
+{
+	guard(ULevel::MoveActorFirstBlocking);
+	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x7000) == 0 )
+		return 0;
+	INT result = 0;
+	if ( FirstHit )
+	{
+		FCheckResult* Check = FirstHit;
+		do {
+			AActor* hitActor = *(AActor**)((BYTE*)Check + 4);
+			if ( bIgnorePawns )
+			{
+				typedef INT (__thiscall* GetPlayerPawnFn)(void*);
+				INT isPlayerPawn = ((GetPlayerPawnFn)(*(DWORD*)(*(DWORD*)hitActor + 0x68)))(hitActor);
+				if ( isPlayerPawn )
+					appFailAssert("!bIgnorePawns || !Test->Actor->GetPlayerPawn()", ".\\UnLevAct.cpp", 0x535);
+			}
+			if ( (bTest == 0 || !Actor->IsBasedOn(hitActor)) &&
+				 !hitActor->IsBasedOn(Actor) &&
+				 hitActor != *(AActor**)((BYTE*)Actor + 0x180) &&
+				 *(AActor**)((BYTE*)hitActor + 0x180) != Actor )
+			{
+				result = 1;
+				typedef INT (__thiscall* VFn)(void*);
+				INT canHandle = ((VFn)(*(DWORD*)(*(DWORD*)Actor + 0x70)))(hitActor);
+				if ( canHandle )
+				{
+					DWORD* s = (DWORD*)Check;
+					DWORD* d = (DWORD*)&Hit;
+					for ( INT i = 0xc; i != 0; i-- )
+						*d++ = *s++;
+					return 1;
+				}
+			}
+			Check = *(FCheckResult**)Check;
+		} while ( Check );
+		return result;
+	}
+	return 0;
+	unguard;
+}
 IMPL_DIVERGE("stub; retail ToFloor at Ghidra 0x103c0140")
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
 IMPL_DIVERGE("partial; terrain zone registration helper unresolved at Ghidra 0x103c11a0")
