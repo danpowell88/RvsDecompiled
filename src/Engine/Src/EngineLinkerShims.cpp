@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	EngineLinkerShims.cpp: Linker-level shims for __FUNC_NAME__ exports and
 	dummy symbol targets.
 
@@ -50,34 +50,34 @@ extern "C" void* dummy_stub_data = 0;
 	to a named wide-string blob instead of anonymous dummy storage.
 -----------------------------------------------------------------------------*/
 extern "C" {
-__declspec(dllexport) const unsigned short _gfn_FDirectionalLightMapSceneNodeCtor[] = {'F','D','i','r','e','c','t','i','o','n','a','l','L','i','g','h','t','M','a','p','S','c','e','n','e','N','o','d','e',':',':','F','D','i','r','e','c','t','i','o','n','a','l','L','i','g','h','t','M','a','p','S','c','e','N','o','d','e',0};
-__declspec(dllexport) const unsigned short _gfn_FPointLightMapSceneNodeCtor[]       = {'F','P','o','i','n','t','L','i','g','h','t','M','a','p','S','c','e','n','e','N','o','d','e',':',':','F','P','o','i','n','t','L','i','g','h','t','M','a','p','S','c','e','n','e','N','o','d','e',0};
-__declspec(dllexport) const unsigned short _gfn_TLazyArrayByteDtor[]                 = {'T','L','a','z','y','A','r','r','a','y','<','B','Y','T','E','>',':',':','~','T','L','a','z','y','A','r','r','a','y',0};
-__declspec(dllexport) const unsigned short _gfn_ABrushBuildCoords[]                  = {'A','B','r','u','s','h',':',':','B','u','i','l','d','C','o','o','r','d','s',0};
-__declspec(dllexport) const unsigned short _gfn_FMipmapClear[]                       = {'F','M','i','m','a','p',':',':','C','l','e','a','r',0};
-__declspec(dllexport) const unsigned short _gfn_ABrushCopyPosRotScaleFrom[]          = {'A','B','r','u','s','h',':',':','C','o','p','y','P','o','s','R','o','t','S','c','a','l','e','F','r','o','m',0};
-__declspec(dllexport) const unsigned short _gfn_ULevelGetActorIndex[]                = {'U','L','e','v','e','l',':',':','G','e','t','A','c','t','o','r','I','n','d','e','x',0};
-__declspec(dllexport) const unsigned short _gfn_ATerrainInfoGetLayerAlpha[]          = {'A','T','e','r','r','a','i','n','I','n','f','o',':',':','G','e','t','L','a','y','e','r','A','l','p','h','a',0};
-__declspec(dllexport) const unsigned short _gfn_FTagsInit[]                          = {'F','T','a','g','s',':',':','I','n','i','t',0};
-__declspec(dllexport) const unsigned short _gfn_UTerrainSectorIsTriangleAll[]        = {'U','T','e','r','r','a','i','n','S','e','c','t','o','r',':',':','I','s','T','r','i','a','n','g','l','e','A','l','l',0};
-__declspec(dllexport) const unsigned short _gfn_TLazyArrayByteLoad[]                 = {'T','L','a','z','y','A','r','r','a','y','<','B','Y','T','E','>',':',':','L','o','a','d',0};
-__declspec(dllexport) const unsigned short _gfn_ABrushOldBuildCoords[]               = {'A','B','r','u','s','h',':',':','O','l','d','B','u','i','l','d','C','o','o','r','d','s',0};
-__declspec(dllexport) const unsigned short _gfn_ULevelSummaryPostLoad[]              = {'U','L','e','v','e','l','S','u','m','m','a','r','y',':',':','P','o','s','t','L','o','a','d',0};
-__declspec(dllexport) const unsigned short _gfn_UKMeshPropsSerialize[]               = {'U','K','M','e','s','h','P','r','o','p','s',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UPolysSerialize[]                    = {'U','P','o','l','y','s',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UVertexBufferSerialize[]             = {'U','V','e','r','t','e','x','B','u','f','f','e','r',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UVertexStreamCOLORSerialize[]        = {'U','V','e','r','t','e','x','S','t','r','e','a','m','C','O','L','O','R',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UVertexStreamPosNormTexSerialize[]   = {'U','V','e','r','t','e','x','S','t','r','e','a','m','P','o','s','N','o','r','m','T','e','x',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UVertexStreamUVSerialize[]           = {'U','V','e','r','t','e','x','S','t','r','e','a','m','U','V',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UVertexStreamVECTORSerialize[]       = {'U','V','e','r','t','e','x','S','t','r','e','a','m','V','E','C','T','O','R',':',':','S','e','r','i','a','l','i','z','e',0};
-__declspec(dllexport) const unsigned short _gfn_UActorChannelStaticConstructor[]     = {'U','A','c','t','o','r','C','h','a','n','n','e','l',':',':','S','t','a','t','i','c','C','o','n','s','t','r','u','c','t','o','r',0};
-__declspec(dllexport) const unsigned short _gfn_UControlChannelStaticConstructor[]   = {'U','C','o','n','t','r','o','l','C','h','a','n','n','e','l',':',':','S','t','a','t','i','c','C','o','n','s','t','r','u','c','t','o','r',0};
-__declspec(dllexport) const unsigned short _gfn_UFileChannelStaticConstructor[]      = {'U','F','i','l','e','C','h','a','n','n','e','l',':',':','S','t','a','t','i','c','C','o','n','s','t','r','u','c','t','o','r',0};
-__declspec(dllexport) const unsigned short _gfn_AActorTwoWallAdjust[]                = {'A','A','c','t','o','r',':',':','T','w','o','W','a','l','l','A','d','j','u','s','t',0};
-__declspec(dllexport) const unsigned short _gfn_TLazyArrayByteUnload[]               = {'T','L','a','z','y','A','r','r','a','y','<','B','Y','T','E','>',':',':','U','n','l','o','a','d',0};
-__declspec(dllexport) const unsigned short _gfn_AActorPhysKarmaRagDollInternalDD[]   = {'A','A','c','t','o','r',':',':','p','h','y','s','K','a','r','m','a','R','a','g','D','o','l','l','_','i','n','t','e','r','n','a','l','$','D','D',0};
-__declspec(dllexport) const unsigned short _gfn_AActorPhysKarmaRagDollInternalDK[]   = {'A','A','c','t','o','r',':',':','p','h','y','s','K','a','r','m','a','R','a','g','D','o','l','l','_','i','n','t','e','r','n','a','l','$','D','K',0};
-__declspec(dllexport) const unsigned short _gfn_AActorPhysKarmaRagDollInternalFG[]   = {'A','A','c','t','o','r',':',':','p','h','y','s','K','a','r','m','a','R','a','g','D','o','l','l','_','i','n','t','e','r','n','a','l','$','F','G',0};
+extern __declspec(dllexport) const unsigned short _gfn_FDirectionalLightMapSceneNodeCtor[] = {'F','D','i','r','e','c','t','i','o','n','a','l','L','i','g','h','t','M','a','p','S','c','e','n','e','N','o','d','e',':',':','F','D','i','r','e','c','t','i','o','n','a','l','L','i','g','h','t','M','a','p','S','c','e','N','o','d','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_FPointLightMapSceneNodeCtor[]       = {'F','P','o','i','n','t','L','i','g','h','t','M','a','p','S','c','e','n','e','N','o','d','e',':',':','F','P','o','i','n','t','L','i','g','h','t','M','a','p','S','c','e','n','e','N','o','d','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_TLazyArrayByteDtor[]                 = {'T','L','a','z','y','A','r','r','a','y','<','B','Y','T','E','>',':',':','~','T','L','a','z','y','A','r','r','a','y',0};
+extern __declspec(dllexport) const unsigned short _gfn_ABrushBuildCoords[]                  = {'A','B','r','u','s','h',':',':','B','u','i','l','d','C','o','o','r','d','s',0};
+extern __declspec(dllexport) const unsigned short _gfn_FMipmapClear[]                       = {'F','M','i','m','a','p',':',':','C','l','e','a','r',0};
+extern __declspec(dllexport) const unsigned short _gfn_ABrushCopyPosRotScaleFrom[]          = {'A','B','r','u','s','h',':',':','C','o','p','y','P','o','s','R','o','t','S','c','a','l','e','F','r','o','m',0};
+extern __declspec(dllexport) const unsigned short _gfn_ULevelGetActorIndex[]                = {'U','L','e','v','e','l',':',':','G','e','t','A','c','t','o','r','I','n','d','e','x',0};
+extern __declspec(dllexport) const unsigned short _gfn_ATerrainInfoGetLayerAlpha[]          = {'A','T','e','r','r','a','i','n','I','n','f','o',':',':','G','e','t','L','a','y','e','r','A','l','p','h','a',0};
+extern __declspec(dllexport) const unsigned short _gfn_FTagsInit[]                          = {'F','T','a','g','s',':',':','I','n','i','t',0};
+extern __declspec(dllexport) const unsigned short _gfn_UTerrainSectorIsTriangleAll[]        = {'U','T','e','r','r','a','i','n','S','e','c','t','o','r',':',':','I','s','T','r','i','a','n','g','l','e','A','l','l',0};
+extern __declspec(dllexport) const unsigned short _gfn_TLazyArrayByteLoad[]                 = {'T','L','a','z','y','A','r','r','a','y','<','B','Y','T','E','>',':',':','L','o','a','d',0};
+extern __declspec(dllexport) const unsigned short _gfn_ABrushOldBuildCoords[]               = {'A','B','r','u','s','h',':',':','O','l','d','B','u','i','l','d','C','o','o','r','d','s',0};
+extern __declspec(dllexport) const unsigned short _gfn_ULevelSummaryPostLoad[]              = {'U','L','e','v','e','l','S','u','m','m','a','r','y',':',':','P','o','s','t','L','o','a','d',0};
+extern __declspec(dllexport) const unsigned short _gfn_UKMeshPropsSerialize[]               = {'U','K','M','e','s','h','P','r','o','p','s',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UPolysSerialize[]                    = {'U','P','o','l','y','s',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UVertexBufferSerialize[]             = {'U','V','e','r','t','e','x','B','u','f','f','e','r',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UVertexStreamCOLORSerialize[]        = {'U','V','e','r','t','e','x','S','t','r','e','a','m','C','O','L','O','R',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UVertexStreamPosNormTexSerialize[]   = {'U','V','e','r','t','e','x','S','t','r','e','a','m','P','o','s','N','o','r','m','T','e','x',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UVertexStreamUVSerialize[]           = {'U','V','e','r','t','e','x','S','t','r','e','a','m','U','V',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UVertexStreamVECTORSerialize[]       = {'U','V','e','r','t','e','x','S','t','r','e','a','m','V','E','C','T','O','R',':',':','S','e','r','i','a','l','i','z','e',0};
+extern __declspec(dllexport) const unsigned short _gfn_UActorChannelStaticConstructor[]     = {'U','A','c','t','o','r','C','h','a','n','n','e','l',':',':','S','t','a','t','i','c','C','o','n','s','t','r','u','c','t','o','r',0};
+extern __declspec(dllexport) const unsigned short _gfn_UControlChannelStaticConstructor[]   = {'U','C','o','n','t','r','o','l','C','h','a','n','n','e','l',':',':','S','t','a','t','i','c','C','o','n','s','t','r','u','c','t','o','r',0};
+extern __declspec(dllexport) const unsigned short _gfn_UFileChannelStaticConstructor[]      = {'U','F','i','l','e','C','h','a','n','n','e','l',':',':','S','t','a','t','i','c','C','o','n','s','t','r','u','c','t','o','r',0};
+extern __declspec(dllexport) const unsigned short _gfn_AActorTwoWallAdjust[]                = {'A','A','c','t','o','r',':',':','T','w','o','W','a','l','l','A','d','j','u','s','t',0};
+extern __declspec(dllexport) const unsigned short _gfn_TLazyArrayByteUnload[]               = {'T','L','a','z','y','A','r','r','a','y','<','B','Y','T','E','>',':',':','U','n','l','o','a','d',0};
+extern __declspec(dllexport) const unsigned short _gfn_AActorPhysKarmaRagDollInternalDD[]   = {'A','A','c','t','o','r',':',':','p','h','y','s','K','a','r','m','a','R','a','g','D','o','l','l','_','i','n','t','e','r','n','a','l','$','D','D',0};
+extern __declspec(dllexport) const unsigned short _gfn_AActorPhysKarmaRagDollInternalDK[]   = {'A','A','c','t','o','r',':',':','p','h','y','s','K','a','r','m','a','R','a','g','D','o','l','l','_','i','n','t','e','r','n','a','l','$','D','K',0};
+extern __declspec(dllexport) const unsigned short _gfn_AActorPhysKarmaRagDollInternalFG[]   = {'A','A','c','t','o','r',':',':','p','h','y','s','K','a','r','m','a','R','a','g','D','o','l','l','_','i','n','t','e','r','n','a','l','$','F','G',0};
 }
 static volatile const void* _gfnRefs[] = {
 	_gfn_FDirectionalLightMapSceneNodeCtor,

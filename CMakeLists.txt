@@ -85,6 +85,11 @@ if(MSVC)
     if(MSVC_VERSION GREATER 1310)
         add_compile_options(/wd4595 /wd4661 /wd4073 /wd4477)
     endif()
+    # MSVC 7.1 specific: suppress C4234 (__thiscall in typedef is not standard
+    # in 7.1 but the calling convention is still honoured at codegen time).
+    if(MSVC_VERSION EQUAL 1310)
+        add_compile_options(/wd4234)
+    endif()
 endif()
 
 # DO_GUARD: controls guard()/unguard() try/catch expansion.

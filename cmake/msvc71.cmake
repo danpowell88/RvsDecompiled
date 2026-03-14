@@ -84,7 +84,10 @@ set(DXSDK_INC  "${DXSDK_INC}"  CACHE PATH "DirectX SDK include")
 
 # --- Linker flags ---
 set(CMAKE_EXE_LINKER_FLAGS_INIT    "/MACHINE:X86 /SUBSYSTEM:WINDOWS /NOLOGO")
-set(CMAKE_MODULE_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO")
+# /FORCE:UNRESOLVED — MSVC 7.1 with DO_GUARD=0 never emits __FUNC_NAME__ statics,
+# but retail Core.def exports 6 of them. No retail DLL imports them; null export
+# addresses are safe. Without this flag the link would fail with LNK2001.
+set(CMAKE_MODULE_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED")
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO")
 
 # --- PATH: cl.exe depends on c1.dll, c2.dll, mspdb71.dll, msobj71.dll ---
