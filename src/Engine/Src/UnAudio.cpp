@@ -30,7 +30,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- USound ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USound::PostLoad()
 {
 	// Ghidra 0x7eee0: UObject::PostLoad, then if Audio exists call vtable[0x70/4] to
@@ -68,7 +68,7 @@ USound::USound(const TCHAR* InName, INT InFlags)
 }
 
 // (merged from earlier occurrence)
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USound::Serialize(FArchive& Ar)
 {
 	// Retail: 0x1037fe10. Calls UObject::Serialize, then serializes FSoundData at +0x48.
@@ -76,7 +76,7 @@ void USound::Serialize(FArchive& Ar)
 	// raw sound data is loaded directly from the .u package stream.
 	UObject::Serialize(Ar);
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USound::Destroy()
 {
 	// Retail: 0x1037ee40. Notifies global audio subsystem (at 0x10666b58) to release
@@ -91,7 +91,7 @@ void USound::Destroy()
 	}
 	UObject::Destroy();
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 float USound::GetDuration()
 {
 	// Ghidra: Duration at offset 0x5C, FSoundData at offset 0x2C.
@@ -148,15 +148,15 @@ void USoundGen::Serialize(FArchive &Ar)
 // ============================================================================
 
 // ??0FWaveModInfo@@QAE@XZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FWaveModInfo::FWaveModInfo() : SampleLoopsNum(0), NoiseGate(0) {}
 
 // ??4FWaveModInfo@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FWaveModInfo & FWaveModInfo::operator=(FWaveModInfo const & Other) { appMemcpy(this, &Other, 64); return *this; }
 
 // ?ReadWaveInfo@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 	guard(FWaveModInfo::ReadWaveInfo);
 
@@ -207,7 +207,7 @@ INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 }
 
 // ?UpdateWaveData@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
 {
 	if (NewDataSize < SampleDataSize) {
@@ -233,11 +233,11 @@ INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
 }
 
 // ?Pad16Bit@FWaveModInfo@@QAEKK@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD FWaveModInfo::Pad16Bit(DWORD InVal) { return (InVal + 1) & ~1; }
 
 // ?HalveData@FWaveModInfo@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FWaveModInfo::HalveData()
 {
 	if (*pBitsPerSample == 16)
@@ -281,7 +281,7 @@ void FWaveModInfo::HalveData()
 }
 
 // ?HalveReduce16to8@FWaveModInfo@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FWaveModInfo::HalveReduce16to8()
 {
 	DWORD DataSize = SampleDataSize;
@@ -306,7 +306,7 @@ void FWaveModInfo::HalveReduce16to8()
 }
 
 // ?NoiseGateFilter@FWaveModInfo@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FWaveModInfo::NoiseGateFilter()
 {
 	BYTE* Data = SampleDataStart;
@@ -338,7 +338,7 @@ void FWaveModInfo::NoiseGateFilter()
 }
 
 // ?Reduce16to8@FWaveModInfo@@QAEXXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FWaveModInfo::Reduce16to8()
 {
 	DWORD DataSize = SampleDataSize;
@@ -362,11 +362,11 @@ void FWaveModInfo::Reduce16to8()
 // ============================================================================
 // FSoundData
 // ============================================================================
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FSoundData::FSoundData(USound*) { appMemzero(this, sizeof(*this)); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FSoundData::~FSoundData() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FSoundData::Load() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FLOAT FSoundData::GetPeriod() { return 0.0f; }

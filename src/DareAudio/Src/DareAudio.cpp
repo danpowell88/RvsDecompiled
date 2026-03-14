@@ -105,7 +105,7 @@ static FLOAT s_VolumeResetData[12] =
 	Helper: linear amplitude [0,1] to dB.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("linear amplitude to dB conversion helper")
+IMPL_APPROX("linear amplitude to dB conversion helper")
 static FLOAT LinearToDb(FLOAT v)
 {
 	return 20.0f * log10f(v > 0.0001f ? v : 0.0001f);
@@ -115,18 +115,18 @@ static FLOAT LinearToDb(FLOAT v)
 Constructors / Destructor / Assignment.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 UDareAudioSubsystem::UDareAudioSubsystem()
 {
 }
 
-IMPL_INFERRED("copy constructor delegates to UAudioSubsystem")
+IMPL_APPROX("copy constructor delegates to UAudioSubsystem")
 UDareAudioSubsystem::UDareAudioSubsystem(const UDareAudioSubsystem& Other)
 : UAudioSubsystem(Other)
 {
 }
 
-IMPL_INFERRED("assignment operator delegates to UAudioSubsystem")
+IMPL_APPROX("assignment operator delegates to UAudioSubsystem")
 UDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& Other)
 {
 UAudioSubsystem::operator=(Other);
@@ -137,23 +137,23 @@ return *this;
 UObject interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UDareAudioSubsystem::StaticConstructor()
 {
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UDareAudioSubsystem::PostEditChange()
 {
 }
 
-IMPL_INFERRED("delegates to CleanUp")
+IMPL_APPROX("delegates to CleanUp")
 void UDareAudioSubsystem::Destroy()
 {
 CleanUp();
 }
 
-IMPL_INFERRED("delegates to CleanUp on error shutdown")
+IMPL_APPROX("delegates to CleanUp on error shutdown")
 void UDareAudioSubsystem::ShutdownAfterError()
 {
 CleanUp();
@@ -163,7 +163,7 @@ CleanUp();
 FExec interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("parses AUDIO QUALITY console commands")
+IMPL_APPROX("parses AUDIO QUALITY console commands")
 UBOOL UDareAudioSubsystem::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 if (ParseCommand(&Cmd, TEXT("AUDIO")))
@@ -202,7 +202,7 @@ return 0;
 UAudioSubsystem interface -- Initialisation.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("initialises DARE sound engine, creates types/lines/micro")
+IMPL_APPROX("initialises DARE sound engine, creates types/lines/micro")
 UBOOL UDareAudioSubsystem::Init()
 {
 if (m_bInitialized) return 1;
@@ -223,7 +223,7 @@ F_INT(this, 0x210)    = -1;
 return m_bInitialized;
 }
 
-IMPL_INFERRED("shuts down DARE engine and frees request and bank arrays")
+IMPL_APPROX("shuts down DARE engine and frees request and bank arrays")
 void UDareAudioSubsystem::CleanUp()
 {
 if (!m_bInitialized) return;
@@ -273,13 +273,13 @@ BMAP_MAX(this)   = 0;
 }
 }
 
-IMPL_INFERRED("returns static viewport pointer")
+IMPL_APPROX("returns static viewport pointer")
 UViewport* UDareAudioSubsystem::GetViewport()
 {
 return m_pViewport;
 }
 
-IMPL_INFERRED("stores static viewport pointer")
+IMPL_APPROX("stores static viewport pointer")
 UBOOL UDareAudioSubsystem::SetViewport(UViewport* InViewport, FString DeviceName)
 {
 m_pViewport = InViewport;
@@ -327,7 +327,7 @@ void UDareAudioSubsystem::RegisterSound(USound* Sound)
 	unguard;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UDareAudioSubsystem::UnregisterSound(USound* Sound)
 {
 }
@@ -336,7 +336,7 @@ void UDareAudioSubsystem::UnregisterSound(USound* Sound)
 Sound playback.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("sends DARE sound request and tracks it in the request array")
+IMPL_APPROX("sends DARE sound request and tracks it in the request array")
 UBOOL UDareAudioSubsystem::PlaySoundW(AActor* Actor, USound* Sound, INT Slot, INT Flags)
 {
 if (!m_bInitialized || !Sound) return 0;
@@ -377,7 +377,7 @@ req->Slot  = Slot;
 return 1;
 }
 
-IMPL_INFERRED("kills all sound objects for actor via DARE")
+IMPL_APPROX("kills all sound objects for actor via DARE")
 UBOOL UDareAudioSubsystem::StopSound(AActor* Actor, USound* Sound)
 {
 if (!m_bInitialized) return 0;
@@ -386,14 +386,14 @@ SND_fn_vKillSoundObject(actorId, -1);
 return 1;
 }
 
-IMPL_INFERRED("kills all DARE sound object types")
+IMPL_APPROX("kills all DARE sound object types")
 void UDareAudioSubsystem::StopAllSounds()
 {
 if (!m_bInitialized) return;
 SND_fn_vKillAllSoundObjectTypes();
 }
 
-IMPL_INFERRED("kills DARE sound objects for a specific actor and slot")
+IMPL_APPROX("kills DARE sound objects for a specific actor and slot")
 void UDareAudioSubsystem::StopAllSoundsActor(AActor* Actor, ESoundSlot Slot)
 {
 if (!m_bInitialized || !Actor) return;
@@ -401,7 +401,7 @@ long actorId = (long)(DWORD)(size_t)Actor;
 SND_fn_vKillSoundObject(actorId, (int)Slot);
 }
 
-IMPL_INFERRED("kills actor sounds and removes actor from ambient list")
+IMPL_APPROX("kills actor sounds and removes actor from ambient list")
 void UDareAudioSubsystem::NoteDestroy(AActor* Actor)
 {
 if (!m_bInitialized || !Actor) return;
@@ -425,7 +425,7 @@ break;
 Music.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("sends DARE music request by USound name")
+IMPL_APPROX("sends DARE music request by USound name")
 UBOOL UDareAudioSubsystem::PlayMusic(USound* Music, INT SongSection)
 {
 if (!m_bInitialized || !Music) return 0;
@@ -466,7 +466,7 @@ req->Slot  = SLOT_Music;
 return 1;
 }
 
-IMPL_INFERRED("sends DARE music request by event name string with fade-in")
+IMPL_APPROX("sends DARE music request by event name string with fade-in")
 UBOOL UDareAudioSubsystem::PlayMusic(FString MusicName, FLOAT FadeInTime)
 {
 if (!m_bInitialized) return 0;
@@ -483,7 +483,7 @@ F_INT(this, 0x58) = 1;
 return 1;
 }
 
-IMPL_INFERRED("kills music slot sounds via DARE")
+IMPL_APPROX("kills music slot sounds via DARE")
 UBOOL UDareAudioSubsystem::StopMusic(USound* Music)
 {
 if (!m_bInitialized) return 0;
@@ -493,7 +493,7 @@ F_INT(this, 0x58) = 0;
 return 1;
 }
 
-IMPL_INFERRED("kills music slot sounds; FadeOutTime not supported by DARE backend")
+IMPL_APPROX("kills music slot sounds; FadeOutTime not supported by DARE backend")
 UBOOL UDareAudioSubsystem::StopMusic(INT SongSection, FLOAT FadeOutTime)
 {
 if (!m_bInitialized) return 0;
@@ -502,7 +502,7 @@ F_INT(this, 0x58) = 0;
 return 1;
 }
 
-IMPL_INFERRED("kills music slot sounds; FadeOutTime not supported by DARE backend")
+IMPL_APPROX("kills music slot sounds; FadeOutTime not supported by DARE backend")
 UBOOL UDareAudioSubsystem::StopAllMusic(FLOAT FadeOutTime)
 {
 if (!m_bInitialized) return 0;
@@ -511,7 +511,7 @@ F_INT(this, 0x58) = 0;
 return 1;
 }
 
-IMPL_INFERRED("kills music slot sounds via DARE")
+IMPL_APPROX("kills music slot sounds via DARE")
 void UDareAudioSubsystem::StopAllMusic()
 {
 if (!m_bInitialized) return;
@@ -523,14 +523,14 @@ F_INT(this, 0x58) = 0;
 Bank / Map loading.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("delegates to AddSoundBank using the sound asset name")
+IMPL_APPROX("delegates to AddSoundBank using the sound asset name")
 void UDareAudioSubsystem::AddAndFindBankInSound(USound* Sound, ELoadBankSound LoadType)
 {
 if (!Sound) return;
 AddSoundBank(FString(Sound->GetName()), LoadType);
 }
 
-IMPL_INFERRED("allocates FBankEntry, appends to bank map array, loads via DARE")
+IMPL_APPROX("allocates FBankEntry, appends to bank map array, loads via DARE")
 void UDareAudioSubsystem::AddSoundBank(FString BankName, ELoadBankSound LoadType)
 {
 if (!m_bInitialized) return;
@@ -563,7 +563,7 @@ BMAP_DATA(this)[BMAP_COUNT(this)++] = entry;
 SND_fn_bLoadBank(TCHAR_TO_ANSI(*BankName));
 }
 
-IMPL_INFERRED("sets DARE master directory from GCdPath and loads map bank file")
+IMPL_APPROX("sets DARE master directory from GCdPath and loads map bank file")
 void UDareAudioSubsystem::LoadBankMap(ULevel* Level, FString MapName)
 {
 if (!m_bInitialized) return;
@@ -576,7 +576,7 @@ SND_fn_vSetMasterDirectory(TCHAR_TO_ANSI(masterDir));
 SND_fn_bLoadMap(TCHAR_TO_ANSI(*MapName));
 }
 
-IMPL_INFERRED("clears needs-map-load flag on viewport after map bank load")
+IMPL_APPROX("clears needs-map-load flag on viewport after map bank load")
 void UDareAudioSubsystem::PostLoadMap(ULevel* Level)
 {
 if (m_pViewport)
@@ -586,7 +586,7 @@ if (m_pViewport)
 }
 }
 
-IMPL_INFERRED("unloads all banks or LBS_Gun banks from DARE based on state")
+IMPL_APPROX("unloads all banks or LBS_Gun banks from DARE based on state")
 void UDareAudioSubsystem::SetBankInfo(ER6SoundState State)
 {
 if (!m_bInitialized) return;
@@ -634,7 +634,7 @@ BMAP_COUNT(this) = dst;
 Sound queries.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("returns DARE sound event length in seconds")
+IMPL_APPROX("returns DARE sound event length in seconds")
 FLOAT UDareAudioSubsystem::GetDuration(USound* Sound)
 {
 if (!m_bInitialized || !Sound) return 0.0f;
@@ -644,7 +644,7 @@ if (!evHandle) return 0.0f;
 return SND_fn_fGetLengthSoundEvent(evHandle);
 }
 
-IMPL_INFERRED("returns playback position of latest matching sound request")
+IMPL_APPROX("returns playback position of latest matching sound request")
 FLOAT UDareAudioSubsystem::GetPosition(AActor* Actor, USound* Sound)
 {
 if (!m_bInitialized || !Sound) return 0.0f;
@@ -657,7 +657,7 @@ if (!reqId) return 0.0f;
 return SND_fn_fGetPosSoundRequest(reqId);
 }
 
-IMPL_INFERRED("checks request array for a still-playing sound/actor pair")
+IMPL_APPROX("checks request array for a still-playing sound/actor pair")
 UBOOL UDareAudioSubsystem::SND_IsSoundPlaying(AActor* Actor, USound* Sound)
 {
 if (!m_bInitialized || !Sound) return 0;
@@ -674,7 +674,7 @@ return 1;
 return 0;
 }
 
-IMPL_INFERRED("checks request array for a still-playing instance on any actor")
+IMPL_APPROX("checks request array for a still-playing instance on any actor")
 UBOOL UDareAudioSubsystem::IsPlayingAnyActor(USound* Sound)
 {
 if (!m_bInitialized || !Sound) return 0;
@@ -695,13 +695,13 @@ return 0;
 Volume control.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("returns DARE volume for a sound object type slot")
+IMPL_APPROX("returns DARE volume for a sound object type slot")
 FLOAT UDareAudioSubsystem::SND_GetVolume_TypeSound(ESoundSlot Slot)
 {
 return SND_fn_fGetVolumeSoundObjectType((INT)Slot);
 }
 
-IMPL_INFERRED("returns stored initial volume for a slot index")
+IMPL_APPROX("returns stored initial volume for a slot index")
 FLOAT UDareAudioSubsystem::SND_GetVolumeInit_TypeSound(ESoundSlot Slot)
 {
 INT idx = (INT)Slot;
@@ -711,7 +711,7 @@ return 0.0f;
 }
 
 // Returns the volume line handle for a given volume type
-IMPL_INFERRED("maps ESoundVolume enum to stored DARE volume line handle")
+IMPL_APPROX("maps ESoundVolume enum to stored DARE volume line handle")
 static long GetVolumeLineHandle(void* self, ESoundVolume VolType)
 {
 switch (VolType)
@@ -724,7 +724,7 @@ default:             return 0;
 }
 }
 
-IMPL_INFERRED("returns current DARE volume line level")
+IMPL_APPROX("returns current DARE volume line level")
 FLOAT UDareAudioSubsystem::SND_GetVolumeLine(ESoundVolume VolType)
 {
 long h = GetVolumeLineHandle(this, VolType);
@@ -732,7 +732,7 @@ if (!h) return 0.0f;
 return SND_fn_fGetSoundVolumeLine(h);
 }
 
-IMPL_INFERRED("sets DARE volume line level")
+IMPL_APPROX("sets DARE volume line level")
 void UDareAudioSubsystem::SND_SetVolumeLine(ESoundVolume VolType, FLOAT Volume)
 {
 long h = GetVolumeLineHandle(this, VolType);
@@ -740,13 +740,13 @@ if (!h) return;
 SND_fn_vSetSoundVolumeLine(h, Volume);
 }
 
-IMPL_INFERRED("sets volume for a single DARE sound object type")
+IMPL_APPROX("sets volume for a single DARE sound object type")
 void UDareAudioSubsystem::SND_ChangeVolume_TypeSound(ESoundSlot Slot, FLOAT Volume)
 {
 SND_fn_vChangeVolumeSoundObjectType((INT)Slot, Volume);
 }
 
-IMPL_INFERRED("converts integer 0-100 volume to 0.0-1.0 and sets the DARE volume line")
+IMPL_APPROX("converts integer 0-100 volume to 0.0-1.0 and sets the DARE volume line")
 void UDareAudioSubsystem::SND_ChangeVolumeLinear_TypeSound(ESoundSlot Slot, INT Volume)
 {
 // Volume is linear 0-100; convert to linear 0-1 then set on the volume line
@@ -770,26 +770,26 @@ long h = GetVolumeLineHandle(this, vt);
 if (h) SND_fn_vSetSoundVolumeLine(h, linear);
 }
 
-IMPL_INFERRED("sets volume for all DARE sound object types")
+IMPL_APPROX("sets volume for all DARE sound object types")
 void UDareAudioSubsystem::SND_ChangeVolume_AllTypeSound(FLOAT Volume)
 {
 SND_fn_vChangeVolumeAllSoundObjectTypes(Volume);
 }
 
-IMPL_INFERRED("sets volume for all DARE sound object types except the given slot")
+IMPL_APPROX("sets volume for all DARE sound object types except the given slot")
 void UDareAudioSubsystem::SND_ChangeVolume_AllButOneTypeSound(ESoundSlot Slot, FLOAT Volume)
 {
 SND_fn_vChangeVolumeAllSoundObjectTypesButOne((INT)Slot, Volume);
 }
 
-IMPL_INFERRED("changes volume for a specific actor and slot via DARE")
+IMPL_APPROX("changes volume for a specific actor and slot via DARE")
 void UDareAudioSubsystem::SND_ChangeVolume_Actor(AActor* Actor, ESoundSlot Slot, FLOAT Volume)
 {
 if (!Actor) return;
 SND_fn_vChangeVolumeSoundObject((long)(DWORD)(size_t)Actor, (INT)Slot, Volume);
 }
 
-IMPL_INFERRED("snapshots current volume into s_VolumeInitData then resets DARE slot")
+IMPL_APPROX("snapshots current volume into s_VolumeInitData then resets DARE slot")
 void UDareAudioSubsystem::SND_ResetVolumeSoundObjectType(ESoundSlot Slot)
 {
 INT idx = (INT)Slot;
@@ -799,7 +799,7 @@ s_VolumeInitData[idx] = current;
 SND_fn_vResetVolumeSoundObjectType(idx);
 }
 
-IMPL_INFERRED("snapshots and resets volumes for all 12 DARE sound types")
+IMPL_APPROX("snapshots and resets volumes for all 12 DARE sound types")
 void UDareAudioSubsystem::SND_ResetVolume_AllTypeSound()
 {
 for (INT i = 0; i < 12; i++)
@@ -810,7 +810,7 @@ SND_fn_vResetVolumeSoundObjectType(i);
 }
 }
 
-IMPL_INFERRED("snapshots and resets volumes for all DARE sound types except one")
+IMPL_APPROX("snapshots and resets volumes for all DARE sound types except one")
 void UDareAudioSubsystem::SND_ResetVolume_ButOneTypeSound(ESoundSlot Slot)
 {
 for (INT i = 0; i < 12; i++)
@@ -834,7 +834,7 @@ Fade arrays at fixed offsets:
   m_VolumeLineSaved[12] at +0x1c4
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("sets up per-slot fade with start volume, target and step rate")
+IMPL_APPROX("sets up per-slot fade with start volume, target and step rate")
 void UDareAudioSubsystem::SND_FadeSound(FLOAT FadeTime, INT Direction, ESoundSlot Slot)
 {
 INT idx = (INT)Slot;
@@ -859,7 +859,7 @@ F_FLOAT(this, 0x14c + idx * 4) = targetVol;
 }
 }
 
-IMPL_INFERRED("saves all current volumes and volume line levels into m_FadeSaved arrays")
+IMPL_APPROX("saves all current volumes and volume line levels into m_FadeSaved arrays")
 void UDareAudioSubsystem::SND_SaveCurrentFadeValue()
 {
 for (INT i = 0; i < 15; i++)
@@ -881,7 +881,7 @@ lines[i] ? SND_fn_fGetSoundVolumeLine(lines[i]) : 0.0f;
 }
 }
 
-IMPL_INFERRED("restores or fades back to previously saved volume values")
+IMPL_APPROX("restores or fades back to previously saved volume values")
 void UDareAudioSubsystem::SND_ReturnSavedFadeValue(FLOAT FadeTime)
 {
 for (INT i = 0; i < 15; i++)
@@ -919,7 +919,7 @@ if (lines[i]) SND_fn_vSetSoundVolumeLine(lines[i], saved);
 Sound options.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("EAX toggle is handled at Init; runtime changes unsupported by DARE stubs")
+IMPL_APPROX("EAX toggle is handled at Init; runtime changes unsupported by DARE stubs")
 void UDareAudioSubsystem::SND_SetSoundOptions(bool bEAX, FString DeviceName)
 {
 // EAX / hardware acceleration toggle is done during Init; runtime changes
@@ -930,7 +930,7 @@ void UDareAudioSubsystem::SND_SetSoundOptions(bool bEAX, FString DeviceName)
 Tick.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("advances all active per-slot fades each tick then purges finished requests")
+IMPL_APPROX("advances all active per-slot fades each tick then purges finished requests")
 void UDareAudioSubsystem::TickUpdate(FLOAT DeltaTime, ALevelInfo* LevelInfo)
 {
 if (!m_bInitialized) return;
@@ -968,14 +968,14 @@ UpdateSoundList();
 	Ambient sounds / Update helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UDareAudioSubsystem::UpdateAmbientSounds(FCoords& Coords)
 {
 	// Ambient sound update: walk the ambient actor list, play/stop as needed.
 	// Actual level actor scan happens elsewhere; we just service the stored list.
 }
 
-IMPL_INFERRED("compacts request array by removing entries whose DARE request has stopped")
+IMPL_APPROX("compacts request array by removing entries whose DARE request has stopped")
 void UDareAudioSubsystem::UpdateSoundList()
 {
 if (!m_bInitialized) return;
@@ -1001,13 +1001,13 @@ SREQ_COUNT(this) = dst;
 Private helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 FLOAT UDareAudioSubsystem::GetDuration(DWORD SoundHandle)
 {
 return 0.0f;
 }
 
-IMPL_INFERRED("creates DARE listener micro and registers all four listener callbacks")
+IMPL_APPROX("creates DARE listener micro and registers all four listener callbacks")
 void UDareAudioSubsystem::CreateMicro()
 {
 long micro = SND_fn_lCreateSoundMicro();
@@ -1025,7 +1025,7 @@ SND_fn_vSetRetSoundMicros(
 (void*)&GetMicroTangeant);
 }
 
-IMPL_INFERRED("registers 12 DARE sound object types with actor position/speed/switch callbacks")
+IMPL_APPROX("registers 12 DARE sound object types with actor position/speed/switch callbacks")
 void UDareAudioSubsystem::CreateSoundTypes()
 {
 for (INT i = 0; i < 12; i++)
@@ -1055,7 +1055,7 @@ SND_fn_vSetRetSoundChannelType(h,
 }
 }
 
-IMPL_INFERRED("creates 4 DARE volume lines for music, voices, FX and grenade slots")
+IMPL_APPROX("creates 4 DARE volume lines for music, voices, FX and grenade slots")
 void UDareAudioSubsystem::CreateVolumeLines()
 {
 F_LONG(this, 0x228) = SND_fn_lAddSoundVolumeLine((INT)SLOT_Music,         0, 0);
@@ -1064,7 +1064,7 @@ F_LONG(this, 0x230) = SND_fn_lAddSoundVolumeLine((INT)SLOT_SFX,           0, 0);
 F_LONG(this, 0x234) = SND_fn_lAddSoundVolumeLine((INT)SLOT_GrenadeEffect,  0, 0);
 }
 
-IMPL_INFERRED("stops a named DARE sound event by generating a stop event")
+IMPL_APPROX("stops a named DARE sound event by generating a stop event")
 void UDareAudioSubsystem::StopSoundPlaying(FString EventName)
 {
 if (!m_bInitialized) return;
@@ -1084,26 +1084,26 @@ Coordinate system: DARE is right-handed, UE2 is left-handed.
   DARE.z =  UE.Z
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("DARE callback: clears actor info buffer; no per-actor info exposed")
+IMPL_APPROX("DARE callback: clears actor info buffer; no per-actor info exposed")
 void __stdcall UDareAudioSubsystem::GetActorInfo(long ActorId, char* InfoBuffer, long BufferSize)
 {
 if (InfoBuffer && BufferSize > 0)
 InfoBuffer[0] = '\0';
 }
 
-IMPL_INFERRED("DARE callback: all actors link to the single listener micro")
+IMPL_APPROX("DARE callback: all actors link to the single listener micro")
 INT __stdcall UDareAudioSubsystem::GetActorMicroLink(long ActorId, long MicroId)
 {
 return 1; // All actors link to the single listener micro
 }
 
-IMPL_INFERRED("DARE callback: no multi-layer support; always returns 0")
+IMPL_APPROX("DARE callback: no multi-layer support; always returns 0")
 long __stdcall UDareAudioSubsystem::GetActorMultiLayer(long ActorId, long LayerId, int Param)
 {
 return 0;
 }
 
-IMPL_INFERRED("DARE callback: reads actor Location from byte offsets 0x234-0x23c, flips Y axis")
+IMPL_APPROX("DARE callback: reads actor Location from byte offsets 0x234-0x23c, flips Y axis")
 void __stdcall UDareAudioSubsystem::GetActorPos(long ActorId, _SND_tdstVectorFloat* OutPos)
 {
 float* out = reinterpret_cast<float*>(OutPos);
@@ -1115,13 +1115,13 @@ out[1] = -*(float*)(p + 0x238); // -Y (coordinate flip)
 out[2] =  *(float*)(p + 0x23c); //  Z
 }
 
-IMPL_INFERRED("DARE callback: uses default roll-off; always returns 0")
+IMPL_APPROX("DARE callback: uses default roll-off; always returns 0")
 INT __stdcall UDareAudioSubsystem::GetActorRollOff(long ActorId, _SND_tdstRollOffParam* OutRollOff)
 {
 return 0; // Use default roll-off
 }
 
-IMPL_INFERRED("DARE callback: reads actor Velocity from byte offsets 0x24c-0x254, flips Y axis")
+IMPL_APPROX("DARE callback: reads actor Velocity from byte offsets 0x24c-0x254, flips Y axis")
 void __stdcall UDareAudioSubsystem::GetActorSpeed(long ActorId, _SND_tdstVectorFloat* OutSpeed)
 {
 float* out = reinterpret_cast<float*>(OutSpeed);
@@ -1133,13 +1133,13 @@ out[1] = -*(float*)(p + 0x250); // -Velocity.Y (coordinate flip)
 out[2] =  *(float*)(p + 0x254); //  Velocity.Z
 }
 
-IMPL_INFERRED("DARE callback: no switch support; always returns 0")
+IMPL_APPROX("DARE callback: no switch support; always returns 0")
 long __stdcall UDareAudioSubsystem::GetActorSwitch(long ActorId, long SwitchId)
 {
 return 0;
 }
 
-IMPL_INFERRED("DARE callback: reads listener pawn location via viewport controller chain, flips Y axis")
+IMPL_APPROX("DARE callback: reads listener pawn location via viewport controller chain, flips Y axis")
 void __stdcall UDareAudioSubsystem::GetMicroPos(long MicroId, _SND_tdstVectorFloat* OutPos)
 {
 float* out = reinterpret_cast<float*>(OutPos);
@@ -1164,7 +1164,7 @@ out[1] = -*(float*)(p + 0x238); // -Location.Y
 out[2] =  *(float*)(p + 0x23c); //  Location.Z
 }
 
-IMPL_INFERRED("DARE callback: reads listener pawn velocity via viewport controller chain, flips Y axis")
+IMPL_APPROX("DARE callback: reads listener pawn velocity via viewport controller chain, flips Y axis")
 void __stdcall UDareAudioSubsystem::GetMicroSpeed(long MicroId, _SND_tdstVectorFloat* OutSpeed)
 {
 float* out = reinterpret_cast<float*>(OutSpeed);
@@ -1187,7 +1187,7 @@ out[1] = -*(float*)(p + 0x250);
 out[2] =  *(float*)(p + 0x254);
 }
 
-IMPL_INFERRED("DARE callback: reads listener facing direction via FRotatorF from pawn rotation offsets")
+IMPL_APPROX("DARE callback: reads listener facing direction via FRotatorF from pawn rotation offsets")
 void __stdcall UDareAudioSubsystem::GetMicroNormal(long MicroId, _SND_tdstVectorFloat* OutNormal)
 {
 float* out = reinterpret_cast<float*>(OutNormal);
@@ -1219,7 +1219,7 @@ out[1] = -fwd.Y; // coordinate flip
 out[2] =  fwd.Z;
 }
 
-IMPL_INFERRED("DARE callback: listener right vector by rotating yaw 90 degrees via FRotatorF")
+IMPL_APPROX("DARE callback: listener right vector by rotating yaw 90 degrees via FRotatorF")
 void __stdcall UDareAudioSubsystem::GetMicroTangeant(long MicroId, _SND_tdstVectorFloat* OutTangent)
 {
 float* out = reinterpret_cast<float*>(OutTangent);
@@ -1248,7 +1248,7 @@ out[1] = -right.Y;
 out[2] =  right.Z;
 }
 
-IMPL_INFERRED("DARE callback: returns unity coefficients for all sound channel blend factors")
+IMPL_APPROX("DARE callback: returns unity coefficients for all sound channel blend factors")
 void __stdcall UDareAudioSubsystem::GetSoundExtraCoef(long ActorId, _SND_tdstBlockEvent* Event, FLOAT* OutCoef1, FLOAT* OutCoef2, FLOAT* OutCoef3)
 {
 if (OutCoef1) *OutCoef1 = 1.0f;

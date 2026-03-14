@@ -66,7 +66,7 @@ void UClient::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UClient::Exec);
@@ -175,7 +175,7 @@ void UClient::Flush(int)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UClient::Init(UEngine* Engine)
 {
 	guard(UClient::Init);
@@ -187,7 +187,7 @@ void UClient::Init(UEngine* Engine)
 
 
 // --- UPlayer ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UPlayer::Serialize(FArchive &Ar)
 {
 	guard(UPlayer::Serialize);
@@ -203,7 +203,7 @@ void UPlayer::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UPlayer::Exec);
@@ -277,11 +277,11 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 // ============================================================================
 
 // ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
 {
 	if (!UChannel::IsKnownChannelType((INT)ChType))
@@ -346,7 +346,7 @@ UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally,
 
 	return Ch;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UNetConnection::PostSend()
 {
 	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -363,13 +363,13 @@ UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 	guard(UDemoRecConnection::UDemoRecConnection);
 	unguard;
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDemoRecConnection::StaticConstructor() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
 	if (Driver->ServerConnection == NULL) {
@@ -383,19 +383,19 @@ void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 
 // Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
 // JNZ path: if ServerConnection != NULL, cross-function-jump to UNetConnection::FlushNet.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDemoRecConnection::FlushNet() {
 	if (Driver->ServerConnection != NULL)
 		UNetConnection::FlushNet();
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
 // Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }

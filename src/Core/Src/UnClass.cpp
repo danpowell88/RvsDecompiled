@@ -124,7 +124,7 @@ UBOOL UField::MergeBools()
 	return 1;
 }
 
-IMPL_INTENTIONALLY_EMPTY("Retail Core.dll: truly empty, confirmed")
+IMPL_EMPTY("Retail Core.dll: truly empty, confirmed")
 void UField::Bind()
 {
 	// Retail Core.dll: ret (truly empty)

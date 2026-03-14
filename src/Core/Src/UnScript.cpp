@@ -2567,7 +2567,7 @@ void UObject::execVSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 225, execVSize );
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execVSizeSquared( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVSizeSquared);
@@ -2874,7 +2874,7 @@ IMPLEMENT_FUNCTION( UObject, 320, execRotRand );
 	Quaternion functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execQuatProduct( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatProduct);
@@ -2884,7 +2884,7 @@ void UObject::execQuatProduct( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execQuatInvert( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatInvert);
@@ -2893,7 +2893,7 @@ void UObject::execQuatInvert( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execQuatRotateVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatRotateVector);
@@ -2907,7 +2907,7 @@ void UObject::execQuatRotateVector( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execQuatFindBetween( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatFindBetween);
@@ -2930,7 +2930,7 @@ void UObject::execQuatFindBetween( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execQuatFromAxisAndAngle( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatFromAxisAndAngle);
@@ -2945,7 +2945,7 @@ void UObject::execQuatFromAxisAndAngle( FFrame& Stack, RESULT_DECL )
 	InterpCurve functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execInterpCurveEval( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveEval);
@@ -2956,7 +2956,7 @@ void UObject::execInterpCurveEval( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execInterpCurveEval );
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execInterpCurveGetInputDomain( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveGetInputDomain);
@@ -2976,7 +2976,7 @@ void UObject::execInterpCurveGetInputDomain( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execInterpCurveGetOutputRange( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveGetOutputRange);
@@ -3112,7 +3112,7 @@ void UObject::execFindObject( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execFindObject );
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execCalcDirection( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCalcDirection);
@@ -3123,7 +3123,7 @@ void UObject::execCalcDirection( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCalcRotation);
@@ -3134,7 +3134,7 @@ void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 
 static const TCHAR* GCompressedStringPrefix = TEXT("R6C1:");
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3145,7 +3145,7 @@ static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 		OutBytes(i) = ToAnsi( Chars[i] );
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 {
 	FString Out;
@@ -3157,7 +3157,7 @@ static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes, UBOOL Encode )
 {
 	FBufferReader Reader( InBytes );
@@ -3168,7 +3168,7 @@ static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BY
 		Codec.Decode( Reader, Writer );
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecRLE Stage1;
@@ -3184,7 +3184,7 @@ static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutB
 	RunCodecStage( Stage5, Buffer4, OutBytes, 1 );
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecHuffman Stage1;
@@ -3200,13 +3200,13 @@ static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutByt
 	RunCodecStage( Stage5, Buffer4, OutBytes, 0 );
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static TCHAR EncodeHexNibble( BYTE Value )
 {
 	return Value < 10 ? TEXT('0') + Value : TEXT('A') + (Value - 10);
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static INT DecodeHexNibble( TCHAR Ch )
 {
 	if( Ch >= TEXT('0') && Ch <= TEXT('9') )
@@ -3218,7 +3218,7 @@ static INT DecodeHexNibble( TCHAR Ch )
 	return INDEX_NONE;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 {
 	const INT PrefixLen = appStrlen( GCompressedStringPrefix );
@@ -3236,7 +3236,7 @@ static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3262,7 +3262,7 @@ static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 	return 1;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCompress);
@@ -3277,7 +3277,7 @@ void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execExpand);
@@ -3485,7 +3485,7 @@ IMPLEMENT_FUNCTION( UObject, 0, execGetEnum );
 	Ravenshield INI profile functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPrivateProfileInt);
@@ -3497,7 +3497,7 @@ void UObject::execGetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPrivateProfileString);
@@ -3509,7 +3509,7 @@ void UObject::execGetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPrivateProfileInt);
@@ -3520,7 +3520,7 @@ void UObject::execSetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPrivateProfileString);
@@ -3531,7 +3531,7 @@ void UObject::execSetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSavePrivateProfile( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSavePrivateProfile);
@@ -3543,7 +3543,7 @@ void UObject::execSavePrivateProfile( FFrame& Stack, RESULT_DECL )
 	Ravenshield-specific version/platform/filter functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetPlatform( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPlatform);
@@ -3551,7 +3551,7 @@ void UObject::execGetPlatform( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetVersionWarfareEngine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionWarfareEngine);
@@ -3559,7 +3559,7 @@ void UObject::execGetVersionWarfareEngine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetVersionAGPMajor( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPMajor);
@@ -3567,7 +3567,7 @@ void UObject::execGetVersionAGPMajor( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetVersionAGPMinor( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPMinor);
@@ -3575,7 +3575,7 @@ void UObject::execGetVersionAGPMinor( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetVersionAGPTiny( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPTiny);
@@ -3583,7 +3583,7 @@ void UObject::execGetVersionAGPTiny( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execIsDebugBuild( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIsDebugBuild);
@@ -3595,7 +3595,7 @@ void UObject::execIsDebugBuild( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetMilesOnly( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetMilesOnly);
@@ -3603,7 +3603,7 @@ void UObject::execGetMilesOnly( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetMilesOnly( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetMilesOnly);
@@ -3611,7 +3611,7 @@ void UObject::execSetMilesOnly( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetNoBlood( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNoBlood);
@@ -3619,7 +3619,7 @@ void UObject::execGetNoBlood( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetNoBlood( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetNoBlood);
@@ -3627,7 +3627,7 @@ void UObject::execSetNoBlood( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetNoSniper( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNoSniper);
@@ -3635,7 +3635,7 @@ void UObject::execGetNoSniper( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetNoSniper( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetNoSniper);
@@ -3643,7 +3643,7 @@ void UObject::execSetNoSniper( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetLanguageFilter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetLanguageFilter);
@@ -3651,7 +3651,7 @@ void UObject::execGetLanguageFilter( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetLanguageFilter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetLanguageFilter);
@@ -3659,7 +3659,7 @@ void UObject::execSetLanguageFilter( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetInputKeyString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetInputKeyString);
@@ -3668,7 +3668,7 @@ void UObject::execGetInputKeyString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetBaseDir( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetBaseDir);
@@ -3694,7 +3694,7 @@ IMPLEMENT_FUNCTION( UObject, 0x46, execPrimitiveCast );
 	Private set handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execPrivateSet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrivateSet);
@@ -3712,7 +3712,7 @@ enum { MAX_SCRIPT_FILE_HANDLES = 64 };
 static FArchive* GScriptFileHandles[MAX_SCRIPT_FILE_HANDLES];
 static UBOOL GScriptFileHandlesInit = 0;
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static void InitFileHandles()
 {
 	if( !GScriptFileHandlesInit )
@@ -3722,7 +3722,7 @@ static void InitFileHandles()
 	}
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static INT AllocFileHandle( FArchive* Ar )
 {
 	InitFileHandles();
@@ -3738,7 +3738,7 @@ static INT AllocFileHandle( FArchive* Ar )
 	return -1;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static FArchive* GetFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3747,7 +3747,7 @@ static FArchive* GetFileHandle( INT Handle )
 	return NULL;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 static void FreeFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3758,7 +3758,7 @@ static void FreeFileHandle( INT Handle )
 	}
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFOpen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFOpen);
@@ -3773,7 +3773,7 @@ void UObject::execFOpen( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFOpenWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFOpenWrite);
@@ -3783,7 +3783,7 @@ void UObject::execFOpenWrite( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFClose( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFClose);
@@ -3792,7 +3792,7 @@ void UObject::execFClose( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFReadLine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFReadLine);
@@ -3818,7 +3818,7 @@ void UObject::execFReadLine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFWrite);
@@ -3836,7 +3836,7 @@ void UObject::execFWrite( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFWriteLine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFWriteLine);
@@ -3856,7 +3856,7 @@ void UObject::execFWriteLine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFLoad( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFLoad);
@@ -3876,7 +3876,7 @@ void UObject::execFLoad( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFUnload( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFUnload);
@@ -3889,7 +3889,7 @@ void UObject::execFUnload( FFrame& Stack, RESULT_DECL )
 	Log file functions — Ravenshield additions.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execLogFileOpen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileOpen);
@@ -3899,7 +3899,7 @@ void UObject::execLogFileOpen( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execLogFileClose( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileClose);
@@ -3908,7 +3908,7 @@ void UObject::execLogFileClose( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execLogFileWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileWrite);
@@ -3934,7 +3934,7 @@ void UObject::execLogFileWrite( FFrame& Stack, RESULT_DECL )
 -----------------------------------------------------------------------------*/
 
 // native(1227)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execItoa( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execItoa);
@@ -3946,7 +3946,7 @@ void UObject::execItoa( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1227, execItoa );
 
 // native(1228)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execAtoi( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAtoi);
@@ -3958,7 +3958,7 @@ void UObject::execAtoi( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1228, execAtoi );
 
 // native(1306)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execStrnicmp( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStrnicmp);
@@ -3972,7 +3972,7 @@ void UObject::execStrnicmp( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1306, execStrnicmp );
 
 // native(238) R6CODE — RemoveInvalidChars replaces Localize at this index.
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execRemoveInvalidChars( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRemoveInvalidChars);
@@ -3993,7 +3993,7 @@ void UObject::execRemoveInvalidChars( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 238, execRemoveInvalidChars );
 
 // native(2718)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execLogSnd( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogSnd);
@@ -4009,7 +4009,7 @@ void UObject::execLogSnd( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 2718, execLogSnd );
 
 // native(1010)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execLoadConfig( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLoadConfig);
@@ -4027,7 +4027,7 @@ static TArray<UClass*>* GPkgIterArray    = NULL;
 static INT              GPkgIterIndex    = 0;
 
 // native(1005)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetFirstPackageClass( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetFirstPackageClass);
@@ -4072,7 +4072,7 @@ void UObject::execGetFirstPackageClass( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1005, execGetFirstPackageClass );
 
 // native(1006)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetNextClass( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNextClass);
@@ -4086,7 +4086,7 @@ void UObject::execGetNextClass( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1006, execGetNextClass );
 
 // native(1301)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execRewindToFirstClass( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRewindToFirstClass);
@@ -4099,7 +4099,7 @@ void UObject::execRewindToFirstClass( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1301, execRewindToFirstClass );
 
 // native(1007)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execFreePackageObjects( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFreePackageObjects);
@@ -4118,7 +4118,7 @@ void UObject::execFreePackageObjects( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1007, execFreePackageObjects );
 
 // native(1850)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execClearOuter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClearOuter);
@@ -4129,7 +4129,7 @@ void UObject::execClearOuter( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1850, execClearOuter );
 
 // native(1852)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execClock( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClock);
@@ -4140,7 +4140,7 @@ void UObject::execClock( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1852, execClock );
 
 // native(1853)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execUnclock( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execUnclock);
@@ -4151,7 +4151,7 @@ void UObject::execUnclock( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1853, execUnclock );
 
 // native(1851)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execShortestAngle2D( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execShortestAngle2D);
@@ -4167,7 +4167,7 @@ void UObject::execShortestAngle2D( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1851, execShortestAngle2D );
 
 // native(1854)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execGetRegistryKey( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetRegistryKey);
@@ -4185,7 +4185,7 @@ void UObject::execGetRegistryKey( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 1854, execGetRegistryKey );
 
 // native(1855)
-IMPL_INFERRED("Ravenshield-specific; not present in UT99 base")
+IMPL_APPROX("Ravenshield-specific; not present in UT99 base")
 void UObject::execSetRegistryKey( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetRegistryKey);

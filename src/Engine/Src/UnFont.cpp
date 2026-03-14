@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FFontCharacter ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 {
 	appMemcpy( this, &Other, sizeof(FFontCharacter) );
@@ -24,7 +24,7 @@ FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 
 
 // --- FFontPage ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FFontPage::FFontPage(FFontPage const &Other)
 {
 	// Ghidra 0x27800: no vtable; 2 DWORDs at +0,+4; TArray<FLineVertex> at +8 (stride 0x10)
@@ -32,21 +32,21 @@ FFontPage::FFontPage(FFontPage const &Other)
 	new ((BYTE*)this + 0x08) TArray<FLineVertex>(*(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x08));
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FFontPage::FFontPage()
 {
 	// Initialize TArray<FLineVertex> at +8 to empty
 	new ((BYTE*)this + 0x08) TArray<FLineVertex>();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FFontPage::~FFontPage()
 {
 	// Ghidra 0x103277f0: destroy TArray<FLineVertex> at +8 (stride 0x10, POD elements)
 	((TArray<FLineVertex>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FFontPage& FFontPage::operator=(const FFontPage& Other)
 {
 	// Ghidra 0x27830: 2 DWORDs at +0,+4, then TArray<FLineVertex> at +8
@@ -58,7 +58,7 @@ FFontPage& FFontPage::operator=(const FFontPage& Other)
 
 
 // --- UFont ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 _WORD UFont::RemapChar(_WORD Char)
 {
 	// Retail: 15b. If remap table ptr at this+0x50 is null, return Char unchanged.

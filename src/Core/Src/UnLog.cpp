@@ -69,43 +69,43 @@ void FOutputDevice::Logf( enum EName Type, const TCHAR* Fmt, ... )
 	FErrorOutError / FLogOutError / FNullOutError / FThrowOut classes.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FErrorOutError::FErrorOutError() {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FErrorOutError::FErrorOutError( const FErrorOutError& ) {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FErrorOutError& FErrorOutError::operator=( const FErrorOutError& ) { return *this; }
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 void FErrorOutError::Serialize( const TCHAR* V, EName Event )
 {
 	if( GError )
 		GError->Serialize( V, Event );
 }
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 void FErrorOutError::HandleError()
 {
 	if( GError )
 		GError->HandleError();
 }
 
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FLogOutError::FLogOutError() {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FLogOutError::FLogOutError( const FLogOutError& ) {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FLogOutError& FLogOutError::operator=( const FLogOutError& ) { return *this; }
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 void FLogOutError::Serialize( const TCHAR* V, EName Event )
 {
 	if( GLog )
 		GLog->Serialize( V, Event );
 }
 
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FNullOutError::FNullOutError() {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FNullOutError::FNullOutError( const FNullOutError& ) {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
 IMPL_GHIDRA("Core.dll", 0x1290)
 void FNullOutError::Serialize( const TCHAR* V, EName Event )
@@ -115,13 +115,13 @@ void FNullOutError::Serialize( const TCHAR* V, EName Event )
 	unguard;
 }
 
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FThrowOut::FThrowOut() {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FThrowOut::FThrowOut( const FThrowOut& ) {}
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FThrowOut& FThrowOut::operator=( const FThrowOut& ) { return *this; }
-IMPL_INFERRED("Ravenshield-specific output device; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 void FThrowOut::Serialize( const TCHAR* V, EName Event )
 {
 	appThrowf( TEXT("%s"), V );
@@ -131,7 +131,7 @@ void FThrowOut::Serialize( const TCHAR* V, EName Event )
 	FFrame::Serialize.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("retail 0x1bd50: logs script frame context to GLog/GError")
+IMPL_APPROX("retail 0x1bd50: logs script frame context to GLog/GError")
 void FFrame::Serialize( const TCHAR* V, EName Event )
 {
 	guard(FFrame::Serialize);

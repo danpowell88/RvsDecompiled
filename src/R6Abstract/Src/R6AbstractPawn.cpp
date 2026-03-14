@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6AbstractPawn)
 
 // --- AR6AbstractPawn ---
 
-IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 FLOAT AR6AbstractPawn::eventGetSkill(BYTE eSkillName)
 {
 	struct { BYTE eSkillName; FLOAT ReturnValue; } Parms;

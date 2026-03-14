@@ -49,14 +49,14 @@ float FBezier::Evaluate(FVector *,int,TArray<FVector> *)
 // ============================================================================
 
 // ??4FPoly@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("copy via appMemcpy")
+IMPL_APPROX("copy via appMemcpy")
 FPoly & FPoly::operator=(FPoly const & Other) {
 	appMemcpy(this, &Other, sizeof(FPoly));
 	return *this;
 }
 
 // ?GetTextureSize@FPoly@@QAE?AVFVector@@XZ
-IMPL_INFERRED("returns material UV size or default 256x256")
+IMPL_APPROX("returns material UV size or default 256x256")
 FVector FPoly::GetTextureSize()
 {
 	if( !Material )
@@ -66,7 +66,7 @@ FVector FPoly::GetTextureSize()
 
 // --- Moved from EngineStubs.cpp ---
 // ?Area@FPoly@@QAEMXZ
-IMPL_INFERRED("triangle fan area accumulation from vertex 0")
+IMPL_APPROX("triangle fan area accumulation from vertex 0")
 float FPoly::Area() {
 	FLOAT TotalArea = 0.f;
 	FVector Side1 = Vertex[1] - Vertex[0];
@@ -79,7 +79,7 @@ float FPoly::Area() {
 	return TotalArea;
 }
 // ?CalcNormal@FPoly@@QAEHH@Z
-IMPL_INFERRED("cross-product normal from vertex fan")
+IMPL_APPROX("cross-product normal from vertex fan")
 int FPoly::CalcNormal(int bSilent) {
 	Normal = FVector(0,0,0);
 	for( INT i=2; i<NumVertices; i++ )
@@ -114,7 +114,7 @@ int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection)
 }
 
 // ?Faces@FPoly@@QBEHABV1@@Z
-IMPL_INFERRED("coplanar and dot-product face test; checks vertex distances between both polys")
+IMPL_APPROX("coplanar and dot-product face test; checks vertex distances between both polys")
 int FPoly::Faces(FPoly const & Other) const {
 	if( IsCoplanar(Other) )
 		return 0;
@@ -168,7 +168,7 @@ int FPoly::Finalize(int bSilent) {
 }
 
 // ?Fix@FPoly@@QAEHXZ
-IMPL_INFERRED("removes duplicate adjacent vertices")
+IMPL_APPROX("removes duplicate adjacent vertices")
 int FPoly::Fix()
 {
 	INT j = 0;
@@ -194,13 +194,13 @@ int FPoly::Fix()
 }
 
 // ?IsBackfaced@FPoly@@QBEHABVFVector@@@Z
-IMPL_INFERRED("dot product backface test")
+IMPL_APPROX("dot product backface test")
 int FPoly::IsBackfaced(FVector const & Point) const {
 	return ((Point - Base) | Normal) < 0.f;
 }
 
 // ?IsCoplanar@FPoly@@QBEHABV1@@Z
-IMPL_INFERRED("plane-distance and normal-dot coplanarity test")
+IMPL_APPROX("plane-distance and normal-dot coplanarity test")
 int FPoly::IsCoplanar(FPoly const & Other) const {
 	FLOAT d = (Base - Other.Base) | Normal;
 	if( d < 0.f ) d = -d;
@@ -214,7 +214,7 @@ int FPoly::IsCoplanar(FPoly const & Other) const {
 }
 
 // ?OnPlane@FPoly@@QAEHVFVector@@@Z
-IMPL_INFERRED("signed distance from plane test")
+IMPL_APPROX("signed distance from plane test")
 int FPoly::OnPlane(FVector Point) {
 	FLOAT d = (Point - Vertex[0]) | Normal;
 	return (d > -0.1f && d < 0.1f) ? 1 : 0;
@@ -239,7 +239,7 @@ int FPoly::OnPoly(FVector Point) {
 }
 
 // ?Split@FPoly@@QAEHABVFVector@@0H@Z
-IMPL_INFERRED("splits polygon against plane using SplitWithPlaneFast")
+IMPL_APPROX("splits polygon against plane using SplitWithPlaneFast")
 int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
 {
 	if (NoOverflow && NumVertices >= 14)
@@ -263,7 +263,7 @@ int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
 }
 
 // ?SplitPrecise@FPoly@@QAEHABVFVector@@0H@Z
-IMPL_INFERRED("splits polygon precisely using SplitWithPlaneFastPrecise")
+IMPL_APPROX("splits polygon precisely using SplitWithPlaneFastPrecise")
 int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverflow)
 {
 	if (NoOverflow && NumVertices >= 14)
@@ -297,7 +297,7 @@ int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverfl
 //   Model+0x8c = Points.Data (FVector array,  stride 0x0c)
 //   Model+0x9c = Surfs.Data  (FBspSurf array, stride 0x5c; vNormal INT at +0x0c)
 // FBspNode field offsets: iVertPool at +0x30, iSurf at +0x34
-IMPL_INFERRED("splits against BSP node plane reading UModel raw offsets; Ghidra-verified layout")
+IMPL_APPROX("splits against BSP node plane reading UModel raw offsets; Ghidra-verified layout")
 int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int p4) const
 {
 	const BYTE* NodesData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x5c);
@@ -322,7 +322,7 @@ int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int 
 // ?SplitWithPlane@FPoly@@QBEHABVFVector@@0PAV1@1H@Z
 // Same split logic as SplitWithPlaneFast but takes Base+Normal instead of FPlane.
 // bNormal flag (p4): if non-zero, calls CalcNormal on each output polygon.
-IMPL_INFERRED("delegates to SplitWithPlaneFast with optional normal recalculation")
+IMPL_APPROX("delegates to SplitWithPlaneFast with optional normal recalculation")
 int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FPoly * p3, int p4) const
 {
 	FPlane Plane(p1.X, p1.Y, p1.Z, p1 | p0);
@@ -339,7 +339,7 @@ int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FP
 // Splits this polygon against a plane using THRESH_SPLIT_POLY_WITH_PLANE (0.25).
 // Returns SP_Front, SP_Back, SP_Coplanar, or SP_Split.
 // Out-polys (FrontPoly/BackPoly) may be NULL when the result is one-sided.
-IMPL_INFERRED("Sutherland-Hodgman polygon clip against plane with THRESH_SPLIT_POLY_WITH_PLANE")
+IMPL_APPROX("Sutherland-Hodgman polygon clip against plane with THRESH_SPLIT_POLY_WITH_PLANE")
 int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 {
 	const FLOAT Thresh = THRESH_SPLIT_POLY_WITH_PLANE;
@@ -401,7 +401,7 @@ int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 
 // ?SplitWithPlaneFastPrecise@FPoly@@QBEHVFPlane@@PAV1@1@Z
 // Same as SplitWithPlaneFast but uses THRESH_SPLIT_POLY_PRECISELY (0.01).
-IMPL_INFERRED("Sutherland-Hodgman clip with THRESH_SPLIT_POLY_PRECISELY")
+IMPL_APPROX("Sutherland-Hodgman clip with THRESH_SPLIT_POLY_PRECISELY")
 int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
 {
 	const FLOAT Thresh = THRESH_SPLIT_POLY_PRECISELY;
@@ -479,7 +479,7 @@ int FPoly::operator==(FPoly Other) {
 	return 1;
 }
 // ?Init@FPoly@@QAEXXZ
-IMPL_INFERRED("zero-initializes all FPoly fields with LightMapScale and sentinel values")
+IMPL_APPROX("zero-initializes all FPoly fields with LightMapScale and sentinel values")
 void FPoly::Init() {
 	Base     = FVector(0,0,0);
 	Normal   = FVector(0,0,0);
@@ -504,7 +504,7 @@ void FPoly::Init() {
 
 // ?InsertVertex@FPoly@@QAEXHVFVector@@@Z
 // NOTE: Original uses temp TArray copy+insert+copyback. Simplified to in-place shift.
-IMPL_INFERRED("simplified in-place shift; original uses TArray copy+insert+copyback")
+IMPL_APPROX("simplified in-place shift; original uses TArray copy+insert+copyback")
 void FPoly::InsertVertex(int InPos, FVector InVtx)
 {
 	check(InPos <= NumVertices);
@@ -515,7 +515,7 @@ void FPoly::InsertVertex(int InPos, FVector InVtx)
 }
 
 // ?Reverse@FPoly@@QAEXXZ
-IMPL_INFERRED("negates normal, reverses vertex winding")
+IMPL_APPROX("negates normal, reverses vertex winding")
 void FPoly::Reverse() {
 	Normal *= -1.f;
 	for( INT i=0; i<NumVertices/2; i++ ) {
@@ -587,7 +587,7 @@ void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, 
 // Removes collinear (in-line) vertices. A vertex is collinear if it lies within
 // THRESH_POINT_ON_SIDE of the line connecting its two neighbours.
 // Returns final vertex count.
-IMPL_INFERRED("removes vertices within THRESH_POINT_ON_SIDE of their neighbour edge")
+IMPL_APPROX("removes vertices within THRESH_POINT_ON_SIDE of their neighbour edge")
 INT FPoly::RemoveColinears()
 {
 	BYTE Colinear[16];
@@ -616,7 +616,7 @@ INT FPoly::RemoveColinears()
 // TArray<BYTE> operators
 // ============================================================================
 // Ghidra: appends elements from Other to this, element-by-element via FArray::Add
-IMPL_INFERRED("element-by-element append via FArray::Add; Ghidra-verified")
+IMPL_APPROX("element-by-element append via FArray::Add; Ghidra-verified")
 TArray<BYTE>& TArray<BYTE>::operator+(const TArray<BYTE>& Other)
 {
 	if (this != &Other)
@@ -631,7 +631,7 @@ TArray<BYTE>& TArray<BYTE>::operator+(const TArray<BYTE>& Other)
 }
 
 // Ghidra: delegates to operator+ then operator= (self)
-IMPL_INFERRED("delegates to operator+ then returns self; Ghidra-verified")
+IMPL_APPROX("delegates to operator+ then returns self; Ghidra-verified")
 TArray<BYTE>& TArray<BYTE>::operator+=(const TArray<BYTE>& Other)
 {
 	if (this != &Other)

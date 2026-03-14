@@ -11,13 +11,13 @@ IMPLEMENT_FUNCTION(UR6FileManagerCampaign, -1, execSaveCampaign)
 
 // --- UR6FileManagerCampaign ---
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UR6FileManagerCampaign::execLoadCampaign(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UR6FileManagerCampaign::execSaveCampaign(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

@@ -11,7 +11,7 @@ static FLOAT GInteractiveObject_OldNetDamagePercentage;
 
 // --- AR6InteractiveObject ---
 
-IMPL_INFERRED("Validates StaticMesh tags referenced in the interactive object state list")
+IMPL_APPROX("Validates StaticMesh tags referenced in the interactive object state list")
 void AR6InteractiveObject::CheckForErrors()
 {
 	guard(AR6InteractiveObject::CheckForErrors);
@@ -48,7 +48,7 @@ void AR6InteractiveObject::CheckForErrors()
 	unguard;
 }
 
-IMPL_INFERRED("Fires damage state event on net damage change; syncs replicated skins to Skins array")
+IMPL_APPROX("Fires damage state event on net damage change; syncs replicated skins to Skins array")
 void AR6InteractiveObject::PostNetReceive()
 {
 	guard(AR6InteractiveObject::PostNetReceive);
@@ -75,14 +75,14 @@ void AR6InteractiveObject::PostNetReceive()
 
 // Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
 // Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
-IMPL_INTENTIONALLY_EMPTY("Verified no-op in Ghidra at 0x1c220; body is just return")
+IMPL_EMPTY("Verified no-op in Ghidra at 0x1c220; body is just return")
 void AR6InteractiveObject::PostScriptDestroyed()
 {
 	guard(AR6InteractiveObject::PostScriptDestroyed);
 	unguard;
 }
 
-IMPL_INFERRED("Caches net damage percentage before net receive for change detection in PostNetReceive")
+IMPL_APPROX("Caches net damage percentage before net receive for change detection in PostNetReceive")
 void AR6InteractiveObject::PreNetReceive()
 {
 	guard(AR6InteractiveObject::PreNetReceive);
@@ -91,7 +91,7 @@ void AR6InteractiveObject::PreNetReceive()
 	unguard;
 }
 
-IMPL_INFERRED("Draws a debug sphere at the object's trigger radius location when selected in the editor")
+IMPL_APPROX("Draws a debug sphere at the object's trigger radius location when selected in the editor")
 void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6InteractiveObject::RenderEditorInfo);
@@ -118,7 +118,7 @@ void AR6InteractiveObject::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderI
 	unguard;
 }
 
-IMPL_INFERRED("R6-specific trace filter: checks shot-through, see-through, bullet/pawn pass-through, and corona visibility flags")
+IMPL_APPROX("R6-specific trace filter: checks shot-through, see-through, bullet/pawn pass-through, and corona visibility flags")
 INT AR6InteractiveObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6InteractiveObject::ShouldTrace);
@@ -160,7 +160,7 @@ INT AR6InteractiveObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_INFERRED("Standard UObject event thunk")
+IMPL_APPROX("Standard UObject event thunk")
 void AR6InteractiveObject::eventSetNewDamageState(FLOAT A)
 {
 	struct { FLOAT A; } Parms;

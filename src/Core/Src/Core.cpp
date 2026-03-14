@@ -184,7 +184,7 @@ private:
 	HANDLE Heap;
 };
 
-IMPL_INFERRED("Core pre-init CRC table bootstrap; Ravenshield-specific")
+IMPL_APPROX("Core pre-init CRC table bootstrap; Ravenshield-specific")
 static void appInitPreloadCRCTable()
 {
 	for( DWORD iCRC=0; iCRC<256; iCRC++ )
@@ -196,7 +196,7 @@ static void appInitPreloadCRCTable()
 	}
 }
 
-IMPL_INFERRED("Core pre-init allocator factory; Ravenshield-specific")
+IMPL_APPROX("Core pre-init allocator factory; Ravenshield-specific")
 static FCoreBootstrapMalloc& GetCorePreInitMalloc()
 {
 	static FCoreBootstrapMalloc Malloc;

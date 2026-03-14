@@ -44,13 +44,13 @@ void AR6DemolitionsGadget::PostNetReceive()
 		eventNbBulletChange();
 }
 
-IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6DemolitionsGadget::eventNbBulletChange()
 {
 	ProcessEvent(FindFunctionChecked(R6WEAPONS_NbBulletChange), NULL);
 }
 
-IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6DemolitionsGadget::eventSetGadgetStaticMesh()
 {
 	ProcessEvent(FindFunctionChecked(R6WEAPONS_SetGadgetStaticMesh), NULL);

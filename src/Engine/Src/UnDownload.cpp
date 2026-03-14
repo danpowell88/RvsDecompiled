@@ -38,7 +38,7 @@ int UBinaryFileDownload::TrySkipFile()
 }
 
 // (merged from earlier occurrence)
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 {
 	// Retail: 0x189270. Lazy-opens a write-file at path this+0x4C, then appends Data bytes.
@@ -63,14 +63,14 @@ void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 {
 	// Retail: 0x14770 (shared empty stub)
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UBinaryFileDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x1891e0. UChannelDownload::Serialize + serialize connection ptr at this+0x458.
 	UChannelDownload::Serialize(Ar);
 	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UBinaryFileDownload::Destroy()
 {
 	// Retail: 0x189a30. Clear connection back-pointer at conn+0x68, call UChannelDownload::Destroy.
@@ -81,7 +81,7 @@ void UBinaryFileDownload::Destroy()
 	*(INT*)((BYTE*)this + 0x458) = 0;
 	UChannelDownload::Destroy();
 }
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UBinaryFileDownload::DownloadDone()
 {
 	// Retail: 0x189330. Closes the file write handle and notifies connection.
@@ -113,7 +113,7 @@ void UChannelDownload::StaticConstructor()
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UChannelDownload::TrySkipFile()
 {
 	guard(UChannelDownload::TrySkipFile);
@@ -136,7 +136,7 @@ int UChannelDownload::TrySkipFile()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex, const TCHAR* Data, int DataSize)
 {
 	// Retail: 0x1898c0, 310b.
@@ -168,7 +168,7 @@ void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex,
 	ch->SendBunch(&bunch, 0);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UChannelDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x188f20, 84b.
@@ -176,7 +176,7 @@ void UChannelDownload::Serialize(FArchive& Ar)
 	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UChannelDownload::Destroy()
 {
 	// Retail: 0x1890d0, 84b. Clear the channel's back-pointer, then chain to base Destroy.
@@ -203,7 +203,7 @@ void UDownload::Tick()
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UDownload::TrySkipFile()
 {
 	// Retail (28b, RVA 0x188AF0): need the connection object at +0x48 to exist,
@@ -216,7 +216,7 @@ int UDownload::TrySkipFile()
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDownload::ReceiveData(BYTE* Data, int Size)
 {
 	// Retail: 0x188b10, 544b. Lazy-open a temp file on the first call, then append data.
@@ -245,7 +245,7 @@ void UDownload::ReceiveData(BYTE* Data, int Size)
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR* /*Data*/, int /*DataSize*/)
 {
 	// Retail: 32b. Stores connection/channel, computes channel base offset.
@@ -255,7 +255,7 @@ void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR
 	*(INT*)((BYTE*)this + 0x34) = Channel * 0x44 + *(INT*)(ChannelTable + 0x2C);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x188a60, 82b.
@@ -263,7 +263,7 @@ void UDownload::Serialize(FArchive& Ar)
 	Ar << *(UObject**)((BYTE*)this + 0x2c);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDownload::Destroy()
 {
 	// Retail: 0x188df0, 124b. Close and delete the temp file, clear connection back-pointer.
@@ -358,7 +358,7 @@ void UDownload::DownloadDone()
 	*(INT*)((BYTE*)this + 0x2c) = 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UDownload::DownloadError(const TCHAR* Error)
 {
 	// Retail: 0x188d70, 79b. Copy error string into the error buffer at +0x24c.

@@ -19,7 +19,7 @@ inline void  operator delete(void*, void*) noexcept {}
 static UPrimitive* GProjectorPrimitive = NULL;
 
 // --- AProjector ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int AProjector::ShouldTrace(AActor * Other, DWORD TraceFlags)
 {
 	if (TraceFlags & 0x4000)
@@ -27,7 +27,7 @@ int AProjector::ShouldTrace(AActor * Other, DWORD TraceFlags)
 	return AActor::ShouldTrace(Other, TraceFlags);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::TickSpecial(float DeltaTime)
 {
 	// When the projector uses rotating physics, recalculate its projection matrix.
@@ -36,7 +36,7 @@ void AProjector::TickSpecial(float DeltaTime)
 		CalcMatrix();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::UpdateParticleMaterial(UParticleMaterial* PM, int Index)
 {
 	// Retail: 0xfad80, 162b. Copy projector texture + matrix rows + flags into a
@@ -51,7 +51,7 @@ void AProjector::UpdateParticleMaterial(UParticleMaterial* PM, int Index)
 	*(DWORD*)((BYTE*)PM + Index * 0x4c + 0xd0) = (DWORD)*(BYTE*)((BYTE*)this + 0x395);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	// Retail: 0x10b970, 86b.
@@ -59,7 +59,7 @@ void AProjector::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterfa
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::RenderWireframe(FRenderInterface* RI)
 {
 	// Retail: 0xf8ae0, 1200b. Draws the projector volume as a wireframe box.
@@ -105,7 +105,7 @@ void AProjector::RenderWireframe(FRenderInterface* RI)
 	lb.DrawLine(farPts[3], nearPts[3], col);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::PostEditChange()
 {
 	// Retail: 0x6020, 31b. Reattach on property change.
@@ -126,7 +126,7 @@ void AProjector::PostEditMove()
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::Abandon()
 {
 	// Retail: 0xfb7f0, 103b. Decrement the render-info refcount and free when zero.
@@ -144,7 +144,7 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::Attach()
 {
 	// Retail: 0xfb160, 1291b. Build the projection matrix then allocate and populate
@@ -208,7 +208,7 @@ void AProjector::CalcMatrix()
 	// DIVERGENCE: FCoords construction and matrix-multiply helpers not reconstructed.
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::Destroy()
 {
 	// Retail: 0x60a0, 21b.
@@ -216,7 +216,7 @@ void AProjector::Destroy()
 	AActor::Destroy();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::Detach(int Flush)
 {
 	// Retail: 0xfb6e0, 209b. Timestamp the render info with the current TSC-based
@@ -246,7 +246,7 @@ void AProjector::Detach(int Flush)
 	*(DWORD*)((BYTE*)this + 0x48c) = 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 UPrimitive * AProjector::GetPrimitive()
 {
 	// Ghidra 0xfaca0: lazily constructs a singleton UProjectorPrimitive (DAT_10780140).
@@ -261,7 +261,7 @@ UPrimitive * AProjector::GetPrimitive()
 
 
 // --- UProjectorPrimitive ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UProjectorPrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
 	// Ghidra 0xfa470: projector frustum line-check against 6 clip planes.
@@ -292,7 +292,7 @@ int UProjectorPrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector 
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UProjectorPrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
 {
 	// Ghidra 0xfa360: projector frustum point-check (no SEH frame).
@@ -316,7 +316,7 @@ int UProjectorPrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UProjectorPrimitive::Destroy()
 {
 	// Retail: 0xf8270, 73b. Clear the singleton primitive global then chain to base.
@@ -324,14 +324,14 @@ void UProjectorPrimitive::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FBox UProjectorPrimitive::GetCollisionBoundingBox(AActor const *) const
 {
 	// Retail: 30b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x470.
 	return *(FBox*)((BYTE*)this + 0x470);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector UProjectorPrimitive::GetEncroachCenter(AActor* Actor)
 {
 	// Retail: 41b. Allocates temp FBox, calls virtual GetCollisionBoundingBox(Actor),
@@ -339,7 +339,7 @@ FVector UProjectorPrimitive::GetEncroachCenter(AActor* Actor)
 	return GetCollisionBoundingBox(Actor).GetCenter();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector UProjectorPrimitive::GetEncroachExtent(AActor* Actor)
 {
 	// Retail: 41b. Same pattern as GetEncroachCenter but calls FBox::GetExtent().

@@ -54,7 +54,7 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
-IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
+IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -141,7 +141,7 @@ void AVolume::PostBeginPlay()
 	unguard;
 }
 
-IMPL_INFERRED("No Ghidra RVA; Brush PointCheck pattern inferred from Ghidra notes")
+IMPL_APPROX("No Ghidra RVA; Brush PointCheck pattern inferred from Ghidra notes")
 int AVolume::Encompasses(FVector Location)
 {
 	// Ghidra: Check if Brush is NULL (offset 0x178), return 0 if so.

@@ -221,7 +221,7 @@ INT FBitReader::GetPosBits()
 	The copy ctor and operator= are implicitly declared but must be
 	exported (CORE_API on the struct).  MSVC only emits them when used.
 -----------------------------------------------------------------------------*/
-IMPL_INFERRED("link-time emission helper for FBitReader special members")
+IMPL_APPROX("link-time emission helper for FBitReader special members")
 void _ForceFBitReaderEmit() {
 	FBitReader a;
 	FBitReader b(a);

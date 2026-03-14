@@ -23,7 +23,7 @@
 
 CORE_API DWORD GCRCTable[256];
 
-IMPL_INFERRED("CRC table init; reconstructed")
+IMPL_APPROX("CRC table init; reconstructed")
 static void appInitCRCTable()
 {
 	for( DWORD iCRC=0; iCRC<256; iCRC++ )
@@ -1673,7 +1673,7 @@ CORE_API UBOOL appGetProcReturnCode( void* ProcHandle, INT* ReturnCode )
 	unguard;
 }
 
-IMPL_INFERRED("Ravenshield-specific PunkBuster check")
+IMPL_APPROX("Ravenshield-specific PunkBuster check")
 CORE_API INT appIsPBInstalled()
 {
 	// Check for pb\pbsv.dll via GFileManager — returns 1 if present.
@@ -1682,7 +1682,7 @@ CORE_API INT appIsPBInstalled()
 	return 0;
 }
 
-IMPL_INFERRED("Ravenshield-specific overload of appMsgf")
+IMPL_APPROX("Ravenshield-specific overload of appMsgf")
 CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -1692,7 +1692,7 @@ CORE_API const INT appMsgf( INT Type, const TCHAR* Fmt, ... )
 	return 1;
 }
 
-IMPL_INFERRED("Ravenshield-specific GMT timezone helper")
+IMPL_APPROX("Ravenshield-specific GMT timezone helper")
 CORE_API FString appGetGMTRef()
 {
 	// Compute the local UTC offset as a "+HH:MM" / "-HH:MM" string.
@@ -1784,7 +1784,7 @@ CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD
 	unguard;
 }
 
-IMPL_INFERRED("Ravenshield-specific char-upper helper")
+IMPL_APPROX("Ravenshield-specific char-upper helper")
 CORE_API TCHAR* appCharUpper( TCHAR* Str )
 {
 	if( Str )
@@ -1798,7 +1798,7 @@ CORE_API TCHAR* appCharUpper( TCHAR* Str )
 	return Str;
 }
 
-IMPL_INFERRED("Ravenshield-specific integer-to-string helper")
+IMPL_APPROX("Ravenshield-specific integer-to-string helper")
 CORE_API TCHAR* appItoa( INT Num )
 {
 	static TCHAR Buf[64];
@@ -1806,7 +1806,7 @@ CORE_API TCHAR* appItoa( INT Num )
 	return Buf;
 }
 
-IMPL_INFERRED("Ravenshield-specific ANSI-to-TCHAR conversion helper")
+IMPL_APPROX("Ravenshield-specific ANSI-to-TCHAR conversion helper")
 CORE_API TCHAR* winAnsiToTCHAR( char* Str )
 {
 	static TCHAR Buf[4096];
@@ -1822,7 +1822,7 @@ CORE_API TCHAR* winAnsiToTCHAR( char* Str )
 	return Buf;
 }
 
-IMPL_INFERRED("Ravenshield-specific file age query")
+IMPL_APPROX("Ravenshield-specific file age query")
 CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 {
 	// Ghidra 0x149b40 (206 bytes): stat the file and compute age in whole days.
@@ -1854,7 +1854,7 @@ CORE_API INT GetFileAgeDays( const TCHAR* Filename )
 	return (INT)(secs / 86400.0);
 }
 
-IMPL_INFERRED("Ravenshield-specific registry read helper")
+IMPL_APPROX("Ravenshield-specific registry read helper")
 CORE_API INT RegGet( FString Key, FString Name, FString& Value )
 {
 	// Read a REG_SZ value from HKEY_LOCAL_MACHINE\<Key>\<Name>.
@@ -1873,7 +1873,7 @@ CORE_API INT RegGet( FString Key, FString Name, FString& Value )
 	return 1;
 }
 
-IMPL_INFERRED("Ravenshield-specific registry write helper")
+IMPL_APPROX("Ravenshield-specific registry write helper")
 CORE_API INT RegSet( FString Key, FString Name, FString Value )
 {
 	// Write a REG_SZ value to HKEY_LOCAL_MACHINE\<Key>\<Name>.
@@ -1892,13 +1892,13 @@ CORE_API INT RegSet( FString Key, FString Name, FString Value )
 	return ( Res == ERROR_SUCCESS ) ? 1 : 0;
 }
 
-IMPL_INFERRED("Ravenshield-specific CD presence check")
+IMPL_APPROX("Ravenshield-specific CD presence check")
 CORE_API INT IsRavenShieldCDInDrive()
 {
 	return 1;
 }
 
-IMPL_INFERRED("Ravenshield-specific 2-arg overload of appCreateProc")
+IMPL_APPROX("Ravenshield-specific 2-arg overload of appCreateProc")
 CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms )
 {
 	return appCreateProc( URL, Parms, 0 );

@@ -247,7 +247,7 @@ void ALadderVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterfac
 	unguard;
 }
 
-IMPL_INTENTIONALLY_EMPTY("Not present in Ghidra exports")
+IMPL_EMPTY("Not present in Ghidra exports")
 void ALadderVolume::AddMyMarker(AActor* Actor)
 {
 	guard(ALadderVolume::AddMyMarker);
@@ -659,7 +659,7 @@ void AScout::InitForPathing()
 // ANavigationPoint
 // =============================================================================
 
-IMPL_INFERRED("Calls Super::Destroy() as expected for AActor-derived cleanup")
+IMPL_APPROX("Calls Super::Destroy() as expected for AActor-derived cleanup")
 void ANavigationPoint::Destroy() { Super::Destroy(); }
 IMPL_TODO("Needs Ghidra analysis")
 void ANavigationPoint::PostEditMove() {}
@@ -680,7 +680,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
 IMPL_TODO("Needs Ghidra analysis")
 void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
-IMPL_INFERRED("Calls Super::CheckForErrors() as expected base pass-through")
+IMPL_APPROX("Calls Super::CheckForErrors() as expected base pass-through")
 void ANavigationPoint::CheckForErrors() { Super::CheckForErrors(); }
 IMPL_TODO("Needs Ghidra analysis")
 INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav) { return 0; }
@@ -688,7 +688,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
 IMPL_TODO("Needs Ghidra analysis")
 void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
-IMPL_INFERRED("Reconstructed from disassembly: zeros chain pointers and empties PathList")
+IMPL_APPROX("Reconstructed from disassembly: zeros chain pointers and empties PathList")
 void ANavigationPoint::ClearPaths()
 {
 	// Retail: 104b SEH. Zeros the 4 path-chain pointer fields, then empties PathList.
@@ -709,7 +709,7 @@ IMPL_TODO("Needs Ghidra analysis")
 INT ANavigationPoint::ReviewPath(APawn* Scout) { return 0; }
 IMPL_TODO("Needs Ghidra analysis")
 INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
-IMPL_INFERRED("Reconstructed from disassembly: removes pruned specs and shrinks PathList")
+IMPL_APPROX("Reconstructed from disassembly: removes pruned specs and shrinks PathList")
 void ANavigationPoint::CleanUpPruned()
 {
 	// Retail: 124b SEH. Iterates PathList backwards, removing specs with bPruned set.
@@ -725,7 +725,7 @@ void ANavigationPoint::CleanUpPruned()
 }
 IMPL_TODO("Needs Ghidra analysis")
 INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
-IMPL_INFERRED("Reconstructed from disassembly: linear scan of PathList for matching endpoint")
+IMPL_APPROX("Reconstructed from disassembly: linear scan of PathList for matching endpoint")
 UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 {
 	// Retail: 103b SEH. Linear scan of PathList (at this+0x3D8) for spec->End == Nav.
@@ -738,7 +738,7 @@ UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 	}
 	return NULL;
 }
-IMPL_INFERRED("Reconstructed from disassembly: checks Level bNetworkGame flag and bNotBased")
+IMPL_APPROX("Reconstructed from disassembly: checks Level bNetworkGame flag and bNotBased")
 INT ANavigationPoint::ShouldBeBased()
 {
 	// Retail: 32b (JNZ at +24 uses shared return-0 epilog 3 bytes past function end).
@@ -879,7 +879,7 @@ IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStopGSClientProcedur
 
 /*-- UR6FileManager ----------------------------------------------------*/
 
-IMPL_INFERRED("Delegates to GFileManager->Delete")
+IMPL_APPROX("Delegates to GFileManager->Delete")
 void UR6FileManager::execDeleteFile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execDeleteFile);
@@ -890,7 +890,7 @@ void UR6FileManager::execDeleteFile( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1527, execDeleteFile );
 
-IMPL_INFERRED("Delegates to GFileManager->FindFiles")
+IMPL_APPROX("Delegates to GFileManager->FindFiles")
 void UR6FileManager::execFindFile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execFindFile);
@@ -944,7 +944,7 @@ void UR6ModMgr::execCallSndEngineInit( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 3003, execCallSndEngineInit );
 
-IMPL_INFERRED("Returns hardcoded build version string 1.60")
+IMPL_APPROX("Returns hardcoded build version string 1.60")
 void UR6ModMgr::execGetASBuildVersion( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execGetASBuildVersion);
@@ -954,7 +954,7 @@ void UR6ModMgr::execGetASBuildVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetASBuildVersion );
 
-IMPL_INFERRED("Returns hardcoded build version string 1.60")
+IMPL_APPROX("Returns hardcoded build version string 1.60")
 void UR6ModMgr::execGetIWBuildVersion( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execGetIWBuildVersion);
@@ -995,14 +995,14 @@ IMPLEMENT_FUNCTION( UR6ModMgr, 2021, execSetSystemMod );
 
 // =============================================================================
 // --- AAIController ---
-IMPL_INFERRED("Sets bAdjusting flag and AdjustLoc field")
+IMPL_APPROX("Sets bAdjusting flag and AdjustLoc field")
 void AAIController::SetAdjustLocation(FVector NewLoc)
 {
 	bAdjusting = 1;
 	AdjustLoc = NewLoc;
 }
 
-IMPL_INFERRED("Returns 1 if goal is a NavigationPoint, mirroring AI pathfinding acceptance logic")
+IMPL_APPROX("Returns 1 if goal is a NavigationPoint, mirroring AI pathfinding acceptance logic")
 int AAIController::AcceptNearbyPath(AActor* Goal)
 {
 	if( Goal && Goal->IsA(ANavigationPoint::StaticClass()) )
@@ -1010,7 +1010,7 @@ int AAIController::AcceptNearbyPath(AActor* Goal)
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from disassembly comments; handles mover hit and wall avoidance during AI movement")
+IMPL_APPROX("Reconstructed from disassembly comments; handles mover hit and wall avoidance during AI movement")
 void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 {
 	guard(AAIController::AdjustFromWall);
@@ -1064,7 +1064,7 @@ void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 
 
 // --- AAIMarker ---
-IMPL_INFERRED("Checks own FName and markedScript FName against given Name")
+IMPL_APPROX("Checks own FName and markedScript FName against given Name")
 int AAIMarker::IsIdentifiedAs(FName Name)
 {
 	guard(AAIMarker::IsIdentifiedAs);
@@ -1080,7 +1080,7 @@ int AAIMarker::IsIdentifiedAs(FName Name)
 }
 
 
-IMPL_INFERRED("Reconstructed from Ghidra; spawns AIMarker at scout position and links to this AIScript")
+IMPL_APPROX("Reconstructed from Ghidra; spawns AIMarker at scout position and links to this AIScript")
 void AAIScript::AddMyMarker(AActor* param_1)
 {
 	guard(AAIScript::AddMyMarker);
@@ -1143,7 +1143,7 @@ void AAIScript::AddMyMarker(AActor* param_1)
 // ============================================================================
 
 // ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
-IMPL_INFERRED("Reconstructed from disassembly; finds reachable end anchor in sorted path list")
+IMPL_APPROX("Reconstructed from disassembly; finds reachable end anchor in sorted path list")
 ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVector EndVec, INT bAllowFallback)
 {
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
@@ -1163,7 +1163,7 @@ ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVec
 }
 
 // ?findStartAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@@Z
-IMPL_INFERRED("Reconstructed from disassembly; finds reachable start anchor in sorted path list")
+IMPL_APPROX("Reconstructed from disassembly; finds reachable start anchor in sorted path list")
 ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 {
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
@@ -1179,7 +1179,7 @@ ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 }
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Bitwise copy of FPathBuilder via appMemcpy")
+IMPL_APPROX("Bitwise copy of FPathBuilder via appMemcpy")
 FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; }
 
 // --- Moved from EngineStubs.cpp ---
@@ -1189,7 +1189,7 @@ int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
 // Ghidra: iterate actors, destroy auto-built navigation points, clear bPathsTransient on LevelInfo
-IMPL_INFERRED("Reconstructed from Ghidra; destroys auto-built nav points and clears bPathsTransient on LevelInfo")
+IMPL_APPROX("Reconstructed from Ghidra; destroys auto-built nav points and clears bPathsTransient on LevelInfo")
 int FPathBuilder::removePaths(ULevel* Level)
 {
 	// Store level pointer at this+0 (first field in Pad)
@@ -1226,7 +1226,7 @@ int FPathBuilder::removePaths(ULevel* Level)
 // Ghidra: For each AR6ActionSpot, set CollisionHeight, call PutOnGround,
 // find a NavigationPoint anchor within 1200 uu via FSortedPathList, then
 // chain into LevelInfo->m_ActionSpotList linked list.
-IMPL_INFERRED("Reconstructed from Ghidra; populates m_ActionSpotList for AR6ActionSpots with nav anchors")
+IMPL_APPROX("Reconstructed from Ghidra; populates m_ActionSpotList for AR6ActionSpots with nav anchors")
 void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 	// Spawn a scout if one is not already present (local_18 tracks whether we did)
@@ -1303,7 +1303,7 @@ void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 // ?ReviewPaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: for each NavigationPoint in linked list, call ReviewPath(Scout);
 // then warn about movers without associated nav points.
-IMPL_INFERRED("Reconstructed from Ghidra; iterates nav points calling ReviewPath and warns about orphaned movers")
+IMPL_APPROX("Reconstructed from Ghidra; iterates nav points calling ReviewPath and warns about orphaned movers")
 void FPathBuilder::ReviewPaths(ULevel* Level) {
 	debugf(NAME_Log, TEXT("Reviewing paths"));
 	GWarn->BeginSlowTask(TEXT("Reviewing paths..."), 0, 0);
@@ -1369,7 +1369,7 @@ void FPathBuilder::ReviewPaths(ULevel* Level) {
 // flagged as changed (no 0x800 bit at NavPoint+0x3a4). For unchanged nav
 // points, empties their PathList (TArray at +0x3d8). Same scout+pass sequence
 // as definePaths but operates on the changed subset and spawns its own scout.
-IMPL_INFERRED("Reconstructed from Ghidra; partial path rebuild for changed nav points only")
+IMPL_APPROX("Reconstructed from Ghidra; partial path rebuild for changed nav points only")
 void FPathBuilder::defineChangedPaths(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 
@@ -1533,7 +1533,7 @@ void FPathBuilder::defineChangedPaths(ULevel* Level) {
 // Ghidra: undefinePaths, then spawn scout, build nav-point linked list, run
 // addReachSpecs + SetupForcedPath + PrunePaths + ClearPaths passes, destroy scout,
 // set bPathsDefined, then BuildActionSpotList + PostPath on all actors.
-IMPL_INFERRED("Reconstructed from Ghidra; full path build pipeline: scout spawn, InitForPathFinding, addReachSpecs, prune, BuildActionSpotList")
+IMPL_APPROX("Reconstructed from Ghidra; full path build pipeline: scout spawn, InitForPathFinding, addReachSpecs, prune, BuildActionSpotList")
 void FPathBuilder::definePaths(ULevel* Level) {
 	undefinePaths(Level);
 	*(ULevel**)Pad = Level;
@@ -1663,7 +1663,7 @@ void FPathBuilder::definePaths(ULevel* Level) {
 // ?undefinePaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: destroy all non-transient ANavigationPoints; for transient ones call ClearPaths (vtable[0x66]);
 // clear bPathsDefined on LevelInfo.
-IMPL_INFERRED("Reconstructed from Ghidra; clears path network and bPathsDefined flag on LevelInfo")
+IMPL_APPROX("Reconstructed from Ghidra; clears path network and bPathsDefined flag on LevelInfo")
 void FPathBuilder::undefinePaths(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 	debugf(NAME_Log, TEXT("Undefining paths"));
@@ -1709,11 +1709,11 @@ void FPathBuilder::undefinePaths(ULevel* Level) {
 // ============================================================================
 // FSortedPathList
 // ============================================================================
-IMPL_INFERRED("Zero-initializes FSortedPathList via appMemzero")
+IMPL_APPROX("Zero-initializes FSortedPathList via appMemzero")
 FSortedPathList::FSortedPathList() { appMemzero(this, sizeof(*this)); }
-IMPL_INFERRED("Bitwise copy of FSortedPathList fields via appMemcpy")
+IMPL_APPROX("Bitwise copy of FSortedPathList fields via appMemcpy")
 FSortedPathList& FSortedPathList::operator=(const FSortedPathList& Other) { appMemcpy(this, &Other, 260); return *this; } // 65 dwords
-IMPL_INFERRED("Reconstructed from Ghidra (172B); sorted insertion into fixed 32-element array")
+IMPL_APPROX("Reconstructed from Ghidra (172B); sorted insertion into fixed 32-element array")
 void FSortedPathList::addPath(ANavigationPoint* Path, INT Cost)
 {
 	// Ghidra (172B): Sorted insertion into fixed 32-element array.

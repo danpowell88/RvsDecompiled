@@ -8,14 +8,14 @@ IMPLEMENT_CLASS(AR6Door)
 
 // --- AR6Door ---
 
-IMPL_INTENTIONALLY_EMPTY("Ghidra 0x1cfb0: shared null stub; returns NULL with no SEH frame")
+IMPL_EMPTY("Ghidra 0x1cfb0: shared null stub; returns NULL with no SEH frame")
 AActor * AR6Door::AssociatedLevelGeometry()
 {
 	// Retail 0x1cfb0: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_INFERRED("Reconstructed door validation and game-type path setup")
+IMPL_APPROX("Reconstructed door validation and game-type path setup")
 void AR6Door::CheckForErrors()
 {
 	guard(AR6Door::CheckForErrors);
@@ -36,7 +36,7 @@ void AR6Door::CheckForErrors()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed path pruning via alternate route check, excluding corresponding door")
+IMPL_APPROX("Reconstructed path pruning via alternate route check, excluding corresponding door")
 INT AR6Door::PrunePaths()
 {
 	guard(AR6Door::PrunePaths);
@@ -68,7 +68,7 @@ INT AR6Door::PrunePaths()
 	unguard;
 }
 
-IMPL_INTENTIONALLY_EMPTY("FLineBatcher drawing stub; Ghidra confirms drawing-only body")
+IMPL_EMPTY("FLineBatcher drawing stub; Ghidra confirms drawing-only body")
 void AR6Door::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6Door::RenderEditorInfo);
@@ -77,7 +77,7 @@ void AR6Door::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI,
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed reach spec creation to corresponding door with fixed collision and reach flags")
+IMPL_APPROX("Reconstructed reach spec creation to corresponding door with fixed collision and reach flags")
 void AR6Door::addReachSpecs(APawn* Scout, INT bOnlyChanged)
 {
 	guard(AR6Door::addReachSpecs);

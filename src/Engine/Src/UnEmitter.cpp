@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AEmitter ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AEmitter::Spawned()
 {
 	// Ghidra 0xdf2e0, 18B: set flag 4 at offset 0x3c8 when not in editor
@@ -23,7 +23,7 @@ void AEmitter::Spawned()
 		*(DWORD*)((BYTE*)this + 0x3c8) |= 4;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 {
 	guard(AEmitter::Tick);
@@ -250,7 +250,7 @@ void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicAct
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AEmitter::Kill()
 {
 	// Ghidra 0xdf3b0, 178b: iterate emitter list at this+0x398, clear flags and reset per-emitter counters.
@@ -271,7 +271,7 @@ void AEmitter::Kill()
 	*(DWORD*)((BYTE*)this + 0x394) &= ~0x200u;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AEmitter::PostScriptDestroyed()
 {
 	// Ghidra 0xdf300, 113b: if spawn flag set at bit 2 of this+0x3c8,
@@ -294,7 +294,7 @@ void AEmitter::PostScriptDestroyed()
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int AEmitter::CheckForProjectors()
 {
 	guard(AEmitter::CheckForProjectors);
@@ -333,7 +333,7 @@ void UBeamEmitter::UpdateActorHitList()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UBeamEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UBeamEmitter::UpdateParticles);
@@ -405,7 +405,7 @@ void UBeamEmitter::Scale(float)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UBeamEmitter::PostEditChange()
 {
 	// Ghidra 0x80850: call parent, then CleanUp (vtbl[26]) and Initialize(MaxParticles) (vtbl[25]).
@@ -417,7 +417,7 @@ void UBeamEmitter::PostEditChange()
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UBeamEmitter::CleanUp()
 {
 	// Ghidra 0x80af0, ~100b: empty beam/noise arrays then delegate to parent.
@@ -437,7 +437,7 @@ void UBeamEmitter::Initialize(int)
 
 
 // --- UMeshEmitter ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UMeshEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UMeshEmitter::UpdateParticles);
@@ -455,7 +455,7 @@ int UMeshEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UMeshEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UMeshEmitter::RenderParticles);
@@ -466,7 +466,7 @@ int UMeshEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UMeshEmitter::PostEditChange()
 {
 	// Ghidra 0xcabc0: same pattern as UBeamEmitter::PostEditChange.
@@ -501,13 +501,13 @@ void UParticleEmitter::SpawnParticle(int,float,int,int,FVector const &)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 float UParticleEmitter::SpawnParticles(float,float,float)
 {
 	return 0.0f;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UParticleEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UParticleEmitter::UpdateParticles);
@@ -528,7 +528,7 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UParticleEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UParticleEmitter::RenderParticles);
@@ -563,7 +563,7 @@ void UParticleEmitter::Scale(float)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UParticleEmitter::PostEditChange()
 {
 	// Ghidra 0xdcf30: re-initialize if particle count changed or dirty bit set;
@@ -586,7 +586,7 @@ void UParticleEmitter::PostEditChange()
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UParticleEmitter::PostLoad()
 {
 	// Ghidra 0xdca10: call super, then Initialize(MaxParticles) via vtable[25].
@@ -596,7 +596,7 @@ void UParticleEmitter::PostLoad()
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UParticleEmitter::CleanUp()
 {
 	// Ghidra 0xdd0e0: empty loop over active particles, then free array and clear counters.
@@ -607,7 +607,7 @@ void UParticleEmitter::CleanUp()
 	*(DWORD*)((BYTE*)this + 0x2dc) &= ~1u;  // clear initialized bit
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UParticleEmitter::Destroy()
 {
 	// Ghidra 0xdca90: CleanUp via vtable[26], then super Destroy.
@@ -640,7 +640,7 @@ void USparkEmitter::SpawnParticle(int,float,int,int,FVector const &)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int USparkEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(USparkEmitter::UpdateParticles);
@@ -651,7 +651,7 @@ int USparkEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int USparkEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USparkEmitter::RenderParticles);
@@ -688,7 +688,7 @@ int USparkEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* para
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USparkEmitter::PostEditChange()
 {
 	// Retail: 28b. Call parent, then call vtable[26]() and vtable[25](this+0x3C).
@@ -701,7 +701,7 @@ void USparkEmitter::PostEditChange()
 	((IntFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USparkEmitter::CleanUp()
 {
 	// Ghidra 0x143460: call parent CleanUp, then empty spark line array.
@@ -719,7 +719,7 @@ void USparkEmitter::Initialize(int)
 
 
 // --- USpriteEmitter ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int USpriteEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(USpriteEmitter::UpdateParticles);
@@ -742,7 +742,7 @@ int USpriteEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USpriteEmitter::RenderParticles);
@@ -753,7 +753,7 @@ int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* par
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USpriteEmitter::PostEditChange()
 {
 	// Retail: 28b. Same as USparkEmitter::PostEditChange — call parent,
@@ -766,7 +766,7 @@ void USpriteEmitter::PostEditChange()
 	((IntFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void USpriteEmitter::CleanUp()
 {
 	// Ghidra 0x143ed0: delegate to parent only.

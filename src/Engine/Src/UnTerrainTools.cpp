@@ -45,7 +45,7 @@ UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrush::UTerrainBrush()
 {
 	// Initialize 2 FStrings to empty
@@ -75,7 +75,7 @@ UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 static ATerrainInfo* GCurrentTerrainInfo  = NULL; // DAT_1061b794
 static UTexture*     GCurrentAlphaTexture = NULL; // DAT_1061b790
 
-IMPL_INFERRED("reads GCurrentTerrainInfo/GCurrentAlphaTexture globals and locks alpha texture")
+IMPL_APPROX("reads GCurrentTerrainInfo/GCurrentAlphaTexture globals and locks alpha texture")
 int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 {
 	guard(UTerrainBrush::BeginPainting);
@@ -128,7 +128,7 @@ FBox UTerrainBrush::GetRect()
 
 
 // --- UTerrainBrushColor ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -137,14 +137,14 @@ UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushColor::UTerrainBrushColor()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushColor::~UTerrainBrushColor()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -168,7 +168,7 @@ void UTerrainBrushColor::Execute(int)
 
 
 // --- UTerrainBrushEdgeTurn ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -177,14 +177,14 @@ UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -214,7 +214,7 @@ FBox UTerrainBrushEdgeTurn::GetRect()
 
 
 // --- UTerrainBrushFlatten ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -223,14 +223,14 @@ UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushFlatten::UTerrainBrushFlatten()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushFlatten::~UTerrainBrushFlatten()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -254,7 +254,7 @@ void UTerrainBrushFlatten::Execute(int)
 
 
 // --- UTerrainBrushNoise ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -263,14 +263,14 @@ UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushNoise::UTerrainBrushNoise()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushNoise::~UTerrainBrushNoise()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -294,7 +294,7 @@ void UTerrainBrushNoise::Execute(int)
 
 
 // --- UTerrainBrushPaint ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -303,14 +303,14 @@ UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushPaint::UTerrainBrushPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushPaint::~UTerrainBrushPaint()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -341,7 +341,7 @@ void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 	unguard;
 }
 
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -350,14 +350,14 @@ UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPain
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -395,7 +395,7 @@ void UTerrainBrushSelect::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -404,14 +404,14 @@ UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushSelect::UTerrainBrushSelect()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushSelect::~UTerrainBrushSelect()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -441,7 +441,7 @@ FBox UTerrainBrushSelect::GetRect()
 
 
 // --- UTerrainBrushSmooth ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -450,14 +450,14 @@ UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushSmooth::UTerrainBrushSmooth()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushSmooth::~UTerrainBrushSmooth()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -488,7 +488,7 @@ void UTerrainBrushTexPan::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -497,14 +497,14 @@ UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushTexPan::UTerrainBrushTexPan()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushTexPan::~UTerrainBrushTexPan()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -528,7 +528,7 @@ void UTerrainBrushTexRotate::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -537,14 +537,14 @@ UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Oth
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushTexRotate::UTerrainBrushTexRotate()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushTexRotate::~UTerrainBrushTexRotate()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -568,7 +568,7 @@ void UTerrainBrushTexScale::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -577,14 +577,14 @@ UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushTexScale::UTerrainBrushTexScale()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushTexScale::~UTerrainBrushTexScale()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -601,7 +601,7 @@ UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexSc
 
 
 // --- UTerrainBrushVertexEdit ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -610,14 +610,14 @@ UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -634,7 +634,7 @@ UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushV
 
 
 // --- UTerrainBrushVisibility ---
-IMPL_INFERRED("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
 UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -643,14 +643,14 @@ UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_INFERRED("placement-new initializes two FStrings to empty")
+IMPL_APPROX("placement-new initializes two FStrings to empty")
 UTerrainBrushVisibility::UTerrainBrushVisibility()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_INFERRED("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
 UTerrainBrushVisibility::~UTerrainBrushVisibility()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();

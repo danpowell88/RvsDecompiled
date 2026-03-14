@@ -10,7 +10,7 @@
 
 // ReadToken: Read a single token (alphanumeric word or quoted string) from
 // a text buffer. Returns pointer past the token, or NULL on failure.
-IMPL_INFERRED("local text parsing helper; reconstructed from context")
+IMPL_APPROX("local text parsing helper; reconstructed from context")
 static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 {
 	if( !Buffer )
@@ -185,7 +185,7 @@ UBOOL UProperty::Port() const
 	return (Category != NAME_None) && !(PropertyFlags & (CPF_Transient|CPF_Native));
 }
 
-IMPL_PERMANENT_DIVERGENCE("raw class-object type byte read at offset 0x20; field name unknown")
+IMPL_DIVERGE("raw class-object type byte read at offset 0x20; field name unknown")
 BYTE UProperty::GetID() const
 {
 	// DIVERGENCE: Ghidra reads *(BYTE*)(GetClass() + 0x20) — a class-object-embedded

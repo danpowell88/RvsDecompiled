@@ -53,7 +53,7 @@ IMPLEMENT_CLASS(UWetTexture);
 	The retail DLL exports these explicitly.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FSpark& FSpark::operator=( const FSpark& Other )
 {
 	Type  = Other.Type;
@@ -67,7 +67,7 @@ FSpark& FSpark::operator=( const FSpark& Other )
 	return *this;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FDrop& FDrop::operator=( const FDrop& Other )
 {
 	Type   = Other.Type;
@@ -81,7 +81,7 @@ FDrop& FDrop::operator=( const FDrop& Other )
 	return *this;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 {
 	Type  = Other.Type;
@@ -178,7 +178,7 @@ KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 #define PTR_AT(obj, off)    (*(INT*)((BYTE*)(obj) + (off)))
 
 /* Get pixel data pointer from the first mipmap. */
-IMPL_INFERRED("Internal helper reconstructed from context")
+IMPL_APPROX("Internal helper reconstructed from context")
 static inline BYTE* GetMipPixels( void* Obj )
 {
 	INT MipsPtr = PTR_AT(Obj, 0xbc);
@@ -187,7 +187,7 @@ static inline BYTE* GetMipPixels( void* Obj )
 }
 
 /* Random byte — approximates FUN_10509f60 (retail inline PRNG). */
-IMPL_INFERRED("Approximates retail PRNG FUN_10509f60")
+IMPL_APPROX("Approximates retail PRNG FUN_10509f60")
 static inline BYTE RandByte()
 {
 	return (BYTE)appRand();
@@ -226,7 +226,7 @@ static BYTE  GOrbBright[256];       // DAT_105131c0  orbital brightness
 
 static UBOOL GTablesInit = 0;
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 static void InitFireTables()
 {
 	if( GTablesInit ) return;
@@ -245,13 +245,13 @@ static void InitFireTables()
 	UFractalTexture — base class for all procedural textures.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFractalTexture::Init( INT InUSize, INT InVSize )
 {
 	UTexture::Init( InUSize, InVSize );
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFractalTexture::PostLoad()
 {
 	UTexture::PostLoad();
@@ -263,7 +263,7 @@ void UFractalTexture::PostEditChange()
 	// Ghidra: PostEditChange at 0x6b20 is empty in the retail binary.
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFractalTexture::Prime()
 {
 	// Ghidra: Calls UTexture::Prime after checking client state
@@ -272,7 +272,7 @@ void UFractalTexture::Prime()
 	UTexture::Prime();
 }
 
-IMPL_INFERRED("Confirmed empty in retail binary")
+IMPL_APPROX("Confirmed empty in retail binary")
 void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Confirmed empty in retail binary.
@@ -282,7 +282,7 @@ void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	UFireTexture — animated fire effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UFireTexture::Clear( DWORD Flags )
 {
 	// Ghidra: memsets the mip pixel buffer to 0.
@@ -294,7 +294,7 @@ void UFireTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFireTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -317,7 +317,7 @@ void UFireTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 	FirePaint( IX, IY, Flags );
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UFireTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra: similar to Click — calls FirePaint.
@@ -338,13 +338,13 @@ void UFireTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	}
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFireTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFireTexture::Serialize( FArchive& Ar )
 {
 	UTexture::Serialize( Ar );
@@ -1593,7 +1593,7 @@ void UFireTexture::RedrawSparks()
 	UWaterTexture — animated water ripple effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWaterTexture::Clear( DWORD Flags )
 {
 	// Ghidra: clears source fields buffer.
@@ -1605,13 +1605,13 @@ void UWaterTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaterTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWaterTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	INT IX = (INT)X;
@@ -1619,7 +1619,7 @@ void UWaterTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 	WaterPaint( IX, IY, Flags );
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWaterTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	INT IX = (INT)X;
@@ -1643,7 +1643,7 @@ void UWaterTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 	*((BYTE*)SourceFields + Offset + USize) = Val;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaterTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
@@ -2151,13 +2151,13 @@ void UWaterTexture::WaterRedrawDrops()
 	UWaveTexture — animated wave effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaveTexture::Clear( DWORD Flags )
 {
 	UWaterTexture::Clear( Flags );
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaveTexture::Init( INT InUSize, INT InVSize )
 {
 	UWaterTexture::Init( InUSize, InVSize );
@@ -2172,13 +2172,13 @@ void UWaveTexture::ConstantTimeTick()
 	SetWaveLight();
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWaveTexture::PostLoad()
 {
 	UWaterTexture::PostLoad();
 }
 
-IMPL_INFERRED("Confirmed empty in retail binary")
+IMPL_APPROX("Confirmed empty in retail binary")
 void UWaveTexture::SetWaveLight()
 {
 	// Confirmed empty in the retail binary (just 'ret').
@@ -2188,13 +2188,13 @@ void UWaveTexture::SetWaveLight()
 	UFluidTexture — fluid simulation texture.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFluidTexture::Clear( DWORD Flags )
 {
 	UWaterTexture::Clear( Flags );
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFluidTexture::Init( INT InUSize, INT InVSize )
 {
 	UWaterTexture::Init( InUSize, InVSize );
@@ -2208,7 +2208,7 @@ void UFluidTexture::ConstantTimeTick()
 	CalculateFluid();
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UFluidTexture::PostLoad()
 {
 	UWaterTexture::PostLoad();
@@ -2297,7 +2297,7 @@ void UFluidTexture::CalculateFluid()
 	UIceTexture — animated ice/glass effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UIceTexture::Clear( DWORD Flags )
 {
 	BYTE* Pixels = GetMipPixels( this );
@@ -2308,7 +2308,7 @@ void UIceTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UIceTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -2342,20 +2342,20 @@ void UIceTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 	// Ghidra at 0x2420: confirmed empty.
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UIceTexture::MousePosition( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra: sets ForceRefresh flag so ice re-renders.
 	INT_AT(this, 0x130) = 1;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UIceTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UIceTexture::Destroy()
 {
 	UTexture::Destroy();
@@ -2492,7 +2492,7 @@ void UIceTexture::BlitTexIce()
 	UWetTexture — animated wet surface effect.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWetTexture::Clear( DWORD Flags )
 {
 	BYTE* Pixels = GetMipPixels( this );
@@ -2503,7 +2503,7 @@ void UWetTexture::Clear( DWORD Flags )
 	}
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWetTexture::Init( INT InUSize, INT InVSize )
 {
 	UFractalTexture::Init( InUSize, InVSize );
@@ -2516,13 +2516,13 @@ void UWetTexture::ConstantTimeTick()
 	ApplyWetTexture();
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UWetTexture::PostLoad()
 {
 	UFractalTexture::PostLoad();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UWetTexture::Destroy()
 {
 	// Free locally allocated bitmap if present.

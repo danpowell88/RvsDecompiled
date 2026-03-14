@@ -47,9 +47,9 @@
 	into the __imp_ thunk that the compiler emits for dllimport calls.
 -----------------------------------------------------------------------------*/
 
-IMPL_INTENTIONALLY_EMPTY("UObject property system handles initialisation via InitProperties()")
+IMPL_EMPTY("UObject property system handles initialisation via InitProperties()")
 AActor::AActor() {}
-IMPL_INTENTIONALLY_EMPTY("UObject property system handles initialisation via InitProperties()")
+IMPL_EMPTY("UObject property system handles initialisation via InitProperties()")
 APawn::APawn() {}
 
 /* FMatrix copy-ctor shim:
@@ -1049,7 +1049,7 @@ void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 	PunkBuster export.
 -----------------------------------------------------------------------------*/
 
-IMPL_INTENTIONALLY_EMPTY("PunkBuster export stub; body intentionally empty")
+IMPL_EMPTY("PunkBuster export stub; body intentionally empty")
 extern "C" ENGINE_API void pb_Export() {}
 
 /*-----------------------------------------------------------------------------

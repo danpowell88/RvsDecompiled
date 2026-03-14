@@ -116,7 +116,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 	FArchiveCountMem class.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveCountMem::FArchiveCountMem( UObject* Src )
 : Num(0), Max(0)
 {
@@ -126,37 +126,37 @@ FArchiveCountMem::FArchiveCountMem( UObject* Src )
 	unguard;
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveCountMem::FArchiveCountMem( const FArchiveCountMem& Other )
 : FArchive(Other), Num(Other.Num), Max(Other.Max)
 {
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveCountMem::~FArchiveCountMem()
 {
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 void FArchiveCountMem::CountBytes( SIZE_T InNum, SIZE_T InMax )
 {
 	Num += InNum;
 	Max += InMax;
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 DWORD FArchiveCountMem::GetNum()
 {
 	return (DWORD)Num;
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 DWORD FArchiveCountMem::GetMax()
 {
 	return (DWORD)Max;
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveCountMem& FArchiveCountMem::operator=( const FArchiveCountMem& Other )
 {
 	Num = Other.Num;
@@ -168,24 +168,24 @@ FArchiveCountMem& FArchiveCountMem::operator=( const FArchiveCountMem& Other )
 	FArchiveDummySave class.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveDummySave::FArchiveDummySave()
 {
 	ArIsSaving = 1;
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveDummySave::FArchiveDummySave( const FArchiveDummySave& Other )
 : FArchive(Other)
 {
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveDummySave::~FArchiveDummySave()
 {
 }
 
-IMPL_INFERRED("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
 FArchiveDummySave& FArchiveDummySave::operator=( const FArchiveDummySave& Other )
 {
 	return *this;

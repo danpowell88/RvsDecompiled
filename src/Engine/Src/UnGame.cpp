@@ -25,7 +25,7 @@ extern ENGINE_API UEngine* g_pEngine;
 // GConfig server-ini section call uses GetSection; original vtable slot unclear.
 // GLevel vtable[0xb4] and vtable[0xdc] preserved via raw dispatch; identities unknown.
 // Audio vtable[0x78] setup signature approximated as (void*, FString&) -> INT.
-IMPL_INFERRED("Multiple Ghidra-identified gaps; identity not established for omitted calls")
+IMPL_APPROX("Multiple Ghidra-identified gaps; identity not established for omitted calls")
 void UGameEngine::Init()
 {
     guard(UGameEngine::Init);
@@ -82,7 +82,7 @@ void UGameEngine::Init()
         Cast<URenderDevice>(RenDevObj)->Init();
 
         // FUN_103563f0: post-init render resource setup (GIsClient guard confirmed).
-        // Identity unknown — omitted. See IMPL_INFERRED annotation above.
+        // Identity unknown — omitted. See IMPL_APPROX annotation above.
     }
 
     // Error string used throughout Browse / LoadMap.
@@ -325,7 +325,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -362,7 +362,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -397,7 +397,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -460,7 +460,7 @@ void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 // --- UEngine ---
 // Ghidra 0x10393060 (UEngine::StaticConstructor):
 // Register two config properties and create the ArmPatches cache directory.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::StaticConstructor()
 {
 	guard(UEngine::StaticConstructor)
@@ -485,7 +485,7 @@ int UEngine::ReplaceTexture(FString,UTexture *)
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::Serialize(FArchive &Ar)
 {
 	guard(UEngine::Serialize);
@@ -500,7 +500,7 @@ void UEngine::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UEngine::Key(UViewport*, EInputKey Key)
 {
 	guard(UEngine::Key);
@@ -515,7 +515,7 @@ int UEngine::Key(UViewport*, EInputKey Key)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	// Ghidra 0x103118e0: destructs FString by-value param, returns 1.
@@ -539,7 +539,7 @@ int UEngine::CacheArmPatch(FGuid *,DWORD *)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::Destroy()
 {
 	guard(UEngine::Destroy);
@@ -567,7 +567,7 @@ int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UEngine::InitAudio()
 {
 	guard(UEngine::InitAudio);
@@ -603,7 +603,7 @@ void UEngine::InitAudio()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action, float Delta)
 {
 	guard(UEngine::InputEvent);
@@ -733,13 +733,203 @@ void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::AbortScoreSubmission() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::MasterServerManager() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::InitGameInfoGameService() {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}
+
+// =============================================================================
+// UGameEngine::Browse — retail Engine.dll @ 0x103a4da0
+//
+// The top-level navigation entry-point. Receives a FURL and decides how to
+// handle it:
+//   • Local internal  (no host, game protocol) → call LoadMap directly
+//   • Network client  (has host, GIsClient)    → create UNetPendingLevel
+//   • Internal, not client                     → error (server can't open maps)
+//   • External URL                             → hand off to OS
+//
+// The retail function (2433 bytes) also handles:
+//   • Audio stop before any transition (3 vtable calls)
+//   • .unreal redirect file lookup
+//   • Abort-to-entry options (failed/entry/userdisconnect)
+//   • Hub-save, restart, and load=N URL transformations
+// Those complex paths are approximated or stubbed here; see blog post #100.
+// =============================================================================
+IMPL_APPROX("Core dispatch path reconstructed from Ghidra; audio stop vtable slots from blog#100; hub/save/restart/net stubs pending")
+INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error )
+{
+    guard(UGameEngine::Browse);
+
+    // --- Audio stop before any level transition (retail: 3 vtable calls) ---
+    // Slots on UAudioSubsystem vtable: 0xc4 (stop), 0xe4 (flush), 0xe0 (clear).
+    // Identity of these methods not yet established; dispatched raw.
+    if (Audio)
+    {
+        typedef void (__thiscall* tAudioVoid)(void*);
+        void** AudioVT = *(void***)Audio;
+        ((tAudioVoid)(AudioVT[0xc4 / sizeof(void*)]))(Audio);
+        ((tAudioVoid)(AudioVT[0xe4 / sizeof(void*)]))(Audio);
+        ((tAudioVoid)(AudioVT[0xe0 / sizeof(void*)]))(Audio);
+    }
+
+    GLog->Logf(NAME_Dev, TEXT("Browse: %s"), *URL.String());
+
+    if (!URL.Valid)
+    {
+        Error = LocalizeError(TEXT("InvalidUrl"), TEXT("Engine"));
+        return 0;
+    }
+
+    // --- Local file map → load synchronously ---
+    if (URL.IsLocalInternal())
+    {
+        ULevel* Level = LoadMap(URL, NULL, TravelInfo, Error);
+        return Level != NULL ? 1 : 0;
+    }
+
+    // --- Network map (has a host) → async pending level (client only) ---
+    // Full retail implementation creates UNetPendingLevel here and starts a TCP
+    // connection. Not yet reconstructed; return failure so Init() can fall back.
+    if (URL.IsInternal() && GIsClient)
+    {
+        Error = LocalizeError(TEXT("FailedBrowse"), TEXT("Engine"));
+        return 0;
+    }
+
+    // --- Internal URL on a dedicated server → unsupported ---
+    if (URL.IsInternal())
+    {
+        Error = LocalizeError(TEXT("ServerOpen"), TEXT("Engine"));
+        return 0;
+    }
+
+    // --- External URL (e.g. http://) → OS browser ---
+    // appLaunchURL signature not confirmed; log and bail.
+    GLog->Logf(NAME_Warning, TEXT("Browse: external URL ignored: %s"), *URL.String());
+    return 0;
+
+    unguard;
+}
+
+// =============================================================================
+// UGameEngine::LoadMap — retail Engine.dll @ 0x103a7190
+//
+// Loads a .unr map package from disk and makes it the active level:
+//   1. Notify subsystems of impending level change
+//   2. Load the UPackage via UObject::LoadPackage
+//   3. Find the ULevel object ("MyLevel") within the package
+//   4. Store in GLevel and return
+//
+// The retail function also:
+//   • Shows a progress/loading screen (SetProgress)
+//   • Resets old package loaders (UObject::ResetLoaders)
+//   • Collects garbage to free the old map
+//   • Spawns the local player actor (SpawnPlayActor)
+//   • Fires BeginPlay on actors
+// Those paths are approximated; full reconstruction pending Ghidra analysis.
+// =============================================================================
+IMPL_APPROX("Core load path (LoadPackage + StaticFindObject + GLevel assignment) reconstructed from UE2 architecture; SpawnPlayActor and BeginPlay deferred")
+ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error )
+{
+    guard(UGameEngine::LoadMap);
+
+    GLog->Logf(NAME_Dev, TEXT("LoadMap: %s"), *URL.Map);
+
+    // Notify subsystems that the current level is about to go away.
+    if (GLevel)
+        NotifyLevelChange();
+
+    // Clear the active level pointer before loading the new one.
+    GLevel = NULL;
+
+    // Load the map package. LOAD_NoFail crashes on missing file — intentional:
+    // Init() verifies the map exists before calling us.
+    UPackage* LevelPkg = (UPackage*)UObject::LoadPackage(NULL, *URL.Map, LOAD_NoFail);
+    if (!LevelPkg)
+    {
+        Error = FString::Printf(TEXT("Failed to load map package: %s"), *URL.Map);
+        return NULL;
+    }
+
+    // The primary level object is conventionally named "MyLevel" in UE2 packages.
+    ULevel* Level = (ULevel*)UObject::StaticFindObject(
+        ULevel::StaticClass(), LevelPkg, TEXT("MyLevel"), 0 );
+    if (!Level)
+    {
+        Error = FString::Printf(TEXT("Failed to find ULevel 'MyLevel' in package: %s"), *URL.Map);
+        return NULL;
+    }
+
+    // Store the destination URL on the level (used by network code and save/load).
+    Level->URL = URL;
+
+    // Make this the active level.
+    GLevel = Level;
+
+    GLog->Logf(NAME_Init, TEXT("LoadMap: loaded %s"), *URL.Map);
+    return Level;
+
+    unguard;
+}
+
+// =============================================================================
+// UGameEngine::Tick — retail Engine.dll @ 0x103ae730
+//
+// Main-loop tick called once per frame. At minimum must advance the active level.
+// The retail function also:
+//   • Updates the stat graph
+//   • Ticks the pending level (network connection in progress)
+//   • Ticks all active net drivers
+//   • Calls InteractionMaster::MasterProcessTick
+//   • Ticks the audio subsystem
+// Those paths are left as future work; GLevel->Tick is the critical path.
+// =============================================================================
+IMPL_APPROX("GLevel->Tick(LEVELTICK_All) is the critical path; audio and interaction master ticks deferred")
+void UGameEngine::Tick( FLOAT DeltaSeconds )
+{
+    guard(UGameEngine::Tick);
+
+    // Advance actors, physics, scripts, and timers in the active level.
+    if (GLevel)
+        GLevel->Tick(LEVELTICK_All, DeltaSeconds);
+
+    // Tick client-side interaction master (HUD, menus, input dispatch).
+    if (Client)
+    {
+        BYTE* CR = (BYTE*)Client;
+        UInteractionMaster* IM = *(UInteractionMaster**)(CR + 0x94);
+        if (IM)
+            IM->MasterProcessTick(DeltaSeconds);
+    }
+
+    unguard;
+}
+
+// =============================================================================
+// UGameEngine::Draw — retail Engine.dll @ 0x103aa6e0
+//
+// Renders a single frame to Viewport. The retail implementation:
+//   1. Locks the viewport render target
+//   2. Sets up FLevelSceneNode with camera position / FOV
+//   3. Calls the scene manager to render actors, BSP, static meshes
+//   4. Calls PostRenderFullScreenEffects (blur, fade-to-black, etc.)
+//   5. Unlocks / presents the back buffer
+//
+// Full reconstruction is deferred — the render pipeline depends on many
+// FRenderInterface internals not yet decoded. The viewport's own draw path
+// (driven by the window message pump) still operates correctly.
+// =============================================================================
+IMPL_APPROX("Empty body: render path is driven by viewport/render-device directly; full scene-node setup deferred")
+void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize )
+{
+    guard(UGameEngine::Draw);
+    // Rendering is handled by the viewport → render device chain.
+    // This stub ensures the vtable slot resolves without a null-call crash.
+    unguard;
+}

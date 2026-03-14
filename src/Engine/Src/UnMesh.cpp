@@ -35,7 +35,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- CBoneDescData ---
-IMPL_INFERRED("reconstructed from Ghidra; loads bone names and frame data from LBP text file")
+IMPL_APPROX("reconstructed from Ghidra; loads bone names and frame data from LBP text file")
 int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
 	guard(CBoneDescData::fn_bInitFromLbpFile);
@@ -84,7 +84,7 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 	unguard;
 }
 
-IMPL_INFERRED("parses one LBP token line into bone position/quaternion; axis conventions from Ghidra")
+IMPL_APPROX("parses one LBP token line into bone position/quaternion; axis conventions from Ghidra")
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
 	guard(CBoneDescData::m_vProcessLbpLine);
@@ -131,7 +131,7 @@ CBoneDescData::CBoneDescData()
 	*(DWORD*)((BYTE*)this + 0x20) = 0;
 }
 
-IMPL_INFERRED("destroys TArray<FString> and FString members in correct order")
+IMPL_APPROX("destroys TArray<FString> and FString members in correct order")
 CBoneDescData::~CBoneDescData()
 {
 	// Destroy TArray<FString> at +0x08 and FString at +0x14.
@@ -154,7 +154,7 @@ CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 
 
 // --- CCompressedLipDescData ---
-IMPL_INFERRED("null-check then delegates to m_bReadCompressedFileFromMemory")
+IMPL_APPROX("null-check then delegates to m_bReadCompressedFileFromMemory")
 int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 {
 	if (param_1 == NULL) return 0;
@@ -163,7 +163,7 @@ int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 	return iVar1;
 }
 
-IMPL_INFERRED("reads compressed lip-sync header and allocates per-frame morph-key arrays")
+IMPL_APPROX("reads compressed lip-sync header and allocates per-frame morph-key arrays")
 int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 {
 	guard(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
@@ -212,7 +212,7 @@ CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDe
 
 
 // --- ULodMesh ---
-IMPL_INFERRED("simplified to UObject::Serialize; LOD array serializers unresolved")
+IMPL_APPROX("simplified to UObject::Serialize; LOD array serializers unresolved")
 void ULodMesh::Serialize(FArchive& Ar)
 {
 	// Retail: calls UMesh::Serialize (which calls UObject::Serialize) then serializes
@@ -229,7 +229,7 @@ int ULodMesh::MemFootprint(int param_1)
 	unguard;
 }
 
-IMPL_INFERRED("returns ULodMeshInstance::StaticClass()")
+IMPL_APPROX("returns ULodMeshInstance::StaticClass()")
 UClass * ULodMesh::MeshGetInstanceClass()
 {
 	return ULodMeshInstance::StaticClass();
@@ -263,7 +263,7 @@ UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 	return *(UMeshInstance**)((BYTE*)this + 0x58);
 }
 
-IMPL_INFERRED("returns UMeshInstance::StaticClass() for base UMesh")
+IMPL_APPROX("returns UMeshInstance::StaticClass() for base UMesh")
 UClass * UMesh::MeshGetInstanceClass()
 {
 	// Retail: base UMesh uses UMeshInstance; subclasses override this.
@@ -359,7 +359,7 @@ void UMeshAnimation::ClearAnimNotifys()
 	}
 }
 
-IMPL_INFERRED("linear search through Sequences TArray at +0x48 by FName; re-fetches count each iteration")
+IMPL_APPROX("linear search through Sequences TArray at +0x48 by FName; re-fetches count each iteration")
 FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
 {
 	// Retail: 79b. Linear search through Sequences TArray (this+0x48, stride 0x2C=44b).
@@ -380,7 +380,7 @@ FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
 	return NULL;
 }
 
-IMPL_INFERRED("searches Sequences TArray for FName then returns MotionChunk at stride 0x58")
+IMPL_APPROX("searches Sequences TArray for FName then returns MotionChunk at stride 0x58")
 MotionChunk * UMeshAnimation::GetMovement(FName Name)
 {
 	// Retail: ~90b. Searches Sequences (this+0x48, stride 0x2C) for FName match.
@@ -402,7 +402,7 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 	return NULL;
 }
 
-IMPL_INFERRED("allocates 0x2C-byte digest struct if not already present; seeds 1.0f sentinel")
+IMPL_APPROX("allocates 0x2C-byte digest struct if not already present; seeds 1.0f sentinel")
 void UMeshAnimation::InitForDigestion()
 {
 	guard(UMeshAnimation::InitForDigestion);
@@ -421,7 +421,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_INFERRED("builds render-section list from raw verts and tex-index array")
+IMPL_APPROX("builds render-section list from raw verts and tex-index array")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -479,7 +479,7 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_INFERRED("calls ULodMesh::Serialize; complex TArray serializers diverged — data loaded from package")
+IMPL_APPROX("calls ULodMesh::Serialize; complex TArray serializers diverged — data loaded from package")
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
@@ -504,7 +504,7 @@ void UVertMesh::Serialize(FArchive& Ar)
 	unguard;
 }
 
-IMPL_INFERRED("returns UVertMeshInstance::StaticClass()")
+IMPL_APPROX("returns UVertMeshInstance::StaticClass()")
 UClass * UVertMesh::MeshGetInstanceClass()
 {
 	return UVertMeshInstance::StaticClass();
@@ -520,14 +520,14 @@ void UVertMesh::PostLoad()
 	UObject::PostLoad();
 }
 
-IMPL_INFERRED("delegates to mesh instance GetRenderBoundingBox")
+IMPL_APPROX("delegates to mesh instance GetRenderBoundingBox")
 FBox UVertMesh::GetRenderBoundingBox(AActor const * Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
 	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
 }
 
-IMPL_INFERRED("delegates to mesh instance GetRenderBoundingSphere")
+IMPL_APPROX("delegates to mesh instance GetRenderBoundingSphere")
 FSphere UVertMesh::GetRenderBoundingSphere(AActor const * Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
@@ -545,7 +545,7 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 	boneDesc->fn_bInitFromLbpFile(*FileName);
 }
 
-IMPL_INFERRED("AddUnique on alias name array then inserts or updates target FName and FCoords")
+IMPL_APPROX("AddUnique on alias name array then inserts or updates target FName and FCoords")
 int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
 	guard(USkeletalMesh::SetAttachAlias);
@@ -635,7 +635,7 @@ int USkeletalMesh::LODFootprint(int param_1, int param_2)
 	return n7 * 0x20 + total + n0 * 4 + n1 * 0x10 + n2 * 0x14 + n3 * 0x14 + 0xBC + n4 * 2 + n5 * 2 + n6 * 2;
 }
 
-IMPL_INTENTIONALLY_EMPTY("Ghidra 0x1651d0 confirms function body is empty")
+IMPL_EMPTY("Ghidra 0x1651d0 confirms function body is empty")
 void USkeletalMesh::NormalizeInfluences(int)
 {
 	guard(USkeletalMesh::NormalizeInfluences);
@@ -735,7 +735,7 @@ int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 	return Actor->Physics != PHYS_KarmaRagDoll;
 }
 
-IMPL_INFERRED("delegates to UPrimitive::LineCheck except for skeletal hit-cylinder path which is unresolved")
+IMPL_APPROX("delegates to UPrimitive::LineCheck except for skeletal hit-cylinder path which is unresolved")
 int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::R6LineCheck);
@@ -758,7 +758,7 @@ void USkeletalMesh::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::LineCheck);
@@ -836,14 +836,14 @@ FBox USkeletalMesh::GetCollisionBoundingBox(const AActor* Owner) const
 	return UPrimitive::GetCollisionBoundingBox(Owner);
 }
 
-IMPL_INFERRED("delegates to mesh instance GetRenderBoundingBox")
+IMPL_APPROX("delegates to mesh instance GetRenderBoundingBox")
 FBox USkeletalMesh::GetRenderBoundingBox(const AActor* Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
 	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
 }
 
-IMPL_INFERRED("delegates to mesh instance GetRenderBoundingSphere")
+IMPL_APPROX("delegates to mesh instance GetRenderBoundingSphere")
 FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
@@ -866,7 +866,7 @@ void USkeletalMesh::ReconstructRawMesh()
 	unguard;
 }
 
-IMPL_INFERRED("returns 1; skeletal mesh render pre-process is a no-op at this level")
+IMPL_APPROX("returns 1; skeletal mesh render pre-process is a no-op at this level")
 int USkeletalMesh::RenderPreProcess()
 {
 	guard(USkeletalMesh::RenderPreProcess);
@@ -874,7 +874,7 @@ int USkeletalMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_INFERRED("returns USkeletalMeshInstance::StaticClass()")
+IMPL_APPROX("returns USkeletalMeshInstance::StaticClass()")
 UClass * USkeletalMesh::MeshGetInstanceClass()
 {
 	return USkeletalMeshInstance::StaticClass();

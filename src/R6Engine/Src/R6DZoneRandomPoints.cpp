@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6DZoneRandomPoints)
 
 // --- AR6DZoneRandomPoints ---
 
-IMPL_INFERRED("Reconstructed validation: checks node list, removes orphaned nodes, delegates to base")
+IMPL_APPROX("Reconstructed validation: checks node list, removes orphaned nodes, delegates to base")
 void AR6DZoneRandomPoints::CheckForErrors()
 {
 	guard(AR6DZoneRandomPoints::CheckForErrors);
@@ -31,7 +31,7 @@ void AR6DZoneRandomPoints::CheckForErrors()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed node deletion by pointer: searches m_aNode and delegates to index overload")
+IMPL_APPROX("Reconstructed node deletion by pointer: searches m_aNode and delegates to index overload")
 void AR6DZoneRandomPoints::DeleteANode(AR6DZoneRandomPointNode *Node)
 {
 	guard(AR6DZoneRandomPoints::DeleteANode);
@@ -46,7 +46,7 @@ void AR6DZoneRandomPoints::DeleteANode(AR6DZoneRandomPointNode *Node)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed node deletion by index: removes from array and destroys actor")
+IMPL_APPROX("Reconstructed node deletion by index: removes from array and destroys actor")
 void AR6DZoneRandomPoints::DeleteANode(INT iIndex)
 {
 	guard(AR6DZoneRandomPoints::DeleteANode);
@@ -58,7 +58,7 @@ void AR6DZoneRandomPoints::DeleteANode(INT iIndex)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed nearest-node location search using squared-distance comparison")
+IMPL_APPROX("Reconstructed nearest-node location search using squared-distance comparison")
 FVector AR6DZoneRandomPoints::FindClosestPointTo(FVector const & Point)
 {
 	guard(AR6DZoneRandomPoints::FindClosestPointTo);
@@ -84,7 +84,7 @@ FVector AR6DZoneRandomPoints::FindClosestPointTo(FVector const & Point)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed random node location selection")
+IMPL_APPROX("Reconstructed random node location selection")
 FVector AR6DZoneRandomPoints::FindRandomPointInArea()
 {
 	guard(AR6DZoneRandomPoints::FindRandomPointInArea);
@@ -98,7 +98,7 @@ FVector AR6DZoneRandomPoints::FindRandomPointInArea()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed priority-queue spawning point selection with rotation, group ID, stance and leave flag")
+IMPL_APPROX("Reconstructed priority-queue spawning point selection with rotation, group ID, stance and leave flag")
 FVector AR6DZoneRandomPoints::FindSpawningPoint(FRotator * pRotation, INT * pGroupID, enum EStance * pStance, INT * pAllowLeave)
 {
 	guard(AR6DZoneRandomPoints::FindSpawningPoint);
@@ -133,7 +133,7 @@ FVector AR6DZoneRandomPoints::FindSpawningPoint(FRotator * pRotation, INT * pGro
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed init: builds priority temp node lists, delegates to base FirstInit with m_bInInit guard")
+IMPL_APPROX("Reconstructed init: builds priority temp node lists, delegates to base FirstInit with m_bInInit guard")
 void AR6DZoneRandomPoints::FirstInit()
 {
 	guard(AR6DZoneRandomPoints::FirstInit);
@@ -153,7 +153,7 @@ void AR6DZoneRandomPoints::FirstInit()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed with raw offsets: game mode and network path to GRI terrorist count, capped by zone max")
+IMPL_APPROX("Reconstructed with raw offsets: game mode and network path to GRI terrorist count, capped by zone max")
 INT AR6DZoneRandomPoints::GetNbOfTerroristToSpawn()
 {
 	guard(AR6DZoneRandomPoints::GetNbOfTerroristToSpawn);
@@ -216,7 +216,7 @@ INT AR6DZoneRandomPoints::IsPointInZone(FVector const &)
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed node list destruction loop with safe actor cleanup")
+IMPL_APPROX("Reconstructed node list destruction loop with safe actor cleanup")
 void AR6DZoneRandomPoints::PostScriptDestroyed()
 {
 	guard(AR6DZoneRandomPoints::PostScriptDestroyed);
@@ -230,7 +230,7 @@ void AR6DZoneRandomPoints::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_INFERRED("Calls parent RenderEditorInfo; additional FLineBatcher node bounding box drawing stubbed")
+IMPL_APPROX("Calls parent RenderEditorInfo; additional FLineBatcher node bounding box drawing stubbed")
 void AR6DZoneRandomPoints::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DZoneRandomPoints::RenderEditorInfo);
@@ -242,7 +242,7 @@ void AR6DZoneRandomPoints::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderI
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed random point node spawn and parent zone link setup")
+IMPL_APPROX("Reconstructed random point node spawn and parent zone link setup")
 void AR6DZoneRandomPoints::SpawnANewNode(FVector)
 {
 	guard(AR6DZoneRandomPoints::SpawnANewNode);
@@ -252,7 +252,7 @@ void AR6DZoneRandomPoints::SpawnANewNode(FVector)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed Spawned: delegates to base and spawns one initial node offset along Y axis")
+IMPL_APPROX("Reconstructed Spawned: delegates to base and spawns one initial node offset along Y axis")
 void AR6DZoneRandomPoints::Spawned()
 {
 	guard(AR6DZoneRandomPoints::Spawned);

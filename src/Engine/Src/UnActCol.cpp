@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FReachSpec ---
-IMPL_INFERRED("Copies the 44-byte reach spec block via appMemcpy")
+IMPL_APPROX("Copies the 44-byte reach spec block via appMemcpy")
 FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
 {
 	appMemcpy(this, &Other, 44); // 11 dwords, shared with FStaticMeshCollisionNode
@@ -292,7 +292,7 @@ int UReachSpec::BotOnlyPath()
 	return CollisionRadius < 0x28 ? 1 : 0;
 }
 
-IMPL_INFERRED("Zeros all navigation spec fields and clears bForced")
+IMPL_APPROX("Zeros all navigation spec fields and clears bForced")
 void UReachSpec::Init()
 {
 	// Retail (36b): zeros all nav fields and clears bit 0 of bForced
@@ -318,7 +318,7 @@ IMPL_TODO("Needs Ghidra analysis")
 FCollisionHash::~FCollisionHash() {}
 
 // ??4FCollisionHash@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Copies bucket array and free list via appMemcpy")
+IMPL_APPROX("Copies bucket array and free list via appMemcpy")
 FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) {
 	appMemcpy(Buckets, p0.Buckets, sizeof(Buckets));
 	FreeList = p0.FreeList;
@@ -331,14 +331,14 @@ IMPL_TODO("Needs Ghidra analysis")
 FCollisionOctree::~FCollisionOctree() {}
 
 // ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Copies Pad block via appMemcpy")
+IMPL_APPROX("Copies Pad block via appMemcpy")
 FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & Other) {
 	appMemcpy(Pad, Other.Pad, sizeof(Pad));
 	return *this;
 }
 
 // ??4FOctreeNode@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Copies Pad block via appMemcpy")
+IMPL_APPROX("Copies Pad block via appMemcpy")
 FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
@@ -630,7 +630,7 @@ FCheckResult * FCollisionHash::ActorRadiusCheck(FMemStack & Mem, FVector Center,
 // actors that appear in multiple query cells via the visited tag at actor+0x60.
 
 // ?ActorEncroachmentCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@VFVector@@VFRotator@@KK@Z
-IMPL_INFERRED("Encroachment check mirroring FCollisionHash; iterates root node actor list")
+IMPL_APPROX("Encroachment check mirroring FCollisionHash; iterates root node actor list")
 FCheckResult* FCollisionOctree::ActorEncroachmentCheck(FMemStack& Mem, AActor* Actor, FVector Location, FRotator Rotation, DWORD ExtraNodeFlags, DWORD TypeFlags)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -661,7 +661,7 @@ FCheckResult* FCollisionOctree::ActorEncroachmentCheck(FMemStack& Mem, AActor* A
 // ?ActorLineCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@11KKPAVAActor@@@Z
 // Sweeps a line (or capsule if Extent nonzero) through all tracked actors.
 // Mirrors FCollisionHash::ActorLineCheck but draws from the octree's root actor list.
-IMPL_INFERRED("Line check mirroring FCollisionHash; iterates root node actor list")
+IMPL_APPROX("Line check mirroring FCollisionHash; iterates root node actor list")
 FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD TypeFlags, AActor* SourceActor)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -702,7 +702,7 @@ FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, 
 
 // ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
 // Tests a point+AABB against all tracked actors; uses GMem for allocation (matching retail).
-IMPL_INFERRED("Point check mirroring FCollisionHash; iterates root node actor list")
+IMPL_APPROX("Point check mirroring FCollisionHash; iterates root node actor list")
 FCheckResult* FCollisionOctree::ActorPointCheck(FMemStack& /*Mem*/, FVector Location, FVector Extent, DWORD ExtraNodeFlags, DWORD /*unused*/, INT bSingleResult, AActor* SourceActor)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -731,7 +731,7 @@ FCheckResult* FCollisionOctree::ActorPointCheck(FMemStack& /*Mem*/, FVector Loca
 
 // ?ActorRadiusCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
 // Returns all actors whose location is within Radius of Center.
-IMPL_INFERRED("Radius check mirroring FCollisionHash; iterates root node actor list")
+IMPL_APPROX("Radius check mirroring FCollisionHash; iterates root node actor list")
 FCheckResult* FCollisionOctree::ActorRadiusCheck(FMemStack& Mem, FVector Center, FLOAT Radius, DWORD ExtraNodeFlags)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -960,7 +960,7 @@ void FCollisionHash::GetActorExtent(AActor* Actor, INT& MinX, INT& MaxX, INT& Mi
 //   Pad[16..27]   = query Location (FVector)
 //   Pad[80..87]   = Extent (FVector, zero for point test)
 //   Pad[88..91]   = TraceFlags (DWORD)
-IMPL_INFERRED("Per-node encroachment check; reads query context from OctHash->Pad")
+IMPL_APPROX("Per-node encroachment check; reads query context from OctHash->Pad")
 void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -991,7 +991,7 @@ void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree* OctHash, FPlane const
 
 // ?ActorNonZeroExtentLineCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
 // Capsule line check — like the zero-extent version but passes Extent to LineCheck.
-IMPL_INFERRED("Per-node capsule line check; reads query context from OctHash->Pad")
+IMPL_APPROX("Per-node capsule line check; reads query context from OctHash->Pad")
 void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1033,7 +1033,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
-IMPL_INFERRED("Per-node point check; reads query context from OctHash->Pad")
+IMPL_APPROX("Per-node point check; reads query context from OctHash->Pad")
 void FOctreeNode::ActorPointCheck(FCollisionOctree* OctHash, FPlane const* NodePlane, AActor* SourceActor)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1060,7 +1060,7 @@ void FOctreeNode::ActorPointCheck(FCollisionOctree* OctHash, FPlane const* NodeP
 }
 
 // ?ActorRadiusCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_INFERRED("Per-node radius check; reads query context from OctHash->Pad")
+IMPL_APPROX("Per-node radius check; reads query context from OctHash->Pad")
 void FOctreeNode::ActorRadiusCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1099,7 +1099,7 @@ void FOctreeNode::ActorRadiusCheck(FCollisionOctree* OctHash, FPlane const* Node
 // Entry point for a ray test against actors in this node.  The caller passes
 // Start and End as individual floats; Ghidra confirmed the packing order is
 // Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z.
-IMPL_INFERRED("Per-node zero-extent line check; reads query context from OctHash->Pad")
+IMPL_APPROX("Per-node zero-extent line check; reads query context from OctHash->Pad")
 void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, float Sy, float Sz, float Ex, float Ey, float Ez, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);

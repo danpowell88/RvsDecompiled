@@ -41,7 +41,7 @@ INT* conn = (INT*)Clients(i);
 }
 }
 
-IMPL_INFERRED("Advances network time and prunes timed-out client connections")
+IMPL_APPROX("Advances network time and prunes timed-out client connections")
 void UNetDriver::TickDispatch(float DeltaSeconds)
 {
 guard(UNetDriver::TickDispatch);
@@ -94,7 +94,7 @@ guard(UNetDriver::AssertValid);
 unguard;
 }
 
-IMPL_INFERRED("Destroys server/client connections and calls LowLevelDestroy via vtable")
+IMPL_APPROX("Destroys server/client connections and calls LowLevelDestroy via vtable")
 void UNetDriver::Destroy()
 {
 guard(UNetDriver::Destroy);
@@ -119,7 +119,7 @@ Super::Destroy();
 unguard;
 }
 
-IMPL_INFERRED("Stores Notify pointer; base implementation")
+IMPL_APPROX("Stores Notify pointer; base implementation")
 int UNetDriver::InitConnect(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitConnect);
@@ -128,7 +128,7 @@ return 1;
 unguard;
 }
 
-IMPL_INFERRED("Stores Notify pointer; base implementation")
+IMPL_APPROX("Stores Notify pointer; base implementation")
 int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitListen);
@@ -161,7 +161,7 @@ guard(UDemoRecDriver::TickDispatch);
 unguard;
 }
 
-IMPL_INFERRED("Destroys demo file object via vtable destructor")
+IMPL_APPROX("Destroys demo file object via vtable destructor")
 void UDemoRecDriver::LowLevelDestroy()
 {
 guard(UDemoRecDriver::LowLevelDestroy);
@@ -190,7 +190,7 @@ return 0;
 unguard;
 }
 
-IMPL_INFERRED("Returns level from Notify; asserts validity")
+IMPL_APPROX("Returns level from Notify; asserts validity")
 ULevel* UDemoRecDriver::GetLevel()
 {
 guard(UDemoRecDriver::GetLevel);
@@ -204,7 +204,7 @@ return lev;
 unguard;
 }
 
-IMPL_INFERRED("Initialises demo filename and resets counters")
+IMPL_APPROX("Initialises demo filename and resets counters")
 int UDemoRecDriver::InitBase(int, FNetworkNotify*, FURL& InURL, FString&)
 {
 guard(UDemoRecDriver::InitBase);
@@ -269,10 +269,10 @@ fn(fdOut, Data, Event);
 unguard;
 }
 
-IMPL_INFERRED("Delegates to Super::Destroy")
+IMPL_APPROX("Delegates to Super::Destroy")
 void UNetConnection::Destroy() { Super::Destroy(); }
 
-IMPL_INFERRED("Serialises PackageMap, all channel objects, and download object")
+IMPL_APPROX("Serialises PackageMap, all channel objects, and download object")
 void UNetConnection::Serialize(FArchive& Ar)
 {
 guard(UNetConnection::Serialize);
@@ -292,7 +292,7 @@ guard(UNetConnection::ReadInput);
 unguard;
 }
 
-IMPL_INFERRED("Initialises the output bit-writer to MaxPacket size")
+IMPL_APPROX("Initialises the output bit-writer to MaxPacket size")
 void UNetConnection::InitOut()
 {
 guard(UNetConnection::InitOut);
@@ -301,7 +301,7 @@ FBitWriter TempWriter(*(INT*)((BYTE*)this + 0xD0) << 3);
 unguard;
 }
 
-IMPL_INFERRED("Validates protocol version and connection state")
+IMPL_APPROX("Validates protocol version and connection state")
 void UNetConnection::AssertValid()
 {
 guard(UNetConnection::AssertValid);
@@ -316,7 +316,7 @@ appFailAssert("State==USOCK_Closed || State==USOCK_Pending || State==USOCK_Open"
 unguard;
 }
 
-IMPL_INFERRED("Sends ACK packet; queues pending ack if RemotePacketId is non-zero")
+IMPL_APPROX("Sends ACK packet; queues pending ack if RemotePacketId is non-zero")
 void UNetConnection::SendAck(INT PacketId, INT RemotePacketId)
 {
 guard(UNetConnection::SendAck);
@@ -356,7 +356,7 @@ guard(UNetConnection::Tick);
 unguard;
 }
 
-IMPL_INFERRED("Always returns ready")
+IMPL_APPROX("Always returns ready")
 INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
 
 IMPL_TODO("Needs Ghidra analysis")
@@ -366,10 +366,10 @@ guard(UNetConnection::HandleClientPlayer);
 unguard;
 }
 
-IMPL_INFERRED("Returns Driver field")
+IMPL_APPROX("Returns Driver field")
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
 
-IMPL_INFERRED("Flushes output if adding bits would overflow MaxPacket; writes packet header")
+IMPL_APPROX("Flushes output if adding bits would overflow MaxPacket; writes packet header")
 void UNetConnection::PreSend( INT SizeBits )
 {
 // Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -390,7 +390,7 @@ if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
 appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
 }
 
-IMPL_INFERRED("Flushes pending ACK queue")
+IMPL_APPROX("Flushes pending ACK queue")
 void UNetConnection::PurgeAcks()
 {
 guard(UNetConnection::PurgeAcks);
@@ -408,7 +408,7 @@ guard(UNetConnection::ReceiveFile);
 unguard;
 }
 
-IMPL_INFERRED("Propagates NAK to dirty channels")
+IMPL_APPROX("Propagates NAK to dirty channels")
 void UNetConnection::ReceivedNak(INT NakPacketId)
 {
 guard(UNetConnection::ReceivedNak);

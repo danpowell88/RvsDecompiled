@@ -26,7 +26,7 @@ unguard;
 
 
 // --- UFileChannel ---
-IMPL_INFERRED("Sets ChType to CHTYPE_File")
+IMPL_APPROX("Sets ChType to CHTYPE_File")
 void UFileChannel::StaticConstructor()
 {
 guard(UFileChannel::StaticConstructor);
@@ -100,7 +100,7 @@ UChannel::Init(Conn, ChIndex, InType);
 
 
 // --- UActorChannel ---
-IMPL_INFERRED("Sets ChType to CHTYPE_Actor")
+IMPL_APPROX("Sets ChType to CHTYPE_Actor")
 void UActorChannel::StaticConstructor()
 {
 guard(UActorChannel::StaticConstructor);
@@ -108,7 +108,7 @@ guard(UActorChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_INFERRED("Delegates to UChannel::Tick")
+IMPL_APPROX("Delegates to UChannel::Tick")
 void UActorChannel::Tick()
 {
 guard(UActorChannel::Tick);
@@ -124,7 +124,7 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_INFERRED("Delegates to UChannel::ReceivedNak; actor replication NAK handling not implemented")
+IMPL_APPROX("Delegates to UChannel::ReceivedNak; actor replication NAK handling not implemented")
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
@@ -172,7 +172,7 @@ FString UActorChannel::Describe()
 return FString();
 }
 
-IMPL_INFERRED("Tears down actor channel replication state; client-side actor-ref cleanup deferred")
+IMPL_APPROX("Tears down actor channel replication state; client-side actor-ref cleanup deferred")
 void UActorChannel::Destroy()
 {
 	guard(UActorChannel::Destroy);
@@ -224,7 +224,7 @@ void UActorChannel::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Returns actor pointer at channel offset 0x6C")
+IMPL_APPROX("Returns actor pointer at channel offset 0x6C")
 AActor* UActorChannel::GetActor()
 {
 // Ghidra (4B): Actor at offset 0x6C
@@ -246,7 +246,7 @@ appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 
 
 // --- UControlChannel ---
-IMPL_INFERRED("Sets ChType to CHTYPE_Control")
+IMPL_APPROX("Sets ChType to CHTYPE_Control")
 void UControlChannel::StaticConstructor()
 {
 guard(UControlChannel::StaticConstructor);
@@ -270,7 +270,7 @@ guard(UControlChannel::Serialize);
 unguard;
 }
 
-IMPL_INFERRED("Returns empty description string")
+IMPL_APPROX("Returns empty description string")
 FString UControlChannel::Describe()
 {
 return FString();
@@ -286,7 +286,7 @@ if (RouteDestroy() == 0)
 UChannel::Destroy();
 }
 
-IMPL_INFERRED("Delegates to UChannel::Init")
+IMPL_APPROX("Delegates to UChannel::Init")
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 UChannel::Init(Conn, ChIndex, InType);
@@ -300,10 +300,10 @@ UChannel::Init(Conn, ChIndex, InType);
 // UChannel
 // =============================================================================
 
-IMPL_INFERRED("Delegates to Super::Destroy")
+IMPL_APPROX("Delegates to Super::Destroy")
 void UChannel::Destroy() { Super::Destroy(); }
 
-IMPL_INFERRED("Initialises channel connection, index, and opening locality")
+IMPL_APPROX("Initialises channel connection, index, and opening locality")
 void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
 {
 ChIndex = InChIndex;
@@ -316,7 +316,7 @@ OpenPacketId = INDEX_NONE;
 NegotiatedVer = 0;
 }
 
-IMPL_INFERRED("Sets Closing flag to 1")
+IMPL_APPROX("Sets Closing flag to 1")
 void UChannel::SetClosingFlag() { Closing = 1; }
 
 IMPL_TODO("Needs Ghidra analysis")
@@ -327,7 +327,7 @@ guard(UChannel::Close);
 unguard;
 }
 
-IMPL_INFERRED("Returns empty description string")
+IMPL_APPROX("Returns empty description string")
 FString UChannel::Describe()
 {
 guard(UChannel::Describe);
@@ -335,7 +335,7 @@ return FString();
 unguard;
 }
 
-IMPL_INFERRED("Marks reliable unacked bunches for resend on NAK")
+IMPL_APPROX("Marks reliable unacked bunches for resend on NAK")
 void UChannel::ReceivedNak(INT NakPacketId)
 {
 guard(UChannel::ReceivedNak);
@@ -360,7 +360,7 @@ guard(UChannel::Tick);
 unguard;
 }
 
-IMPL_INFERRED("Asserts InBunch chain is in ascending sequence order")
+IMPL_APPROX("Asserts InBunch chain is in ascending sequence order")
 void UChannel::AssertInSequenced()
 {
 guard(UChannel::AssertInSequenced);
@@ -372,7 +372,7 @@ appFailAssert("In->Next->ChSequence>In->ChSequence", ".\\UnChan.cpp", 0x108);
 unguard;
 }
 
-IMPL_INFERRED("Returns 1 if Type is a registered channel class")
+IMPL_APPROX("Returns 1 if Type is a registered channel class")
 INT CDECL UChannel::IsKnownChannelType(INT Type)
 {
 if (Type >= 0 && Type < 8 && UChannel::ChannelClasses[Type])
@@ -380,10 +380,10 @@ return 1;
 return 0;
 }
 
-IMPL_INFERRED("Always returns ready")
+IMPL_APPROX("Always returns ready")
 INT UChannel::IsNetReady( INT Saturate ) { return 1; }
 
-IMPL_INFERRED("Returns available bytes for next bunch based on connection buffer state")
+IMPL_APPROX("Returns available bytes for next bunch based on connection buffer state")
 INT UChannel::MaxSendBytes()
 {
 guard(UChannel::MaxSendBytes);
@@ -472,38 +472,38 @@ unguard;
 // DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
 //             that reference allocated memory may alias incorrectly at runtime.
-IMPL_INFERRED("Copies entire FInBunch via memcpy; retail sets individual fields after FBitReader copy-ctor")
+IMPL_APPROX("Copies entire FInBunch via memcpy; retail sets individual fields after FBitReader copy-ctor")
 FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
 //             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
-IMPL_INFERRED("Zeroes Pad region; retail calls FBitReader(nullptr,0) and sets individual fields")
+IMPL_APPROX("Zeroes Pad region; retail calls FBitReader(nullptr,0) and sets individual fields")
 FInBunch::FInBunch(UNetConnection*) : FBitReader() { appMemzero(Pad, sizeof(Pad)); }
-IMPL_INFERRED("Copies entire FInBunch via memcpy")
+IMPL_APPROX("Copies entire FInBunch via memcpy")
 FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
-IMPL_INFERRED("No-op serialiser for network objects")
+IMPL_APPROX("No-op serialiser for network objects")
 FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
-IMPL_INFERRED("No-op serialiser for network names")
+IMPL_APPROX("No-op serialiser for network names")
 FArchive& FInBunch::operator<<(FName& N) { return *this; }
 
 // ============================================================================
 // FOutBunch
 // ============================================================================
 // DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
-IMPL_INFERRED("Zeroes FOutBunch; retail calls FBitWriter(0) then sets vtable")
+IMPL_APPROX("Zeroes FOutBunch; retail calls FBitWriter(0) then sets vtable")
 FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
-IMPL_INFERRED("Copies entire FOutBunch via memcpy; retail sets individual fields")
+IMPL_APPROX("Copies entire FOutBunch via memcpy; retail sets individual fields")
 FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
-IMPL_INFERRED("Zeroes FOutBunch; retail calls FBitWriter and sets channel/sequence fields")
+IMPL_APPROX("Zeroes FOutBunch; retail calls FBitWriter and sets channel/sequence fields")
 FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
-IMPL_INFERRED("Empty destructor")
+IMPL_APPROX("Empty destructor")
 FOutBunch::~FOutBunch() {}
-IMPL_INFERRED("No-op serialiser for network objects")
+IMPL_APPROX("No-op serialiser for network objects")
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
-IMPL_INFERRED("No-op serialiser for network names")
+IMPL_APPROX("No-op serialiser for network names")
 FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
 
 // --- Moved from EngineStubs.cpp ---

@@ -116,7 +116,7 @@ void ATerrainInfo::UpdateVertices(float,int,int,int,int)
 	guard(ATerrainInfo::UpdateVertices);
 	unguard;
 }
-IMPL_INFERRED("Transforms world position to heightmap space via FCoords at +0x1330")
+IMPL_APPROX("Transforms world position to heightmap space via FCoords at +0x1330")
 FVector ATerrainInfo::WorldToHeightmap(FVector In)
 {
 	// Retail: 29b. ECX=this+0x1330 (heightmap FCoords), call FVector::TransformPointBy.
@@ -183,7 +183,7 @@ void ATerrainInfo::SelectVerticesInBox(FBox &)
 	guard(ATerrainInfo::SelectVerticesInBox);
 	unguard;
 }
-IMPL_INFERRED("Writes packed bit into EdgeTurnBitmap at +0x137C")
+IMPL_APPROX("Writes packed bit into EdgeTurnBitmap at +0x137C")
 void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 {
 	// Retail: packed-bit write into EdgeTurnBitmap.Data (Data* at this+0x137C).
@@ -196,7 +196,7 @@ void ATerrainInfo::SetEdgeTurnBitmap(int X, int Y, int Value)
 	if (Value) data[idx >> 5] |=  bit_mask;
 	else       data[idx >> 5] &= ~bit_mask;
 }
-IMPL_INFERRED("Writes 16-bit height value at USize*Y+X in G16 heightmap texture")
+IMPL_APPROX("Writes 16-bit height value at USize*Y+X in G16 heightmap texture")
 void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 {
 	// Retail: 45b. Writes 16-bit height value at USize*Y+X in the G16 heightmap.
@@ -215,7 +215,7 @@ void ATerrainInfo::SetLayerAlpha(float,float,int,BYTE,UTexture *)
 	guard(ATerrainInfo::SetLayerAlpha);
 	unguard;
 }
-IMPL_INFERRED("Writes biased 4-bit nibble into packed planning floor map at +0x13C8")
+IMPL_APPROX("Writes biased 4-bit nibble into packed planning floor map at +0x13C8")
 void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 {
 	// Retail: writes biased 4-bit nibble (Value+8) into packed INT array at
@@ -232,7 +232,7 @@ void ATerrainInfo::SetPlanningFloorMap(int X, int Y, int Value)
 	// Retail 0x104570D0: mark terrain dirty for rebuild (bit 2 of DWORD at +0x12B4).
 	*(DWORD*)((BYTE*)this + 0x12B4) |= 4;
 }
-IMPL_INFERRED("Writes packed bit into QuadVisibilityBitmap at +0x1370")
+IMPL_APPROX("Writes packed bit into QuadVisibilityBitmap at +0x1370")
 void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 {
 	// Same as SetEdgeTurnBitmap but for QuadVisibilityBitmap.Data (Data* at this+0x1370).
@@ -382,7 +382,7 @@ int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX
 	}
 	return 0;
 }
-IMPL_INFERRED("Returns single bit from EdgeTurnBitmap at +0x137C")
+IMPL_APPROX("Returns single bit from EdgeTurnBitmap at +0x137C")
 int ATerrainInfo::GetEdgeTurnBitmap(int X, int Y)
 {
 	// Retail: return single bit from EdgeTurnBitmap (Data* at this+0x137C).
@@ -395,7 +395,7 @@ int ATerrainInfo::GetEdgeTurnBitmap(int X, int Y)
 	INT bit_mask = 1 << (idx & 31);
 	return (word & bit_mask) ? 1 : 0;
 }
-IMPL_INFERRED("Returns HeightmapX * Y + X linear heightmap index")
+IMPL_APPROX("Returns HeightmapX * Y + X linear heightmap index")
 int ATerrainInfo::GetGlobalVertex(int X, int Y)
 {
 	// Retail: 8B 81 E0 12 00 00 0F AF 44 24 08 03 44 24 04 C2 08 00
@@ -468,7 +468,7 @@ BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 		return *(BYTE*)((BYTE*)texData + idx);          // 8-bit alpha
 	return 0;
 }
-IMPL_INFERRED("Reads biased 4-bit nibble from packed planning floor map at +0x13C8")
+IMPL_APPROX("Reads biased 4-bit nibble from packed planning floor map at +0x13C8")
 int ATerrainInfo::GetPlanningFloorMap(int X, int Y)
 {
 	// Retail: 57b. Planning floor map stored as packed 4-bit nibbles in INT array
@@ -482,7 +482,7 @@ int ATerrainInfo::GetPlanningFloorMap(int X, int Y)
 	INT nibble = (planData[idx >> 3] >> bit_pos) & 0x0F;
 	return nibble - 8;            // unbias: stored range 0..15, returned -8..7
 }
-IMPL_INFERRED("Returns single bit from QuadVisibilityBitmap at +0x1370")
+IMPL_APPROX("Returns single bit from QuadVisibilityBitmap at +0x1370")
 int ATerrainInfo::GetQuadVisibilityBitmap(int X, int Y)
 {
 	// Same pattern as GetEdgeTurnBitmap but reads QuadVisibilityBitmap (Data* at this+0x1370).
@@ -542,7 +542,7 @@ FVector ATerrainInfo::GetVertexNormal(int,int)
 {
 	return FVector(0,0,0);
 }
-IMPL_INFERRED("Transforms heightmap position to world space via FCoords at +0x1300")
+IMPL_APPROX("Transforms heightmap position to world space via FCoords at +0x1300")
 FVector ATerrainInfo::HeightmapToWorld(FVector In)
 {
 	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
@@ -631,7 +631,7 @@ FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLa
 
 
 // --- FTerrainTools ---
-IMPL_INFERRED("Writes Value to terrain brush adjust field at indirect struct+0x60")
+IMPL_APPROX("Writes Value to terrain brush adjust field at indirect struct+0x60")
 void FTerrainTools::SetAdjust(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -667,7 +667,7 @@ void FTerrainTools::SetCurrentBrush(int BrushID)
 	appFailAssert("0", ".\\UnTerrainTools.cpp", 0x372);
 }
 
-IMPL_INFERRED("Updates current terrain info pointer and clears related brush/selection fields")
+IMPL_APPROX("Updates current terrain info pointer and clears related brush/selection fields")
 void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)
 {
 	// Ghidra (29B): if changed, set ptr and zero related fields
@@ -682,7 +682,7 @@ void FTerrainTools::SetCurrentTerrainInfo(ATerrainInfo* Info)
 	}
 }
 
-IMPL_INFERRED("Clamps value to minimum -7 and stores in Pad[0x40]")
+IMPL_APPROX("Clamps value to minimum -7 and stores in Pad[0x40]")
 void FTerrainTools::SetFloorOffset(int Value)
 {
 	// Retail: 20b. Clamp to minimum of -7 only; no upper clamp.
@@ -690,7 +690,7 @@ void FTerrainTools::SetFloorOffset(int Value)
 	*(INT*)&Pad[0x40] = Value;
 }
 
-IMPL_INFERRED("Writes Value to terrain brush inner radius field at indirect struct+0x54")
+IMPL_APPROX("Writes Value to terrain brush inner radius field at indirect struct+0x54")
 void FTerrainTools::SetInnerRadius(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -698,7 +698,7 @@ void FTerrainTools::SetInnerRadius(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x54) = Value;
 }
 
-IMPL_INFERRED("Writes Value to terrain brush mirror axis field at indirect struct+0x64")
+IMPL_APPROX("Writes Value to terrain brush mirror axis field at indirect struct+0x64")
 void FTerrainTools::SetMirrorAxis(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -706,7 +706,7 @@ void FTerrainTools::SetMirrorAxis(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x64) = Value;
 }
 
-IMPL_INFERRED("Writes Value to terrain brush outer radius field at indirect struct+0x58")
+IMPL_APPROX("Writes Value to terrain brush outer radius field at indirect struct+0x58")
 void FTerrainTools::SetOuterRadius(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -714,7 +714,7 @@ void FTerrainTools::SetOuterRadius(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x58) = Value;
 }
 
-IMPL_INFERRED("Writes Value to terrain brush strength field at indirect struct+0x5C")
+IMPL_APPROX("Writes Value to terrain brush strength field at indirect struct+0x5C")
 void FTerrainTools::SetStrength(int Value)
 {
 	// Retail: 20b. No-op if Pad[0] (this+0x04) is null (cross-function-jump).
@@ -750,7 +750,7 @@ void FTerrainTools::FindActorsToAlign()
 	unguard;
 }
 
-IMPL_INFERRED("Returns adjust value from active brush struct or fallback at Pad[0x88]")
+IMPL_APPROX("Returns adjust value from active brush struct or fallback at Pad[0x88]")
 int FTerrainTools::GetAdjust()
 {
 	// Ghidra (21B): if brush ptr (Pad[0]) non-null, read from indirect struct;
@@ -764,7 +764,7 @@ int FTerrainTools::GetAdjust()
 	return *(INT*)&Pad[0x88];
 }
 
-IMPL_INFERRED("Returns terrain info pointer from Pad[0x78]")
+IMPL_APPROX("Returns terrain info pointer from Pad[0x78]")
 ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
 {
 	// Ghidra (4B): return pointer at Pad[0x78]
@@ -777,14 +777,14 @@ FString FTerrainTools::GetExecFromBrushName(FString &)
 	return FString();
 }
 
-IMPL_INFERRED("Returns floor offset stored in Pad[0x40]")
+IMPL_APPROX("Returns floor offset stored in Pad[0x40]")
 int FTerrainTools::GetFloorOffset()
 {
 	// Ghidra (4B): direct read from Pad[0x40]
 	return *(INT*)&Pad[0x40];
 }
 
-IMPL_INFERRED("Returns inner radius from active brush struct or fallback at Pad[0x7C]")
+IMPL_APPROX("Returns inner radius from active brush struct or fallback at Pad[0x7C]")
 int FTerrainTools::GetInnerRadius()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -796,7 +796,7 @@ int FTerrainTools::GetInnerRadius()
 	return *(INT*)&Pad[0x7C];
 }
 
-IMPL_INFERRED("Returns mirror axis from active brush struct or fallback at Pad[0x8C]")
+IMPL_APPROX("Returns mirror axis from active brush struct or fallback at Pad[0x8C]")
 int FTerrainTools::GetMirrorAxis()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -808,7 +808,7 @@ int FTerrainTools::GetMirrorAxis()
 	return *(INT*)&Pad[0x8C];
 }
 
-IMPL_INFERRED("Returns outer radius from active brush struct or fallback at Pad[0x80]")
+IMPL_APPROX("Returns outer radius from active brush struct or fallback at Pad[0x80]")
 int FTerrainTools::GetOuterRadius()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -820,7 +820,7 @@ int FTerrainTools::GetOuterRadius()
 	return *(INT*)&Pad[0x80];
 }
 
-IMPL_INFERRED("Returns strength from active brush struct or fallback at Pad[0x84]")
+IMPL_APPROX("Returns strength from active brush struct or fallback at Pad[0x84]")
 int FTerrainTools::GetStrength()
 {
 	INT* BrushPtr = *(INT**)&Pad[0];
@@ -841,7 +841,7 @@ void FTerrainTools::Init()
 
 
 // --- UTerrainMaterial ---
-IMPL_INFERRED("Returns this; UTerrainMaterial is its own fallback material")
+IMPL_APPROX("Returns this; UTerrainMaterial is its own fallback material")
 UMaterial * UTerrainMaterial::CheckFallback()
 {
 	return this;
@@ -886,7 +886,7 @@ IMPL_TODO("Needs Ghidra analysis")
 UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_INFERRED("Delegates to UPrimitive::Serialize")
+IMPL_APPROX("Delegates to UPrimitive::Serialize")
 void UTerrainPrimitive::Serialize(FArchive& Ar) { UPrimitive::Serialize(Ar); }
 IMPL_TODO("Needs Ghidra analysis")
 INT UTerrainPrimitive::LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD) { return 1; }
@@ -897,7 +897,7 @@ void UTerrainPrimitive::Illuminate(AActor*, INT) {}
 IMPL_TODO("Needs Ghidra analysis")
 FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor*, INT) { return FBox(); }
 
-IMPL_INFERRED("Delegates to UObject::Serialize")
+IMPL_APPROX("Delegates to UObject::Serialize")
 void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
 IMPL_TODO("Needs Ghidra analysis")
 void UTerrainSector::PostLoad() {}

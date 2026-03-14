@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(UR6PlayAnim)
 
 // --- UR6PlayAnim ---
 
-IMPL_INFERRED("Standard UObject event thunk")
+IMPL_APPROX("Standard UObject event thunk")
 void UR6PlayAnim::eventAnimFinished()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_AnimFinished), NULL);

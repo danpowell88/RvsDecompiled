@@ -12,7 +12,7 @@ static INT  _DAT_10075508 = 0; // physics step counter
 
 // --- AR6RagDoll ---
 
-IMPL_INFERRED("Remaps hit bone to parent ragdoll particle and applies impulse to its position")
+IMPL_APPROX("Remaps hit bone to parent ragdoll particle and applies impulse to its position")
 void AR6RagDoll::AddImpulseToBone(INT BoneIndex, FVector Impulse)
 {
 	// Remap certain bone indices to their parent ragdoll particle
@@ -44,7 +44,7 @@ void AR6RagDoll::AddImpulseToBone(INT BoneIndex, FVector Impulse)
 	}
 }
 
-IMPL_INFERRED("Adds a new Verlet spring constraint between two particles with min/max squared distance")
+IMPL_APPROX("Adds a new Verlet spring constraint between two particles with min/max squared distance")
 void AR6RagDoll::AddSpring(INT idx1, INT idx2, FLOAT dist, FLOAT maxDist)
 {
 	INT i = m_aSpring.Add(1);
@@ -65,7 +65,7 @@ void AR6RagDoll::AddSpring(INT idx1, INT idx2, FLOAT dist, FLOAT maxDist)
 		s.fMaxSquared = maxDist * maxDist;
 }
 
-IMPL_INFERRED("Projects particle back onto a plane when it penetrates it, with 0.2 restitution")
+IMPL_APPROX("Projects particle back onto a plane when it penetrates it, with 0.2 restitution")
 void AR6RagDoll::ClipParticleToPlane(INT particleIdx, FVector const & Normal, FVector const & PlanePoint)
 {
 	FVector& Origin = m_aParticle[particleIdx].cCurrentPos.Origin;
@@ -80,7 +80,7 @@ void AR6RagDoll::ClipParticleToPlane(INT particleIdx, FVector const & Normal, FV
 	}
 }
 
-IMPL_INFERRED("Sweeps each particle against world geometry and resolves penetration via SingleLineCheck")
+IMPL_APPROX("Sweeps each particle against world geometry and resolves penetration via SingleLineCheck")
 void AR6RagDoll::CollisionDetection()
 {
 	guard(AR6RagDoll::CollisionDetection);
@@ -96,7 +96,7 @@ void AR6RagDoll::CollisionDetection()
 	unguard;
 }
 
-IMPL_INFERRED("Initialises all 16 ragdoll particles from the pawn's skeletal reference pose and builds spring constraints")
+IMPL_APPROX("Initialises all 16 ragdoll particles from the pawn's skeletal reference pose and builds spring constraints")
 void AR6RagDoll::FirstInit(AR6AbstractPawn * param_1)
 {
 	guard(AR6RagDoll::FirstInit);
@@ -221,7 +221,7 @@ void AR6RagDoll::FirstInit(AR6AbstractPawn * param_1)
 	unguard;
 }
 
-IMPL_INFERRED("Editor debug visualisation of ragdoll skeleton via FLineBatcher; unresolved raw call pattern omitted")
+IMPL_APPROX("Editor debug visualisation of ragdoll skeleton via FLineBatcher; unresolved raw call pattern omitted")
 void AR6RagDoll::RenderBones(UCanvas * Canvas)
 {
 	guard(AR6RagDoll::RenderBones);
@@ -234,7 +234,7 @@ void AR6RagDoll::RenderBones(UCanvas * Canvas)
 	unguard;
 }
 
-IMPL_INFERRED("Iterates all spring constraints and corrects particle positions to satisfy min/max distance bounds")
+IMPL_APPROX("Iterates all spring constraints and corrects particle positions to satisfy min/max distance bounds")
 void AR6RagDoll::SatisfyConstraints()
 {
 	guard(AR6RagDoll::SatisfyConstraints);
@@ -291,7 +291,7 @@ void AR6RagDoll::SatisfyConstraints()
 	unguard;
 }
 
-IMPL_INFERRED("Verlet-steps ragdoll physics, updates bone positions on pawn mesh, and snaps pawn to ragdoll root")
+IMPL_APPROX("Verlet-steps ragdoll physics, updates bone positions on pawn mesh, and snaps pawn to ragdoll root")
 INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 {
 	guard(AR6RagDoll::Tick);
@@ -415,7 +415,7 @@ INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 	unguard;
 }
 
-IMPL_INFERRED("Standard Verlet integration with gravity; loop matches binary but is clean rather than unrolled")
+IMPL_APPROX("Standard Verlet integration with gravity; loop matches binary but is clean rather than unrolled")
 void AR6RagDoll::VerletIntegration(FLOAT dt)
 {
 	// Standard Verlet integration: newPos = 2*pos - prevPos + accel*dt^2

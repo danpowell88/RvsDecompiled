@@ -51,30 +51,30 @@ IMPLEMENT_CLASS(AR6eviLTesting);
 	The vtable requires definitions for all declared virtuals.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Delegates to UObject::Serialize — base class serialization")
+IMPL_APPROX("Delegates to UObject::Serialize — base class serialization")
 void UPrimitive::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
 }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
+IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
 INT UPrimitive::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 { return 0; }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
+IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
 INT UPrimitive::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD ExtraFlags )
 { return 0; }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
+IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
 FBox UPrimitive::GetRenderBoundingBox( const AActor* Owner )
 { return FBox(0); }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — returns degenerate sphere")
+IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate sphere")
 FSphere UPrimitive::GetRenderBoundingSphere( const AActor* Owner )
 { return FSphere(0); }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
+IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
 FBox UPrimitive::GetCollisionBoundingBox( const AActor* Owner ) const
 { return FBox(0); }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no geometry — cylinder collision handled by derived classes")
+IMPL_EMPTY("Base UPrimitive has no geometry — cylinder collision handled by derived classes")
 INT UPrimitive::UseCylinderCollision( const AActor* Owner )
 { return 0; }
-IMPL_INTENTIONALLY_EMPTY("Base UPrimitive has no illumination data")
+IMPL_EMPTY("Base UPrimitive has no illumination data")
 void UPrimitive::Illuminate( AActor* Owner, INT bDynamic )
 {}
 IMPL_GHIDRA("Engine.dll", 0xF78E0)
@@ -159,21 +159,21 @@ static_assert(sizeof(UGameEngine) == 0x4d0, "UGameEngine layout mismatch — adj
 // UGameEngine
 // =============================================================================
 
-IMPL_INFERRED("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
-IMPL_INFERRED("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
 void UGameEngine::Destroy() { Super::Destroy(); }
-IMPL_INFERRED("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
 void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
-IMPL_TODO("Needs Ghidra analysis")
-void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
+// UGameEngine::Tick()   — implemented in UnGame.cpp
+// UGameEngine::Init()   — implemented in UnGame.cpp
+// UGameEngine::Browse() — implemented in UnGame.cpp
+// UGameEngine::LoadMap()— implemented in UnGame.cpp
+// UGameEngine::Draw()   — implemented in UnGame.cpp
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::UpdateConnectingMessage() {}
-// UGameEngine::Init() implemented in UnGame.cpp
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::Exit() {}
-IMPL_TODO("Needs Ghidra analysis")
-void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize ) {}
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
 IMPL_TODO("Needs Ghidra analysis")
@@ -186,7 +186,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
-IMPL_INFERRED("Ghidra: 30b; mixes Challenge halfwords with prime multiply and XOR constant")
+IMPL_APPROX("Ghidra: 30b; mixes Challenge halfwords with prime multiply and XOR constant")
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
@@ -196,10 +196,6 @@ IMPL_TODO("Needs Ghidra analysis")
 FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
-IMPL_TODO("Needs Ghidra analysis")
-INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error ) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
-ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error ) { return NULL; }
 IMPL_TODO("Needs Ghidra analysis")
 void UGameEngine::SaveGame( INT Position ) {}
 IMPL_TODO("Needs Ghidra analysis")
@@ -218,29 +214,29 @@ void UGameEngine::FixUpLevel() {}
 // (moved from EngineStubs.cpp)
 // ============================================================================
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF::FRotatorF(float InPitch, float InYaw, float InRoll) : Pitch(InPitch), Yaw(InYaw), Roll(InRoll) {}
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF::FRotatorF() {}
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotator FRotatorF::Rotator() { return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)); }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator*(float p0) const { return FRotatorF(Pitch*p0, Yaw*p0, Roll*p0); }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator*=(float p0) { Pitch*=p0; Yaw*=p0; Roll*=p0; return *this; }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator+(FRotatorF p0) const { return FRotatorF(Pitch+p0.Pitch, Yaw+p0.Yaw, Roll+p0.Roll); }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator+=(FRotatorF p0) { Pitch+=p0.Pitch; Yaw+=p0.Yaw; Roll+=p0.Roll; return *this; }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(Pitch-p0.Pitch, Yaw-p0.Yaw, Roll-p0.Roll); }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator-=(FRotatorF p0) { Pitch-=p0.Pitch; Yaw-=p0.Yaw; Roll-=p0.Roll; return *this; }
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FVector FRotatorF::Vector()
 {
 	return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)).Vector();

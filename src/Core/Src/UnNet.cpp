@@ -65,7 +65,7 @@ FArchive& operator<<( FArchive& Ar, FClassNetCache& Cache )
 	FPackageInfo.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield extension to UPackageMap; reconstructed from context")
+IMPL_APPROX("Ravenshield extension to UPackageMap; reconstructed from context")
 FPackageInfo::FPackageInfo( ULinkerLoad* InLinker )
 :	Linker          ( InLinker )
 ,	Parent          ( InLinker ? InLinker->LinkerRoot : NULL )
@@ -83,7 +83,7 @@ FPackageInfo::FPackageInfo( ULinkerLoad* InLinker )
 		URL = InLinker->Filename;
 }
 
-IMPL_INFERRED("Ravenshield extension to UPackageMap; reconstructed from context")
+IMPL_APPROX("Ravenshield extension to UPackageMap; reconstructed from context")
 FArchive& operator<<( FArchive& Ar, FPackageInfo& I )
 {
 	return Ar << I.URL << I.Parent << I.Guid << I.FileSize

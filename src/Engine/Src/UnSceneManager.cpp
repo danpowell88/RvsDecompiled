@@ -216,7 +216,7 @@ void ASceneManager::ChangeOrientation(FOrientation orient)
 	*(DWORD*)((BYTE*)this + 0x42C) = *(DWORD*)(actor + 0x248);
 }
 
-IMPL_INFERRED("Empties PathSamples TArray at this+0x3E4")
+IMPL_APPROX("Empties PathSamples TArray at this+0x3E4")
 void ASceneManager::DeletePathSamples()
 {
 	// Retail: 17b. Empties the PathSamples TArray at this+0x3E4 (FVector elements, 12b each).
@@ -265,7 +265,7 @@ float ASceneManager::GetActionPctFromScenePct(float Pct)
 	return t;
 }
 
-IMPL_INFERRED("Returns current actor FVector at +0x234 when scene is playing")
+IMPL_APPROX("Returns current actor FVector at +0x234 when scene is playing")
 FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 {
 	// Retail: 102b SEH. Returns the current action's cached location if the scene is playing.
@@ -277,7 +277,7 @@ FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 	return *(FVector*)(action + 0x234);
 }
 
-IMPL_INFERRED("Returns current actor FRotator at +0x240 when scene is playing")
+IMPL_APPROX("Returns current actor FRotator at +0x240 when scene is playing")
 FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMatAction *,int)
 {
 	// Retail: 106b SEH. Same guard as GetLocation: bit 2 of state byte at this+0x398.
@@ -289,7 +289,7 @@ FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMa
 	return *(FRotator*)(action + 0x240);
 }
 
-IMPL_INFERRED("Calls Initialize() on each action in the Actions TArray")
+IMPL_APPROX("Calls Initialize() on each action in the Actions TArray")
 void ASceneManager::InitializeActions()
 {
 	// Retail: 48b. Calls Initialize() on each action in the Actions TArray at this+0x3A8.
@@ -332,7 +332,7 @@ FR6MatineePreviewProxy::~FR6MatineePreviewProxy()
 {
 }
 
-IMPL_INFERRED("Default copy-assignment; no data members to copy")
+IMPL_APPROX("Default copy-assignment; no data members to copy")
 FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePreviewProxy&)
 {
 	return *this;
@@ -340,7 +340,7 @@ FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePrevie
 
 
 // --- UMatAction ---
-IMPL_INFERRED("Calls Super::PostEditChange and refreshes scene manager path")
+IMPL_APPROX("Calls Super::PostEditChange and refreshes scene manager path")
 void UMatAction::PostEditChange()
 {
 	guard(UMatAction::PostEditChange);
@@ -354,7 +354,7 @@ void UMatAction::PostEditChange()
 	unguard;
 }
 
-IMPL_INFERRED("Clears stale pending-kill object reference at +0x40 per retail 89b")
+IMPL_APPROX("Clears stale pending-kill object reference at +0x40 per retail 89b")
 void UMatAction::PostLoad()
 {
 	// Retail: 89b. Call Super::PostLoad() then clear stale object reference.
@@ -412,7 +412,7 @@ int UMatSubAction::Update(float Pct, ASceneManager*)
 	return 1;
 }
 
-IMPL_INFERRED("Calls Super::PostEditChange and refreshes scene manager path")
+IMPL_APPROX("Calls Super::PostEditChange and refreshes scene manager path")
 void UMatSubAction::PostEditChange()
 {
 	guard(UMatSubAction::PostEditChange);
@@ -450,14 +450,14 @@ void UMatSubAction::Initialize()
 	eventInitialize();
 }
 
-IMPL_INFERRED("Returns 1 if status byte at +0x2C equals 2 (ending state)")
+IMPL_APPROX("Returns 1 if status byte at +0x2C equals 2 (ending state)")
 int UMatSubAction::IsEnding()
 {
 	// Retail: 12b. Returns 1 if status byte at this+0x2C == 2 (SETE pattern).
 	return *(BYTE*)((BYTE*)this + 0x2C) == 2 ? 1 : 0;
 }
 
-IMPL_INFERRED("Returns 1 if status byte at +0x2C is 1 (running) or 2 (ending)")
+IMPL_APPROX("Returns 1 if status byte at +0x2C is 1 (running) or 2 (ending)")
 int UMatSubAction::IsRunning()
 {
 	// Retail: 14b. Returns 1 if status byte at this+0x2C is 1 (started) or 2 (ending).
@@ -785,13 +785,13 @@ FString USubActionTrigger::GetStatString()
 // ASceneManager
 // =============================================================================
 
-IMPL_INFERRED("Delegates to Super::PostEditChange()")
+IMPL_APPROX("Delegates to Super::PostEditChange()")
 void ASceneManager::PostEditChange() { Super::PostEditChange(); }
-IMPL_INFERRED("Delegates to Super::Tick()")
+IMPL_APPROX("Delegates to Super::Tick()")
 INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
 IMPL_TODO("Needs Ghidra analysis")
 void ASceneManager::PostBeginPlay() {}
-IMPL_INFERRED("Delegates to Super::CheckForErrors()")
+IMPL_APPROX("Delegates to Super::CheckForErrors()")
 void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
 IMPL_TODO("Needs Ghidra analysis")
 FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
@@ -804,7 +804,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void AReplicationInfo::CloseVideo(UCanvas* Canvas)
 {
 }
-IMPL_INFERRED("Stores raw time, clears reset counter, calls RefreshSubActions with normalised pct")
+IMPL_APPROX("Stores raw time, clears reset counter, calls RefreshSubActions with normalised pct")
 void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 	// Retail: 42b. Stores raw time at this+0x3D0, clears reset counter at this+0x448,
 	// then calls RefreshSubActions with time normalized by TotalSceneTime at this+0x3CC.
@@ -866,11 +866,11 @@ IMPL_TODO("Needs Ghidra analysis")
 FMatineeTools::~FMatineeTools() {}
 
 // ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
-IMPL_INFERRED("Returns CurrentScene pointer")
+IMPL_APPROX("Returns CurrentScene pointer")
 ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@PAV2@@Z
-IMPL_INFERRED("Sets current scene and initializes CurrentAction/SubAction from scene's first action")
+IMPL_APPROX("Sets current scene and initializes CurrentAction/SubAction from scene's first action")
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
 {
 	CurrentScene = Scene;
@@ -894,7 +894,7 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASce
 }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
-IMPL_INFERRED("Finds named scene manager in level actors and sets it as current")
+IMPL_APPROX("Finds named scene manager in level actors and sets it as current")
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
 {
 	for (INT i = 0; i < Level->Actors.Num(); i++)
@@ -914,7 +914,7 @@ IMPL_TODO("Needs Ghidra analysis")
 FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
-IMPL_INFERRED("Copies 24 bytes of lip sync data via appMemcpy")
+IMPL_APPROX("Copies 24 bytes of lip sync data via appMemcpy")
 ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 	appMemcpy(this, &Other, 24);
 	return *this;
@@ -923,12 +923,12 @@ ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 // --- Moved from EngineStubs.cpp ---
 // ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
 // Ghidra: returns CurrentAction (offset 0x44).
-IMPL_INFERRED("Returns CurrentAction pointer")
+IMPL_APPROX("Returns CurrentAction pointer")
 UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
 
 // ?GetNextAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: GetActionIdx, return [idx+1] wrapping to [0].
-IMPL_INFERRED("Returns action at index+1 in Actions array, wrapping to 0 at end")
+IMPL_APPROX("Returns action at index+1 in Actions array, wrapping to 0 at end")
 UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Current)
 {
 	if (!Scene) return NULL;
@@ -941,7 +941,7 @@ UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Cu
 
 // ?GetNextMovementAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: calls GetNextAction in a loop until the action IsA(UActionMoveCamera).
-IMPL_INFERRED("Finds next UActionMoveCamera in the action sequence")
+IMPL_APPROX("Finds next UActionMoveCamera in the action sequence")
 UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAction * Current)
 {
 	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
@@ -960,7 +960,7 @@ UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAct
 
 // ?GetPrevAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: GetActionIdx, return [idx-1] wrapping to [last].
-IMPL_INFERRED("Returns action at index-1, wrapping to last at beginning")
+IMPL_APPROX("Returns action at index-1, wrapping to last at beginning")
 UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Current)
 {
 	if (!Scene) return NULL;
@@ -974,7 +974,7 @@ UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Cu
 
 // ?SetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@PAV2@@Z
 // Ghidra: sets CurrentAction, primes CurrentSubAction from SubActions[0] if available.
-IMPL_INFERRED("Sets CurrentAction and primes CurrentSubAction from SubActions[0]")
+IMPL_APPROX("Sets CurrentAction and primes CurrentSubAction from SubActions[0]")
 UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 {
 	CurrentAction = Action;
@@ -992,12 +992,12 @@ UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 
 // ?GetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@XZ
 // Ghidra: returns CurrentSubAction (offset 0x48).
-IMPL_INFERRED("Returns CurrentSubAction pointer")
+IMPL_APPROX("Returns CurrentSubAction pointer")
 UMatSubAction * FMatineeTools::GetCurrentSubAction() { return CurrentSubAction; }
 
 // ?SetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@PAV2@@Z
 // Ghidra: stores SubAction at this+0x48 and returns it.
-IMPL_INFERRED("Stores SubAction to CurrentSubAction and returns it")
+IMPL_APPROX("Stores SubAction to CurrentSubAction and returns it")
 UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 {
 	CurrentSubAction = SubAction;
@@ -1006,7 +1006,7 @@ UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 
 
 // ?GetActionIdx@FMatineeTools@@QAEHPAVASceneManager@@PAVUMatAction@@@Z
-IMPL_INFERRED("Returns index of Action in SM->Actions array, or -1 if not found")
+IMPL_APPROX("Returns index of Action in SM->Actions array, or -1 if not found")
 int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 {
 	if (!SM)
@@ -1022,7 +1022,7 @@ int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 }
 
 // ?GetPathStyle@FMatineeTools@@QAEHPAVUMatAction@@@Z
-IMPL_INFERRED("Returns path style byte; 0 for Pause actions, per-action byte for MoveCamera")
+IMPL_APPROX("Returns path style byte; 0 for Pause actions, per-action byte for MoveCamera")
 int FMatineeTools::GetPathStyle(UMatAction* Action)
 {
 	if (Action)
@@ -1036,7 +1036,7 @@ int FMatineeTools::GetPathStyle(UMatAction* Action)
 }
 
 // ?GetSubActionIdx@FMatineeTools@@QAEHPAVUMatSubAction@@@Z
-IMPL_INFERRED("Returns index of SubAction in CurrentAction->SubActions, or -1")
+IMPL_APPROX("Returns index of SubAction in CurrentAction->SubActions, or -1")
 int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 {
 	if (!CurrentAction)
@@ -1051,7 +1051,7 @@ int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 	return -1;
 }
 // ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
-IMPL_INFERRED("Sets bPlaying=1 to start lip sync playback")
+IMPL_APPROX("Sets bPlaying=1 to start lip sync playback")
 void ECLipSynchData::m_vStartLipsynch()
 {
 	bPlaying = 1;

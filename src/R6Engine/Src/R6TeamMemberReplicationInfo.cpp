@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6TeamMemberReplicationInfo)
 
 // --- AR6TeamMemberReplicationInfo ---
 
-IMPL_INFERRED("Returns relevance only for friendly pawns; checks viewer pawn then falls back to view target")
+IMPL_APPROX("Returns relevance only for friendly pawns; checks viewer pawn then falls back to view target")
 INT AR6TeamMemberReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*, FVector)
 {
 	guard(AR6TeamMemberReplicationInfo::IsNetRelevantFor);
@@ -34,7 +34,7 @@ INT AR6TeamMemberReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AA
 	unguard;
 }
 
-IMPL_INFERRED("Returns 1 if Other pawn has a controller and is a friend of this actor's instigator")
+IMPL_APPROX("Returns 1 if Other pawn has a controller and is a friend of this actor's instigator")
 INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn* Other)
 {
 	guard(AR6TeamMemberReplicationInfo::IsRelevantToTeamMember);
@@ -44,7 +44,7 @@ INT AR6TeamMemberReplicationInfo::IsRelevantToTeamMember(APawn* Other)
 	unguard;
 }
 
-IMPL_INFERRED("Chains to AActor::TickSpecial with no additional logic")
+IMPL_APPROX("Chains to AActor::TickSpecial with no additional logic")
 void AR6TeamMemberReplicationInfo::TickSpecial(FLOAT DeltaTime)
 {
 	AActor::TickSpecial(DeltaTime);

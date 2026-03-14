@@ -6,7 +6,7 @@ static INT  s_prevViewTarget = 0;
 static BYTE s_prevViewState  = 0;
 
 // --- APlayerController ---
-IMPL_INFERRED("Ghidra-sourced logic (no RVA recorded): checks UNetConnection at +0x5B4, sets bPendingDestroy on Driver")
+IMPL_APPROX("Ghidra-sourced logic (no RVA recorded): checks UNetConnection at +0x5B4, sets bPendingDestroy on Driver")
 void APlayerController::SpecialDestroy()
 {
 	// Ghidra (49B): If Player (offset 0x5B4) is a UNetConnection with a Driver,
@@ -193,7 +193,7 @@ void APlayerController::SetPlayer(UPlayer* InPlayer)
 	debugf(TEXT("%s"), GetFullName());
 }
 
-IMPL_INFERRED("No Ghidra address; checks UViewport at +0x5B4")
+IMPL_APPROX("No Ghidra address; checks UViewport at +0x5B4")
 int APlayerController::LocalPlayerController()
 {
 	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4
@@ -237,13 +237,13 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
-IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
+IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 
-IMPL_INFERRED("Ghidra-noted vtable dispatch to LowLevelGetRemoteAddress; no RVA recorded")
+IMPL_APPROX("Ghidra-noted vtable dispatch to LowLevelGetRemoteAddress; no RVA recorded")
 FString APlayerController::GetPlayerNetworkAddress()
 {
 	// Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player connection.
@@ -253,7 +253,7 @@ FString APlayerController::GetPlayerNetworkAddress()
 	return FString(TEXT(""));
 }
 
-IMPL_INFERRED("No Ghidra address; view-target fallback chain via Pawn then self")
+IMPL_APPROX("No Ghidra address; view-target fallback chain via Pawn then self")
 AActor * APlayerController::GetViewTarget()
 {
 	AActor*& ViewTarget = *(AActor**)(&_NativeData[51]); // offset 0x5B8
@@ -269,7 +269,7 @@ AActor * APlayerController::GetViewTarget()
 	return ViewTarget;
 }
 
-IMPL_INFERRED("No Ghidra address; self-relevance shortcut then delegates to AActor::IsNetRelevantFor")
+IMPL_APPROX("No Ghidra address; self-relevance shortcut then delegates to AActor::IsNetRelevantFor")
 int APlayerController::IsNetRelevantFor(APlayerController* RealViewer,AActor* Viewer,FVector SrcLocation)
 {
 	if( this == RealViewer )

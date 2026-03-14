@@ -23,7 +23,7 @@ extern CORE_API INT FLineExtentBoxIntersection(const FBox& Box, const FVector& S
 
 // FUN_103db080: removes an oscillator pointer (passed as &ptr) from the target
 // fluid surface's oscillator TArray at surface+0x47c.
-IMPL_INFERRED("Calls retail helper at 0x103db080 to remove oscillator from fluid surface list")
+IMPL_APPROX("Calls retail helper at 0x103db080 to remove oscillator from fluid surface list")
 static void RemoveOscillatorFromList(void* oscPtr)
 {
 	typedef void (*FnType)(void*);
@@ -394,7 +394,7 @@ int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVec
 	return 1;
 }
 
-IMPL_INFERRED("Returns bounding box from associated FluidSurfaceInfo")
+IMPL_APPROX("Returns bounding box from associated FluidSurfaceInfo")
 FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 {
 	// Retail: 29b. REP MOVSD 7 DWORDs from *(this+0x58)+0x448.
@@ -421,13 +421,13 @@ FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 // AFluidSurfaceInfo
 // =============================================================================
 
-IMPL_INFERRED("Delegates to Super::PostLoad")
+IMPL_APPROX("Delegates to Super::PostLoad")
 void AFluidSurfaceInfo::PostLoad() { Super::PostLoad(); }
-IMPL_INFERRED("Delegates to Super::Destroy")
+IMPL_APPROX("Delegates to Super::Destroy")
 void AFluidSurfaceInfo::Destroy() { Super::Destroy(); }
-IMPL_INFERRED("Delegates to Super::PostEditChange")
+IMPL_APPROX("Delegates to Super::PostEditChange")
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
-IMPL_INFERRED("Delegates to Super::Tick")
+IMPL_APPROX("Delegates to Super::Tick")
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
 IMPL_TODO("Needs Ghidra analysis")
 void AFluidSurfaceInfo::PostEditMove() {}

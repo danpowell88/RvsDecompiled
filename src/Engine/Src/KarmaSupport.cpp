@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AKActor ---
-IMPL_INFERRED("Engine.dll", 0x62160, "Karma body creation not implemented; calls super only")
+IMPL_APPROX("Engine.dll", 0x62160, "Karma body creation not implemented; calls super only")
 void AKActor::Spawned()
 {
 // Ghidra 0x62160: if PhysicsVolume at this+0x18C is NULL, create Karma body
@@ -27,7 +27,7 @@ AActor::Spawned();
 
 
 // --- AKConeLimit ---
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKConeLimit::KUpdateConstraintParams()
 {
 guard(AKConeLimit::KUpdateConstraintParams);
@@ -36,7 +36,7 @@ unguard;
 
 
 // --- AKConstraint ---
-IMPL_INFERRED("Reconstructed from Ghidra; field offset at 0x418")
+IMPL_APPROX("Reconstructed from Ghidra; field offset at 0x418")
 MdtBaseConstraint * AKConstraint::getKConstraint() const
 {
 // Retail: 7b. MOV EAX, [ECX+0x418]; RET — returns the Karma constraint pointer.
@@ -52,21 +52,21 @@ return NULL;
 unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKConstraint::physKarma(float)
 {
 guard(AKConstraint::physKarma);
 unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKConstraint::postKarmaStep()
 {
 guard(AKConstraint::postKarmaStep);
 unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKConstraint::preKarmaStep(float)
 {
 guard(AKConstraint::preKarmaStep);
@@ -80,7 +80,7 @@ guard(AKConstraint::RenderEditorSelected);
 unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKConstraint::KUpdateConstraintParams()
 {
 guard(AKConstraint::KUpdateConstraintParams);
@@ -145,14 +145,14 @@ unguard;
 
 
 // --- AKHinge ---
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKHinge::preKarmaStep(float)
 {
 guard(AKHinge::preKarmaStep);
 unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AKHinge::KUpdateConstraintParams()
 {
 guard(AKHinge::KUpdateConstraintParams);
@@ -171,7 +171,7 @@ new ((BYTE*)this + 0x18) TArray<FKCylinderElem>(*(const TArray<FKCylinderElem>*)
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>(*(const TArray<FKConvexElem>*)((const BYTE*)&Other + 0x24));
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKAggregateGeom::FKAggregateGeom()
 {
 // Initialize all 4 TArrays to empty
@@ -181,7 +181,7 @@ new ((BYTE*)this + 0x18) TArray<FKCylinderElem>();
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>();
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKAggregateGeom::~FKAggregateGeom()
 {
 // Destroy 4 TArrays in reverse order
@@ -202,7 +202,7 @@ FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 return *this;
 }
 
-IMPL_INFERRED("Reconstructed from Ghidra; retail 44 bytes")
+IMPL_APPROX("Reconstructed from Ghidra; retail 44 bytes")
 void FKAggregateGeom::EmptyElements()
 {
 // Retail: 44b. Calls TArray::Empty(0) on each sub-array.
@@ -214,7 +214,7 @@ void FKAggregateGeom::EmptyElements()
 }
 
 // Ghidra: sum of 4 TArray Num() at offsets 0x00, 0x0C, 0x18, 0x24
-IMPL_INFERRED("Reconstructed from Ghidra")
+IMPL_APPROX("Reconstructed from Ghidra")
 int FKAggregateGeom::GetElementCount()
 {
 INT* Counts = (INT*)this;
@@ -225,7 +225,7 @@ return Counts[1] + Counts[4] + Counts[7] + Counts[10];
 
 
 // --- FKBoxElem ---
-IMPL_INFERRED("Reconstructed from Ghidra")
+IMPL_APPROX("Reconstructed from Ghidra")
 FKBoxElem::FKBoxElem(float InSize)
 {
 // Ghidra: FMatrix::FMatrix() + set all 3 dims to same value
@@ -234,7 +234,7 @@ Y = InSize;
 Z = InSize;
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKBoxElem::FKBoxElem(float InX, float InY, float InZ)
 {
 X = InX;
@@ -242,7 +242,7 @@ Y = InY;
 Z = InZ;
 }
 
-IMPL_INFERRED("Reconstructed from Ghidra")
+IMPL_APPROX("Reconstructed from Ghidra")
 FKBoxElem::FKBoxElem()
 {
 // Ghidra: just calls FMatrix::FMatrix() (default FMatrix ctor is empty)
@@ -255,7 +255,7 @@ guard(FKBoxElem::~FKBoxElem);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKBoxElem& FKBoxElem::operator=(const FKBoxElem& Other)
 {
 appMemcpy( this, &Other, sizeof(FKBoxElem) );
@@ -273,7 +273,7 @@ new ((BYTE*)this + 0x40) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)
 new ((BYTE*)this + 0x4C) TArray<INT>(*(const TArray<INT>*)((const BYTE*)&Other + 0x4C));
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKConvexElem::FKConvexElem()
 {
 // Initialize TArray<FVector> at +0x40 and TArray<INT> at +0x4C to empty
@@ -281,7 +281,7 @@ new ((BYTE*)this + 0x40) TArray<FVector>();
 new ((BYTE*)this + 0x4C) TArray<INT>();
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKConvexElem::~FKConvexElem()
 {
 // Destroy TArray<INT> at +0x4C then TArray<FVector> at +0x40 (reverse order)
@@ -302,7 +302,7 @@ return *this;
 
 
 // --- FKCylinderElem ---
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKCylinderElem::FKCylinderElem(float InRadius, float InLength)
 {
 Radius = InRadius;
@@ -323,7 +323,7 @@ guard(FKCylinderElem::~FKCylinderElem);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKCylinderElem& FKCylinderElem::operator=(const FKCylinderElem& Other)
 {
 appMemcpy( this, &Other, sizeof(FKCylinderElem) );
@@ -332,7 +332,7 @@ return *this;
 
 
 // --- FKSphereElem ---
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKSphereElem::FKSphereElem(float InRadius)
 {
 Radius = InRadius;
@@ -352,7 +352,7 @@ guard(FKSphereElem::~FKSphereElem);
 unguard;
 }
 
-IMPL_INFERRED("Reconstructed from struct layout")
+IMPL_APPROX("Reconstructed from struct layout")
 FKSphereElem& FKSphereElem::operator=(const FKSphereElem& Other)
 {
 appMemcpy( this, &Other, sizeof(FKSphereElem) );
@@ -361,7 +361,7 @@ return *this;
 
 
 // --- UKMeshProps ---
-IMPL_INFERRED("Engine.dll", 0x501b0, "TArray at +0x50 (FKConvexElem array) not serialized")
+IMPL_APPROX("Engine.dll", 0x501b0, "TArray at +0x50 (FKConvexElem array) not serialized")
 void UKMeshProps::Serialize(FArchive& Ar)
 {
 // Ghidra 0x501b0: UObject::Serialize + 9 FLOAT fields at +0x2C..+0x4C (mass props),

@@ -124,7 +124,7 @@ static void D3DMemcpy( void* Dst, const void* Src, DWORD Count )
 /*=============================================================================
 	Helper: D3D error string.
 =============================================================================*/
-IMPL_INFERRED("Helper mapping D3D HRESULT codes to human-readable strings; not a standalone function in the retail binary")
+IMPL_APPROX("Helper mapping D3D HRESULT codes to human-readable strings; not a standalone function in the retail binary")
 static const TCHAR* D3DError( HRESULT hr )
 {
 	switch( hr )
@@ -141,7 +141,7 @@ static const TCHAR* D3DError( HRESULT hr )
 	}
 }
 
-IMPL_INFERRED("Default constructor initialising config bitfields and zeroing render caps; no dedicated Ghidra address identified")
+IMPL_APPROX("Default constructor initialising config bitfields and zeroing render caps; no dedicated Ghidra address identified")
 UD3DRenderDevice::UD3DRenderDevice()
 {
 	// Set default config values. Bitfields cannot be initialised via
@@ -185,7 +185,7 @@ UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	unguard;
 }
 
-IMPL_INFERRED("Assignment operator mirroring the config fields copied by the copy constructor; no Ghidra address identified")
+IMPL_APPROX("Assignment operator mirroring the config fields copied by the copy constructor; no Ghidra address identified")
 UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 {
 	if (this != &Other)
@@ -841,7 +841,7 @@ void UD3DRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels)
 
 	The retail binary appears to ignore this (no D3D reference device usage).
 =============================================================================*/
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UD3DRenderDevice::SetEmulationMode(EHardwareEmulationMode Mode)
 {
 	guard(UD3DRenderDevice::SetEmulationMode);
@@ -902,7 +902,7 @@ static BinkCopyToBufferFunc GBinkCopyToBuffer = NULL;
 static BinkNextFrameFunc    GBinkNextFrame    = NULL;
 static BinkWaitFunc         GBinkWait         = NULL;
 
-IMPL_INFERRED("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically but binkw32.lib is unavailable")
+IMPL_APPROX("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically but binkw32.lib is unavailable")
 static UBOOL LoadBinkDLL()
 {
 	if( GBinkDLL )
@@ -933,7 +933,7 @@ static UBOOL LoadBinkDLL()
 #define BINKSURFACE32    3
 #define BINKCOPYALL      0x80000000L
 
-IMPL_INFERRED("Opens a Bink video file via dynamically loaded binkw32.dll and creates a D3D texture to receive decoded frames")
+IMPL_APPROX("Opens a Bink video file via dynamically loaded binkw32.dll and creates a D3D texture to receive decoded frames")
 INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTrack, INT Flags)
 {
 	guard(UD3DRenderDevice::OpenVideo);
@@ -981,7 +981,7 @@ INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTra
 	unguard;
 }
 
-IMPL_INFERRED("Releases GBinkTexture and closes GBinkHandle via BinkClose; resets Bink state")
+IMPL_APPROX("Releases GBinkTexture and closes GBinkHandle via BinkClose; resets Bink state")
 void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::CloseVideo);
@@ -1002,7 +1002,7 @@ void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 	unguard;
 }
 
-IMPL_INFERRED("Decodes the current Bink frame into GBinkTexture via BinkDoFrame/BinkCopyToBuffer and sets it on D3D texture stage 0")
+IMPL_APPROX("Decodes the current Bink frame into GBinkTexture via BinkDoFrame/BinkCopyToBuffer and sets it on D3D texture stage 0")
 void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 {
 	guard(UD3DRenderDevice::DisplayVideo);
@@ -1042,7 +1042,7 @@ void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 	unguard;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Flags)
 {
 	guard(UD3DRenderDevice::StartVideo);
@@ -1051,7 +1051,7 @@ void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Fl
 	unguard;
 }
 
-IMPL_INFERRED("Delegates video teardown to CloseVideo; distinction from CloseVideo exists for audio track cueing in other drivers")
+IMPL_APPROX("Delegates video teardown to CloseVideo; distinction from CloseVideo exists for audio track cueing in other drivers")
 void UD3DRenderDevice::StopVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::StopVideo);
@@ -1381,7 +1381,7 @@ FD3DVertexShader* UD3DRenderDevice::GetVertexShader(EVertexShader Shader, FShade
 	Called when SetRes encounters a fatal error. Cleans up any partially
 	created D3D objects and returns 0 (failure).
 =============================================================================*/
-IMPL_INFERRED("Error-path helper for SetRes: logs failure reason, releases partially-created D3D objects, and returns 0")
+IMPL_APPROX("Error-path helper for SetRes: logs failure reason, releases partially-created D3D objects, and returns 0")
 INT UD3DRenderDevice::UnSetRes(const TCHAR* Reason, LONG hResult)
 {
 	guard(UD3DRenderDevice::UnSetRes);

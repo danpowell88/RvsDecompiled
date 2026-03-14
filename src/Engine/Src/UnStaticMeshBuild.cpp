@@ -137,25 +137,25 @@ FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
 {
 	return FBox();
 }
-IMPL_INFERRED("Retail 41b; delegates to GetCollisionBoundingBox().GetCenter()")
+IMPL_APPROX("Retail 41b; delegates to GetCollisionBoundingBox().GetCenter()")
 FVector UStaticMesh::GetEncroachCenter(AActor * Actor)
 {
 	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetCenter().
 	return GetCollisionBoundingBox(Actor).GetCenter();
 }
-IMPL_INFERRED("Retail 41b; delegates to GetCollisionBoundingBox().GetExtent()")
+IMPL_APPROX("Retail 41b; delegates to GetCollisionBoundingBox().GetExtent()")
 FVector UStaticMesh::GetEncroachExtent(AActor * Actor)
 {
 	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetExtent().
 	return GetCollisionBoundingBox(Actor).GetExtent();
 }
-IMPL_INFERRED("Retail 23b; raw FBox copy from this+0x2C")
+IMPL_APPROX("Retail 23b; raw FBox copy from this+0x2C")
 FBox UStaticMesh::GetRenderBoundingBox(const AActor*)
 {
 	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x2C to return buffer.
 	return *(FBox*)((BYTE*)this + 0x2C);
 }
-IMPL_INFERRED("Retail 23b; raw FSphere copy from this+0x48")
+IMPL_APPROX("Retail 23b; raw FSphere copy from this+0x48")
 FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 {
 	// Retail: 23b. Copy-constructs FSphere from this+0x48.
@@ -202,7 +202,7 @@ void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 }
 
 // --- FOrientation ---
-IMPL_INFERRED("Zero-initialised orientation struct; no Ghidra reference")
+IMPL_APPROX("Zero-initialised orientation struct; no Ghidra reference")
 FOrientation::FOrientation()
 {
 	*(INT*)&_Data[0x00] = 2;
@@ -215,14 +215,14 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-IMPL_INFERRED("Raw memcpy assignment; no Ghidra reference")
+IMPL_APPROX("Raw memcpy assignment; no Ghidra reference")
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
 	appMemcpy(this, &Other, 0x34);
 	return *this;
 }
 
-IMPL_INFERRED("Compares single DWORD field; no Ghidra reference")
+IMPL_APPROX("Compares single DWORD field; no Ghidra reference")
 int FOrientation::operator!=(FOrientation const & Other) const
 {
 	return *(INT*)&_Data[0x18] != *(INT*)&Other._Data[0x18];
@@ -230,14 +230,14 @@ int FOrientation::operator!=(FOrientation const & Other) const
 
 
 // --- FRebuildOptions ---
-IMPL_INFERRED("Copy constructor with memcpy + FString copy; no Ghidra reference")
+IMPL_APPROX("Copy constructor with memcpy + FString copy; no Ghidra reference")
 FRebuildOptions::FRebuildOptions(FRebuildOptions const & Other)
 	: Name(Other.Name)
 {
 	appMemcpy(Options, Other.Options, sizeof(Options));
 }
 
-IMPL_INFERRED("Default constructor with known option values; no Ghidra reference")
+IMPL_APPROX("Default constructor with known option values; no Ghidra reference")
 FRebuildOptions::FRebuildOptions()
 {
 	Options[0] = 2;    // 0x0C
@@ -251,13 +251,13 @@ FRebuildOptions::FRebuildOptions()
 	Name = TEXT("Default");
 }
 
-IMPL_INTENTIONALLY_EMPTY("FString member destructor handles cleanup automatically")
+IMPL_EMPTY("FString member destructor handles cleanup automatically")
 FRebuildOptions::~FRebuildOptions()
 {
 	// Name's implicit destructor handles FString cleanup
 }
 
-IMPL_INFERRED("Assignment with FString copy + memcpy; no Ghidra reference")
+IMPL_APPROX("Assignment with FString copy + memcpy; no Ghidra reference")
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
 	Name = Other.Name;
@@ -265,13 +265,13 @@ FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 	return *this;
 }
 
-IMPL_INFERRED("Returns Name field; no Ghidra reference")
+IMPL_APPROX("Returns Name field; no Ghidra reference")
 FString FRebuildOptions::GetName()
 {
 	return Name;
 }
 
-IMPL_INFERRED("Resets option values to defaults; no Ghidra reference")
+IMPL_APPROX("Resets option values to defaults; no Ghidra reference")
 void FRebuildOptions::Init()
 {
 	Options[0] = 2;
@@ -294,7 +294,7 @@ FTags::FTags(FTags const &Other)
 	new ((BYTE*)this + 0x30) FString(*(const FString*)((const BYTE*)&Other + 0x30));
 }
 
-IMPL_INFERRED("Zero-initialised FTags with empty FString; no Ghidra reference")
+IMPL_APPROX("Zero-initialised FTags with empty FString; no Ghidra reference")
 FTags::FTags()
 {
 	// Zero first 0x30 bytes;initialize owned FString at +0x30 to empty
@@ -318,7 +318,7 @@ FTags& FTags::operator=(const FTags& Other)
 	return *this;
 }
 
-IMPL_INFERRED("Ghidra layout; resets FString at +0x30; no explicit RVA")
+IMPL_APPROX("Ghidra layout; resets FString at +0x30; no explicit RVA")
 void FTags::Init()
 {
 	guard(FTags::Init);
@@ -334,11 +334,11 @@ void FTags::Init()
 // ============================================================================
 
 // ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
-IMPL_INFERRED("Returns first member pointer; no Ghidra reference")
+IMPL_APPROX("Returns first member pointer; no Ghidra reference")
 FRebuildOptions * FRebuildTools::GetCurrent() { return *(FRebuildOptions**)this; }
 
 // ?GetFromName@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-IMPL_INFERRED("Linear search of option array by name; no Ghidra reference")
+IMPL_APPROX("Linear search of option array by name; no Ghidra reference")
 FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 {
 	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
@@ -361,7 +361,7 @@ extern ENGINE_API FRebuildTools GRebuildTools;
 
 // ?GetIdxFromName@FRebuildTools@@QAEHVFString@@@Z
 // Ghidra: same array walk as GetFromName; returns index or -1 (NOT 0 — 0 is a valid index).
-IMPL_INFERRED("Ghidra: same array walk as GetFromName; returns index or -1")
+IMPL_APPROX("Ghidra: same array walk as GetFromName; returns index or -1")
 int FRebuildTools::GetIdxFromName(FString p0)
 {
 	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
@@ -389,7 +389,7 @@ void FRebuildTools::SetCurrent(FString p0) {}
 // ?Shutdown@FRebuildTools@@QAEXXZ
 IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Shutdown() {}
-IMPL_INFERRED("Vertex component layout; no Ghidra reference")
+IMPL_APPROX("Vertex component layout; no Ghidra reference")
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
 	C[0].Type = 4; C[0].Function = 3;
 	return 1;

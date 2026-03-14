@@ -26,7 +26,7 @@ IMPLEMENT_CLASS(UParticleEmitter);
 	Exec function implementations.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AEmitter::execKill( FFrame& Stack, RESULT_DECL )
 {
 	guard(AEmitter::execKill);
@@ -37,7 +37,7 @@ void AEmitter::execKill( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AEmitter, INDEX_NONE, execKill );
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::execAbandonProjector( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execAbandonProjector);
@@ -47,7 +47,7 @@ void AProjector::execAbandonProjector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execAbandonProjector );
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::execAttachActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execAttachActor);
@@ -57,7 +57,7 @@ void AProjector::execAttachActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execAttachActor );
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::execAttachProjector( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execAttachProjector);
@@ -66,7 +66,7 @@ void AProjector::execAttachProjector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execAttachProjector );
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::execDetachActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execDetachActor);
@@ -76,7 +76,7 @@ void AProjector::execDetachActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execDetachActor );
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AProjector::execDetachProjector( FFrame& Stack, RESULT_DECL )
 {
 	guard(AProjector::execDetachProjector);
@@ -86,7 +86,7 @@ void AProjector::execDetachProjector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AProjector, INDEX_NONE, execDetachProjector );
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void UParticleEmitter::execSpawnParticle( FFrame& Stack, RESULT_DECL )
 {
 	guard(UParticleEmitter::execSpawnParticle);

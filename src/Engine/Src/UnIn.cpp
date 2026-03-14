@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UInputPlanning ---
-IMPL_INFERRED("Retail byte-count verified (6b); no Ghidra RVA recorded")
+IMPL_APPROX("Retail byte-count verified (6b); no Ghidra RVA recorded")
 const TCHAR* UInputPlanning::StaticConfigName()
 {
 	// Retail: 6b. Returns same hardcoded pointer as UInput::StaticConfigName = L"User".
@@ -45,7 +45,7 @@ void UInputPlanning::StaticInitInput()
 
 IMPL_TODO("Needs Ghidra analysis")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-IMPL_INFERRED("Delegates to Super::Serialize")
+IMPL_APPROX("Delegates to Super::Serialize")
 void UInput::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_TODO("Needs Ghidra analysis")
 void UInput::Init( UViewport* InViewport ) {}
@@ -65,7 +65,7 @@ IMPL_TODO("Needs Ghidra analysis")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
 IMPL_TODO("Needs Ghidra analysis")
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
-IMPL_INFERRED("Ghidra-verified KeyDownMap layout at offset 0xEB4; no RVA recorded")
+IMPL_APPROX("Ghidra-verified KeyDownMap layout at offset 0xEB4; no RVA recorded")
 BYTE UInput::KeyDown( INT Key )
 {
 	BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
@@ -81,7 +81,7 @@ void UInput::StaticConstructor() {}
 // =============================================================================
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_INFERRED("Ghidra-verified KeyDownMap IST_Press/IST_Release logic at offset 0xEB4; no RVA recorded")
+IMPL_APPROX("Ghidra-verified KeyDownMap IST_Press/IST_Release logic at offset 0xEB4; no RVA recorded")
 INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
 {
 	// KeyDownMap at offset 0xEB4 from this (Ghidra-verified).
@@ -108,7 +108,7 @@ INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
 	}
 	return 0;
 }
-IMPL_INFERRED("No Ghidra RVA; Bindings FString array at +0x2B0, CurrentAction/Delta at +0xEAC/+0xEB0")
+IMPL_APPROX("No Ghidra RVA; Bindings FString array at +0x2B0, CurrentAction/Delta at +0xEAC/+0xEB0")
 INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta)
 {
 	if ((INT)Key < 0 || (INT)Key >= 0xFF)
@@ -134,7 +134,7 @@ void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 // Letters A-Z and digits 0-9 are their single character.
 // Numpad, Function keys and special keys use the standard Unreal names.
 // Unrecognised codes return "Unknown%02X" format (e.g. "Unknown3A").
-IMPL_INFERRED("No Ghidra RVA; retail-verified key name table matching DefUser.ini binding keys")
+IMPL_APPROX("No Ghidra RVA; retail-verified key name table matching DefUser.ini binding keys")
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
 	static TCHAR GenBuf[16]; // used for dynamically generated names
@@ -198,7 +198,7 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 }
 
 // ?FindKeyName@UInput@@QBEHPBGAAHPAVEInputKey@@@Z (reverse lookup: name → EInputKey)
-IMPL_INFERRED("No Ghidra RVA; reverse-iterates GetKeyName table for case-insensitive lookup")
+IMPL_APPROX("No Ghidra RVA; reverse-iterates GetKeyName table for case-insensitive lookup")
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
 	for (INT i = 1; i < 256; i++)
@@ -211,23 +211,23 @@ INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 	}
 	return 0;
 }
-IMPL_INFERRED("No Ghidra RVA; writes Action/Delta to offsets +0xEAC/+0xEB0")
+IMPL_APPROX("No Ghidra RVA; writes Action/Delta to offsets +0xEAC/+0xEB0")
 void UInput::SetInputAction(EInputAction Action, FLOAT Delta)
 {
 	*(EInputAction*)((BYTE*)this + 0xEAC) = Action;
 	*(FLOAT*)((BYTE*)this + 0xEB0) = Delta;
 }
-IMPL_INFERRED("No Ghidra RVA; reads EInputAction from offset +0xEAC")
+IMPL_APPROX("No Ghidra RVA; reads EInputAction from offset +0xEAC")
 EInputAction UInput::GetInputAction()
 {
 	return *(EInputAction*)((BYTE*)this + 0xEAC);
 }
-IMPL_INFERRED("No Ghidra RVA; reads FLOAT from offset +0xEB0")
+IMPL_APPROX("No Ghidra RVA; reads FLOAT from offset +0xEB0")
 FLOAT UInput::GetInputDelta()
 {
 	return *(FLOAT*)((BYTE*)this + 0xEB0);
 }
-IMPL_INFERRED("Retail byte-count verified (6b); returns hardcoded L\"User\" pointer")
+IMPL_APPROX("Retail byte-count verified (6b); returns hardcoded L\"User\" pointer")
 const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }
 IMPL_TODO("Needs Ghidra analysis")
 void UInput::StaticInitInput() {}

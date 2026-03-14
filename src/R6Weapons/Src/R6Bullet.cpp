@@ -58,7 +58,7 @@ FLOAT AR6Bullet::StunLoss(FLOAT fRange)
 	return fRange * m_fRangeConversionConst * fRange;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6Bullet::execBulletGoesThroughSurface(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, TouchedSurface);

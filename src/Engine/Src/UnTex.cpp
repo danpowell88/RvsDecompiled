@@ -42,7 +42,7 @@ void UMaterial::ClearFallbacks()
 	unguard;
 }
 
-IMPL_INFERRED("Converts legacy poly-flag bitmask to UShader/UTexEnvMap material combinations")
+IMPL_APPROX("Converts legacy poly-flag bitmask to UShader/UTexEnvMap material combinations")
 UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param_2)
 {
 	guard(UMaterial::ConvertPolyFlagsToMaterial);
@@ -159,7 +159,7 @@ UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param
 // --- UTexture ---
 
 
-IMPL_INFERRED("Advances animation mip sequence by calling prime-one-mip vtable callback")
+IMPL_APPROX("Advances animation mip sequence by calling prime-one-mip vtable callback")
 void UTexture::Prime()
 {
 	// Retail: 49b. Loops while PrimeCurrent < PrimeCount, calling vtable[42]
@@ -175,7 +175,7 @@ void UTexture::Prime()
 }
 
 // (merged from earlier occurrence)
-IMPL_INFERRED("Stores Time at __LastUpdateTime offset 0xD0")
+IMPL_APPROX("Stores Time at __LastUpdateTime offset 0xD0")
 void UTexture::SetLastUpdateTime(double Time)
 {
 	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
@@ -301,7 +301,7 @@ int UTexture::DefaultLOD()
 	return 0;
 	unguard;
 }
-IMPL_INFERRED("Returns Colors data pointer from Palette if present, else NULL")
+IMPL_APPROX("Returns Colors data pointer from Palette if present, else NULL")
 FColor * UTexture::GetColors()
 {
 	// Ghidra (14B): if Palette (0x70) non-null, return Colors data at Palette+0x2C
@@ -310,7 +310,7 @@ FColor * UTexture::GetColors()
 		return *(FColor**)((BYTE*)Pal + 0x2C);
 	return NULL;
 }
-IMPL_INFERRED("Returns Palette object index via UObject::GetIndex")
+IMPL_APPROX("Returns Palette object index via UObject::GetIndex")
 DWORD UTexture::GetColorsIndex()
 {
 	// Ghidra (9B): return Palette->GetIndex()
@@ -322,20 +322,20 @@ FString UTexture::GetFormatDesc()
 {
 	return FString();
 }
-IMPL_INFERRED("Returns __LastUpdateTime double at offset 0xD0")
+IMPL_APPROX("Returns __LastUpdateTime double at offset 0xD0")
 double UTexture::GetLastUpdateTime()
 {
 	// Ghidra (7B): return double at offset 0xD0
 	return *(double*)((BYTE*)this + 0xD0);
 }
-IMPL_INFERRED("Returns pointer to mip entry at MipIndex * 0x28 stride in Mips array")
+IMPL_APPROX("Returns pointer to mip entry at MipIndex * 0x28 stride in Mips array")
 FMipmapBase * UTexture::GetMip(int MipIndex)
 {
 	// Ghidra (19B): Mips at 0xBC, element stride 0x28
 	BYTE* MipsData = *(BYTE**)((BYTE*)this + 0xBC);
 	return (FMipmapBase*)(MipsData + MipIndex * 0x28);
 }
-IMPL_INFERRED("Returns mip count from Mips TArray")
+IMPL_APPROX("Returns mip count from Mips TArray")
 int UTexture::GetNumMips()
 {
 	return Mips.Num();
@@ -390,7 +390,7 @@ void UTexture::Tick(float DeltaSeconds)
 	}
 	unguard;
 }
-IMPL_INFERRED("Retail per-pixel blend operation; not yet implemented")
+IMPL_APPROX("Retail per-pixel blend operation; not yet implemented")
 void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
 	// DIVERGENCE: retail (~150+ B) does per-pixel blending. Skipped — too complex.
@@ -426,7 +426,7 @@ void UTexture::Clear(FColor InColor)
 		}
 	}
 }
-IMPL_INFERRED("Advances circular animation list at AnimCurrent offset 0xA8")
+IMPL_APPROX("Advances circular animation list at AnimCurrent offset 0xA8")
 void UTexture::ConstantTimeTick()
 {
 	// Retail: 45b. Advances the circular linked-list for realtime texture ticking.
@@ -449,7 +449,7 @@ UBitmapMaterial * UTexture::Get(double Time, UViewport *)
 	UBitmapMaterial* cur = *(UBitmapMaterial**)((BYTE*)this + 0xA8); // AnimCurrent
 	return cur ? cur : (UBitmapMaterial*)this;
 }
-IMPL_INFERRED("Returns RenderInterface field directly")
+IMPL_APPROX("Returns RenderInterface field directly")
 FBaseTexture * UTexture::GetRenderInterface()
 {
 	return *(FBaseTexture**)((BYTE*)this + 0xAC);
@@ -631,7 +631,7 @@ FMipmapBase::FMipmapBase()
 	appMemzero((BYTE*)this, sizeof(_Data));
 }
 
-IMPL_INFERRED("Copies FMipmapBase data via appMemcpy")
+IMPL_APPROX("Copies FMipmapBase data via appMemcpy")
 FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)
 {
 	appMemcpy( this, &Other, sizeof(FMipmapBase) );
@@ -642,7 +642,7 @@ FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)
 // --- UBitmapMaterial ---
 
 
-IMPL_INFERRED("Returns this; trivial implementation per retail bytes 8B 01 C3")
+IMPL_APPROX("Returns this; trivial implementation per retail bytes 8B 01 C3")
 UBitmapMaterial * UBitmapMaterial::Get(double,UViewport *)
 {
 	return this;
@@ -659,7 +659,7 @@ UBitmapMaterial * UBitmapMaterial::Get(double,UViewport *)
 
 
 // --- UConstantColor ---
-IMPL_INFERRED("Returns stored Color field")
+IMPL_APPROX("Returns stored Color field")
 FColor UConstantColor::GetColor(float)
 {
 	return Color;
@@ -690,7 +690,7 @@ void UCubemap::Destroy()
 	unguard;
 }
 
-IMPL_INFERRED("Returns render interface pointer at offset 0xF0")
+IMPL_APPROX("Returns render interface pointer at offset 0xF0")
 FBaseTexture * UCubemap::GetRenderInterface()
 {
 	// Retail: 8B 81 F0 00 00 00 C3 = return *(this+0xF0) — UCubemap's own render interface
@@ -735,7 +735,7 @@ void UMaterialSwitch::PostEditChange()
 	unguard;
 }
 
-IMPL_INFERRED("Iterates Materials array and recursively checks for circular references")
+IMPL_APPROX("Iterates Materials array and recursively checks for circular references")
 UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 {
 	guard(UMaterialSwitch::CheckCircularReferences);
@@ -865,19 +865,19 @@ void UPalette::FixPalette()
 
 
 // --- UProxyBitmapMaterial ---
-IMPL_INFERRED("Stores Interface pointer to TextureInterface field")
+IMPL_APPROX("Stores Interface pointer to TextureInterface field")
 void UProxyBitmapMaterial::SetTextureInterface(FBaseTexture * Interface)
 {
 	TextureInterface = Interface;
 }
 
-IMPL_INFERRED("Returns this; proxy always returns itself")
+IMPL_APPROX("Returns this; proxy always returns itself")
 UBitmapMaterial * UProxyBitmapMaterial::Get(double,UViewport *)
 {
 	return this;
 }
 
-IMPL_INFERRED("Returns stored TextureInterface pointer")
+IMPL_APPROX("Returns stored TextureInterface pointer")
 FBaseTexture * UProxyBitmapMaterial::GetRenderInterface()
 {
 	return TextureInterface;
@@ -910,7 +910,7 @@ UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 	return NULL;
 }
 
-IMPL_INFERRED("Returns render interface pointer at offset 0x9C")
+IMPL_APPROX("Returns render interface pointer at offset 0x9C")
 FBaseTexture * UShadowBitmapMaterial::GetRenderInterface()
 {
 	// Retail: 8B 81 9C 00 00 00 C3 = return *(this+0x9C) — render interface pointer in shadow bitmap
@@ -933,7 +933,7 @@ INT UTexCoordMaterial::MaterialVSize()
 
 
 // --- UTexCoordSource ---
-IMPL_INFERRED("Clamps TexCoordCount to 0 and zeroes mode byte if count was negative")
+IMPL_APPROX("Clamps TexCoordCount to 0 and zeroes mode byte if count was negative")
 void UTexCoordSource::PostEditChange()
 {
 	// Retail: 25b. Call parent, then clamp TexCoordCount at this+0x64 to 0 if negative.
@@ -949,7 +949,7 @@ void UTexCoordSource::PostEditChange()
 
 
 // --- UTexEnvMap ---
-IMPL_INFERRED("Sets coord gen mode when envMode==1; always returns NULL per retail 21b")
+IMPL_APPROX("Sets coord gen mode when envMode==1; always returns NULL per retail 21b")
 FMatrix * UTexEnvMap::GetMatrix(float)
 {
 	// Retail: 21b. When env mapping mode (this+0x64) == 1: set coord-generation
@@ -970,7 +970,7 @@ FMatrix * UTexMatrix::GetMatrix(float)
 
 
 // --- UTexModifier ---
-IMPL_INFERRED("Delegates to Material->SetValidated via vtable call if Material present")
+IMPL_APPROX("Delegates to Material->SetValidated via vtable call if Material present")
 void UTexModifier::SetValidated(int x)
 {
 	// Delegate to Material via virtual call if present.
@@ -979,7 +979,7 @@ void UTexModifier::SetValidated(int x)
 		Material->SetValidated(x);
 }
 
-IMPL_INFERRED("Computes required UV stream bitmask per texture coordinate source mode")
+IMPL_APPROX("Computes required UV stream bitmask per texture coordinate source mode")
 BYTE UTexModifier::RequiredUVStreams()
 {
 	// Retail: when TexCoordSource <= 7 and Material present: (1<<src)|Material->RequiredUVStreams()
@@ -999,7 +999,7 @@ BYTE UTexModifier::RequiredUVStreams()
 	return 1;
 }
 
-IMPL_INFERRED("Delegates to Material->MaterialUSize(); returns 0 if null")
+IMPL_APPROX("Delegates to Material->MaterialUSize(); returns 0 if null")
 int UTexModifier::MaterialUSize()
 {
 	// Retail: 17b. Delegates to Material->MaterialUSize(); returns 0 if null.
@@ -1007,7 +1007,7 @@ int UTexModifier::MaterialUSize()
 	return Material->MaterialUSize();
 }
 
-IMPL_INFERRED("Delegates to Material->MaterialVSize(); returns 0 if null")
+IMPL_APPROX("Delegates to Material->MaterialVSize(); returns 0 if null")
 int UTexModifier::MaterialVSize()
 {
 	// Retail: 17b. Delegates to Material->MaterialVSize(); returns 0 if null.
@@ -1024,7 +1024,7 @@ FMatrix * UTexModifier::GetMatrix(float)
 	unguard;
 }
 
-IMPL_INFERRED("Returns Material->GetValidated() if present, else 1")
+IMPL_APPROX("Returns Material->GetValidated() if present, else 1")
 int UTexModifier::GetValidated()
 {
 	// Retail: if Material -> tail-call Material->GetValidated(); else return 1
@@ -1058,7 +1058,7 @@ FMatrix * UTexPanner::GetMatrix(float)
 
 
 // --- UTexRotator ---
-IMPL_INFERRED("Converts legacy bit-0 flag to TexCoordSource=1 per retail 28b")
+IMPL_APPROX("Converts legacy bit-0 flag to TexCoordSource=1 per retail 28b")
 void UTexRotator::PostLoad()
 {
 	// Retail: 28b. Call parent PostLoad (imports UObject::PostLoad from Core.dll),

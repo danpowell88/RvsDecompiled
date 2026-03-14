@@ -12,19 +12,19 @@ IMPLEMENT_FUNCTION(AR6PlanningCtrl, -1, execPlanningTrace)
 
 // --- AR6PlanningCtrl ---
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6PlanningCtrl::execGetClickResult(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6PlanningCtrl::execGetXYPoint(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_INFERRED("Needs Ghidra analysis")
+IMPL_APPROX("Needs Ghidra analysis")
 void AR6PlanningCtrl::execPlanningTrace(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

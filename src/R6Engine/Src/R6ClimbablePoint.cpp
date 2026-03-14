@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6ClimbablePoint)
 
 // --- AR6ClimbablePoint ---
 
-IMPL_INFERRED("Reconstructed path clearing with back-reference nulling on the owning climbable object")
+IMPL_APPROX("Reconstructed path clearing with back-reference nulling on the owning climbable object")
 void AR6ClimbablePoint::ClearPaths()
 {
 	guard(AR6ClimbablePoint::ClearPaths);
@@ -24,7 +24,7 @@ void AR6ClimbablePoint::ClearPaths()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed path finding init connecting climbable point pairs via their shared object")
+IMPL_APPROX("Reconstructed path finding init connecting climbable point pairs via their shared object")
 void AR6ClimbablePoint::InitForPathFinding()
 {
 	guard(AR6ClimbablePoint::InitForPathFinding);
@@ -40,7 +40,7 @@ void AR6ClimbablePoint::InitForPathFinding()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed path preclusion: blocks same-object climbable point pairing")
+IMPL_APPROX("Reconstructed path preclusion: blocks same-object climbable point pairing")
 INT AR6ClimbablePoint::ProscribedPathTo(ANavigationPoint* Nav)
 {
 	guard(AR6ClimbablePoint::ProscribedPathTo);
@@ -53,7 +53,7 @@ INT AR6ClimbablePoint::ProscribedPathTo(ANavigationPoint* Nav)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed reach spec delegation to base navigation point")
+IMPL_APPROX("Reconstructed reach spec delegation to base navigation point")
 void AR6ClimbablePoint::addReachSpecs(APawn* Other, INT bOnlyChanged)
 {
 	guard(AR6ClimbablePoint::addReachSpecs);

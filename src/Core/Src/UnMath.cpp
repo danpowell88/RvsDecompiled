@@ -408,7 +408,7 @@ CORE_API void appSRandInit( INT Seed )
 	appRandInit( Seed );
 }
 
-IMPL_INFERRED("platform-specific Win32 wrapper; reconstructed from context")
+IMPL_APPROX("platform-specific Win32 wrapper; reconstructed from context")
 CORE_API INT appIsDebuggerPresent()
 {
 	return ::IsDebuggerPresent();

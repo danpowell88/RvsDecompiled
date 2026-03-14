@@ -197,7 +197,7 @@ USystem::USystem()
 	// TArrays (offsets +0x5C, +0x60, +0x64 zeroed directly in compiled output).
 }
 
-IMPL_PERMANENT_DIVERGENCE("field layout diverges from binary; Paths/Suppress offsets may not match retail")
+IMPL_DIVERGE("field layout diverges from binary; Paths/Suppress offsets may not match retail")
 void USystem::StaticConstructor()
 {
 	guard(USystem::StaticConstructor);

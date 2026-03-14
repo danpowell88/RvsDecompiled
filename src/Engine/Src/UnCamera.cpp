@@ -208,7 +208,7 @@ void UViewport::PopHit(int)
 	unguard;
 }
 
-IMPL_INFERRED("Decoded from retail binary; no direct RVA recorded")
+IMPL_APPROX("Decoded from retail binary; no direct RVA recorded")
 void UViewport::ChangeInputSet(BYTE bReset)
 {
 	// Retail: 23b. If bReset==0, restores input set ptr: copy this+0x84 to this+0x80.
@@ -352,7 +352,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
 // FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
 // Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
-IMPL_INFERRED("Decoded from Ghidra sub-function analysis; no direct RVA for this operator")
+IMPL_APPROX("Decoded from Ghidra sub-function analysis; no direct RVA for this operator")
 FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
 	FArray& Arr = *(FArray*)&V.Pad[4];
@@ -828,7 +828,7 @@ FArchive & operator<<(FArchive& Ar, FURL& U) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFBspVertex@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FBspVertex & V) {
 	// Always serialize: offsets 0x00-0x08 (3 floats), 0x18-0x24 (4 floats)
 	Ar.ByteOrderSerialize(&V._Data[0x00], 4);
@@ -878,7 +878,7 @@ FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionNode@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 	// 4 FCompactIndex values at offsets 0x00, 0x04, 0x08, 0x0C
 	Ar << *(FCompactIndex*)&V._Data[0x00];
@@ -891,7 +891,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionNode & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshCollisionTriangle@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
 	// 16 floats (4 FPlanes) via ByteOrderSerialize
 	for (INT i = 0; i < 16; i++)
@@ -905,7 +905,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshCollisionTriangle & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshUV@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 	Ar.ByteOrderSerialize(&V._Data[0], 4);
 	Ar.ByteOrderSerialize(&V._Data[4], 4);
@@ -913,7 +913,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)
@@ -923,7 +923,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFTerrainVertex@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
 	// 6 floats at 0x00-0x14
 	for (INT i = 0; i < 6; i++)
@@ -940,7 +940,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUV2Data@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
 	Ar.ByteOrderSerialize(&D, 4);
 	Ar.ByteOrderSerialize((BYTE*)&D + 4, 4);
@@ -948,7 +948,7 @@ FArchive & operator<<(FArchive & Ar, FUV2Data & D) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFUntransformedVertex@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
 	// 11 floats: offsets 0x00-0x28
 	for (INT i = 0; i < 11; i++)
@@ -957,7 +957,7 @@ FArchive & operator<<(FArchive & Ar, FUntransformedVertex & V) {
 }
 
 // ?GNewCollisionHash@@YAPAVFCollisionHashBase@@XZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FCollisionHashBase * GNewCollisionHash() {
 	if( !GIsEditor )
 		return new FCollisionOctree();
@@ -969,7 +969,7 @@ FCollisionHashBase * GNewCollisionHash() {
 // Converts Hue/Saturation/Value (each 0-255) to a normalised FPlane colour.
 // Ghidra: param_2 (S/Hue) selects one of three sectors; param_3 (V) scales
 // brightness; result has W=1.0f.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 	FLOAT fR, fG, fB;
 	if (S < 0x56) {
@@ -999,7 +999,7 @@ FPlane FGetHSV(BYTE H, BYTE S, BYTE V) {
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen);
 
 // ?GetFROTATOR@@YAHPBGAAVFRotator@@H@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 {
 	FLOAT Temp = 0.f;
@@ -1025,7 +1025,7 @@ int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 }
 
 // ?GetFROTATOR@@YAHPBG0AAVFRotator@@H@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int ScaleFactor)
 {
 	TCHAR Temp[80];
@@ -1035,7 +1035,7 @@ int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int
 }
 
 // ?GetFVECTOR@@YAHPBGAAVFVector@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 {
 	int NumParsed = 0;
@@ -1060,7 +1060,7 @@ int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 }
 
 // ?GetFVECTOR@@YAHPBG0AAVFVector@@@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 {
 	TCHAR Temp[80];
@@ -1070,7 +1070,7 @@ int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 }
 
 // ?GetSUBSTRING@@YAHPBG0PAGH@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen)
 {
 	const TCHAR* Found = appStrfind( Stream, Match );
@@ -1085,7 +1085,7 @@ int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxL
 }
 
 // ?getGameShutDown@@YAHXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int getGameShutDown() { return bGameShutDown; }
 
 // ?newPath@FPathBuilder@@AAEPAVANavigationPoint@@VFVector@@@Z
@@ -1093,7 +1093,7 @@ int getGameShutDown() { return bGameShutDown; }
 // Spawns a PathNode at Location (adjusting Z upward if Scout's half-height < 85)
 // and sets the machine-placed flag bit 0x80 at NavigationPoint+0x3a4.
 // FPathBuilder layout: Pad[0..3]=ULevel*, Pad[4..7]=APawn* Scout.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout  = *(APawn**)((BYTE*)this + 4);
@@ -1126,7 +1126,7 @@ ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 // Retail ordinal 2514 (0x6d6f0).  Returns the signed distance along axis p1
 // to the far or near face of hash cell p0 (cell size = p3 unreal units,
 // world offset = 262144).  Returns 256000 when p1 is zero (no movement along axis).
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT CellSize) {
 	if (Dir == 0.0f) return 256000.0f;
 	if (Dir > 0.0f)
@@ -1140,7 +1140,7 @@ float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT
 // Teleports the Scout pawn to Start, tests whether it can reach End via
 // APawn::pointReachable, then teleports Scout back to its original position.
 // FPathBuilder layout: Pad[0..3] = ULevel*, Pad[4..7] = APawn* Scout.
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int FPathBuilder::TestReach(FVector Start, FVector End) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout = *(APawn**)((BYTE*)this + 4);
@@ -1168,7 +1168,7 @@ int FPathBuilder::TestReach(FVector Start, FVector End) {
 }
 
 // ?TestWalk@FPathBuilder@@AAEHVFVector@@UFCheckResult@@M@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 
 // ?ValidNode@FPathBuilder@@AAEHPAVANavigationPoint@@PAVAActor@@@Z
@@ -1177,7 +1177,7 @@ int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 //   - p1 is non-null and different from p0
 //   - p1 is not flagged as deleted (sign byte at 0xa0 >= 0)
 //   - p1 is a NavigationPoint but NOT a LiftCenter
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 	if (Candidate && Candidate != (AActor*)NavPoint && *(SBYTE*)((BYTE*)Candidate + 0xa0) >= 0) {
 		if (((UObject*)Candidate)->IsA(ANavigationPoint::StaticClass())) {
@@ -1189,7 +1189,7 @@ int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 }
 
 // ?createPaths@FPathBuilder@@AAEHXZ
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 int FPathBuilder::createPaths() { return 0; }
 
 // ?StoreActor@FOctreeNode@@AAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
@@ -1197,7 +1197,7 @@ int FPathBuilder::createPaths() { return 0; }
 // this node in the actor's OctreeNodes list (actor+0x338) for fast removal.
 // If the node already has >2 actors and is large enough to subdivide it does so;
 // for simplicity we always use leaf storage (no subdivision).
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
 	// Add actor to this node's actor list (TArray<AActor*> at FOctreeNode offset 0)
@@ -1220,7 +1220,7 @@ void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane co
 //
 // NOTE: The retail SingleLineCheck has a 7th undeclared FLOAT parameter (ExtraParam = 16.0).
 // Passes 1 and 2 supply 16.0f for it via raw vtable call; pass 3 omits it (= 0).
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FPathBuilder::FindBlockingNormal(FVector& p0)
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1282,7 +1282,7 @@ void FPathBuilder::FindBlockingNormal(FVector& p0)
 }
 
 // ?Pass2From@FPathBuilder@@AAEXVFVector@@0M@Z
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 
 // ?SetPathCollision@FPathBuilder@@AAEXH@Z
@@ -1296,7 +1296,7 @@ void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 //   the temp flag set.
 // Field actor+0x320 (800 decimal): custom scratch field used only during path
 //   building; bit 3 (0x8) = "collision was disabled for path test; restore it".
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void FPathBuilder::SetPathCollision(int bDisable) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	INT Count = Level->Actors.Num();
@@ -1347,7 +1347,7 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 //   Scout+0xa8 |= 0x1000  (bPathBuilding flag)
 //   vtable[0x10c] and vtable[0x114] on Scout (SetPhysics-related calls)
 //   Scout->PhysicsVolume = Level->GetDefaultPhysicsVolume()
-IMPL_INFERRED("Decoded from Ghidra vtable and layout analysis; no direct RVA recorded")
+IMPL_APPROX("Decoded from Ghidra vtable and layout analysis; no direct RVA recorded")
 void FPathBuilder::getScout()
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1407,7 +1407,7 @@ void FPathBuilder::getScout()
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
 // Ghidra: call findStart on Scout; if Z matches within MaxStepHeight -> testPathwithRadius;
 // else retry findStart with Start.Z+20. If neither works, return.
-IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
+IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
 void FPathBuilder::testPathsFrom(FVector Start) {
 	AScout* Scout = *(AScout**)(Pad + 4);
 	if (Scout->findStart(Start)) {
@@ -1428,7 +1428,7 @@ void FPathBuilder::testPathsFrom(FVector Start) {
 
 // ?testPathwithRadius@FPathBuilder@@AAEXVFVector@@M@Z
 // Ghidra: resize Scout to Radius x 85, then probe 8 horizontal directions (±X, ±Y) at ±1 walk.
-IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
+IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
 void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 	AActor* Scout = *(AActor**)(Pad + 4);
 	Scout->SetCollisionSize(Radius, 85.0f);
@@ -1462,7 +1462,7 @@ FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRot
 // Copy constructor — rarely called; just default-init and leave buckets empty.
 // A proper implementation would clone the hash table from p0, but that involves
 // re-inserting all actors which requires level context we don't have here.
-IMPL_INFERRED("Copy constructor; no direct RVA — rarely invoked, buckets default-initialized")
+IMPL_APPROX("Copy constructor; no direct RVA — rarely invoked, buckets default-initialized")
 FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 	FreeList = NULL;
 	// AllocatedPools default-constructed to empty
@@ -1499,14 +1499,14 @@ FCollisionHash::FCollisionHash() {
 }
 
 // ??0FCollisionOctree@@QAE@ABV0@@Z
-IMPL_INFERRED("Copy constructor; inferred from member layout")
+IMPL_APPROX("Copy constructor; inferred from member layout")
 FCollisionOctree::FCollisionOctree(FCollisionOctree const& p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 }
 
 // ??0FCollisionOctree@@QAE@XZ
 // Ghidra: allocates a root FOctreeNode, zeroes counters, sets world bitmask.
-IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
+IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
 FCollisionOctree::FCollisionOctree() {
 	appMemzero(Pad, sizeof(Pad));
 	// Pad[0..3] = root FOctreeNode* (object offset +4, ref from Ghidra)
@@ -1522,7 +1522,7 @@ IMPL_TODO("Needs Ghidra analysis")
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FHitCause@@QAE@PAVFHitObserver@@PAVUViewport@@KMM@Z
-IMPL_INFERRED("Inferred from member initializer list")
+IMPL_APPROX("Inferred from member initializer list")
 FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InButtons, float InMouseX, float InMouseY)
 :	Observer(InObserver)
 ,	Viewport(InViewport)
@@ -1532,7 +1532,7 @@ FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InBu
 {}
 
 // ??4FHitCause@@QAEAAU0@ABU0@@Z
-IMPL_INFERRED("Inferred from member copy pattern")
+IMPL_APPROX("Inferred from member copy pattern")
 FHitCause& FHitCause::operator=(const FHitCause& Other)
 {
 	Observer = Other.Observer;
@@ -1549,7 +1549,7 @@ FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSc
 
 // ??0FLevelSceneNode@@QAE@ABV0@@Z
 // Ghidra: calls FSceneNode copy ctor, then copies 6 DWORDs at 0x1B8-0x1CC
-IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
+IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & Other) : FSceneNode((const FSceneNode&)Other)
 {
 	appMemcpy(((BYTE*)this) + 0x1B8, ((const BYTE*)&Other) + 0x1B8, 24);
@@ -1569,14 +1569,14 @@ FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
 
 // ??0FOctreeNode@@QAE@ABV0@@Z
 // Copy constructor — copy TArray (actors list at Pad[0..11]) and flag at Pad[12]
-IMPL_INFERRED("Copy constructor; inferred from member layout")
+IMPL_APPROX("Copy constructor; inferred from member layout")
 FOctreeNode::FOctreeNode(FOctreeNode const& p0) {
 	appMemcpy(Pad, p0.Pad, 16);
 }
 
 // ??0FOctreeNode@@QAE@XZ
 // Ghidra: FArray::FArray((FArray*)this) zeros first 12 bytes; *(this+0xc) = 0
-IMPL_INFERRED("Decoded from Ghidra; no direct RVA recorded")
+IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
 FOctreeNode::FOctreeNode() {
 	appMemzero(Pad, 16); // TArray<> at 0..11, flag at 12
 }
@@ -1590,7 +1590,7 @@ IMPL_TODO("Needs Ghidra analysis")
 FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3, int p4, int p5, int p6, int p7) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FPoly@@QAE@XZ
-IMPL_INFERRED("Calls FPoly::Init() per SDK pattern")
+IMPL_APPROX("Calls FPoly::Init() per SDK pattern")
 FPoly::FPoly() {
 	Init();
 }
@@ -1615,9 +1615,9 @@ IMPL_TODO("Needs Ghidra analysis")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_TODO("Needs Ghidra analysis")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
-IMPL_INFERRED("Delegates to Super::Destroy()")
+IMPL_APPROX("Delegates to Super::Destroy()")
 void UViewport::Destroy() { Super::Destroy(); }
-IMPL_INFERRED("Delegates to Super::Serialize()")
+IMPL_APPROX("Delegates to Super::Serialize()")
 void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
@@ -1635,7 +1635,7 @@ IMPL_TODO("Needs Ghidra analysis")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
 IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
-IMPL_INFERRED("Inferred from UObject outer cast pattern")
+IMPL_APPROX("Inferred from UObject outer cast pattern")
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
 IMPL_TODO("Needs Ghidra analysis")
 void UViewport::InitInput() {}

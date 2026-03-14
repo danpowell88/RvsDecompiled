@@ -51,7 +51,7 @@ static AR6SoundReplicationInfo* GR6Pawn_OldSoundRepInfo;
 
 // --- AR6Pawn ---
 
-IMPL_INFERRED("Lerps collision cylinder toward crouch height and moves pawn; sweep check via ULevel vtable")
+IMPL_APPROX("Lerps collision cylinder toward crouch height and moves pawn; sweep check via ULevel vtable")
 INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT Blend, INT bTest)
 {
 	if (m_bIsProne)
@@ -120,7 +120,7 @@ INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT Blend, INT bTest)
 	return MoveResult;
 }
 
-IMPL_INFERRED("Clamps peeking to a directional limit when moving in the corresponding direction")
+IMPL_APPROX("Clamps peeking to a directional limit when moving in the corresponding direction")
 FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT InPeeking, FLOAT InLimit)
 {
 	if (m_bPeekingLeft)
@@ -136,7 +136,7 @@ FLOAT AR6Pawn::AdjustMaxFluidPeeking(FLOAT InPeeking, FLOAT InLimit)
 	return InLimit;
 }
 
-IMPL_INFERRED("Passes touch to base only when genuinely overlapping a door actor")
+IMPL_APPROX("Passes touch to base only when genuinely overlapping a door actor")
 void AR6Pawn::BeginTouch(AActor* Other)
 {
 	// If touching a door, only process if genuinely overlapping
@@ -148,13 +148,13 @@ void AR6Pawn::BeginTouch(AActor* Other)
 	AActor::BeginTouch(Other);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector AR6Pawn::CheckForLedges(AActor *, FVector, FVector, FVector, INT &, INT &, FLOAT)
 {
 	return FVector(0,0,0);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 	AActor* param_4, FVector& param_5, AActor* param_6, FVector& param_7)
 {
@@ -212,7 +212,7 @@ INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD AR6Pawn::CheckSeePawn(AR6Pawn* param_1, FVector& param_2, INT param_3)
 {
 	guard(AR6Pawn::CheckSeePawn);
@@ -269,7 +269,7 @@ DWORD AR6Pawn::CheckSeePawn(AR6Pawn* param_1, FVector& param_2, INT param_3)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT TargetHeight, FLOAT OtherHeight)
 {
 	FLOAT Result = Abs((CollisionHeight - TargetHeight) / (TargetHeight - OtherHeight));
@@ -280,7 +280,7 @@ FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT TargetHeight, FLOAT OtherHeight)
 	return Result;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::Crawl(INT)
 {
 	guard(AR6Pawn::Crawl);
@@ -366,7 +366,7 @@ void AR6Pawn::Crawl(INT)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::DirectionHasChanged(FLOAT ForwardDot)
 {
 	FVector NormVel = Velocity;
@@ -396,7 +396,7 @@ INT AR6Pawn::DirectionHasChanged(FLOAT ForwardDot)
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 BYTE AR6Pawn::GetAnimState()
 {
 	// Dead or incapacitated
@@ -439,7 +439,7 @@ BYTE AR6Pawn::GetAnimState()
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 BYTE AR6Pawn::GetCurrentMaterial()
 {
 	guard(AR6Pawn::GetCurrentMaterial);
@@ -481,7 +481,7 @@ done:
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::GetDefaultHeightAndRadius(FLOAT& OutHeight, FLOAT& OutCrouchHeight, FLOAT& OutRadius)
 {
 	AActor* Default = (AActor*)GetClass()->GetDefaultObject();
@@ -490,19 +490,19 @@ void AR6Pawn::GetDefaultHeightAndRadius(FLOAT& OutHeight, FLOAT& OutCrouchHeight
 	OutCrouchHeight = ((APawn*)Default)->CrouchHeight;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector AR6Pawn::GetFootLocation(AActor *)
 {
 	return FVector(0,0,0);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector AR6Pawn::GetHeadLocation(AActor *)
 {
 	return FVector(0,0,0);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FLOAT AR6Pawn::GetMaxFluidPeeking(FLOAT SpeedRatio, INT bReverse)
 {
 	FLOAT Ratio = GetPeekingRatioNorm(1600.0f);
@@ -512,13 +512,13 @@ FLOAT AR6Pawn::GetMaxFluidPeeking(FLOAT SpeedRatio, INT bReverse)
 	return Value + 1000.0f;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector AR6Pawn::GetMidSectionLocation(AActor *)
 {
 	return FVector(0,0,0);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 enum eMovementDirection AR6Pawn::GetMovementDirection()
 {
 	guard(AR6Pawn::GetMovementDirection);
@@ -577,13 +577,13 @@ enum eMovementDirection AR6Pawn::GetMovementDirection()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FLOAT AR6Pawn::GetPeekingRatioNorm(FLOAT PeekingValue)
 {
 	return (PeekingValue - 1000.0f) * 0.001f;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::GetRotValueCenteredAroundZero(INT Value)
 {
 	if (Value > 0x8000)
@@ -593,7 +593,7 @@ INT AR6Pawn::GetRotValueCenteredAroundZero(INT Value)
 	return Value;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FRotator AR6Pawn::GetRotationOffset()
 {
 	if (m_bIsPlayer)
@@ -602,7 +602,7 @@ FRotator AR6Pawn::GetRotationOffset()
 	return m_rPrevRotationOffset;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 BYTE AR6Pawn::GetSoundGunType(INT InType)
 {
 	// AZoneInfo bitfield at offset 0x398: bit 4 = m_bInDoor (auto-generated field)
@@ -612,7 +612,7 @@ BYTE AR6Pawn::GetSoundGunType(INT InType)
 	return ((ZoneBits & 0x10) | 0x20) >> 4;	// Gun sound type: 2=outdoor, 3=indoor
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 BYTE AR6Pawn::GetStatusOtherTeam()
 {
 	if (Controller)
@@ -624,7 +624,7 @@ BYTE AR6Pawn::GetStatusOtherTeam()
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 BYTE AR6Pawn::GetTeamColor()
 {
 	if (Controller)
@@ -641,7 +641,7 @@ BYTE AR6Pawn::GetTeamColor()
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FRotator AR6Pawn::GetViewRotation()
 {
 	return FRotator(0,0,0);
@@ -655,7 +655,7 @@ INT AR6Pawn::HurtByVolume(AActor *)
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::IsCrawling()
 {
 	if (CollisionHeight == m_fProneHeight)
@@ -667,7 +667,7 @@ INT AR6Pawn::IsCrawling()
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::IsOverLedge(AActor* param_1, FVector ledgePoint, FLOAT ledgeRadius)
 {
 	guard(AR6Pawn::IsOverLedge);
@@ -735,7 +735,7 @@ INT AR6Pawn::IsUsingHeartBeatSensor()
 	return 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::PawnLook(FRotator LookRot, INT bShouldAim, INT BlendTime)
 {
 	if (m_bIsClimbingLadder)
@@ -752,7 +752,7 @@ void AR6Pawn::PawnLook(FRotator LookRot, INT bShouldAim, INT BlendTime)
 	SetPawnLookDirection(LookRot, BlendTime);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::PawnLookAbsolute(FRotator AbsoluteRot, INT bShouldAim, INT BlendTime)
 {
 	if (m_bIsClimbingLadder)
@@ -773,7 +773,7 @@ void AR6Pawn::PawnLookAbsolute(FRotator AbsoluteRot, INT bShouldAim, INT BlendTi
 	SetPawnLookDirection(RelRot, BlendTime);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::PawnLookAt(FVector TargetLoc, INT bShouldAim, INT BlendTime)
 {
 	FVector Dir = TargetLoc - Location;
@@ -791,7 +791,7 @@ void AR6Pawn::PawnLookAt(FVector TargetLoc, INT bShouldAim, INT BlendTime)
 	SetPawnLookAndAimDirection(RelRot, BlendTime);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::PawnSetBoneRotation(FName BoneName, INT Pitch, INT Yaw, INT Roll, FLOAT Alpha)
 {
 	guard(AR6Pawn::PawnSetBoneRotation);
@@ -800,7 +800,7 @@ void AR6Pawn::PawnSetBoneRotation(FName BoneName, INT Pitch, INT Yaw, INT Roll, 
 	unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 {
 	m_bAim = bShouldAim;
@@ -808,7 +808,7 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
 	guard(AR6Pawn::PickActorAdjust);
@@ -871,7 +871,7 @@ INT AR6Pawn::PickActorAdjust(AActor* param_1)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::PostNetReceive()
 {
 	// If SoundRepInfo changed and we're ragdoll, stop weapon sound
@@ -891,7 +891,7 @@ void AR6Pawn::PostNetReceive()
 	APawn::PostNetReceive();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::PreNetReceive()
 {
 	GR6Pawn_OldNetActionIndex = m_iNetCurrentActionIndex;
@@ -899,7 +899,7 @@ void AR6Pawn::PreNetReceive()
 	APawn::PreNetReceive();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD AR6Pawn::R6LineOfSightTo(AActor* param_1, INT param_2)
 {
 	guard(AR6Pawn::R6LineOfSightTo);
@@ -969,7 +969,7 @@ DWORD AR6Pawn::R6LineOfSightTo(AActor* param_1, INT param_2)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD AR6Pawn::R6SeePawn(APawn* param_1, INT param_2)
 {
 	guard(AR6Pawn::R6SeePawn);
@@ -1046,7 +1046,7 @@ DWORD AR6Pawn::R6SeePawn(APawn* param_1, INT param_2)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::ResetColBox()
 {
 	if (!m_collisionBox)
@@ -1086,7 +1086,7 @@ void AR6Pawn::ResetColBox()
 	m_fPrePivotLastUpdate = 0.0f;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::SetAudioInfo()
 {
 	guard(AR6Pawn::SetAudioInfo);
@@ -1149,7 +1149,7 @@ INT AR6Pawn::SetAudioInfo()
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookAndAimDirection);
@@ -1216,7 +1216,7 @@ void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::SetPawnLookDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookDirection);
@@ -1266,7 +1266,7 @@ void AR6Pawn::SetPawnLookDirection(FRotator InRot, INT BlendTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::SetPrePivot(FVector NewPrePivot)
 {
 	PrePivot = NewPrePivot;
@@ -1274,13 +1274,13 @@ void AR6Pawn::SetPrePivot(FVector NewPrePivot)
 		PrePivot.Z -= 5.0f;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::TickSpecial(FLOAT DeltaTime)
 {
 	APawn::TickSpecial(DeltaTime);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::UnCrawl(INT param_1)
 {
 	guard(AR6Pawn::UnCrawl);
@@ -1358,7 +1358,7 @@ void AR6Pawn::UnCrawl(INT param_1)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::UpdateColBox(FVector& NewLocation, INT p1, INT p2, INT p3)
 {
 	guard(AR6Pawn::UpdateColBox);
@@ -1371,7 +1371,7 @@ void AR6Pawn::UpdateColBox(FVector& NewLocation, INT p1, INT p2, INT p3)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 {
 	guard(AR6Pawn::UpdateColBoxPeeking);
@@ -1588,7 +1588,7 @@ FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateFullPeekingMode);
@@ -1635,7 +1635,7 @@ void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateMovementAnimation);
@@ -1656,7 +1656,7 @@ void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AR6Pawn::UpdatePawnTrackActor(INT BlendTime)
 {
 	FVector Dir = m_TrackActor->Location - Location;
@@ -1671,7 +1671,7 @@ void AR6Pawn::UpdatePawnTrackActor(INT BlendTime)
 		SetPawnLookDirection(RelRot, BlendTime);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 {
 	if (!m_collisionBox)
@@ -1749,7 +1749,7 @@ void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 	UpdateFullPeekingMode(DeltaTime);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::WeaponFollow(INT param_1, FLOAT param_2)
 {
 	guard(AR6Pawn::WeaponFollow);
@@ -1800,7 +1800,7 @@ INT AR6Pawn::WeaponIsAGadget()
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::WeaponLock(INT param_1, FLOAT param_2, FLOAT param_3)
 {
 	guard(AR6Pawn::WeaponLock);
@@ -1870,7 +1870,7 @@ INT AR6Pawn::WeaponShouldFollowHead()
 	return m_bWeaponGadgetActivated ? 1 : 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::actorReachableFromLocation(AActor* param_1, FVector loc)
 {
 	guard(AR6Pawn::actorReachableFromLocation);
@@ -1918,7 +1918,7 @@ INT AR6Pawn::actorReachableFromLocation(AActor* param_1, FVector loc)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::calcVelocity(FVector Accel, FLOAT BrakingDecel, FLOAT Friction, FLOAT MaxSpeed, INT bFluid, INT bRestricted, INT bWaterJump)
 {
 	FLOAT OverrideSpeed = 0.0f;
@@ -1976,19 +1976,19 @@ void AR6Pawn::calcVelocity(FVector Accel, FLOAT BrakingDecel, FLOAT Friction, FL
 	APawn::calcVelocity(Accel, BrakingDecel, Friction, OverrideSpeed, bFluid, bRestricted, bWaterJump);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventAdjustPawnForDiagonalStrafing()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_AdjustPawnForDiagonalStrafing), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventEndCrawl()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_EndCrawl), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventEndOfGrenadeEffect(BYTE A)
 {
 	struct { BYTE A; } Parms;
@@ -1996,7 +1996,7 @@ void AR6Pawn::eventEndOfGrenadeEffect(BYTE A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_EndOfGrenadeEffect), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventEndPeekingMode(BYTE A)
 {
 	struct { BYTE A; } Parms;
@@ -2004,7 +2004,7 @@ void AR6Pawn::eventEndPeekingMode(BYTE A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_EndPeekingMode), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FVector AR6Pawn::eventGetFiringStartPoint()
 {
 	struct {
@@ -2015,7 +2015,7 @@ FVector AR6Pawn::eventGetFiringStartPoint()
 	return Parms.ReturnValue;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 FLOAT AR6Pawn::eventGetStanceReticuleModifier()
 {
 	struct {
@@ -2026,7 +2026,7 @@ FLOAT AR6Pawn::eventGetStanceReticuleModifier()
 	return Parms.ReturnValue;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventInitBiPodPosture(DWORD A)
 {
 	struct { DWORD A; } Parms;
@@ -2034,7 +2034,7 @@ void AR6Pawn::eventInitBiPodPosture(DWORD A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_InitBiPodPosture), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD AR6Pawn::eventIsFullPeekingOver()
 {
 	struct {
@@ -2045,7 +2045,7 @@ DWORD AR6Pawn::eventIsFullPeekingOver()
 	return Parms.ReturnValue;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 DWORD AR6Pawn::eventIsPeekingLeft()
 {
 	struct {
@@ -2056,7 +2056,7 @@ DWORD AR6Pawn::eventIsPeekingLeft()
 	return Parms.ReturnValue;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPlayCrouchToProne(DWORD A)
 {
 	struct { DWORD A; } Parms;
@@ -2064,7 +2064,7 @@ void AR6Pawn::eventPlayCrouchToProne(DWORD A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlayCrouchToProne), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPlayFluidPeekingAnim(FLOAT A, FLOAT B, FLOAT C)
 {
 	struct { 
@@ -2078,7 +2078,7 @@ void AR6Pawn::eventPlayFluidPeekingAnim(FLOAT A, FLOAT B, FLOAT C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlayFluidPeekingAnim), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPlayPeekingAnim(DWORD A)
 {
 	struct { DWORD A; } Parms;
@@ -2086,7 +2086,7 @@ void AR6Pawn::eventPlayPeekingAnim(DWORD A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlayPeekingAnim), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPlayProneToCrouch(DWORD A)
 {
 	struct { DWORD A; } Parms;
@@ -2094,7 +2094,7 @@ void AR6Pawn::eventPlayProneToCrouch(DWORD A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlayProneToCrouch), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPlaySpecialPendingAction(BYTE A, INT B)
 {
 	struct { 
@@ -2106,13 +2106,13 @@ void AR6Pawn::eventPlaySpecialPendingAction(BYTE A, INT B)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlaySpecialPendingAction), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPlaySurfaceSwitch()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PlaySurfaceSwitch), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventPotentialOpenDoor(AR6Door * A)
 {
 	struct { AR6Door * A; } Parms;
@@ -2120,19 +2120,19 @@ void AR6Pawn::eventPotentialOpenDoor(AR6Door * A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_PotentialOpenDoor), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventR6MakeMovementNoise()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_R6MakeMovementNoise), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventR6ResetLookDirection()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_R6ResetLookDirection), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventRemovePotentialOpenDoor(AR6Door * A)
 {
 	struct { AR6Door * A; } Parms;
@@ -2140,19 +2140,19 @@ void AR6Pawn::eventRemovePotentialOpenDoor(AR6Door * A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_RemovePotentialOpenDoor), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventResetBipodPosture()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ResetBipodPosture), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventResetDiagonalStrafing()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ResetDiagonalStrafing), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventSetCrouchBlend(FLOAT A)
 {
 	struct { FLOAT A; } Parms;
@@ -2160,7 +2160,7 @@ void AR6Pawn::eventSetCrouchBlend(FLOAT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetCrouchBlend), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventSetPeekingInfo(BYTE A, FLOAT B, DWORD C)
 {
 	struct { 
@@ -2174,7 +2174,7 @@ void AR6Pawn::eventSetPeekingInfo(BYTE A, FLOAT B, DWORD C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetPeekingInfo), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventSetRotationOffset(INT A, INT B, INT C)
 {
 	struct { 
@@ -2188,31 +2188,31 @@ void AR6Pawn::eventSetRotationOffset(INT A, INT B, INT C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetRotationOffset), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventSpawnRagDoll()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SpawnRagDoll), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventStartCrawl()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StartCrawl), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventStartFluidPeeking()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StartFluidPeeking), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventStartFullPeeking()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StartFullPeeking), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventTurnToFaceActor(AActor * A)
 {
 	struct { AActor * A; } Parms;
@@ -2220,13 +2220,13 @@ void AR6Pawn::eventTurnToFaceActor(AActor * A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_TurnToFaceActor), &Parms);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::eventUpdateBipodPosture()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_UpdateBipodPosture), NULL);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execAdjustFluidCollisionCylinder(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_FLOAT(fBlendRate);
@@ -2235,7 +2235,7 @@ void AR6Pawn::execAdjustFluidCollisionCylinder(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = AdjustFluidCollisionCylinder(fBlendRate, bTest);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execCheckCylinderTranslation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vStart);
@@ -2250,7 +2250,7 @@ void AR6Pawn::execCheckCylinderTranslation(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_NAME(nBoneName);
@@ -2263,7 +2263,7 @@ void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 	// Requires resolving UDecalManager and hit-material helpers. Left as no-op.
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iKillDamage);
@@ -2297,21 +2297,21 @@ void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 		*(BYTE*)Result = (BYTE)((pTable->Threshold3 <= iDmg ? 1 : 0) + 2);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetMaxRotationOffset(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(INT*)Result = getMaxRotationOffset((m_bWantsToProne || m_bIsProne) ? 1 : 0);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetMovementDirection(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(BYTE*)Result = (BYTE)GetMovementDirection();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetPeekingRatioNorm(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_FLOAT(fPeeking);
@@ -2319,14 +2319,14 @@ void AR6Pawn::execGetPeekingRatioNorm(FFrame& Stack, RESULT_DECL)
 	*(FLOAT*)Result = GetPeekingRatioNorm(fPeeking);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetRotationOffset(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FRotator*)Result = GetRotationOffset();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iStunDamage);
@@ -2359,7 +2359,7 @@ void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 		*(BYTE*)Result = (BYTE)((pTable->Threshold3 <= iDmg ? 1 : 0) + 2);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iKillDamage);
@@ -2420,7 +2420,7 @@ void AR6Pawn::execPawnCanBeHurtFrom(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = (Hit.Actor == NULL) ? 1 : 0;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execPawnLook(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rLookDir);
@@ -2430,7 +2430,7 @@ void AR6Pawn::execPawnLook(FFrame& Stack, RESULT_DECL)
 	PawnLook(rLookDir, bAim, bNoBlend);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execPawnLookAbsolute(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rLookDir);
@@ -2440,7 +2440,7 @@ void AR6Pawn::execPawnLookAbsolute(FFrame& Stack, RESULT_DECL)
 	PawnLookAbsolute(rLookDir, bAim, bNoBlend);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execPawnLookAt(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vTarget);
@@ -2450,7 +2450,7 @@ void AR6Pawn::execPawnLookAt(FFrame& Stack, RESULT_DECL)
 	PawnLookAt(vTarget, bAim, bNoBlend);
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AR6Pawn::execPawnTrackActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, Target);
@@ -2459,7 +2459,7 @@ void AR6Pawn::execPawnTrackActor(FFrame& Stack, RESULT_DECL)
 	PawnTrackActor(Target, bAim);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execPlayVoices(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, sndPlayVoice);
@@ -2486,14 +2486,14 @@ void AR6Pawn::execPlayVoices(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FRotator*)Result = GetViewRotation();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, S);
@@ -2508,14 +2508,14 @@ void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 	// (pawn+0x5e4..0x5ec) so the replication loop is omitted here.
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execSetAudioInfo(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	SetAudioInfo();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execSetPawnScale(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_FLOAT(fNewScale);
@@ -2523,7 +2523,7 @@ void AR6Pawn::execSetPawnScale(FFrame& Stack, RESULT_DECL)
 	SetDrawScale(fNewScale);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execStartLipSynch(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, _hSound);
@@ -2532,7 +2532,7 @@ void AR6Pawn::execStartLipSynch(FFrame& Stack, RESULT_DECL)
 	m_vInitNewLipSynch(_hSound, _hStopSound);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execStopLipSynch(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
@@ -2540,7 +2540,7 @@ void AR6Pawn::execStopLipSynch(FFrame& Stack, RESULT_DECL)
 		((ECLipSynchData*)m_hLipSynchData)->m_vStopLipsynch();
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execToggleHeatProperties(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bTurnItOn);
@@ -2578,7 +2578,7 @@ void AR6Pawn::execToggleHeatProperties(FFrame& Stack, RESULT_DECL)
 	GCompileMaterialsRevision++;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bTurnItOn);
@@ -2616,7 +2616,7 @@ void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
 	GCompileMaterialsRevision++;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bTurnItOn);
@@ -2655,7 +2655,7 @@ void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 	GCompileMaterialsRevision++;
 }
 
-IMPL_PERMANENT_DIVERGENCE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
 void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bNoBlend);
@@ -2663,7 +2663,7 @@ void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)
 	UpdatePawnTrackActor(bNoBlend);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::getMaxRotationOffset(INT InProne)
 {
 	if (InProne == 0)
@@ -2676,7 +2676,7 @@ INT AR6Pawn::getMaxRotationOffset(INT InProne)
 	return 3000;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::initCrawlMode(bool bEnable)
 {
 	guard(AR6Pawn::initCrawlMode);
@@ -2709,7 +2709,7 @@ void AR6Pawn::initCrawlMode(bool bEnable)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 {
 	if (Mesh && Mesh->IsA(USkeletalMesh::StaticClass()))
@@ -2719,7 +2719,7 @@ void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 	}
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 {
 	guard(AR6Pawn::m_vInitNewLipSynch);
@@ -2739,7 +2739,7 @@ void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::moveToPosition(FVector const& Target)
 {
 	if (!Controller)
@@ -2835,7 +2835,7 @@ INT AR6Pawn::moveToPosition(FVector const& Target)
 	return 1;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 INT AR6Pawn::moveToward(FVector const& Dest, AActor* GoalActor)
 {
 	if (!Controller)
@@ -2849,7 +2849,7 @@ INT AR6Pawn::moveToward(FVector const& Dest, AActor* GoalActor)
 	return APawn::moveToward(Dest, GoalActor);
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::performPhysics(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::performPhysics);
@@ -2985,7 +2985,7 @@ void AR6Pawn::performPhysics(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 {
 	guard(AR6Pawn::physLadder);
@@ -3051,7 +3051,7 @@ void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 	unguard;
 }
 
-IMPL_INFERRED("Reconstructed from context")
+IMPL_APPROX("Reconstructed from context")
 void AR6Pawn::physicsRotation(FLOAT DeltaTime, FVector InVelocity)
 {
 	guard(AR6Pawn::physicsRotation);

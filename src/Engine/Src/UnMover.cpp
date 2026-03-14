@@ -18,7 +18,7 @@ void AMover::physMovingBrush(float DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Dispatches physics by mode; RDTSC profiling bookends omitted")
+IMPL_APPROX("Dispatches physics by mode; RDTSC profiling bookends omitted")
 void AMover::performPhysics(float DeltaTime)
 {
 	guard(AMover::performPhysics);
@@ -82,7 +82,7 @@ void AMover::performPhysics(float DeltaTime)
 	unguard;
 }
 
-IMPL_INFERRED("Returns whether TraceFlags requests actor tracing")
+IMPL_APPROX("Returns whether TraceFlags requests actor tracing")
 int AMover::ShouldTrace(AActor*,DWORD TraceFlags)
 {
 	return TraceFlags & 2;
@@ -96,7 +96,7 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
-IMPL_INFERRED("Delegates to AActor::GetOptimizedRepList")
+IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -372,7 +372,7 @@ void AMover::PreRaytrace()
 
 
 // --- ADoor ---
-IMPL_INFERRED("Sets bForce flag on path specs for this door and all nav points targeting it")
+IMPL_APPROX("Sets bForce flag on path specs for this door and all nav points targeting it")
 void ADoor::PostaddReachSpecs(APawn *)
 {
 	guard(ADoor::PostaddReachSpecs);

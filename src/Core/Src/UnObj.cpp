@@ -38,12 +38,12 @@ IMPLEMENT_CLASS(UObject);
 	FScriptDelegate.
 -----------------------------------------------------------------------------*/
 
-IMPL_INFERRED("Ravenshield FScriptDelegate; reconstructed from context")
+IMPL_APPROX("Ravenshield FScriptDelegate; reconstructed from context")
 FScriptDelegate::FScriptDelegate()
 {
 }
 
-IMPL_INFERRED("Ravenshield FScriptDelegate; reconstructed from context")
+IMPL_APPROX("Ravenshield FScriptDelegate; reconstructed from context")
 FScriptDelegate& FScriptDelegate::operator=( const FScriptDelegate& Other )
 {
 	Object       = Other.Object;
@@ -215,7 +215,7 @@ void UObject::ProcessDelegate( FName DelegateName, FScriptDelegate* Delegate, vo
 	unguard;
 }
 
-IMPL_INTENTIONALLY_EMPTY("Retail Core.dll: truly empty, no SEH frame")
+IMPL_EMPTY("Retail Core.dll: truly empty, no SEH frame")
 void UObject::ProcessState( FLOAT DeltaSeconds )
 {
 	// Retail Core.dll: ret 4 (truly empty, no SEH frame)
@@ -442,7 +442,7 @@ void UObject::InitExecution()
 	unguard;
 }
 
-IMPL_INTENTIONALLY_EMPTY("Retail Core.dll: truly empty")
+IMPL_EMPTY("Retail Core.dll: truly empty")
 void UObject::ShutdownAfterError()
 {
 	// Retail Core.dll: ret (truly empty, no SEH frame)
@@ -557,7 +557,7 @@ INT UObject::GetPropertiesSize()
 	unguard;
 }
 
-IMPL_INTENTIONALLY_EMPTY("Retail Core.dll: truly empty")
+IMPL_EMPTY("Retail Core.dll: truly empty")
 void UObject::NetDirty( UProperty* Property )
 {
 	// Retail Core.dll: ret 4 (truly empty)
@@ -643,7 +643,7 @@ INT UObject::IsIn( UObject* SomeOuter ) const
 	unguardSlow;
 }
 
-IMPL_INFERRED("not yet implemented; stub returning 0")
+IMPL_APPROX("not yet implemented; stub returning 0")
 INT UObject::IsInState( FName StateName )
 {
 	guard(UObject::IsInState);

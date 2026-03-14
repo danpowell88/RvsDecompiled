@@ -8,19 +8,19 @@ IMPLEMENT_CLASS(AR6AbstractWeapon)
 
 // --- AR6AbstractWeapon ---
 
-IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6AbstractWeapon::PreNetReceive()
 {
 	Super::PreNetReceive();
 }
 
-IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6AbstractWeapon::PostNetReceive()
 {
 	Super::PostNetReceive();
 }
 
-IMPL_INFERRED("Ravenshield-specific; reconstructed from context")
+IMPL_APPROX("Ravenshield-specific; reconstructed from context")
 void AR6AbstractWeapon::eventSpawnSelectedGadget()
 {
 	ProcessEvent(FindFunctionChecked(R6ABSTRACT_SpawnSelectedGadget), NULL);
