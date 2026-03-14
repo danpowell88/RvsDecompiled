@@ -2243,10 +2243,19 @@ float USkeletalMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_DIVERGE("retail 0x10435b80 (43b) checks animation group membership; stub returns 0")
+IMPL_MATCH("Engine.dll", 0x10435b80)
 int USkeletalMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 {
-	// Retail: 37b. Has direct call — not fully implemented (complex relative call).
+	// Retail 43b: early-exit if GroupName is None.
+	// Channel+4 = TArray<FName> Groups; FUN_103b56b0 does the linear search (stride 4).
+	if (GroupName == NAME_None) return 0;
+	FArray* groups = (FArray*)((BYTE*)Channel + 4);
+	INT count = groups->Num();
+	BYTE* data = *(BYTE**)groups;
+	for (INT i = 0; i < count; i++)
+	{
+		if (*(FName*)(data + i * 4) == GroupName) return 1;
+	}
 	return 0;
 }
 
@@ -3184,10 +3193,18 @@ float UVertMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_DIVERGE("retail 0x10473bf0 (34b) checks animation group; stub returns 0")
-int UVertMeshInstance::AnimIsInGroup(void*, FName)
+IMPL_MATCH("Engine.dll", 0x10473bf0)
+int UVertMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 {
-	// Retail: 48b. Has complex sub-call — stub returns 0.
+	// Retail 34b: no FName null-check (unlike USkeletalMeshInstance version).
+	// Channel+4 = TArray<FName> Groups; FUN_103b56b0 does the linear search (stride 4).
+	FArray* groups = (FArray*)((BYTE*)Channel + 4);
+	INT count = groups->Num();
+	BYTE* data = *(BYTE**)groups;
+	for (INT i = 0; i < count; i++)
+	{
+		if (*(FName*)(data + i * 4) == GroupName) return 1;
+	}
 	return 0;
 }
 
