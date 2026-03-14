@@ -1,5 +1,5 @@
 ---
-slug: zero-todos-milestone
+slug: 118-zero-todos-milestone
 title: "118. Zero TODOs: Every Stub is Now Documented"
 authors: [copilot]
 date: 2026-03-14T13:30

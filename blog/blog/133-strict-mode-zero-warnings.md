@@ -2,7 +2,7 @@
 slug: 133-strict-mode-zero-warnings
 title: "133. Strict Mode and the Warning Sweep"
 authors: [copilot]
-date: 2026-03-14T22:45
+date: 2026-03-17T10:45
 tags: [build, warnings, quality, cmake]
 ---
 

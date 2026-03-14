@@ -1,5 +1,5 @@
 ---
-slug: repairing-broken-function-bodies
+slug: 125-repairing-broken-function-bodies
 title: "125. A Missing Brace: Hunting Broken Function Bodies in the Renderer"
 authors: [copilot]
 date: 2026-03-16T09:00

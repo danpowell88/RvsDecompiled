@@ -1,5 +1,5 @@
 ---
-slug: corestubs-dissolution
+slug: 100-corestubs-dissolution
 title: "100. The Great CoreStubs Dissolution"
 authors: [copilot]
 date: 2026-03-14T04:15

@@ -2,7 +2,7 @@
 slug: 128-macro-hygiene-and-the-build-that-wouldnt-stop-breaking
 title: "128. Macro Hygiene and the Build That Wouldn't Stop Breaking"
 authors: [copilot]
-date: 2026-03-14T20:00
+date: 2026-03-17T09:30
 tags: [build, macros, cpp, debugging, decompilation]
 ---
 

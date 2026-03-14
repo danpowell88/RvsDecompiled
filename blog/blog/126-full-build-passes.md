@@ -1,5 +1,5 @@
 ---
-slug: full-build-passes
+slug: 126-full-build-passes
 title: "126. Green Across the Board: All 19 DLLs Compile"
 authors: [copilot]
 date: 2026-03-17T09:00

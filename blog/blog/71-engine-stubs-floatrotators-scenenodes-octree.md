@@ -1,5 +1,5 @@
 ---
-slug: 72-engine-stubs-floatrotators-scenenodes-octree
+slug: 71-engine-stubs-floatrotators-scenenodes-octree
 title: "71. Float Rotators, Scene Nodes, and Octree Debug Methods"
 date: 2026-03-13T21:00
 authors: [copilot]

@@ -23,17 +23,19 @@ Docusaurus sorts posts by the `date` field. Posts with a missing, duplicate, or 
    - Post N+1: `date: 2026-03-14T08:15`
    - Post N+2: `date: 2026-03-14T08:30`
 
+3. **Dates must increase with post number.** The blog listing is sorted newest-first. If post N+5 has an earlier date than post N, posts N+1 through N+4 will appear AFTER post N+5 in the listing, making them look missing. Always assign a date strictly later than the previous post's date — even if you are writing posts N+1 through N+5 in a single session, increment by 15 minutes per post so the listing order matches the post numbers.
+
 3. **Never copy frontmatter from an earlier post without updating the date.** This is the most common source of duplicates.
 
 4. **The year must be correct.** Accidentally writing `2025` instead of `2026` sends a post to the very beginning of the chronological listing. *(Note: posts 01–66 intentionally carry 2025 dates — they were written in 2025. All new posts use 2026.)*
 
 5. **Every post MUST have a `slug:` field.** Without it, Docusaurus derives one from the filename, which can collide with auto-generated slugs or cause unexpected URLs. The slug MUST be the first field after the opening `---`, and MUST follow the pattern `NNN-kebab-title` matching the filename prefix. A missing slug has caused posts to silently disappear before.
 
-6. **After writing a new post, verify the next date slot is free** by checking what `date:` the previous post uses, then incrementing by 15 minutes.
+6. **After writing a new post, verify the next date slot is free** by checking what `date:` the previous post uses, then incrementing by 15 minutes. Also verify the new date is **strictly greater than the previous post's date** (posts must have monotonically increasing dates matching their post numbers).
 
 7. **Before committing any blog post, run `npm run build` inside the `/blog` directory.** A successful build confirms the frontmatter parses cleanly and no JSX errors exist.
 
-8. **Before committing, run this quick audit** to catch any missing fields:
+8. **Before committing, run this quick audit** to catch any missing fields or date ordering problems:
    ```powershell
    # Run from repo root — lists any blog post missing date, slug, or truncate marker
    Get-ChildItem blog\blog\*.md | ForEach-Object {
@@ -43,6 +45,17 @@ Docusaurus sorts posts by the `date` field. Posts with a missing, duplicate, or 
        if ($content -notmatch 'slug:') { $missing += 'slug' }
        if ($content -notmatch '<!-- truncate -->') { $missing += 'truncate' }
        if ($missing) { Write-Host "$($_.Name): missing $($missing -join ', ')" }
+   }
+   # Also check date ordering — dates must increase with post number
+   Get-ChildItem blog\blog\*.md | Sort-Object Name | ForEach-Object {
+       $content = Get-Content $_ -Raw
+       $date = if ($content -match 'date:\s*(\S+)') { $Matches[1] } else { $null }
+       [PSCustomObject]@{ Name = $_.Name; Date = $date }
+   } | Where-Object Date | ForEach-Object -Begin { $prev = $null } -Process {
+       if ($prev -and $_.Date -lt $prev.Date) {
+           Write-Host "DATE ORDER: $($_.Name) ($($_.Date)) is earlier than $($prev.Name) ($($prev.Date))"
+       }
+       $prev = $_
    }
    ```
 

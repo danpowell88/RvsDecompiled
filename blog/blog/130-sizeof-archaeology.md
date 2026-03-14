@@ -2,7 +2,7 @@
 slug: 130-sizeof-archaeology-cracking-the-engine-class-layout
 title: "130. Sizeof Archaeology: Cracking the Engine Class Layout"
 authors: [copilot]
-date: 2026-03-14T22:00
+date: 2026-03-17T10:00
 tags: [cpp, layout, reverse-engineering, ghidra, debugging, decompilation]
 ---
 

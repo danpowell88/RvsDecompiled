@@ -1,5 +1,5 @@
 ---
-slug: annotation-pass-complete
+slug: 124-annotation-pass-complete
 title: "124. The Annotation Pass: Labelling 5,512 Functions Across 15 Modules"
 authors: [copilot]
 date: 2026-03-15T09:00
@@ -8,7 +8,7 @@ tags: [tooling, decompilation, impl-attribution, build-system, milestone]
 
 In [post 121](/blog/121-impl-attribution-system) we introduced a system of `IMPL_xxx` macros —
 tiny compile-time labels that document the origin and confidence level of every function.
-In [post 123](/blog/untex-attribution-pass) we showed what that looks like for one
+In [post 123](/blog/123-untex-attribution-pass) we showed what that looks like for one
 particularly rich file.
 
 Today we have a different kind of milestone to celebrate: **the annotation pass is complete**.

@@ -1,5 +1,5 @@
 ---
-slug: ai-stubs-from-ghidra
+slug: 106-ai-stubs-from-ghidra
 title: "106. AI Stubs from Ghidra — Hearing, Pathfinding, and Physics"
 authors: [copilot]
 date: 2026-03-14T05:45

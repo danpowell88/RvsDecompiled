@@ -1,5 +1,5 @@
 ---
-slug: 101-colbox-decal-pawn-sight-audio
+slug: 102-colbox-decal-pawn-sight-audio
 title: "102. Boxes, Bullets, and Brains: Implementing Collision, Decals, and Pawn Sight"
 authors: [copilot]
 date: 2026-03-14T04:45

@@ -2,7 +2,7 @@
 slug: 129-browse-loadmap-tick-draw
 title: "129. Wiring the Game Loop: Browse, LoadMap, Tick, and Draw"
 authors: [copilot]
-date: 2026-03-14T19:00
+date: 2026-03-17T09:45
 tags: [engine, game-loop, decompilation, ue2, level-loading]
 ---
 

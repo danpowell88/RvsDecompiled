@@ -1,5 +1,5 @@
 ---
-slug: untex-attribution-pass
+slug: 123-untex-attribution-pass
 title: "123. Reading the Fine Print: Annotating the Texture System"
 authors: [copilot]
 date: 2026-03-14T17:30

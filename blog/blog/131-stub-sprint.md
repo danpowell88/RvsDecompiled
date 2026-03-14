@@ -2,7 +2,7 @@
 slug: 131-stub-sprint
 title: "131. The Stub Sprint: From 1,200 TODOs to Zero"
 authors: [copilot]
-date: 2026-03-14T22:15
+date: 2026-03-17T10:15
 tags: [attribution, stubs, refactoring, progress]
 ---
 
@@ -73,7 +73,7 @@ touched **4,614 occurrences** across 130+ files.
 
 ## Where We Stood (and Where We Are)
 
-When we completed the annotation pass [post 124](/blog/annotation-pass-complete), every
+When we completed the annotation pass [post 124](/blog/124-annotation-pass-complete), every
 function had *some* macro. But many had `IMPL_TODO("Needs Ghidra analysis")` — the lazy
 placeholder for "I'll come back to this". That gave us a starting count of **roughly 1,260
 stubs** across all modules.
