@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FReachSpec ---
-IMPL_MATCH("Engine.dll", 0x115E0)
+IMPL_MATCH("Engine.dll", 0x103115e0)
 FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
 {
 	appMemcpy(this, &Other, 44); // 11 dwords, shared with FStaticMeshCollisionNode
@@ -25,7 +25,7 @@ FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
 
 
 // --- UReachSpec ---
-IMPL_MATCH("Engine.dll", 0xfcdb0)
+IMPL_MATCH("Engine.dll", 0x103fcdb0)
 int UReachSpec::findBestReachable(AScout *Scout)
 {
 	// Ghidra 0xfcdb0: test reachability at multiple scout collision sizes;
@@ -73,7 +73,7 @@ int UReachSpec::findBestReachable(AScout *Scout)
 	return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0xFF90)
+IMPL_MATCH("Engine.dll", 0x1030ff90)
 int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
 {
   // Retail (52b, RVA 0xFF90): check if this spec can be used by a mover with
@@ -85,7 +85,7 @@ int UReachSpec::supports(int Radius, int Height, int ReqFlags, int MaxV)
   return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0xfd140)
+IMPL_MATCH("Engine.dll", 0x103fd140)
 int UReachSpec::defineFor(ANavigationPoint *Pt1, ANavigationPoint *Pt2, APawn *Scout)
 {
 	// Ghidra 0xfd140: record start/end nav-points, call InitForPathing, then findBestReachable.
@@ -120,7 +120,7 @@ int UReachSpec::defineFor(ANavigationPoint *Pt1, ANavigationPoint *Pt2, APawn *S
 	return result;
 }
 
-IMPL_MATCH("Engine.dll", 0xfc830)
+IMPL_MATCH("Engine.dll", 0x103fc830)
 FPlane UReachSpec::PathColor()
 {
 	// Retail: 0xfc830, ordinal 3857. Returns a colour for editor path visualisation
@@ -168,7 +168,7 @@ FPlane UReachSpec::PathColor()
 	return FPlane(r, g, b, 0.0f);
 }
 
-IMPL_MATCH("Engine.dll", 0xfca40)
+IMPL_MATCH("Engine.dll", 0x103fca40)
 int UReachSpec::PlaceScout(AScout *Scout)
 {
 	// Ghidra 0xfca40: teleport Scout to the Start node's location (with optional ladder/ledge offset).
@@ -238,7 +238,7 @@ PlaceScout_done:
 	return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0xfc950)
+IMPL_MATCH("Engine.dll", 0x103fc950)
 int UReachSpec::operator==(UReachSpec const & other)
 {
 	// Retail: 0xfc950, ordinal 1865. Compares the 5 navigation spec fields:
@@ -253,7 +253,7 @@ int UReachSpec::operator==(UReachSpec const & other)
 	return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0xfccd0)
+IMPL_MATCH("Engine.dll", 0x103fccd0)
 UReachSpec * UReachSpec::operator+(UReachSpec const & other) const
 {
 	// Retail: 0xfccd0, 165 bytes. Creates a new UReachSpec in the same outer package,
@@ -270,7 +270,7 @@ UReachSpec * UReachSpec::operator+(UReachSpec const & other) const
 	return result;
 }
 
-IMPL_MATCH("Engine.dll", 0xfc9f0)
+IMPL_MATCH("Engine.dll", 0x103fc9f0)
 int UReachSpec::operator<=(UReachSpec const & other)
 {
 	// Retail: 0xfc9f0, 68 bytes. Returns 1 if this spec is dominated by other:
@@ -284,7 +284,7 @@ int UReachSpec::operator<=(UReachSpec const & other)
 	return 1;
 }
 
-IMPL_MATCH("Engine.dll", 0xfc940)
+IMPL_MATCH("Engine.dll", 0x103fc940)
 int UReachSpec::BotOnlyPath()
 {
 	// Retail: 0xfc940, ordinal 2311. Returns 1 if CollisionRadius < 0x28 (40 units),
@@ -292,7 +292,7 @@ int UReachSpec::BotOnlyPath()
 	return CollisionRadius < 0x28 ? 1 : 0;
 }
 
-IMPL_MATCH("Engine.dll", 0xFC800)
+IMPL_MATCH("Engine.dll", 0x103fc800)
 void UReachSpec::Init()
 {
 	// Retail (36b): zeros all nav fields and clears bit 0 of bForced
@@ -318,7 +318,7 @@ IMPL_EMPTY("Destructor — no custom cleanup; retail also trivial")
 FCollisionHash::~FCollisionHash() {}
 
 // ??4FCollisionHash@@QAEAAV0@ABV0@@Z
-IMPL_MATCH("Engine.dll", 0x6F3F0)
+IMPL_MATCH("Engine.dll", 0x1036f3f0)
 FCollisionHash & FCollisionHash::operator=(FCollisionHash const & p0) {
 	appMemcpy(Buckets, p0.Buckets, sizeof(Buckets));
 	FreeList = p0.FreeList;
@@ -331,14 +331,14 @@ IMPL_EMPTY("Destructor — no custom cleanup; retail also trivial")
 FCollisionOctree::~FCollisionOctree() {}
 
 // ??4FCollisionOctree@@QAEAAV0@ABV0@@Z
-IMPL_MATCH("Engine.dll", 0x6DA50)
+IMPL_MATCH("Engine.dll", 0x1036da50)
 FCollisionOctree & FCollisionOctree::operator=(FCollisionOctree const & Other) {
 	appMemcpy(Pad, Other.Pad, sizeof(Pad));
 	return *this;
 }
 
 // ??4FOctreeNode@@QAEAAV0@ABV0@@Z
-IMPL_MATCH("Engine.dll", 0x6F350)
+IMPL_MATCH("Engine.dll", 0x1036f350)
 FOctreeNode & FOctreeNode::operator=(FOctreeNode const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
@@ -353,7 +353,7 @@ extern INT GHashExtraCount;
 // Retail ordinal 2214 (0x6e3d0). Temporarily moves Actor to NewLocation/NewRotation and checks
 // for overlap with every actor whose AABB touches the new position. Returns a tail-ordered list
 // of encroachment hits. Uses GMem (the Mem argument is unused per the retail binary).
-IMPL_MATCH("Engine.dll", 0x6e3d0)
+IMPL_MATCH("Engine.dll", 0x1036e3d0)
 FCheckResult * FCollisionHash::ActorEncroachmentCheck(FMemStack & Mem, AActor * Actor, FVector NewLocation, FRotator NewRot, DWORD TraceFlags, DWORD ExtraNodeFlags)
 {
 	check(Actor != NULL);
@@ -431,7 +431,7 @@ FCheckResult * FCollisionHash::ActorEncroachmentCheck(FMemStack & Mem, AActor * 
 //   Zero Extent:     DDA ray traversal from Start to End one cell at a time.
 // TraceFlags bit 0x200 = return first hit only; bit 0x400 = sort by facing distance.
 // Uses the Mem argument for allocation (retail binary does NOT use GMem here).
-IMPL_MATCH("Engine.dll", 0x6e6f0)
+IMPL_MATCH("Engine.dll", 0x1036e6f0)
 FCheckResult * FCollisionHash::ActorLineCheck(FMemStack & Mem, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD TypeFlags, AActor * SourceActor)
 {
 	CollisionTag++;
@@ -540,14 +540,14 @@ FCheckResult * FCollisionHash::ActorLineCheck(FMemStack & Mem, FVector End, FVec
 
 // ?ActorOverlapCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
 // Retail ordinal 2220 (0x33a0). Stub in retail binary — returns NULL.
-IMPL_MATCH("Engine.dll", 0x33a0)
+IMPL_MATCH("Engine.dll", 0x103033a0)
 FCheckResult * FCollisionHash::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
 
 // ?ActorPointCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
 // Retail ordinal 2223 (0x6dec0). Tests whether a point+AABB (Location ± Extent) overlaps any
 // actor in the hash. Calls each candidate's ShouldTrace then GetPrimitive()->PointCheck.
 // Uses GMem (the Mem argument is unused per the retail binary).
-IMPL_MATCH("Engine.dll", 0x6dec0)
+IMPL_MATCH("Engine.dll", 0x1036dec0)
 FCheckResult * FCollisionHash::ActorPointCheck(FMemStack & Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, DWORD /*unused*/, INT bSingleResult, AActor * SourceActor)
 {
 	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
@@ -587,7 +587,7 @@ FCheckResult * FCollisionHash::ActorPointCheck(FMemStack & Mem, FVector Location
 // ?ActorRadiusCheck@FCollisionHash@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
 // Retail ordinal 2226 (0x6e1a0). Returns all actors within Radius of Center (sphere test on
 // stored Location, no primitive shape check). Uses GMem (Mem argument unused per retail binary).
-IMPL_MATCH("Engine.dll", 0x6e1a0)
+IMPL_MATCH("Engine.dll", 0x1036e1a0)
 FCheckResult * FCollisionHash::ActorRadiusCheck(FMemStack & Mem, FVector Center, FLOAT Radius, DWORD ExtraNodeFlags)
 {
 	INT MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
@@ -630,7 +630,7 @@ FCheckResult * FCollisionHash::ActorRadiusCheck(FMemStack & Mem, FVector Center,
 // actors that appear in multiple query cells via the visited tag at actor+0x60.
 
 // ?ActorEncroachmentCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@VFVector@@VFRotator@@KK@Z
-IMPL_MATCH("Engine.dll", 0xDAD30)
+IMPL_MATCH("Engine.dll", 0x103dad30)
 FCheckResult* FCollisionOctree::ActorEncroachmentCheck(FMemStack& Mem, AActor* Actor, FVector Location, FRotator Rotation, DWORD ExtraNodeFlags, DWORD TypeFlags)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -661,7 +661,7 @@ FCheckResult* FCollisionOctree::ActorEncroachmentCheck(FMemStack& Mem, AActor* A
 // ?ActorLineCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@11KKPAVAActor@@@Z
 // Sweeps a line (or capsule if Extent nonzero) through all tracked actors.
 // Mirrors FCollisionHash::ActorLineCheck but draws from the octree's root actor list.
-IMPL_MATCH("Engine.dll", 0xDA540)
+IMPL_MATCH("Engine.dll", 0x103da540)
 FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD TypeFlags, AActor* SourceActor)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -702,7 +702,7 @@ FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, 
 
 // ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
 // Tests a point+AABB against all tracked actors; uses GMem for allocation (matching retail).
-IMPL_MATCH("Engine.dll", 0xDAAF0)
+IMPL_MATCH("Engine.dll", 0x103daaf0)
 FCheckResult* FCollisionOctree::ActorPointCheck(FMemStack& /*Mem*/, FVector Location, FVector Extent, DWORD ExtraNodeFlags, DWORD /*unused*/, INT bSingleResult, AActor* SourceActor)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -731,7 +731,7 @@ FCheckResult* FCollisionOctree::ActorPointCheck(FMemStack& /*Mem*/, FVector Loca
 
 // ?ActorRadiusCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@MK@Z
 // Returns all actors whose location is within Radius of Center.
-IMPL_MATCH("Engine.dll", 0xDAC20)
+IMPL_MATCH("Engine.dll", 0x103dac20)
 FCheckResult* FCollisionOctree::ActorRadiusCheck(FMemStack& Mem, FVector Center, FLOAT Radius, DWORD ExtraNodeFlags)
 {
 	INT& Frame = *(INT*)(Pad + 4);
@@ -770,7 +770,7 @@ FCheckResult* FCollisionOctree::ActorRadiusCheck(FMemStack& Mem, FVector Center,
 // its bounding box overlaps.  Pool-allocates 12-byte FCollisionLink slabs of
 // 1024 nodes (0x3000 bytes) on demand.  Saves actor Location into ColLocation
 // (offsets 0x308-0x310) so RemoveActor can look it up by the original position.
-IMPL_MATCH("Engine.dll", 0x6ee70)
+IMPL_MATCH("Engine.dll", 0x1036ee70)
 void FCollisionHash::AddActor(AActor* Actor) {
 	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800); // bCollideActors must be set
 	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;  // bDeleteMe — skip
@@ -814,24 +814,24 @@ void FCollisionHash::AddActor(AActor* Actor) {
 
 // ?CheckActorLocations@FCollisionHash@@UAEXPAVULevel@@@Z
 // retail: empty (ordinal 2351 shares address 0x1651d0 with dozens of other no-op virtuals)
-IMPL_MATCH("Engine.dll", 0x1651d0)
+IMPL_MATCH("Engine.dll", 0x104651d0)
 void FCollisionHash::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionHash@@UAEXPAVAActor@@@Z
 // retail: empty (ordinal 2353 shares address 0x1651d0 — same shared no-op stub)
-IMPL_MATCH("Engine.dll", 0x1651d0)
+IMPL_MATCH("Engine.dll", 0x104651d0)
 void FCollisionHash::CheckActorNotReferenced(AActor * p0) {}
 
 // ?CheckIsEmpty@FCollisionHash@@UAEXXZ
 // retail: empty (ordinal 2383 shares address 0x176d60 — another shared no-op stub)
-IMPL_MATCH("Engine.dll", 0x176d60)
+IMPL_MATCH("Engine.dll", 0x10476d60)
 void FCollisionHash::CheckIsEmpty() {}
 
 // ?RemoveActor@FCollisionHash@@UAEXPAVAActor@@@Z
 // Retail ordinal 4274 (0x6f0c0).  Removes an actor from every hash cell it
 // occupies by walking the ColLocation extent (not current Location, so it
 // works even if the actor has moved since it was added).  Returns links to pool.
-IMPL_MATCH("Engine.dll", 0x6f0c0)
+IMPL_MATCH("Engine.dll", 0x1036f0c0)
 void FCollisionHash::RemoveActor(AActor* Actor) {
 	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800); // bCollideActors must be set
 	if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0) return;  // bDeleteMe
@@ -862,7 +862,7 @@ void FCollisionHash::RemoveActor(AActor* Actor) {
 
 // ?Tick@FCollisionHash@@UAEXXZ
 // Retail ordinal 4860 (0x6d6d0).  Resets per-frame performance counters.
-IMPL_MATCH("Engine.dll", 0x6d6d0)
+IMPL_MATCH("Engine.dll", 0x1036d6d0)
 void FCollisionHash::Tick() {
 	GHashExtraCount    = 0; // DAT_1064ff34
 	GHashLinkCellCount = 0; // DAT_1064ff2c
@@ -873,7 +873,7 @@ void FCollisionHash::Tick() {
 // Ghidra (0xdc1a0): Computes actor bbox, inserts into octree via SingleNodeFilter
 // or MultiNodeFilter depending on whether actor is flagged bStatic.
 // Simplified: insert into root node's flat actor list directly.
-IMPL_MATCH("Engine.dll", 0xdc1a0)
+IMPL_MATCH("Engine.dll", 0x103dc1a0)
 void FCollisionOctree::AddActor(AActor* Actor)
 {
 	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800);          // bCollideActors
@@ -898,13 +898,13 @@ void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
 // retail: empty (ordinal 2354 shares address 0x1651d0 — shared no-op stub)
-IMPL_MATCH("Engine.dll", 0x1651d0)
+IMPL_MATCH("Engine.dll", 0x104651d0)
 void FCollisionOctree::CheckActorNotReferenced(AActor * p0) {}
 
 // ?CheckIsEmpty@FCollisionOctree@@UAEXXZ
 // Ghidra (0xdaf60): delegates straight to FOctreeNode::CheckIsEmpty on the root node.
 // Root FOctreeNode* is stored at Pad[0..3] (first field after vtable pointer).
-IMPL_MATCH("Engine.dll", 0xdaf60)
+IMPL_MATCH("Engine.dll", 0x103daf60)
 void FCollisionOctree::CheckIsEmpty()
 {
 	FOctreeNode* Root = *(FOctreeNode**)Pad;
@@ -914,7 +914,7 @@ void FCollisionOctree::CheckIsEmpty()
 // ?RemoveActor@FCollisionOctree@@UAEXPAVAActor@@@Z
 // Ghidra (0xdbd00): Removes actor from every octree node it appears in,
 // then clears actor's OctreeNodes list.
-IMPL_MATCH("Engine.dll", 0xdbd00)
+IMPL_MATCH("Engine.dll", 0x103dbd00)
 void FCollisionOctree::RemoveActor(AActor* Actor)
 {
 	check((*(DWORD*)((BYTE*)Actor + 0xa8)) & 0x800);  // bCollideActors
@@ -938,7 +938,7 @@ void FCollisionOctree::Tick() {}
 // Retail ordinal 3033 (0x6dd20).
 // Converts a world-space coordinate to a hash-table grid index in each axis.
 // Grid resolution: each cell = 256 unreal units; world spans [-262144, +262144].
-IMPL_MATCH("Engine.dll", 0x6dd20)
+IMPL_MATCH("Engine.dll", 0x1036dd20)
 void FCollisionHash::GetHashIndices(FVector V, INT& XI, INT& YI, INT& ZI) {
 	XI = Clamp(appRound((V.X + 262144.0f) * 0.00390625f), 0, 0x3FFF);
 	YI = Clamp(appRound((V.Y + 262144.0f) * 0.00390625f), 0, 0x3FFF);
@@ -948,7 +948,7 @@ void FCollisionHash::GetHashIndices(FVector V, INT& XI, INT& YI, INT& ZI) {
 // ?GetActorExtent@FCollisionHash@@QAEXPAVAActor@@AAH11111@Z
 // Retail ordinal 2897 (0x6dde0).
 // Converts the actor's collision bounding box into a 3D range of hash indices.
-IMPL_MATCH("Engine.dll", 0x6dde0)
+IMPL_MATCH("Engine.dll", 0x1036dde0)
 void FCollisionHash::GetActorExtent(AActor* Actor, INT& MinX, INT& MaxX, INT& MinY, INT& MaxY, INT& MinZ, INT& MaxZ) {
 	FBox Box = Actor->GetPrimitive()->GetCollisionBoundingBox(Actor);
 	GetHashIndices(Box.Min, MinX, MinY, MinZ);
@@ -960,7 +960,7 @@ void FCollisionHash::GetActorExtent(AActor* Actor, INT& MinX, INT& MaxX, INT& Mi
 //   Pad[16..27]   = query Location (FVector)
 //   Pad[80..87]   = Extent (FVector, zero for point test)
 //   Pad[88..91]   = TraceFlags (DWORD)
-IMPL_MATCH("Engine.dll", 0xD9D20)
+IMPL_MATCH("Engine.dll", 0x103d9d20)
 void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -991,7 +991,7 @@ void FOctreeNode::ActorEncroachmentCheck(FCollisionOctree* OctHash, FPlane const
 
 // ?ActorNonZeroExtentLineCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
 // Capsule line check — like the zero-extent version but passes Extent to LineCheck.
-IMPL_MATCH("Engine.dll", 0xD9A50)
+IMPL_MATCH("Engine.dll", 0x103d9a50)
 void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1033,7 +1033,7 @@ IMPL_DIVERGE("ActorOverlapCheck node — no-op; overlap traversal needs Ghidra a
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
-IMPL_MATCH("Engine.dll", 0xD9F50)
+IMPL_MATCH("Engine.dll", 0x103d9f50)
 void FOctreeNode::ActorPointCheck(FCollisionOctree* OctHash, FPlane const* NodePlane, AActor* SourceActor)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1060,7 +1060,7 @@ void FOctreeNode::ActorPointCheck(FCollisionOctree* OctHash, FPlane const* NodeP
 }
 
 // ?ActorRadiusCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_MATCH("Engine.dll", 0xDA1C0)
+IMPL_MATCH("Engine.dll", 0x103da1c0)
 void FOctreeNode::ActorRadiusCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1099,7 +1099,7 @@ void FOctreeNode::ActorRadiusCheck(FCollisionOctree* OctHash, FPlane const* Node
 // Entry point for a ray test against actors in this node.  The caller passes
 // Start and End as individual floats; Ghidra confirmed the packing order is
 // Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z.
-IMPL_MATCH("Engine.dll", 0xD9490)
+IMPL_MATCH("Engine.dll", 0x103d9490)
 void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, float Sy, float Sz, float Ex, float Ey, float Ez, FPlane const* NodePlane)
 {
 	INT     Frame       = *(INT*)(OctHash->Pad + 4);
@@ -1140,7 +1140,7 @@ void FOctreeNode::ActorZeroExtentLineCheck(FCollisionOctree* OctHash, float Sx, 
 // 8 children if present.  Exact format string unclear from decompiler output.
 // DIVERGENCE: format string approximated as TEXT("%s"); Ghidra shows Logf(GError, vtable_ptr)
 //             which is a decompiler artefact, not a literal vtable dereference.
-IMPL_MATCH("Engine.dll", 0xd93c0)
+IMPL_MATCH("Engine.dll", 0x103d93c0)
 void FOctreeNode::CheckActorNotReferenced(AActor * /*Actor*/)
 {
 	// FOctreeNode layout (Ghidra-verified, 0x10 bytes per node):
@@ -1167,7 +1167,7 @@ void FOctreeNode::CheckActorNotReferenced(AActor * /*Actor*/)
 // Ghidra (0xd9300): logs every actor in this node to GLog, then recurses into
 // 8 children if present.
 // DIVERGENCE: format string approximated; see CheckActorNotReferenced note above.
-IMPL_MATCH("Engine.dll", 0xd9300)
+IMPL_MATCH("Engine.dll", 0x103d9300)
 void FOctreeNode::CheckIsEmpty()
 {
 	void* DataPtr = *(void**)Pad;
@@ -1201,7 +1201,7 @@ void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPla
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
 // Ghidra (0xd8ec0): In the full octree, routes actor to all overlapping child nodes.
 // Simplified: store at this node directly (no subdivision).
-IMPL_MATCH("Engine.dll", 0xd8ec0)
+IMPL_MATCH("Engine.dll", 0x103d8ec0)
 void FOctreeNode::MultiNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
 	StoreActor(Actor, OctHash, Plane);
@@ -1210,7 +1210,7 @@ void FOctreeNode::MultiNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPla
 // ?RemoveAllActors@FOctreeNode@@QAEXPAVFCollisionOctree@@@Z
 // Ghidra (0xdb3e0): Recursively clears all actors from this node and its children.
 // Simplified: just clear this node's actor list.
-IMPL_MATCH("Engine.dll", 0xdb3e0)
+IMPL_MATCH("Engine.dll", 0x103db3e0)
 void FOctreeNode::RemoveAllActors(FCollisionOctree* OctHash)
 {
 	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
@@ -1220,7 +1220,7 @@ void FOctreeNode::RemoveAllActors(FCollisionOctree* OctHash)
 // ?SingleNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
 // Ghidra (0xdc010): In the full octree, routes actor to the single containing child.
 // Simplified: store at this node directly (no subdivision).
-IMPL_MATCH("Engine.dll", 0xdc010)
+IMPL_MATCH("Engine.dll", 0x103dc010)
 void FOctreeNode::SingleNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
 	StoreActor(Actor, OctHash, Plane);
@@ -1229,7 +1229,7 @@ void FOctreeNode::SingleNodeFilter(AActor* Actor, FCollisionOctree* OctHash, FPl
 // Retail ordinal 3034 (0x6d680).
 // Returns a reference to the bucket-head pointer for hash cell (x, y, z) and
 // writes the encoded position z*0x100000 + y*0x400 + x into OutPos.
-IMPL_MATCH("Engine.dll", 0x6d680)
+IMPL_MATCH("Engine.dll", 0x1036d680)
 FCollisionHash::FCollisionLink*& FCollisionHash::GetHashLink(INT x, INT y, INT z, INT& OutPos)
 {
 	OutPos = (z * 0x400 + y) * 0x400 + x;

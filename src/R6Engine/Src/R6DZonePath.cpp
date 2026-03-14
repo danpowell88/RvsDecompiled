@@ -124,7 +124,7 @@ FVector AR6DZonePath::FindSpawningPoint(FRotator * pRotation, INT *, enum EStanc
 
 // Ghidra 0x193c0: shared null stub — same address as HurtByVolume/R6DZoneRandomPoints::IsPointInZone.
 // No SEH frame in binary; returns 0 (MSVC requires a return value in non-void functions).
-IMPL_MATCH("R6Engine.dll", 0x193c0)
+IMPL_MATCH("R6Engine.dll", 0x100193c0)
 INT AR6DZonePath::IsPointInZone(FVector const &)
 {
 	return 0;

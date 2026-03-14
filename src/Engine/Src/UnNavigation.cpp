@@ -1,7 +1,7 @@
 #pragma optimize("", off)
 #include "EnginePrivate.h"
 // --- AJumpDest ---
-IMPL_MATCH("Engine.dll", 0xd67a0)
+IMPL_MATCH("Engine.dll", 0x103d67a0)
 void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 {
 	guard(AJumpDest::SetupForcedPath);
@@ -36,7 +36,7 @@ void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd69e0)
+IMPL_MATCH("Engine.dll", 0x103d69e0)
 void AJumpDest::ClearPaths()
 {
 	// Ghidra 0xd69e0, 24B. Call base, then zero the path-count field at +0x3E8.
@@ -46,7 +46,7 @@ void AJumpDest::ClearPaths()
 
 
 // --- AJumpPad ---
-IMPL_MATCH("Engine.dll", 0xd8520)
+IMPL_MATCH("Engine.dll", 0x103d8520)
 void AJumpPad::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(AJumpPad::addReachSpecs);
@@ -90,7 +90,7 @@ void AJumpPad::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- ALadder ---
-IMPL_MATCH("Engine.dll", 0xd7b00)
+IMPL_MATCH("Engine.dll", 0x103d7b00)
 void ALadder::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(ALadder::addReachSpecs);
@@ -157,7 +157,7 @@ void ALadder::addReachSpecs(APawn* Scout, int bOnlyChanged)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd7130)
+IMPL_MATCH("Engine.dll", 0x103d7130)
 int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 {
 	// Ghidra 0xd7130, 131B: if Nav is ALadder with same MyLadder ptr, proscribed
@@ -172,7 +172,7 @@ int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 	return ANavigationPoint::ProscribedPathTo(Nav);
 }
 
-IMPL_MATCH("Engine.dll", 0xd6a60)
+IMPL_MATCH("Engine.dll", 0x103d6a60)
 void ALadder::ClearPaths()
 {
 	// Ghidra 0xd6a60, 90B: call base, clear ladder reference, zero pointers
@@ -184,7 +184,7 @@ void ALadder::ClearPaths()
 	*MyLadder = 0;
 }
 
-IMPL_MATCH("Engine.dll", 0xd81f0)
+IMPL_MATCH("Engine.dll", 0x103d81f0)
 void ALadder::InitForPathFinding()
 {
 	guard(ALadder::InitForPathFinding);
@@ -224,7 +224,7 @@ void ALadder::InitForPathFinding()
 
 
 // --- ALadderVolume ---
-IMPL_MATCH("Engine.dll", 0x10d250)
+IMPL_MATCH("Engine.dll", 0x1040d250)
 void ALadderVolume::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(ALadderVolume::RenderEditorInfo);
@@ -269,7 +269,7 @@ FVector ALadderVolume::FindTop(FVector)
 
 
 // --- ALiftCenter ---
-IMPL_MATCH("Engine.dll", 0xd75f0)
+IMPL_MATCH("Engine.dll", 0x103d75f0)
 void ALiftCenter::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(ALiftCenter::addReachSpecs);
@@ -422,7 +422,7 @@ void ALiftCenter::addReachSpecs(APawn* Scout, int bOnlyChanged)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd8780)
+IMPL_MATCH("Engine.dll", 0x103d8780)
 void ALiftCenter::FindBase()
 {
 	guard(ALiftCenter::FindBase);
@@ -457,7 +457,7 @@ void ALiftCenter::FindBase()
 
 
 // --- ALineOfSightTrigger ---
-IMPL_MATCH("Engine.dll", 0xc4670)
+IMPL_MATCH("Engine.dll", 0x103c4670)
 void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 {
 	guard(ALineOfSightTrigger::TickAuthoritative);
@@ -527,7 +527,7 @@ void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 
 
 // --- ANote ---
-IMPL_MATCH("Engine.dll", 0x980f0)
+IMPL_MATCH("Engine.dll", 0x103980f0)
 void ANote::CheckForErrors()
 {
 	// Ghidra 0x980f0: log the Note text via GWarn, then call super.
@@ -538,7 +538,7 @@ void ANote::CheckForErrors()
 
 
 // --- APathNode ---
-IMPL_MATCH("Engine.dll", 0xd6400)
+IMPL_MATCH("Engine.dll", 0x103d6400)
 int APathNode::ReviewPath(APawn* P)
 {
 	guard(APathNode::ReviewPath);
@@ -565,7 +565,7 @@ int APathNode::ReviewPath(APawn* P)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xd64b0)
+IMPL_MATCH("Engine.dll", 0x103d64b0)
 void APathNode::CheckSymmetry(ANavigationPoint* param_1)
 {
 	guard(APathNode::CheckSymmetry);
@@ -598,7 +598,7 @@ void APathNode::CheckSymmetry(ANavigationPoint* param_1)
 
 
 // --- APlayerStart ---
-IMPL_MATCH("Engine.dll", 0xd7f50)
+IMPL_MATCH("Engine.dll", 0x103d7f50)
 void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 {
 	guard(APlayerStart::addReachSpecs);
@@ -627,14 +627,14 @@ int AScout::findStart(FVector)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x10304720)
 int AScout::HurtByVolume(AActor *)
 {
 	// Ghidra 0x4720: shared stub; returns 0.
 	return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0xfc9b0)
+IMPL_MATCH("Engine.dll", 0x103fc9b0)
 void AScout::InitForPathing()
 {
 	// Retail: 0xfc9b0, ordinal 3354. Initialises the scout's pathfinding state:
@@ -663,7 +663,7 @@ IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103d8a30 is 277 bytes, not full
 void ANavigationPoint::Destroy() { Super::Destroy(); }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostEditMove() {}
-IMPL_MATCH("Engine.dll", 0xD5B50)
+IMPL_MATCH("Engine.dll", 0x103d5b50)
 void ANavigationPoint::Spawned()
 {
 	// Retail (27b, RVA 0xD5B50): clear bit 11 (bPathsChanged) of Zone's flags at +0x450,

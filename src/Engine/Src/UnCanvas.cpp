@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FCanvasUtil ---
-IMPL_MATCH("Engine.dll", 0x18c10)
+IMPL_MATCH("Engine.dll", 0x10318c10)
 FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 {
 	// Ghidra 0x18c10: vtable set by compiler; same copy regions as operator= (0x18cb0):
@@ -24,21 +24,21 @@ FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 	appMemcpy((BYTE*)this + 0x94, (const BYTE*)&Other + 0x94, 0xC14);
 }
 
-IMPL_MATCH("Engine.dll", 0x18C10)
+IMPL_MATCH("Engine.dll", 0x10318c10)
 FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
 {
 	guard(FCanvasUtil::FCanvasUtil);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x116E10)
+IMPL_MATCH("Engine.dll", 0x10416e10)
 FCanvasUtil::~FCanvasUtil()
 {
 	guard(FCanvasUtil::~FCanvasUtil);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x18cb0)
+IMPL_MATCH("Engine.dll", 0x10318cb0)
 FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 {
 	// Ghidra 0x18cb0: vtable at +0 skipped. Copy +4..+53, skip +54..+93 (transient state),
@@ -49,7 +49,7 @@ FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_MATCH("Engine.dll", 0x115b90)
+IMPL_MATCH("Engine.dll", 0x10415b90)
 void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 {
 	guard(FCanvasUtil::BeginPrimitive);
@@ -62,43 +62,43 @@ void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 	}
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x117600)
+IMPL_MATCH("Engine.dll", 0x10417600)
 void FCanvasUtil::DrawLine(float,float,float,float,FColor)
 {
 	guard(FCanvasUtil::DrawLine);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x117980)
+IMPL_MATCH("Engine.dll", 0x10417980)
 void FCanvasUtil::DrawPoint(float,float,float,float,float,FColor)
 {
 	guard(FCanvasUtil::DrawPoint);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x115C20)
+IMPL_MATCH("Engine.dll", 0x10415c20)
 void FCanvasUtil::DrawTile(float,float,float,float,float,float,float,float,float,UMaterial *,FColor)
 {
 	guard(FCanvasUtil::DrawTile);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x116010)
+IMPL_MATCH("Engine.dll", 0x10416010)
 void FCanvasUtil::DrawTileRotated(float,float,float,float,float,float,float,float,float,UMaterial *,FColor,float)
 {
 	guard(FCanvasUtil::DrawTileRotated);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x1159C0)
+IMPL_MATCH("Engine.dll", 0x104159c0)
 void FCanvasUtil::Flush()
 {
 	guard(FCanvasUtil::Flush);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x114140)
+IMPL_MATCH("Engine.dll", 0x10414140)
 unsigned __int64 FCanvasUtil::GetCacheId()
 {
 	// Ghidra: CacheId QWORD at this+0xc9c = Pad+0xc98
 	return *(QWORD*)(Pad + 0xc98);
 }
-IMPL_MATCH("Engine.dll", 0x1436D0)
+IMPL_MATCH("Engine.dll", 0x104436d0)
 int FCanvasUtil::GetComponents(FVertexComponent* C)
 {
 	C[0].Type = 1; C[0].Function = 0;
@@ -112,25 +112,25 @@ void FCanvasUtil::GetRawStreamData(void * *,int)
 	guard(FCanvasUtil::GetRawStreamData);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x1436B0)
+IMPL_MATCH("Engine.dll", 0x104436b0)
 int FCanvasUtil::GetRevision()
 {
 	return 1;
 }
-IMPL_MATCH("Engine.dll", 0x114150)
+IMPL_MATCH("Engine.dll", 0x10414150)
 int FCanvasUtil::GetSize()
 {
 	// Ghidra: count at this+0x98 = Pad+0x94, times stride 0x18
 	return *(INT*)(Pad + 0x94) * 0x18;
 }
-IMPL_MATCH("Engine.dll", 0x114170)
+IMPL_MATCH("Engine.dll", 0x10414170)
 void FCanvasUtil::GetStreamData(void * Dest)
 {
 	// Ghidra: memcpy from inline vertex buffer at this+0x9c = Pad+0x98
 	INT Size = *(INT*)(Pad + 0x94) * 0x18;
 	appMemcpy(Dest, Pad + 0x98, Size);
 }
-IMPL_MATCH("Engine.dll", 0x114160)
+IMPL_MATCH("Engine.dll", 0x10414160)
 int FCanvasUtil::GetStride()
 {
 	return 0x18;
@@ -138,14 +138,14 @@ int FCanvasUtil::GetStride()
 
 
 // --- UCanvas ---
-IMPL_MATCH("Engine.dll", 0x8B180)
+IMPL_MATCH("Engine.dll", 0x1038b180)
 void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
 {
 	guard(UCanvas::WrappedPrint);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x8b500)
+IMPL_MATCH("Engine.dll", 0x1038b500)
 void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 {
 	// Ghidra 0x8b500, 128B. Format varargs then call WrappedPrint with STY_Normal.
@@ -155,7 +155,7 @@ void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 	WrappedPrint(STY_Normal, XL, YL, Font, bCenter, Buffer);
 }
 
-IMPL_MATCH("Engine.dll", 0x8b450)
+IMPL_MATCH("Engine.dll", 0x1038b450)
 void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...)
 {
 	// Ghidra 0x8b450, 122B. Format varargs then call WrappedPrint with STY_None to measure.
@@ -165,7 +165,7 @@ void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ..
 }
 
 // (merged from earlier occurrence)
-IMPL_MATCH("Engine.dll", 0x8A130)
+IMPL_MATCH("Engine.dll", 0x1038a130)
 void UCanvas::SetVirtualSize(FLOAT SizeX, FLOAT SizeY)
 {
 	// Retail: 59b. Only stores new virtual size if current virtual dims >= origin dims.
@@ -176,7 +176,7 @@ void UCanvas::SetVirtualSize(FLOAT SizeX, FLOAT SizeY)
 	*(FLOAT*)((BYTE*)this + 0x9C) = SizeX;
 	*(FLOAT*)((BYTE*)this + 0xA0) = SizeY;
 }
-IMPL_MATCH("Engine.dll", 0x87FA0)
+IMPL_MATCH("Engine.dll", 0x10387fa0)
 void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags)
 {
 	// Retail: 47b. Stores fade parameters and updates fade state word at this+0xB8.
@@ -190,7 +190,7 @@ void UCanvas::StartFade(FColor EndColor, FColor FromColor, FLOAT Time, INT Flags
 	*(DWORD*)((BYTE*)this + 0xC8) = 0;
 	*(DWORD*)((BYTE*)this + 0xB8) = state;
 }
-IMPL_MATCH("Engine.dll", 0x89FD0)
+IMPL_MATCH("Engine.dll", 0x10389fd0)
 void UCanvas::UseVirtualSize(int bEnable, float SizeX, float SizeY)
 {
 	// Retail: 0x89fd0, ordinal 4960. Two modes:
@@ -248,14 +248,14 @@ void UCanvas::UseVirtualSize(int bEnable, float SizeX, float SizeY)
 	*(FLOAT*)((BYTE*)this + 0x48) = *(FLOAT*)((BYTE*)this + 0x40) * 0.5f;
 	*(FLOAT*)((BYTE*)this + 0x4C) = *(FLOAT*)((BYTE*)this + 0x44) * 0.5f;
 }
-IMPL_MATCH("Engine.dll", 0x883F0)
+IMPL_MATCH("Engine.dll", 0x103883f0)
 void UCanvas::SetStretch(float stretchX, float stretchY)
 {
 	// Retail (23b): stores both params directly into m_fStretchX (0x94) and m_fStretchY (0x98)
 	m_fStretchX = stretchX;
 	m_fStretchY = stretchY;
 }
-IMPL_MATCH("Engine.dll", 0x88f10)
+IMPL_MATCH("Engine.dll", 0x10388f10)
 void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL)
 {
 	// Ghidra 0x88f10, ~200B. Clip tile to current canvas bounds, then call DrawTile.
@@ -300,7 +300,7 @@ void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, 
 	CurX  = SpaceX + CurX + XL;
 	CurYL = Max(CurYL, YL);
 }
-IMPL_MATCH("Engine.dll", 0x8B130)
+IMPL_MATCH("Engine.dll", 0x1038b130)
 int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane Color, int CR, int RenderStyle, int DrawExtraLine)
 {
 	// FUN_1038ac40 = UCanvas_DrawStringInternal() — internal low-level DrawString worker.
@@ -316,7 +316,7 @@ void UCanvas::WrappedDrawString(ERenderStyle InStyle, INT& XL, INT& YL, UFont* F
 	// Ghidra 0x8cac0, 11B. Simply forwards to WrappedPrint.
 	WrappedPrint(InStyle, XL, YL, Font, bCenter, Text);
 }
-IMPL_MATCH("Engine.dll", 0x881D0)
+IMPL_MATCH("Engine.dll", 0x103881d0)
 void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
 {
   // Retail (59b, RVA 0x881D0): set clip origin and size, compute half-sizes,
@@ -330,7 +330,7 @@ void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
   CurX      = 0.0f;
   CurY      = 0.0f;
 }
-IMPL_MATCH("Engine.dll", 0x880F0)
+IMPL_MATCH("Engine.dll", 0x103880f0)
 void UCanvas::DrawIcon(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XSize, FLOAT YSize, FLOAT ZDepth, FPlane Color, FPlane AlphaScale)
 {
 	// Ghidra 0x880f0, 170B. Get material UV dimensions, then call DrawTile.
@@ -340,7 +340,7 @@ void UCanvas::DrawIcon(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XSize, FLOAT
 	DrawTile(Material, X, Y, XSize, YSize, 0.0f, 0.0f,
 	         (FLOAT)MatUSize, (FLOAT)MatVSize, ZDepth, Color, AlphaScale, 0.0f);
 }
-IMPL_MATCH("Engine.dll", 0x87FF0)
+IMPL_MATCH("Engine.dll", 0x10387ff0)
 void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT TileU, FLOAT TileV, FLOAT TileZ, FPlane Color, FPlane AlphaScale)
 {
 	// Ghidra 0x87ff0. Tile the material across the surface using Scale and UV offsets.
@@ -352,7 +352,7 @@ void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT
 	         (Y - TileV) * Scale + (FLOAT)MatVSize,
 	         XL * Scale, YL * Scale, TileZ, Color, AlphaScale, 0.0f);
 }
-IMPL_MATCH("Engine.dll", 0x8A980)
+IMPL_MATCH("Engine.dll", 0x1038a980)
 void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,float,float,FPlane,FPlane,float)
 {
 	guard(UCanvas::DrawTile);
@@ -361,7 +361,7 @@ void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,flo
 
 
 // --- FCanvasVertex ---
-IMPL_MATCH("Engine.dll", 0x3850)
+IMPL_MATCH("Engine.dll", 0x10303850)
 FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float InV)
 :	Point(InPoint)
 ,	Color(InColor)
@@ -370,12 +370,12 @@ FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float I
 {
 }
 
-IMPL_MATCH("Engine.dll", 0x3810)
+IMPL_MATCH("Engine.dll", 0x10303810)
 FCanvasVertex::FCanvasVertex()
 {
 }
 
-IMPL_MATCH("Engine.dll", 0x3890)
+IMPL_MATCH("Engine.dll", 0x10303890)
 FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 {
 	Point = Other.Point;

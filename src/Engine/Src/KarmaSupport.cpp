@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AKActor ---
-IMPL_MATCH("Engine.dll", 0x62160)
+IMPL_MATCH("Engine.dll", 0x10362160)
 void AKActor::Spawned()
 {
 // Ghidra 0x62160: if KParams (this+0x18C) is NULL and not an AKConstraint,
@@ -40,14 +40,14 @@ unguard;
 
 
 // --- AKConstraint ---
-IMPL_MATCH("Engine.dll", 0x59d20)
+IMPL_MATCH("Engine.dll", 0x10359d20)
 MdtBaseConstraint * AKConstraint::getKConstraint() const
 {
 // Retail 0x59d20: 7b. MOV EAX, [ECX+0x418]; RET — returns the Karma constraint pointer.
 return *(MdtBaseConstraint**)((BYTE*)this + 0x418);
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 _McdModel * AKConstraint::getKModel() const
 {
 guard(AKConstraint::getKModel);
@@ -85,7 +85,7 @@ void AKConstraint::KUpdateConstraintParams()
 {
 }
 
-IMPL_MATCH("Engine.dll", 0x59d30)
+IMPL_MATCH("Engine.dll", 0x10359d30)
 void AKConstraint::PostEditChange()
 {
 // Ghidra 0x59d30: if GIsEditor, call vtable[+0x80]; always call vtable[+0x188].
@@ -105,7 +105,7 @@ guard(AKConstraint::PostEditMove);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x59dc0)
+IMPL_MATCH("Engine.dll", 0x10359dc0)
 void AKConstraint::CheckForErrors()
 {
 // Ghidra 0x59dc0: call super, then warn if neither constraint actor is set.
@@ -114,7 +114,7 @@ if (*(INT*)((BYTE*)this + 0x3C0) == 0 && *(INT*)((BYTE*)this + 0x3C4) == 0)
 GWarn->Logf(TEXT("KConstraint which does not point to any Actors."));
 }
 
-IMPL_MATCH("Engine.dll", 0x5A410)
+IMPL_MATCH("Engine.dll", 0x1035a410)
 int AKConstraint::CheckOwnerUpdated()
 {
 // Retail 0x5A410: same replication-queue logic as AActor, but checks Owner,
@@ -165,7 +165,7 @@ unguard;
 
 
 // --- FKAggregateGeom ---
-IMPL_MATCH("Engine.dll", 0x3cc00)
+IMPL_MATCH("Engine.dll", 0x1033cc00)
 FKAggregateGeom::FKAggregateGeom(FKAggregateGeom const &Other)
 {
 // Ghidra 0x3cc00: no vtable; 4 TArrays at +0, +0xC, +0x18, +0x24
@@ -175,7 +175,7 @@ new ((BYTE*)this + 0x18) TArray<FKCylinderElem>(*(const TArray<FKCylinderElem>*)
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>(*(const TArray<FKConvexElem>*)((const BYTE*)&Other + 0x24));
 }
 
-IMPL_MATCH("Engine.dll", 0x3caf0)
+IMPL_MATCH("Engine.dll", 0x1033caf0)
 FKAggregateGeom::FKAggregateGeom()
 {
 // Ghidra 0x3caf0: calls FArray::FArray (TArray default ctor) at +0,+0xC,+0x18,+0x24.
@@ -186,7 +186,7 @@ new ((BYTE*)this + 0x18) TArray<FKCylinderElem>();
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>();
 }
 
-IMPL_MATCH("Engine.dll", 0x3cb90)
+IMPL_MATCH("Engine.dll", 0x1033cb90)
 FKAggregateGeom::~FKAggregateGeom()
 {
 // Ghidra 0x3cb90: destroys the 4 TArrays in reverse construction order.
@@ -196,7 +196,7 @@ FKAggregateGeom::~FKAggregateGeom()
 ((TArray<FKSphereElem>*)  ((BYTE*)this + 0x00))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x3cc80)
+IMPL_MATCH("Engine.dll", 0x1033cc80)
 FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 {
 // Ghidra 0x3cc80: 4 TArrays at +0,+0xC,+0x18,+0x24
@@ -207,7 +207,7 @@ FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 return *this;
 }
 
-IMPL_MATCH("Engine.dll", 0x3cb60)
+IMPL_MATCH("Engine.dll", 0x1033cb60)
 void FKAggregateGeom::EmptyElements()
 {
 // Ghidra 0x3cb60: calls TArray::Empty on each sub-array.
@@ -219,7 +219,7 @@ void FKAggregateGeom::EmptyElements()
 }
 
 // Ghidra 0x4b50: sum of FArray::Num() for 4 TArrays at offsets 0x00, 0x0C, 0x18, 0x24.
-IMPL_MATCH("Engine.dll", 0x4b50)
+IMPL_MATCH("Engine.dll", 0x10304b50)
 int FKAggregateGeom::GetElementCount()
 {
 INT* Counts = (INT*)this;
@@ -230,7 +230,7 @@ return Counts[1] + Counts[4] + Counts[7] + Counts[10];
 
 
 // --- FKBoxElem ---
-IMPL_MATCH("Engine.dll", 0x4ab0)
+IMPL_MATCH("Engine.dll", 0x10304ab0)
 FKBoxElem::FKBoxElem(float InSize)
 {
 // Ghidra 0x4ab0: FMatrix::FMatrix(this) + set TM+0x40/0x44/0x48 = InSize.
@@ -240,7 +240,7 @@ Y = InSize;
 Z = InSize;
 }
 
-IMPL_MATCH("Engine.dll", 0x4ad0)
+IMPL_MATCH("Engine.dll", 0x10304ad0)
 FKBoxElem::FKBoxElem(float InX, float InY, float InZ)
 {
 // Ghidra 0x4ad0: FMatrix::FMatrix(this) + set TM+0x40=InX, +0x44=InY, +0x48=InZ.
@@ -249,21 +249,21 @@ Y = InY;
 Z = InZ;
 }
 
-IMPL_MATCH("Engine.dll", 0x4a60)
+IMPL_MATCH("Engine.dll", 0x10304a60)
 FKBoxElem::FKBoxElem()
 {
 // Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKCylinderElem/FKSphereElem default ctors.
 // C++ auto-calls TM.FMatrix() as member initialiser; body is intentionally empty.
 }
 
-IMPL_MATCH("Engine.dll", 0x4b40)
+IMPL_MATCH("Engine.dll", 0x10304b40)
 FKBoxElem::~FKBoxElem()
 {
 // Ghidra 0x4b40: FMatrix::~FMatrix(this); shared stub with FKCylinderElem/FKSphereElem dtors.
 // C++ auto-calls TM.~FMatrix() after this body; body is intentionally empty.
 }
 
-IMPL_MATCH("Engine.dll", 0x4b00)
+IMPL_MATCH("Engine.dll", 0x10304b00)
 FKBoxElem& FKBoxElem::operator=(const FKBoxElem& Other)
 {
 // Ghidra 0x4b00: loop copying 0x13 DWORDs (76 bytes = sizeof FKBoxElem).
@@ -273,7 +273,7 @@ return *this;
 
 
 // --- FKConvexElem ---
-IMPL_MATCH("Engine.dll", 0x27ce0)
+IMPL_MATCH("Engine.dll", 0x10327ce0)
 FKConvexElem::FKConvexElem(FKConvexElem const &Other)
 {
 // Ghidra 0x27ce0: no vtable; 16 DWORDs at +0..+3F; TArray<FVector> at +40 (stride 12); TArray<INT> at +4C (stride 4)
@@ -282,7 +282,7 @@ new ((BYTE*)this + 0x40) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)
 new ((BYTE*)this + 0x4C) TArray<INT>(*(const TArray<INT>*)((const BYTE*)&Other + 0x4C));
 }
 
-IMPL_MATCH("Engine.dll", 0x27c20)
+IMPL_MATCH("Engine.dll", 0x10327c20)
 FKConvexElem::FKConvexElem()
 {
 // Ghidra 0x27c20: FMatrix::FMatrix(this) + FArray::FArray at +0x40 + FArray::FArray at +0x4C.
@@ -292,7 +292,7 @@ new ((BYTE*)this + 0x40)  TArray<FVector>();
 new ((BYTE*)this + 0x4C)  TArray<INT>();
 }
 
-IMPL_MATCH("Engine.dll", 0x27c80)
+IMPL_MATCH("Engine.dll", 0x10327c80)
 FKConvexElem::~FKConvexElem()
 {
 // Ghidra 0x27c80: destroy TArray<INT> at +0x4C, then TArray<FVector> at +0x40, then FMatrix.
@@ -301,7 +301,7 @@ FKConvexElem::~FKConvexElem()
 ((FMatrix*)(void*)this)->~FMatrix();
 }
 
-IMPL_MATCH("Engine.dll", 0x27d50)
+IMPL_MATCH("Engine.dll", 0x10327d50)
 FKConvexElem& FKConvexElem::operator=(const FKConvexElem& Other)
 {
 // Ghidra 0x27d50: 16 DWORDs (64 bytes) at +0..+3F (no vtable),
@@ -314,7 +314,7 @@ return *this;
 
 
 // --- FKCylinderElem ---
-IMPL_MATCH("Engine.dll", 0x4b20)
+IMPL_MATCH("Engine.dll", 0x10304b20)
 FKCylinderElem::FKCylinderElem(float InRadius, float InLength)
 {
 // Ghidra 0x4b20: FMatrix::FMatrix(this) + set TM+0x40=InRadius, +0x44=InLength.
@@ -323,19 +323,19 @@ Radius = InRadius;
 Length = InLength;
 }
 
-IMPL_MATCH("Engine.dll", 0x4a60)
+IMPL_MATCH("Engine.dll", 0x10304a60)
 FKCylinderElem::FKCylinderElem()
 {
 // Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKBoxElem/FKSphereElem default ctors.
 }
 
-IMPL_MATCH("Engine.dll", 0x4b40)
+IMPL_MATCH("Engine.dll", 0x10304b40)
 FKCylinderElem::~FKCylinderElem()
 {
 // Ghidra 0x4b40: FMatrix::~FMatrix(this); shared stub with FKBoxElem/FKSphereElem dtors.
 }
 
-IMPL_MATCH("Engine.dll", 0x9810)
+IMPL_MATCH("Engine.dll", 0x10309810)
 FKCylinderElem& FKCylinderElem::operator=(const FKCylinderElem& Other)
 {
 // Ghidra 0x9810: loop copying 0x12 DWORDs (72 bytes = sizeof FKCylinderElem).
@@ -345,7 +345,7 @@ return *this;
 
 
 // --- FKSphereElem ---
-IMPL_MATCH("Engine.dll", 0x4a70)
+IMPL_MATCH("Engine.dll", 0x10304a70)
 FKSphereElem::FKSphereElem(float InRadius)
 {
 // Ghidra 0x4a70: FMatrix::FMatrix(this) + set TM+0x40=InRadius.
@@ -353,19 +353,19 @@ FKSphereElem::FKSphereElem(float InRadius)
 Radius = InRadius;
 }
 
-IMPL_MATCH("Engine.dll", 0x4a60)
+IMPL_MATCH("Engine.dll", 0x10304a60)
 FKSphereElem::FKSphereElem()
 {
 // Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKBoxElem/FKCylinderElem default ctors.
 }
 
-IMPL_MATCH("Engine.dll", 0x4b40)
+IMPL_MATCH("Engine.dll", 0x10304b40)
 FKSphereElem::~FKSphereElem()
 {
 // Ghidra 0x4b40: FMatrix::~FMatrix(this); shared stub with FKBoxElem/FKCylinderElem dtors.
 }
 
-IMPL_MATCH("Engine.dll", 0x4a90)
+IMPL_MATCH("Engine.dll", 0x10304a90)
 FKSphereElem& FKSphereElem::operator=(const FKSphereElem& Other)
 {
 // Ghidra 0x4a90: loop copying 0x11 DWORDs (68 bytes = sizeof FKSphereElem).

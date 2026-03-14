@@ -28,6 +28,8 @@ if(SOURCE_COUNT GREATER 0)
     # across multiple translation units that include the same class definitions.
     target_link_options(Engine PRIVATE /FORCE:MULTIPLE)
     add_impl_verification(Engine ${ENGINE_SRC_DIR}/Src)
+    include(${PROJECT_SOURCE_DIR}/cmake/ByteParity.cmake)
+    add_byte_parity_check(Engine ${ENGINE_SRC_DIR}/Src Engine.dll)
 else()
     message(STATUS "Engine: no source files yet — skipping")
 endif()

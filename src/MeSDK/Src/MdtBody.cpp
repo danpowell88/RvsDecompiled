@@ -55,7 +55,7 @@ extern "C" {
  * Called from physKarmaRagDoll_internal to test whether a body is contacting.
  * Retail: 13 bytes.  MOV EAX,[ECX+164h]; RET
  */
-IMPL_MATCH("Engine.dll", 0x193130)
+IMPL_MATCH("Engine.dll", 0x10493130)
 int FUN_10493130(int param_1)
 {
     return *(int*)(param_1 + 0x164);
@@ -65,7 +65,7 @@ int FUN_10493130(int param_1)
  * FUN_10496010 — read position-x field (body+0x160).
  * Retail: 13 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x196010)
+IMPL_MATCH("Engine.dll", 0x10496010)
 int FUN_10496010(int param_1)
 {
     return *(int*)(param_1 + 0x160);
@@ -76,7 +76,7 @@ int FUN_10496010(int param_1)
  * Callers treat the returned int as a handle to the first constraint slot.
  * Retail: 12 bytes.  LEA EAX,[ECX+194h]; RET
  */
-IMPL_MATCH("Engine.dll", 0x194770)
+IMPL_MATCH("Engine.dll", 0x10494770)
 int FUN_10494770(int param_1)
 {
     return param_1 + 0x194;
@@ -86,7 +86,7 @@ int FUN_10494770(int param_1)
  * FUN_10494780 — read secondary linked-list pointer (body+0x1dc).
  * Retail: 13 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x194780)
+IMPL_MATCH("Engine.dll", 0x10494780)
 int FUN_10494780(int param_1)
 {
     return *(int*)(param_1 + 0x1dc);
@@ -97,7 +97,7 @@ int FUN_10494780(int param_1)
  * Returns as double (float10 in Ghidra) because of x87 FLD/FSTP round-trip.
  * Retail: 13 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x195dc0)
+IMPL_MATCH("Engine.dll", 0x10495dc0)
 double FUN_10495dc0(int param_1)
 {
     return (double)*(float*)(param_1 + 0x1e0);
@@ -112,7 +112,7 @@ double FUN_10495dc0(int param_1)
  * Writes 3 floats to offsets +0x160/+0x164/+0x168.
  * Retail: 37 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x194890)
+IMPL_MATCH("Engine.dll", 0x10494890)
 void FUN_10494890(int param_1, int param_2, int param_3, int param_4)
 {
     *(int*)(param_1 + 0x160) = param_2;
@@ -125,7 +125,7 @@ void FUN_10494890(int param_1, int param_2, int param_3, int param_4)
  * Reads 3 floats from +0x160/+0x164/+0x168 into the output array.
  * Retail: 37 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x1946d0)
+IMPL_MATCH("Engine.dll", 0x104946d0)
 void FUN_104946d0(int param_1, int* param_2)
 {
     param_2[0] = *(int*)(param_1 + 0x160);
@@ -142,7 +142,7 @@ void FUN_104946d0(int param_1, int* param_2)
  * Writes 3 floats to offsets +0x16c/+0x170/+0x174.
  * Retail: 37 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x1948c0)
+IMPL_MATCH("Engine.dll", 0x104948c0)
 void FUN_104948c0(int param_1, int param_2, int param_3, int param_4)
 {
     *(int*)(param_1 + 0x16c) = param_2;
@@ -158,7 +158,7 @@ void FUN_104948c0(int param_1, int param_2, int param_3, int param_4)
  * FUN_104934f0 — write body flags DWORD (body+0x178).
  * Retail: 17 bytes.  MOV [ECX+178h],EDX; RET
  */
-IMPL_MATCH("Engine.dll", 0x1934f0)
+IMPL_MATCH("Engine.dll", 0x104934f0)
 void FUN_104934f0(int param_1, int param_2)
 {
     *(int*)(param_1 + 0x178) = param_2;
@@ -175,7 +175,7 @@ void FUN_104934f0(int param_1, int param_2)
  * (magnitude^2 > 1e-12).
  * Retail: 121 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x194910)
+IMPL_MATCH("Engine.dll", 0x10494910)
 void FUN_10494910(int param_1, int param_2, int param_3, int param_4)
 {
     *(int*)(param_1 + 0x188) = param_2;
@@ -210,7 +210,7 @@ void FUN_10494910(int param_1, int param_2, int param_3, int param_4)
  * zero the sleep counter at +0x230.
  * Retail: 120 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x1941b0)
+IMPL_MATCH("Engine.dll", 0x104941b0)
 void FUN_104941b0(int param_1)
 {
     typedef void (*CodePtr)(int);
@@ -250,7 +250,7 @@ void FUN_104941b0(int param_1)
  * the list is exhausted).
  * Retail: 58 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x193270)
+IMPL_MATCH("Engine.dll", 0x10493270)
 int FUN_10493270(int* param_1)
 {
     int iVar1;
@@ -286,7 +286,7 @@ int FUN_10493270(int* param_1)
  * param_2 receives the resulting 3-float world position.
  * Retail: 157 bytes.
  */
-IMPL_MATCH("Engine.dll", 0x193c10)
+IMPL_MATCH("Engine.dll", 0x10493c10)
 void FUN_10493c10(int param_1, float* param_2)
 {
     param_2[0] = *(float*)(param_1 + 0x130) * *(float*)(param_1 + 0x190)

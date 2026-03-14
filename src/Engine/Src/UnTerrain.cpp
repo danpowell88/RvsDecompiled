@@ -44,7 +44,7 @@ void ATerrainInfo::ResetMove()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x164960)
+IMPL_MATCH("Engine.dll", 0x10464960)
 void ATerrainInfo::PostEditChange()
 {
 	// Ghidra 0x164960: update terrain arrays, rebuild sectors, recalculate coords.
@@ -82,7 +82,7 @@ void ATerrainInfo::SoftSelect(float,float)
 	guard(ATerrainInfo::SoftSelect);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x161140)
+IMPL_MATCH("Engine.dll", 0x10461140)
 void ATerrainInfo::Update(float Dt, int X1, int Y1, int X2, int Y2, int Flags)
 {
 	guard(ATerrainInfo::Update);
@@ -276,7 +276,7 @@ void ATerrainInfo::MoveVertices(float)
 	guard(ATerrainInfo::MoveVertices);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x15c9a0)
+IMPL_MATCH("Engine.dll", 0x1045c9a0)
 int ATerrainInfo::PointCheck(FCheckResult& Result, FVector Location, FVector Extent, int ExtraNodeFlags)
 {
 	guard(ATerrainInfo::PointCheck);
@@ -292,7 +292,7 @@ int ATerrainInfo::PointCheck(FCheckResult& Result, FVector Location, FVector Ext
 	return 1;
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x156780)
+IMPL_MATCH("Engine.dll", 0x10456780)
 void ATerrainInfo::CalcCoords()
 {
 	// Ghidra 0x156780: build heightmap-to-world FCoords at this+0x1300,
@@ -331,7 +331,7 @@ void ATerrainInfo::CalcLayerTexCoords()
 	guard(ATerrainInfo::CalcLayerTexCoords);
 	unguard;
 }
-IMPL_MATCH("Engine.dll", 0x1615a0)
+IMPL_MATCH("Engine.dll", 0x104615a0)
 void ATerrainInfo::CheckComputeDataOnLoad()
 {
 	guard(ATerrainInfo::CheckComputeDataOnLoad);
@@ -403,7 +403,7 @@ int ATerrainInfo::GetGlobalVertex(int X, int Y)
 	INT HeightmapX_val = *(INT*)((BYTE*)this + 0x12E0);
 	return HeightmapX_val * Y + X;
 }
-IMPL_MATCH("Engine.dll", 0x157000)
+IMPL_MATCH("Engine.dll", 0x10457000)
 _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 {
 	// Retail: 0x157000, 94b. Format-check wrapper over heightmap texture at this+0x398.
@@ -494,7 +494,7 @@ int ATerrainInfo::GetQuadVisibilityBitmap(int X, int Y)
 	INT bit_mask = 1 << (idx & 31);
 	return (word & bit_mask) ? 1 : 0;
 }
-IMPL_MATCH("Engine.dll", 0x15e8f0)
+IMPL_MATCH("Engine.dll", 0x1045e8f0)
 int ATerrainInfo::GetRenderCombinationNum(TArray<INT>& Layers, ETerrainRenderMethod Method)
 {
 	guard(ATerrainInfo::GetRenderCombinationNum);
@@ -559,7 +559,7 @@ void ATerrainInfo::Serialize(FArchive& Ar)
 	Ar.ByteOrderSerialize((BYTE*)this + 0x12E0, 4);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x12E4, 4);
 }
-IMPL_MATCH("Engine.dll", 0x977b0)
+IMPL_MATCH("Engine.dll", 0x103977b0)
 void ATerrainInfo::CheckForErrors()
 {
 	// Retail: 0x977b0. Iterates 32 layer slots at this+0x3AC (stride 0x78),
@@ -574,7 +574,7 @@ void ATerrainInfo::CheckForErrors()
 		}
 	}
 }
-IMPL_MATCH("Engine.dll", 0x1566f0)
+IMPL_MATCH("Engine.dll", 0x104566f0)
 void ATerrainInfo::Destroy()
 {
 	// Retail: 0x1566f0. Checks this->LevelInfo (this+0x144); reads ULevel* at levelInfo+0x328
@@ -603,7 +603,7 @@ UPrimitive * ATerrainInfo::GetPrimitive()
 
 
 // --- FTerrainMaterialLayer ---
-IMPL_MATCH("Engine.dll", 0x97f0)
+IMPL_MATCH("Engine.dll", 0x103097f0)
 FTerrainMaterialLayer::FTerrainMaterialLayer()
 {
 	guard(FTerrainMaterialLayer::FTerrainMaterialLayer);
@@ -612,7 +612,7 @@ FTerrainMaterialLayer::FTerrainMaterialLayer()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x9800)
+IMPL_MATCH("Engine.dll", 0x10309800)
 FTerrainMaterialLayer::~FTerrainMaterialLayer()
 {
 	guard(FTerrainMaterialLayer::~FTerrainMaterialLayer);
@@ -621,7 +621,7 @@ FTerrainMaterialLayer::~FTerrainMaterialLayer()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x9810)
+IMPL_MATCH("Engine.dll", 0x10309810)
 FTerrainMaterialLayer& FTerrainMaterialLayer::operator=(const FTerrainMaterialLayer& Other)
 {
 	// Ghidra 0x9810: shares address with FKCylinderElem::operator= (same-size flat copy, no vtable)
@@ -639,7 +639,7 @@ void FTerrainTools::SetAdjust(int Value)
 		*(INT*)((BYTE*)(*(INT**)&Pad[0x50]) + 0x60) = Value;
 }
 
-IMPL_MATCH("Engine.dll", 0x1665d0)
+IMPL_MATCH("Engine.dll", 0x104665d0)
 void FTerrainTools::SetCurrentBrush(int BrushID)
 {
 	// Ghidra 0x1665d0: if a current terrain info is set, clear its selection list.
@@ -847,7 +847,7 @@ UMaterial * UTerrainMaterial::CheckFallback()
 	return this;
 }
 
-IMPL_MATCH("Engine.dll", 0x15d6c0)
+IMPL_MATCH("Engine.dll", 0x1045d6c0)
 int UTerrainMaterial::HasFallback()
 {
 	guard(UTerrainMaterial::HasFallback);
@@ -906,7 +906,7 @@ void UTerrainSector::StaticLight(INT) {}
 IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void UTerrainSector::GenerateTriangles() {}
 // Ghidra at 0x156550. Returns linear index in the global heightmap grid.
-IMPL_MATCH("Engine.dll", 0x156550)
+IMPL_MATCH("Engine.dll", 0x10456550)
 INT UTerrainSector::GetGlobalVertex(INT X, INT Y) {
 	// TerrainInfo->HeightmapX is at offset 0x12E0 in ATerrainInfo
 	INT HeightmapX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
@@ -914,7 +914,7 @@ INT UTerrainSector::GetGlobalVertex(INT X, INT Y) {
 }
 
 // Ghidra at 0x153a0. Returns linear index within this sector.
-IMPL_MATCH("Engine.dll", 0x153a0)
+IMPL_MATCH("Engine.dll", 0x103153a0)
 INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }

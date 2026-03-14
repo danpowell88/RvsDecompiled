@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FFontCharacter ---
-IMPL_MATCH("Engine.dll", 0x4570)
+IMPL_MATCH("Engine.dll", 0x10304570)
 FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 {
 	appMemcpy( this, &Other, sizeof(FFontCharacter) );
@@ -24,7 +24,7 @@ FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 
 
 // --- FFontPage ---
-IMPL_MATCH("Engine.dll", 0x277E0)
+IMPL_MATCH("Engine.dll", 0x103277e0)
 FFontPage::FFontPage(FFontPage const &Other)
 {
 	// Ghidra 0x27800: no vtable; 2 DWORDs at +0,+4; TArray<FLineVertex> at +8 (stride 0x10)
@@ -32,21 +32,21 @@ FFontPage::FFontPage(FFontPage const &Other)
 	new ((BYTE*)this + 0x08) TArray<FLineVertex>(*(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x08));
 }
 
-IMPL_MATCH("Engine.dll", 0x27800)
+IMPL_MATCH("Engine.dll", 0x10327800)
 FFontPage::FFontPage()
 {
 	// Initialize TArray<FLineVertex> at +8 to empty
 	new ((BYTE*)this + 0x08) TArray<FLineVertex>();
 }
 
-IMPL_MATCH("Engine.dll", 0x277F0)
+IMPL_MATCH("Engine.dll", 0x103277f0)
 FFontPage::~FFontPage()
 {
 	// Ghidra 0x103277f0: destroy TArray<FLineVertex> at +8 (stride 0x10, POD elements)
 	((TArray<FLineVertex>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_MATCH("Engine.dll", 0x27830)
+IMPL_MATCH("Engine.dll", 0x10327830)
 FFontPage& FFontPage::operator=(const FFontPage& Other)
 {
 	// Ghidra 0x27830: 2 DWORDs at +0,+4, then TArray<FLineVertex> at +8
@@ -58,7 +58,7 @@ FFontPage& FFontPage::operator=(const FFontPage& Other)
 
 
 // --- UFont ---
-IMPL_MATCH("Engine.dll", 0x20B80)
+IMPL_MATCH("Engine.dll", 0x10320b80)
 _WORD UFont::RemapChar(_WORD Char)
 {
 	// Retail: 15b. If remap table ptr at this+0x50 is null, return Char unchanged.
@@ -68,7 +68,7 @@ _WORD UFont::RemapChar(_WORD Char)
 	return Char; // divergence: remap table lookup not implemented
 }
 
-IMPL_MATCH("Engine.dll", 0x9C230)
+IMPL_MATCH("Engine.dll", 0x1039c230)
 void UFont::Serialize(FArchive& Ar)
 {
 	guard(UFont::Serialize);

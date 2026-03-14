@@ -22,7 +22,7 @@ guard(UNetDriver::StaticConstructor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x18b820)
+IMPL_MATCH("Engine.dll", 0x1048b820)
 void UNetDriver::TickFlush()
 {
 // Retail: 0x18b820, ordinal 4877. Calls TickFlush on ServerConnection (this+0x3C)
@@ -252,7 +252,7 @@ return 0;
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x184540)
+IMPL_MATCH("Engine.dll", 0x10484540)
 void UNetConnection::Serialize(const TCHAR* Data, EName Event)
 {
 guard(UNetConnection::Serialize);

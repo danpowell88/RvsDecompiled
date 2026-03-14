@@ -72,7 +72,7 @@ IMPLEMENT_CLASS(AR6Alarm);
 
 /*-- Error / Sleep / Lifecycle ------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x125850)
+IMPL_MATCH("Engine.dll", 0x10425850)
 void AActor::execError( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execError);
@@ -83,7 +83,7 @@ void AActor::execError( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 233, execError );
 
-IMPL_MATCH("Engine.dll", 0x120850)
+IMPL_MATCH("Engine.dll", 0x10420850)
 void AActor::execSleep( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSleep);
@@ -95,7 +95,7 @@ void AActor::execSleep( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 256, execSleep );
 
-IMPL_MATCH("Engine.dll", 0x120BC0)
+IMPL_MATCH("Engine.dll", 0x10420bc0)
 void AActor::execPollSleep( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollSleep);
@@ -107,7 +107,7 @@ void AActor::execPollSleep( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPollSleep );
 
-IMPL_MATCH("Engine.dll", 0x129950)
+IMPL_MATCH("Engine.dll", 0x10429950)
 void AActor::execDestroy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDestroy);
@@ -117,7 +117,7 @@ void AActor::execDestroy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 279, execDestroy );
 
-IMPL_MATCH("Engine.dll", 0x129750)
+IMPL_MATCH("Engine.dll", 0x10429750)
 void AActor::execSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSpawn);
@@ -147,7 +147,7 @@ IMPLEMENT_FUNCTION( AActor, 278, execSpawn );
 
 /*-- Movement & Physics ------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x128950)
+IMPL_MATCH("Engine.dll", 0x10428950)
 void AActor::execMove( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMove);
@@ -159,7 +159,7 @@ void AActor::execMove( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 266, execMove );
 
-IMPL_MATCH("Engine.dll", 0xF1520)
+IMPL_MATCH("Engine.dll", 0x103f1520)
 void AActor::execMoveSmooth( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveSmooth);
@@ -171,7 +171,7 @@ void AActor::execMoveSmooth( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 3969, execMoveSmooth );
 
-IMPL_MATCH("Engine.dll", 0x128A60)
+IMPL_MATCH("Engine.dll", 0x10428a60)
 void AActor::execSetLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetLocation);
@@ -183,7 +183,7 @@ void AActor::execSetLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 267, execSetLocation );
 
-IMPL_MATCH("Engine.dll", 0x128D30)
+IMPL_MATCH("Engine.dll", 0x10428d30)
 void AActor::execSetRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetRotation);
@@ -195,7 +195,7 @@ void AActor::execSetRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 299, execSetRotation );
 
-IMPL_MATCH("Engine.dll", 0x128B20)
+IMPL_MATCH("Engine.dll", 0x10428b20)
 void AActor::execSetRelativeLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetRelativeLocation);
@@ -209,7 +209,7 @@ void AActor::execSetRelativeLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetRelativeLocation );
 
-IMPL_MATCH("Engine.dll", 0x128E40)
+IMPL_MATCH("Engine.dll", 0x10428e40)
 void AActor::execSetRelativeRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetRelativeRotation);
@@ -224,7 +224,7 @@ void AActor::execSetRelativeRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetRelativeRotation );
 
-IMPL_MATCH("Engine.dll", 0xEC630)
+IMPL_MATCH("Engine.dll", 0x103ec630)
 void AActor::execSetPhysics( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPhysics);
@@ -235,7 +235,7 @@ void AActor::execSetPhysics( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 3970, execSetPhysics );
 
-IMPL_MATCH("Engine.dll", 0xEC6D0)
+IMPL_MATCH("Engine.dll", 0x103ec6d0)
 void AActor::execAutonomousPhysics( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAutonomousPhysics);
@@ -249,7 +249,7 @@ IMPLEMENT_FUNCTION( AActor, 3971, execAutonomousPhysics );
 
 /*-- Collision ---------------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x124590)
+IMPL_MATCH("Engine.dll", 0x10424590)
 void AActor::execSetCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetCollision);
@@ -262,7 +262,7 @@ void AActor::execSetCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 262, execSetCollision );
 
-IMPL_MATCH("Engine.dll", 0x124730)
+IMPL_MATCH("Engine.dll", 0x10424730)
 void AActor::execSetCollisionSize( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetCollisionSize);
@@ -277,7 +277,7 @@ IMPLEMENT_FUNCTION( AActor, 283, execSetCollisionSize );
 
 /*-- Timers ------------------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x124BD0)
+IMPL_MATCH("Engine.dll", 0x10424bd0)
 void AActor::execSetTimer( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetTimer);
@@ -293,7 +293,7 @@ IMPLEMENT_FUNCTION( AActor, 280, execSetTimer );
 
 /*-- Owner / Base ------------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x124B60)
+IMPL_MATCH("Engine.dll", 0x10424b60)
 void AActor::execSetOwner( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetOwner);
@@ -304,7 +304,7 @@ void AActor::execSetOwner( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 272, execSetOwner );
 
-IMPL_MATCH("Engine.dll", 0x1247D0)
+IMPL_MATCH("Engine.dll", 0x104247d0)
 void AActor::execSetBase( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBase);
@@ -318,7 +318,7 @@ IMPLEMENT_FUNCTION( AActor, 298, execSetBase );
 
 /*-- Trace / Collision queries -----------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x12CFA0)
+IMPL_MATCH("Engine.dll", 0x1042cfa0)
 void AActor::execTrace( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTrace);
@@ -345,7 +345,7 @@ void AActor::execTrace( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 277, execTrace );
 
-IMPL_MATCH("Engine.dll", 0x129610)
+IMPL_MATCH("Engine.dll", 0x10429610)
 void AActor::execFastTrace( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFastTrace);
@@ -358,7 +358,7 @@ void AActor::execFastTrace( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 548, execFastTrace );
 
-IMPL_MATCH("Engine.dll", 0x12CD60)
+IMPL_MATCH("Engine.dll", 0x1042cd60)
 void AActor::execR6Trace( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execR6Trace);
@@ -383,7 +383,7 @@ void AActor::execR6Trace( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1806, execR6Trace );
 
-IMPL_MATCH("Engine.dll", 0x129350)
+IMPL_MATCH("Engine.dll", 0x10429350)
 void AActor::execFindSpot( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFindSpot);
@@ -397,7 +397,7 @@ IMPLEMENT_FUNCTION( AActor, 1800, execFindSpot );
 
 /*-- Animation ---------------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x120D50)
+IMPL_MATCH("Engine.dll", 0x10420d50)
 void AActor::execPlayAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayAnim);
@@ -413,7 +413,7 @@ void AActor::execPlayAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 259, execPlayAnim );
 
-IMPL_MATCH("Engine.dll", 0x120E90)
+IMPL_MATCH("Engine.dll", 0x10420e90)
 void AActor::execLoopAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoopAnim);
@@ -429,7 +429,7 @@ void AActor::execLoopAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 260, execLoopAnim );
 
-IMPL_MATCH("Engine.dll", 0x120FD0)
+IMPL_MATCH("Engine.dll", 0x10420fd0)
 void AActor::execTweenAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTweenAnim);
@@ -442,7 +442,7 @@ void AActor::execTweenAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 294, execTweenAnim );
 
-IMPL_MATCH("Engine.dll", 0x1208C0)
+IMPL_MATCH("Engine.dll", 0x104208c0)
 void AActor::execFinishAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFinishAnim);
@@ -455,7 +455,7 @@ void AActor::execFinishAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 261, execFinishAnim );
 
-IMPL_MATCH("Engine.dll", 0x120C00)
+IMPL_MATCH("Engine.dll", 0x10420c00)
 void AActor::execPollFinishAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollFinishAnim);
@@ -465,7 +465,7 @@ void AActor::execPollFinishAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPollFinishAnim );
 
-IMPL_MATCH("Engine.dll", 0x121110)
+IMPL_MATCH("Engine.dll", 0x10421110)
 void AActor::execStopAnimating( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAnimating);
@@ -481,7 +481,7 @@ void AActor::execStopAnimating( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAnimating );
 
-IMPL_MATCH("Engine.dll", 0x1210A0)
+IMPL_MATCH("Engine.dll", 0x104210a0)
 void AActor::execIsAnimating( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsAnimating);
@@ -492,7 +492,7 @@ void AActor::execIsAnimating( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 282, execIsAnimating );
 
-IMPL_MATCH("Engine.dll", 0x121240)
+IMPL_MATCH("Engine.dll", 0x10421240)
 void AActor::execIsTweening( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsTweening);
@@ -509,7 +509,7 @@ void AActor::execIsTweening( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execIsTweening );
 
-IMPL_MATCH("Engine.dll", 0x1212D0)
+IMPL_MATCH("Engine.dll", 0x104212d0)
 void AActor::execHasAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execHasAnim);
@@ -526,7 +526,7 @@ void AActor::execHasAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 263, execHasAnim );
 
-IMPL_MATCH("Engine.dll", 0x124370)
+IMPL_MATCH("Engine.dll", 0x10424370)
 void AActor::execGetAnimGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAnimGroup);
@@ -547,7 +547,7 @@ void AActor::execGetAnimGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1500, execGetAnimGroup );
 
-IMPL_MATCH("Engine.dll", 0x121380)
+IMPL_MATCH("Engine.dll", 0x10421380)
 void AActor::execGetAnimParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAnimParams);
@@ -574,7 +574,7 @@ void AActor::execGetAnimParams( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetAnimParams );
 
-IMPL_MATCH("Engine.dll", 0x126570)
+IMPL_MATCH("Engine.dll", 0x10426570)
 void AActor::execAnimBlendParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAnimBlendParams);
@@ -594,7 +594,7 @@ void AActor::execAnimBlendParams( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendParams );
 
-IMPL_MATCH("Engine.dll", 0x1266D0)
+IMPL_MATCH("Engine.dll", 0x104266d0)
 void AActor::execAnimBlendToAlpha( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAnimBlendToAlpha);
@@ -612,7 +612,7 @@ void AActor::execAnimBlendToAlpha( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimBlendToAlpha );
 
-IMPL_MATCH("Engine.dll", 0x1267C0)
+IMPL_MATCH("Engine.dll", 0x104267c0)
 void AActor::execGetAnimBlendAlpha( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAnimBlendAlpha);
@@ -629,7 +629,7 @@ void AActor::execGetAnimBlendAlpha( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2208, execGetAnimBlendAlpha );
 
-IMPL_MATCH("Engine.dll", 0x124470)
+IMPL_MATCH("Engine.dll", 0x10424470)
 void AActor::execAnimIsInGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAnimIsInGroup);
@@ -652,7 +652,7 @@ void AActor::execAnimIsInGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAnimIsInGroup );
 
-IMPL_MATCH("Engine.dll", 0x121190)
+IMPL_MATCH("Engine.dll", 0x10421190)
 void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFreezeAnimAt);
@@ -669,7 +669,7 @@ void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execFreezeAnimAt );
 
-IMPL_MATCH("Engine.dll", 0x126860)
+IMPL_MATCH("Engine.dll", 0x10426860)
 void AActor::execGetNotifyChannel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNotifyChannel);
@@ -679,7 +679,7 @@ void AActor::execGetNotifyChannel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNotifyChannel );
 
-IMPL_MATCH("Engine.dll", 0x1268D0)
+IMPL_MATCH("Engine.dll", 0x104268d0)
 void AActor::execEnableChannelNotify( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableChannelNotify);
@@ -696,7 +696,7 @@ void AActor::execEnableChannelNotify( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execEnableChannelNotify );
 
-IMPL_MATCH("Engine.dll", 0x124260)
+IMPL_MATCH("Engine.dll", 0x10424260)
 void AActor::execClearChannel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execClearChannel);
@@ -714,7 +714,7 @@ IMPLEMENT_FUNCTION( AActor, 1805, execClearChannel );
 
 /*-- Skeletal mesh / Bone control --------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x125FD0)
+IMPL_MATCH("Engine.dll", 0x10425fd0)
 void AActor::execLinkMesh( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLinkMesh);
@@ -726,7 +726,7 @@ void AActor::execLinkMesh( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLinkMesh );
 
-IMPL_MATCH("Engine.dll", 0x125E00)
+IMPL_MATCH("Engine.dll", 0x10425e00)
 void AActor::execLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLinkSkelAnim);
@@ -743,7 +743,7 @@ void AActor::execLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLinkSkelAnim );
 
-IMPL_MATCH("Engine.dll", 0x125EF0)
+IMPL_MATCH("Engine.dll", 0x10425ef0)
 void AActor::execUnLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUnLinkSkelAnim);
@@ -758,7 +758,7 @@ void AActor::execUnLinkSkelAnim( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2210, execUnLinkSkelAnim );
 
-IMPL_MATCH("Engine.dll", 0x125F50)
+IMPL_MATCH("Engine.dll", 0x10425f50)
 void AActor::execWasSkeletonUpdated( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execWasSkeletonUpdated);
@@ -774,7 +774,7 @@ void AActor::execWasSkeletonUpdated( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1501, execWasSkeletonUpdated );
 
-IMPL_MATCH("Engine.dll", 0x1264B0)
+IMPL_MATCH("Engine.dll", 0x104264b0)
 void AActor::execLockRootMotion( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLockRootMotion);
@@ -785,7 +785,7 @@ void AActor::execLockRootMotion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execLockRootMotion );
 
-IMPL_MATCH("Engine.dll", 0x1262B0)
+IMPL_MATCH("Engine.dll", 0x104262b0)
 void AActor::execGetRootLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootLocation);
@@ -795,7 +795,7 @@ void AActor::execGetRootLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootLocation );
 
-IMPL_MATCH("Engine.dll", 0x1263B0)
+IMPL_MATCH("Engine.dll", 0x104263b0)
 void AActor::execGetRootLocationDelta( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootLocationDelta);
@@ -805,7 +805,7 @@ void AActor::execGetRootLocationDelta( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootLocationDelta );
 
-IMPL_MATCH("Engine.dll", 0x126330)
+IMPL_MATCH("Engine.dll", 0x10426330)
 void AActor::execGetRootRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootRotation);
@@ -815,7 +815,7 @@ void AActor::execGetRootRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootRotation );
 
-IMPL_MATCH("Engine.dll", 0x126430)
+IMPL_MATCH("Engine.dll", 0x10426430)
 void AActor::execGetRootRotationDelta( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootRotationDelta);
@@ -825,7 +825,7 @@ void AActor::execGetRootRotationDelta( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootRotationDelta );
 
-IMPL_MATCH("Engine.dll", 0x1260A0)
+IMPL_MATCH("Engine.dll", 0x104260a0)
 void AActor::execGetBoneCoords( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetBoneCoords);
@@ -846,7 +846,7 @@ void AActor::execGetBoneCoords( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneCoords );
 
-IMPL_MATCH("Engine.dll", 0x126190)
+IMPL_MATCH("Engine.dll", 0x10426190)
 void AActor::execGetBoneRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetBoneRotation);
@@ -864,7 +864,7 @@ void AActor::execGetBoneRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetBoneRotation );
 
-IMPL_MATCH("Engine.dll", 0x126B90)
+IMPL_MATCH("Engine.dll", 0x10426b90)
 void AActor::execSetBoneRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneRotation);
@@ -884,7 +884,7 @@ void AActor::execSetBoneRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneRotation );
 
-IMPL_MATCH("Engine.dll", 0x126CE0)
+IMPL_MATCH("Engine.dll", 0x10426ce0)
 void AActor::execSetBoneDirection( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneDirection);
@@ -904,7 +904,7 @@ void AActor::execSetBoneDirection( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneDirection );
 
-IMPL_MATCH("Engine.dll", 0x126A80)
+IMPL_MATCH("Engine.dll", 0x10426a80)
 void AActor::execSetBoneLocation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneLocation);
@@ -922,7 +922,7 @@ void AActor::execSetBoneLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneLocation );
 
-IMPL_MATCH("Engine.dll", 0x126990)
+IMPL_MATCH("Engine.dll", 0x10426990)
 void AActor::execSetBoneScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetBoneScale);
@@ -940,7 +940,7 @@ void AActor::execSetBoneScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetBoneScale );
 
-IMPL_MATCH("Engine.dll", 0x12BA90)
+IMPL_MATCH("Engine.dll", 0x1042ba90)
 void AActor::execGetRenderBoundingSphere( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRenderBoundingSphere);
@@ -950,7 +950,7 @@ void AActor::execGetRenderBoundingSphere( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRenderBoundingSphere );
 
-IMPL_MATCH("Engine.dll", 0x124A50)
+IMPL_MATCH("Engine.dll", 0x10424a50)
 void AActor::execAttachToBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAttachToBone);
@@ -962,7 +962,7 @@ void AActor::execAttachToBone( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAttachToBone );
 
-IMPL_MATCH("Engine.dll", 0x124AF0)
+IMPL_MATCH("Engine.dll", 0x10424af0)
 void AActor::execDetachFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDetachFromBone);
@@ -1028,7 +1028,7 @@ void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDemoPlaySound );
 
-IMPL_MATCH("Engine.dll", 0xE58F0)
+IMPL_MATCH("Engine.dll", 0x103e58f0)
 void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMakeNoise);
@@ -1095,7 +1095,7 @@ void AActor::execStopAllMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopAllMusic );
 
-IMPL_MATCH("Engine.dll", 0x127FE0)
+IMPL_MATCH("Engine.dll", 0x10427fe0)
 void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSounds);
@@ -1146,7 +1146,7 @@ void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2716, execAddSoundBank );
 
-IMPL_MATCH("Engine.dll", 0x1281B0)
+IMPL_MATCH("Engine.dll", 0x104281b0)
 void AActor::execAddAndFindBankInSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddAndFindBankInSound);
@@ -1158,7 +1158,7 @@ void AActor::execAddAndFindBankInSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2717, execAddAndFindBankInSound );
 
-IMPL_MATCH("Engine.dll", 0x127B90)
+IMPL_MATCH("Engine.dll", 0x10427b90)
 void AActor::execResetVolume_AllTypeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execResetVolume_AllTypeSound);
@@ -1167,7 +1167,7 @@ void AActor::execResetVolume_AllTypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2704, execResetVolume_AllTypeSound );
 
-IMPL_MATCH("Engine.dll", 0x127BE0)
+IMPL_MATCH("Engine.dll", 0x10427be0)
 void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execResetVolume_TypeSound);
@@ -1188,7 +1188,7 @@ void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2705, execChangeVolumeType );
 
-IMPL_MATCH("Engine.dll", 0x127D30)
+IMPL_MATCH("Engine.dll", 0x10427d30)
 void AActor::execSaveCurrentFadeValue( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSaveCurrentFadeValue);
@@ -1197,7 +1197,7 @@ void AActor::execSaveCurrentFadeValue( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2722, execSaveCurrentFadeValue );
 
-IMPL_MATCH("Engine.dll", 0x127D80)
+IMPL_MATCH("Engine.dll", 0x10427d80)
 void AActor::execReturnSavedFadeValue( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReturnSavedFadeValue);
@@ -1206,7 +1206,7 @@ void AActor::execReturnSavedFadeValue( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2723, execReturnSavedFadeValue );
 
-IMPL_MATCH("Engine.dll", 0x128840)
+IMPL_MATCH("Engine.dll", 0x10428840)
 void AActor::execGetSoundDuration( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetSoundDuration);
@@ -1219,7 +1219,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetSoundDuration );
 
 /*-- Visual property setters -------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x124890)
+IMPL_MATCH("Engine.dll", 0x10424890)
 void AActor::execSetDrawScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetDrawScale);
@@ -1230,7 +1230,7 @@ void AActor::execSetDrawScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetDrawScale );
 
-IMPL_MATCH("Engine.dll", 0x1249D0)
+IMPL_MATCH("Engine.dll", 0x104249d0)
 void AActor::execSetDrawScale3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetDrawScale3D);
@@ -1241,7 +1241,7 @@ void AActor::execSetDrawScale3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetDrawScale3D );
 
-IMPL_MATCH("Engine.dll", 0x124970)
+IMPL_MATCH("Engine.dll", 0x10424970)
 void AActor::execSetDrawType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetDrawType);
@@ -1252,7 +1252,7 @@ void AActor::execSetDrawType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetDrawType );
 
-IMPL_MATCH("Engine.dll", 0x124900)
+IMPL_MATCH("Engine.dll", 0x10424900)
 void AActor::execSetStaticMesh( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetStaticMesh);
@@ -1263,7 +1263,7 @@ void AActor::execSetStaticMesh( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSetStaticMesh );
 
-IMPL_MATCH("Engine.dll", 0x124660)
+IMPL_MATCH("Engine.dll", 0x10424660)
 void AActor::execOnlyAffectPawns( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execOnlyAffectPawns);
@@ -1273,7 +1273,7 @@ void AActor::execOnlyAffectPawns( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execOnlyAffectPawns );
 
-IMPL_MATCH("Engine.dll", 0x120B80)
+IMPL_MATCH("Engine.dll", 0x10420b80)
 void AActor::execFinishInterpolation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFinishInterpolation);
@@ -1283,7 +1283,7 @@ void AActor::execFinishInterpolation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 301, execFinishInterpolation );
 
-IMPL_MATCH("Engine.dll", 0x120C40)
+IMPL_MATCH("Engine.dll", 0x10420c40)
 void AActor::execPollFinishInterpolation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPollFinishInterpolation);
@@ -1295,7 +1295,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPollFinishInterpolation );
 
 /*-- Actor iterators ---------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0x1299A0)
+IMPL_MATCH("Engine.dll", 0x104299a0)
 void AActor::execAllActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAllActors);
@@ -1327,7 +1327,7 @@ void AActor::execAllActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 304, execAllActors );
 
-IMPL_MATCH("Engine.dll", 0x129BC0)
+IMPL_MATCH("Engine.dll", 0x10429bc0)
 void AActor::execDynamicActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDynamicActors);
@@ -1359,7 +1359,7 @@ void AActor::execDynamicActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 313, execDynamicActors );
 
-IMPL_MATCH("Engine.dll", 0x129DE0)
+IMPL_MATCH("Engine.dll", 0x10429de0)
 void AActor::execChildActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChildActors);
@@ -1387,7 +1387,7 @@ void AActor::execChildActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 305, execChildActors );
 
-IMPL_MATCH("Engine.dll", 0x129FB0)
+IMPL_MATCH("Engine.dll", 0x10429fb0)
 void AActor::execBasedActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execBasedActors);
@@ -1415,7 +1415,7 @@ void AActor::execBasedActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 306, execBasedActors );
 
-IMPL_MATCH("Engine.dll", 0x12A170)
+IMPL_MATCH("Engine.dll", 0x1042a170)
 void AActor::execTouchingActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTouchingActors);
@@ -1443,7 +1443,7 @@ void AActor::execTouchingActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 307, execTouchingActors );
 
-IMPL_MATCH("Engine.dll", 0x12A310)
+IMPL_MATCH("Engine.dll", 0x1042a310)
 void AActor::execTraceActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execTraceActors);
@@ -1484,7 +1484,7 @@ void AActor::execTraceActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 309, execTraceActors );
 
-IMPL_MATCH("Engine.dll", 0x12A690)
+IMPL_MATCH("Engine.dll", 0x1042a690)
 void AActor::execRadiusActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRadiusActors);
@@ -1517,7 +1517,7 @@ void AActor::execRadiusActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 310, execRadiusActors );
 
-IMPL_MATCH("Engine.dll", 0x12A900)
+IMPL_MATCH("Engine.dll", 0x1042a900)
 void AActor::execVisibleActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execVisibleActors);
@@ -1557,7 +1557,7 @@ void AActor::execVisibleActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 311, execVisibleActors );
 
-IMPL_MATCH("Engine.dll", 0x12AC40)
+IMPL_MATCH("Engine.dll", 0x1042ac40)
 void AActor::execVisibleCollidingActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execVisibleCollidingActors);
@@ -1598,7 +1598,7 @@ void AActor::execVisibleCollidingActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 312, execVisibleCollidingActors );
 
-IMPL_MATCH("Engine.dll", 0x12AFB0)
+IMPL_MATCH("Engine.dll", 0x1042afb0)
 void AActor::execCollidingActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execCollidingActors);
@@ -1634,7 +1634,7 @@ void AActor::execCollidingActors( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 321, execCollidingActors );
 
-IMPL_MATCH("Engine.dll", 0xE7470)
+IMPL_MATCH("Engine.dll", 0x103e7470)
 void AActor::execPlayerCanSeeMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayerCanSeeMe);
@@ -1659,7 +1659,7 @@ IMPLEMENT_FUNCTION( AActor, 532, execPlayerCanSeeMe );
 
 /*-- Map / Game queries ------------------------------------------------*/
 
-IMPL_MATCH("Engine.dll", 0xB02B0)
+IMPL_MATCH("Engine.dll", 0x103b02b0)
 void AActor::execGetMapName( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMapName);
@@ -1672,7 +1672,7 @@ void AActor::execGetMapName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 539, execGetMapName );
 
-IMPL_MATCH("Engine.dll", 0x123880)
+IMPL_MATCH("Engine.dll", 0x10423880)
 void AActor::execGetMapNameExt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMapNameExt);
@@ -1685,7 +1685,7 @@ void AActor::execGetMapNameExt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1519, execGetMapNameExt );
 
-IMPL_MATCH("Engine.dll", 0xAF5A0)
+IMPL_MATCH("Engine.dll", 0x103af5a0)
 void AActor::execGetURLMap( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetURLMap);
@@ -1695,7 +1695,7 @@ void AActor::execGetURLMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 547, execGetURLMap );
 
-IMPL_MATCH("Engine.dll", 0xAFF20)
+IMPL_MATCH("Engine.dll", 0x103aff20)
 void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextSkin);
@@ -1720,7 +1720,7 @@ void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextInt );
 
-IMPL_MATCH("Engine.dll", 0xAFC60)
+IMPL_MATCH("Engine.dll", 0x103afc60)
 void AActor::execGetNextIntDesc( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextIntDesc);
@@ -1733,7 +1733,7 @@ void AActor::execGetNextIntDesc( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextIntDesc );
 
-IMPL_MATCH("Engine.dll", 0xB3510)
+IMPL_MATCH("Engine.dll", 0x103b3510)
 void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCacheEntry);
@@ -1757,7 +1757,7 @@ void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execMoveCacheEntry );
 
-IMPL_MATCH("Engine.dll", 0x122CB0)
+IMPL_MATCH("Engine.dll", 0x10422cb0)
 void AActor::execGetTime( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTime);
@@ -1787,7 +1787,7 @@ void AActor::execGetModMgr( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1524, execGetModMgr );
 
-IMPL_MATCH("Engine.dll", 0x122C10)
+IMPL_MATCH("Engine.dll", 0x10422c10)
 void AActor::execGetGameOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameOptions);
@@ -1807,7 +1807,7 @@ void AActor::execGetServerOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1273, execGetServerOptions );
 
-IMPL_MATCH("Engine.dll", 0x12CA20)
+IMPL_MATCH("Engine.dll", 0x1042ca20)
 void AActor::execSaveServerOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSaveServerOptions);
@@ -1817,7 +1817,7 @@ void AActor::execSaveServerOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1283, execSaveServerOptions );
 
-IMPL_MATCH("Engine.dll", 0x123F60)
+IMPL_MATCH("Engine.dll", 0x10423f60)
 void AActor::execGetMissionDescription( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetMissionDescription);
@@ -1827,7 +1827,7 @@ void AActor::execGetMissionDescription( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1302, execGetMissionDescription );
 
-IMPL_MATCH("Engine.dll", 0x124000)
+IMPL_MATCH("Engine.dll", 0x10424000)
 void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetServerBeacon);
@@ -1897,7 +1897,7 @@ void AActor::execNativeNonUbiMatchMakingHost( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1316, execNativeNonUbiMatchMakingHost );
 
-IMPL_MATCH("Engine.dll", 0x127410)
+IMPL_MATCH("Engine.dll", 0x10427410)
 void AActor::execGetGameVersion( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetGameVersion);
@@ -1939,7 +1939,7 @@ void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1401, execSetPBStatus );
 
-IMPL_MATCH("Engine.dll", 0x7C650)
+IMPL_MATCH("Engine.dll", 0x1037c650)
 void AActor::execIsAvailableInGameType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsAvailableInGameType);
@@ -1950,7 +1950,7 @@ void AActor::execIsAvailableInGameType( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1513, execIsAvailableInGameType );
 
-IMPL_MATCH("Engine.dll", 0x79680)
+IMPL_MATCH("Engine.dll", 0x10379680)
 void AActor::execConvertGameTypeIntToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertGameTypeIntToString);
@@ -1961,7 +1961,7 @@ void AActor::execConvertGameTypeIntToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1256, execConvertGameTypeIntToString );
 
-IMPL_MATCH("Engine.dll", 0x79780)
+IMPL_MATCH("Engine.dll", 0x10379780)
 void AActor::execConvertGameTypeToInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertGameTypeToInt);
@@ -1972,7 +1972,7 @@ void AActor::execConvertGameTypeToInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2015, execConvertGameTypeToInt );
 
-IMPL_MATCH("Engine.dll", 0x123770)
+IMPL_MATCH("Engine.dll", 0x10423770)
 void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConvertIntTimeToString);
@@ -2208,7 +2208,7 @@ void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2619, execEnableLoadingScreen );
 
-IMPL_MATCH("Engine.dll", 0x12DA60)
+IMPL_MATCH("Engine.dll", 0x1042da60)
 void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddMessageToConsole);
@@ -2228,7 +2228,7 @@ void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2621, execUpdateGraphicOptions );
 
-IMPL_MATCH("Engine.dll", 0x122FC0)
+IMPL_MATCH("Engine.dll", 0x10422fc0)
 void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGarbageCollect);
@@ -2271,7 +2271,7 @@ void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2610, execRenderLevelFromMe );
 
-IMPL_MATCH("Engine.dll", 0x125720)
+IMPL_MATCH("Engine.dll", 0x10425720)
 void AActor::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execConsoleCommand);
@@ -2286,7 +2286,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execConsoleCommand );
 
 /*-- Color math operators (called from UnrealScript) --------------------*/
 
-IMPL_MATCH("Engine.dll", 0x12B7B0)
+IMPL_MATCH("Engine.dll", 0x1042b7b0)
 void AActor::execMultiply_ColorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMultiply_ColorFloat);
@@ -2298,7 +2298,7 @@ void AActor::execMultiply_ColorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execMultiply_ColorFloat );
 
-IMPL_MATCH("Engine.dll", 0x12B880)
+IMPL_MATCH("Engine.dll", 0x1042b880)
 void AActor::execMultiply_FloatColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMultiply_FloatColor);
@@ -2310,7 +2310,7 @@ void AActor::execMultiply_FloatColor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execMultiply_FloatColor );
 
-IMPL_MATCH("Engine.dll", 0x12B950)
+IMPL_MATCH("Engine.dll", 0x1042b950)
 void AActor::execAdd_ColorColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAdd_ColorColor);
@@ -2322,7 +2322,7 @@ void AActor::execAdd_ColorColor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execAdd_ColorColor );
 
-IMPL_MATCH("Engine.dll", 0x12B9F0)
+IMPL_MATCH("Engine.dll", 0x1042b9f0)
 void AActor::execSubtract_ColorColor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSubtract_ColorColor);
@@ -2340,13 +2340,13 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execSubtract_ColorColor );
 -----------------------------------------------------------------------------*/
 
 // Pending-state queries
-IMPL_MATCH("Engine.dll", 0x5BF0)
+IMPL_MATCH("Engine.dll", 0x10305bf0)
 INT AActor::IsPendingKill()
 {
 	return bDeleteMe;
 }
 
-IMPL_MATCH("Engine.dll", 0x5C00)
+IMPL_MATCH("Engine.dll", 0x10305c00)
 INT AActor::IsPendingDelete()
 {
 	// Retail (32b RVA=0x5C00): checks bDeleteMe (bit7 @0xA0) first (JS path),
@@ -2355,50 +2355,50 @@ INT AActor::IsPendingDelete()
 }
 
 // Brush type queries
-IMPL_MATCH("Engine.dll", 0x14E20)
+IMPL_MATCH("Engine.dll", 0x10314e20)
 INT AActor::IsBrush() const
 {
 	return Brush!=NULL && IsA(ABrush::StaticClass());
 }
 
-IMPL_MATCH("Engine.dll", 0x14E50)
+IMPL_MATCH("Engine.dll", 0x10314e50)
 INT AActor::IsStaticBrush() const
 {
 	return Brush!=NULL && IsA(ABrush::StaticClass()) && bStatic;
 }
 
-IMPL_MATCH("Engine.dll", 0x14EA0)
+IMPL_MATCH("Engine.dll", 0x10314ea0)
 INT AActor::IsMovingBrush() const
 {
 	return Brush!=NULL && IsA(ABrush::StaticClass()) && !bStatic;
 }
 
-IMPL_MATCH("Engine.dll", 0x14ED0)
+IMPL_MATCH("Engine.dll", 0x10314ed0)
 INT AActor::IsVolumeBrush() const
 {
 	return IsA(AVolume::StaticClass());
 }
 
-IMPL_MATCH("Engine.dll", 0x14F00)
+IMPL_MATCH("Engine.dll", 0x10314f00)
 INT AActor::IsEncroacher() const
 {
 	return bCollideActors && (IsA(AMover::StaticClass()) || IsA(AKActor::StaticClass()));
 }
 
 // Editor / octree queries
-IMPL_MATCH("Engine.dll", 0x57E0)
+IMPL_MATCH("Engine.dll", 0x103057e0)
 INT AActor::IsHiddenEd()
 {
 	return bHiddenEd || bHiddenEdGroup;
 }
 
-IMPL_MATCH("Engine.dll", 0x5C20)
+IMPL_MATCH("Engine.dll", 0x10305c20)
 INT AActor::IsInOctree()
 {
 	return OctreeNodes.Num() > 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x14F90)
+IMPL_MATCH("Engine.dll", 0x10314f90)
 UBOOL AActor::IsPlayer() const
 {
 	guardSlow(AActor::IsPlayer);
@@ -2409,19 +2409,19 @@ UBOOL AActor::IsPlayer() const
 }
 
 // Simple getters
-IMPL_MATCH("Engine.dll", 0x14FF0)
+IMPL_MATCH("Engine.dll", 0x10314ff0)
 ULevel* AActor::GetLevel() const
 {
 	return XLevel;
 }
 
-IMPL_MATCH("Engine.dll", 0x1A90)
+IMPL_MATCH("Engine.dll", 0x10301a90)
 AActor* AActor::GetHitActor()
 {
 	return (AActor*)this;
 }
 
-IMPL_MATCH("Engine.dll", 0x14F40)
+IMPL_MATCH("Engine.dll", 0x10314f40)
 AActor* AActor::GetTopOwner()
 {
 	AActor* Top;
@@ -2429,13 +2429,13 @@ AActor* AActor::GetTopOwner()
 	return Top;
 }
 
-IMPL_MATCH("Engine.dll", 0x5BC0)
+IMPL_MATCH("Engine.dll", 0x10305bc0)
 FVector AActor::GetCylinderExtent() const
 {
 	return FVector(CollisionRadius, CollisionRadius, CollisionHeight);
 }
 
-IMPL_MATCH("Engine.dll", 0x5C40)
+IMPL_MATCH("Engine.dll", 0x10305c40)
 AActor* AActor::GetAmbientLightingActor()
 {
 	// Retail: 27b. Follows the ambient lighting relay chain via this+0x15C
@@ -2450,13 +2450,13 @@ AActor* AActor::GetAmbientLightingActor()
 	return actor;
 }
 
-IMPL_MATCH("Engine.dll", 0x15000)
+IMPL_MATCH("Engine.dll", 0x10315000)
 FRotator AActor::GetViewRotation()
 {
 	return Rotation;
 }
 
-IMPL_MATCH("Engine.dll", 0x125560)
+IMPL_MATCH("Engine.dll", 0x10425560)
 AActor* AActor::GetProjectorBase()
 {
 	return (AActor*)this;
@@ -2476,7 +2476,7 @@ APawn* AActor::GetPlayerPawn() const
 	return NULL;
 }
 
-IMPL_MATCH("Engine.dll", 0x78DE0)
+IMPL_MATCH("Engine.dll", 0x10378de0)
 UPrimitive* AActor::GetPrimitive()
 {
 	// Retail (47b, RVA 0x78DE0): check 3 direct primitive fields, then a
@@ -2493,7 +2493,7 @@ UPrimitive* AActor::GetPrimitive()
 }
 
 // Simple setters
-IMPL_MATCH("Engine.dll", 0x78E40)
+IMPL_MATCH("Engine.dll", 0x10378e40)
 void AActor::SetOwner( AActor* NewOwner )
 {
 	guard(AActor::SetOwner);
@@ -2501,7 +2501,7 @@ void AActor::SetOwner( AActor* NewOwner )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x78740)
+IMPL_MATCH("Engine.dll", 0x10378740)
 void AActor::SetDrawScale( FLOAT NewScale )
 {
 	guard(AActor::SetDrawScale);
@@ -2509,7 +2509,7 @@ void AActor::SetDrawScale( FLOAT NewScale )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x78A60)
+IMPL_MATCH("Engine.dll", 0x10378a60)
 void AActor::SetDrawScale3D( FVector NewScale3D )
 {
 	guard(AActor::SetDrawScale3D);
@@ -2517,7 +2517,7 @@ void AActor::SetDrawScale3D( FVector NewScale3D )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x78990)
+IMPL_MATCH("Engine.dll", 0x10378990)
 void AActor::SetDrawType( EDrawType NewDrawType )
 {
 	guard(AActor::SetDrawType);
@@ -2525,7 +2525,7 @@ void AActor::SetDrawType( EDrawType NewDrawType )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x78810)
+IMPL_MATCH("Engine.dll", 0x10378810)
 void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 {
 	guard(AActor::SetStaticMesh);
@@ -2561,7 +2561,7 @@ void AActor::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7A860)
+IMPL_MATCH("Engine.dll", 0x1037a860)
 void AActor::PostLoad()
 {
 	guard(AActor::PostLoad);
@@ -2569,7 +2569,7 @@ void AActor::PostLoad()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7A6F0)
+IMPL_MATCH("Engine.dll", 0x1037a6f0)
 void AActor::Destroy()
 {
 	guard(AActor::Destroy);
@@ -2577,7 +2577,7 @@ void AActor::Destroy()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7BF60)
+IMPL_MATCH("Engine.dll", 0x1037bf60)
 void AActor::PostEditChange()
 {
 	guard(AActor::PostEditChange);
@@ -2585,7 +2585,7 @@ void AActor::PostEditChange()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1255C0)
+IMPL_MATCH("Engine.dll", 0x104255c0)
 void AActor::InitExecution()
 {
 	guard(AActor::InitExecution);
@@ -2593,7 +2593,7 @@ void AActor::InitExecution()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x70C00)
+IMPL_MATCH("Engine.dll", 0x10370c00)
 void AActor::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 {
 	guard(AActor::ProcessEvent);
@@ -2601,7 +2601,7 @@ void AActor::ProcessEvent( UFunction* Function, void* Parms, void* Result )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x125070)
+IMPL_MATCH("Engine.dll", 0x10425070)
 void AActor::ProcessState( FLOAT DeltaSeconds )
 {
 	guard(AActor::ProcessState);
@@ -2609,7 +2609,7 @@ void AActor::ProcessState( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x12DD20)
+IMPL_MATCH("Engine.dll", 0x1042dd20)
 INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessRemoteFunction);
@@ -2625,7 +2625,7 @@ void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* S
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x70920)
+IMPL_MATCH("Engine.dll", 0x10370920)
 void AActor::NetDirty( UProperty* Property )
 {
 	// Retail (27b, RVA 0x70920): only mark bNetDirty if Property is non-null
@@ -2645,7 +2645,7 @@ INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, 
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x77DE0)
+IMPL_MATCH("Engine.dll", 0x10377de0)
 FLOAT AActor::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(AActor::GetNetPriority);
@@ -2664,7 +2664,7 @@ FLOAT AActor::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xC4010)
+IMPL_MATCH("Engine.dll", 0x103c4010)
 INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(AActor::IsNetRelevantFor);
@@ -2690,7 +2690,7 @@ void AActor::PostNetReceiveLocation()
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 INT AActor::PlayerControlled()
 {
 	guard(AActor::PlayerControlled);
@@ -2699,7 +2699,7 @@ INT AActor::PlayerControlled()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x78EF0)
+IMPL_MATCH("Engine.dll", 0x10378ef0)
 INT AActor::IsBlockedBy( const AActor* Other ) const
 {
 	guardSlow(AActor::IsBlockedBy);
@@ -2717,7 +2717,7 @@ INT AActor::IsBlockedBy( const AActor* Other ) const
 	unguardSlow;
 }
 
-IMPL_MATCH("Engine.dll", 0x78b40)
+IMPL_MATCH("Engine.dll", 0x10378b40)
 UBOOL AActor::IsOverlapping( AActor* Other, FCheckResult* Hit )
 {
 	guard(AActor::IsOverlapping);
@@ -2741,7 +2741,7 @@ UBOOL AActor::IsOverlapping( AActor* Other, FCheckResult* Hit )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x712D0)
+IMPL_MATCH("Engine.dll", 0x103712d0)
 INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
 	guard(AActor::ShouldTrace);
@@ -2749,7 +2749,7 @@ INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x14770)
+IMPL_MATCH("Engine.dll", 0x10314770)
 void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
 {
 	guard(AActor::UpdateColBox);
@@ -2757,19 +2757,19 @@ void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgn
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x5820)
+IMPL_MATCH("Engine.dll", 0x10305820)
 FCoords AActor::ToLocal() const
 {
 	return GMath.UnitCoords / Rotation / Location;
 }
 
-IMPL_MATCH("Engine.dll", 0x5860)
+IMPL_MATCH("Engine.dll", 0x10305860)
 FCoords AActor::ToWorld() const
 {
 	return GMath.UnitCoords * Location * Rotation;
 }
 
-IMPL_MATCH("Engine.dll", 0x58A0)
+IMPL_MATCH("Engine.dll", 0x103058a0)
 FMatrix AActor::LocalToWorld() const
 {
 	guard(AActor::LocalToWorld);
@@ -2798,7 +2798,7 @@ FMatrix AActor::LocalToWorld() const
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x192F0)
+IMPL_MATCH("Engine.dll", 0x103192f0)
 FMatrix AActor::WorldToLocal() const
 {
 	guard(AActor::WorldToLocal);
@@ -2826,7 +2826,7 @@ FMatrix AActor::WorldToLocal() const
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xc4870)
+IMPL_MATCH("Engine.dll", 0x103c4870)
 INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AActor::Tick);
@@ -2856,7 +2856,7 @@ INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xC35C0)
+IMPL_MATCH("Engine.dll", 0x103c35c0)
 void AActor::TickAuthoritative( FLOAT DeltaTime )
 {
 	guard(AActor::TickAuthoritative);
@@ -2866,7 +2866,7 @@ void AActor::TickAuthoritative( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xC33F0)
+IMPL_MATCH("Engine.dll", 0x103c33f0)
 void AActor::TickSimulated( FLOAT DeltaTime )
 {
 	// Retail Engine.dll vtable[61]: mov eax,[ecx]; jmp [eax+0xF0]
@@ -2880,7 +2880,7 @@ void AActor::TickSpecial( FLOAT DeltaTime )
 	// Retail Engine.dll: ret 4 (truly empty, no SEH frame)
 }
 
-IMPL_MATCH("Engine.dll", 0x71790)
+IMPL_MATCH("Engine.dll", 0x10371790)
 INT AActor::TickThisFrame( FLOAT DeltaTime )
 {
 	guard(AActor::TickThisFrame);
@@ -2890,7 +2890,7 @@ INT AActor::TickThisFrame( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xC3F60)
+IMPL_MATCH("Engine.dll", 0x103c3f60)
 void AActor::UpdateTimers( FLOAT DeltaSeconds )
 {
 	guard(AActor::UpdateTimers);
@@ -3000,7 +3000,7 @@ void AActor::Spawned()
 	// Retail Engine.dll: ret (truly empty)
 }
 
-IMPL_MATCH("Engine.dll", 0x77D80)
+IMPL_MATCH("Engine.dll", 0x10377d80)
 UMaterial* AActor::GetSkin( INT Index )
 {
 	guard(AActor::GetSkin);
@@ -3010,7 +3010,7 @@ UMaterial* AActor::GetSkin( INT Index )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x77D30)
+IMPL_MATCH("Engine.dll", 0x10377d30)
 void AActor::NotifyAnimEnd( INT Channel )
 {
 	guard(AActor::NotifyAnimEnd);
@@ -3032,7 +3032,7 @@ void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x120930)
+IMPL_MATCH("Engine.dll", 0x10420930)
 void AActor::StartAnimPoll()
 {
 	// Retail RVA 0x120930.
@@ -3070,7 +3070,7 @@ INT AActor::CheckAnimFinished( INT Channel )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x70B90)
+IMPL_MATCH("Engine.dll", 0x10370b90)
 INT AActor::IsAnimating( INT Channel ) const
 {
 	// Retail RVA 0x70B90.
@@ -3085,7 +3085,7 @@ INT AActor::IsAnimating( INT Channel ) const
 	return MeshInstance ? MeshInstance->AnimGetNotifyCount( reinterpret_cast<void*>(Channel) ) : 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x120C60)
+IMPL_MATCH("Engine.dll", 0x10420c60)
 void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bOverride, INT bRestart )
 {
 	guard(AActor::PlayAnim);
@@ -3191,7 +3191,7 @@ void AActor::AnimBlendParams( INT Channel, FLOAT BlendAlpha, FLOAT InTime, FLOAT
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7AAC0)
+IMPL_MATCH("Engine.dll", 0x1037aac0)
 void AActor::BeginTouch( AActor* Other )
 {
 	guard(AActor::BeginTouch);
@@ -3212,7 +3212,7 @@ void AActor::BeginTouch( AActor* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7C030)
+IMPL_MATCH("Engine.dll", 0x1037c030)
 void AActor::EndTouch( AActor* Other, INT bNoNotifySelf )
 {
 	guard(AActor::EndTouch);
@@ -3227,7 +3227,7 @@ void AActor::EndTouch( AActor* Other, INT bNoNotifySelf )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xB73D0)
+IMPL_MATCH("Engine.dll", 0x103b73d0)
 void AActor::NotifyBump( AActor* Other )
 {
 	guard(AActor::NotifyBump);
@@ -3235,7 +3235,7 @@ void AActor::NotifyBump( AActor* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7C1F0)
+IMPL_MATCH("Engine.dll", 0x1037c1f0)
 void AActor::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(AActor::SetBase);
@@ -3309,7 +3309,7 @@ void AActor::DetachProjector( AProjector* Proj )
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_MATCH("Engine.dll", 0x7CD20)
+IMPL_MATCH("Engine.dll", 0x1037cd20)
 void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewBlockPlayers )
 {
 	guard(AActor::SetCollision);
@@ -3319,7 +3319,7 @@ void AActor::SetCollision( INT bNewCollideActors, INT bNewBlockActors, INT bNewB
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x78660)
+IMPL_MATCH("Engine.dll", 0x10378660)
 void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 {
 	guard(AActor::SetCollisionSize);
@@ -3337,7 +3337,7 @@ void AActor::UpdateRenderData()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x5800)
+IMPL_MATCH("Engine.dll", 0x10305800)
 FLOAT AActor::WorldLightRadius() const
 {
 	// Retail (19b): LightRadius * 1.0 * 25.0
@@ -3356,7 +3356,7 @@ void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface*
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_MATCH("Engine.dll", 0xBD2A0)
+IMPL_MATCH("Engine.dll", 0x103bd2a0)
 void AActor::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(AActor::SetZone);
@@ -3413,7 +3413,7 @@ void AActor::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xBB5A0)
+IMPL_MATCH("Engine.dll", 0x103bb5a0)
 void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 {
 	guard(AActor::SetVolumes);
@@ -3433,7 +3433,7 @@ void AActor::SetVolumes()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF16B0)
+IMPL_MATCH("Engine.dll", 0x103f16b0)
 void AActor::setPhysics( BYTE NewPhysics, AActor* NewFloor, FVector NewFloorV )
 {
 	guard(AActor::setPhysics);
@@ -3441,7 +3441,7 @@ void AActor::setPhysics( BYTE NewPhysics, AActor* NewFloor, FVector NewFloorV )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF3670)
+IMPL_MATCH("Engine.dll", 0x103f3670)
 void AActor::performPhysics( FLOAT DeltaSeconds )
 {
 	guard(AActor::performPhysics);
@@ -3470,7 +3470,7 @@ void AActor::performPhysics( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF19B0)
+IMPL_MATCH("Engine.dll", 0x103f19b0)
 void AActor::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(AActor::processHitWall);
@@ -3478,7 +3478,7 @@ void AActor::processHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF1DD0)
+IMPL_MATCH("Engine.dll", 0x103f1dd0)
 void AActor::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingTime, INT Iterations )
 {
 	guard(AActor::processLanded);
@@ -3486,7 +3486,7 @@ void AActor::processLanded( FVector HitNormal, AActor* HitActor, FLOAT Remaining
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF21C0)
+IMPL_MATCH("Engine.dll", 0x103f21c0)
 void AActor::physFalling( FLOAT DeltaTime, INT Iterations )
 {
 	guard(AActor::physFalling);
@@ -3561,7 +3561,7 @@ void AActor::physFalling( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF2E80)
+IMPL_MATCH("Engine.dll", 0x103f2e80)
 void AActor::physProjectile( FLOAT DeltaTime, INT Iterations )
 {
 	guard(AActor::physProjectile);
@@ -3608,7 +3608,7 @@ void AActor::physProjectile( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF11D0)
+IMPL_MATCH("Engine.dll", 0x103f11d0)
 void AActor::physTrailer( FLOAT DeltaTime )
 {
 	guard(AActor::physTrailer);
@@ -3635,7 +3635,7 @@ void AActor::physTrailer( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF31F0)
+IMPL_MATCH("Engine.dll", 0x103f31f0)
 void AActor::physRootMotion( FLOAT DeltaTime )
 {
 	guard(AActor::physRootMotion);
@@ -3673,7 +3673,7 @@ void AActor::physRootMotion( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xED150)
+IMPL_MATCH("Engine.dll", 0x103ed150)
 void AActor::physicsRotation( FLOAT DeltaTime )
 {
 	guard(AActor::physicsRotation);
@@ -3703,7 +3703,7 @@ void AActor::physicsRotation( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xEC7B0)
+IMPL_MATCH("Engine.dll", 0x103ec7b0)
 FRotator AActor::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 {
 	guard(AActor::FindSlopeRotation);
@@ -3711,7 +3711,7 @@ FRotator AActor::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF15C0)
+IMPL_MATCH("Engine.dll", 0x103f15c0)
 void AActor::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(AActor::SmoothHitWall);
@@ -3719,7 +3719,7 @@ void AActor::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xef2f0)
+IMPL_MATCH("Engine.dll", 0x103ef2f0)
 void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(AActor::stepUp);
@@ -3777,7 +3777,7 @@ void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckR
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xECB30)
+IMPL_MATCH("Engine.dll", 0x103ecb30)
 INT AActor::moveSmooth( FVector Delta )
 {
 	guard(AActor::moveSmooth);
@@ -3803,7 +3803,7 @@ INT AActor::moveSmooth( FVector Delta )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xED040)
+IMPL_MATCH("Engine.dll", 0x103ed040)
 INT AActor::fixedTurn( INT Current, INT Desired, INT DeltaRate )
 {
 	guard(AActor::fixedTurn);
@@ -3822,7 +3822,7 @@ INT AActor::fixedTurn( INT Current, INT Desired, INT DeltaRate )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x5C60)
+IMPL_MATCH("Engine.dll", 0x10305c60)
 void AActor::TwoWallAdjust( FVector& DesiredDir, FVector& Delta, FVector& HitNormal, FVector& OldHitNormal, FLOAT HitTime )
 {
 	guard(AActor::TwoWallAdjust);
@@ -3843,7 +3843,7 @@ void AActor::TwoWallAdjust( FVector& DesiredDir, FVector& Delta, FVector& HitNor
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xecf00)
+IMPL_MATCH("Engine.dll", 0x103ecf00)
 void AActor::FindBase()
 {
 	guard(AActor::FindBase);
@@ -3857,7 +3857,7 @@ void AActor::FindBase()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x79e30)
+IMPL_MATCH("Engine.dll", 0x10379e30)
 void AActor::PutOnGround()
 {
 	guard(AActor::PutOnGround);
@@ -3943,7 +3943,7 @@ void AActor::postKarmaStep_skeletal()
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_MATCH("Engine.dll", 0x5e90)
+IMPL_MATCH("Engine.dll", 0x10305e90)
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
 {
 	guard(AActor::KMP2DynKarmaInterface);
@@ -3952,7 +3952,7 @@ INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xD5AD0)
+IMPL_MATCH("Engine.dll", 0x103d5ad0)
 AActor* AActor::AssociatedLevelGeometry()
 {
 	// Retail Engine.dll vtable[86]: returns this if bWorldGeometry is set, else NULL.
@@ -3960,7 +3960,7 @@ AActor* AActor::AssociatedLevelGeometry()
 	return bWorldGeometry ? this : NULL;
 }
 
-IMPL_MATCH("Engine.dll", 0xD5B00)
+IMPL_MATCH("Engine.dll", 0x103d5b00)
 INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 {
 	// Retail Engine.dll: test bWorldGeometry flag; returns 1 only if this actor
@@ -3977,7 +3977,7 @@ void AActor::KFreezeRagdoll()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnHeartBeat);
@@ -3986,7 +3986,7 @@ INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnHeatVision);
@@ -3995,7 +3995,7 @@ INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 INT AActor::IsRelevantToPawnRadar( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnRadar);
@@ -4018,7 +4018,7 @@ void AActor::AddMyMarker( AActor* S )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x14F10)
+IMPL_MATCH("Engine.dll", 0x10314f10)
 UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const
 {
 	guardSlow(AActor::IsOwnedBy);
@@ -4029,7 +4029,7 @@ UBOOL AActor::IsOwnedBy( const AActor* TestOwner ) const
 	unguardSlow;
 }
 
-IMPL_MATCH("Engine.dll", 0x14FC0)
+IMPL_MATCH("Engine.dll", 0x10314fc0)
 UBOOL AActor::IsBasedOn( const AActor* Other ) const
 {
 	guard(AActor::IsBasedOn);
@@ -4040,19 +4040,19 @@ UBOOL AActor::IsBasedOn( const AActor* Other ) const
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x14F60)
+IMPL_MATCH("Engine.dll", 0x10314f60)
 UBOOL AActor::IsInZone( const AZoneInfo* TestZone ) const
 {
 	return Region.Zone!=Level ? Region.Zone==TestZone : 1;
 }
 
-IMPL_MATCH("Engine.dll", 0x195F0)
+IMPL_MATCH("Engine.dll", 0x103195f0)
 FLOAT AActor::LifeFraction()
 {
 	return Clamp( 1.f - LifeSpan / GetClass()->GetDefaultActor()->LifeSpan, 0.f, 1.f );
 }
 
-IMPL_MATCH("Engine.dll", 0x710D0)
+IMPL_MATCH("Engine.dll", 0x103710d0)
 INT AActor::IsJoinedTo( const AActor* Other ) const
 {
     for( const AActor* A = this; A; A = A->Base )
@@ -4074,7 +4074,7 @@ INT AActor::TestCanSeeMe( APlayerController* Viewer )
     unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x70c30)
+IMPL_MATCH("Engine.dll", 0x10370c30)
 void AActor::UpdateRelativeRotation()
 {
 	guard(AActor::UpdateRelativeRotation);
@@ -4086,7 +4086,7 @@ void AActor::UpdateRelativeRotation()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x8EB20)
+IMPL_MATCH("Engine.dll", 0x1038eb20)
 void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType PawnType, ESoundType SoundType )
 {
 	guard(AActor::CheckNoiseHearing);
@@ -4108,7 +4108,7 @@ void AActor::CheckNoiseHearing( FLOAT Loudness, ENoiseType NoiseType, EPawnType 
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1294E0)
+IMPL_MATCH("Engine.dll", 0x104294e0)
 AActor* AActor::Trace( FVector& HitLocation, FVector& HitNormal, FVector& TraceEnd, FVector& TraceStart, INT bTraceActors, FVector& Extent, UMaterial** HitMaterial )
 {
 	guard(AActor::Trace);
@@ -4125,7 +4125,7 @@ AActor* AActor::Trace( FVector& HitLocation, FVector& HitNormal, FVector& TraceE
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF02E0)
+IMPL_MATCH("Engine.dll", 0x103f02e0)
 void AActor::GetNetBuoyancy( FLOAT& NetBuoyancy, FLOAT& NetFluidFriction )
 {
 	guard(AActor::GetNetBuoyancy);
@@ -4134,7 +4134,7 @@ void AActor::GetNetBuoyancy( FLOAT& NetBuoyancy, FLOAT& NetFluidFriction )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x79FD0)
+IMPL_MATCH("Engine.dll", 0x10379fd0)
 void AActor::SafeDestroyActor( AActor* A )
 {
 	guard(AActor::SafeDestroyActor);
@@ -4143,7 +4143,7 @@ void AActor::SafeDestroyActor( AActor* A )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7B430)
+IMPL_MATCH("Engine.dll", 0x1037b430)
 void AActor::CopyR6Availability( AActor* Src )
 {
 	guard(AActor::CopyR6Availability);
@@ -4181,7 +4181,7 @@ void AActor::CopyR6Availability( AActor* Src )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x123270)
+IMPL_MATCH("Engine.dll", 0x10423270)
 FString AActor::GlobalIDToString( BYTE* const Bytes )
 {
 	guard(AActor::GlobalIDToString);
@@ -4197,7 +4197,7 @@ FString AActor::GlobalIDToString( BYTE* const Bytes )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x123690)
+IMPL_MATCH("Engine.dll", 0x10423690)
 void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FString& Result )
 {
 	guard(AActor::SecondsToString);
@@ -4216,7 +4216,7 @@ void AActor::SaveServerOptions( FString FileName )
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_MATCH("Engine.dll", 0x7AED0)
+IMPL_MATCH("Engine.dll", 0x1037aed0)
 BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
 {
 	guard(AActor::GetR6AvailabilityPtr);
@@ -4224,7 +4224,7 @@ BYTE* AActor::GetR6AvailabilityPtr( FString GameType, INT Index )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x7B320)
+IMPL_MATCH("Engine.dll", 0x1037b320)
 INT AActor::IsAvailableInGameType( FString GameType )
 {
 	guard(AActor::IsAvailableInGameType);
@@ -4234,7 +4234,7 @@ INT AActor::IsAvailableInGameType( FString GameType )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x123B60)
+IMPL_MATCH("Engine.dll", 0x10423b60)
 INT AActor::NativeNonUbiMatchMaking()
 {
     guard(AActor::NativeNonUbiMatchMaking);
@@ -4242,7 +4242,7 @@ INT AActor::NativeNonUbiMatchMaking()
     unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x123A40)
+IMPL_MATCH("Engine.dll", 0x10423a40)
 INT AActor::NativeNonUbiMatchMakingHost()
 {
     guard(AActor::NativeNonUbiMatchMakingHost);
@@ -4250,7 +4250,7 @@ INT AActor::NativeNonUbiMatchMakingHost()
     unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x123920)
+IMPL_MATCH("Engine.dll", 0x10423920)
 INT AActor::NativeStartedByGSClient()
 {
 	guard(AActor::NativeStartedByGSClient);
@@ -4299,11 +4299,11 @@ void AActor::DbgVectorReset( INT VectorIndex )
 // ABrush
 // =============================================================================
 
-IMPL_MATCH("Engine.dll", 0x7AE60)
+IMPL_MATCH("Engine.dll", 0x1037ae60)
 void ABrush::PostLoad() { Super::PostLoad(); }
-IMPL_MATCH("Engine.dll", 0x77B0)
+IMPL_MATCH("Engine.dll", 0x103077b0)
 void ABrush::PostEditChange() { Super::PostEditChange(); }
-IMPL_MATCH("Engine.dll", 0x7B40)
+IMPL_MATCH("Engine.dll", 0x10307b40)
 FCoords ABrush::ToLocal() const
 {
 	// Retail (112b, RVA 0x7B40):
@@ -4319,7 +4319,7 @@ FCoords ABrush::ToLocal() const
 		/ *(FRotator*)&Location
 		/ *(FVector*)&Rotation;
 }
-IMPL_MATCH("Engine.dll", 0x7BC0)
+IMPL_MATCH("Engine.dll", 0x10307bc0)
 FCoords ABrush::ToWorld() const
 {
 	// Retail (112b, RVA 0x7BC0):
@@ -4334,7 +4334,7 @@ FCoords ABrush::ToWorld() const
 		* *(FRotator*)&Location
 		* sv;
 }
-IMPL_MATCH("Engine.dll", 0x78E20)
+IMPL_MATCH("Engine.dll", 0x10378e20)
 UPrimitive* ABrush::GetPrimitive()
 {
 	// Retail (27b, RVA 0x78E20): check Brush/UModel primitive field, then
@@ -4347,11 +4347,11 @@ UPrimitive* ABrush::GetPrimitive()
 	if (!p) return NULL;
 	return *(UPrimitive**)((BYTE*)p + 0x40);
 }
-IMPL_MATCH("Engine.dll", 0x98180)
+IMPL_MATCH("Engine.dll", 0x10398180)
 void ABrush::CheckForErrors() { Super::CheckForErrors(); }
 IMPL_EMPTY("Retail body is also empty — confirmed no-op")
 void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
-IMPL_MATCH("Engine.dll", 0x71110)
+IMPL_MATCH("Engine.dll", 0x10371110)
 void ABrush::InitPosRotScale()
 {
     guard(ABrush::InitPosRotScale);
@@ -4368,7 +4368,7 @@ IMPL_DIVERGE("Returns 0.0f — full float calculation needs Ghidra analysis")
 FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
 IMPL_DIVERGE("Returns 0.0f — full float calculation needs Ghidra analysis")
 FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
-IMPL_MATCH("Engine.dll", 0x77D0)
+IMPL_MATCH("Engine.dll", 0x103077d0)
 FCoords ABrush::OldToLocal() const
 {
 	// Retail (168b, RVA 0x77D0):
@@ -4388,7 +4388,7 @@ FCoords ABrush::OldToLocal() const
 		/ s3c4
 		/ *(FVector*)&Rotation;
 }
-IMPL_MATCH("Engine.dll", 0x7880)
+IMPL_MATCH("Engine.dll", 0x10307880)
 FCoords ABrush::OldToWorld() const
 {
 	// Retail (168b, RVA 0x7880):

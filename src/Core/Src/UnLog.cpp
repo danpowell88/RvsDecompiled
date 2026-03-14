@@ -107,7 +107,7 @@ IMPL_MATCH("Core.dll", 0x101012B0)
 FNullOutError::FNullOutError( const FNullOutError& ) {}
 IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
-IMPL_MATCH("Core.dll", 0x1290)
+IMPL_MATCH("Core.dll", 0x10101290)
 void FNullOutError::Serialize( const TCHAR* V, EName Event )
 {
 	guard(FNullOutError::Serialize);

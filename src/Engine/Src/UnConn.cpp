@@ -17,56 +17,56 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UNetConnection ---
 
 // --- UClient ---
-IMPL_MATCH("Engine.dll", 0x87060)
+IMPL_MATCH("Engine.dll", 0x10387060)
 void UClient::StaticConstructor()
 {
 	guard(UClient::StaticConstructor);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x878A0)
+IMPL_MATCH("Engine.dll", 0x103878a0)
 void UClient::UpdateGamma()
 {
 	guard(UClient::UpdateGamma);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x876A0)
+IMPL_MATCH("Engine.dll", 0x103876a0)
 void UClient::UpdateGraphicOptions()
 {
 	guard(UClient::UpdateGraphicOptions);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x87950)
+IMPL_MATCH("Engine.dll", 0x10387950)
 void UClient::RestoreGamma()
 {
 	guard(UClient::RestoreGamma);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x87F10)
+IMPL_MATCH("Engine.dll", 0x10387f10)
 void UClient::Serialize(FArchive &)
 {
 	guard(UClient::Serialize);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x86FA0)
+IMPL_MATCH("Engine.dll", 0x10386fa0)
 void UClient::PostEditChange()
 {
 	guard(UClient::PostEditChange);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x86EA0)
+IMPL_MATCH("Engine.dll", 0x10386ea0)
 void UClient::Destroy()
 {
 	guard(UClient::Destroy);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x879F0)
+IMPL_MATCH("Engine.dll", 0x103879f0)
 int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UClient::Exec);
@@ -168,14 +168,14 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x877F0)
+IMPL_MATCH("Engine.dll", 0x103877f0)
 void UClient::Flush(int)
 {
 	guard(UClient::Flush);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x86F20)
+IMPL_MATCH("Engine.dll", 0x10386f20)
 void UClient::Init(UEngine* Engine)
 {
 	guard(UClient::Init);
@@ -187,7 +187,7 @@ void UClient::Init(UEngine* Engine)
 
 
 // --- UPlayer ---
-IMPL_MATCH("Engine.dll", 0xF7120)
+IMPL_MATCH("Engine.dll", 0x103f7120)
 void UPlayer::Serialize(FArchive &Ar)
 {
 	guard(UPlayer::Serialize);
@@ -196,14 +196,14 @@ void UPlayer::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF7370)
+IMPL_MATCH("Engine.dll", 0x103f7370)
 void UPlayer::Destroy()
 {
 	guard(UPlayer::Destroy);
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xF71A0)
+IMPL_MATCH("Engine.dll", 0x103f71a0)
 int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UPlayer::Exec);
@@ -277,11 +277,11 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 // ============================================================================
 
 // ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
-IMPL_MATCH("Engine.dll", 0x6F880)
+IMPL_MATCH("Engine.dll", 0x1036f880)
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_MATCH("Engine.dll", 0x1855E0)
+IMPL_MATCH("Engine.dll", 0x104855e0)
 UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
 {
 	if (!UChannel::IsKnownChannelType((INT)ChType))
@@ -346,7 +346,7 @@ UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally,
 
 	return Ch;
 }
-IMPL_MATCH("Engine.dll", 0x1847A0)
+IMPL_MATCH("Engine.dll", 0x104847a0)
 void UNetConnection::PostSend()
 {
 	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -357,7 +357,7 @@ void UNetConnection::PostSend()
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
 }
-IMPL_MATCH("Engine.dll", 0x7EB40)
+IMPL_MATCH("Engine.dll", 0x1037eb40)
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
 	guard(UDemoRecConnection::UDemoRecConnection);
@@ -365,11 +365,11 @@ UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 }
 IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void UDemoRecConnection::StaticConstructor() {}
-IMPL_MATCH("Engine.dll", 0x187C50)
+IMPL_MATCH("Engine.dll", 0x10487c50)
 FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
-IMPL_MATCH("Engine.dll", 0x187AF0)
+IMPL_MATCH("Engine.dll", 0x10487af0)
 FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
-IMPL_MATCH("Engine.dll", 0x187B80)
+IMPL_MATCH("Engine.dll", 0x10487b80)
 void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
 	if (Driver->ServerConnection == NULL) {
@@ -383,19 +383,19 @@ void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 
 // Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
 // JNZ path: if ServerConnection != NULL, cross-function-jump to UNetConnection::FlushNet.
-IMPL_MATCH("Engine.dll", 0x187CF0)
+IMPL_MATCH("Engine.dll", 0x10487cf0)
 void UDemoRecConnection::FlushNet() {
 	if (Driver->ServerConnection != NULL)
 		UNetConnection::FlushNet();
 }
-IMPL_MATCH("Engine.dll", 0x187CE0)
+IMPL_MATCH("Engine.dll", 0x10487ce0)
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
 IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
-IMPL_MATCH("Engine.dll", 0x701C0)
+IMPL_MATCH("Engine.dll", 0x103701c0)
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
-IMPL_MATCH("Engine.dll", 0x18BD30)
+IMPL_MATCH("Engine.dll", 0x1048bd30)
 INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
 // Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
-IMPL_MATCH("Engine.dll", 0x18BCD0)
+IMPL_MATCH("Engine.dll", 0x1048bcd0)
 INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }

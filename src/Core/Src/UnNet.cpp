@@ -23,7 +23,7 @@ FArchive& operator<<( FArchive& Ar, FFieldNetCache& F )
 	FClassNetCache.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1ab10)
+IMPL_MATCH("Core.dll", 0x1011ab10)
 FClassNetCache::FClassNetCache()
 :	FieldsBase        ( 0 )
 ,	Super             ( NULL )
@@ -39,7 +39,7 @@ FClassNetCache::FClassNetCache()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1a580)
+IMPL_MATCH("Core.dll", 0x1011a580)
 FClassNetCache::FClassNetCache( UClass* InClass )
 :	FieldsBase        ( 0 )
 ,	Super             ( NULL )

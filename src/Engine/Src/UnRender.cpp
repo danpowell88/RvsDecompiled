@@ -256,7 +256,7 @@ void UCanvas::execDrawPortal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawPortal );
 
-IMPL_MATCH("Engine.dll", 0x89b10)
+IMPL_MATCH("Engine.dll", 0x10389b10)
 void UCanvas::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDraw3DLine);

@@ -21,7 +21,7 @@ UExporter::UExporter()
 {
 }
 
-IMPL_MATCH("Core.dll", 0x11240)
+IMPL_MATCH("Core.dll", 0x10111240)
 void UExporter::StaticConstructor()
 {
 	guard(UExporter::StaticConstructor);
@@ -158,7 +158,7 @@ UFactory::UFactory()
 {
 }
 
-IMPL_MATCH("Core.dll", 0x12310)
+IMPL_MATCH("Core.dll", 0x10112310)
 void UFactory::StaticConstructor()
 {
 	guard(UFactory::StaticConstructor);

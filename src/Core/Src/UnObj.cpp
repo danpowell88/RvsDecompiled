@@ -221,7 +221,7 @@ void UObject::ProcessState( FLOAT DeltaSeconds )
 	// Retail Core.dll: ret 4 (truly empty, no SEH frame)
 }
 
-IMPL_MATCH("Core.dll", 0x1bd40)
+IMPL_MATCH("Core.dll", 0x1011bd40)
 INT UObject::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	// Ghidra 0x1bd40: genuine stub; returns 0.
@@ -237,7 +237,7 @@ void UObject::Modify()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x3AA30)
+IMPL_MATCH("Core.dll", 0x1013aa30)
 void UObject::PostLoad()
 {
 	guard(UObject::PostLoad);
@@ -295,14 +295,14 @@ void UObject::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1da0)
+IMPL_MATCH("Core.dll", 0x10101da0)
 INT UObject::IsPendingDelete()
 {
 	// Ghidra 0x1da0: shared stub; returns 0.
 	return 0;
 }
 
-IMPL_MATCH("Core.dll", 0x1da0)
+IMPL_MATCH("Core.dll", 0x10101da0)
 INT UObject::IsPendingKill()
 {
 	// Ghidra 0x1da0: shared stub; returns 0.
@@ -567,7 +567,7 @@ void UObject::NetDirty( UProperty* Property )
 	UObject COM interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x38a80)
+IMPL_MATCH("Core.dll", 0x10138a80)
 DWORD STDCALL UObject::QueryInterface( const FGuid& RefIID, void** InterfacePtr )
 {
 	// Ghidra 0x38a80: sets *InterfacePtr = NULL (E_NOINTERFACE), returns 0.
@@ -575,14 +575,14 @@ DWORD STDCALL UObject::QueryInterface( const FGuid& RefIID, void** InterfacePtr 
 	return 0;
 }
 
-IMPL_MATCH("Core.dll", 0x38a90)
+IMPL_MATCH("Core.dll", 0x10138a90)
 DWORD STDCALL UObject::AddRef()
 {
 	// Ghidra 0x38a90: genuine stub; returns 0.
 	return 0;
 }
 
-IMPL_MATCH("Core.dll", 0x38aa0)
+IMPL_MATCH("Core.dll", 0x10138aa0)
 DWORD STDCALL UObject::Release()
 {
 	// Ghidra 0x38aa0: genuine stub; returns 0.

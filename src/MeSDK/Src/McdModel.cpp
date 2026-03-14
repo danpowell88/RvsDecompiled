@@ -23,7 +23,7 @@
  * a collision model.
  * Retail: 10 bytes.  MOV EAX,[ECX+24h]; RET
  */
-IMPL_MATCH("Engine.dll", 0x1c3660)
+IMPL_MATCH("Engine.dll", 0x104c3660)
 int FUN_104c3660(int param_1)
 {
     return *(int*)(param_1 + 0x24);
