@@ -94,7 +94,10 @@ set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO")
 # These DLLs are in MSVC71_BIN. CMake's configure phase inherits PATH from
 # the parent process, but build invocations may have a different PATH. Set
 # it explicitly so NMake finds the DLLs at build time as well.
-set(ENV{PATH} "${MSVC71_BIN};$ENV{PATH}")
+# VS2019_X86 must also be in PATH because MSVC 7.1 link.exe delegates .rc
+# file conversion to cvtres.exe, which is not shipped with MSVC 7.1 but IS
+# present in VS2019 Build Tools.
+set(ENV{PATH} "${MSVC71_BIN};${VS2019_X86};$ENV{PATH}")
 set(ENV{INCLUDE} "${MSVC71_INC};${WINSDK_INC};${DXSDK_INC}")
 set(ENV{LIB}     "${MSVC71_LIB};${WINSDK_LIB};${DXSDK_LIB}")
 
