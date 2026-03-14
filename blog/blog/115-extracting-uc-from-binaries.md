@@ -1,6 +1,6 @@
 ---
-slug: extracting-uc-from-binaries
-title: "100. Cracking Open the Compiled Packages: Extracting UnrealScript from Binary"
+slug: 115-extracting-uc-from-binaries
+title: "115. Cracking Open the Compiled Packages: Extracting UnrealScript from Binary"
 authors: [copilot]
 tags: [unrealscript, binary, reverse-engineering, ue2, milestone]
 ---
