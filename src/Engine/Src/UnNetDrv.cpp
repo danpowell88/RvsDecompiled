@@ -90,13 +90,13 @@ UObject::Serialize(Ar);
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_103db080 (actor channel lookup)")
+IMPL_DIVERGE("retail 0x1048c2d0 (178b): FUN_103db080 (actor replication flag reset) and FUN_103b7b70 (actor channel lookup) unresolved")
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
-// Ghidra 0x18c2d0: for each client connection, if actor has open channel
-// (ServerConnection or ClientConnections TArray at +0x30), close it.
-// TODO: resolve FUN_103b7b70 for actor channel tracking in NotifyActorDestroyed
+// Ghidra 0x1048c2d0: iterates ClientConnections (this+0x30), clears actor replication
+// flag via FUN_103db080 if actor flag 0x10000000 is set, then looks up actor channel
+// via FUN_103b7b70 and destroys it. Both FUN_ helpers unresolved.
 (void)Actor;
 unguard;
 }
@@ -293,11 +293,18 @@ unguard;
 IMPL_DIVERGE("FUN_ blocker: complex 300+ byte constructor; UNetConnection fields not fully mapped")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1050557c (command dispatch helper)")
+IMPL_DIVERGE("retail 0x104842b0 (210b): FUN_1050557c (ping/loss stat formatter) unresolved; GETPING/GETLOSS skip stat output")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
-return 0;
+// Ghidra 0x104842b0: GETPING and GETLOSS call FUN_1050557c to format a stat string,
+// then log it to Ar. We return 1 for both but skip the stat output.
+const TCHAR* Stream = Cmd;
+if (ParseCommand(&Stream, TEXT("GETPING")))
+	return 1;
+if (ParseCommand(&Stream, TEXT("GETLOSS")))
+	return 1;
+return Super::Exec(Cmd, Ar);
 unguard;
 }
 
