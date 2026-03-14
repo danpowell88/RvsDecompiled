@@ -51,10 +51,11 @@ IMPLEMENT_CLASS(AR6eviLTesting);
 	The vtable requires definitions for all declared virtuals.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Delegates to UObject::Serialize — base class serialization")
+IMPL_MATCH("Engine.dll", 0xF7760)
 void UPrimitive::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
+	Ar << BoundingBox << BoundingSphere;
 }
 IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
 INT UPrimitive::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
@@ -161,11 +162,11 @@ static_assert(sizeof(UGameEngine) == 0x4d0, "UGameEngine layout mismatch — adj
 // UGameEngine
 // =============================================================================
 
-IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_DIVERGE("retail 0xa3f00 is 3692 bytes of console-command dispatch (STAT, SHOW, OPEN, etc.); stub delegates to super")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
-IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_DIVERGE("retail 0x9edc0 (153b) sets GIsRequestingExit, destroys pending level, calls KTermGameKarma(); stub delegates to super")
 void UGameEngine::Destroy() { Super::Destroy(); }
-IMPL_APPROX("Delegates to super; Ghidra shows no additional behaviour beyond base class")
+IMPL_DIVERGE("retail 0x9f1b0 (163b) serializes GLevel, GEntry, GPendingLevel and 4 global state vars; stub delegates to super")
 void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 // UGameEngine::Tick()   — implemented in UnGame.cpp
 // UGameEngine::Init()   — implemented in UnGame.cpp
@@ -188,13 +189,13 @@ IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
 IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
-IMPL_APPROX("Ghidra: 30b; mixes Challenge halfwords with prime multiply and XOR constant")
+IMPL_MATCH("Engine.dll", 0x9eb60)
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
 	return ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE;
 }
-IMPL_APPROX("returns 0.0f (uncapped); retail may vary but base class default is 0")
+IMPL_DIVERGE("retail 0x9f480 (160b) reads MaxTickRate from GLevel->NetDriver->ServerConnection or GameInfo; stub returns 0.0f (uncapped)")
 FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
 IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
@@ -216,13 +217,13 @@ void UGameEngine::FixUpLevel() {}
 // (moved from EngineStubs.cpp)
 // ============================================================================
 
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1ac0)
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1aa0)
 FRotatorF::FRotatorF(float InPitch, float InYaw, float InRoll) : Pitch(InPitch), Yaw(InYaw), Roll(InRoll) {}
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1a90)
 FRotatorF::FRotatorF() {}
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1ae0)
 FRotator FRotatorF::Rotator() { return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)); }
 IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF & FRotatorF::operator=(FRotatorF const & p0) { Pitch=p0.Pitch; Yaw=p0.Yaw; Roll=p0.Roll; return *this; }
@@ -238,7 +239,7 @@ IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator-(FRotatorF p0) const { return FRotatorF(Pitch-p0.Pitch, Yaw-p0.Yaw, Roll-p0.Roll); }
 IMPL_APPROX("Reconstructed from struct layout")
 FRotatorF FRotatorF::operator-=(FRotatorF p0) { Pitch-=p0.Pitch; Yaw-=p0.Yaw; Roll-=p0.Roll; return *this; }
-IMPL_APPROX("Reconstructed from struct layout")
+IMPL_MATCH("Engine.dll", 0x1c60)
 FVector FRotatorF::Vector()
 {
 	return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)).Vector();
@@ -249,7 +250,7 @@ FVector FRotatorF::Vector()
 // (moved from EngineStubs.cpp)
 // ============================================================================
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x171a30)
 FURL::FURL(FURL* Base, const TCHAR* TextURL, ETravelType Type) {
 	Protocol = DefaultProtocol;
 	Host     = DefaultHost;
@@ -461,7 +462,7 @@ FURL::FURL(FURL* Base, const TCHAR* TextURL, ETravelType Type) {
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x171950)
 FURL::FURL(const TCHAR* Filename) {
 	Protocol = DefaultProtocol;
 	Host     = DefaultHost;
@@ -471,7 +472,7 @@ FURL::FURL(const TCHAR* Filename) {
 	Valid    = 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x1710c0)
 FString FURL::String(int FullyQualified) const {
 	FString Result;
 	if (Protocol != DefaultProtocol || FullyQualified) {
@@ -501,7 +502,7 @@ FString FURL::String(int FullyQualified) const {
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x1712c0)
 void FURL::AddOption(const TCHAR* Str) {
 	const TCHAR* Eq = appStrchr(Str,'=');
 	INT PrefixLen = Eq ? (INT)(Eq - Str) + 1 : appStrlen(Str) + 1;
@@ -515,7 +516,7 @@ void FURL::AddOption(const TCHAR* Str) {
 		Op(i) = Str;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x1713f0)
 void FURL::LoadURLConfig(const TCHAR* Section, const TCHAR* Filename) {
 	TCHAR Buffer[32000];
 	GConfig->GetSection( Section, Buffer, ARRAY_COUNT(Buffer), Filename );
@@ -526,7 +527,7 @@ void FURL::LoadURLConfig(const TCHAR* Section, const TCHAR* Filename) {
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x1714b0)
 void FURL::SaveURLConfig(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename) const {
 	for( INT i=0; i<Op.Num(); i++ ) {
 		TCHAR Temp[1024];
@@ -540,7 +541,7 @@ void FURL::SaveURLConfig(const TCHAR* Section, const TCHAR* Key, const TCHAR* Fi
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x170ea0)
 void FURL::StaticExit() {
 	DefaultProtocol          = TEXT("");
 	DefaultProtocolDescription = TEXT("");
@@ -553,7 +554,7 @@ void FURL::StaticExit() {
 	DefaultSaveExt           = TEXT("");
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x170c80)
 void FURL::StaticInit() {
 	DefaultProtocol            = GConfig->GetStr( TEXT("URL"), TEXT("Protocol"), NULL );
 	DefaultProtocolDescription = GConfig->GetStr( TEXT("URL"), TEXT("ProtocolDescription"), NULL );
@@ -571,7 +572,7 @@ void FURL::StaticInit() {
 	DefaultPort     = appAtoi( GConfig->GetStr( TEXT("URL"), TEXT("Port"), NULL ) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x1715b0)
 int FURL::HasOption(const TCHAR* Test) const {
 	for( INT i=0; i<Op.Num(); i++ )
 		if( appStricmp(*Op(i),Test)==0 )
@@ -579,12 +580,12 @@ int FURL::HasOption(const TCHAR* Test) const {
 	return 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x170fa0)
 int FURL::IsInternal() const {
 	return Protocol == DefaultProtocol;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x171020)
 int FURL::IsLocalInternal() const {
 	return IsInternal() && Host.Len()==0;
 }
@@ -602,7 +603,7 @@ int FURL::operator==(FURL const & Other) const {
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Engine/Src/UnURL.cpp")
+IMPL_MATCH("Engine.dll", 0x171670)
 const TCHAR* FURL::GetOption(const TCHAR* Match, const TCHAR* Default) const {
 	for( INT i=0; i<Op.Num(); i++ )
 		if( appStrnicmp(*Op(i),Match,appStrlen(Match))==0 )
