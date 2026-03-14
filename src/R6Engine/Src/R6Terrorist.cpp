@@ -49,7 +49,7 @@ void AR6Terrorist::PreNetReceive()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x29590: 2500 bytes; interpolates m_iCurrentHeadYaw/m_iCurrentAimingPitch and distributes across neck/spine/arm bones via SetBoneRotation; rate constants unknown")
 void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 {
 	guard(AR6Terrorist::UpdateAiming);

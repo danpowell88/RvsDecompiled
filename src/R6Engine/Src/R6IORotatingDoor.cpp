@@ -15,7 +15,7 @@ static FVector GRotatingDoor_OldLocation;
 
 // --- AR6IORotatingDoor ---
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Navigation marker spawning: spawns R6Door markers at door pivot; complex SpawnActor vtable dispatch not reconstructed; AI door pathfinding absent")
 void AR6IORotatingDoor::AddMyMarker(AActor * param_1)
 {
 	guard(AR6IORotatingDoor::AddMyMarker);

@@ -150,7 +150,7 @@ AActor * AR6RainbowAI::FindSafeSpot()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10036700: returns formation position left of door based on team slot index; 1515 bytes of door formation logic not reconstructed")
 FVector AR6RainbowAI::GetTeamLeftOfDoorPosition(INT, AR6Door *)
 {
 	return FVector(0,0,0);
@@ -162,7 +162,7 @@ AActor * AR6RainbowAI::GetTeamManager()
 	return m_TeamManager;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10036130: returns formation position right of door based on team slot index; 1467 bytes of door formation logic not reconstructed")
 FVector AR6RainbowAI::GetTeamRightOfDoorPosition(INT, AR6Door *)
 {
 	return FVector(0,0,0);
@@ -420,31 +420,31 @@ void AR6RainbowAI::execSetOrientation(FFrame& Stack, RESULT_DECL)
 	setMemberOrientation((EPawnOrientation)eOverrideOrientation);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10037840: 2979 bytes; returns pawn entry position based on breach/assault slot assignment and door rotation; not reconstructed")
 FVector AR6RainbowAI::getEntryPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10038450: 477 bytes; returns team member guard position offset from NavPoint; not reconstructed")
 FVector AR6RainbowAI::getGuardPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10038660: 446 bytes; returns team member ladder position; not reconstructed")
 FVector AR6RainbowAI::getLadderPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10036d00: 2789 bytes; returns pre-entry staging position for breach; not reconstructed")
 FVector AR6RainbowAI::getPreEntryPosition()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x10038b40: 2306 bytes; returns target engagement position for AI; not reconstructed")
 FVector AR6RainbowAI::getTargetPosition()
 {
 	return FVector(0,0,0);

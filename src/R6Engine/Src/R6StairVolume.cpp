@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6StairVolume)
 
 // --- AR6StairVolume ---
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Navigation marker spawning: spawns R6Stairs markers along volume; rotation cross product for stair normal; SpawnActor vtable not reconstructed")
 void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6StairVolume::AddMyMarker);

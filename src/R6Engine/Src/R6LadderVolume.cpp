@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6LadderVolume)
 
 // --- AR6LadderVolume ---
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Navigation marker spawning: spawns R6Ladder markers at top/bottom; SpawnActor vtable dispatch not reconstructed; AI cannot use ladders")
 void AR6LadderVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6LadderVolume::AddMyMarker);

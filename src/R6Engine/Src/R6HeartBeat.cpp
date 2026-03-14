@@ -54,7 +54,7 @@ INT AR6FalseHeartBeat::IsRelevantToPawn(APawn* Other)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns 0; full logic requires FUN_1001bc40 heart beat range accessor not yet resolved")
 INT AR6FalseHeartBeat::IsRelevantToPawnHeartBeat(APawn *)
 {
 	return 0;

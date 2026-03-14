@@ -661,7 +661,7 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Too complex to reconstruct: poll checks MoveTimer, advances route cache via SetDestinationToNextInCache, handles door-type waypoints (FUN_10007b80); deferred")
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
 	// Poll — no bytecode params; called by VM during latent waits.

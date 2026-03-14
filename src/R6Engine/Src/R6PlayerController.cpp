@@ -46,7 +46,7 @@ void AR6PlayerController::Destroy()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns empty string; full key-name lookup table requires resolving action key mapping data not yet reconstructed")
 FString AR6PlayerController::GetLocKeyNameByActionKey(TCHAR const *)
 {
 	return TEXT("");
@@ -411,13 +411,13 @@ void AR6PlayerController::eventSetCrouchBlend(FLOAT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetCrouchBlend), &Parms);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x1002fce0: calls P_FINISH then GLog->Logf; logging call not reconstructed due to Ghidra format string artifact")
 void AR6PlayerController::execDebugFunction(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x100303b0: searches team member list by name or ID; returns NULL stub due to struct offset complexity")
 void AR6PlayerController::execFindPlayer(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(inPlayerIdent);
@@ -426,7 +426,7 @@ void AR6PlayerController::execFindPlayer(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns empty string; full logic requires resolving action key to localization key mapping; not reconstructed")
 void AR6PlayerController::execGetLocStringWithActionKey(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(szText);
@@ -435,7 +435,7 @@ void AR6PlayerController::execGetLocStringWithActionKey(FFrame& Stack, RESULT_DE
 	*(FString*)Result = TEXT("");
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns empty string; Ghidra 0x10031530 is 6724 bytes of localization string lookup; too complex to reconstruct fully")
 void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(SectionName);
@@ -447,7 +447,7 @@ void AR6PlayerController::execLocalizeTraining(FFrame& Stack, RESULT_DECL)
 	*(FString*)Result = TEXT("");
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Priority voice queue management: manages m_PlayVoicesPriority list with FstSoundPriorityPtr; not reconstructed due to unknown struct layout")
 void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6SoundReplicationInfo, aAudioRepInfo);

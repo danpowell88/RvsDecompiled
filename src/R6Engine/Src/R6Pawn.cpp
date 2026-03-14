@@ -649,7 +649,7 @@ FRotator AR6Pawn::GetViewRotation()
 
 // Ghidra 0x193c0: shared null stub — same address as IsPointInZone overrides above.
 // No SEH frame in binary; returns 0 (MSVC requires a return value in non-void functions).
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Ghidra 0x100193c0: 5-byte stub — shared address with IsPointInZone overrides; confirmed return 0")
 INT AR6Pawn::HurtByVolume(AActor *)
 {
 	return 0;
@@ -708,7 +708,7 @@ INT AR6Pawn::IsOverLedge(AActor* param_1, FVector ledgePoint, FLOAT ledgeRadius)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns 0; full logic requires FUN_1001bc10/FUN_1001bc70/FUN_1001bc40 heart beat sensor accessor functions not yet resolved")
 INT AR6Pawn::IsRelevantToPawnHeartBeat(APawn *)
 {
 	// TODO: resolve FUN_1001bc10/FUN_1001bc70/FUN_1001bc40 (internal R6 gadget/sensor
@@ -716,7 +716,7 @@ INT AR6Pawn::IsRelevantToPawnHeartBeat(APawn *)
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns 0; full logic requires FUN_1001bc10/FUN_1001bc70/FUN_1001bc40 heat vision sensor accessor functions not yet resolved")
 INT AR6Pawn::IsRelevantToPawnHeatVision(APawn *)
 {
 	// TODO: resolve FUN_1001bc10/FUN_1001bc70/FUN_1001bc40 (same gadget/sensor

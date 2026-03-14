@@ -261,14 +261,14 @@ void AR6TerroristAI::execCallBackupForInvestigation(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x1003ddd0: 685 bytes; calls P_FINISH then iterates team terrorists, checks faction ally codes and distance, dispatches eventGotoPointToAttack; complex path not reconstructed")
 void AR6TerroristAI::execCallVisibleTerrorist(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x1003d8c0: 976 bytes; finds better cover vantage near target pawn; complex raycast logic not reconstructed")
 void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(APawn, PTarget);
@@ -276,7 +276,7 @@ void AR6TerroristAI::execFindBetterShotLocation(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = FVector(0,0,0);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x1003cc90: 477 bytes; finds next random navigation node from terror network excluding recent nodes; complex FSortedPathList logic not reconstructed")
 void AR6TerroristAI::execGetNextRandomNode(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
@@ -292,14 +292,14 @@ void AR6TerroristAI::execHaveAClearShot(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = HaveAClearShot(vStart, PTarget);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x1003c880: 584 bytes; checks if current attack spot is still reachable and uncontested via walkReachable/findPathToward; not reconstructed")
 void AR6TerroristAI::execIsAttackSpotStillValid(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Ghidra 0x1003d190: 486 bytes; populates m_aBackupList with nearby terrorists sharing same group ID; not reconstructed")
 void AR6TerroristAI::execMakeBackupList(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

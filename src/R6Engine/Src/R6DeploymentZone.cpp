@@ -126,7 +126,7 @@ FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns zero vector; retail tries up to 5 random spawns using FUN_10042934; not reconstructed")
 FVector AR6DeploymentZone::FindRandomPointInArea()
 {
 	// STUB: too complex — retail tries up to 5 times to find a valid pawn-sized spawn
@@ -264,14 +264,14 @@ INT AR6DeploymentZone::HaveTerrorist()
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Hostage AI init: sets faction/patrol/zone from template via FUN_10016b00/FUN_1003e330/FUN_1003e3d0; not reconstructed")
 void AR6DeploymentZone::InitHostageAI(FR6CharTemplate * Template, AR6Hostage * Hostage)
 {
 	// STUB: too complex — sets hostage AI parameters (faction, patrol mode, zone ref)
 	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Terrorist AI init: sets skin/stance/group/zone from template via FUN_10016b00/FUN_1003e330/FUN_1003e3d0; not reconstructed")
 void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate * Template, AR6Terrorist * Terrorist)
 {
 	// STUB: too complex — sets terrorist AI parameters (skin, stance, group ID, zone ref)
@@ -328,7 +328,7 @@ void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Spawn hostage: picks weighted-random template, resolves class, spawns actor, calls InitHostageAI, fires event, adds to m_aHostage; not reconstructed")
 void AR6DeploymentZone::SpawnAHostage()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a hostage class
@@ -336,7 +336,7 @@ void AR6DeploymentZone::SpawnAHostage()
 	// fires a script event, and adds the result to m_aHostage.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Spawn terrorist: picks weighted-random template, resolves class, spawns actor, calls InitTerroristAI, fires event, adds to m_aTerrorist; not reconstructed")
 void AR6DeploymentZone::SpawnATerrorist()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a terrorist class
