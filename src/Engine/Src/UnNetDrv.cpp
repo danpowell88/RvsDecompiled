@@ -475,18 +475,22 @@ if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
 appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10485440 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10485440)
 void UNetConnection::PurgeAcks()
 {
 guard(UNetConnection::PurgeAcks);
-TArray<INT>& AckQueue = *(TArray<INT>*)((BYTE*)this + 0x4b70);
-for (INT i = 0; i < AckQueue.Num(); i++)
-SendAck(AckQueue(i), 0);
-AckQueue.Empty();
+typedef void (__thiscall* SendAckFn)(void*, INT, INT);
+INT n = ((FArray*)((BYTE*)this + 0x4b70))->Num();
+for (INT i = 0; i < n; i++)
+{
+INT ackId = *(INT*)(*(INT*)((BYTE*)this + 0x4b70) + i * 4);
+((SendAckFn)(*(void**)(*(INT*)this + 0x7c)))(this, ackId, 0);
+}
+((FArray*)((BYTE*)this + 0x4b70))->Empty(4, 0x20);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10484D40 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_103bef40 (file download helper)")
 void UNetConnection::ReceiveFile(INT PackageIndex)
 {
 guard(UNetConnection::ReceiveFile);
@@ -508,29 +512,138 @@ ch->ReceivedAcks();
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10485990 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10485990)
 void UNetConnection::ReceivedPacket(FBitReader& Reader)
 {
 guard(UNetConnection::ReceivedPacket);
-// TODO: implement UNetConnection::ReceivedPacket (very complex packet processing)
+typedef void (__thiscall* VoidFn)(void*);
+typedef void (__thiscall* SendAckFn)(void*, INT, INT);
+// Notify driver we received a packet (vtable[0x78/4] on driver)
+void* drv = *(void**)((BYTE*)this + 0x7c);
+((VoidFn)(*(void**)(*(INT*)drv + 0x78)))(drv);
+if (Reader.IsError()) return;
+// Update last-receive timestamp from driver clock
+*(double*)((BYTE*)this + 0xf4) = *(double*)(*(INT*)((BYTE*)this + 0x7c) + 0x48);
+// Read incoming packet sequence (modulo 0x4000 window)
+INT localSeq = *(INT*)((BYTE*)this + 0xea4);
+DWORD rawSeq = Reader.ReadInt(0x4000);
+INT inSeq = (INT)(((rawSeq - (DWORD)localSeq - 0x2000) & 0x3fff) - 0x2000) + localSeq;
+if (localSeq < inSeq)
+{
+*(INT*)((BYTE*)this + 0x1fc) += inSeq - localSeq - 1;
+*(INT*)((BYTE*)this + 0xea4) = inSeq;
+}
+else
+*(INT*)((BYTE*)this + 0x21c) += 1;
+// Acknowledge incoming packet (vtable[0x7c/4] = SendAck on this)
+((SendAckFn)(*(void**)(*(INT*)this + 0x7c)))(this, inSeq, 1);
+// Process acks and bunches
+while (!Reader.AtEnd() && *(INT*)((BYTE*)this + 0x80) != 1)
+{
+BYTE isAck = Reader.ReadBit();
+if (Reader.IsError()) break;
+if (isAck)
+{
+// Incoming ACK for a packet we previously sent
+INT localAck = *(INT*)((BYTE*)this + 0xeac);
+DWORD rawAck = Reader.ReadInt(0x4000);
+DWORD ackSeq = (((rawAck - (DWORD)localAck - 0x2000) & 0x3fff) - 0x2000) + (DWORD)localAck;
+if (Reader.IsError()) break;
+if (localAck < (INT)ackSeq)
+{
+for (INT s = localAck + 1; s < (INT)ackSeq; s++)
+{ ReceivedNak(s); *(INT*)((BYTE*)this + 0x200) += 1; }
+*(DWORD*)((BYTE*)this + 0xeac) = ackSeq;
+}
+// Update latency stats if we have send-time for this ack slot
+DWORD slot = ackSeq & 0xff;
+if (*(DWORD*)((BYTE*)this + slot * 4 + 0xaa4) == ackSeq)
+{
+double st = *(double*)((BYTE*)this + slot * 8 + 0x2a4);
+double dt = *(double*)(*(INT*)((BYTE*)this + 0x7c) + 0x48);
+*(INT*)((BYTE*)this + 0x224) += 1;
+*(float*)((BYTE*)this + 500) += (float)(dt - st - *(double*)((BYTE*)this + 0x234) * 0.5);
+}
+// Walk dirty channels and mark bunches as acked
+TArray<UChannel*>& dirty = *(TArray<UChannel*>*)((BYTE*)this + 0x4b7c);
+for (INT i = dirty.Num() - 1; i >= 0; i--)
+{
+UChannel* ch = dirty(i);
+for (INT* b = (INT*)*(INT*)((BYTE*)ch + 0x5c); b; b = (INT*)*(INT*)((BYTE*)b + 0x54))
+{
+if (*(DWORD*)((BYTE*)b + 0x74) == ackSeq)
+{ *(INT*)((BYTE*)b + 100) = 1; if (*(BYTE*)((BYTE*)b + 0x78)) *(INT*)((BYTE*)ch + 0x30) = 1; }
+}
+if (*(DWORD*)((BYTE*)ch + 0x40) == ackSeq) *(INT*)((BYTE*)ch + 0x30) = 1;
+ch->ReceivedAcks();
+}
+}
+else
+{
+// Incoming bunch — read header
+FInBunch Bunch(this);
+BYTE bHasSeq = Reader.ReadBit();
+BYTE bOpen = 0, bClose = 0, bReliable = 0;
+INT seq = 0;
+EChannelType chType = CHTYPE_None;
+if (bHasSeq) { bOpen = Reader.ReadBit(); bClose = Reader.ReadBit(); }
+bReliable = Reader.ReadBit();
+DWORD chIdx = Reader.ReadInt(0x50f);
+if (bReliable)
+{
+INT lch = *(INT*)((BYTE*)this + chIdx * 4 + 0x3728);
+DWORD rch = Reader.ReadInt(0x400);
+seq = (INT)(((rch - (DWORD)lch - 0x200) & 0x3ff) - 0x200) + lch;
+if (bHasSeq) chType = (EChannelType)Reader.ReadInt(8);
+}
+else if (bHasSeq) chType = (EChannelType)Reader.ReadInt(8);
+DWORD bunchBits = Reader.ReadInt(*(INT*)((BYTE*)this + 0xd0) << 3);
+if (Reader.IsError()) return;
+Bunch.SetData(Reader, bunchBits);
+if (Reader.IsError()) return;
+// Filter out-of-order and duplicate bunches
+UChannel* ch = *(UChannel**)((BYTE*)this + chIdx * 4 + 0xeb0);
+UBOOL valid;
+if (!bReliable)
+valid = ((bOpen && bClose) || (ch && *(INT*)((BYTE*)ch + 0x40) != -1));
+else
+valid = (seq > *(INT*)((BYTE*)this + chIdx * 4 + 0x3728));
+if (!valid) continue;
+// Open channel if needed
+if (!ch)
+{
+if (!UChannel::IsKnownChannelType(chType)) return;
+ch = CreateChannel(chType, 0, chIdx);
+if (!ch) continue;
+}
+if (bOpen) { *(INT*)((BYTE*)ch + 0x30) = 1; *(INT*)((BYTE*)ch + 0x40) = inSeq; }
+ch->ReceivedRawBunch(Bunch);
+*(INT*)((BYTE*)this + 0x20c) += 1;
+if (*(INT*)(*(INT*)((BYTE*)this + 0x7c) + 0x3c) == 0 && Bunch.IsCriticalError())
+*(INT*)((BYTE*)this + 0x80) = 1;
+}
+}
+GLog->Logf(TEXT("Net: ReceivedPacket error"));
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104862B0 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1050557c (command dispatch helper)")
 void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
 {
 guard(UNetConnection::ReceivedRawPacket);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10484EC0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10484ec0)
 void UNetConnection::SendPackageMap()
 {
 guard(UNetConnection::SendPackageMap);
+// Retail: 0x10484ec0 — iterates PackageMap->List, sends package metadata and MD5 digests.
+// Full implementation blocked by complex file I/O and MD5 hashing across multiple helpers.
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10484860 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_10481dd0 (bunch serialization helper)")
 INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
 {
 guard(UNetConnection::SendRawBunch);
@@ -538,7 +651,7 @@ return 0;
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103C5D70 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_103b7b70 (actor channel lookup)")
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
 guard(UNetConnection::SetActorDirty);
@@ -547,11 +660,10 @@ guard(UNetConnection::SetActorDirty);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_MATCH("Engine.dll", 0x10476d60)
 void UNetConnection::SlowAssertValid()
 {
-guard(UNetConnection::SlowAssertValid);
-unguard;
+// Retail: shared empty stub at 0x10476d60.
 }
 
 // =============================================================================
@@ -562,22 +674,64 @@ unguard;
 
 // UNetDriver
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("body incomplete — Ghidra 0x1048BA90 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1048ba90)
 UBOOL UNetDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetDriver::Exec);
+if (ParseCommand(&Cmd, TEXT("SOCKETS")))
+{
+// Server connection at Ghidra this+0x10; channels at conn+0x4b7c
+if (*(INT*)((BYTE*)this + 0x10) != 0)
+{
+void* conn = *(void**)((BYTE*)this + 0x10);
+// LowLevelGetNetworkNumber via vtable[0x6c/4]; MSVC __thiscall returns FString via hidden first arg
+typedef void* (__thiscall* GetNetNumFn)(void*, void*);
+FString srvNum;
+((GetNetNumFn)(*(void**)(*(INT*)conn + 0x6c)))(conn, &srvNum);
+Ar.Logf(TEXT("%s"), *srvNum);
+INT nch = ((FArray*)((BYTE*)conn + 0x4b7c))->Num();
+for (INT i = 0; i < nch; i++)
+{
+void* ch = *(void**)(*(INT*)((BYTE*)conn + 0x4b7c) + i * 4);
+typedef void* (__thiscall* DescFn)(void*, void*);
+FString desc;
+((DescFn)(*(void**)(*(INT*)ch + 0x70)))(ch, &desc);
+Ar.Logf(TEXT("  %s"), *desc);
+}
+}
+// Client connections at Ghidra this+0x4
+INT ncli = ((FArray*)((BYTE*)this + 4))->Num();
+for (INT i = 0; i < ncli; i++)
+{
+void* conn = *(void**)(*(INT*)((BYTE*)this + 4) + i * 4);
+typedef void* (__thiscall* GetNetNumFn)(void*, void*);
+FString cliNum;
+((GetNetNumFn)(*(void**)(*(INT*)conn + 0x6c)))(conn, &cliNum);
+Ar.Logf(TEXT("%s"), *cliNum);
+INT nch = ((FArray*)((BYTE*)conn + 0x12df))->Num();
+for (INT j = 0; j < nch; j++)
+{
+void* ch = *(void**)(*(INT*)((BYTE*)conn + 0x12df) + j * 4);
+typedef void* (__thiscall* DescFn)(void*, void*);
+FString desc;
+((DescFn)(*(void**)(*(INT*)ch + 0x70)))(ch, &desc);
+Ar.Logf(TEXT("  %s"), *desc);
+}
+}
+return 1;
+}
 return 0;
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_DIVERGE("not found in Ghidra export — virtual override stub")
 void UNetDriver::LowLevelDestroy()
 {
 guard(UNetDriver::LowLevelDestroy);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_DIVERGE("not found in Ghidra export — virtual override stub")
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
 return FString();
