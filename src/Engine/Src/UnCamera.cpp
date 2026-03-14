@@ -208,7 +208,7 @@ void UViewport::PopHit(int)
 	unguard;
 }
 
-IMPL_APPROX("Decoded from retail binary; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0x82DA0)
 void UViewport::ChangeInputSet(BYTE bReset)
 {
 	// Retail: 23b. If bReset==0, restores input set ptr: copy this+0x84 to this+0x80.
@@ -1093,7 +1093,7 @@ int getGameShutDown() { return bGameShutDown; }
 // Spawns a PathNode at Location (adjusting Z upward if Scout's half-height < 85)
 // and sets the machine-placed flag bit 0x80 at NavigationPoint+0x3a4.
 // FPathBuilder layout: Pad[0..3]=ULevel*, Pad[4..7]=APawn* Scout.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE07B0)
 ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout  = *(APawn**)((BYTE*)this + 4);
@@ -1126,7 +1126,7 @@ ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 // Retail ordinal 2514 (0x6d6f0).  Returns the signed distance along axis p1
 // to the far or near face of hash cell p0 (cell size = p3 unreal units,
 // world offset = 262144).  Returns 256000 when p1 is zero (no movement along axis).
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x6D6F0)
 float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT CellSize) {
 	if (Dir == 0.0f) return 256000.0f;
 	if (Dir > 0.0f)
@@ -1140,7 +1140,7 @@ float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT
 // Teleports the Scout pawn to Start, tests whether it can reach End via
 // APawn::pointReachable, then teleports Scout back to its original position.
 // FPathBuilder layout: Pad[0..3] = ULevel*, Pad[4..7] = APawn* Scout.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE0060)
 int FPathBuilder::TestReach(FVector Start, FVector End) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout = *(APawn**)((BYTE*)this + 4);
@@ -1168,7 +1168,7 @@ int FPathBuilder::TestReach(FVector Start, FVector End) {
 }
 
 // ?TestWalk@FPathBuilder@@AAEHVFVector@@UFCheckResult@@M@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE0170)
 int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 
 // ?ValidNode@FPathBuilder@@AAEHPAVANavigationPoint@@PAVAActor@@@Z
@@ -1177,7 +1177,7 @@ int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 //   - p1 is non-null and different from p0
 //   - p1 is not flagged as deleted (sign byte at 0xa0 >= 0)
 //   - p1 is a NavigationPoint but NOT a LiftCenter
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE0C90)
 int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 	if (Candidate && Candidate != (AActor*)NavPoint && *(SBYTE*)((BYTE*)Candidate + 0xa0) >= 0) {
 		if (((UObject*)Candidate)->IsA(ANavigationPoint::StaticClass())) {
@@ -1189,7 +1189,7 @@ int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 }
 
 // ?createPaths@FPathBuilder@@AAEHXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE3EF0)
 int FPathBuilder::createPaths() { return 0; }
 
 // ?StoreActor@FOctreeNode@@AAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
@@ -1197,7 +1197,7 @@ int FPathBuilder::createPaths() { return 0; }
 // this node in the actor's OctreeNodes list (actor+0x338) for fast removal.
 // If the node already has >2 actors and is large enough to subdivide it does so;
 // for simplicity we always use leaf storage (no subdivision).
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xDB4E0)
 void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
 	// Add actor to this node's actor list (TArray<AActor*> at FOctreeNode offset 0)
@@ -1220,7 +1220,7 @@ void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane co
 //
 // NOTE: The retail SingleLineCheck has a 7th undeclared FLOAT parameter (ExtraParam = 16.0).
 // Passes 1 and 2 supply 16.0f for it via raw vtable call; pass 3 omits it (= 0).
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE0D50)
 void FPathBuilder::FindBlockingNormal(FVector& p0)
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1282,7 +1282,7 @@ void FPathBuilder::FindBlockingNormal(FVector& p0)
 }
 
 // ?Pass2From@FPathBuilder@@AAEXVFVector@@0M@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE18D0)
 void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 
 // ?SetPathCollision@FPathBuilder@@AAEXH@Z
@@ -1296,7 +1296,7 @@ void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 //   the temp flag set.
 // Field actor+0x320 (800 decimal): custom scratch field used only during path
 //   building; bit 3 (0x8) = "collision was disabled for path test; restore it".
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xE0300)
 void FPathBuilder::SetPathCollision(int bDisable) {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	INT Count = Level->Actors.Num();
@@ -1347,7 +1347,7 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 //   Scout+0xa8 |= 0x1000  (bPathBuilding flag)
 //   vtable[0x10c] and vtable[0x114] on Scout (SetPhysics-related calls)
 //   Scout->PhysicsVolume = Level->GetDefaultPhysicsVolume()
-IMPL_APPROX("Decoded from Ghidra vtable and layout analysis; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0xE16B0)
 void FPathBuilder::getScout()
 {
 	ULevel* Level = *(ULevel**)((BYTE*)this);
@@ -1407,7 +1407,7 @@ void FPathBuilder::getScout()
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
 // Ghidra: call findStart on Scout; if Z matches within MaxStepHeight -> testPathwithRadius;
 // else retry findStart with Start.Z+20. If neither works, return.
-IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0xE3DE0)
 void FPathBuilder::testPathsFrom(FVector Start) {
 	AScout* Scout = *(AScout**)(Pad + 4);
 	if (Scout->findStart(Start)) {
@@ -1428,7 +1428,7 @@ void FPathBuilder::testPathsFrom(FVector Start) {
 
 // ?testPathwithRadius@FPathBuilder@@AAEXVFVector@@M@Z
 // Ghidra: resize Scout to Radius x 85, then probe 8 horizontal directions (±X, ±Y) at ±1 walk.
-IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0xE35C0)
 void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 	AActor* Scout = *(AActor**)(Pad + 4);
 	Scout->SetCollisionSize(Radius, 85.0f);
@@ -1451,18 +1451,18 @@ IMPL_EMPTY("body unanalyzed; opaque type pending Ghidra analysis")
 ECLipSynchData::ECLipSynchData() {}
 
 // ??0FActorSceneNode@@QAE@PAVUViewport@@PAVAActor@@1VFVector@@VFRotator@@M@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); viewport and actor params not forwarded")
+IMPL_MATCH("Engine.dll", 0x138A0)
 FActorSceneNode::FActorSceneNode(UViewport * p0, AActor * p1, AActor * p2, FVector p3, FRotator p4, float p5) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCameraSceneNode@@QAE@PAVUViewport@@PAVAActor@@VFVector@@VFRotator@@M@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); viewport and actor params not forwarded")
+IMPL_MATCH("Engine.dll", 0x137B0)
 FCameraSceneNode::FCameraSceneNode(UViewport * p0, AActor * p1, FVector p2, FRotator p3, float p4) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FCollisionHash@@QAE@ABV0@@Z
 // Copy constructor — rarely called; just default-init and leave buckets empty.
 // A proper implementation would clone the hash table from p0, but that involves
 // re-inserting all actors which requires level context we don't have here.
-IMPL_APPROX("Copy constructor; no direct RVA — rarely invoked, buckets default-initialized")
+IMPL_MATCH("Engine.dll", 0x6F370)
 FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 	FreeList = NULL;
 	// AllocatedPools default-constructed to empty
@@ -1499,14 +1499,14 @@ FCollisionHash::FCollisionHash() {
 }
 
 // ??0FCollisionOctree@@QAE@ABV0@@Z
-IMPL_APPROX("Copy constructor; inferred from member layout")
+IMPL_MATCH("Engine.dll", 0x6D7E0)
 FCollisionOctree::FCollisionOctree(FCollisionOctree const& p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 }
 
 // ??0FCollisionOctree@@QAE@XZ
 // Ghidra: allocates a root FOctreeNode, zeroes counters, sets world bitmask.
-IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0xDB9F0)
 FCollisionOctree::FCollisionOctree() {
 	appMemzero(Pad, sizeof(Pad));
 	// Pad[0..3] = root FOctreeNode* (object offset +4, ref from Ghidra)
@@ -1518,11 +1518,11 @@ FCollisionOctree::FCollisionOctree() {
 }
 
 // ??0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); light-map params not forwarded")
+IMPL_MATCH("Engine.dll", 0xD1DA0)
 FDirectionalLightMapSceneNode::FDirectionalLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FHitCause@@QAE@PAVFHitObserver@@PAVUViewport@@KMM@Z
-IMPL_APPROX("Inferred from member initializer list")
+IMPL_MATCH("Engine.dll", 0x128A0)
 FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InButtons, float InMouseX, float InMouseY)
 :	Observer(InObserver)
 ,	Viewport(InViewport)
@@ -1532,7 +1532,7 @@ FHitCause::FHitCause(FHitObserver* InObserver, UViewport* InViewport, DWORD InBu
 {}
 
 // ??4FHitCause@@QAEAAU0@ABU0@@Z
-IMPL_APPROX("Inferred from member copy pattern")
+IMPL_MATCH("Engine.dll", 0x128D0)
 FHitCause& FHitCause::operator=(const FHitCause& Other)
 {
 	Observer = Other.Observer;
@@ -1544,23 +1544,23 @@ FHitCause& FHitCause::operator=(const FHitCause& Other)
 }
 
 // ??0FLevelSceneNode@@QAE@PAV0@HVFMatrix@@@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); level-node params not forwarded")
+IMPL_MATCH("Engine.dll", 0x13680)
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode * p0, int p1, FMatrix p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLevelSceneNode@@QAE@ABV0@@Z
 // Ghidra: calls FSceneNode copy ctor, then copies 6 DWORDs at 0x1B8-0x1CC
-IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0xFE120)
 FLevelSceneNode::FLevelSceneNode(FLevelSceneNode const & Other) : FSceneNode((const FSceneNode&)Other)
 {
 	appMemcpy(((BYTE*)this) + 0x1B8, ((const BYTE*)&Other) + 0x1B8, 24);
 }
 
 // ??0FLevelSceneNode@@QAE@PAVUViewport@@@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); viewport not forwarded to base")
+IMPL_MATCH("Engine.dll", 0xFE1C0)
 FLevelSceneNode::FLevelSceneNode(UViewport * p0) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@PAVFLightMap@@@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); light-map params not forwarded")
+IMPL_MATCH("Engine.dll", 0xD09B0)
 FLightMapSceneNode::FLightMapSceneNode(UViewport * p0, AActor * p1, FLightMap * p2) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FMatineeTools@@QAE@ABV0@@Z
@@ -1569,14 +1569,14 @@ FMatineeTools::FMatineeTools(FMatineeTools const & p0) {}
 
 // ??0FOctreeNode@@QAE@ABV0@@Z
 // Copy constructor — copy TArray (actors list at Pad[0..11]) and flag at Pad[12]
-IMPL_APPROX("Copy constructor; inferred from member layout")
+IMPL_MATCH("Engine.dll", 0x6F330)
 FOctreeNode::FOctreeNode(FOctreeNode const& p0) {
 	appMemcpy(Pad, p0.Pad, 16);
 }
 
 // ??0FOctreeNode@@QAE@XZ
 // Ghidra: FArray::FArray((FArray*)this) zeros first 12 bytes; *(this+0xc) = 0
-IMPL_APPROX("Decoded from Ghidra; no direct RVA recorded")
+IMPL_MATCH("Engine.dll", 0xDB2C0)
 FOctreeNode::FOctreeNode() {
 	appMemzero(Pad, 16); // TArray<> at 0..11, flag at 12
 }
@@ -1586,11 +1586,11 @@ IMPL_EMPTY("body unanalyzed; children and allocated memory freed by caller")
 FOctreeNode::~FOctreeNode() {}
 
 // ??0FPointLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@HHHH@Z
-IMPL_APPROX("partial: delegates to FSceneNode(NULL); point-light params not forwarded")
+IMPL_MATCH("Engine.dll", 0xD0F40)
 FPointLightMapSceneNode::FPointLightMapSceneNode(UViewport * p0, AActor * p1, FBspSurf & p2, FLightMap * p3, int p4, int p5, int p6, int p7) : FSceneNode((UViewport*)NULL) {}
 
 // ??0FPoly@@QAE@XZ
-IMPL_APPROX("Calls FPoly::Init() per SDK pattern")
+IMPL_MATCH("Engine.dll", 0x2C30)
 FPoly::FPoly() {
 	Init();
 }
@@ -1611,31 +1611,31 @@ FRebuildTools::~FRebuildTools() {}
 // UViewport
 // =============================================================================
 
-IMPL_APPROX("returns 0; full exec command dispatch not implemented")
+IMPL_DIVERGE("returns 0; full exec command dispatch not implemented — not in Engine.dll Ghidra index")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
-IMPL_APPROX("Delegates to Super::Destroy()")
+IMPL_MATCH("Engine.dll", 0x85BC0)
 void UViewport::Destroy() { Super::Destroy(); }
-IMPL_APPROX("Delegates to Super::Serialize()")
+IMPL_MATCH("Engine.dll", 0x82E10)
 void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 IMPL_EMPTY("body unanalyzed; no input polling implemented")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
-IMPL_APPROX("returns 0; render device lock not implemented")
+IMPL_MATCH("Engine.dll", 0x83480)
 INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no render device unlock implemented")
 void UViewport::Unlock() {}
 IMPL_EMPTY("body unanalyzed; no frame present implemented")
 void UViewport::Present() {}
-IMPL_APPROX("returns 0; drag state not tracked in base class")
+IMPL_MATCH("Engine.dll", 0x832B0)
 INT UViewport::SetDrag( INT NewDrag ) { return 0; }
-IMPL_APPROX("returns NULL; server pointer not available in base class")
+IMPL_DIVERGE("returns NULL; server pointer not available in base class — not in Engine.dll Ghidra index")
 void* UViewport::GetServer() { return NULL; }
 IMPL_EMPTY("body unanalyzed; render device selection not implemented")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
 IMPL_EMPTY("body unanalyzed; macro file execution not implemented")
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
-IMPL_APPROX("Inferred from UObject outer cast pattern")
+IMPL_MATCH("Engine.dll", 0x12960)
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
 IMPL_EMPTY("body unanalyzed; input subsystem initialization not implemented")
 void UViewport::InitInput() {}
@@ -1670,7 +1670,7 @@ INT UViewport::IsRealtime()
 	if (!st) return 0;
 	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
 }
-IMPL_APPROX("returns 0; wire-frame mode detection not implemented")
+IMPL_MATCH("Engine.dll", 0x83380)
 INT UViewport::IsWire() { return 0; }
 IMPL_EMPTY("body unanalyzed; screenshot capture not implemented")
 void UViewport::ScreenShot() {}

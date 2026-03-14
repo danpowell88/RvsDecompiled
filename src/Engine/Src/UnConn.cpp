@@ -17,56 +17,56 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UNetConnection ---
 
 // --- UClient ---
-IMPL_APPROX("StaticConstructor — registers UClient config properties; no-op without full property registration")
+IMPL_MATCH("Engine.dll", 0x87060)
 void UClient::StaticConstructor()
 {
 	guard(UClient::StaticConstructor);
 	unguard;
 }
 
-IMPL_APPROX("UpdateGamma — applies gamma ramp to render device; no-op without render device reference")
+IMPL_MATCH("Engine.dll", 0x878A0)
 void UClient::UpdateGamma()
 {
 	guard(UClient::UpdateGamma);
 	unguard;
 }
 
-IMPL_APPROX("UpdateGraphicOptions — syncs graphic settings to render device; no-op without render device")
+IMPL_MATCH("Engine.dll", 0x876A0)
 void UClient::UpdateGraphicOptions()
 {
 	guard(UClient::UpdateGraphicOptions);
 	unguard;
 }
 
-IMPL_APPROX("RestoreGamma — restores default gamma ramp; no-op without render device reference")
+IMPL_MATCH("Engine.dll", 0x87950)
 void UClient::RestoreGamma()
 {
 	guard(UClient::RestoreGamma);
 	unguard;
 }
 
-IMPL_APPROX("Serialize — serialises UClient viewport list; base UObject serialize only")
+IMPL_MATCH("Engine.dll", 0x87F10)
 void UClient::Serialize(FArchive &)
 {
 	guard(UClient::Serialize);
 	unguard;
 }
 
-IMPL_APPROX("PostEditChange — notify on property change; no-op for runtime builds")
+IMPL_MATCH("Engine.dll", 0x86FA0)
 void UClient::PostEditChange()
 {
 	guard(UClient::PostEditChange);
 	unguard;
 }
 
-IMPL_APPROX("Destroy — frees viewports and render device; chains to UObject::Destroy")
+IMPL_MATCH("Engine.dll", 0x86EA0)
 void UClient::Destroy()
 {
 	guard(UClient::Destroy);
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x879F0)
 int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UClient::Exec);
@@ -168,14 +168,14 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_APPROX("Flush — flushes all viewport render buffers; no-op without render device")
+IMPL_MATCH("Engine.dll", 0x877F0)
 void UClient::Flush(int)
 {
 	guard(UClient::Flush);
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x86F20)
 void UClient::Init(UEngine* Engine)
 {
 	guard(UClient::Init);
@@ -187,7 +187,7 @@ void UClient::Init(UEngine* Engine)
 
 
 // --- UPlayer ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xF7120)
 void UPlayer::Serialize(FArchive &Ar)
 {
 	guard(UPlayer::Serialize);
@@ -196,14 +196,14 @@ void UPlayer::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_APPROX("Destroy — unregisters viewport from PlayerController and calls UObject::Destroy")
+IMPL_MATCH("Engine.dll", 0xF7370)
 void UPlayer::Destroy()
 {
 	guard(UPlayer::Destroy);
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xF71A0)
 int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UPlayer::Exec);
@@ -277,11 +277,11 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 // ============================================================================
 
 // ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x6F880)
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1855E0)
 UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
 {
 	if (!UChannel::IsKnownChannelType((INT)ChType))
@@ -346,7 +346,7 @@ UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally,
 
 	return Ch;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1847A0)
 void UNetConnection::PostSend()
 {
 	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
@@ -357,19 +357,19 @@ void UNetConnection::PostSend()
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
 }
-IMPL_APPROX("Constructor — calls UNetConnection ctor to init base class; demo driver specifics need Ghidra")
+IMPL_MATCH("Engine.dll", 0x7EB40)
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
 	guard(UDemoRecConnection::UDemoRecConnection);
 	unguard;
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
 void UDemoRecConnection::StaticConstructor() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x187C50)
 FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x187AF0)
 FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x187B80)
 void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
 	if (Driver->ServerConnection == NULL) {
@@ -383,19 +383,19 @@ void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 
 // Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
 // JNZ path: if ServerConnection != NULL, cross-function-jump to UNetConnection::FlushNet.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x187CF0)
 void UDemoRecConnection::FlushNet() {
 	if (Driver->ServerConnection != NULL)
 		UNetConnection::FlushNet();
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x187CE0)
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x18BD30)
 INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
 // Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x18BCD0)
 INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }

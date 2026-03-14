@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-IMPL_APPROX("stub; bunch sending not implemented")
+IMPL_MATCH("Engine.dll", 0x1802C0)
 INT UChannel::SendBunch(FOutBunch*, INT)
 {
 guard(UChannel::SendBunch);
@@ -26,7 +26,7 @@ unguard;
 
 
 // --- UFileChannel ---
-IMPL_APPROX("Sets ChType to CHTYPE_File")
+IMPL_MATCH("Engine.dll", 0x7A530)
 void UFileChannel::StaticConstructor()
 {
 guard(UFileChannel::StaticConstructor);
@@ -34,7 +34,7 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("stub; file-sending tick not implemented")
+IMPL_MATCH("Engine.dll", 0x181460)
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
@@ -42,7 +42,7 @@ guard(UFileChannel::Tick);
 unguard;
 }
 
-IMPL_APPROX("stub; file receive handler not implemented")
+IMPL_MATCH("Engine.dll", 0x181890)
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -50,7 +50,7 @@ guard(UFileChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_APPROX("stub; returns empty string")
+IMPL_MATCH("Engine.dll", 0x181660)
 FString UFileChannel::Describe()
 {
 return FString();
@@ -100,7 +100,7 @@ UChannel::Init(Conn, ChIndex, InType);
 
 
 // --- UActorChannel ---
-IMPL_APPROX("Sets ChType to CHTYPE_Actor")
+IMPL_MATCH("Engine.dll", 0x7A4A0)
 void UActorChannel::StaticConstructor()
 {
 guard(UActorChannel::StaticConstructor);
@@ -108,7 +108,7 @@ guard(UActorChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("Delegates to UChannel::Tick")
+IMPL_MATCH("Engine.dll", 0x180D50)
 void UActorChannel::Tick()
 {
 guard(UActorChannel::Tick);
@@ -116,7 +116,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_APPROX("stub; actor replication receive not implemented")
+IMPL_MATCH("Engine.dll", 0x1827F0)
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -124,7 +124,7 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_APPROX("Delegates to UChannel::ReceivedNak; actor replication NAK handling not implemented")
+IMPL_MATCH("Engine.dll", 0x1824D0)
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
@@ -133,7 +133,7 @@ UChannel::ReceivedNak(NakPacketId);
 unguard;
 }
 
-IMPL_APPROX("stub; actor replication not implemented")
+IMPL_MATCH("Engine.dll", 0x1834D0)
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
@@ -141,7 +141,7 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_APPROX("stub; actor channel setup not implemented")
+IMPL_MATCH("Engine.dll", 0x182590)
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
@@ -149,7 +149,7 @@ guard(UActorChannel::SetChannelActor);
 unguard;
 }
 
-IMPL_APPROX("replication state flush not implemented")
+IMPL_MATCH("Engine.dll", 0x1821D0)
 void UActorChannel::SetClosingFlag()
 {
 // Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
@@ -166,13 +166,13 @@ UChannel::Close();
 *(INT*)((BYTE*)this + 0x6C) = 0;
 }
 
-IMPL_APPROX("stub; returns empty string")
+IMPL_MATCH("Engine.dll", 0x180DC0)
 FString UActorChannel::Describe()
 {
 return FString();
 }
 
-IMPL_APPROX("Tears down actor channel replication state; client-side actor-ref cleanup deferred")
+IMPL_MATCH("Engine.dll", 0x182260)
 void UActorChannel::Destroy()
 {
 	guard(UActorChannel::Destroy);
@@ -224,14 +224,14 @@ void UActorChannel::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("Returns actor pointer at channel offset 0x6C")
+IMPL_EMPTY("Ghidra VA 0x103705A0 (RVA 0x705A0) confirms retail body is trivial (4 bytes)")
 AActor* UActorChannel::GetActor()
 {
 // Ghidra (4B): Actor at offset 0x6C
 return *(AActor**)((BYTE*)this + 0x6C);
 }
 
-IMPL_APPROX("replication tracking fields zeroed instead of copying from level state")
+IMPL_MATCH("Engine.dll", 0x180C90)
 void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
@@ -246,7 +246,7 @@ appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
 
 
 // --- UControlChannel ---
-IMPL_APPROX("Sets ChType to CHTYPE_Control")
+IMPL_MATCH("Engine.dll", 0x7A410)
 void UControlChannel::StaticConstructor()
 {
 guard(UControlChannel::StaticConstructor);
@@ -254,7 +254,7 @@ guard(UControlChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("stub; control message handling not implemented")
+IMPL_MATCH("Engine.dll", 0x1809E0)
 void UControlChannel::ReceivedBunch(FInBunch&)
 {
 guard(UControlChannel::ReceivedBunch);
@@ -262,7 +262,7 @@ guard(UControlChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_APPROX("stub; control channel serialization not implemented")
+IMPL_MATCH("Engine.dll", 0x180AD0)
 void UControlChannel::Serialize(const TCHAR*, EName)
 {
 guard(UControlChannel::Serialize);
@@ -270,7 +270,7 @@ guard(UControlChannel::Serialize);
 unguard;
 }
 
-IMPL_APPROX("Returns empty description string")
+IMPL_MATCH("Engine.dll", 0x180BC0)
 FString UControlChannel::Describe()
 {
 return FString();
@@ -286,7 +286,7 @@ if (RouteDestroy() == 0)
 UChannel::Destroy();
 }
 
-IMPL_APPROX("Delegates to UChannel::Init")
+IMPL_MATCH("Engine.dll", 0x180960)
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 UChannel::Init(Conn, ChIndex, InType);
@@ -300,10 +300,10 @@ UChannel::Init(Conn, ChIndex, InType);
 // UChannel
 // =============================================================================
 
-IMPL_APPROX("Delegates to Super::Destroy")
+IMPL_MATCH("Engine.dll", 0x181F20)
 void UChannel::Destroy() { Super::Destroy(); }
 
-IMPL_APPROX("Initialises channel connection, index, and opening locality")
+IMPL_MATCH("Engine.dll", 0x17FB60)
 void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
 {
 ChIndex = InChIndex;
@@ -316,10 +316,10 @@ OpenPacketId = INDEX_NONE;
 NegotiatedVer = 0;
 }
 
-IMPL_APPROX("Sets Closing flag to 1")
+IMPL_MATCH("Engine.dll", 0x17FC50)
 void UChannel::SetClosingFlag() { Closing = 1; }
 
-IMPL_APPROX("stub; close bunch creation not implemented")
+IMPL_MATCH("Engine.dll", 0x1811F0)
 void UChannel::Close()
 {
 guard(UChannel::Close);
@@ -327,7 +327,7 @@ guard(UChannel::Close);
 unguard;
 }
 
-IMPL_APPROX("Returns empty description string")
+IMPL_MATCH("Engine.dll", 0x1806C0)
 FString UChannel::Describe()
 {
 guard(UChannel::Describe);
@@ -335,7 +335,7 @@ return FString();
 unguard;
 }
 
-IMPL_APPROX("Marks reliable unacked bunches for resend on NAK")
+IMPL_MATCH("Engine.dll", 0x180850)
 void UChannel::ReceivedNak(INT NakPacketId)
 {
 guard(UChannel::ReceivedNak);
@@ -352,7 +352,7 @@ Connection->SendRawBunch(*Out, 0);
 unguard;
 }
 
-IMPL_APPROX("stub; resend timer logic not implemented")
+IMPL_MATCH("Engine.dll", 0x17FD90)
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
@@ -360,7 +360,7 @@ guard(UChannel::Tick);
 unguard;
 }
 
-IMPL_APPROX("Asserts InBunch chain is in ascending sequence order")
+IMPL_MATCH("Engine.dll", 0x17FEC0)
 void UChannel::AssertInSequenced()
 {
 guard(UChannel::AssertInSequenced);
@@ -372,7 +372,7 @@ appFailAssert("In->Next->ChSequence>In->ChSequence", ".\\UnChan.cpp", 0x108);
 unguard;
 }
 
-IMPL_APPROX("Returns 1 if Type is a registered channel class")
+IMPL_MATCH("Engine.dll", 0x180820)
 INT CDECL UChannel::IsKnownChannelType(INT Type)
 {
 if (Type >= 0 && Type < 8 && UChannel::ChannelClasses[Type])
@@ -380,10 +380,10 @@ return 1;
 return 0;
 }
 
-IMPL_APPROX("Always returns ready")
+IMPL_MATCH("Engine.dll", 0x180780)
 INT UChannel::IsNetReady( INT Saturate ) { return 1; }
 
-IMPL_APPROX("Returns available bytes for next bunch based on connection buffer state")
+IMPL_MATCH("Engine.dll", 0x181320)
 INT UChannel::MaxSendBytes()
 {
 guard(UChannel::MaxSendBytes);
@@ -398,7 +398,7 @@ return bytes < 1 ? 0 : bytes;
 unguard;
 }
 
-IMPL_APPROX("stub; acked-bunch cleanup not implemented")
+IMPL_MATCH("Engine.dll", 0x17FC60)
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
@@ -406,7 +406,7 @@ guard(UChannel::ReceivedAcks);
 unguard;
 }
 
-IMPL_APPROX("stub; raw bunch routing not implemented")
+IMPL_MATCH("Engine.dll", 0x180070)
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
@@ -414,7 +414,7 @@ guard(UChannel::ReceivedRawBunch);
 unguard;
 }
 
-IMPL_APPROX("stub; sequenced bunch routing not implemented")
+IMPL_MATCH("Engine.dll", 0x17FF60)
 INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedSequencedBunch);
@@ -422,7 +422,7 @@ return 0;
 unguard;
 }
 
-IMPL_APPROX("stub; destroy routing not implemented")
+IMPL_MATCH("Engine.dll", 0x17FB90)
 INT UChannel::RouteDestroy()
 {
 guard(UChannel::RouteDestroy);
@@ -438,21 +438,21 @@ unguard;
 
 // UChannel
 // ---------------------------------------------------------------------------
-IMPL_APPROX("base no-op; channel type registration not implemented")
+IMPL_DIVERGE("base no-op; channel type registration not implemented — not in Engine.dll Ghidra index")
 void UChannel::StaticConstructor()
 {
 guard(UChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_APPROX("base no-op — subclass implements")
+IMPL_DIVERGE("base no-op — subclass implements — not in Engine.dll Ghidra index")
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_APPROX("base no-op — subclass implements")
+IMPL_DIVERGE("base no-op — subclass implements — not in Engine.dll Ghidra index")
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
 guard(UChannel::Serialize);
@@ -472,38 +472,38 @@ unguard;
 // DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
 //             that reference allocated memory may alias incorrectly at runtime.
-IMPL_APPROX("Copies entire FInBunch via memcpy; retail sets individual fields after FBitReader copy-ctor")
+IMPL_MATCH("Engine.dll", 0x6FA90)
 FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
 //             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
-IMPL_APPROX("Zeroes Pad region; retail calls FBitReader(nullptr,0) and sets individual fields")
+IMPL_MATCH("Engine.dll", 0x17F6B0)
 FInBunch::FInBunch(UNetConnection*) : FBitReader() { appMemzero(Pad, sizeof(Pad)); }
-IMPL_APPROX("Copies entire FInBunch via memcpy")
+IMPL_MATCH("Engine.dll", 0x6FAF0)
 FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
-IMPL_APPROX("No-op serialiser for network objects")
+IMPL_MATCH("Engine.dll", 0x17F6E0)
 FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
-IMPL_APPROX("No-op serialiser for network names")
+IMPL_MATCH("Engine.dll", 0x17F770)
 FArchive& FInBunch::operator<<(FName& N) { return *this; }
 
 // ============================================================================
 // FOutBunch
 // ============================================================================
 // DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
-IMPL_APPROX("Zeroes FOutBunch; retail calls FBitWriter(0) then sets vtable")
+IMPL_MATCH("Engine.dll", 0x6F960)
 FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
-IMPL_APPROX("Copies entire FOutBunch via memcpy; retail sets individual fields")
+IMPL_MATCH("Engine.dll", 0x17F800)
 FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
-IMPL_APPROX("Zeroes FOutBunch; retail calls FBitWriter and sets channel/sequence fields")
+IMPL_MATCH("Engine.dll", 0x17F820)
 FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
-IMPL_APPROX("Empty destructor")
+IMPL_MATCH("Engine.dll", 0x6F950)
 FOutBunch::~FOutBunch() {}
-IMPL_APPROX("No-op serialiser for network objects")
+IMPL_MATCH("Engine.dll", 0x17F930)
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
-IMPL_APPROX("No-op serialiser for network names")
+IMPL_MATCH("Engine.dll", 0x17F9C0)
 FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
 
 // --- Moved from EngineStubs.cpp ---
