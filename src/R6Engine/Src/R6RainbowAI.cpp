@@ -543,9 +543,9 @@ void AR6RainbowAI::setMemberOrientation(enum EPawnOrientation param_1)
 	{
 		// On stairs: adjust pitch based on stair direction
 		if ((*(DWORD*)(pawnPtr + 0x6c4) & 2) == 0)
-			bDesiredPitch = (BYTE)((((param_1 != 5) - 1) & 0x1c70) - 0xe38 >> 8);
+			bDesiredPitch = (BYTE)(((((param_1 != 5) - 1) & 0x1c70) - 0xe38) >> 8);
 		else
-			bDesiredPitch = (BYTE)(((INT)((param_1 != 5) - 1) & (INT)0xffffe390) + 0xe38 >> 8);
+			bDesiredPitch = (BYTE)((((INT)((param_1 != 5) - 1) & (INT)0xffffe390) + 0xe38) >> 8);
 	}
 	else
 	{

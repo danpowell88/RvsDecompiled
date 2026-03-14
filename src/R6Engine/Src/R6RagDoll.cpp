@@ -337,6 +337,7 @@ INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 				USkeletalMeshInstance* local_18 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)pMesh + 0x88))(pMesh, pawnOwner);
 
 				BYTE local_38[12];
+				(void)local_38;
 				for (INT iVar4 = 1; iVar4 < 0x10; iVar4++)
 				{
 					FCoords* this_00 = (FCoords*)((BYTE*)this + iVar4 * 0x58 + 0x3a8);

@@ -169,7 +169,6 @@ INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 	pMasterSize = (DWORD*)(Start + 4);
 
 	BYTE* Ptr;
-	DWORD ChunkSize;
 
 	for( Ptr = Start + 12; Ptr + 8 < WaveDataEnd && *(DWORD*)Ptr != 0x20746d66; Ptr += Pad16Bit(*(DWORD*)(Ptr+4)) + 8 ) {}
 	if( *(DWORD*)Ptr != 0x20746d66 )

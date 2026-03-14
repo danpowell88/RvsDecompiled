@@ -2942,8 +2942,7 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 			return 1;
 		}
 		// Rate > 0 with no looping: single-play with optional tween
-		FName noneName(NAME_None);
-		INT same = (*(FName*)((BYTE*)this + 0xB8) == noneName) ? 1 : 0;
+		INT same = (*(FName*)((BYTE*)this + 0xB8) == FName(NAME_None)) ? 1 : 0;
 		if (same) TweenTime = 0.0f;
 
 		FLOAT fc  = (*(GetFrameCountFn*)(vtbl + 0xC0))(this, seqObj);

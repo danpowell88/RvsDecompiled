@@ -24,6 +24,8 @@
 ----------------------------------------------------------------------------*/
 
 #ifndef NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) extern WINDRV_API FName WINDRV_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name)
 #endif

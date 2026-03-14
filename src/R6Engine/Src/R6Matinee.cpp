@@ -203,7 +203,6 @@ FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT par
 	if (piVar3 == (INT*)0)
 		piVar3 = (INT*)0; // stay NULL
 
-LAB_PctToFrameDone:
 	// Lookup anim by name, then release
 	typedef DWORD (__thiscall *TGetAnimByName2)(void*, DWORD);
 	DWORD uVar4 = ((TGetAnimByName2)*(DWORD*)(*(DWORD*)piVar3 + 0xb0))(piVar3, *(DWORD*)((BYTE*)param_1 + 0x50));

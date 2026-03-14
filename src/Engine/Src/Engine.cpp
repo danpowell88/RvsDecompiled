@@ -136,6 +136,8 @@ ENGINE_API AR6eviLTesting*			GEvilTest				= NULL;
 -----------------------------------------------------------------------------*/
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) ENGINE_API FName ENGINE_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "EngineClasses.h"

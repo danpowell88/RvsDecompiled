@@ -16,6 +16,8 @@ IMPLEMENT_PACKAGE(WinDrv)
 -----------------------------------------------------------------------------*/
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) WINDRV_API FName WINDRV_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "WinDrvClasses.h"

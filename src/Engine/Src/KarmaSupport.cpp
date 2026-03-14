@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AKActor ---
-IMPL_APPROX("Engine.dll", 0x62160, "Karma body creation not implemented; calls super only")
+IMPL_APPROX("Karma body creation not implemented; calls super only")
 void AKActor::Spawned()
 {
 // Ghidra 0x62160: if PhysicsVolume at this+0x18C is NULL, create Karma body
@@ -361,7 +361,7 @@ return *this;
 
 
 // --- UKMeshProps ---
-IMPL_APPROX("Engine.dll", 0x501b0, "TArray at +0x50 (FKConvexElem array) not serialized")
+IMPL_APPROX("TArray at +0x50 (FKConvexElem array) not serialized")
 void UKMeshProps::Serialize(FArchive& Ar)
 {
 // Ghidra 0x501b0: UObject::Serialize + 9 FLOAT fields at +0x2C..+0x4C (mass props),

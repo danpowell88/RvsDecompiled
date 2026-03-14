@@ -25,6 +25,8 @@ DWORD g_net_old_bit7      = 0;
 -----------------------------------------------------------------------------*/
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) R6WEAPONS_API FName R6WEAPONS_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "R6WeaponsClasses.h"

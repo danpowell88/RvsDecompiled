@@ -3,6 +3,10 @@
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 
+// Suppress C4996: gethostbyname/inet_addr are deprecated in modern Windows SDK
+// but these are the exact APIs retail Ravenshield used — suppress to match parity.
+#pragma warning(disable: 4996)
+
 #include "IpDrvPrivate.h"
 #include <intrin.h>
 
@@ -17,6 +21,8 @@ IMPLEMENT_PACKAGE(IpDrv)
 -----------------------------------------------------------------------------*/
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) IPDRV_API FName IPDRV_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "IpDrvClasses.h"

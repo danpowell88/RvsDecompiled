@@ -26,6 +26,8 @@ IMPLEMENT_PACKAGE(R6Engine)
 -----------------------------------------------------------------------------*/
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) R6ENGINE_API FName R6ENGINE_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "R6EngineClasses.h"

@@ -68,13 +68,19 @@ if(MSVC)
     add_compile_options(/GS-)           # Disable stack cookies (not needed with guard disabled)
     # Use async exception handling so SEH exceptions are visible to C++ code.
     string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    # Suppress SDK-origin warnings we cannot fix (legacy Unreal SDK headers):
+    #   C4595 — non-member operator new/delete defined inline (UnFile.h SDK)
+    #   C4661 — template instantiation without definition (UnTemplate.h SDK)
+    #   C4073 — initializers put in library initialization area (SDK pattern)
+    #   C4477 — format string type mismatch in SDK headers
+    add_compile_options(/wd4595 /wd4661 /wd4073 /wd4477)
 endif()
 
 # Disable guard/unguard try/catch blocks. Cross-CRT exception handling between
 # MSVC 7.1 (retail DLLs) and MSVC 2019 (our exe) causes terminate() when
 # exceptions propagate through our stack frames. With DO_GUARD=0, guard/unguard
 # become plain braces — no try/catch interference with cross-DLL exceptions.
-add_definitions(-DDO_GUARD=0 -D_UNICODE -DUNICODE)
+add_definitions(-DDO_GUARD=0 -D_UNICODE -DUNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS)
 
 # --- Global include directories ---
 # Available to all modules: core Unreal headers + R6 SDK headers

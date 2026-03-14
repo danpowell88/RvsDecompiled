@@ -1,4 +1,4 @@
-﻿/*===========================================================================
+/*===========================================================================
 	EngineClasses.h: Ravenshield Engine class declarations.
 	Reconstructed for decompilation — provides DECLARE_CLASS macros that
 	IMPLEMENT_CLASS requires, plus the AUTOGENERATE_NAME / FUNCTION pattern.
@@ -12,6 +12,8 @@
 #endif
 
 #ifndef NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) extern ENGINE_API FName ENGINE_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name)
 #endif
@@ -315,11 +317,11 @@ class FCollisionHash;
 class FPoly;
 class FSortedPathList;
 class FRenderInterface;
-class FRenderCaps;
+struct FRenderCaps;
 class FLevelSceneNode;
 class FDynamicActor;
 class FBaseTexture;
-class FBitReader;
+struct FBitReader;
 class FOutBunch;
 class FInBunch;
 struct FHitCause;

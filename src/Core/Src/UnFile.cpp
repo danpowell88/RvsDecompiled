@@ -6,6 +6,10 @@
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 
+// Suppress C4996: retail used GetVersionExA/wcscpy/wcscat etc. verbatim.
+// These are intentional for byte parity — do not change to *_s variants.
+#pragma warning(disable: 4996)
+
 #include "CorePrivate.h"
 #include <windows.h>
 #include <stdio.h>

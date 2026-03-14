@@ -12,6 +12,8 @@
 #endif
 
 #ifndef NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) extern R6GAMESERVICE_API FName R6GAMESERVICE_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name)
 #endif

@@ -7,6 +7,8 @@
 IMPLEMENT_PACKAGE(R6Game)
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) R6GAME_API FName R6GAME_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "R6GameClasses.h"

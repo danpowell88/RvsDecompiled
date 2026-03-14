@@ -3,6 +3,9 @@
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 
+// Suppress C4996: inet_addr was used by retail GameSpy code — intentional.
+#pragma warning(disable: 4996)
+
 #include "R6GameServicePrivate.h"
 
 IMPLEMENT_CLASS(UR6GSServers)

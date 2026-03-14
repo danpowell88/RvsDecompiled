@@ -454,7 +454,6 @@ BYTE AR6Pawn::GetCurrentMaterial()
 	// would create a circular link dependency. pSVClass left NULL — sound volume check skipped.
 	UClass* pSVClass = NULL;
 
-walk_isA:
 	for (UClass* C = *(UClass**)((BYTE*)pZone + 0x24); C; C = *(UClass**)((BYTE*)C + 0x2c))
 	{
 		if (C == pSVClass)

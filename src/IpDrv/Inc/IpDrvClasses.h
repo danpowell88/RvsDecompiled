@@ -16,6 +16,8 @@
 ==========================================================================*/
 
 #ifndef NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) extern IPDRV_API FName IPDRV_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name)
 #endif

@@ -18,6 +18,8 @@ IMPLEMENT_PACKAGE(R6Abstract)
 -----------------------------------------------------------------------------*/
 
 #define NAMES_ONLY
+#undef  AUTOGENERATE_NAME
+#undef  AUTOGENERATE_FUNCTION
 #define AUTOGENERATE_NAME(name) R6ABSTRACT_API FName R6ABSTRACT_##name;
 #define AUTOGENERATE_FUNCTION(cls,idx,name) IMPLEMENT_FUNCTION(cls,idx,name)
 #include "R6AbstractClasses.h"
