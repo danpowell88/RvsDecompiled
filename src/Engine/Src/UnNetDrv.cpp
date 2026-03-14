@@ -15,10 +15,24 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UNetDriver ---
-IMPL_DIVERGE("stub body — Ghidra 0x1048B400 shows 990-byte implementation not yet reconstructed")
+IMPL_MATCH("Engine.dll", 0x1048b400)
 void UNetDriver::StaticConstructor()
 {
 guard(UNetDriver::StaticConstructor);
+new(GetClass(),TEXT("ConnectionTimeout"),    RF_Public) UFloatProperty(EC_CppProperty, 0x50, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("InitialConnectTimeout"),RF_Public) UFloatProperty(EC_CppProperty, 0x54, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("KeepAliveTime"),        RF_Public) UFloatProperty(EC_CppProperty, 0x58, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("RelevantTimeout"),      RF_Public) UFloatProperty(EC_CppProperty, 0x5c, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("SpawnPrioritySeconds"), RF_Public) UFloatProperty(EC_CppProperty, 0x60, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("ServerTravelPause"),    RF_Public) UFloatProperty(EC_CppProperty, 0x64, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("MaxClientRate"),        RF_Public) UIntProperty  (EC_CppProperty, 0x68, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("NetServerMaxTickRate"), RF_Public) UIntProperty  (EC_CppProperty, 0x6c, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("LanServerMaxTickRate"), RF_Public) UIntProperty  (EC_CppProperty, 0x70, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("AllowDownloads"),       RF_Public) UBoolProperty (EC_CppProperty, 0x74, TEXT("Client"), CPF_Config);
+new(GetClass(),TEXT("MaxDownloadSize"),      RF_Public) UIntProperty  (EC_CppProperty, 0x8c, TEXT("Client"), CPF_Config);
+UArrayProperty* PA = new(GetClass(),TEXT("DownloadManagers"),RF_Public) UArrayProperty(EC_CppProperty, 0x90, TEXT("Client"), CPF_Config);
+PA->Inner = new(PA,TEXT("StrProperty0"),RF_Public) UStrProperty(EC_CppProperty, 0, TEXT("Client"), CPF_Config);
+*(DWORD*)((BYTE*)this + 0x68) = 25000;
 unguard;
 }
 
@@ -64,7 +78,7 @@ typedef void (__thiscall* DestroyFn)(void*, INT);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1048C210 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1048bfa0 (conditional-transact archive helper)")
 void UNetDriver::Serialize(FArchive &Ar)
 {
 guard(UNetDriver::Serialize);
@@ -76,7 +90,7 @@ UObject::Serialize(Ar);
 unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1048c2d0 is 178 bytes, not fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_103db080 (actor channel lookup)")
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
@@ -128,7 +142,7 @@ return 1;
 unguard;
 }
 
-IMPL_DIVERGE("UNetDriver::InitListen not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("FUN_ blocker: FUN_1032b9b0 (listen socket creation)")
 int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UNetDriver::InitListen);
@@ -139,21 +153,22 @@ unguard;
 
 
 // --- UDemoRecDriver ---
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_DIVERGE("FUN_ blocker: FUN_104c3660 (spectator spawn helper)")
 void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*)
 {
 guard(UDemoRecDriver::SpawnDemoRecSpectator);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10487DA0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10487da0)
 void UDemoRecDriver::StaticConstructor()
 {
 guard(UDemoRecDriver::StaticConstructor);
+new(GetClass(),TEXT("DemoSpectatorClass"),RF_Public) UStrProperty(EC_CppProperty, 0xa8, TEXT("Client"), CPF_Config);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10488050 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_10301000 (demo file read helper)")
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
@@ -176,16 +191,45 @@ typedef void (__thiscall* VDtor)(void*);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10487F20 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1031ded0 (address string helper)")
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
 return FString();
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10488300 not yet fully reconstructed")
-int UDemoRecDriver::Exec(const TCHAR*, FOutputDevice&)
+IMPL_MATCH("Engine.dll", 0x10488300)
+int UDemoRecDriver::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UDemoRecDriver::Exec);
+if (*(INT*)((BYTE*)this + 0x98) != 0)
+    return 0;
+if (ParseCommand(&Cmd, TEXT("DEMOREC")) || ParseCommand(&Cmd, TEXT("DEMOPLAY")))
+{
+    Ar.Log(**(FString*)((BYTE*)this + 0x70));
+    return 1;
+}
+if (ParseCommand(&Cmd, TEXT("STOPDEMO")))
+{
+    Ar.Log(**(FString*)((BYTE*)this + 0x70));
+    if (*(FOutputDevice**)((BYTE*)this + 0xa0))
+        (*(FOutputDevice**)((BYTE*)this + 0xa0))->Log(**(FString*)((BYTE*)this + 0x70));
+    if (*(INT*)((BYTE*)this + 0x10) == 0)
+    {
+        UDemoRecDriver* driver = (UDemoRecDriver*)((BYTE*)this - 0x2c);
+        ULevel* lev = driver->GetLevel();
+        if (lev) *(INT*)((BYTE*)lev + 0x8c) = 0;
+        if (driver)
+        {
+            typedef void (__thiscall* DestroyFn)(void*, INT);
+            ((DestroyFn)(*(void**)(*(INT*)driver + 0xc)))(driver, 1);
+        }
+    }
+    else
+    {
+        *(INT*)(*(INT*)((BYTE*)this + 0x10) + 0x80) = 1;
+    }
+    return 1;
+}
 return 0;
 unguard;
 }
@@ -204,7 +248,7 @@ return lev;
 unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10487d00 is 104 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10487d00)
 int UDemoRecDriver::InitBase(int, FNetworkNotify*, FURL& InURL, FString&)
 {
 guard(UDemoRecDriver::InitBase);
@@ -217,7 +261,7 @@ return 1;
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10488560 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1032b9b0 (connection init helper)")
 int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitConnect);
@@ -225,7 +269,7 @@ return 0;
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10488740 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1038ef30 (demo record init helper)")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -241,10 +285,10 @@ unguard;
 // UNetConnection
 // =============================================================================
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x1037E100 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: complex 300+ byte constructor; UNetConnection fields not fully mapped")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104842B0 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1050557c (command dispatch helper)")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -269,7 +313,7 @@ fn(fdOut, Data, Event);
 unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10485820 is 305 bytes, not fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_103db080 (actor channel cleanup)")
 void UNetConnection::Destroy() { Super::Destroy(); }
 
 IMPL_MATCH("Engine.dll", 0x10484200)
@@ -285,14 +329,13 @@ Ar << *(UObject**)((BYTE*)this + 0x4ba8);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete/diverged — reason indicates divergence (stub)")
+IMPL_MATCH("Engine.dll", 0x104651d0)
 void UNetConnection::ReadInput(FLOAT DeltaSeconds)
 {
-guard(UNetConnection::ReadInput);
-unguard;
+// Retail: shared empty stub at 0x104651d0.
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104844a0 is 108 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x104844a0)
 void UNetConnection::InitOut()
 {
 guard(UNetConnection::InitOut);
@@ -316,7 +359,7 @@ appFailAssert("State==USOCK_Closed || State==USOCK_Pending || State==USOCK_Open"
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104854F0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x104854f0)
 void UNetConnection::SendAck(INT PacketId, INT RemotePacketId)
 {
 guard(UNetConnection::SendAck);
@@ -325,9 +368,8 @@ if (*(INT*)((BYTE*)this + 0xD8) == 0)
 if (RemotePacketId != 0)
 {
 PurgeAcks();
-TArray<INT>& AckPending = *(TArray<INT>*)((BYTE*)this + 0x4b64);
-INT idx = AckPending.Add(1);
-AckPending(idx) = PacketId;
+INT idx = ((FArray*)((BYTE*)this + 0x4b64))->Add(1, 4);
+*(INT*)(*(INT*)((BYTE*)this + 0x4b64) + idx * 4) = PacketId;
 }
 BYTE bits = appCeilLogTwo(0x4000);
 PreSend((INT)bits + 1);
@@ -340,7 +382,7 @@ PostSend();
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10486440 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_10301050 (packet assembly helper)")
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
@@ -348,7 +390,7 @@ guard(UNetConnection::FlushNet);
 unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104868F0 not yet fully reconstructed")
+IMPL_DIVERGE("FUN_ blocker: FUN_1037cf90 (channel tick helper)")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
@@ -356,17 +398,60 @@ guard(UNetConnection::Tick);
 unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104845d0 is 115 bytes, not fully reconstructed")
-INT UNetConnection::IsNetReady( INT Saturate ) { return 1; }
-
-IMPL_DIVERGE("body incomplete — Ghidra 0x10484B70 not yet fully reconstructed")
-void UNetConnection::HandleClientPlayer(APlayerController* PC)
+IMPL_MATCH("Engine.dll", 0x104845d0)
+INT UNetConnection::IsNetReady(INT Saturate)
 {
-guard(UNetConnection::HandleClientPlayer);
+guard(UNetConnection::IsNetReady);
+if (Saturate != 0)
+{
+INT numBytes = ((FBitWriter*)((BYTE*)this + 0x250))->GetNumBytes();
+*(INT*)((BYTE*)this + 0x114) = -numBytes;
+}
+INT numBytes = ((FBitWriter*)((BYTE*)this + 0x250))->GetNumBytes();
+return (INT)((DWORD)(*(INT*)((BYTE*)this + 0x114) + numBytes) < 1u);
 unguard;
 }
 
-IMPL_DIVERGE("UNetConnection::GetDriver not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10484b70)
+void UNetConnection::HandleClientPlayer(APlayerController* PC)
+{
+guard(UNetConnection::HandleClientPlayer);
+typedef void (__thiscall* VoidFn)(void*);
+// Validate PC->GetLevel()->Engine->Client exists
+if (*(INT*)(*(INT*)(*(INT*)((BYTE*)PC + 0x328) + 0x44) + 0x44) == 0)
+    appFailAssert("PC->GetLevel()->Engine->Client", ".\\UnConn.cpp", 0x43e);
+// Validate Client has viewports
+if (((FArray*)(*(INT*)(*(INT*)(*(INT*)((BYTE*)PC + 0x328) + 0x44) + 0x44) + 0x30))->Num() == 0)
+    appFailAssert("PC->GetLevel()->Engine->Client->Viewports.Num()", ".\\UnConn.cpp", 0x43f);
+// Get first viewport (Data ptr of TArray at Client+0x30)
+UObject* viewport = *(UObject**)(*(INT*)(*(INT*)(*(INT*)((BYTE*)PC + 0x328) + 0x44) + 0x44) + 0x30);
+*(INT*)(*(INT*)((BYTE*)viewport + 0x34) + 0x5b4) = 0;
+*(DWORD*)((BYTE*)viewport + 0x48) = *(DWORD*)((BYTE*)this + 0x48);
+// Set NM_Client (3)
+*(BYTE*)((BYTE*)PC + 0x2d) = 3;
+*(DWORD*)((BYTE*)PC + 0x4f8) = 0x334cc80c;
+*(INT*)((BYTE*)PC + 0x504) = 5;
+PC->SetPlayer((UPlayer*)viewport);
+GLog->Logf(TEXT("SetPlayer"));
+// Refresh viewport via vtable[0x7c/4]
+{
+    void* vpPtr = *(void**)(*(INT*)(*(INT*)(*(INT*)(*(INT*)((BYTE*)PC + 0x328) + 0x44) + 0x44) + 0x30) + 0x80);
+    ((VoidFn)(*(void**)(*(INT*)vpPtr + 0x7c)))(vpPtr);
+}
+// Notify engine via vtable[0x78/4]
+{
+    void* engPtr = *(void**)(*(INT*)((BYTE*)PC + 0x328) + 0x44);
+    ((VoidFn)(*(void**)(*(INT*)engPtr + 0x78)))(engPtr);
+}
+*(BYTE*)(*(INT*)((BYTE*)PC + 0x144) + 0x928) = 0;
+if (*(INT*)((BYTE*)this + 0x80) != 2)
+    appFailAssert("State==USOCK_Pending", ".\\UnConn.cpp", 0x453);
+*(APlayerController**)((BYTE*)this + 0x34) = PC;
+*(INT*)((BYTE*)this + 0x80) = 3;
+unguard;
+}
+
+IMPL_DIVERGE("not found in Ghidra export — simple accessor")
 UNetDriver* UNetConnection::GetDriver() { return Driver; }
 
 IMPL_MATCH("Engine.dll", 0x10484680)

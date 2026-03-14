@@ -154,7 +154,7 @@ FVector AR6Pawn::CheckForLedges(AActor *, FVector, FVector, FVector, INT &, INT 
 	return FVector(0,0,0);
 }
 
-IMPL_DIVERGE("distance/size checks and 4-point probe grid from param_5 unresolved.")
+IMPL_DIVERGE("FUN_ blocker: FUN_100015d0 (unlisted ULevel::ActorLineCheck helper)")
 INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 	AActor* param_4, FVector& param_5, AActor* param_6, FVector& param_7)
 {
@@ -799,7 +799,7 @@ void AR6Pawn::PawnSetBoneRotation(FName BoneName, INT Pitch, INT Yaw, INT Roll, 
 	unguard;
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 {
 	m_bAim = bShouldAim;
@@ -807,7 +807,7 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_DIVERGE("FUN_ blocker: FUN_10001750 (Karma physics actor adjustment helper)")
 INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
 	guard(AR6Pawn::PickActorAdjust);
@@ -1148,7 +1148,7 @@ INT AR6Pawn::SetAudioInfo()
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10042934 reads cached bone rotation state; use 0 (identity rotation) as approximation")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookAndAimDirection);
@@ -1215,7 +1215,7 @@ void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10042934 reads cached bone rotation state; use 0 (identity rotation) as approximation")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::SetPawnLookDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookDirection);
@@ -1587,7 +1587,7 @@ FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("raw bit check at this+0x3E8 bit 4; approximated with m_bWantsToProne")
+IMPL_DIVERGE("FUN_ blocker: FUN_10017320 (raw bit test at this+0x3E8 not yet resolved)")
 void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateFullPeekingMode);
@@ -1748,7 +1748,7 @@ void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 	UpdateFullPeekingMode(DeltaTime);
 }
 
-IMPL_DIVERGE("FUN_10042934 reads cached bone rotation state; use 0 (identity rotation) as approximation")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::WeaponFollow(INT param_1, FLOAT param_2)
 {
 	guard(AR6Pawn::WeaponFollow);
@@ -1799,7 +1799,7 @@ INT AR6Pawn::WeaponIsAGadget()
 	return 1;
 }
 
-IMPL_DIVERGE("FUN_10042934 reads cached bone rotation state; use 0 (identity rotation) as approximation")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::WeaponLock(INT param_1, FLOAT param_2, FLOAT param_3)
 {
 	guard(AR6Pawn::WeaponLock);
@@ -2262,7 +2262,7 @@ void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 	// Requires resolving UDecalManager and hit-material helpers. Left as no-op.
 }
 
-IMPL_DIVERGE("original code applies armor modification to iKillDamage via an x87 ftol")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor in damage calc)")
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iKillDamage);
@@ -2325,7 +2325,7 @@ void AR6Pawn::execGetRotationOffset(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetRotationOffset();
 }
 
-IMPL_DIVERGE("same x87 armor-modification divergence as execGetKillResult")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor in damage calc)")
 void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iStunDamage);
@@ -2379,7 +2379,7 @@ void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = (iResult < 0) ? 0 : iResult;
 }
 
-IMPL_DIVERGE("function obtains a USkeletalMeshInstance, calls GetBoneCoords for the")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor in hit bone calc)")
 void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rHitDirection);
@@ -2492,7 +2492,7 @@ void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetViewRotation();
 }
 
-IMPL_DIVERGE("server-side network replication walks the PlayerController list at")
+IMPL_DIVERGE("FUN_ blocker: FUN_10024560 (server-side network replication per-controller call)")
 void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, S);
@@ -2718,7 +2718,7 @@ void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 	}
 }
 
-IMPL_DIVERGE("ECLipSynchData constructor param order uncertain from Ghidra")
+IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (ECLipSynchData constructor parameter helper)")
 void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 {
 	guard(AR6Pawn::m_vInitNewLipSynch);
@@ -2738,7 +2738,7 @@ void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 	unguard;
 }
 
-IMPL_DIVERGE("Controller float at raw offset 0x3BC — unlisted AController field")
+IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (pathfinding / ActorReachable helper)")
 INT AR6Pawn::moveToPosition(FVector const& Target)
 {
 	if (!Controller)
@@ -3050,7 +3050,7 @@ void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_1001bc10 on Controller is an unknown accessor; approximate")
+IMPL_DIVERGE("FUN_ blocker: FUN_1001bc10 (unlisted AController rotation accessor)")
 void AR6Pawn::physicsRotation(FLOAT DeltaTime, FVector InVelocity)
 {
 	guard(AR6Pawn::physicsRotation);

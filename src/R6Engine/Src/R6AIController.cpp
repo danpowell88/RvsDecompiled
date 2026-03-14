@@ -661,13 +661,69 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_DIVERGE("Too complex to reconstruct: poll checks MoveTimer, advances route cache via SetDestinationToNextInCache, handles door-type waypoints (FUN_10007b80); deferred")
+IMPL_DIVERGE("FUN_100017c0 unresolved (navigation-point initialiser)")
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
-	// Poll — no bytecode params; called by VM during latent waits.
-	// DIVERGENCE: poll checks MoveTimer, calls vtable move method, advances route cache via
-	// SetDestinationToNextInCache, handles door-type waypoints; complex Ghidra analysis
-	// (FUN_10007b80) required to fully reconstruct — deferred.
+	void* pPawn = *(void**)((BYTE*)this + 0x3d8);
+
+	// Timer expired or no pawn: clear latent action
+	if (pPawn == NULL || !(*(FLOAT*)((BYTE*)this + 0x3bc) >= 0.0f))
+	{
+		GetStateFrame()->LatentAction = 0;
+		m_eMoveToResult = 2;
+		return;
+	}
+
+	typedef INT (__thiscall *TMoveToward)(void*, void*, INT);
+
+	if ((*(DWORD*)((BYTE*)this + 0x3a8) & 0x40) == 0)
+	{
+		// Not adjusting: move pawn toward next route waypoint
+		m_eMoveToResult = 0;
+		INT iVar3 = ((TMoveToward)(*(INT**)pPawn)[0x184 / 4])(pPawn, (BYTE*)this + 0x480, *(INT*)((BYTE*)this + 0x3e0));
+
+		if (iVar3 != 0)
+		{
+			if (m_eMoveToResult != 1)
+			{
+				GetStateFrame()->LatentAction = 0;
+				m_eMoveToResult = 2;
+				return;
+			}
+
+			// Reached a waypoint — optionally handle door-type nav point
+			INT curRoute = *(INT*)((BYTE*)this + *(INT*)((BYTE*)this + 0x4fc) * 4 + 0x408);
+			if (curRoute != 0)
+			{
+				// DIVERGENCE: FUN_100017c0 unresolved (navigation-point initialiser).
+				// Retail walks class hierarchy (checking PrivateStaticClass_exref) and calls
+				// FUN_100017c0(curRoute) to initialise the nav-point, then stores result at
+				// Pawn+0x4f8. Skipped here as both FUN_100017c0 and the reference class are
+				// unresolved external symbols.
+			}
+
+			if (SetDestinationToNextInCache())
+			{
+				void* pPawn2 = *(void**)((BYTE*)this + 0x3d8);
+				((TMoveToward)(*(INT**)pPawn2)[0x184 / 4])(pPawn2, (BYTE*)this + 0x480, *(INT*)((BYTE*)this + 0x3e0));
+				return;
+			}
+			GetStateFrame()->LatentAction = 0;
+			return;
+		}
+	}
+	else
+	{
+		// Adjusting around obstacle: move toward AdjustLoc with no target
+		INT iVar3 = ((TMoveToward)(*(INT**)pPawn)[0x184 / 4])(pPawn, (BYTE*)this + 0x474, 0);
+
+		// Set or clear bAdjusting (bit 0x40 at this+0x3a8) based on MoveToward result
+		DWORD flags = *(DWORD*)((BYTE*)this + 0x3a8);
+		if (iVar3 == 0)
+			*(DWORD*)((BYTE*)this + 0x3a8) = flags | 0x40;
+		else
+			*(DWORD*)((BYTE*)this + 0x3a8) = flags & ~0x40u;
+	}
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10001280)

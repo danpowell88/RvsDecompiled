@@ -278,16 +278,21 @@ FLOAT FInterpCurve::Eval( FLOAT Input )
 // Note: DllMain, hInstance, and GPackage are provided by IMPLEMENT_PACKAGE(Core) above.
 
 /*-----------------------------------------------------------------------------
-	__FUNC_NAME__ external linkage workaround.
-	With DO_GUARD=0 the guard/unguard macros are no-ops, so the function-local
-	__FUNC_NAME__ statics that retail Code.def exports are never emitted by our
-	compiler. We define equivalent global arrays and redirect the mangled names
-	via /alternatename.
+	__FUNC_NAME__ external linkage workaround (MSVC 2019 / DO_GUARD=0 builds only).
 
-	The `extern` keyword is required to give each array external linkage — in C++
-	`const` at namespace scope has internal linkage by default, and MSVC 7.1
-	enforces this strictly even inside an `extern "C"` block.
+	With DO_GUARD=0 the guard/unguard macros are no-ops, so the function-local
+	__FUNC_NAME__ statics that retail Core.def exports are never emitted.
+	We define equivalent global arrays and use /alternatename to redirect the
+	mangled names so the .def-exported ordinals resolve correctly.
+
+	When building with MSVC 7.1 (DO_GUARD=1), the guard() macro creates the
+	statics naturally — this entire block is skipped.
+
+	The `extern` keyword is required to give each array external linkage — in
+	C++, `const` at namespace scope has internal linkage by default.
+	MSVC 7.1 enforces this strictly even inside `extern "C"`.
 -----------------------------------------------------------------------------*/
+#if DO_GUARD == 0
 extern "C" {
 extern __declspec(dllexport) const unsigned short _gfn_Reverse[]        = {'F','S','t','r','i','n','g',':',':','R','e','v','e','r','s','e',0};
 extern __declspec(dllexport) const unsigned short _gfn_ParseIntoArray[] = {'F','S','t','r','i','n','g',':',':','P','a','r','s','e','I','n','t','o','A','r','r','a','y',0};
@@ -296,16 +301,18 @@ extern __declspec(dllexport) const unsigned short _gfn_SerializeExp[]   = {'F','
 extern __declspec(dllexport) const unsigned short _gfn_SerializeImp[]   = {'F','O','b','j','e','c','t','I','m','p','o','r','t',':',':','S','e','r','i','a','l','i','z','e',0};
 extern __declspec(dllexport) const unsigned short _gfn_OpDelete[]       = {'U','O','b','j','e','c','t',':',':','o','p','e','r','a','t','o','r',' ','d','e','l','e','t','e',0};
 }
-// Force emission of the above arrays (compiler may optimize away unused consts).
+// Force emission (compiler may optimize away unused consts).
 static volatile const void* _gfnRefs[] = {_gfn_Reverse, _gfn_ParseIntoArray, _gfn_AddDependency, _gfn_SerializeExp, _gfn_SerializeImp, _gfn_OpDelete};
-// /alternatename: redirect any code-level references to __FUNC_NAME__ statics to our arrays.
-// (The .def aliasing above handles the export table; this covers any linkage references in .obj files.)
+// Redirect .def-exported mangled __FUNC_NAME__ statics to our arrays.
+// (The double-underscore prefix is the MSVC x86 extern "C" convention for
+// a variable whose C name already starts with '_': _gfn_Reverse → __gfn_Reverse)
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Reverse@FString@@QAE?AV2@XZ@4QBGB=__gfn_Reverse")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??ParseIntoArray@FString@@QAEHPBGPAV?$TArray@VFString@@@@@Z@4QBGB=__gfn_ParseIntoArray")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??AddDependency@UClass@@QAEXPAV2@H@Z@4QBGB=__gfn_AddDependency")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectExport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeExp")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectImport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeImp")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???3UObject@@SAXPAXI@Z@4QBGB=__gfn_OpDelete")
+#endif // DO_GUARD == 0
 
 /*-----------------------------------------------------------------------------
 	Force inline functions to emit out-of-line copies for .def export.

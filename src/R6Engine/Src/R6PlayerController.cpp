@@ -315,15 +315,15 @@ void AR6PlayerController::UpdateSpectatorReticule()
 
 	FVector StartPoint(0.f, 0.f, 0.f);
 	FVector EndPoint(0.f, 0.f, 0.f);
-	UBOOL bDoTrace = TRUE;
+	DWORD bDoTrace = 1;
 
-	if ((*(UINT*)((BYTE*)this + 0x524) & 0x20000) == 0)
+	if ((*(DWORD*)((BYTE*)this + 0x524) & 0x20000) == 0)
 	{
 		// ViewTarget mode: spectating another player
 		void* pViewTarget = *(void**)((BYTE*)this + 0x5b8);
 		if (pViewTarget == NULL)
 		{
-			bDoTrace = FALSE;
+			bDoTrace = 0;
 		}
 		else
 		{
@@ -332,7 +332,7 @@ void AR6PlayerController::UpdateSpectatorReticule()
 			INT bAlive = ((TIsAlive)(*(INT**)pViewTarget)[0x68 / 4])(pViewTarget);
 			if (!bAlive)
 			{
-				bDoTrace = FALSE;
+				bDoTrace = 0;
 			}
 			else
 			{
@@ -549,7 +549,7 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 	}
 
 	// Allocate 0x1c-byte FstSoundPriorityPtr entry
-	INT* pEntry = (INT*)GMalloc->Malloc(0x1c);
+	INT* pEntry = (INT*)GMalloc->Malloc(0x1c, TEXT("R6Sound"));
 	if (pEntry == NULL)
 		return;
 
@@ -579,11 +579,11 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 		}
 		else if (iPriority == 10)
 		{
-			UBOOL bFoundMatch = FALSE;
+			UBOOL bFoundMatch = 0;
 			for (INT i = 0; i < m_PlayVoicesPriority.Num(); i++)
 			{
 				INT* pE = (INT*)*(INT*)(*(INT*)((BYTE*)this + 0x900) + i * 4);
-				UBOOL bStop = FALSE;
+				UBOOL bStop = 0;
 				if ((AR6SoundReplicationInfo*)pE[0] == aAudioRepInfo)
 				{
 					if (pE[2] != 10)
@@ -594,13 +594,13 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 					{
 						if (pE[5] == 0 || pE[6] == 0)
 						{
-							bStop = TRUE;
+							bStop = 1;
 						}
 						else
 						{
 							if (pE[1] == (INT)sndPlayVoice)
 								bAlreadyExists = 1;
-							bFoundMatch = TRUE;
+							bFoundMatch = 1;
 						}
 					}
 				}
@@ -612,12 +612,12 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 					    *(BYTE*)((BYTE*)pE + 0x0d) == 1 &&
 					    pE[2] > 14)
 					{
-						bStop = TRUE;
+						bStop = 1;
 					}
 				}
 				else
 				{
-					bFoundMatch = TRUE;
+					bFoundMatch = 1;
 					bAlreadyExists = 1;
 				}
 				if (bStop)
