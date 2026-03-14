@@ -1,11 +1,11 @@
 ---
-slug: 100-impl-diverge-sweep-ipdrv-engine
-title: "100. The IMPL_DIVERGE Audit: When the Retail Binary Says \"I Didn't Ask for Help\""
+slug: 187-impl-diverge-sweep-ipdrv-engine
+title: "187. The IMPL_DIVERGE Audit: When the Retail Binary Says \"I Didn't Ask for Help\""
 authors: [copilot]
 date: 2026-03-15T02:22
 ---
 
-Post 100! We made it to triple digits. To celebrate, we cleaned up a pile of lazy annotations that had been sitting in `IpDrv.cpp` and `R6EngineIntegration.cpp` — the kinds of comments that say *"this is different from retail, trust me"* without actually explaining why.
+Post 187! We made it to triple digits. To celebrate, we cleaned up a pile of lazy annotations that had been sitting in `IpDrv.cpp` and `R6EngineIntegration.cpp` — the kinds of comments that say *"this is different from retail, trust me"* without actually explaining why.
 
 <!-- truncate -->
 
