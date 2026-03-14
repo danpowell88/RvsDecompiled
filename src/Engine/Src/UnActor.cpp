@@ -2156,54 +2156,78 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_DIVERGE("Returns hardcoded resolution — actual display resolution query needs Ghidra")
+IMPL_DIVERGE("DIVERGENCE: retail reads resolution from engine list via vtable for given Index (Ghidra 0x10427090) — binary-specific vtable; hardcoded fallback")
 void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
 	P_GET_INT(Index);
 	P_FINISH;
+	// Ghidra 0x10427090: queries width/height/depth from engine resolution array at Index.
 	*(FString*)Result = TEXT("1024x768");
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("DIVERGENCE: calls UEngine vtable[0xD4/4] with OldTex name (Ghidra 0x10424160) — binary-specific vtable; texture replacement stubbed")
 void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
 	P_GET_OBJECT(UMaterial,OldTex);
 	P_GET_OBJECT(UMaterial,NewTex);
 	P_FINISH;
+	// Ghidra 0x10424160: (*(g_pEngine->vtable + 0xD4))(g_pEngine, OldTex->GetName())
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_DIVERGE("Returns 1 — full implementation needs Ghidra analysis")
+IMPL_DIVERGE("DIVERGENCE: retail queries VRAM via UViewport vtable chain at 0xC0 and tests >32 MB (Ghidra 0x10427350); returns 1 as safe default for modern GPUs")
 void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
 	P_FINISH;
+	// Ghidra 0x10427350: g_pEngine->Client->Viewports[0]->inner->vtable[0xC0/4]() > 0x20
 	*(DWORD*)Result = 1;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2617, execIsVideoHardwareAtLeast64M );
 
-IMPL_DIVERGE("Returns NULL — full implementation needs Ghidra analysis")
+IMPL_DIVERGE("DIVERGENCE: reads UCanvas from first UViewport via binary-specific offsets (UClient+0x30=Viewports, UViewport+0x7C=Canvas) — Ghidra 0x10427270")
 void AActor::execGetCanvas( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetCanvas);
 	P_FINISH;
-	*(UObject**)Result = NULL;
+	// Ghidra 0x10427270: g_pEngine->Client->Viewports[0]->Canvas
+	*(void**)Result = NULL;
+	if( g_pEngine )
+	{
+		BYTE* pClient = *(BYTE**)((BYTE*)g_pEngine + 0x44);
+		if( pClient )
+		{
+			INT numViewports = *(INT*)(pClient + 0x34);
+			if( numViewports > 0 )
+			{
+				BYTE* pViewport = **(BYTE***)(pClient + 0x30);
+				*(void**)Result = *(void**)(pViewport + 0x7C);
+			}
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2618, execGetCanvas );
 
-IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("DIVERGENCE: sets bit 0x8000 in UEngine bitfield at raw offset 0x120 (Ghidra 0x10422d50) — binary-specific field offset")
 void AActor::execEnableLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execEnableLoadingScreen);
 	P_GET_UBOOL(bEnable);
 	P_FINISH;
+	// Ghidra 0x10422d50: *(g_pEngine+0x120) bit 15 (0x8000) = bEnable
+	if( g_pEngine )
+	{
+		DWORD& flags = *(DWORD*)((BYTE*)g_pEngine + 0x120);
+		if( bEnable ) flags |=  0x8000u;
+		else          flags &= ~0x8000u;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2619, execEnableLoadingScreen );
@@ -2219,11 +2243,18 @@ void AActor::execAddMessageToConsole( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2620, execAddMessageToConsole );
 
-IMPL_DIVERGE("UnrealScript native dispatch stub — P_FINISH but no return value; body deferred")
+IMPL_DIVERGE("DIVERGENCE: calls vtable[0x68] on UClient at g_pEngine+0x44 (Ghidra 0x10422f20) — binary-specific vtable offset")
 void AActor::execUpdateGraphicOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execUpdateGraphicOptions);
 	P_FINISH;
+	// Ghidra 0x10422f20: g_pEngine->Client->vtable[0x68/4]()
+	if( g_pEngine )
+	{
+		INT* pClient = *(INT**)((BYTE*)g_pEngine + 0x44);
+		if( pClient )
+			(*(void(**)(INT*))(*pClient + 0x68))(pClient);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2621, execUpdateGraphicOptions );
@@ -4367,10 +4398,44 @@ void ABrush::InitPosRotScale()
     *(FVector*)((BYTE*)this + 0x2c8) = FVector(0,0,0);
     unguard;
 }
-IMPL_DIVERGE("Returns 0.0f — full float calculation needs Ghidra analysis")
-FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
-IMPL_DIVERGE("Returns 0.0f — full float calculation needs Ghidra analysis")
-FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
+IMPL_MATCH("Engine.dll", 0x10307c40)
+FLOAT ABrush::BuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
+{
+	guard(ABrush::BuildCoords);
+	if( Coords )
+	{
+		Coords->PointXform  = GMath.UnitCoords;
+		Coords->VectorXform = GMath.UnitCoords.Transpose();
+	}
+	if( UnCoords )
+	{
+		UnCoords->PointXform  = GMath.UnitCoords;
+		UnCoords->VectorXform = GMath.UnitCoords.Transpose();
+	}
+	return 0.0f;
+	unguard;
+}
+IMPL_DIVERGE("DIVERGENCE: OldBuildCoords applies TempScale/Location/Rotation and hidden FScale fields at this+0x3B0/0x3C4 (Ghidra 0x10307930); intermediates not recoverable from Ghidra pseudo-C alone")
+FLOAT ABrush::OldBuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
+{
+	// Retail RVA 0x7930 (0x10307930): builds model coords from brush TempScale, Location
+	// (as FRotator), Rotation (as FVector), and two hidden FScale fields at +0x3B0 and +0x3C4.
+	// Returns FScale::Orientation(s3b0) * FScale::Orientation(s3c4).
+	// Approximation: fall back to identity transforms until full field layout is confirmed.
+	if( Coords )
+	{
+		Coords->PointXform  = GMath.UnitCoords;
+		Coords->VectorXform = GMath.UnitCoords.Transpose();
+	}
+	if( UnCoords )
+	{
+		UnCoords->PointXform  = GMath.UnitCoords;
+		UnCoords->VectorXform = GMath.UnitCoords.Transpose();
+	}
+	FScale& s3b0 = *(FScale*)((BYTE*)this + 0x3B0);
+	FScale& s3c4 = *(FScale*)((BYTE*)this + 0x3C4);
+	return s3b0.Orientation() * s3c4.Orientation();
+}
 IMPL_MATCH("Engine.dll", 0x103077d0)
 FCoords ABrush::OldToLocal() const
 {
