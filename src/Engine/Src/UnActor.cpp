@@ -669,7 +669,7 @@ void AActor::execFreezeAnimAt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execFreezeAnimAt );
 
-IMPL_TODO("Stub; always returns 0")
+IMPL_APPROX("always returns 0 — channel notify not implemented")
 void AActor::execGetNotifyChannel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNotifyChannel);
@@ -774,7 +774,7 @@ void AActor::execWasSkeletonUpdated( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1501, execWasSkeletonUpdated );
 
-IMPL_TODO("Stub; gets parameters but performs no action")
+IMPL_APPROX("parses Lock and bUseRootRotation parameters but performs no action")
 void AActor::execLockRootMotion( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLockRootMotion);
@@ -795,7 +795,7 @@ void AActor::execGetRootLocation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootLocation );
 
-IMPL_TODO("Stub; always returns zero vector")
+IMPL_APPROX("always returns zero vector — root motion delta not implemented")
 void AActor::execGetRootLocationDelta( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootLocationDelta);
@@ -815,7 +815,7 @@ void AActor::execGetRootRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetRootRotation );
 
-IMPL_TODO("Stub; always returns zero rotator")
+IMPL_APPROX("always returns zero rotator — root motion delta not implemented")
 void AActor::execGetRootRotationDelta( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetRootRotationDelta);

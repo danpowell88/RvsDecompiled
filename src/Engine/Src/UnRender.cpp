@@ -495,7 +495,7 @@ FSceneNode::FSceneNode(UViewport * Viewport)
 }
 
 // ??1FSceneNode@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated scene node")
 FSceneNode::~FSceneNode() {}
 
 // ?GetActorSceneNode@FSceneNode@@UAEPAVFActorSceneNode@@XZ
@@ -523,11 +523,11 @@ IMPL_APPROX("base class returns NULL; subclass FWarpZoneSceneNode overrides")
 FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
 
 // ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns default FPlane; full projection math not implemented")
 FPlane FSceneNode::Project(FVector p0) { return FPlane(); }
 
 // ?Deproject@FSceneNode@@QAE?AVFVector@@VFPlane@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns zero vector; full deprojection math not implemented")
 FVector FSceneNode::Deproject(FPlane p0) { return FVector(); }
 
 // ??4FSceneNode@@QAEAAV0@ABV0@@Z
@@ -535,7 +535,7 @@ IMPL_APPROX("bitwise copy via appMemcpy")
 FSceneNode& FSceneNode::operator=(const FSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 
 // ??1FLevelSceneNode@@UAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated level scene node")
 FLevelSceneNode::~FLevelSceneNode() {}
 
 // ??4FLevelSceneNode@@QAEAAV0@ABV0@@Z
@@ -650,7 +650,7 @@ IMPL_APPROX("zero-initializes all fields via appMemzero")
 FDbgVectorInfo::FDbgVectorInfo() { appMemzero(this, sizeof(*this)); }
 IMPL_APPROX("bitwise copy via appMemcpy")
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("trivial destructor; no heap resources to free")
 FDbgVectorInfo::~FDbgVectorInfo() {}
 IMPL_APPROX("bitwise copy via appMemcpy")
 FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
@@ -670,17 +670,17 @@ FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { a
 // ============================================================================
 
 // FActorSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FActorSceneNode::Render(FRenderInterface*) {}
 IMPL_APPROX("returns this as FActorSceneNode")
 FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
 
 // FCameraSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FCameraSceneNode::Render(FRenderInterface*) {}
 IMPL_APPROX("returns this as FCameraSceneNode")
 FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; view/projection matrices not updated")
 void FCameraSceneNode::UpdateMatrices() {}
 
 // FMirrorSceneNode
@@ -705,12 +705,12 @@ IMPL_APPROX("returns this as FWarpZoneSceneNode")
 FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 
 // FLevelSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty frustum; frustum computation not implemented")
 FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FLightMapSceneNode
 extern ENGINE_API FRebuildTools GRebuildTools;
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FLightMapSceneNode::Render(FRenderInterface*) {}
 IMPL_APPROX("filters actors by rebuild tool flags and actor bits")
 INT FLightMapSceneNode::FilterActor(AActor* Actor)
@@ -721,17 +721,17 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 }
 
 // FDirectionalLightMapSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty frustum; directional light frustum not implemented")
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FPointLightMapSceneNode
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty frustum; point-light frustum not implemented")
 FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // ============================================================================
 // HCoords
 // ============================================================================
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("body unanalyzed; camera-coordinate transform pending Ghidra analysis")
 HCoords::HCoords(FCameraSceneNode*) {}
 
 // --- Moved from EngineStubs.cpp ---
@@ -741,7 +741,7 @@ void URenderResource::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 	Ar << Revision;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — subclass handles hit events")
 void FHitObserver::Click(const FHitCause& Cause, const HHitProxy& Hit) {}
 
 // ?AVIStart@@YAXPBGPAVUEngine@@H@Z

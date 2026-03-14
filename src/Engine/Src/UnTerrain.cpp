@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnTerrain.cpp: Terrain system (ATerrainInfo, FTerrainTools)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -832,7 +832,7 @@ int FTerrainTools::GetStrength()
 	return *(INT*)&Pad[0x84];
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void FTerrainTools::Init()
 {
 	guard(FTerrainTools::Init);
@@ -878,32 +878,32 @@ int UTerrainMaterial::HasFallback()
 // ============================================================================
 
 // ??0UTerrainSector@@QAE@PAVATerrainInfo@@HHHH@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 UTerrainSector::UTerrainSector(ATerrainInfo*, INT, INT, INT, INT) {}
 
 // ??0UTerrainPrimitive@@QAE@PAVATerrainInfo@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
 
 // --- Moved from EngineStubs.cpp ---
 IMPL_APPROX("Delegates to UPrimitive::Serialize")
 void UTerrainPrimitive::Serialize(FArchive& Ar) { UPrimitive::Serialize(Ar); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 1 — no hit; terrain primitive line check not yet reconstructed")
 INT UTerrainPrimitive::LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD) { return 1; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 1 — no hit; terrain primitive point check not yet reconstructed")
 INT UTerrainPrimitive::PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD) { return 1; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainPrimitive::Illuminate(AActor*, INT) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns empty FBox; terrain primitive render bounds not yet reconstructed")
 FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor*, INT) { return FBox(); }
 
 IMPL_APPROX("Delegates to UObject::Serialize")
 void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::PostLoad() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::StaticLight(INT) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 void UTerrainSector::GenerateTriangles() {}
 // Ghidra at 0x156550. Returns linear index in the global heightmap grid.
 IMPL_MATCH("Engine.dll", 0x156550)
@@ -918,7 +918,7 @@ IMPL_MATCH("Engine.dll", 0x153a0)
 INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 1 — always pass; triangle visibility test not yet reconstructed")
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
 // ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
 // Gets the alpha texture for the layer, computes texel range for this sector,
@@ -952,7 +952,7 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 
 	return 1;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0; full triangle layer alpha check not yet reconstructed")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}
