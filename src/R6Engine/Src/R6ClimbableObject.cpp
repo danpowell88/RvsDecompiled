@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6ClimbableObject)
 
 // --- AR6ClimbableObject ---
 
-IMPL_DIVERGE("retail error log args are in data sections; log a generic message")
+IMPL_DIVERGE("R6Engine.dll 0x10016310: error log uses raw data-section format string; class lookup via StaticFindObjectChecked (vs direct StaticClass()); SpawnActor via raw vtable slot 0xa8")
 void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 {
 	guard(AR6ClimbableObject::AddMyMarker);

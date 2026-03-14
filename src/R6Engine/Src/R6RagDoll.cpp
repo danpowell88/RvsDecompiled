@@ -221,7 +221,7 @@ void AR6RagDoll::FirstInit(AR6AbstractPawn * param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("editor/debug visualization function (Ghidra 0x33760, ~1000 bytes).")
+IMPL_DIVERGE("R6Engine.dll 0x10033760 (~1000 bytes): FLineBatcher skeleton draw; omitted (editor-only path)")
 void AR6RagDoll::RenderBones(UCanvas * Canvas)
 {
 	guard(AR6RagDoll::RenderBones);
@@ -291,7 +291,7 @@ void AR6RagDoll::SatisfyConstraints()
 	unguard;
 }
 
-IMPL_DIVERGE("original passes extra buffer arg; dropped")
+IMPL_DIVERGE("R6Engine.dll 0x10035000: SetBonePosition calls pass an extra buffer argument not present in our signature; dropped")
 INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 {
 	guard(AR6RagDoll::Tick);
