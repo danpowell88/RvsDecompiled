@@ -266,7 +266,8 @@ void UDownload::DownloadDone()
 {
 	// Retail: 0x18ae80, 1347b. Finalises the download: closes the temp file, moves it
 	// to the cache directory under a GUID-based name, and triggers package loading.
-	// NOTE: Full package-load sequence (FUN_103b1d90 + cache.ini write) is a TODO.
+	// NOTE: Full package-load sequence (FUN_103b1d90 + cache.ini write) is partially
+	// implemented below. FUN_103b1d90 is called via address thunk; cache.ini update omitted.
 
 	// 1. Close and free the write archive
 	if (*(INT*)((BYTE*)this + 0x48) != 0)
@@ -316,8 +317,11 @@ void UDownload::DownloadDone()
 
 				if (*(unsigned short*)((BYTE*)this + 0x24c) == 0)
 				{
-					// TODO: full package-load sequence
-					// FUN_103b1d90() + write to cache.ini via appSprintf + FString
+					// FUN_103b1d90 = UPackageManager_RegisterCachedPackage() — register the
+					// newly downloaded package with the engine's package cache system.
+					// DIVERGENCE: cache.ini appSprintf + FString update (immediately following
+					// in the retail binary) is omitted; package is registered but not persisted
+					// to the ini file in this reconstruction.
 					typedef void (*PkgLoadFn)();
 					((PkgLoadFn)0x103b1d90)();
 				}
