@@ -179,7 +179,7 @@ int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
 	// Retail: 0x16c600, 2427b. DXT compression pipeline — too complex to decompile.
-	// DIVERGENCE: full per-format DXT compression not implemented.
+	// TODO: implement UTexture::Compress (retail 0x16c600, 2427 bytes: DXT compression pipeline)
 	return 0;
 	unguard;
 }
@@ -236,7 +236,7 @@ int UTexture::Decompress(ETextureFormat)
 {
 	guard(UTexture::Decompress);
 	// Retail: 0x16b0c0, ~250b. DXT1 block decompression — too complex to decompile.
-	// DIVERGENCE: DXT1→RGBA8 conversion not implemented.
+	// TODO: implement UTexture::Decompress (retail 0x16b0c0, ~250 bytes: DXT1 block decompression)
 	return 0;
 	unguard;
 }
@@ -850,7 +850,7 @@ void UShadowBitmapMaterial::Destroy()
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: 0x12e3e0, 2594b. Shadow map rendering pipeline — too complex to decompile.
-	// DIVERGENCE: shadow projection and render-to-texture not implemented.
+	// TODO: implement UShadowBitmapMaterial::Get (retail 0x12e3e0, 2594 bytes: shadow map rendering pipeline)
 	return NULL;
 }
 

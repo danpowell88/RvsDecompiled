@@ -197,7 +197,7 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 		INT nVP = *(INT*)(*(BYTE**)(*(BYTE**)((BYTE*)eng + 0x44) + 0x30) + 4);
 		if ( nVP == 0 )
 			appFailAssert("Engine->Client->Viewports.Num()", ".\\UnLevTic.cpp", 0x2fa);
-		// DIVERGENCE: BrowseLevel to ?failed not implemented (requires UEngine::Browse).
+		// TODO: BrowseLevel to ?failed (requires UEngine::Browse)
 	}
 	unguard;
 }

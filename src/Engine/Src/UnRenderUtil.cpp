@@ -182,7 +182,7 @@ int FBspVertexStream::GetStride()
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
-	// DIVERGENCE: full scene render pass (BSP, actors, decals, post-process) not implemented.
+	// TODO: implement FLevelSceneNode::Render (retail 0x106670, ~720 bytes: full scene render — BSP, actors, decals, post-process)
 	guard(FLevelSceneNode::Render);
 	unguard;
 }
@@ -348,7 +348,7 @@ void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
 	// computes lighting contributions from each dynamic light, and copies
 	// the result into param_2. Too complex to translate in full here.
-	// DIVERGENCE: lightmap texture data generation not implemented.
+	// TODO: implement FLightMap::GetTextureData (retail 0x110560, ~900 bytes: caches per-lightmap samples, computes lighting contributions)
 	guard(FLightMap::GetTextureData);
 	unguard;
 }
@@ -1358,7 +1358,7 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 	new ((BYTE*)this + 0x48) FBox();
 	new ((BYTE*)this + 0x64) FSphere();
 	*(AActor**)this = Actor;
-	// DIVERGENCE: complex mesh/physics transform setup omitted (requires FUN_* stubs).
+	// TODO: complete FDynamicActor constructor mesh/physics transform setup (requires unresolved FUN_* helpers)
 }
 
 FDynamicActor::~FDynamicActor()
