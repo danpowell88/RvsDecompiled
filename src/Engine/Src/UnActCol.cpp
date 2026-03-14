@@ -697,7 +697,7 @@ FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVec
 }
 
 // ?ActorOverlapCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
-IMPL_DIVERGE("ActorOverlapCheck — returns NULL; overlap query needs Ghidra analysis for octree traversal")
+IMPL_DIVERGE("Ghidra 0x103DAEA0: sets up frame counter and result list in Pad[], then recurses via FOctreeNode::ActorOverlapCheck; FOctreeNode traversal helpers unresolved")
 FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
 
 // ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
@@ -892,8 +892,7 @@ void FCollisionOctree::AddActor(AActor* Actor)
 }
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
-// TODO: implement FCollisionOctree::CheckActorLocations (retail 0xdbec0: walks Level->Actors, tests geometry overlap per node)
-IMPL_DIVERGE("Not yet implemented; retail walks Level->Actors to test geometry overlap per node")
+IMPL_DIVERGE("Ghidra 0x103DBEC0: walks Level->Actors array, builds FBox per actor, calls FOctreeNode::FilterTest for overlap; FilterTest child-node recursion unresolved")
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
@@ -932,7 +931,7 @@ void FCollisionOctree::RemoveActor(AActor* Actor)
 }
 
 // ?Tick@FCollisionOctree@@UAEXXZ
-IMPL_DIVERGE("Tick — no per-frame cleanup required in this reconstruction; full impl needs Ghidra analysis")
+IMPL_DIVERGE("Ghidra 0x103DBBA0: iterates DAT_1077e2b8/DAT_1077e2c4/DAT_1077e2d0 debug-line arrays via FTempLineBatcher::AddLine; GTempLineBatcher and DAT_ globals not reproduced")
 void FCollisionOctree::Tick() {}
 // ?GetHashIndices@FCollisionHash@@QAEXVFVector@@AAH11@Z
 // Retail ordinal 3033 (0x6dd20).
@@ -1029,7 +1028,7 @@ void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane 
 }
 
 // ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_DIVERGE("ActorOverlapCheck node — no-op; overlap traversal needs Ghidra analysis")
+IMPL_DIVERGE("Ghidra 0x103DA390: clips actor extent against node planes, recurses into overlapping child nodes via FOctreeNode::ActorOverlapCheck; FUN_ child-clip helpers unresolved")
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
@@ -1186,16 +1185,14 @@ void FOctreeNode::CheckIsEmpty()
 }
 
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
-// TODO: implement FOctreeNode::Draw (retail 0xdb6c0: draws node bounding box via GTempLineBatcher
-//       and recurses into children; requires FTempLineBatcher access)
-IMPL_DIVERGE("Not yet implemented; retail draws node bounding box via GTempLineBatcher")
+IMPL_DIVERGE("Ghidra 0x103DB6C0: draws node bounding-box wireframe via FTempLineBatcher::AddLine, then recurses into child nodes; GTempLineBatcher global access not reproduced")
 void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_DIVERGE("DrawFlaggedActors — debug draw; no-op for non-editor builds")
+IMPL_DIVERGE("Ghidra 0x103DB840: iterates node actors, draws those with flag 0x4000000 via FOctreeNode::Draw + FTempLineBatcher line append; GTempLineBatcher access and child recursion not reproduced")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 
-IMPL_DIVERGE("FilterTest — octree subdivision filter; no-op pending Ghidra analysis of child-node routing")
+IMPL_DIVERGE("Ghidra 0x103DB0C0: recursive child-node routing — clips FBox against node plane boundaries and recurses into matching children; FUN_ plane-clip helpers unresolved")
 void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
 
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z

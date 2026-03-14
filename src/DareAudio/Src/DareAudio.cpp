@@ -105,8 +105,7 @@ static FLOAT s_VolumeResetData[12] =
 	Helper: linear amplitude [0,1] to dB.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
-static FLOAT LinearToDb(FLOAT v)
+IMPL_DIVERGE("static helper; not identified in DareAudio.dll Ghidra export; may be inlined in retail")`nstatic FLOAT LinearToDb(FLOAT v)
 {
 	return 20.0f * log10f(v > 0.0001f ? v : 0.0001f);
 }
@@ -126,8 +125,7 @@ UDareAudioSubsystem::UDareAudioSubsystem(const UDareAudioSubsystem& Other)
 {
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
-UDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& Other)
+IMPL_DIVERGE("compiler-generated assignment op; not identified in DareAudio.dll Ghidra export; body delegates to UAudioSubsystem::operator=")`nUDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& Other)
 {
 UAudioSubsystem::operator=(Other);
 return *this;
@@ -137,8 +135,7 @@ return *this;
 UObject interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
-void UDareAudioSubsystem::StaticConstructor()
+IMPL_DIVERGE("empty body; address in Ghidra gap 0x10001780-0x10001e80 -- not exported; registerable properties unknown")`nvoid UDareAudioSubsystem::StaticConstructor()
 {
 }
 
@@ -711,8 +708,7 @@ return 0.0f;
 }
 
 // Returns the volume line handle for a given volume type
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
-static long GetVolumeLineHandle(void* self, ESoundVolume VolType)
+IMPL_DIVERGE("static helper; not identified in DareAudio.dll Ghidra export; inferred from SND_GetVolumeLine usage pattern")`nstatic long GetVolumeLineHandle(void* self, ESoundVolume VolType)
 {
 switch (VolType)
 {
@@ -1255,3 +1251,4 @@ if (OutCoef1) *OutCoef1 = 1.0f;
 if (OutCoef2) *OutCoef2 = 1.0f;
 if (OutCoef3) *OutCoef3 = 1.0f;
 }
+
