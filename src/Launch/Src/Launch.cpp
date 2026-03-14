@@ -417,6 +417,16 @@ static void ExitSplash()
 }
 
 IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+// GetModuleHandleExA is an XP SP1+ API. Declare manually for MSVC 7.1 SDK
+// which may lack the definition, but the symbol is in kernel32.lib.
+#ifndef GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+#define GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS 0x00000004
+typedef BOOL (WINAPI *PFN_GetModuleHandleExA)(DWORD, LPCSTR, HMODULE*);
+static PFN_GetModuleHandleExA _GetModuleHandleExA =
+    (PFN_GetModuleHandleExA)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetModuleHandleExA");
+#define GetModuleHandleExA(f,n,h) (_GetModuleHandleExA ? _GetModuleHandleExA(f,n,h) : FALSE)
+#endif
+
 static LONG WINAPI CrashExceptionFilter(EXCEPTION_POINTERS* ep)
 {
 	FILE* f = fopen("crash_error.txt", "w");

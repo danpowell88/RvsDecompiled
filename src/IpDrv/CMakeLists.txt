@@ -12,7 +12,7 @@ file(GLOB_RECURSE IPDRV_SOURCES
 
 list(LENGTH IPDRV_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(IpDrv MODULE ${IPDRV_SOURCES} ${IPDRV_SRC_DIR}/Src/IpDrv.def)
+    add_library(IpDrv SHARED ${IPDRV_SOURCES} ${IPDRV_SRC_DIR}/Src/IpDrv.def)
     target_compile_definitions(IpDrv PRIVATE IPDRV_EXPORTS ThisPackage=IpDrv)
     target_include_directories(IpDrv BEFORE PRIVATE
         ${IPDRV_SRC_DIR}/Inc

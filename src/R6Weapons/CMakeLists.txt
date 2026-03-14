@@ -10,10 +10,10 @@ file(GLOB_RECURSE R6WEAPONS_SOURCES
 
 list(LENGTH R6WEAPONS_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(R6Weapons MODULE ${R6WEAPONS_SOURCES} ${R6WEAPONS_SRC_DIR}/Src/R6Weapons.def)
+    add_library(R6Weapons SHARED ${R6WEAPONS_SOURCES} ${R6WEAPONS_SRC_DIR}/Src/R6Weapons.def)
     target_compile_definitions(R6Weapons PRIVATE R6WEAPONS_EXPORTS ThisPackage=R6Weapons)
-    set(R6ABSTRACT_BUILT_LIB ${CMAKE_BINARY_DIR}/src/R6Abstract/Release/R6Abstract.lib)
-    set(R6ENGINE_BUILT_LIB   ${CMAKE_BINARY_DIR}/src/R6Engine/Release/R6Engine.lib)
+    set(R6ABSTRACT_BUILT_LIB $<TARGET_LINKER_FILE:R6Abstract>)
+    set(R6ENGINE_BUILT_LIB   $<TARGET_LINKER_FILE:R6Engine>)
     target_include_directories(R6Weapons BEFORE PRIVATE
         ${R6WEAPONS_SRC_DIR}/Inc
         ${PROJECT_SOURCE_DIR}/src/R6Abstract/Inc

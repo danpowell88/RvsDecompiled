@@ -12,9 +12,9 @@
 	.def export to a named wide-string blob containing the function name.
 -----------------------------------------------------------------------------*/
 extern "C" {
-__declspec(dllexport) const unsigned short _gfn_WPropertiesCtor[]    = {'W','P','r','o','p','e','r','t','i','e','s',':',':','W','P','r','o','p','e','r','t','i','e','s',0};
-__declspec(dllexport) const unsigned short _gfn_FTreeItemDtor[]      = {'F','T','r','e','e','I','t','e','m',':',':','~','F','T','r','e','e','I','t','e','m',0};
-__declspec(dllexport) const unsigned short _gfn_LoadLocalizedMenu[]  = {'L','o','a','d','L','o','c','a','l','i','z','e','d','M','e','n','u',0};
+extern __declspec(dllexport) const unsigned short _gfn_WPropertiesCtor[]    = {'W','P','r','o','p','e','r','t','i','e','s',':',':','W','P','r','o','p','e','r','t','i','e','s',0};
+extern __declspec(dllexport) const unsigned short _gfn_FTreeItemDtor[]      = {'F','T','r','e','e','I','t','e','m',':',':','~','F','T','r','e','e','I','t','e','m',0};
+extern __declspec(dllexport) const unsigned short _gfn_LoadLocalizedMenu[]  = {'L','o','a','d','L','o','c','a','l','i','z','e','d','M','e','n','u',0};
 }
 static volatile const void* _gfnWindowRefs[] = {_gfn_WPropertiesCtor, _gfn_FTreeItemDtor, _gfn_LoadLocalizedMenu};
 

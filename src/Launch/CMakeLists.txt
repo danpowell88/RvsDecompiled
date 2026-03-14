@@ -7,7 +7,7 @@
 # hInstance so DLLs loaded at runtime can find them.
 
 set(LAUNCH_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(WINDOW_BUILT_LIB ${CMAKE_BINARY_DIR}/src/Window/Release/Window.lib)
+set(WINDOW_BUILT_LIB $<TARGET_LINKER_FILE:Window>)
 
 file(GLOB_RECURSE LAUNCH_SOURCES
     ${LAUNCH_SRC_DIR}/Inc/*.h

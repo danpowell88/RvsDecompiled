@@ -19,11 +19,11 @@ void AR6Grenade::PostNetReceive()
 	// at +0x2f0..+0x2f8 (likely spawn/impact position).
 	AActor* pReplWeapon  = *(AActor**)((BYTE*)this + 0x2c);
 	AActor** pCachedWeap = (AActor**)((BYTE*)this + 0x3f8);
-	if (pReplWeapon == nullptr)
+	if (pReplWeapon == NULL)
 	{
 		AActor* pOldCache = *pCachedWeap;
-		*pCachedWeap = nullptr;
-		if (pOldCache != nullptr)
+		*pCachedWeap = NULL;
+		if (pOldCache != NULL)
 		{
 			*(INT*)((BYTE*)this + 0x2f0) = 0;
 			*(INT*)((BYTE*)this + 0x2f4) = 0;
@@ -39,3 +39,4 @@ void AR6Grenade::PostNetReceive()
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+

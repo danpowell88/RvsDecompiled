@@ -10,7 +10,7 @@ file(GLOB_RECURSE CORE_SOURCES
 
 list(LENGTH CORE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(Core MODULE ${CORE_SOURCES})
+    add_library(Core SHARED ${CORE_SOURCES})
     # Module definition file for ordinal-accurate exports matching retail Core.dll.
     if(EXISTS ${CORE_SRC_DIR}/Src/Core.def)
         target_sources(Core PRIVATE ${CORE_SRC_DIR}/Src/Core.def)

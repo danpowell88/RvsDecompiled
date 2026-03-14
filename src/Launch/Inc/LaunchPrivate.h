@@ -58,7 +58,9 @@
 ----------------------------------------------------------------------------*/
 
 CORE_API const int appMsgf(int Type, const TCHAR* Fmt, ...);
+#if _MSC_VER > 1310
 #define appMsgf(...) appMsgf(0, __VA_ARGS__)
+#endif
 
 #pragma comment(linker, "/ALTERNATENAME:__imp_??0FPreferencesInfo@@QAE@$$QAV0@@Z=__imp_??0FPreferencesInfo@@QAE@ABV0@@Z")
 #pragma comment(linker, "/ALTERNATENAME:__imp_??4FPreferencesInfo@@QAEAAV0@$$QAV0@@Z=__imp_??4FPreferencesInfo@@QAEAAV0@ABV0@@Z")

@@ -10,7 +10,7 @@ file(GLOB_RECURSE ENGINE_SOURCES
 
 list(LENGTH ENGINE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(Engine MODULE ${ENGINE_SOURCES})
+    add_library(Engine SHARED ${ENGINE_SOURCES})
     # Module definition file for ordinal-accurate exports matching retail Engine.dll.
     if(EXISTS ${ENGINE_SRC_DIR}/Src/Engine.def)
         target_sources(Engine PRIVATE ${ENGINE_SRC_DIR}/Src/Engine.def)

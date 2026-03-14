@@ -1671,10 +1671,13 @@ float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 	return 0.0f;
 }
 
-IMPL_DIVERGE("Ghidra 0x104104f0 (102b): FDynamicLight::SampleLight — scales color by SampleIntensity; FColor computation not yet reconstructed")
-FColor FDynamicLight::SampleLight(FVector,FVector)
+IMPL_MATCH("Engine.dll", 0x104104f0)
+FColor FDynamicLight::SampleLight(FVector Point, FVector Normal)
 {
-	return FColor(0,0,0,0);
+	// Ghidra 0x1104f0 (102b): call SampleIntensity to get per-sample float intensity,
+	// scale the FPlane light color at this+4 by that intensity, return as FColor.
+	float Intensity = SampleIntensity(Point, Normal);
+	return FColor(*(FPlane*)((BYTE*)this + 0x04) * Intensity);
 }
 
 IMPL_MATCH("Engine.dll", 0x10313540)

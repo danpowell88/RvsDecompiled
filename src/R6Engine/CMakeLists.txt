@@ -10,9 +10,9 @@ file(GLOB_RECURSE R6ENGINE_SOURCES
 
 list(LENGTH R6ENGINE_SOURCES SOURCE_COUNT)
 if(SOURCE_COUNT GREATER 0)
-    add_library(R6Engine MODULE ${R6ENGINE_SOURCES} ${R6ENGINE_SRC_DIR}/Src/R6Engine.def)
+    add_library(R6Engine SHARED ${R6ENGINE_SOURCES} ${R6ENGINE_SRC_DIR}/Src/R6Engine.def)
     target_compile_definitions(R6Engine PRIVATE R6ENGINE_EXPORTS ThisPackage=R6Engine)
-    set(R6ABSTRACT_BUILT_LIB ${CMAKE_BINARY_DIR}/src/R6Abstract/Release/R6Abstract.lib)
+    set(R6ABSTRACT_BUILT_LIB $<TARGET_LINKER_FILE:R6Abstract>)
     target_include_directories(R6Engine BEFORE PRIVATE
         ${R6ENGINE_SRC_DIR}/Inc
         ${PROJECT_SOURCE_DIR}/src/R6Abstract/Inc
