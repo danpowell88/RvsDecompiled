@@ -799,7 +799,7 @@ void AR6Pawn::PawnSetBoneRotation(FName BoneName, INT Pitch, INT Yaw, INT Roll, 
 	unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 {
 	m_bAim = bShouldAim;
@@ -807,7 +807,7 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
 	guard(AR6Pawn::PickActorAdjust);
@@ -1655,7 +1655,7 @@ void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AR6Pawn::UpdatePawnTrackActor(INT BlendTime)
 {
 	FVector Dir = m_TrackActor->Location - Location;
@@ -2449,7 +2449,7 @@ void AR6Pawn::execPawnLookAt(FFrame& Stack, RESULT_DECL)
 	PawnLookAt(vTarget, bAim, bNoBlend);
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AR6Pawn::execPawnTrackActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, Target);
@@ -2654,7 +2654,7 @@ void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 	GCompileMaterialsRevision++;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bNoBlend);

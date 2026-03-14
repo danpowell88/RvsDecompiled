@@ -636,7 +636,7 @@ void AR6AIController::execNeedToOpenDoor(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = NeedToOpenDoor(Target);
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, pActor);

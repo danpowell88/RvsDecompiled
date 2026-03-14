@@ -18,7 +18,7 @@ void AMP2IOKarma::CheckForErrors()
 	unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A)
 {
 	guard(AMP2IOKarma::KMP2DynKarmaInterface);
@@ -87,7 +87,7 @@ INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A
 	unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AMP2IOKarma::RenderEditorInfo);
@@ -141,7 +141,7 @@ void AMP2IOKarma::eventZDRSetDamageState(INT A, FLOAT B, FVector C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ZDRSetDamageState), &Parms);
 }
 
-IMPL_INFERRED("Exec thunk for MP2IOKarmaAllNativeFct; native body empty — all logic is in UnrealScript")
+IMPL_APPROX("Exec thunk for MP2IOKarmaAllNativeFct; native body empty — all logic is in UnrealScript")
 void AMP2IOKarma::execMP2IOKarmaAllNativeFct(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

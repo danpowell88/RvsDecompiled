@@ -261,7 +261,7 @@ void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetServerOptionsRefreshed );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddBoneLifter);
@@ -274,7 +274,7 @@ void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddBoneLifter );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddImpulse);
@@ -286,7 +286,7 @@ void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddImpulse );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKDisableCollision);
@@ -296,7 +296,7 @@ void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKDisableCollision );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKEnableCollision);
@@ -306,7 +306,7 @@ void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKEnableCollision );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKFreezeRagdoll);
@@ -315,7 +315,7 @@ void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKFreezeRagdoll );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetActorGravScale);
@@ -325,7 +325,7 @@ void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetActorGravScale );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMOffset);
@@ -358,7 +358,7 @@ void AActor::execKGetDampingProps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetDampingProps );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetFriction);
@@ -368,7 +368,7 @@ void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetFriction );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetImpactThreshold);
@@ -389,7 +389,7 @@ void AActor::execKGetInertiaTensor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetInertiaTensor );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetMass);
@@ -399,7 +399,7 @@ void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetMass );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetRestitution);
@@ -409,7 +409,7 @@ void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetRestitution );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetSkelMass);
@@ -419,7 +419,7 @@ void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetSkelMass );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsAwake);
@@ -429,7 +429,7 @@ void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsAwake );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsRagdollAvailable);
@@ -439,7 +439,7 @@ void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsRagdollAvailable );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMakeRagdollAvailable);
@@ -448,7 +448,7 @@ void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMakeRagdollAvailable );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMP2IOKarmaAllNativeFct);
@@ -457,7 +457,7 @@ void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMP2IOKarmaAllNativeFct );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveAllBoneLifters);
@@ -466,7 +466,7 @@ void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveAllBoneLifters );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveLifterFromBone);
@@ -476,7 +476,7 @@ void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveLifterFromBone );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetActorGravScale);
@@ -486,7 +486,7 @@ void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetActorGravScale );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetBlockKarma);
@@ -496,7 +496,7 @@ void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetBlockKarma );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetCOMOffset);
@@ -506,7 +506,7 @@ void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetCOMOffset );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetDampingProps);
@@ -517,7 +517,7 @@ void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetDampingProps );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetFriction);
@@ -527,7 +527,7 @@ void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetFriction );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetImpactThreshold);
@@ -537,7 +537,7 @@ void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetImpactThreshold );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetInertiaTensor);
@@ -547,7 +547,7 @@ void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetInertiaTensor );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetMass);
@@ -557,7 +557,7 @@ void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetMass );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetRestitution);
@@ -578,7 +578,7 @@ void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetSkelVel );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetStayUpright);
@@ -589,7 +589,7 @@ void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetStayUpright );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; exec stub does not call Karma")
+IMPL_APPROX("Karma exec stub pending MeSDK decompilation from Engine.dll")
 void AActor::execKWake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKWake);
@@ -684,7 +684,7 @@ IMPLEMENT_FUNCTION( AFluidSurfaceInfo, INDEX_NONE, execPling );
 
 /*-- AKConstraint ------------------------------------------------------*/
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintForce);
@@ -694,7 +694,7 @@ void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintForce );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintTorque);
@@ -704,7 +704,7 @@ void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintTorque );
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::execKUpdateConstraintParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKUpdateConstraintParams);

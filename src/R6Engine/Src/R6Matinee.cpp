@@ -7,9 +7,9 @@
 IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
 // Stubs for unresolved R6Engine internal functions
-IMPL_INFERRED("Unresolved internal helper; identity not established; returns NULL pending Ghidra analysis")
+IMPL_APPROX("Unresolved internal helper; identity not established; returns NULL pending Ghidra analysis")
 static INT*  FUN_10024530(INT) { return NULL; }
-IMPL_INFERRED("Unresolved internal helper; identity not established; returns 0 pending Ghidra analysis")
+IMPL_APPROX("Unresolved internal helper; identity not established; returns 0 pending Ghidra analysis")
 static QWORD FUN_10042934()    { return 0; }
 static const FLOAT s_flt_1_0f = 1.0f;
 

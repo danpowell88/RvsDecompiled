@@ -758,7 +758,7 @@ void USkeletalMesh::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::LineCheck);

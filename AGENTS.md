@@ -89,17 +89,19 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 
 
 5. **Retail parity attribution** — every function definition must be preceded by one of these macros (see `src/Core/Inc/ImplSource.h`):
-   - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact byte parity with retail; build fails if compiled size diverges
-   - `IMPL_APPROX("reason")` — intentional or unverified deviation; parity check skipped; **reason is mandatory**
-   - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed)
-   - `IMPL_DIVERGE("reason")` — permanent divergence (Karma physics, GameSpy, etc.)
+   - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact parity with retail binary; derived from Ghidra analysis
+   - `IMPL_APPROX("reason")` — approximation: not yet Ghidra-confirmed, body inferred, or Ghidra match with a documented deviation
+   - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed); alias for `IMPL_INTENTIONALLY_EMPTY`
+   - `IMPL_DIVERGE("reason")` — permanent divergence (defunct live services, etc.); alias for `IMPL_PERMANENT_DIVERGENCE`
    - `IMPL_TODO("reason")` — not yet implemented; **BUILD FAILS**
 
-   **The macros express parity status, not code origin.** Where the code came from (Ghidra, UT99 reference, inferred) belongs in a regular `//` comment above the macro. `IMPL_APPROX` is used for UT99-reference-derived code, Ghidra approximations, and anything inferred — all are unverified until confirmed.
+   **The macros express only Ghidra match status.** Either a function has been decompiled from Ghidra and matches retail (`IMPL_MATCH`), or it hasn't yet / has a documented deviation (`IMPL_APPROX`). Where the code came from (Ghidra approximation, inferred from context, etc.) belongs in a regular `//` comment above the macro.
 
-   Do NOT use the old `IMPL_GHIDRA`, `IMPL_GHIDRA_APPROX`, `IMPL_UT99_REF`, `IMPL_INFERRED`, `IMPL_INTENTIONALLY_EMPTY`, `IMPL_SDK`, or `IMPL_PERMANENT_DIVERGENCE` macros (all renamed/removed).
+   **`IMPL_DIVERGE` is for true permanent divergences only** — e.g. defunct GameSpy servers, hardware-specific RNG seeds. It is NOT correct to use `IMPL_DIVERGE` simply because a function hasn't been decompiled yet. If the retail binary has the code and it can be decompiled from Ghidra, use `IMPL_APPROX` until the decompilation is done.
 
-   **IMPL_STRICT is permanently ON** (default changed in `CMakeLists.txt`, 2026-03-14). The build fails on any unannotated function or `IMPL_TODO`. Do NOT add `IMPL_TODO` annotations — decide the correct macro before committing. If you genuinely cannot classify a function yet, use `IMPL_APPROX("reason TBD")` as a placeholder.
+   Do NOT use the removed macros: `IMPL_SDK`, `IMPL_SDK_MODIFIED`, `IMPL_INFERRED`, `IMPL_GHIDRA`, `IMPL_GHIDRA_APPROX`, `IMPL_UT99_REF`.
+
+   **IMPL_STRICT is permanently ON** (default changed in `CMakeLists.txt`, 2026-03-14). The build fails on any `IMPL_TODO`. If you cannot classify a function yet, use `IMPL_APPROX("reason TBD")` as a placeholder.
 
    **CRITICAL: IMPL_xxx macros MUST be on a single line.** The attribution scanner (`tools/verify_impl_sources.py`) walks backward one line at a time; a multi-line macro with a string continuation on the next line confuses it. Always write the whole reason on one line:
    ```cpp

@@ -27,7 +27,7 @@ AActor::Spawned();
 
 
 // --- AKConeLimit ---
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConeLimit::KUpdateConstraintParams()
 {
 guard(AKConeLimit::KUpdateConstraintParams);
@@ -52,35 +52,35 @@ return NULL;
 unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::physKarma(float)
 {
 guard(AKConstraint::physKarma);
 unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::postKarmaStep()
 {
 guard(AKConstraint::postKarmaStep);
 unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::preKarmaStep(float)
 {
 guard(AKConstraint::preKarmaStep);
 unguard;
 }
 
-IMPL_DIVERGE("Karma physics - MathEngine SDK proprietary; editor rendering not implemented")
+IMPL_APPROX("Karma editor rendering pending MeSDK decompilation from Engine.dll")
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 guard(AKConstraint::RenderEditorSelected);
 unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKConstraint::KUpdateConstraintParams()
 {
 guard(AKConstraint::KUpdateConstraintParams);
@@ -145,14 +145,14 @@ unguard;
 
 
 // --- AKHinge ---
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKHinge::preKarmaStep(float)
 {
 guard(AKHinge::preKarmaStep);
 unguard;
 }
 
-IMPL_DIVERGE("Karma physics — MathEngine SDK proprietary; source unavailable")
+IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
 void AKHinge::KUpdateConstraintParams()
 {
 guard(AKHinge::KUpdateConstraintParams);
