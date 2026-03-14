@@ -1,71 +1,37 @@
 //=============================================================================
-// R61stHandsGripHBS - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R61stHandsGripHBS.uc
 //=============================================================================
 class R61stHandsGripHBS extends R6AbstractFirstPersonHands;
 
-function PostBeginPlay()
-{
-	LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsGripHBSA');
-	super.PostBeginPlay();
-	return;
-}
+#exec OBJ LOAD FILE=..\Animations\R61stHands_UKX.ukx PACKAGE=R61stHands_UKX
 
-auto state Waiting
-{	stop;
-}
+// --- Functions ---
+function PostBeginPlay() {}
 
 state RaiseWeapon
 {
-	simulated event AnimEnd(int Channel)
-	{
-		SetDrawType(0);
-		super.AnimEnd(Channel);
-		return;
-	}
-	stop;
+    simulated event AnimEnd(int Channel) {}
 }
 
 state BringWeaponUp
 {
-	simulated event AnimEnd(int Channel)
-	{
-		SetDrawType(0);
-		super.AnimEnd(Channel);
-		return;
-	}
-	stop;
+    simulated event AnimEnd(int Channel) {}
+}
+
+state Waiting
+{
 }
 
 state DiscardWeapon
 {
-	simulated function BeginState()
-	{
-		SetDrawType(2);
-		super.BeginState();
-		return;
-	}
-	stop;
+    simulated function BeginState() {}
 }
 
 state PutWeaponDown
 {
-	simulated function BeginState()
-	{
-		SetDrawType(2);
-		super.BeginState();
-		return;
-	}
-	stop;
+    simulated function BeginState() {}
 }
 
 defaultproperties
 {
-	DrawType=0
-	Mesh=SkeletalMesh'R61stHands_UKX.R61stHands'
 }

@@ -1,10 +1,4 @@
 //=============================================================================
-// LookTarget - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // LookTarget
 //
 // A convenience actor that you can point a matinee camera at.
@@ -13,12 +7,10 @@
 //
 //=============================================================================
 class LookTarget extends Keypoint
-	native
- placeable;
+    native;
+
+#exec Texture Import File=Textures\LookTarget.pcx Name=S_LookTarget Mips=Off MASKED=1
 
 defaultproperties
 {
-	bStatic=false
-	bNoDelete=true
-	Texture=Texture'Engine.S_LookTarget'
 }

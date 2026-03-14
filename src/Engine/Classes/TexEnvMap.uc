@@ -1,28 +1,17 @@
-//=============================================================================
-// TexEnvMap - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class TexEnvMap extends TexModifier
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object,Material);
+    native;
 
+// --- Enums ---
 enum ETexEnvMapType
 {
-	EM_WorldSpace,                  // 0
-	EM_CameraSpace                  // 1
+    // enum values not recoverable from binary — see 1.56 source
 };
 
-// NEW IN 1.60
-var() TexEnvMap.ETexEnvMapType EnvMapType;
+// --- Variables ---
+var ETexEnvMapType EnvMapType;
 
 defaultproperties
 {
-	EnvMapType=1
-	TexCoordCount=1
 }
-
-// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
-// REMOVED IN 1.60: var ETexEnvMapType

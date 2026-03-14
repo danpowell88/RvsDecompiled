@@ -1,10 +1,4 @@
 //=============================================================================
-// R6WindowServerInfoPlayerBox - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowServerInfoBox.uc : Class used to manage the "list box" of 
 //  server information.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -14,72 +8,21 @@
 //=============================================================================
 class R6WindowServerInfoPlayerBox extends R6WindowListBox;
 
-var bool m_bDrawBorderAndBkg;  // draw the border and the background
+// --- Variables ---
 var Font m_Font;
-var Color TextColor;  // color for text            N.B. var already define in class UWindowDialogControl
-var Color m_SelTextColor;  // color for selected text
+// color for text            N.B. var already define in class UWindowDialogControl
+var Color TextColor;
+// color for selected text
+var Color m_SelTextColor;
+// draw the border and the background
+var bool m_bDrawBorderAndBkg;
 
-function Created()
-{
-	super.Created();
-	m_VertSB.SetHideWhenDisable(false);
-	TextColor = Root.Colors.m_LisBoxNormalTextColor;
-	m_SelTextColor = Root.Colors.m_LisBoxSelectedTextColor;
-	return;
-}
-
-function BeforePaint(Canvas C, float fMouseX, float fMouseY)
-{
-	local float tW, tH;
-
-	C.Font = m_Font;
-	TextSize(C, "TEST", tW, tH);
-	m_fItemHeight = __NFUN_174__(tH, float(2));
-	m_VertSB.SetBorderColor(m_BorderColor);
-	super(UWindowDialogControl).BeforePaint(C, fMouseX, fMouseY);
-	return;
-}
-
-function Paint(Canvas C, float fMouseX, float fMouseY)
-{
-	// End:0x23
-	if(m_bDrawBorderAndBkg)
-	{
-		R6WindowLookAndFeel(LookAndFeel).R6List_DrawBackground(self, C);
-	}
-	super.Paint(C, fMouseX, fMouseY);
-	return;
-}
-
-function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
-{
-	local float TextY, tW, tH;
-	local R6WindowListInfoPlayerItem pListInfoPlayerItem;
-
-	pListInfoPlayerItem = R6WindowListInfoPlayerItem(Item);
-	C.Style = 5;
-	C.Font = m_Font;
-	TextSize(C, "TEST", tW, tH);
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	__NFUN_184__(X, pListInfoPlayerItem.fNameXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	ClipTextWidth(C, X, __NFUN_174__(Y, TextY), pListInfoPlayerItem.szPlName, pListInfoPlayerItem.fNameWidth);
-	__NFUN_184__(X, pListInfoPlayerItem.fSkillsXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(string(pListInfoPlayerItem.iSkills));
-	__NFUN_184__(X, pListInfoPlayerItem.fTimeXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(pListInfoPlayerItem.szTime);
-	__NFUN_184__(X, pListInfoPlayerItem.fPingXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(string(pListInfoPlayerItem.iPing));
-	return;
-}
+// --- Functions ---
+function Paint(Canvas C, float fMouseY, float fMouseX) {}
+function BeforePaint(Canvas C, float fMouseY, float fMouseX) {}
+function DrawItem(Canvas C, float X, float Y, float H, UWindowList Item, float W) {}
+function Created() {}
 
 defaultproperties
 {
-	m_SelTextColor=(R=255,G=255,B=255,A=0)
-	m_fItemHeight=16.0000000
-	ListClass=Class'R6Window.R6WindowListInfoPlayerItem'
 }

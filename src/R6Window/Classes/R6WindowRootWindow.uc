@@ -1,10 +1,4 @@
 //=============================================================================
-// R6WindowRootWindow - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowRootWindow.uc : This root is an intermediate between uwindowrootwindow and all the menu root window
 //							to have access for R6WindowPopUpBox
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
@@ -12,374 +6,95 @@
 //  Revision history:
 //    2002/11/07 * Created by Yannick Joly
 //=============================================================================
-class R6WindowRootWindow extends UWindowRootWindow
- config;
+class R6WindowRootWindow extends UWindowRootWindow;
 
+// --- Structs ---
 struct stKeyAvailability
 {
-	var int iKey;
-	var int iWidgetKA;
+	var INT								iKey;
+	var INT								iWidgetKA;
 };
 
 struct StWidget
 {
-	var UWindowWindow m_pWidget;
-	var R6WindowPopUpBox m_pPopUpFrame;
-	var UWindowRootWindow.eGameWidgetID m_eGameWidgetID;
-	var name m_WidgetConsoleState;
-	var int iWidgetKA;
+	var UWindowWindow					m_pWidget;
+	var R6WindowPopUpBox                m_pPopUpFrame; 
+	var eGameWidgetID					m_eGameWidgetID;
+	var name							m_WidgetConsoleState;
+	var INT								iWidgetKA;
 };
 
-var int m_iWidgetKA;  // widget key availability
-var int m_iLastKeyDown;
-var R6WindowPopUpBox m_pSimplePopUp;  // a real simple pop-up
-// NEW IN 1.60
+// --- Variables ---
+// var ? iKey; // REMOVED IN 1.60
+// var ? iWidgetKA; // REMOVED IN 1.60
+// var ? m_WidgetConsoleState; // REMOVED IN 1.60
+// var ? m_eGameWidgetID; // REMOVED IN 1.60
+// var ? m_pPopUpFrame; // REMOVED IN 1.60
+// var ? m_pWidget; // REMOVED IN 1.60
+// a real simple pop-up
+var R6WindowPopUpBox m_pSimplePopUp;
+// the region of the simple popup
+var Region m_RSimplePopUp;
+var array<array> m_pListOfActiveWidget;
 var Texture m_BGTexture[2];
-var array<StWidget> m_pListOfActiveWidget;
-var array<stKeyAvailability> m_pListOfKeyAvailability;
-var array<R6WindowPopUpBox> m_pListOfFramePopUp;
-var Region m_RSimplePopUp;  // the region of the simple popup
-var Region m_RAddDlgSimplePopUp;  // Pop up with disable button
+// ^ NEW IN 1.60
+// Pop up with disable button
+var Region m_RAddDlgSimplePopUp;
+var array<array> m_pListOfFramePopUp;
+var array<array> m_pListOfKeyAvailability;
 // MPF - Eric
-var string m_szCurrentBackgroundSubDirectory;  // Directory of the background currently displayed
+// Directory of the background currently displayed
+var string m_szCurrentBackgroundSubDirectory;
+var int m_iLastKeyDown;
+// widget key availability
+var int m_iWidgetKA;
 
-//=====================================================================================================
-// SimplePopUp: Provide a simple pop-up
-//=====================================================================================================
-function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePopUpID, optional int _iButtonsType, optional bool bAddDisableDlg, optional UWindowWindow OwnerWindow)
-{
-	local R6WindowWrappedTextArea pTextZone;
-
-	// End:0x17E
-	if(__NFUN_114__(m_pSimplePopUp, none))
-	{
-		m_pSimplePopUp = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000, OwnerWindow));
-		m_pSimplePopUp.SetPopUpResizable(__NFUN_155__(int(_ePopUpID), int(56)));
-		m_pSimplePopUp.bAlwaysOnTop = true;
-		m_pSimplePopUp.CreateStdPopUpWindow(_szTitle, 25.0000000, float(m_RSimplePopUp.X), float(m_RSimplePopUp.Y), float(m_RSimplePopUp.W), float(m_RSimplePopUp.H), _iButtonsType);
-		m_pSimplePopUp.CreateClientWindow(Class'R6Window.R6WindowWrappedTextArea');
-		m_pSimplePopUp.m_ePopUpID = _ePopUpID;
-		pTextZone = R6WindowWrappedTextArea(m_pSimplePopUp.m_ClientArea);
-		pTextZone.SetScrollable(true);
-		pTextZone.m_fXOffSet = 5.0000000;
-		pTextZone.m_fYOffSet = 5.0000000;
-		pTextZone.AddText(_szText, Root.Colors.White, Root.Fonts[12]);
-		pTextZone.m_bDrawBorders = false;		
-	}
-	else
-	{
-		pTextZone = R6WindowWrappedTextArea(m_pSimplePopUp.m_ClientArea);
-		pTextZone.Clear(true, true);
-		pTextZone.AddText(_szText, Root.Colors.White, Root.Fonts[12]);
-		m_pSimplePopUp.OwnerWindow = OwnerWindow;
-		m_pSimplePopUp.SetPopUpResizable(__NFUN_155__(int(_ePopUpID), int(56)));
-		m_pSimplePopUp.ModifyPopUpFrameWindow(_szTitle, 25.0000000, float(m_RSimplePopUp.X), float(m_RSimplePopUp.Y), float(m_RSimplePopUp.W), float(m_RSimplePopUp.H), _iButtonsType);
-		m_pSimplePopUp.m_ePopUpID = _ePopUpID;
-		m_pSimplePopUp.ShowWindow();
-	}
-	// End:0x2F0
-	if(__NFUN_154__(int(_ePopUpID), int(56)))
-	{
-		m_pSimplePopUp.m_ePopUpID = _ePopUpID;
-		m_pSimplePopUp.TextWindowOnly(_szTitle, float(m_RSimplePopUp.X), float(m_RSimplePopUp.Y), float(m_RSimplePopUp.W), float(m_RSimplePopUp.H));		
-	}
-	else
-	{
-		// End:0x359
-		if(bAddDisableDlg)
-		{
-			m_pSimplePopUp.AddDisableDLG();
-			m_pSimplePopUp.ModifyPopUpFrameWindow(_szTitle, 25.0000000, float(m_RAddDlgSimplePopUp.X), float(m_RAddDlgSimplePopUp.Y), float(m_RAddDlgSimplePopUp.W), float(m_RAddDlgSimplePopUp.H), _iButtonsType);			
-		}
-		else
-		{
-			m_pSimplePopUp.RemoveDisableDLG();
-		}
-	}
-	// End:0x38B
-	if(Console.__NFUN_281__('Game'))
-	{
-		Console.LaunchUWindow();
-	}
-	return;
-}
-
+// --- Functions ---
+function SetLoadRandomBackgroundImage(string _szFolder) {}
+function PaintBackground(Canvas C, UWindowWindow _WidgetWindow) {}
+function CheckConsoleTypingState(name _RequestConsoleState) {}
 //=====================================================================================================
 // SimpleTextPopUp: Provide a simple pop-up for text only, no buttons
 //=====================================================================================================
-function SimpleTextPopUp(string _szText)
-{
-	SimplePopUp(_szText, "", 56, int(5));
-	return;
-}
-
-function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
-{
-	m_RSimplePopUp = self.default.m_RSimplePopUp;
-	switch(_ePopUpID)
-	{
-		// End:0x40
-		case 33:
-			// End:0x3D
-			if(__NFUN_154__(int(Result), int(4)))
-			{
-				Console.m_bInterruptConnectionProcess = true;
-			}
-			// End:0x46
-			break;
-		// End:0xFFFF
-		default:
-			// End:0x46
-			break;
-			break;
-	}
-	return;
-}
-
-function UWindowBase.EPopUpID GetSimplePopUpID()
-{
-	// End:0x2E
-	if(__NFUN_130__(__NFUN_119__(m_pSimplePopUp, none), m_pSimplePopUp.bWindowVisible))
-	{
-		return m_pSimplePopUp.m_ePopUpID;
-	}
-	return 0;
-	return;
-}
-
-function ModifyPopUpInsideText(array<string> _ANewText)
-{
-	local R6WindowWrappedTextArea pTextZone;
-	local int i;
-
-	// End:0xC5
-	if(__NFUN_130__(__NFUN_119__(m_pSimplePopUp, none), m_pSimplePopUp.bWindowVisible))
-	{
-		// End:0xC5
-		if(__NFUN_154__(int(m_pSimplePopUp.m_ePopUpID), int(33)))
-		{
-			pTextZone = R6WindowWrappedTextArea(m_pSimplePopUp.m_ClientArea);
-			pTextZone.Clear(true, true);
-			i = 0;
-			J0x69:
-
-			// End:0xC5 [Loop If]
-			if(__NFUN_150__(i, _ANewText.Length))
-			{
-				pTextZone.AddText(_ANewText[i], Root.Colors.White, Root.Fonts[12]);
-				__NFUN_165__(i);
-				// [Loop Continue]
-				goto J0x69;
-			}
-		}
-	}
-	return;
-}
-
+function SimpleTextPopUp(string _szText) {}
+function PopUpBoxDone(MessageBoxResult Result, EPopUpID _ePopUpID) {}
+//=============================================================================================
+// AddKeyInList: Add key in key list availability
+//=============================================================================================
+function AddKeyInList(int _iKey, int _iWKA) {}
+//=====================================================================================================
+// SimplePopUp: Provide a simple pop-up
+//=====================================================================================================
+function SimplePopUp(EPopUpID _ePopUpID, string _szTitle, optional int _iButtonsType, string _szText, optional UWindowWindow OwnerWindow, optional bool bAddDisableDlg) {}
+//=========================================================================================================
+// GetPopUpFrame: Get a pop-up frame
+//=========================================================================================================
+function R6WindowPopUpBox GetPopUpFrame(int _iIndex) {}
+// ^ NEW IN 1.60
+//===================================================================================
+// ManagePrevWInHistory:  Remove the previous widget in the list (in fact the one that you have on the screen, you do a changewidget)
+//===================================================================================
+function ManagePrevWInHistory(out int _iNbOfWidgetInList, bool _bClearPrevWInHistory) {}
+//===================================================================================
+// CloseAllWindow:  Process a hide window on all the window in the list
+//===================================================================================
+function CloseAllWindow() {}
+//===================================================================================================
+// GetMapNameLocalisation: Get the map name localisation. Return true if we found a name
+//===================================================================================================
+function bool GetMapNameLocalisation(out string _szMapNameLoc, string _szMapName, optional bool _bReturnInitName) {}
+// ^ NEW IN 1.60
+function ModifyPopUpInsideText(array<array> _ANewText) {}
+function bool IsWidgetIsInHistory(eGameWidgetID _eWidgetToFind) {}
+// ^ NEW IN 1.60
 //=============================================================================================
 // FillListOfKeyAvailability: Fill the list of key availability
 //							  Each widget (pop-up by a key) is define here
 //=============================================================================================
-function FillListOfKeyAvailability()
-{
-	return;
-}
-
-//=============================================================================================
-// AddKeyInList: Add key in key list availability
-//=============================================================================================
-function AddKeyInList(int _iKey, int _iWKA)
-{
-	local stKeyAvailability stKeyATemp;
-
-	stKeyATemp.iKey = _iKey;
-	stKeyATemp.iWidgetKA = _iWKA;
-	m_pListOfKeyAvailability[m_pListOfKeyAvailability.Length] = stKeyATemp;
-	return;
-}
-
-//=========================================================================================================
-// GetPopUpFrame: Get a pop-up frame
-//=========================================================================================================
-function R6WindowPopUpBox GetPopUpFrame(int _iIndex)
-{
-	local R6WindowPopUpBox pPopUpFrame;
-
-	// End:0x24
-	if(__NFUN_151__(m_pListOfFramePopUp.Length, _iIndex))
-	{
-		pPopUpFrame = m_pListOfFramePopUp[_iIndex];		
-	}
-	else
-	{
-		pPopUpFrame = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
-		pPopUpFrame.CreatePopUpFrameWindow("", 0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000);
-		pPopUpFrame.m_bBGFullScreen = true;
-		pPopUpFrame.HideWindow();
-		m_pListOfFramePopUp[m_pListOfFramePopUp.Length] = pPopUpFrame;
-	}
-	return pPopUpFrame;
-	return;
-}
-
-//===================================================================================
-// ManagePrevWInHistory:  Remove the previous widget in the list (in fact the one that you have on the screen, you do a changewidget)
-//===================================================================================
-function ManagePrevWInHistory(bool _bClearPrevWInHistory, out int _iNbOfWidgetInList)
-{
-	// End:0x7E
-	if(_bClearPrevWInHistory)
-	{
-		// End:0x7E
-		if(__NFUN_155__(_iNbOfWidgetInList, 0))
-		{
-			// End:0x4A
-			if(__NFUN_119__(m_pListOfActiveWidget[__NFUN_147__(_iNbOfWidgetInList, 1)].m_pPopUpFrame, none))
-			{
-				m_pListOfActiveWidget[__NFUN_147__(_iNbOfWidgetInList, 1)].m_pPopUpFrame.HideWindow();
-			}
-			m_pListOfActiveWidget[__NFUN_147__(_iNbOfWidgetInList, 1)].m_pWidget.HideWindow();
-			m_pListOfActiveWidget.Remove(__NFUN_147__(_iNbOfWidgetInList, 1), 1);
-			__NFUN_162__(_iNbOfWidgetInList, 1);
-		}
-	}
-	return;
-}
-
-function bool IsWidgetIsInHistory(UWindowRootWindow.eGameWidgetID _eWidgetToFind)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x41 [Loop If]
-	if(__NFUN_150__(i, m_pListOfActiveWidget.Length))
-	{
-		// End:0x37
-		if(__NFUN_154__(int(m_pListOfActiveWidget[i].m_eGameWidgetID), int(_eWidgetToFind)))
-		{
-			return true;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//===================================================================================
-// CloseAllWindow:  Process a hide window on all the window in the list 
-//===================================================================================
-function CloseAllWindow()
-{
-	local int i, iNbOfWindow;
-
-	iNbOfWindow = m_pListOfActiveWidget.Length;
-	i = 0;
-	J0x13:
-
-	// End:0x76 [Loop If]
-	if(__NFUN_150__(i, iNbOfWindow))
-	{
-		// End:0x52
-		if(__NFUN_119__(m_pListOfActiveWidget[i].m_pPopUpFrame, none))
-		{
-			m_pListOfActiveWidget[i].m_pPopUpFrame.HideWindow();
-		}
-		m_pListOfActiveWidget[i].m_pWidget.HideWindow();
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x13;
-	}
-	m_pListOfActiveWidget.Remove(0, iNbOfWindow);
-	return;
-}
-
-function SetLoadRandomBackgroundImage(string _szFolder)
-{
-	m_szCurrentBackgroundSubDirectory = _szFolder;
-	Class'Engine.Actor'.static.__NFUN_2607__(_szFolder);
-	return;
-}
-
-function PaintBackground(Canvas C, UWindowWindow _WidgetWindow)
-{
-	// End:0xA2
-	if(__NFUN_130__(__NFUN_119__(m_BGTexture[0], none), __NFUN_119__(m_BGTexture[1], none)))
-	{
-		_WidgetWindow.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, 512.0000000, 512.0000000, 0.0000000, 0.0000000, 512.0000000, 512.0000000, m_BGTexture[0]);
-		_WidgetWindow.DrawStretchedTextureSegment(C, 512.0000000, 0.0000000, 512.0000000, 512.0000000, 0.0000000, 0.0000000, 512.0000000, 512.0000000, m_BGTexture[1]);
-	}
-	return;
-}
-
-function CheckConsoleTypingState(name _RequestConsoleState)
-{
-	// End:0x2B
-	if(Console.__NFUN_281__('Typing'))
-	{
-		Console.ConsoleState = _RequestConsoleState;		
-	}
-	else
-	{
-		Console.__NFUN_113__(_RequestConsoleState);
-	}
-	return;
-}
-
-//===================================================================================================
-// GetMapNameLocalisation: Get the map name localisation. Return true if we found a name
-//===================================================================================================
-function bool GetMapNameLocalisation(string _szMapName, out string _szMapNameLoc, optional bool _bReturnInitName)
-{
-	local int i, j;
-	local R6Console R6Console;
-	local R6MissionDescription mission;
-	local LevelInfo pLevel;
-
-	pLevel = GetLevel();
-	R6Console = R6Console(Root.Console);
-	_szMapNameLoc = "";
-	i = 0;
-	J0x34:
-
-	// End:0xC6 [Loop If]
-	if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
-	{
-		mission = R6Console.m_aMissionDescriptions[i];
-		// End:0xBC
-		if(__NFUN_122__(__NFUN_235__(mission.m_MapName), __NFUN_235__(_szMapName)))
-		{
-			_szMapNameLoc = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
-			// [Explicit Break]
-			goto J0xC6;
-		}
-		__NFUN_163__(i);
-		// [Loop Continue]
-		goto J0x34;
-	}
-	J0xC6:
-
-	// End:0xE8
-	if(__NFUN_130__(_bReturnInitName, __NFUN_122__(_szMapNameLoc, "")))
-	{
-		_szMapNameLoc = _szMapName;
-	}
-	return __NFUN_123__(_szMapNameLoc, "");
-	return;
-}
+function FillListOfKeyAvailability() {}
+function EPopUpID GetSimplePopUpID() {}
+// ^ NEW IN 1.60
 
 defaultproperties
 {
-	m_iLastKeyDown=-1
-	m_BGTexture[0]=Texture'R6MenuBG.Backgrounds.GenericMainMenu0'
-	m_BGTexture[1]=Texture'R6MenuBG.Backgrounds.GenericMainMenu1'
-	m_RSimplePopUp=(Zone=Class'R6Window.R6WindowListServerItem',iLeaf=43554,ZoneNumber=0)
-	m_RAddDlgSimplePopUp=(Zone=Class'R6Window.R6WindowListServerItem',iLeaf=42274,ZoneNumber=0)
 }
-
-// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
-// REMOVED IN 1.60: var Texture
-// REMOVED IN 1.60: function GetSimplePopUpID

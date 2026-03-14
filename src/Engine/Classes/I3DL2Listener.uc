@@ -1,55 +1,50 @@
 //=============================================================================
-// I3DL2Listener - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // I3DL2Listener: Base class for I3DL2 room effects.
 //=============================================================================
 class I3DL2Listener extends Object
-	abstract
-	native
-	editinlinenew;
+    native
+    abstract;
 
-var() int Room;
-var() int RoomHF;
-var() int Reflections;
-var() int Reverb;
-var() bool bDecayTimeScale;
-var() bool bReflectionsScale;
-var() bool bReflectionsDelayScale;
-var() bool bReverbScale;
-var() bool bReverbDelayScale;
-var() bool bDecayHFLimit;
-var() float EnvironmentSize;
-var() float EnvironmentDiffusion;
-var() float DecayTime;
-var() float DecayHFRatio;
-var() float ReflectionsDelay;
-var() float ReverbDelay;
-var() float RoomRolloffFactor;
-var() float AirAbsorptionHF;
+// --- Variables ---
+var float EnvironmentSize;
+// ^ NEW IN 1.60
+var float EnvironmentDiffusion;
+// ^ NEW IN 1.60
+var int Room;
+// ^ NEW IN 1.60
+var int RoomHF;
+// ^ NEW IN 1.60
+var float DecayTime;
+// ^ NEW IN 1.60
+var float DecayHFRatio;
+// ^ NEW IN 1.60
+var int Reflections;
+// ^ NEW IN 1.60
+var float ReflectionsDelay;
+// ^ NEW IN 1.60
+var int Reverb;
+// ^ NEW IN 1.60
+var float ReverbDelay;
+// ^ NEW IN 1.60
+var float RoomRolloffFactor;
+// ^ NEW IN 1.60
+var float AirAbsorptionHF;
+// ^ NEW IN 1.60
+var bool bDecayTimeScale;
+// ^ NEW IN 1.60
+var bool bReflectionsScale;
+// ^ NEW IN 1.60
+var bool bReflectionsDelayScale;
+// ^ NEW IN 1.60
+var bool bReverbScale;
+// ^ NEW IN 1.60
+var bool bReverbDelayScale;
+// ^ NEW IN 1.60
+var bool bDecayHFLimit;
+// ^ NEW IN 1.60
 var transient int Environment;
 var transient int Updated;
 
 defaultproperties
 {
-	Room=-1000
-	RoomHF=-100
-	Reflections=-2602
-	Reverb=200
-	bDecayTimeScale=true
-	bReflectionsScale=true
-	bReflectionsDelayScale=true
-	bReverbScale=true
-	bReverbDelayScale=true
-	bDecayHFLimit=true
-	EnvironmentSize=7.5000000
-	EnvironmentDiffusion=1.0000000
-	DecayTime=1.4900000
-	DecayHFRatio=0.8300000
-	ReflectionsDelay=0.0070000
-	ReverbDelay=0.0110000
-	AirAbsorptionHF=-5.0000000
 }

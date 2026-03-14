@@ -1,12 +1,7 @@
-//=============================================================================
-// UWindowConsoleTextAreaControl - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class UWindowConsoleTextAreaControl extends UWindowDynamicTextArea
- config;
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class UWindowConsoleTextAreaControl extends UWindowDynamicTextArea;
 
 defaultproperties
 {
-	MaxLines=500
 }

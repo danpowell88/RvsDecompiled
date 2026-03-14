@@ -1,27 +1,11 @@
-//=============================================================================
-// ACTION_MoveToPlayer - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_MoveToPlayer extends LatentScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_MoveToPlayer extends LatentScriptedAction;
 
-function bool MoveToGoal()
-{
-	return true;
-	return;
-}
-
-function Actor GetMoveTargetFor(ScriptedController C)
-{
-	return C.GetMyPlayer();
-	return;
-}
+// --- Functions ---
+function Actor GetMoveTargetFor(ScriptedController C) {}
+function bool MoveToGoal() {}
 
 defaultproperties
 {
-	bValidForTrigger=false
-	ActionString="Move to player"
 }

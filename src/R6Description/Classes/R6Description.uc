@@ -1,10 +1,4 @@
 //=============================================================================
-// R6Description - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6Description.uc : This classes will provide displayable information about
 //                      selectable menu equipment
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
@@ -14,9 +8,18 @@
 //=============================================================================
 class R6Description extends Object;
 
-var Texture m_2DMenuTexture;  // The 2d image for the menus
-var Region m_2dMenuRegion;  // Region in the texture
-var string m_NameID;  // Name of the object to be displayed in the menus
-var string m_NameTag;  // This is used to select the correct class to spawn in the class name Array
-var string m_ClassName;  // Class of item to spawn
+// --- Variables ---
+//This is used to select the correct class to spawn in the class name Array
+var string m_NameTag;
+//Name of the object to be displayed in the menus
+var string m_NameID;
+//The 2d image for the menus
+var Texture m_2DMenuTexture;
+//Region in the texture
+var Region m_2dMenuRegion;
+//Class of item to spawn
+var string m_ClassName;
 
+defaultproperties
+{
+}

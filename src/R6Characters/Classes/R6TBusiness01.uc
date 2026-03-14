@@ -1,10 +1,4 @@
 //=============================================================================
-// R6TBusiness01 - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6TBusiness01.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -15,7 +9,4 @@ class R6TBusiness01 extends R6TerroristPawn;
 
 defaultproperties
 {
-	Mesh=SkeletalMesh'R6Terrorist_UKX.Business01Mesh'
-	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel249'
-	Skins=/* Array type was not detected. */
 }

@@ -1,23 +1,14 @@
 //=============================================================================
-// AnimEditProps - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // Object to facilitate properties editing
 //=============================================================================
-//  Animation / Mesh editor object to expose/shuttle only selected editable 
-//  parameters from UMeshAnim/ UMesh objects back and forth in the editor.
-//
 class AnimEditProps extends Object
-	native
- hidecategories(Object);
+    native;
 
+// --- Variables ---
 var const int WBrowserAnimationPtr;
-var(Compression) float GlobalCompression;
+var float GlobalCompression;
+// ^ NEW IN 1.60
 
 defaultproperties
 {
-	GlobalCompression=1.0000000
 }

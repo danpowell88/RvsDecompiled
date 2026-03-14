@@ -1,9 +1,3 @@
-//=============================================================================
-// Interactions - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
 // ====================================================================
 //  Class:  Engine.Interactions
 //
@@ -14,274 +8,86 @@
 // (c) 2001, Epic Games, Inc.  All Rights Reserved  
 // ====================================================================
 class Interactions extends Object
-	abstract
- native;
+    native
+    abstract;
 
-enum EInputAction
-{
-	IST_None,                       // 0
-	IST_Press,                      // 1
-	IST_Hold,                       // 2
-	IST_Release,                    // 3
-	IST_Axis                        // 4
-};
-
+// --- Enums ---
 enum EInputKey
 {
-	IK_None,                        // 0
-	IK_LeftMouse,                   // 1
-	IK_RightMouse,                  // 2
-	IK_Cancel,                      // 3
-	IK_MiddleMouse,                 // 4
-	IK_Unknown05,                   // 5
-	IK_Unknown06,                   // 6
-	IK_Unknown07,                   // 7
-	IK_Backspace,                   // 8
-	IK_Tab,                         // 9
-	IK_Unknown0A,                   // 10
-	IK_Unknown0B,                   // 11
-	IK_Unknown0C,                   // 12
-	IK_Enter,                       // 13
-	IK_Unknown0E,                   // 14
-	IK_Unknown0F,                   // 15
-	IK_Shift,                       // 16
-	IK_Ctrl,                        // 17
-	IK_Alt,                         // 18
-	IK_Pause,                       // 19
-	IK_CapsLock,                    // 20
-	IK_Unknown15,                   // 21
-	IK_Unknown16,                   // 22
-	IK_Unknown17,                   // 23
-	IK_Unknown18,                   // 24
-	IK_Unknown19,                   // 25
-	IK_Unknown1A,                   // 26
-	IK_Escape,                      // 27
-	IK_Unknown1C,                   // 28
-	IK_Unknown1D,                   // 29
-	IK_Unknown1E,                   // 30
-	IK_Unknown1F,                   // 31
-	IK_Space,                       // 32
-	IK_PageUp,                      // 33
-	IK_PageDown,                    // 34
-	IK_End,                         // 35
-	IK_Home,                        // 36
-	IK_Left,                        // 37
-	IK_Up,                          // 38
-	IK_Right,                       // 39
-	IK_Down,                        // 40
-	IK_Select,                      // 41
-	IK_Print,                       // 42
-	IK_Execute,                     // 43
-	IK_PrintScrn,                   // 44
-	IK_Insert,                      // 45
-	IK_Delete,                      // 46
-	IK_Help,                        // 47
-	IK_0,                           // 48
-	IK_1,                           // 49
-	IK_2,                           // 50
-	IK_3,                           // 51
-	IK_4,                           // 52
-	IK_5,                           // 53
-	IK_6,                           // 54
-	IK_7,                           // 55
-	IK_8,                           // 56
-	IK_9,                           // 57
-	IK_Unknown3A,                   // 58
-	IK_Unknown3B,                   // 59
-	IK_Unknown3C,                   // 60
-	IK_Unknown3D,                   // 61
-	IK_Unknown3E,                   // 62
-	IK_Unknown3F,                   // 63
-	IK_Unknown40,                   // 64
-	IK_A,                           // 65
-	IK_B,                           // 66
-	IK_C,                           // 67
-	IK_D,                           // 68
-	IK_E,                           // 69
-	IK_F,                           // 70
-	IK_G,                           // 71
-	IK_H,                           // 72
-	IK_I,                           // 73
-	IK_J,                           // 74
-	IK_K,                           // 75
-	IK_L,                           // 76
-	IK_M,                           // 77
-	IK_N,                           // 78
-	IK_O,                           // 79
-	IK_P,                           // 80
-	IK_Q,                           // 81
-	IK_R,                           // 82
-	IK_S,                           // 83
-	IK_T,                           // 84
-	IK_U,                           // 85
-	IK_V,                           // 86
-	IK_W,                           // 87
-	IK_X,                           // 88
-	IK_Y,                           // 89
-	IK_Z,                           // 90
-	IK_Unknown5B,                   // 91
-	IK_Unknown5C,                   // 92
-	IK_Unknown5D,                   // 93
-	IK_Unknown5E,                   // 94
-	IK_Unknown5F,                   // 95
-	IK_NumPad0,                     // 96
-	IK_NumPad1,                     // 97
-	IK_NumPad2,                     // 98
-	IK_NumPad3,                     // 99
-	IK_NumPad4,                     // 100
-	IK_NumPad5,                     // 101
-	IK_NumPad6,                     // 102
-	IK_NumPad7,                     // 103
-	IK_NumPad8,                     // 104
-	IK_NumPad9,                     // 105
-	IK_GreyStar,                    // 106
-	IK_GreyPlus,                    // 107
-	IK_Separator,                   // 108
-	IK_GreyMinus,                   // 109
-	IK_NumPadPeriod,                // 110
-	IK_GreySlash,                   // 111
-	IK_F1,                          // 112
-	IK_F2,                          // 113
-	IK_F3,                          // 114
-	IK_F4,                          // 115
-	IK_F5,                          // 116
-	IK_F6,                          // 117
-	IK_F7,                          // 118
-	IK_F8,                          // 119
-	IK_F9,                          // 120
-	IK_F10,                         // 121
-	IK_F11,                         // 122
-	IK_F12,                         // 123
-	IK_F13,                         // 124
-	IK_F14,                         // 125
-	IK_F15,                         // 126
-	IK_F16,                         // 127
-	IK_F17,                         // 128
-	IK_F18,                         // 129
-	IK_F19,                         // 130
-	IK_F20,                         // 131
-	IK_F21,                         // 132
-	IK_F22,                         // 133
-	IK_F23,                         // 134
-	IK_F24,                         // 135
-	IK_Unknown88,                   // 136
-	IK_Unknown89,                   // 137
-	IK_Unknown8A,                   // 138
-	IK_Unknown8B,                   // 139
-	IK_Unknown8C,                   // 140
-	IK_Unknown8D,                   // 141
-	IK_Unknown8E,                   // 142
-	IK_Unknown8F,                   // 143
-	IK_NumLock,                     // 144
-	IK_ScrollLock,                  // 145
-	IK_Unknown92,                   // 146
-	IK_Unknown93,                   // 147
-	IK_Unknown94,                   // 148
-	IK_Unknown95,                   // 149
-	IK_Unknown96,                   // 150
-	IK_Unknown97,                   // 151
-	IK_Unknown98,                   // 152
-	IK_Unknown99,                   // 153
-	IK_Unknown9A,                   // 154
-	IK_Unknown9B,                   // 155
-	IK_Unknown9C,                   // 156
-	IK_Unknown9D,                   // 157
-	IK_Unknown9E,                   // 158
-	IK_Unknown9F,                   // 159
-	IK_LShift,                      // 160
-	IK_RShift,                      // 161
-	IK_LControl,                    // 162
-	IK_RControl,                    // 163
-	IK_UnknownA4,                   // 164
-	IK_UnknownA5,                   // 165
-	IK_UnknownA6,                   // 166
-	IK_UnknownA7,                   // 167
-	IK_UnknownA8,                   // 168
-	IK_UnknownA9,                   // 169
-	IK_UnknownAA,                   // 170
-	IK_UnknownAB,                   // 171
-	IK_UnknownAC,                   // 172
-	IK_UnknownAD,                   // 173
-	IK_UnknownAE,                   // 174
-	IK_UnknownAF,                   // 175
-	IK_UnknownB0,                   // 176
-	IK_UnknownB1,                   // 177
-	IK_UnknownB2,                   // 178
-	IK_UnknownB3,                   // 179
-	IK_UnknownB4,                   // 180
-	IK_UnknownB5,                   // 181
-	IK_UnknownB6,                   // 182
-	IK_UnknownB7,                   // 183
-	IK_UnknownB8,                   // 184
-	IK_UnknownB9,                   // 185
-	IK_Semicolon,                   // 186
-	IK_Equals,                      // 187
-	IK_Comma,                       // 188
-	IK_Minus,                       // 189
-	IK_Period,                      // 190
-	IK_Slash,                       // 191
-	IK_Tilde,                       // 192
-	IK_UnknownC1,                   // 193
-	IK_UnknownC2,                   // 194
-	IK_UnknownC3,                   // 195
-	IK_UnknownC4,                   // 196
-	IK_UnknownC5,                   // 197
-	IK_UnknownC6,                   // 198
-	IK_UnknownC7,                   // 199
-	IK_Joy1,                        // 200
-	IK_Joy2,                        // 201
-	IK_Joy3,                        // 202
-	IK_Joy4,                        // 203
-	IK_Joy5,                        // 204
-	IK_Joy6,                        // 205
-	IK_Joy7,                        // 206
-	IK_Joy8,                        // 207
-	IK_Joy9,                        // 208
-	IK_Joy10,                       // 209
-	IK_Joy11,                       // 210
-	IK_Joy12,                       // 211
-	IK_Joy13,                       // 212
-	IK_Joy14,                       // 213
-	IK_Joy15,                       // 214
-	IK_Joy16,                       // 215
-	IK_UnknownD8,                   // 216
-	IK_UnknownD9,                   // 217
-	IK_UnknownDA,                   // 218
-	IK_LeftBracket,                 // 219
-	IK_Backslash,                   // 220
-	IK_RightBracket,                // 221
-	IK_SingleQuote,                 // 222
-	IK_UnknownDF,                   // 223
-	IK_JoyX,                        // 224
-	IK_JoyY,                        // 225
-	IK_JoyZ,                        // 226
-	IK_JoyR,                        // 227
-	IK_MouseX,                      // 228
-	IK_MouseY,                      // 229
-	IK_MouseZ,                      // 230
-	IK_MouseW,                      // 231
-	IK_JoyU,                        // 232
-	IK_JoyV,                        // 233
-	IK_UnknownEA,                   // 234
-	IK_UnknownEB,                   // 235
-	IK_MouseWheelUp,                // 236
-	IK_MouseWheelDown,              // 237
-	IK_Unknown10E,                  // 238
-	UK_Unknown10F,                  // 239
-	IK_UnknownF0,                   // 240
-	IK_UnknownF1,                   // 241
-	IK_UnknownF2,                   // 242
-	IK_UnknownF3,                   // 243
-	IK_UnknownF4,                   // 244
-	IK_UnknownF5,                   // 245
-	IK_Attn,                        // 246
-	IK_CrSel,                       // 247
-	IK_ExSel,                       // 248
-	IK_ErEof,                       // 249
-	IK_Play,                        // 250
-	IK_Zoom,                        // 251
-	IK_NoName,                      // 252
-	IK_PA1,                         // 253
-	IK_OEMClear                     // 254
+/*00*/	IK_None			,IK_LeftMouse	,IK_RightMouse	,IK_Cancel		,
+/*04*/	IK_MiddleMouse	,IK_Unknown05	,IK_Unknown06	,IK_Unknown07	,
+/*08*/	IK_Backspace	,IK_Tab         ,IK_Unknown0A	,IK_Unknown0B	,
+/*0C*/	IK_Unknown0C	,IK_Enter	    ,IK_Unknown0E	,IK_Unknown0F	,
+/*10*/	IK_Shift		,IK_Ctrl	    ,IK_Alt			,IK_Pause       ,
+/*14*/	IK_CapsLock		,IK_Unknown15	,IK_Unknown16	,IK_Unknown17	,
+/*18*/	IK_Unknown18	,IK_Unknown19	,IK_Unknown1A	,IK_Escape		,
+/*1C*/	IK_Unknown1C	,IK_Unknown1D	,IK_Unknown1E	,IK_Unknown1F	,
+/*20*/	IK_Space		,IK_PageUp      ,IK_PageDown    ,IK_End         ,
+/*24*/	IK_Home			,IK_Left        ,IK_Up          ,IK_Right       ,
+/*28*/	IK_Down			,IK_Select      ,IK_Print       ,IK_Execute     ,
+/*2C*/	IK_PrintScrn	,IK_Insert      ,IK_Delete      ,IK_Help		,
+/*30*/	IK_0			,IK_1			,IK_2			,IK_3			,
+/*34*/	IK_4			,IK_5			,IK_6			,IK_7			,
+/*38*/	IK_8			,IK_9			,IK_Unknown3A	,IK_Unknown3B	,
+/*3C*/	IK_Unknown3C	,IK_Unknown3D	,IK_Unknown3E	,IK_Unknown3F	,
+/*40*/	IK_Unknown40	,IK_A			,IK_B			,IK_C			,
+/*44*/	IK_D			,IK_E			,IK_F			,IK_G			,
+/*48*/	IK_H			,IK_I			,IK_J			,IK_K			,
+/*4C*/	IK_L			,IK_M			,IK_N			,IK_O			,
+/*50*/	IK_P			,IK_Q			,IK_R			,IK_S			,
+/*54*/	IK_T			,IK_U			,IK_V			,IK_W			,
+/*58*/	IK_X			,IK_Y			,IK_Z			,IK_Unknown5B	,
+/*5C*/	IK_Unknown5C	,IK_Unknown5D	,IK_Unknown5E	,IK_Unknown5F	,
+/*60*/	IK_NumPad0		,IK_NumPad1     ,IK_NumPad2     ,IK_NumPad3     ,
+/*64*/	IK_NumPad4		,IK_NumPad5     ,IK_NumPad6     ,IK_NumPad7     ,
+/*68*/	IK_NumPad8		,IK_NumPad9     ,IK_GreyStar    ,IK_GreyPlus    ,
+/*6C*/	IK_Separator	,IK_GreyMinus	,IK_NumPadPeriod,IK_GreySlash   ,
+/*70*/	IK_F1			,IK_F2          ,IK_F3          ,IK_F4          ,
+/*74*/	IK_F5			,IK_F6          ,IK_F7          ,IK_F8          ,
+/*78*/	IK_F9           ,IK_F10         ,IK_F11         ,IK_F12         ,
+/*7C*/	IK_F13			,IK_F14         ,IK_F15         ,IK_F16         ,
+/*80*/	IK_F17			,IK_F18         ,IK_F19         ,IK_F20         ,
+/*84*/	IK_F21			,IK_F22         ,IK_F23         ,IK_F24         ,
+/*88*/	IK_Unknown88	,IK_Unknown89	,IK_Unknown8A	,IK_Unknown8B	,
+/*8C*/	IK_Unknown8C	,IK_Unknown8D	,IK_Unknown8E	,IK_Unknown8F	,
+/*90*/	IK_NumLock		,IK_ScrollLock  ,IK_Unknown92	,IK_Unknown93	,
+/*94*/	IK_Unknown94	,IK_Unknown95	,IK_Unknown96	,IK_Unknown97	,
+/*98*/	IK_Unknown98	,IK_Unknown99	,IK_Unknown9A	,IK_Unknown9B	,
+/*9C*/	IK_Unknown9C	,IK_Unknown9D	,IK_Unknown9E	,IK_Unknown9F	,
+/*A0*/	IK_LShift		,IK_RShift      ,IK_LControl    ,IK_RControl    ,
+/*A4*/	IK_UnknownA4	,IK_UnknownA5	,IK_UnknownA6	,IK_UnknownA7	,
+/*A8*/	IK_UnknownA8	,IK_UnknownA9	,IK_UnknownAA	,IK_UnknownAB	,
+/*AC*/	IK_UnknownAC	,IK_UnknownAD	,IK_UnknownAE	,IK_UnknownAF	,
+/*B0*/	IK_UnknownB0	,IK_UnknownB1	,IK_UnknownB2	,IK_UnknownB3	,
+/*B4*/	IK_UnknownB4	,IK_UnknownB5	,IK_UnknownB6	,IK_UnknownB7	,
+/*B8*/	IK_UnknownB8	,IK_UnknownB9	,IK_Semicolon	,IK_Equals		,
+/*BC*/	IK_Comma		,IK_Minus		,IK_Period		,IK_Slash		,
+/*C0*/	IK_Tilde		,IK_UnknownC1	,IK_UnknownC2	,IK_UnknownC3	,
+/*C4*/	IK_UnknownC4	,IK_UnknownC5	,IK_UnknownC6	,IK_UnknownC7	,
+/*C8*/	IK_Joy1	        ,IK_Joy2	    ,IK_Joy3	    ,IK_Joy4	    ,
+/*CC*/	IK_Joy5	        ,IK_Joy6	    ,IK_Joy7	    ,IK_Joy8	    ,
+/*D0*/	IK_Joy9	        ,IK_Joy10	    ,IK_Joy11	    ,IK_Joy12		,
+/*D4*/	IK_Joy13		,IK_Joy14	    ,IK_Joy15	    ,IK_Joy16	    ,
+/*D8*/	IK_UnknownD8	,IK_UnknownD9	,IK_UnknownDA	,IK_LeftBracket	,
+/*DC*/	IK_Backslash	,IK_RightBracket,IK_SingleQuote	,IK_UnknownDF	,
+/*E0*/  IK_JoyX			,IK_JoyY		,IK_JoyZ		,IK_JoyR		,
+/*E4*/	IK_MouseX		,IK_MouseY		,IK_MouseZ		,IK_MouseW		,
+/*E8*/	IK_JoyU			,IK_JoyV		,IK_UnknownEA	,IK_UnknownEB	,
+/*EC*/	IK_MouseWheelUp ,IK_MouseWheelDown,IK_Unknown10E,UK_Unknown10F  ,
+/*F0*/	IK_UnknownF0	,IK_UnknownF1	,IK_UnknownF2	,IK_UnknownF3	,
+/*F4*/	IK_UnknownF4	,IK_UnknownF5	,IK_Attn		,IK_CrSel		,
+/*F8*/	IK_ExSel		,IK_ErEof		,IK_Play		,IK_Zoom		,
+/*FC*/	IK_NoName		,IK_PA1			,IK_OEMClear
+};
+enum EInputAction
+{
+	IST_None,    // Not performing special input processing.
+	IST_Press,   // Handling a keypress or button press.
+	IST_Hold,    // Handling holding a key or button.
+	IST_Release, // Handling a key or button release.
+	IST_Axis,    // Handling analog axis movement.
 };
 
+defaultproperties
+{
+}

@@ -1,10 +1,4 @@
 //=============================================================================
-// R6WindowListInfoMapItem - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowListServerInfoItem.uc : Class used to hold the values for 
 //  the entries in the list of maps in the ServerInfo tab in the multi player menu.
 //
@@ -15,17 +9,16 @@
 //=============================================================================
 class R6WindowListInfoMapItem extends UWindowListBoxItem;
 
-var float fMapXOff;
-var float fTypeXOff;
-var float fMapWidth;
+// --- Variables ---
 var float fTypeWidth;
-var string szMap;  // Map name
-var string szType;  // Game type
+var float fMapWidth;
+var float fTypeXOff;
+var float fMapXOff;
+// Game type
+var string szType;
+// Map name
+var string szMap;
 
 defaultproperties
 {
-	fMapXOff=5.0000000
-	fTypeXOff=68.0000000
-	fMapWidth=60.0000000
-	fTypeWidth=159.0000000
 }

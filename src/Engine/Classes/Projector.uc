@@ -1,134 +1,101 @@
-//=============================================================================
-// Projector - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class Projector extends Actor
-	native
- placeable;
+    native;
 
+#exec Texture Import File=Textures\Proj_IconMasked.pcx Name=Proj_Icon Mips=Off MASKED=1
+#exec Texture Import file=Textures\GRADIENT_Fade.tga Name=GRADIENT_Fade Mips=Off UCLAMPMODE=CLAMP VCLAMPMODE=CLAMP
+#exec Texture Import file=Textures\GRADIENT_Clip.tga Name=GRADIENT_Clip Mips=Off UCLAMPMODE=CLAMP VCLAMPMODE=CLAMP
+
+// --- Enums ---
 enum EProjectorBlending
 {
-	PB_None,                        // 0
-	PB_Modulate,                    // 1
-	PB_Modulate1X,                  // 2
-	PB_AlphaBlend,                  // 3
-	PB_Add,                         // 4
-	PB_Darken                       // 5
+	PB_None,
+	PB_Modulate,
+    PB_Modulate1X,
+	PB_AlphaBlend,
+	PB_Add,
+    PB_Darken
 };
 
-var() Projector.EProjectorBlending MaterialBlendingOp;  // The blending operation between the material being projected onto and ProjTexture.
-// NEW IN 1.60
-var() Projector.EProjectorBlending FrameBufferBlendingOp;
-var() int FOV;
-var() int MaxTraceDistance;
-var() bool bProjectBSP;
-var() bool bProjectTerrain;
-var() bool bProjectStaticMesh;
-var() bool bProjectParticles;
-var() bool bProjectActor;
-// NEW IN 1.60
-var() bool bProjectBullet;
-var() bool bLevelStatic;
-var() bool bClipBSP;
-var() bool m_bClipStaticMesh;  // R6CODE - Clip StaticMeshes for speed.
-var() bool m_bRelative;  // R6CODE - Projector is relative to moving actors.
-var bool m_bDirectionalModulation;  // R6CODE - Don't project on backfacing geometry and fade with angle.
-var bool m_bProjectTransparent;  // R6CODE - Project on transparent objects.
-var bool m_bProjectOnlyOnFloor;  // R6CODE - Project only on floor.
-var() bool bProjectOnUnlit;
-var() bool bGradient;
-var() bool bProjectOnAlpha;
-var() bool bProjectOnParallelBSP;
-// NEW IN 1.60
-var() bool bProjectOnlyFirst;
+// --- Variables ---
+var bool bProjectActor;
+// ^ NEW IN 1.60
+var int FOV;
+// ^ NEW IN 1.60
+var name ProjectTag;
+// ^ NEW IN 1.60
+var bool m_bClipStaticMesh;
+// ^ NEW IN 1.60
+var bool bClipBSP;
+// ^ NEW IN 1.60
+var Material ProjTexture;
+// ^ NEW IN 1.60
+var bool bProjectStaticMesh;
+// ^ NEW IN 1.60
+var bool bLevelStatic;
+// ^ NEW IN 1.60
 //R6SHADOW
 var bool bLightInfluenced;
-var() Material ProjTexture;
-var() Texture GradientTexture;
-var() name ProjectTag;
-var const transient Plane FrustumPlanes[6];
-var const transient Vector FrustumVertices[8];
-var const transient Box Box;
-var const transient ProjectorRenderInfoPtr RenderInfo;
-var transient Matrix GradientMatrix;
-var transient Matrix Matrix;
 var transient Vector OldLocation;
+var transient Matrix Matrix;
+var transient Matrix GradientMatrix;
+var transient const ProjectorRenderInfoPtr RenderInfo;
+var transient const Box Box;
+var transient const Vector FrustumVertices[8];
+var transient const Plane FrustumPlanes[6];
+var Texture GradientTexture;
+// ^ NEW IN 1.60
+var bool bProjectOnlyFirst;
+// ^ NEW IN 1.60
+var bool bProjectOnParallelBSP;
+// ^ NEW IN 1.60
+var bool bProjectOnAlpha;
+// ^ NEW IN 1.60
+var bool bGradient;
+// ^ NEW IN 1.60
+var bool bProjectOnUnlit;
+// ^ NEW IN 1.60
+//R6CODE - Project only on floor.
+var bool m_bProjectOnlyOnFloor;
+//R6CODE - Project on transparent objects.
+var bool m_bProjectTransparent;
+//R6CODE - Don't project on backfacing geometry and fade with angle.
+var bool m_bDirectionalModulation;
+var bool m_bRelative;
+// ^ NEW IN 1.60
+var bool bProjectBullet;
+// ^ NEW IN 1.60
+var bool bProjectParticles;
+// ^ NEW IN 1.60
+var bool bProjectTerrain;
+// ^ NEW IN 1.60
+var bool bProjectBSP;
+// ^ NEW IN 1.60
+var int MaxTraceDistance;
+// ^ NEW IN 1.60
+var EProjectorBlending FrameBufferBlendingOp;
+// ^ NEW IN 1.60
+var EProjectorBlending MaterialBlendingOp;
+// ^ NEW IN 1.60
 
-// Export UProjector::execAttachProjector(FFrame&, void* const)
-// functions
- native function AttachProjector();
-
-// Export UProjector::execDetachProjector(FFrame&, void* const)
- native function DetachProjector(optional bool Force);
-
-// Export UProjector::execAbandonProjector(FFrame&, void* const)
- native function AbandonProjector(optional float Lifetime);
-
-// Export UProjector::execAttachActor(FFrame&, void* const)
- native function AttachActor(Actor A);
-
-// Export UProjector::execDetachActor(FFrame&, void* const)
- native function DetachActor(Actor A);
-
-event PostBeginPlay()
-{
-	AttachProjector();
-	// End:0x18
-	if(bLevelStatic)
-	{
-		AbandonProjector();
-		__NFUN_279__();
-	}
-	// End:0x27
-	if(bProjectActor)
-	{
-		__NFUN_262__(true, false, false);
-	}
-	return;
-}
-
+// --- Functions ---
+// function ? Untouch(...); // REMOVED IN 1.60
 // fix unprog
-simulated event Touch(Actor Other)
-{
-	// End:0x69
-	if(__NFUN_130__(__NFUN_130__(Other.bAcceptsProjectors, __NFUN_132__(__NFUN_254__(ProjectTag, 'None'), __NFUN_254__(Other.Tag, ProjectTag))), __NFUN_132__(bProjectStaticMesh, __NFUN_114__(Other.StaticMesh, none))))
-	{
-		AttachActor(Other);
-	}
-	return;
-}
-
-event UnTouch(Actor Other)
-{
-	DetachActor(Other);
-	return;
-}
-
+simulated event Touch(Actor Other) {}
+event UpdateShadow() {}
+event PostBeginPlay() {}
 //R6SHADOW
-event LightUpdateDirect(Vector LightDir, float LightDist, byte bOpacity)
-{
-	return;
-}
-
-event UpdateShadow()
-{
-	return;
-}
+event LightUpdateDirect(byte bOpacity, float LightDist, Vector LightDir) {}
+event UnTouch(Actor Other) {}
+// ^ NEW IN 1.60
+native function DetachActor(Actor A) {}
+native function AttachActor(Actor A) {}
+native function AbandonProjector(optional float Lifetime) {}
+native function DetachProjector(optional bool Force) {}
+// functions
+native function AttachProjector() {}
 
 defaultproperties
 {
-	FrameBufferBlendingOp=1
-	MaxTraceDistance=1000
-	bProjectBSP=true
-	bProjectTerrain=true
-	bProjectStaticMesh=true
-	bProjectParticles=true
-	bProjectActor=true
-	m_bProjectTransparent=true
-	GradientTexture=Texture'Engine.GRADIENT_Fade'
-	bStatic=true
-	bHidden=true
-	bDirectional=true
-	Texture=Texture'Engine.Proj_Icon'
 }

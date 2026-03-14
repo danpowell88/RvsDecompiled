@@ -1,74 +1,29 @@
 //=============================================================================
-// UWindowMenuBarItem - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // UWindowMenuBarItem - An Unreal menu bar item
 //=============================================================================
-class UWindowMenuBarItem extends UWindowList;
+class UWindowMenuBarItem extends UWindowList
+    config;
 
-var byte HotKey;
-var bool bHelp;
-var float ItemLeft;
-var float ItemWidth;
-var UWindowMenuBar Owner;
+// --- Variables ---
 var UWindowPulldownMenu Menu;
+var UWindowMenuBar Owner;
+var float ItemLeft;
+var bool bHelp;
+var float ItemWidth;
 var string Caption;
+var byte HotKey;
 
-function SetHelp(bool B)
+// --- Functions ---
+function UWindowPulldownMenu CreateMenu(class<UWindowPulldownMenu> MenuClass) {}
+// ^ NEW IN 1.60
+function SetHelp(bool B) {}
+function SetCaption(string C) {}
+function DeSelect() {}
+function Select() {}
+function CloseUp() {}
+function UWindowMenuBar GetMenuBar() {}
+// ^ NEW IN 1.60
+
+defaultproperties
 {
-	bHelp = B;
-	return;
 }
-
-function SetCaption(string C)
-{
-	local string Junk, Junk2;
-
-	Caption = C;
-	HotKey = Owner.ParseAmpersand(C, Junk, Junk2, false);
-	return;
-}
-
-function UWindowPulldownMenu CreateMenu(Class<UWindowPulldownMenu> MenuClass)
-{
-	Menu = UWindowPulldownMenu(Owner.ParentWindow.CreateWindow(MenuClass, 0.0000000, 0.0000000, 100.0000000, 100.0000000));
-	Menu.HideWindow();
-	Menu.Owner = self;
-	return Menu;
-	return;
-}
-
-function DeSelect()
-{
-	Owner.LookAndFeel.PlayMenuSound(Owner, 1);
-	Menu.DeSelect();
-	Menu.HideWindow();
-	return;
-}
-
-function Select()
-{
-	Owner.LookAndFeel.PlayMenuSound(Owner, 0);
-	Menu.ShowWindow();
-	Menu.WinLeft = __NFUN_174__(ItemLeft, Owner.WinLeft);
-	Menu.WinTop = 14.0000000;
-	Menu.WinWidth = 100.0000000;
-	Menu.WinHeight = 100.0000000;
-	return;
-}
-
-function CloseUp()
-{
-	Owner.CloseUp();
-	return;
-}
-
-function UWindowMenuBar GetMenuBar()
-{
-	return Owner.GetMenuBar();
-	return;
-}
-

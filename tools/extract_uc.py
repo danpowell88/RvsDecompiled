@@ -123,21 +123,17 @@ def read_index(data: bytes, pos: int):
 
 
 def read_fstring(data: bytes, pos: int):
-    """Read a length-prefixed FString (int32 length + chars). Returns (str, new_pos)."""
-    length = struct.unpack_from('<i', data, pos)[0]
-    pos += 4
+    """Read a UE2 length-prefixed string (compact_index length + chars). Returns (str, new_pos)."""
+    length, pos = read_index(data, pos)
     if length == 0:
         return '', pos
     if length < 0:
-        # Unicode — take even bytes
-        byte_len = (-length) * 2
-        raw = data[pos:pos + byte_len]
-        pos += byte_len
-        return raw[::2].decode('latin-1', errors='replace').rstrip('\x00'), pos
-    else:
-        raw = data[pos:pos + length]
-        pos += length
-        return raw.decode('latin-1', errors='replace').rstrip('\x00'), pos
+        length = -length
+    if length > 4096:
+        return '', pos   # sanity check — bail on absurd lengths
+    raw = data[pos:pos + length]
+    pos += length
+    return raw.decode('latin-1', errors='replace').rstrip('\x00'), pos
 
 
 # ---------------------------------------------------------------------------
@@ -1056,32 +1052,54 @@ def merge_sdk_comments(generated_uc: str, sdk_path: Path, cls: dict) -> str:
                    if m not in ('native',)]   # native comes from binary
 
     new_lines = []
-    for line in lines:
-        if re.match(r'^class\s+\w+\s+extends\s+\w+', line):
-            # Rewrite class declaration with merged modifiers
-            # Already has 'native' if binary says so; add SDK extras
-            existing = line
-            # Build modifier list from the binary-extracted line
-            bin_mods = []
-            if '    native' in existing or existing.rstrip().endswith('native;'):
-                bin_mods.append('native')
-            # Add SDK extras
-            all_mods = bin_mods + [m for m in mods_to_add if m not in bin_mods]
+    in_class_decl   = False
+    bin_mods_found  = []
 
-            # Reconstruct
-            class_name  = cls['name']
-            super_name  = cls['super']
-            if all_mods:
-                mod_lines = '\n    ' + '\n    '.join(all_mods)
-                new_lines.append(f'class {class_name} extends {super_name}{mod_lines};')
+    for line in lines:
+        stripped = line.strip()
+
+        if in_class_decl:
+            # Continuation of the class declaration — scan for modifiers
+            if stripped.rstrip(';').strip() in ('native', 'abstract', 'nativereplication',
+                                                 'transient', 'noexport', 'notplaceable'):
+                tok = stripped.rstrip(';').strip()
+                if tok not in bin_mods_found:
+                    bin_mods_found.append(tok)
+            if stripped.endswith(';'):
+                # End of declaration — emit the merged class line
+                in_class_decl = False
+                all_mods = bin_mods_found + [m for m in mods_to_add if m not in bin_mods_found]
+                class_name = cls['name']
+                super_name = cls['super']
+                if all_mods:
+                    mod_str = '\n    ' + '\n    '.join(all_mods)
+                    new_lines.append(f'class {class_name} extends {super_name}{mod_str};')
+                else:
+                    new_lines.append(f'class {class_name} extends {super_name};')
+            continue   # always skip raw continuation lines
+
+        if re.match(r'^class\s+\w+\s+extends\s+\w+', line):
+            bin_mods_found = []
+            # Collect any inline modifiers on this line
+            for kw in ('native', 'abstract', 'nativereplication', 'transient',
+                       'noexport', 'notplaceable'):
+                if re.search(r'\b' + kw + r'\b', line):
+                    bin_mods_found.append(kw)
+            if line.rstrip().endswith(';'):
+                # Single-line declaration — emit immediately
+                all_mods = bin_mods_found + [m for m in mods_to_add if m not in bin_mods_found]
+                class_name = cls['name']
+                super_name = cls['super']
+                if all_mods:
+                    mod_str = '\n    ' + '\n    '.join(all_mods)
+                    new_lines.append(f'class {class_name} extends {super_name}{mod_str};')
+                else:
+                    new_lines.append(f'class {class_name} extends {super_name};')
             else:
-                new_lines.append(f'class {class_name} extends {super_name};')
-            # Swallow any continuation lines that were part of the original declaration
+                # Multi-line — will be finished when we see the closing ';'
+                in_class_decl = True
             continue
-        # Skip bare modifier lines (they come from our plain generator)
-        if line.strip() in ('native', 'abstract', 'nativereplication') and new_lines and \
-                re.match(r'^class\s', new_lines[-1] if new_lines else ''):
-            continue
+
         new_lines.append(line)
     lines = new_lines
 
@@ -1089,13 +1107,19 @@ def merge_sdk_comments(generated_uc: str, sdk_path: Path, cls: dict) -> str:
     if sdk_execs:
         new_lines2 = []
         inserted = False
+        in_decl = False
         for line in lines:
             new_lines2.append(line)
-            if not inserted and re.match(r'^class\s+\w+\s+extends\s+\w+', line) and line.rstrip().endswith(';'):
-                new_lines2.append('')
-                for ex in sdk_execs:
-                    new_lines2.append(ex)
-                inserted = True
+            if not inserted:
+                s = line.strip()
+                if re.match(r'^class\s+\w+\s+extends\s+\w+', line):
+                    in_decl = True
+                if in_decl and s.endswith(';'):
+                    in_decl = False
+                    new_lines2.append('')
+                    for ex in sdk_execs:
+                        new_lines2.append(ex)
+                    inserted = True
         lines = new_lines2
 
     # Add var comments from 1.56 and mark NEW/REMOVED

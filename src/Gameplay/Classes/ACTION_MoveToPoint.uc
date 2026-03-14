@@ -1,57 +1,19 @@
-//=============================================================================
-// ACTION_MoveToPoint - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_MoveToPoint extends LatentScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_MoveToPoint extends LatentScriptedAction;
 
+// --- Variables ---
+// var ? Movetarget; // REMOVED IN 1.60
 var Actor MoveTarget;
-var(Action) name DestinationTag;  // tag of destination - if none, then use the ScriptedSequence
+// ^ NEW IN 1.60
+var name DestinationTag;
+// ^ NEW IN 1.60
 
-function bool MoveToGoal()
-{
-	return true;
-	return;
-}
-
-function Actor GetMoveTargetFor(ScriptedController C)
-{
-	// End:0x11
-	if(__NFUN_119__(MoveTarget, none))
-	{
-		return MoveTarget;
-	}
-	MoveTarget = C.SequenceScript.GetMoveTarget();
-	// End:0x72
-	if(__NFUN_130__(__NFUN_255__(DestinationTag, 'None'), __NFUN_255__(DestinationTag, 'None')))
-	{
-		// End:0x71
-		foreach C.__NFUN_304__(Class'Engine.Actor', MoveTarget, DestinationTag)
-		{
-			// End:0x71
-			break;			
-		}		
-	}
-	// End:0x9C
-	if(__NFUN_119__(AIScript(MoveTarget), none))
-	{
-		MoveTarget = AIScript(MoveTarget).GetMoveTarget();
-	}
-	return MoveTarget;
-	return;
-}
-
-function string GetActionString()
-{
-	return __NFUN_168__(ActionString, string(DestinationTag));
-	return;
-}
+// --- Functions ---
+function Actor GetMoveTargetFor(ScriptedController C) {}
+function bool MoveToGoal() {}
+function string GetActionString() {}
 
 defaultproperties
 {
-	bValidForTrigger=false
-	ActionString="Move to point"
 }

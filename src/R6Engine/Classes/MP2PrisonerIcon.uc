@@ -1,16 +1,11 @@
-//=============================================================================
-// MP2PrisonerIcon - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// No matching SDK 1.56 source found
-//=============================================================================
-class MP2PrisonerIcon extends R6ReferenceIcons
- placeable;
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class MP2PrisonerIcon extends R6ReferenceIcons;
 
-var(LimitSeats) int m_iPrisonerTeam;
-var(LimitSeats) bool m_bKnownForOtherTeam;
+// --- Variables ---
+var int m_iPrisonerTeam;
+var bool m_bKnownForOtherTeam;
 
 defaultproperties
 {
-	m_bKnownForOtherTeam=true
-	bStatic=true
 }

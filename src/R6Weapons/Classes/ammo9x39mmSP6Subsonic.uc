@@ -1,17 +1,9 @@
-//=============================================================================
-// ammo9x39mmSP6Subsonic - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  ammo9x39mmSP6Subsonic.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-class ammo9x39mmSP6Subsonic extends ammo9x39mmSP6
- abstract;
+class ammo9x39mmSP6Subsonic extends ammo9x39mmSP6;
 
 defaultproperties
 {
-	m_szAmmoType="Subsonic"
 }

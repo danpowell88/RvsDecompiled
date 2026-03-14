@@ -1,18 +1,12 @@
-//=============================================================================
-// AnimNotify_DestroyEffect - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class AnimNotify_DestroyEffect extends AnimNotify
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+    native;
 
-var() bool bExpireParticles;
-var() name DestroyTag;
+// --- Variables ---
+var name DestroyTag;
+var bool bExpireParticles;
 
 defaultproperties
 {
-	bExpireParticles=true
 }

@@ -1,27 +1,17 @@
-//=============================================================================
-// R6ModGSInfo - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// No matching SDK 1.56 source found
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6GameService.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class R6ModGSInfo extends Object
-	native
- config(R6ModGSInfo);
+    native;
 
+// --- Variables ---
 var config byte m_ucModActivationID[16];
-var config bool m_bModValidActivationID;
 var config string m_szModGlobalID;
+var config bool m_bModValidActivationID;
 
-// Export UR6ModGSInfo::execNativeInitModInfo(FFrame&, void* const)
- native(1207) final function NativeInitModInfo();
+// --- Functions ---
+function InitGSMod() {}
+final native function NativeInitModInfo() {}
 
-function InitGSMod()
+defaultproperties
 {
-	local string szFileName;
-	local R6ModMgr pModManager;
-
-	__NFUN_1207__();
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
-	szFileName = __NFUN_112__(__NFUN_112__(__NFUN_112__("..\\", pModManager.GetIniFilesDir()), "\\"), pModManager.GetModKeyword());
-	__NFUN_1010__(szFileName);
-	return;
 }

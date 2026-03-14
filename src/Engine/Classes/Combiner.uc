@@ -1,42 +1,42 @@
-//=============================================================================
-// Combiner - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class Combiner extends Material
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+    native;
 
-enum EColorOperation
-{
-	CO_Use_Color_From_Material1,    // 0
-	CO_Use_Color_From_Material2,    // 1
-	CO_Multiply,                    // 2
-	CO_Add,                         // 3
-	CO_Subtract,                    // 4
-	CO_AlphaBlend_With_Mask,        // 5
-	CO_Add_With_Mask_Modulation,    // 6
-	CO_Use_Color_From_Mask,         // 7
-	CO_Bump                         // 8
-};
-
+// --- Enums ---
 enum EAlphaOperation
 {
-	AO_Use_Mask,                    // 0
-	AO_Multiply,                    // 1
-	AO_Add,                         // 2
-	AO_Use_Alpha_From_Material1,    // 3
-	AO_Use_Alpha_From_Material2     // 4
+	AO_Use_Mask,
+	AO_Multiply,
+	AO_Add,
+	AO_Use_Alpha_From_Material1,
+	AO_Use_Alpha_From_Material2,
+};
+enum EColorOperation
+{
+	CO_Use_Color_From_Material1,
+	CO_Use_Color_From_Material2,
+	CO_Multiply,
+	CO_Add,
+	CO_Subtract,
+	CO_AlphaBlend_With_Mask,
+	CO_Add_With_Mask_Modulation,
+        CO_Use_Color_From_Mask,
+//#ifdef R6BUMPWEAPON
+	CO_Bump,
+//#endif
 };
 
-var() Combiner.EColorOperation CombineOperation;
-var() Combiner.EAlphaOperation AlphaOperation;
-var() bool InvertMask;
-var() bool Modulate2X;
-var() bool Modulate4X;
-var() editinlineuse Material Material1;
-var() editinlineuse Material Material2;
-var() editinlineuse Material Mask;
+// --- Variables ---
+var EColorOperation CombineOperation;
+var EAlphaOperation AlphaOperation;
+var Material Material1;
+var Material Material2;
+var Material Mask;
+var bool InvertMask;
+var bool Modulate2X;
+var bool Modulate4X;
 
+defaultproperties
+{
+}

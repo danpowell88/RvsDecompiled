@@ -1,42 +1,16 @@
-//=============================================================================
-// ACTION_WaitForTimer - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_WaitForTimer extends LatentScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_WaitForTimer extends LatentScriptedAction;
 
-var(Action) float PauseTime;
+// --- Variables ---
+var float PauseTime;
 
-function bool InitActionFor(ScriptedController C)
-{
-	C.CurrentAction = self;
-	C.__NFUN_280__(PauseTime, false);
-	return true;
-	return;
-}
-
-function bool CompleteWhenTriggered()
-{
-	return true;
-	return;
-}
-
-function bool CompleteWhenTimer()
-{
-	return true;
-	return;
-}
-
-function string GetActionString()
-{
-	return __NFUN_168__(ActionString, string(PauseTime));
-	return;
-}
+// --- Functions ---
+function bool InitActionFor(ScriptedController C) {}
+function bool CompleteWhenTriggered() {}
+function bool CompleteWhenTimer() {}
+function string GetActionString() {}
 
 defaultproperties
 {
-	ActionString="Wait for timer"
 }

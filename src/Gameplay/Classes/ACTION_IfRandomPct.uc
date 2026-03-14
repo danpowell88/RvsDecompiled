@@ -1,29 +1,15 @@
-//=============================================================================
-// ACTION_IfRandomPct - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_IfRandomPct extends ScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_IfRandomPct extends ScriptedAction;
 
-var(Action) float Probability;
+// --- Variables ---
+var float Probability;
 
-function ProceedToNextAction(ScriptedController C)
+// --- Functions ---
+function ProceedToNextAction(ScriptedController C) {}
+function bool StartsSection() {}
+// ^ NEW IN 1.60
+
+defaultproperties
 {
-	__NFUN_161__(C.ActionNum, 1);
-	// End:0x28
-	if(__NFUN_177__(__NFUN_195__(), Probability))
-	{
-		ProceedToSectionEnd(C);
-	}
-	return;
 }
-
-function bool StartsSection()
-{
-	return true;
-	return;
-}
-

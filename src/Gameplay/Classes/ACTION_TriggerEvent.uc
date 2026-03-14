@@ -1,29 +1,14 @@
-//=============================================================================
-// ACTION_TriggerEvent - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_TriggerEvent extends ScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_TriggerEvent extends ScriptedAction;
 
-var(Action) name Event;
+// --- Variables ---
+var name Event;
 
-function bool InitActionFor(ScriptedController C)
-{
-	C.TriggerEvent(Event, C.SequenceScript, C.GetInstigator());
-	return false;
-	return;
-}
-
-function string GetActionString()
-{
-	return __NFUN_168__(ActionString, string(Event));
-	return;
-}
+// --- Functions ---
+function bool InitActionFor(ScriptedController C) {}
+function string GetActionString() {}
 
 defaultproperties
 {
-	ActionString="trigger event"
 }

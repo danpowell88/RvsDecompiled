@@ -1,18 +1,14 @@
-//=============================================================================
-// UnrealEdEngine - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UnrealEd.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class UnrealEdEngine extends EditorEngine
-	transient
-	native
-	config
- noexport;
+    native
+    noexport
+    transient;
 
+// --- Variables ---
 var const int NotifyVtbl;
 var const int hWndMain;
 
 defaultproperties
 {
-	GridSize=(X=1.0000000,Y=1.0000000,Z=1.0000000)
 }

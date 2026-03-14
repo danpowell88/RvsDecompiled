@@ -1,10 +1,4 @@
 //=============================================================================
-// R6AbstractNoiseMgr - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6AbstractNoiseMgr.uc : Store value for sound loudness of MakeNoise
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -12,21 +6,15 @@
 //    2001/11/15 * Created by Guillaume Borgia
 //=============================================================================
 class R6AbstractNoiseMgr extends Object
-	abstract
- native;
+    native
+    abstract
+    config(sound);
 
-event R6MakeNoise(Actor.ESoundType eType, Actor Source)
+// --- Functions ---
+event R6MakeNoise(ESoundType eType, Actor Source) {}
+function R6MakePawnMovementNoise(R6AbstractPawn Pawn) {}
+function Init() {}
+
+defaultproperties
 {
-	return;
 }
-
-function R6MakePawnMovementNoise(R6AbstractPawn Pawn)
-{
-	return;
-}
-
-function Init()
-{
-	return;
-}
-

@@ -1,48 +1,22 @@
-//=============================================================================
-// MusicTrigger - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class MusicTrigger extends Triggers
- placeable;
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class MusicTrigger extends Triggers;
 
-var() bool FadeOutAllSongs;
-var() float FadeInTime;
-var() float FadeOutTime;
-var() string Song;
-var transient int SongHandle;
+// --- Variables ---
 var transient bool Triggered;
+var bool FadeOutAllSongs;
+// ^ NEW IN 1.60
+var transient int SongHandle;
+var string Song;
+// ^ NEW IN 1.60
+var float FadeInTime;
+// ^ NEW IN 1.60
+var float FadeOutTime;
+// ^ NEW IN 1.60
 
-function Trigger(Actor Other, Pawn EventInstigator)
-{
-	// End:0x0C
-	if(FadeOutAllSongs)
-	{		
-	}
-	else
-	{
-		// End:0x22
-		if(__NFUN_129__(Triggered))
-		{
-			Triggered = true;			
-		}
-		else
-		{
-			Triggered = false;
-			// End:0x38
-			if(__NFUN_155__(SongHandle, 0))
-			{				
-			}
-			else
-			{
-				__NFUN_231__("WARNING: invalid song handle");
-			}
-		}
-	}
-	return;
-}
+// --- Functions ---
+function Trigger(Actor Other, Pawn EventInstigator) {}
 
 defaultproperties
 {
-	bCollideActors=false
 }

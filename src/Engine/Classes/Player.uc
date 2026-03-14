@@ -1,55 +1,47 @@
 //=============================================================================
-// Player - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // Player: Corresponds to a real player (a local camera or remote net player).
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class Player extends Object
-	native
-	config
- noexport;
+    native
+    noexport;
 
-const IDC_ARROW = 0;
-const IDC_SIZEALL = 1;
-const IDC_SIZENESW = 2;
-const IDC_SIZENS = 3;
-const IDC_SIZENWSE = 4;
-const IDC_SIZEWE = 5;
-const IDC_WAIT = 6;
+// --- Constants ---
+const IDC_WAIT; // value unavailable in binary
+const IDC_SIZEWE; // value unavailable in binary
+const IDC_SIZENWSE; // value unavailable in binary
+const IDC_SIZENS; // value unavailable in binary
+const IDC_SIZENESW; // value unavailable in binary
+const IDC_SIZEALL; // value unavailable in binary
+const IDC_ARROW; // value unavailable in binary
 
-// Internal.
-var native const int vfOut;
-var native const int vfExec;
+// --- Variables ---
+// Holds a listing of all local Interactions
+var transient array<array> LocalInteractions;
 // The actor this player controls.
-var const transient PlayerController Actor;
+var transient const PlayerController Actor;
 var transient Interaction Console;
-// Window input variables
-var const transient bool bWindowsMouseAvailable;
-var bool bShowWindowsMouse;
-var bool bSuspendPrecaching;
-var const transient float WindowsMouseX;
-var const transient float WindowsMouseY;
 var int CurrentNetSpeed;
-var globalconfig int ConfiguredInternetSpeed;
-// NEW IN 1.60
-var globalconfig int ConfiguredLanSpeed;
-var byte SelectedCursor;
-var transient InteractionMaster InteractionMaster;  // Callback to the IM
-var transient array<Interaction> LocalInteractions;  // Holds a listing of all local Interactions
+// Callback to the IM
+var transient InteractionMaster InteractionMaster;
 //R6ARMPATCHES
 var Guid m_ArmPatchGUID;
 //R6CODE
 var byte u8WaitLaunchStatingSound;
+var byte SelectedCursor;
+var config globalconfig int ConfiguredLanSpeed;
+var config globalconfig int ConfiguredInternetSpeed;
+// ^ NEW IN 1.60
+var transient const float WindowsMouseY;
+var transient const float WindowsMouseX;
+var bool bSuspendPrecaching;
+var bool bShowWindowsMouse;
+// Window input variables
+var transient const bool bWindowsMouseAvailable;
+var native const int vfExec;
+// Internal.
+var native const int vfOut;
 
 defaultproperties
 {
-	ConfiguredInternetSpeed=20000
-	ConfiguredLanSpeed=20000
 }
-
-// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
-// REMOVED IN 1.60: var d

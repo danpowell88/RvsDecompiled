@@ -1,20 +1,10 @@
-//=============================================================================
-// ACTION_FinishRotation - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_FinishRotation extends LatentScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_FinishRotation extends LatentScriptedAction;
 
-function bool TurnToGoal()
-{
-	return true;
-	return;
-}
+// --- Functions ---
+function bool TurnToGoal() {}
 
 defaultproperties
 {
-	ActionString="Finish rotation"
 }

@@ -1,33 +1,13 @@
-//=============================================================================
-// UWindowRightClickMenu - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class UWindowRightClickMenu extends UWindowPulldownMenu;
 
-function Created()
-{
-	bTransient = true;
-	super.Created();
-	return;
-}
+// --- Functions ---
+function RMouseDown(float Y, float X) {}
+function RMouseUp(float Y, float X) {}
+function CloseUp(optional bool bByOwner) {}
+function Created() {}
 
-function RMouseDown(float X, float Y)
+defaultproperties
 {
-	LMouseDown(X, Y);
-	return;
 }
-
-function RMouseUp(float X, float Y)
-{
-	LMouseUp(X, Y);
-	return;
-}
-
-function CloseUp(optional bool bByOwner)
-{
-	super.CloseUp(bByOwner);
-	HideWindow();
-	return;
-}
-

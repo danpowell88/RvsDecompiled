@@ -1,13 +1,14 @@
-//=============================================================================
-// R6ClimbablePoint - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class R6ClimbablePoint extends NavigationPoint
-	native
- hidecategories(Lighting,LightColor,Karma,Force);
+    native
+    notplaceable;
 
-var R6ClimbableObject m_climbableObj;
+// --- Variables ---
 var R6ClimbablePoint m_connectedClimbablePoint;
+var R6ClimbableObject m_climbableObj;
 var Vector m_vLookDir;
 
+defaultproperties
+{
+}

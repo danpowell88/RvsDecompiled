@@ -1,32 +1,11 @@
-//=============================================================================
-// R61stLMGM249 - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
 //===============================================================================
 //  [R61stLMGM249] 
 //===============================================================================
 class R61stLMGM249 extends R61stLMGWeapon;
 
-function PostBeginPlay()
-{
-	LinkSkelAnim(MeshAnimation'R61stLMG_UKX.R61stLMGM249A');
-	super.PostBeginPlay();
-	// End:0x2A
-	if(__NFUN_114__(m_smGun, none))
-	{
-		m_smGun = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
-	}
-	m_smGun.SetStaticMesh(StaticMesh'R61stWeapons_SM.LMGs.R61stLMGM249Frame');
-	AttachToBone(m_smGun, 'TagFrame');
-	return;
-}
+// --- Functions ---
+function PostBeginPlay() {}
 
 defaultproperties
 {
-	m_RWing=StaticMesh'R61stWeapons_SM.LMGs.R61stLMG556Nato_RWing'
-	m_2Wing=StaticMesh'R61stWeapons_SM.LMGs.R61stLMG556Nato_2Wing'
-	m_LWing=StaticMesh'R61stWeapons_SM.LMGs.R61stLMG556Nato_LWing'
-	Mesh=SkeletalMesh'R61stLMG_UKX.R61stLMGM249'
 }

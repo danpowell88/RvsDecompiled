@@ -1,10 +1,4 @@
 //=============================================================================
-// AIScript - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // AIScript - used by Level Designers to specify special AI scripts for pawns 
 // placed in a level, and to change which type of AI controller to use for a pawn.
 // AIScripts can be shared by one or many pawns. 
@@ -12,50 +6,22 @@
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class AIScript extends Keypoint
-	native
- placeable;
+    native;
 
-var bool bNavigate;  // if true, put an associated path in the navigation network
-var bool bLoggingEnabled;
+// --- Variables ---
 var AIMarker myMarker;
-var() Class<AIController> ControllerClass;
+var class<AIController> ControllerClass;
+// ^ NEW IN 1.60
+var bool bLoggingEnabled;
+// if true, put an associated path in the navigation network
+var bool bNavigate;
 
-function SpawnControllerFor(Pawn P)
+// --- Functions ---
+function SpawnControllerFor(Pawn P) {}
+function TakeOver(Pawn P) {}
+function Actor GetMoveTarget() {}
+// ^ NEW IN 1.60
+
+defaultproperties
 {
-	local AIController C;
-
-	// End:0x3B
-	if(__NFUN_114__(ControllerClass, none))
-	{
-		// End:0x21
-		if(__NFUN_114__(P.ControllerClass, none))
-		{
-			return;
-		}
-		C = __NFUN_278__(P.ControllerClass);		
-	}
-	else
-	{
-		C = __NFUN_278__(ControllerClass);
-	}
-	C.MyScript = self;
-	C.Possess(P);
-	return;
 }
-
-function Actor GetMoveTarget()
-{
-	// End:0x11
-	if(__NFUN_119__(myMarker, none))
-	{
-		return myMarker;
-	}
-	return self;
-	return;
-}
-
-function TakeOver(Pawn P)
-{
-	return;
-}
-

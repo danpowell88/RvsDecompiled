@@ -1,17 +1,9 @@
-//=============================================================================
-// ammo765mmAutoSubsonic - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  ammo765mmAutoSubsonic.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-class ammo765mmAutoSubsonic extends ammo765mmAuto
- abstract;
+class ammo765mmAutoSubsonic extends ammo765mmAuto;
 
 defaultproperties
 {
-	m_szAmmoType="Subsonic"
 }

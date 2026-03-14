@@ -1,20 +1,13 @@
 //=============================================================================
-// FractalTexture - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // FractalTexture: Base class of FireEngine fractal textures.
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class FractalTexture extends Texture
-	abstract
-	native
-	noexport
-	safereplace
- hidecategories(Object);
+    native
+    noexport
+    abstract;
 
+// --- Variables ---
 // Transient editing parameters.
 var transient int UMask;
 var transient int VMask;
@@ -24,3 +17,6 @@ var transient int GlobalPhase;
 var transient byte DrawPhase;
 var transient byte AuxPhase;
 
+defaultproperties
+{
+}

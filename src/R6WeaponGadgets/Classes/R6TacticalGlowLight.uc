@@ -1,10 +1,4 @@
 //=============================================================================
-// R6TacticalGlowLight - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6TacticalGlowLight.uc : Fading light depending on the view angle.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -14,21 +8,8 @@
 //=============================================================================
 class R6TacticalGlowLight extends R6GlowLight;
 
+#exec OBJ LOAD FILE="..\textures\Inventory_t.utx" Package="Inventory_t.TacticalLight"
+
 defaultproperties
 {
-	RemoteRole=2
-	LightEffect=12
-	LightHue=255
-	LightCone=20
-	bNoDelete=false
-	bDynamicLight=true
-	bCanTeleport=true
-	bAlwaysRelevant=true
-	m_bDrawFromBase=true
-	bMovable=true
-	LightBrightness=255.0000000
-	LightRadius=96.0000000
-	bCoronaMUL2XFactor=1.0000000
-	Texture=none
-	Skins=/* Array type was not detected. */
 }

@@ -1,21 +1,15 @@
-//=============================================================================
-// UWindowPageControlPage - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class UWindowPageControlPage extends UWindowTabControlItem;
 
+// --- Variables ---
 var UWindowPageWindow Page;
 
-function RightClickTab()
-{
-	Page.RightClickTab();
-	return;
-}
+// --- Functions ---
+function RightClickTab() {}
+function UWindowPageControlPage NextPage() {}
+// ^ NEW IN 1.60
 
-function UWindowPageControlPage NextPage()
+defaultproperties
 {
-	return UWindowPageControlPage(Next);
-	return;
 }
-

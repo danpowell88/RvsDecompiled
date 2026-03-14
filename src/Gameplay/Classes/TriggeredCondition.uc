@@ -1,43 +1,23 @@
-//=============================================================================
-// TriggeredCondition - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class TriggeredCondition extends Triggers;
 
-var() bool bToggled;
-var() bool bEnabled;
-var() bool bTriggerControlled;  // false if untriggered
+// --- Variables ---
+var bool bEnabled;
+// ^ NEW IN 1.60
 var bool bInitialValue;
+var bool bToggled;
+// ^ NEW IN 1.60
+var bool bTriggerControlled;
+// ^ NEW IN 1.60
 
-function PostBeginPlay()
+// --- Functions ---
+// function ? Untrigger(...); // REMOVED IN 1.60
+function PostBeginPlay() {}
+function Trigger(Actor Other, Pawn EventInstigator) {}
+function UnTrigger(Actor Other, Pawn EventInstigator) {}
+// ^ NEW IN 1.60
+
+defaultproperties
 {
-	super(Actor).PostBeginPlay();
-	bInitialValue = bEnabled;
-	return;
 }
-
-function Trigger(Actor Other, Pawn EventInstigator)
-{
-	// End:0x1B
-	if(bToggled)
-	{
-		bEnabled = __NFUN_129__(bEnabled);		
-	}
-	else
-	{
-		bEnabled = __NFUN_129__(bInitialValue);
-	}
-	return;
-}
-
-function UnTrigger(Actor Other, Pawn EventInstigator)
-{
-	// End:0x16
-	if(bTriggerControlled)
-	{
-		bEnabled = bInitialValue;
-	}
-	return;
-}
-

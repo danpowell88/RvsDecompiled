@@ -1,19 +1,13 @@
-//=============================================================================
-// AnimNotify_Sound - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class AnimNotify_Sound extends AnimNotify
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+    native;
 
-var() int Radius;
-var() float Volume;
-var() Sound Sound;
+// --- Variables ---
+var Sound Sound;
+var float Volume;
+var int Radius;
 
 defaultproperties
 {
-	Volume=1.0000000
 }

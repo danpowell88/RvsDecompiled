@@ -63,23 +63,54 @@ $modPattern = '(nativereplication|noteditinlineuse|exportstructs|autocollapsecat
 function Fix-ClassHeader {
     param([string]$text)
 
+    # Modifier names to identify class-header continuation lines and same-line concatenation
+    $modNames = @('nativereplication','noteditinlineuse','exportstructs',
+                  'autocollapsecategories','collapsecategories','hidecategories',
+                  'notplaceable','cacheexempt','parseconfig','placeable',
+                  'abstract','nativeonly','native','noexport','safereplace',
+                  'transient','dependson','config')
+
     $lines = $text -split "`n"
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $line    = $lines[$i]
         $trimmed = $line.TrimStart()
 
-        # Case A: modifiers on their own line, e.g. "abstractnativenativereplication;"
+        # Case A: line is a class-header modifier (may or may not end with ;)
+        # Exclude actual code declarations (function/var/enum/struct/comment)
         if ($trimmed -match '^(nativereplication|noteditinlineuse|exportstructs|autocollapsecategories|collapsecategories|hidecategories|notplaceable|cacheexempt|parseconfig|placeable|abstract|nativeonly|native|noexport|safereplace|transient|dependson|config)' -and
-            $trimmed -match ';') {
-            $fixed = [regex]::Replace($trimmed, $modPattern, ' $1')
-            $lines[$i] = "    " + $fixed.TrimStart() -replace ' {2,}', ' '
+            $trimmed -notmatch '\b(function|var|enum|struct)\b' -and
+            $trimmed -notmatch '^//') {
+
+            $hasSemi = $trimmed -match ';'
+            $modStr  = ($trimmed -replace '\s*;.*$', '').Trim()
+            $fixed   = [regex]::Replace($modStr, $modPattern, ' $1').TrimStart() -replace ' {2,}', ' '
+            $lines[$i] = "    " + $fixed + $(if ($hasSemi) { ";" } else { "" })
         }
-        # Case B: modifiers appended directly to the "class X extends Y" line
-        elseif ($line -match '^(class\s+\w+\s+extends\s+\w+)([a-z].+);$') {
-            $prefix  = $Matches[1]
-            $modPart = $Matches[2]
-            $fixed   = [regex]::Replace($modPart.TrimStart(), $modPattern, ' $1').TrimStart()
-            $lines[$i] = $prefix + "`n    " + $fixed + ";"
+        # Case B: modifiers concatenated directly to parent class name on class line
+        # e.g. "class Actor extends Objectabstractnative nativereplication;"
+        elseif ($line -match '^class\s+\w+\s+extends\s+') {
+            if ($line -match '^(class\s+\w+\s+extends\s+)(\w+)(.*)$') {
+                $prefix    = $Matches[1]
+                $combined  = $Matches[2] + $Matches[3]
+                $hasSemi   = $combined -match ';'
+                $restClean = ($combined -replace '\s*;.*$', '').Trim()
+
+                # Find first known modifier in the combined string
+                $restLower = $restClean.ToLower()
+                $bestIdx   = $restClean.Length
+                foreach ($mname in $modNames) {
+                    $mi = $restLower.IndexOf($mname)
+                    if ($mi -ge 1 -and $mi -lt $bestIdx) { $bestIdx = $mi }
+                }
+
+                # Only rewrite if modifiers were found embedded in the parent name
+                if ($bestIdx -lt $restClean.Length) {
+                    $parentClass = $restClean.Substring(0, $bestIdx)
+                    $mods        = $restClean.Substring($bestIdx)
+                    $fixedMods   = [regex]::Replace($mods, $modPattern, ' $1').TrimStart() -replace ' {2,}', ' '
+                    $lines[$i]   = $prefix + $parentClass + "`n    " + $fixedMods + $(if ($hasSemi) { ";" } else { "" })
+                }
+            }
         }
     }
     return $lines -join "`n"
@@ -214,7 +245,7 @@ function Merge-Comments {
         # Insert SDK file header just before the class keyword
         if (-not $classInserted -and $trim -match '^class\b') {
             if ($sdk.PreClassComment -ne '') {
-                $out.AppendLine("// From SDK 1.56 - verify still applicable") | Out-Null
+                $out.Append("// From SDK 1.56 - verify still applicable`n") | Out-Null
                 foreach ($hl in ($sdk.PreClassComment -split "`n")) {
                     $out.AppendLine($hl) | Out-Null
                 }
@@ -242,7 +273,7 @@ function Merge-Comments {
                                 $vi = $sdk.VarInfo[$key]
                                 if ($vi.Pre -ne '') {
                                     foreach ($cl in ($vi.Pre -split "`r?`n")) {
-                                        $out.AppendLine($cl) | Out-Null
+                                        $out.Append($cl.TrimEnd([char]13) + "`n") | Out-Null
                                     }
                                 }
                                 # Append inline comment if the line doesn't already have one
@@ -250,7 +281,7 @@ function Merge-Comments {
                                     $line = $line.TrimEnd() + "  " + $vi.Inline
                                 }
                             } elseif (-not $sdk.VarNames.Contains($nm)) {
-                                $out.AppendLine("// NEW IN 1.60") | Out-Null
+                                $out.Append("// NEW IN 1.60`n") | Out-Null
                             }
                         }
                         $firstAnnotationDone = $true
@@ -268,26 +299,26 @@ function Merge-Comments {
                 if ($sdk.FuncNames.Count -gt 0) {
                     if ($sdk.FuncInfo.ContainsKey($key) -and $sdk.FuncInfo[$key] -ne '') {
                         foreach ($cl in ($sdk.FuncInfo[$key] -split "`r?`n")) {
-                            $out.AppendLine($cl) | Out-Null
+                            $out.Append($cl.TrimEnd([char]13) + "`n") | Out-Null
                         }
                     } elseif (-not $sdk.FuncNames.Contains($fn)) {
-                        $out.AppendLine("// NEW IN 1.60") | Out-Null
+                        $out.Append("// NEW IN 1.60`n") | Out-Null
                     }
                 }
             }
         }
 
-        $out.AppendLine($line) | Out-Null
+        $out.Append($line.TrimEnd([char]13) + "`n") | Out-Null
     }
 
     # Append REMOVED IN 1.60 section
     $removedV = @($sdk.VarNames  | Where-Object { -not $seenV.Contains($_) })
     $removedF = @($sdk.FuncNames | Where-Object { -not $seenF.Contains($_) })
     if ($removedV.Count -gt 0 -or $removedF.Count -gt 0) {
-        $out.AppendLine() | Out-Null
-        $out.AppendLine("// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------") | Out-Null
-        foreach ($v in $removedV) { $out.AppendLine("// REMOVED IN 1.60: var $v") | Out-Null }
-        foreach ($f in $removedF) { $out.AppendLine("// REMOVED IN 1.60: function $f") | Out-Null }
+        $out.Append("`n") | Out-Null
+        $out.Append("// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------`n") | Out-Null
+        foreach ($v in $removedV) { $out.Append("// REMOVED IN 1.60: var $v`n") | Out-Null }
+        foreach ($f in $removedF) { $out.Append("// REMOVED IN 1.60: function $f`n") | Out-Null }
     }
 
     return $out.ToString()
@@ -301,11 +332,11 @@ function Make-Banner {
     $sdkNote = if ($hasSdk) { "// Comments from Ubisoft SDK 1.56 where applicable" } `
                else          { "// No matching SDK 1.56 source found"               }
     $sep = "//============================================================================="
-    return ($sep + "`r`n" +
-            "// " + $className + " - extracted from retail RavenShield 1.60`r`n" +
-            "// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)`r`n" +
-            $sdkNote + "`r`n" +
-            $sep + "`r`n")
+    return ($sep + "`n" +
+            "// " + $className + " - extracted from retail RavenShield 1.60`n" +
+            "// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)`n" +
+            $sdkNote + "`n" +
+            $sep + "`n")
 }
 
 # -----------------------------------------------------------------------------
@@ -364,12 +395,13 @@ foreach ($pkgFile in $packageMap.Keys) {
         try {
             $clsName = $cls.Name.ToString()
 
-            # Decompile the class
+            # Decompile the class, normalize line endings to CRLF
             $raw = $cls.Decompile()
             if ([string]::IsNullOrWhiteSpace($raw)) {
                 Write-Warning "  [EMPTY] $clsName"
                 continue
             }
+            $raw = $raw.Replace("`r`n", "`n").Replace("`r", "`n")
 
             # Fix concatenated class-header modifiers
             $raw = Fix-ClassHeader -text $raw

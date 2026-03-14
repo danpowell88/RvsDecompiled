@@ -1,10 +1,4 @@
 //=============================================================================
-// R6DZonePathNode - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6DZonePathNode.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -12,29 +6,26 @@
 //    2001/10/11 * Created by Guillaume Borgia
 //=============================================================================
 class R6DZonePathNode extends Actor
-	native
- placeable;
+    native;
 
-var(R6DZone) int m_AnimChance;
-var(R6DZone) bool m_bWait;
-var(R6DZone) float m_fRadius;
+// --- Variables ---
+var Sound m_SoundToPlay;
+// ^ NEW IN 1.60
+var name m_AnimToPlay;
+// ^ NEW IN 1.60
+var bool m_bWait;
+// ^ NEW IN 1.60
+var float m_fRadius;
+// ^ NEW IN 1.60
+var int m_AnimChance;
+// ^ NEW IN 1.60
 var R6DZonePath m_pPath;
-var(R6DZone) Sound m_SoundToPlay;
-var(R6DZone) Sound m_SoundToPlayStop;
-var(R6DZone) name m_AnimToPlay;
+var Sound m_SoundToPlayStop;
+// ^ NEW IN 1.60
 
-event Destroyed()
-{
-	return;
-}
+// --- Functions ---
+event Destroyed() {}
 
 defaultproperties
 {
-	m_bWait=true
-	m_fRadius=50.0000000
-	bHidden=true
-	m_bUseR6Availability=true
-	CollisionRadius=40.0000000
-	CollisionHeight=85.0000000
-	Texture=Texture'R6Engine_T.Icons.DZoneTer'
 }

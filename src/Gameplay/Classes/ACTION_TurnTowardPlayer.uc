@@ -1,35 +1,12 @@
-//=============================================================================
-// ACTION_TurnTowardPlayer - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_TurnTowardPlayer extends LatentScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_TurnTowardPlayer extends LatentScriptedAction;
 
-function bool InitActionFor(ScriptedController C)
-{
-	C.ScriptedFocus = C.GetMyPlayer();
-	C.CurrentAction = self;
-	return true;
-	return;
-}
-
-function bool TurnToGoal()
-{
-	return true;
-	return;
-}
-
-function Actor GetMoveTargetFor(ScriptedController C)
-{
-	return C.GetMyPlayer();
-	return;
-}
+// --- Functions ---
+function Actor GetMoveTargetFor(ScriptedController C) {}
+function bool InitActionFor(ScriptedController C) {}
+function bool TurnToGoal() {}
 
 defaultproperties
 {
-	bValidForTrigger=false
-	ActionString="Turn toward player"
 }

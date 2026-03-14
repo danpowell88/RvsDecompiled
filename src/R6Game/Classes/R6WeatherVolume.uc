@@ -1,25 +1,13 @@
-//=============================================================================
-// R6WeatherVolume - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-/********************************************************************
-	created:	2001/06/19
-	filename: 	R6WeatherVolume.uc
-	author:		Jean-Francois Dube
-*********************************************************************/
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Game.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class R6WeatherVolume extends R6SoundVolume;
 
-event Touch(Actor Other)
-{
-	__NFUN_165__(Other.m_bInWeatherVolume);
-	return;
-}
+// --- Functions ---
+// function ? Untouch(...); // REMOVED IN 1.60
+event Touch(Actor Other) {}
+event UnTouch(Actor Other) {}
+// ^ NEW IN 1.60
 
-event UnTouch(Actor Other)
+defaultproperties
 {
-	__NFUN_166__(Other.m_bInWeatherVolume);
-	return;
 }
-

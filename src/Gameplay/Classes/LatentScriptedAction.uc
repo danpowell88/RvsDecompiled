@@ -1,86 +1,33 @@
-//=============================================================================
-// LatentScriptedAction - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class LatentScriptedAction extends ScriptedAction
-	abstract
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+    abstract;
 
-function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
+// --- Functions ---
+function bool InitActionFor(ScriptedController C) {}
+// ^ NEW IN 1.60
+function Actor GetMoveTargetFor(ScriptedController C) {}
+// ^ NEW IN 1.60
+function bool TurnToGoal() {}
+// ^ NEW IN 1.60
+function bool MoveToGoal() {}
+// ^ NEW IN 1.60
+function bool CompleteWhenTriggered() {}
+// ^ NEW IN 1.60
+function bool StillTicking(ScriptedController C, float DeltaTime) {}
+// ^ NEW IN 1.60
+function bool CompleteWhenTimer() {}
+// ^ NEW IN 1.60
+function bool WaitForPlayer() {}
+// ^ NEW IN 1.60
+function bool TickedAction() {}
+// ^ NEW IN 1.60
+function float GetDistance() {}
+// ^ NEW IN 1.60
+function bool CompleteOnAnim(int Channel) {}
+// ^ NEW IN 1.60
+function DisplayDebug(out float YPos, Canvas Canvas, out float YL) {}
+
+defaultproperties
 {
-	Canvas.__NFUN_465__(__NFUN_112__("Action ", GetActionString()), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	return;
 }
-
-function bool InitActionFor(ScriptedController C)
-{
-	C.CurrentAction = self;
-	return true;
-	return;
-}
-
-function bool CompleteWhenTriggered()
-{
-	return false;
-	return;
-}
-
-function bool CompleteOnAnim(int Channel)
-{
-	return false;
-	return;
-}
-
-function bool CompleteWhenTimer()
-{
-	return false;
-	return;
-}
-
-function bool WaitForPlayer()
-{
-	return false;
-	return;
-}
-
-function bool TickedAction()
-{
-	return false;
-	return;
-}
-
-function bool StillTicking(ScriptedController C, float DeltaTime)
-{
-	return false;
-	return;
-}
-
-function bool MoveToGoal()
-{
-	return false;
-	return;
-}
-
-function bool TurnToGoal()
-{
-	return false;
-	return;
-}
-
-function Actor GetMoveTargetFor(ScriptedController C)
-{
-	return C.SequenceScript.GetMoveTarget();
-	return;
-}
-
-function float GetDistance()
-{
-	return 0.0000000;
-	return;
-}
-

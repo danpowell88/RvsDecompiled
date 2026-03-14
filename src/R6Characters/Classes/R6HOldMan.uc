@@ -1,10 +1,4 @@
 //=============================================================================
-// R6HOldMan - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6HOldMan.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -13,9 +7,8 @@
 //=============================================================================
 class R6HOldMan extends R6HostagePawn;
 
+#exec OBJ LOAD FILE=..\Animations\R6Hostage_UKX.ukx PACKAGE=R6Hostage_UKX
+
 defaultproperties
 {
-	Mesh=SkeletalMesh'R6Hostage_UKX.OldManMesh'
-	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel204'
-	Skins=/* Array type was not detected. */
 }

@@ -1,10 +1,4 @@
 //=============================================================================
-// LevelInfo - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // LevelInfo contains information about the current level. There should 
 // be one per level and it should be actor 0. UnrealEd creates each level's 
 // LevelInfo automatically so you should never have to place one
@@ -14,1561 +8,1213 @@
 // the properties of all zones which don't themselves have ZoneInfo.
 //=============================================================================
 class LevelInfo extends ZoneInfo
-	native
-	nativereplication
-	placeable
- hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force,R6Weather);
+    native
+    nativereplication;
 
-const RDC_CamFirstPerson = 0x01;
-const RDC_CamThirdPerson = 0x02;
-const RDC_CamFreeThirdP = 0x04;
-const RDC_CamGhost = 0x08;
-const RDC_CamFadeToBk = 0x10;
+#exec Texture Import File=Textures\WireframeTexture.tga
+#exec Texture Import File=Textures\WhiteSquareTexture.pcx
+#exec Texture Import File=Textures\S_Vertex.tga Name=LargeVertex
+
+// --- Constants ---
 const RDC_CamTeamOnly = 0x20;
+const RDC_CamFadeToBk = 0x10;
+const RDC_CamGhost = 0x08;
+const RDC_CamFreeThirdP = 0x04;
+const RDC_CamThirdPerson = 0x02;
+const RDC_CamFirstPerson = 0x01;
 
-enum EPhysicsDetailLevel
-{
-	PDL_Low,                        // 0
-	PDL_Medium,                     // 1
-	PDL_High                        // 2
-};
-
-enum ELevelAction
-{
-	LEVACT_None,                    // 0
-	LEVACT_Loading,                 // 1
-	LEVACT_Saving,                  // 2
-	LEVACT_Connecting,              // 3
-	LEVACT_Precaching               // 4
-};
-
-enum ENetMode
-{
-	NM_Standalone,                  // 0
-	NM_DedicatedServer,             // 1
-	NM_ListenServer,                // 2
-	NM_Client                       // 3
-};
-
+// --- Enums ---
 enum ER6SoundState
 {
-	BANK_UnloadGun,                 // 0
-	BANK_UnloadAll                  // 1
+    BANK_UnloadGun,
+    BANK_UnloadAll
 };
-
-struct SoundZoneAudibleZones
+enum ENetMode
 {
-	var() bool bZone00;
-	var() bool bZone01;
-	var() bool bZone02;
-	var() bool bZone03;
-	var() bool bZone04;
-	var() bool bZone05;
-	var() bool bZone06;
-	var() bool bZone07;
-	var() bool bZone08;
-	var() bool bZone09;
-	var() bool bZone10;
-	var() bool bZone11;
-	var() bool bZone12;
-	var() bool bZone13;
-	var() bool bZone14;
-	var() bool bZone15;
-	var() bool bZone16;
-	var() bool bZone17;
-	var() bool bZone18;
-	var() bool bZone19;
-	var() bool bZone20;
-	var() bool bZone21;
-	var() bool bZone22;
-	var() bool bZone23;
-	var() bool bZone24;
-	var() bool bZone25;
-	var() bool bZone26;
-	var() bool bZone27;
-	var() bool bZone28;
-	var() bool bZone29;
-	var() bool bZone30;
-	var() bool bZone31;
-	var() bool bZone32;
-	var() bool bZone33;
-	var() bool bZone34;
-	var() bool bZone35;
-	var() bool bZone36;
-	var() bool bZone37;
-	var() bool bZone38;
-	var() bool bZone39;
-	var() bool bZone40;
-	var() bool bZone41;
-	var() bool bZone42;
-	var() bool bZone43;
-	var() bool bZone44;
-	var() bool bZone45;
-	var() bool bZone46;
-	var() bool bZone47;
-	var() bool bZone48;
-	var() bool bZone49;
-	var() bool bZone50;
-	var() bool bZone51;
-	var() bool bZone52;
-	var() bool bZone53;
-	var() bool bZone54;
-	var() bool bZone55;
-	var() bool bZone56;
-	var() bool bZone57;
-	var() bool bZone58;
-	var() bool bZone59;
-	var() bool bZone60;
-	var() bool bZone61;
-	var() bool bZone62;
-	var() bool bZone63;
-};
+	NM_Standalone,        // Standalone game.
+	NM_DedicatedServer,   // Dedicated server, no local client.
+	NM_ListenServer,      // Listen server.
+	NM_Client             // Client only, no local server.
+} NetMode;
+var string ComputerName;  // Machine's name according to the OS.
+var string EngineVersion; // Engine version.
+var string MinNetVersion; // Min engine version that is net compatible.
+var bool  m_bLogBandWidth;  // this bool says whether we want to log bwidth usage
 
-struct WritableMapVertex
-{
-	var Vector Position;
-	var Color Color;
-};
-
-struct WritableMapStroke
-{
-	var float TimeStamp;
-	var int numPoints;
-};
-
-struct WritableMapIcon
-{
-	var float TimeStamp;
-	var int iIconIndex;
-	var Color Color;
-	var int iPosX;
-	var int iPosY;
-};
-
-struct GameTypeInfo
-{
-    // **** if modified, update this struct in AZoneInfo.h ****
-	var string m_szGameType;
-	var string m_szDisplayAsGameType;
-	var Actor.EGameModeInfo m_eGameModeInfo;
-	var bool m_bTeamAdversarial;
-	var bool m_bUsePreRecMessages;
-	var bool m_bCanSetNbOfTerroristToSpawn;
-	var bool m_bPlayWithNonRainbowNPCs;
-	var bool m_bUseRainbowComm;
-	var bool m_bDisplayBombTimer;
-	var string m_szNameLocalization;
-	var string m_szClassName;
-	var string m_szGreenTeamObjective;
-	var string m_szRedTeamObjective;
-	var string m_szGreenShortDescription;
-	var string m_szRedShortDescription;
-	var string m_szToString;
-	var string m_szSaveDirectoryName;
-	var string m_szEnglishDirName;
-	var string m_szLocalizationFile;
-};
-
-// NEW IN 1.60
-var LevelInfo.EPhysicsDetailLevel PhysicsDetailLevel;
-// NEW IN 1.60
-var LevelInfo.ENetMode NetMode;
-var(R6Sound) Actor.ETerroristNationality m_eTerroristVoices;  // Terrorist voice for the map.
-var(R6Sound) Actor.EHostageNationality m_eHostageVoices;  // Terrorist voice for the map.
-// NEW IN 1.60
-var(R6GazAlertMode) int m_iCoughTimes;
-// NEW IN 1.60
-var(FreeBackupMode) int m_iNbOfFreeBackupToSpawn;
-// NEW IN 1.60
-var(FreeBackupMode) int m_iNbOfFBToSpawnBasedOnNbPlayers;
-var int MaxRagdolls;  // Maximum number of simultaneous rag-dolls.
-var int HubStackLevel;
-//R6 change level in planning
-var(R6Planning) int R6PlanningMaxLevel;
-var(R6Planning) int R6PlanningMinLevel;
-var int m_iMotionBlurIntensity;
-var int m_iLimitedSFXCount;
-//#ifdef R6PUNKBUSTER
-//__WITH_PB__
-var int iPBEnabled;  // 1 means PB server is running, 0 means not activated or deactivate cmd given but still running
-// NEW IN 1.60
-var bool m_bShowFloppy;
-// NEW IN 1.60
-var(ClassicMission) bool m_bIsClassicMission;
-var bool bKStaticFriction;  // Better rag-doll/ground friction model, but more CPU.
-var() bool bKNoInit;  // Start _NO_ Karma for this level. Only really for the Entry level.
-var() bool bLonePlayer;  // No multiplayer coordination, i.e. for entranceways.
-var bool bBegunPlay;  // Whether gameplay has begun.
-var bool bPlayersOnly;  // Only update players.
-var bool bHighDetailMode;  // Client high-detail mode.
-var bool bDropDetail;  // frame rate is below DesiredFrameRate, so drop high detail actors
-var bool bAggressiveLOD;  // frame rate is well below DesiredFrameRate, so make LOD more aggressive
-var bool bStartup;  // Starting gameplay.
-var bool bPathsRebuilt;  // True if path network is valid
-//R6InGamePLanning
-var bool m_bInGamePlanningActive;
-var bool m_bInGamePlanningZoomingIn;
-var bool m_bInGamePlanningZoomingOut;
-var bool m_bGameTypesInitialized;
 //-----------------------------------------------------------------------------
-// Renderer Management.
-var() bool bNeverPrecache;
-var bool m_bLogBandWidth;  // this bool says whether we want to log bwidth usage
-var bool bNextItems;
-//R6MissionObjectives 
-var(R6MissionObjectives) bool m_bUseDefaultMoralityRules;
-//#ifdef R6DBGVECTORINFO
-var bool m_bShowDebugLine;
-//R6NEWRENDERERFEATURES
-var bool m_bShowDebugLights;
-var bool m_bShowDebugLODs;
-var bool m_bShowOnlyTransparentSM;
-var bool m_bNightVisionActive;
-var bool m_bHeatVisionActive;
-var bool m_bScopeVisionActive;
-var bool m_bAllow3DRendering;
-var bool m_bSkipMotionBlur;  // used to avoid blur in menus
-// R6SOUND
-var bool m_bPlaySound;
-var bool m_bCanStartStartingSound;
-var bool m_bSoundFadeFinish;
-var bool m_bIsResettingLevel;
-var bool m_bPBSvRunning;  // true means running, false means not running
-//R6HEARTBEAT
-var bool m_bHeartBeatOn;
-// Time passage.
-var() float TimeDilation;  // Normally 1 - scales real time passage.
-// Current time.
-var float TimeSeconds;  // Time in seconds since level began play.
-var float PauseDelay;  // time at which to start pause
-// NEW IN 1.60
-var float m_fCompteurFrameDetection;
-// NEW IN 1.60
-var(MP2VirusUpload) float m_fTempsDetection;
-// NEW IN 1.60
-var(MP2VirusUpload) float m_fClignoteTime;
-// NEW IN 1.60
-var(R6GazAlertMode) float m_fOxygeneTopLevel;
-// NEW IN 1.60
-var(R6GazAlertMode) float m_iCoughSeuil;
-// NEW IN 1.60
-var(R6GazAlertMode) float m_fOxygeneStepDecrease;
-// Karma - jag
-var float KarmaTimeScale;  // Karma physics timestep scaling.
-var float RagdollTimeScale;  // Ragdoll physics timestep scaling. This is applied on top of KarmaTimeScale.
-var float KarmaGravScale;  // Allows you to make ragdolls use lower friction than normal.
-var float m_fInGamePlanningZoomDistance;
-var(Audio) float PlayerDoppler;  // Player doppler shift, 0=none, 1=full.
-var() float Brightness;
-var float m_fRainbowSkillMultiplier;
-var float m_fTerroSkillMultiplier;
-var float NextSwitchCountdown;
-var(R6MissionObjectives) float m_fTimeLimit;
-var(R6Sound) float m_fEndGamePauseTime;
-var float m_fDbgNavPointDistance;  // debug: max distance to player for displaying nav point.
-var float m_fDistanceHeartBeatVisible;
-var PlayerReplicationInfo Pauser;  // If paused, name of person pausing the game.
-var LevelSummary Summary;
-var() Texture Screenshot;
-var Texture DefaultTexture;
-var Texture WireframeTexture;
-var Texture WhiteSquareTexture;
-var Texture LargeVertex;
+// Gameplay rules
+
+var() string DefaultGameType;
 var GameInfo Game;
+
+//-----------------------------------------------------------------------------
+// Navigation point and Pawn lists (chained using nextNavigationPoint and nextPawn).
+
 var const NavigationPoint NavigationPointList;
 var const Controller ControllerList;
 var PhysicsVolume PhysicsVolumeList;
 //#ifdef R6ACTIONSPOT
 var const R6ActionSpot m_ActionSpotList;
+//#endif // #ifdef R6ACTIONSPOT
+
+//-----------------------------------------------------------------------------
+// Server related.
+
+var string NextURL;
+var bool bNextItems;
+var float NextSwitchCountdown;
+
+//R6 Multiplayer SKINS
+var(R6MultiPlayerSkins) string  GreenTeamPawnClass;
+var(R6MultiPlayerSkins) string  RedTeamPawnClass;
+
 //Skin names received by the client. If package does not exist, it will be downloaded.
-var Material GreenTeamSkin;
-var Material GreenHeadSkin;
-var Material GreenGogglesSkin;
-var Material GreenHandSkin;
-var Material GreenMenuSkin;
-var Mesh GreenMesh;
-var StaticMesh GreenHelmetMesh;
-var Material GreenHelmetSkin;
-var Material RedTeamSkin;
-var Material RedHeadSkin;
-var Material RedGogglesSkin;
-var Material RedHandSkin;
-var Material RedMenuSkin;
-var Mesh RedMesh;
-var StaticMesh RedHelmetMesh;
-var Material RedHelmetSkin;
-var(R6MissionObjectives) Sound m_sndMissionComplete;
+var						material  GreenTeamSkin;
+var						material  GreenHeadSkin;
+var						material  GreenGogglesSkin;
+var						material  GreenHandSkin;
+var						material  GreenMenuSkin;
+var						mesh	  GreenMesh;
+var						staticmesh GreenHelmetMesh;
+var						material  GreenHelmetSkin;
+var						Object.Region    GreenMenuRegion;
+
+var						material  RedTeamSkin;
+var						material  RedHeadSkin;
+var						material  RedGogglesSkin;
+var						material  RedHandSkin;
+var						material  RedMenuSkin;
+var						mesh	  RedMesh;
+var						staticmesh RedHelmetMesh;
+var						material  RedHelmetSkin;
+var						Object.Region    RedMenuRegion;
+
+//R6MissionObjectives 
+var(R6MissionObjectives)	bool		m_bUseDefaultMoralityRules;
+var(R6MissionObjectives)	float		m_fTimeLimit;
+var(R6MissionObjectives) string         m_szMissionObjLocalization;
+var(R6MissionObjectives) editinline Array<R6MissionObjectiveBase> m_aMissionObjectives;
+var(R6MissionObjectives) Sound          m_sndMissionComplete;
+
 //R6Weather
-var Emitter m_WeatherEmitter;
-var Actor m_WeatherViewTarget;
-var Sound m_sndPlayMissionIntro;
-var Sound m_sndPlayMissionExtro;
-var(R6Sound) Sound m_SurfaceSwitchSnd;  // Sound event containing all the surface sounds - EB April 6th, 2002
-var(R6Sound) Sound m_SurfaceSwitchForOtherPawnSnd;  // Sound event containing all the surface sounds for the other pawn- SD July 30th, 2002
-var(R6Sound) Sound m_BodyFallSwitchSnd;  // Sound contain only the body fall sounds for player - SD
-var(R6Sound) Sound m_BodyFallSwitchForOtherPawnSnd;  // Sound contain only the body fall sounds for the other pawn- SD
-var(R6Sound) Sound m_StartingMusic;  // When the Music is set in the level the music is play at the beginning of the game.
-var R6DecalManager m_DecalManager;
-var Texture m_pScopeMaskTexture;
-var Texture m_pScopeAddTexture;
-var R6AbstractHostageMgr m_hostageMgr;  // there's only one instance of hostageMgr
-var R6AbstractTerroristMgr m_terroristMgr;
-var(R6SFX) Material m_pProneTrailMaterial;
-var R6ServerInfo m_ServerSettings;
-var R6LimitedSFX m_aLimitedSFX[6];
-// #ifdef R6WRITABLEMAP
-var(R6DrawingTool) Texture m_tWritableMapTexture;
-// NEW IN 1.60
-var Class<StaticMeshActor> GreenHelmet;
-// NEW IN 1.60
-var Class<StaticMeshActor> RedHelmet;
-var(R6LevelWeather) Class<R6WeatherEmitter> m_WeatherEmitterClass;
-var Class<R6WeatherEmitter> m_RepWeatherEmitterClass;
+var					    Emitter	                m_WeatherEmitter;
+var(R6LevelWeather)     class<R6WeatherEmitter> m_WeatherEmitterClass;
+var                     class<R6WeatherEmitter> m_RepWeatherEmitterClass;
+var                     Actor                   m_WeatherViewTarget;
+
 //R6Breathing
-var(R6Breathing) Class<Emitter> m_BreathingEmitterClass;
-var(R6MissionObjectives) editinline array<editinline R6MissionObjectiveBase> m_aMissionObjectives;
-var array<WritableMapVertex> m_aCurrentStrip;
-var array<WritableMapVertex> m_aWritableMapStrip;
-var array<WritableMapStroke> m_aWritableMapTimeStamp;
-var array<WritableMapIcon> m_aWritableMapIcons;
-var array<GameTypeInfo> m_aGameTypeInfo;
+var(R6Breathing)        class<Emitter>  m_BreathingEmitterClass;
+
+//R6Sound
+struct SoundZoneAudibleZones
+{
+    var() bool bZone00;
+    var() bool bZone01;
+    var() bool bZone02;
+    var() bool bZone03;
+    var() bool bZone04;
+    var() bool bZone05;
+    var() bool bZone06;
+    var() bool bZone07;
+    var() bool bZone08;
+    var() bool bZone09;
+    var() bool bZone10;
+    var() bool bZone11;
+    var() bool bZone12;
+    var() bool bZone13;
+    var() bool bZone14;
+    var() bool bZone15;
+    var() bool bZone16;
+    var() bool bZone17;
+    var() bool bZone18;
+    var() bool bZone19;
+    var() bool bZone20;
+    var() bool bZone21;
+    var() bool bZone22;
+    var() bool bZone23;
+    var() bool bZone24;
+    var() bool bZone25;
+    var() bool bZone26;
+    var() bool bZone27;
+    var() bool bZone28;
+    var() bool bZone29;
+    var() bool bZone30;
+    var() bool bZone31;
+    var() bool bZone32;
+    var() bool bZone33;
+    var() bool bZone34;
+    var() bool bZone35;
+    var() bool bZone36;
+    var() bool bZone37;
+    var() bool bZone38;
+    var() bool bZone39;
+    var() bool bZone40;
+    var() bool bZone41;
+    var() bool bZone42;
+    var() bool bZone43;
+    var() bool bZone44;
+    var() bool bZone45;
+    var() bool bZone46;
+    var() bool bZone47;
+    var() bool bZone48;
+    var() bool bZone49;
+    var() bool bZone50;
+    var() bool bZone51;
+    var() bool bZone52;
+    var() bool bZone53;
+    var() bool bZone54;
+    var() bool bZone55;
+    var() bool bZone56;
+    var() bool bZone57;
+    var() bool bZone58;
+    var() bool bZone59;
+    var() bool bZone60;
+    var() bool bZone61;
+    var() bool bZone62;
+    var() bool bZone63;
+};
+enum ELevelAction
+{
+	LEVACT_None,
+	LEVACT_Loading,
+	LEVACT_Saving,
+	LEVACT_Connecting,
+	LEVACT_Precaching
+} LevelAction;
+
+//R6 change level in planning
+var(R6Planning) INT R6PlanningMaxLevel;
+var(R6Planning) INT R6PlanningMinLevel;
+var(R6Planning) vector R6PlanningMaxVector;
+var(R6Planning) vector R6PlanningMinVector;
+
+var string		m_szGameTypeShown;
+var BOOL        m_bGameTypesInitialized;
+var FLOAT       m_fRainbowSkillMultiplier;
+var FLOAT       m_fTerroSkillMultiplier;
+
+//-----------------------------------------------------------------------------
+// Renderer Management.
+var() bool bNeverPrecache;
+
+//-----------------------------------------------------------------------------
+// Networking.
+
+var enum ENetMode
+{
+	NM_Standalone,        // Standalone game.
+	NM_DedicatedServer,   // Dedicated server, no local client.
+	NM_ListenServer,      // Listen server.
+	NM_Client             // Client only, no local server.
+} NetMode;
+var string ComputerName;  // Machine's name according to the OS.
+var string EngineVersion; // Engine version.
+var string MinNetVersion; // Min engine version that is net compatible.
+var bool  m_bLogBandWidth;  // this bool says whether we want to log bwidth usage
+
+//-----------------------------------------------------------------------------
+// Gameplay rules
+
+var() string DefaultGameType;
+var GameInfo Game;
+
+//-----------------------------------------------------------------------------
+// Navigation point and Pawn lists (chained using nextNavigationPoint and nextPawn).
+
+var const NavigationPoint NavigationPointList;
+var const Controller ControllerList;
+var PhysicsVolume PhysicsVolumeList;
+//#ifdef R6ACTIONSPOT
+var const R6ActionSpot m_ActionSpotList;
+//#endif // #ifdef R6ACTIONSPOT
+
+//-----------------------------------------------------------------------------
+// Server related.
+
+var string NextURL;
+var bool bNextItems;
+var float NextSwitchCountdown;
+
+//R6 Multiplayer SKINS
+var(R6MultiPlayerSkins) string  GreenTeamPawnClass;
+var(R6MultiPlayerSkins) string  RedTeamPawnClass;
+
+//Skin names received by the client. If package does not exist, it will be downloaded.
+var						material  GreenTeamSkin;
+var						material  GreenHeadSkin;
+var						material  GreenGogglesSkin;
+var						material  GreenHandSkin;
+var						material  GreenMenuSkin;
+var						mesh	  GreenMesh;
+var						staticmesh GreenHelmetMesh;
+var						material  GreenHelmetSkin;
+var						Object.Region    GreenMenuRegion;
+
+var						material  RedTeamSkin;
+var						material  RedHeadSkin;
+var						material  RedGogglesSkin;
+var						material  RedHandSkin;
+var						material  RedMenuSkin;
+var						mesh	  RedMesh;
+var						staticmesh RedHelmetMesh;
+var						material  RedHelmetSkin;
+var						Object.Region    RedMenuRegion;
+
+//R6MissionObjectives 
+var(R6MissionObjectives)	bool		m_bUseDefaultMoralityRules;
+var(R6MissionObjectives)	float		m_fTimeLimit;
+var(R6MissionObjectives) string         m_szMissionObjLocalization;
+var(R6MissionObjectives) editinline Array<R6MissionObjectiveBase> m_aMissionObjectives;
+var(R6MissionObjectives) Sound          m_sndMissionComplete;
+
+//R6Weather
+var					    Emitter	                m_WeatherEmitter;
+var(R6LevelWeather)     class<R6WeatherEmitter> m_WeatherEmitterClass;
+var                     class<R6WeatherEmitter> m_RepWeatherEmitterClass;
+var                     Actor                   m_WeatherViewTarget;
+
+//R6Breathing
+var(R6Breathing)        class<Emitter>  m_BreathingEmitterClass;
+
+//R6Sound
+struct SoundZoneAudibleZones
+{
+    var() bool bZone00;
+    var() bool bZone01;
+    var() bool bZone02;
+    var() bool bZone03;
+    var() bool bZone04;
+    var() bool bZone05;
+    var() bool bZone06;
+    var() bool bZone07;
+    var() bool bZone08;
+    var() bool bZone09;
+    var() bool bZone10;
+    var() bool bZone11;
+    var() bool bZone12;
+    var() bool bZone13;
+    var() bool bZone14;
+    var() bool bZone15;
+    var() bool bZone16;
+    var() bool bZone17;
+    var() bool bZone18;
+    var() bool bZone19;
+    var() bool bZone20;
+    var() bool bZone21;
+    var() bool bZone22;
+    var() bool bZone23;
+    var() bool bZone24;
+    var() bool bZone25;
+    var() bool bZone26;
+    var() bool bZone27;
+    var() bool bZone28;
+    var() bool bZone29;
+    var() bool bZone30;
+    var() bool bZone31;
+    var() bool bZone32;
+    var() bool bZone33;
+    var() bool bZone34;
+    var() bool bZone35;
+    var() bool bZone36;
+    var() bool bZone37;
+    var() bool bZone38;
+    var() bool bZone39;
+    var() bool bZone40;
+    var() bool bZone41;
+    var() bool bZone42;
+    var() bool bZone43;
+    var() bool bZone44;
+    var() bool bZone45;
+    var() bool bZone46;
+    var() bool bZone47;
+    var() bool bZone48;
+    var() bool bZone49;
+    var() bool bZone50;
+    var() bool bZone51;
+    var() bool bZone52;
+    var() bool bZone53;
+    var() bool bZone54;
+    var() bool bZone55;
+    var() bool bZone56;
+    var() bool bZone57;
+    var() bool bZone58;
+    var() bool bZone59;
+    var() bool bZone60;
+    var() bool bZone61;
+    var() bool bZone62;
+    var() bool bZone63;
+};
+enum EPhysicsDetailLevel
+{
+	PDL_Low,
+	PDL_Medium,
+	PDL_High
+} PhysicsDetailLevel;
+
+
+// Karma - jag
+var float KarmaTimeScale;		// Karma physics timestep scaling.
+var float RagdollTimeScale;		// Ragdoll physics timestep scaling. This is applied on top of KarmaTimeScale.
+var int   MaxRagdolls;			// Maximum number of simultaneous rag-dolls.
+var float KarmaGravScale;		// Allows you to make ragdolls use lower friction than normal.
+var bool  bKStaticFriction;		// Better rag-doll/ground friction model, but more CPU.
+
+var()	   bool bKNoInit;				// Start _NO_ Karma for this level. Only really for the Entry level.
+// jag
+
+//-----------------------------------------------------------------------------
+// Text info about level.
+
+var() localized string Title;
+var()           string Author;		    // Who built it.
+var() localized string LevelEnterText;  // Message to tell players when they enter.
+var()           string LocalizedPkg;    // Package to look in for localizations.
+var             PlayerReplicationInfo Pauser;          // If paused, name of person pausing the game.
+var		LevelSummary Summary;
+var           string VisibleGroups;		    // List of the group names which were checked when the level was last saved
+var transient string SelectedGroups;		// A list of selected groups in the group browser (only used in editor)
+//-----------------------------------------------------------------------------
+// Flags affecting the level.
+
+var() bool           bLonePlayer;     // No multiplayer coordination, i.e. for entranceways.
+var bool             bBegunPlay;      // Whether gameplay has begun.
+var bool             bPlayersOnly;    // Only update players.
+var bool             bHighDetailMode; // Client high-detail mode.
+var bool			 bDropDetail;	  // frame rate is below DesiredFrameRate, so drop high detail actors
+var bool			 bAggressiveLOD;  // frame rate is well below DesiredFrameRate, so make LOD more aggressive
+var bool             bStartup;        // Starting gameplay.
+var	bool			 bPathsRebuilt;	  // True if path network is valid
+var transient const bool		 bPhysicsVolumesInitialized;	// true if physicsvolume list initialized
+
+//R6InGamePLanning
+var bool   m_bInGamePlanningActive;
+var bool   m_bInGamePlanningZoomingIn;
+var bool   m_bInGamePlanningZoomingOut;
+var float  m_fInGamePlanningZoomDistance;
+
 //-----------------------------------------------------------------------------
 // Legend - used for saving the viewport camera positions
-var() Vector CameraLocationDynamic;
-var() Vector CameraLocationTop;
-var() Vector CameraLocationFront;
-var() Vector CameraLocationSide;
-var() Rotator CameraRotationDynamic;
-var(R6Planning) Vector R6PlanningMaxVector;
-var(R6Planning) Vector R6PlanningMinVector;
-var Region GreenMenuRegion;
-var Region RedMenuRegion;
-var(R6Sound) SoundZoneAudibleZones m_SoundZoneAudibleZones[64];
-var Vector m_vPredVector;
-var Vector m_vPredPredVector;
-var() localized string Title;
-var() string Author;  // Who built it.
-var() localized string LevelEnterText;  // Message to tell players when they enter.
-var() string LocalizedPkg;  // Package to look in for localizations.
-var string VisibleGroups;  // List of the group names which were checked when the level was last saved
-var(Audio) string Song;  // Filename of the streaming song.
-var string m_szGameTypeShown;
+var() vector  CameraLocationDynamic;
+var() vector  CameraLocationTop;
+var() vector  CameraLocationFront;
+var() vector  CameraLocationSide;
+var() rotator CameraRotationDynamic;
+
+//-----------------------------------------------------------------------------
+// Audio properties.
+
+var(Audio) string	Song;			// Filename of the streaming song.
+var(Audio) float	PlayerDoppler;	// Player doppler shift, 0=none, 1=full.
+
+//-----------------------------------------------------------------------------
+// Miscellaneous information.
+
+var() float Brightness;
+var() texture Screenshot;
+var texture DefaultTexture;
+var texture WireframeTexture;
+var texture WhiteSquareTexture;
+var texture LargeVertex;
+var int HubStackLevel;
+var transient enum ELevelAction
+{
+	LEVACT_None,
+	LEVACT_Loading,
+	LEVACT_Saving,
+	LEVACT_Connecting,
+	LEVACT_Precaching
+} LevelAction;
+
+//R6 change level in planning
+var(R6Planning) INT R6PlanningMaxLevel;
+var(R6Planning) INT R6PlanningMinLevel;
+var(R6Planning) vector R6PlanningMaxVector;
+var(R6Planning) vector R6PlanningMinVector;
+
+var string		m_szGameTypeShown;
+var BOOL        m_bGameTypesInitialized;
+var FLOAT       m_fRainbowSkillMultiplier;
+var FLOAT       m_fTerroSkillMultiplier;
+
+//-----------------------------------------------------------------------------
+// Renderer Management.
+var() bool bNeverPrecache;
+
+//-----------------------------------------------------------------------------
+// Networking.
+
+var enum ENetMode
+{
+	NM_Standalone,        // Standalone game.
+	NM_DedicatedServer,   // Dedicated server, no local client.
+	NM_ListenServer,      // Listen server.
+	NM_Client             // Client only, no local server.
+} NetMode;
 var string ComputerName;  // Machine's name according to the OS.
-var string EngineVersion;  // Engine version.
-var string MinNetVersion;  // Min engine version that is net compatible.
+var string EngineVersion; // Engine version.
+var string MinNetVersion; // Min engine version that is net compatible.
+var bool  m_bLogBandWidth;  // this bool says whether we want to log bwidth usage
+
+//-----------------------------------------------------------------------------
+// Gameplay rules
+
 var() string DefaultGameType;
+var GameInfo Game;
+
+//-----------------------------------------------------------------------------
+// Navigation point and Pawn lists (chained using nextNavigationPoint and nextPawn).
+
+var const NavigationPoint NavigationPointList;
+var const Controller ControllerList;
+var PhysicsVolume PhysicsVolumeList;
+//#ifdef R6ACTIONSPOT
+var const R6ActionSpot m_ActionSpotList;
+//#endif // #ifdef R6ACTIONSPOT
+
+//-----------------------------------------------------------------------------
+// Server related.
+
 var string NextURL;
+var bool bNextItems;
+var float NextSwitchCountdown;
+
 //R6 Multiplayer SKINS
-var(R6MultiPlayerSkins) string GreenTeamPawnClass;
-var(R6MultiPlayerSkins) string RedTeamPawnClass;
-var(R6MissionObjectives) string m_szMissionObjLocalization;
-var(R6Sound) string m_csVoicesOneLinersBankName;
-// NEW IN 1.60
-var transient LevelInfo.ELevelAction LevelAction;
-var transient int Year;  // Year.
-var transient int Month;  // Month.
-var transient int Day;  // Day of month.
-var transient int DayOfWeek;  // Day of week.
-var transient int Hour;  // Hour.
-var transient int Minute;  // Minute.
-var transient int Second;  // Second.
-var transient int Millisecond;  // Millisecond.
-var const transient bool bPhysicsVolumesInitialized;  // true if physicsvolume list initialized
-var transient string SelectedGroups;  // A list of selected groups in the group browser (only used in editor)
+var(R6MultiPlayerSkins) string  GreenTeamPawnClass;
+var(R6MultiPlayerSkins) string  RedTeamPawnClass;
 
-replication
+//Skin names received by the client. If package does not exist, it will be downloaded.
+var						material  GreenTeamSkin;
+var						material  GreenHeadSkin;
+var						material  GreenGogglesSkin;
+var						material  GreenHandSkin;
+var						material  GreenMenuSkin;
+var						mesh	  GreenMesh;
+var						staticmesh GreenHelmetMesh;
+var						material  GreenHelmetSkin;
+var						Object.Region    GreenMenuRegion;
+
+var						material  RedTeamSkin;
+var						material  RedHeadSkin;
+var						material  RedGogglesSkin;
+var						material  RedHandSkin;
+var						material  RedMenuSkin;
+var						mesh	  RedMesh;
+var						staticmesh RedHelmetMesh;
+var						material  RedHelmetSkin;
+var						Object.Region    RedMenuRegion;
+
+//R6MissionObjectives 
+var(R6MissionObjectives)	bool		m_bUseDefaultMoralityRules;
+var(R6MissionObjectives)	float		m_fTimeLimit;
+var(R6MissionObjectives) string         m_szMissionObjLocalization;
+var(R6MissionObjectives) editinline Array<R6MissionObjectiveBase> m_aMissionObjectives;
+var(R6MissionObjectives) Sound          m_sndMissionComplete;
+
+//R6Weather
+var					    Emitter	                m_WeatherEmitter;
+var(R6LevelWeather)     class<R6WeatherEmitter> m_WeatherEmitterClass;
+var                     class<R6WeatherEmitter> m_RepWeatherEmitterClass;
+var                     Actor                   m_WeatherViewTarget;
+
+//R6Breathing
+var(R6Breathing)        class<Emitter>  m_BreathingEmitterClass;
+
+//R6Sound
+struct SoundZoneAudibleZones
 {
-	// Pos:0x000
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
-		Pauser, TimeDilation;
+    var() bool bZone00;
+    var() bool bZone01;
+    var() bool bZone02;
+    var() bool bZone03;
+    var() bool bZone04;
+    var() bool bZone05;
+    var() bool bZone06;
+    var() bool bZone07;
+    var() bool bZone08;
+    var() bool bZone09;
+    var() bool bZone10;
+    var() bool bZone11;
+    var() bool bZone12;
+    var() bool bZone13;
+    var() bool bZone14;
+    var() bool bZone15;
+    var() bool bZone16;
+    var() bool bZone17;
+    var() bool bZone18;
+    var() bool bZone19;
+    var() bool bZone20;
+    var() bool bZone21;
+    var() bool bZone22;
+    var() bool bZone23;
+    var() bool bZone24;
+    var() bool bZone25;
+    var() bool bZone26;
+    var() bool bZone27;
+    var() bool bZone28;
+    var() bool bZone29;
+    var() bool bZone30;
+    var() bool bZone31;
+    var() bool bZone32;
+    var() bool bZone33;
+    var() bool bZone34;
+    var() bool bZone35;
+    var() bool bZone36;
+    var() bool bZone37;
+    var() bool bZone38;
+    var() bool bZone39;
+    var() bool bZone40;
+    var() bool bZone41;
+    var() bool bZone42;
+    var() bool bZone43;
+    var() bool bZone44;
+    var() bool bZone45;
+    var() bool bZone46;
+    var() bool bZone47;
+    var() bool bZone48;
+    var() bool bZone49;
+    var() bool bZone50;
+    var() bool bZone51;
+    var() bool bZone52;
+    var() bool bZone53;
+    var() bool bZone54;
+    var() bool bZone55;
+    var() bool bZone56;
+    var() bool bZone57;
+    var() bool bZone58;
+    var() bool bZone59;
+    var() bool bZone60;
+    var() bool bZone61;
+    var() bool bZone62;
+    var() bool bZone63;
+};
 
-	// Pos:0x018
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
-		m_RepWeatherEmitterClass;
-
-	// Pos:0x025
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
-		m_bShowFloppy, m_fCompteurFrameDetection;
-}
-
-// Export ULevelInfo::execAddWritableMapPoint(FFrame&, void* const)
- native(2801) final function AddWritableMapPoint(Vector point, Color C);
-
-// Export ULevelInfo::execAddEncodedWritableMapStrip(FFrame&, void* const)
- native(2802) final function AddEncodedWritableMapStrip(string S);
-
-// Export ULevelInfo::execAddWritableMapIcon(FFrame&, void* const)
- native(1608) final function AddWritableMapIcon(string Msg);
-
-// Export ULevelInfo::execSetBankSound(FFrame&, void* const)
- native(2711) final function SetBankSound(LevelInfo.ER6SoundState eGameState);
-
-// Export ULevelInfo::execFinalizeLoading(FFrame&, void* const)
- native(1604) final function FinalizeLoading();
-
-// Export ULevelInfo::execResetLevelInNative(FFrame&, void* const)
- native(1515) final function ResetLevelInNative();
-
-// Export ULevelInfo::execCallLogThisActor(FFrame&, void* const)
- native(1516) final function CallLogThisActor(Actor anActor);
-
-// Export ULevelInfo::execGetMapNameLocalisation(FFrame&, void* const)
-// NEW IN 1.60
- native(1518) final function string GetMapNameLocalisation(string _szMapName);
-
-//------------------------------------------------------------------
-// GameTypeUseNbOfTerroristToSpawn
-//	
-//------------------------------------------------------------------
-simulated event bool GameTypeUseNbOfTerroristToSpawn(string szGameType)
+// --- Structs ---
+struct GameTypeInfo
 {
-	local int i;
+    // **** if modified, update this struct in AZoneInfo.h ****
+    var string		        m_szGameType;
+	var string				m_szDisplayAsGameType;
+    var EGameModeInfo       m_eGameModeInfo;
+    var bool                m_bTeamAdversarial;
+    var bool                m_bUsePreRecMessages;
+    var bool                m_bCanSetNbOfTerroristToSpawn;
+    var bool                m_bPlayWithNonRainbowNPCs;
+    var bool                m_bUseRainbowComm;
+    var bool                m_bDisplayBombTimer;
+    var string              m_szNameLocalization;
+    var string              m_szClassName;
+    var string              m_szGreenTeamObjective;
+    var string              m_szRedTeamObjective;
+    var string              m_szGreenShortDescription;
+    var string              m_szRedShortDescription;
+    var string              m_szToString;
+    var string              m_szSaveDirectoryName;
+    var string              m_szEnglishDirName;
+    var string              m_szLocalizationFile;
+    // **** if modified, update this struct in AZoneInfo.h ****
+};
 
-	i = 0;
-	J0x07:
-
-	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_bCanSetNbOfTerroristToSpawn;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeMultiplayer
-//	
-//------------------------------------------------------------------
-simulated function bool IsGameTypeMultiplayer(string szGameType, optional bool _bNotIncludeGMI_None)
+struct WritableMapVertex
 {
-	local int i;
+	var vector	position;
+	var Color	color;
+};
 
-	i = 0;
-	J0x07:
-
-	// End:0x7A [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x70
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			// End:0x57
-			if(_bNotIncludeGMI_None)
-			{
-				// End:0x57
-				if(__NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(0)))
-				{
-					return false;
-				}
-			}
-			return __NFUN_155__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(1));
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeAdversarial
-//	
-//------------------------------------------------------------------
-simulated function bool IsGameTypeAdversarial(string szGameType)
+struct WritableMapIcon
 {
-	local int i;
+    var float   timeStamp;
+    var INT     iIconIndex;
+    var Color   color;
+    var INT     iPosX;
+    var INT     iPosY;
+};
 
-	i = 0;
-	J0x07:
-
-	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x4A
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return __NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(3));
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-simulated function bool IsGameTypeTeamAdversarial(string szGameType)
+struct WritableMapStroke
 {
-	local int i;
+	var float	timeStamp;
+	var INT		numPoints;
+};
 
-	i = 0;
-	J0x07:
-
-	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_bTeamAdversarial;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeCooperative
-//	
-//------------------------------------------------------------------
-simulated function bool IsGameTypeCooperative(string szGameType)
+struct SoundZoneAudibleZones
 {
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x4A
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return __NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(2));
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeSquad
-//	
-//------------------------------------------------------------------
-simulated function bool IsGameTypeSquad(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x4A
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return __NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(4));
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeUsePreRecMessages
-//	
-//------------------------------------------------------------------
-simulated function bool IsGameTypeUsePreRecMessages(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_bUsePreRecMessages;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeUseNotPlayableNPC
-//	
-//------------------------------------------------------------------
-simulated event bool IsGameTypePlayWithNonRainbowNPCs(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_bPlayWithNonRainbowNPCs;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// IsGameTypeUseRainbowComm
-//	
-//------------------------------------------------------------------
-simulated function bool IsGameTypeUseRainbowComm(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_bUseRainbowComm;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGameNameLocalization
-//	
-//------------------------------------------------------------------
-simulated function string GetGameNameLocalization(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szNameLocalization;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGameNameLocalization
-//	
-//------------------------------------------------------------------
-function string GameTypeToString(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szToString;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GameTypeLocalizationFile
-//	
-//------------------------------------------------------------------
-function string GameTypeLocalizationFile(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szLocalizationFile;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGreenTeamObjective
-//	
-//------------------------------------------------------------------
-simulated function string GetGreenTeamObjective(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szGreenTeamObjective;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetRedTeamObjective
-//	
-//------------------------------------------------------------------
-simulated function string GetRedTeamObjective(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szRedTeamObjective;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGreenShortDescription
-//	
-//------------------------------------------------------------------
-simulated function string GetGreenShortDescription(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szGreenShortDescription;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetRedShortDescription
-//	
-//------------------------------------------------------------------
-simulated function string GetRedShortDescription(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szRedShortDescription;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGameTypeFromClassName
-//	
-//------------------------------------------------------------------
-simulated function string GetGameTypeFromClassName(string szGameClassName)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szClassName, szGameClassName))
-		{
-			return m_aGameTypeInfo[i].m_szGameType;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGameTypeClassName
-//	
-//------------------------------------------------------------------
-simulated function string GetGameTypeClassName(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_szClassName;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return "";
-	return;
-}
-
-simulated function GetGameTypeSaveDirectories(out string SaveDirectory, out string EnglishSaveDir)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x70 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x66
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, Game.m_szGameTypeFlag))
-		{
-			SaveDirectory = m_aGameTypeInfo[i].m_szSaveDirectoryName;
-			EnglishSaveDir = m_aGameTypeInfo[i].m_szEnglishDirName;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return;
-}
-
-simulated function bool FindSaveDirectoryNameFromEnglish(out string SaveDirectory, string EnglishSaveDir)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x53 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x49
-		if(__NFUN_122__(EnglishSaveDir, m_aGameTypeInfo[i].m_szEnglishDirName))
-		{
-			SaveDirectory = m_aGameTypeInfo[i].m_szSaveDirectoryName;
-			return true;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-//------------------------------------------------------------------
-// GetGameTypeFromLocName ; The optional parameter is for similar localization name for single and multi.
-//	
-//------------------------------------------------------------------
-simulated function string GetGameTypeFromLocName(string szGameTypeLoc, optional bool _bOnlyMulti)
-{
-	local int i;
-	local bool bFind;
-
-	bFind = true;
-	i = 0;
-	J0x0F:
-
-	// End:0x85 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x7B
-		if(__NFUN_124__(m_aGameTypeInfo[i].m_szNameLocalization, szGameTypeLoc))
-		{
-			// End:0x61
-			if(_bOnlyMulti)
-			{
-				bFind = __NFUN_155__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(1));
-			}
-			// End:0x7B
-			if(bFind)
-			{
-				return m_aGameTypeInfo[i].m_szGameType;
-			}
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x0F;
-	}
-	return "RGM_NoRulesMode";
-	return;
-}
-
-//------------------------------------------------------------------
-// GetHostageMgr: singleton pattern
-//	
-//------------------------------------------------------------------
-simulated function Actor GetHostageMgr()
-{
-	local Class<R6AbstractHostageMgr> DesiredHostageMgrClass;
-	local R6ModMgr pModManager;
-
-	// End:0xA6
-	if(__NFUN_114__(m_hostageMgr, none))
-	{
-		pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
-		// End:0x6B
-		if(__NFUN_123__(pModManager.m_pCurrentMod.m_HostageMgrToSpawn, ""))
-		{
-			DesiredHostageMgrClass = Class<R6AbstractHostageMgr>(DynamicLoadObject(pModManager.m_pCurrentMod.m_HostageMgrToSpawn, Class'Core.Class'));			
-		}
-		else
-		{
-			DesiredHostageMgrClass = Class<R6AbstractHostageMgr>(DynamicLoadObject("R6Engine.R6HostageMgr", Class'Core.Class'));
-		}
-		m_hostageMgr = __NFUN_278__(DesiredHostageMgrClass);
-	}
-	return m_hostageMgr;
-	return;
-}
-
-//============================================================================
-// Object GetTerroristMgr - 
-//============================================================================
-function Object GetTerroristMgr()
-{
-	local Class<R6AbstractTerroristMgr> mgrClass;
-
-	// End:0x59
-	if(__NFUN_114__(m_terroristMgr, none))
-	{
-		mgrClass = Class<R6AbstractTerroristMgr>(DynamicLoadObject("R6Engine.R6TerroristMgr", Class'Core.Class'));
-		m_terroristMgr = new mgrClass;
-		m_terroristMgr.Initialization(self);
-	}
-	return m_terroristMgr;
-	return;
-}
-
-//------------------------------------------------------------------
-// GameTypeInfoAdd
-//  add the data needed to fill a GameTypeInfo struct
-//------------------------------------------------------------------
-simulated function GameTypeInfoAdd(string szGameType, string szDisplayAsGameType, Actor.EGameModeInfo eGameModeInfoType, bool bTeamAdversarial, bool bUsePreRecMessage, bool bSetNbTerro, bool bPlayWithNonRainbowNPCs, bool bUseRainbowComm, string szLocalizationFile, string szClassName, string szNameLocalization, string szGreenTeamObjective, string szRedTeamObjective, string szGreenShortDescription, string szRedShortDescription, string szToString)
-{
-	local int Index;
-	local GameTypeInfo GameTypeToAdd;
-
-	Index = 0;
-	J0x07:
-
-	// End:0x3D [Loop If]
-	if(__NFUN_150__(Index, m_aGameTypeInfo.Length))
-	{
-		// End:0x33
-		if(__NFUN_122__(m_aGameTypeInfo[Index].m_szGameType, szGameType))
-		{
-			return;
-		}
-		__NFUN_165__(Index);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	GameTypeToAdd.m_eGameModeInfo = eGameModeInfoType;
-	GameTypeToAdd.m_bTeamAdversarial = bTeamAdversarial;
-	GameTypeToAdd.m_bUsePreRecMessages = bUsePreRecMessage;
-	GameTypeToAdd.m_bCanSetNbOfTerroristToSpawn = bSetNbTerro;
-	GameTypeToAdd.m_bPlayWithNonRainbowNPCs = bPlayWithNonRainbowNPCs;
-	GameTypeToAdd.m_bUseRainbowComm = bUseRainbowComm;
-	GameTypeToAdd.m_szGameType = szGameType;
-	GameTypeToAdd.m_szDisplayAsGameType = szDisplayAsGameType;
-	GameTypeToAdd.m_szLocalizationFile = szLocalizationFile;
-	GameTypeToAdd.m_szClassName = szClassName;
-	GameTypeToAdd.m_szNameLocalization = szNameLocalization;
-	GameTypeToAdd.m_szGreenTeamObjective = szGreenTeamObjective;
-	GameTypeToAdd.m_szRedTeamObjective = szRedTeamObjective;
-	GameTypeToAdd.m_szGreenShortDescription = szGreenShortDescription;
-	GameTypeToAdd.m_szRedShortDescription = szRedShortDescription;
-	GameTypeToAdd.m_szToString = szToString;
-	m_aGameTypeInfo[Index] = GameTypeToAdd;
-	return;
-}
-
-simulated function GameTypeSaveGameInfo(int iIndex, string szSaveDirectoryName, string szEnglishDirName)
-{
-	assert(__NFUN_150__(iIndex, m_aGameTypeInfo.Length));
-	m_aGameTypeInfo[iIndex].m_szSaveDirectoryName = szSaveDirectoryName;
-	m_aGameTypeInfo[iIndex].m_szEnglishDirName = szEnglishDirName;
-	return;
-}
-
-//------------------------------------------------------------------
-// SetGameTypeStrings 
-//  
-//------------------------------------------------------------------
-simulated function SetGameTypeStrings()
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x191 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x73
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szGreenTeamObjective, ""))
-		{
-			m_aGameTypeInfo[i].m_szGreenTeamObjective = Localize(m_aGameTypeInfo[i].m_szToString, "GreenTeamObj", m_aGameTypeInfo[i].m_szGreenTeamObjective);
-		}
-		// End:0xCD
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szRedTeamObjective, ""))
-		{
-			m_aGameTypeInfo[i].m_szRedTeamObjective = Localize(m_aGameTypeInfo[i].m_szToString, "RedTeamObj", m_aGameTypeInfo[i].m_szRedTeamObjective);
-		}
-		// End:0x12B
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szGreenShortDescription, ""))
-		{
-			m_aGameTypeInfo[i].m_szGreenShortDescription = Localize(m_aGameTypeInfo[i].m_szToString, "GreenShortDesc", m_aGameTypeInfo[i].m_szGreenShortDescription);
-		}
-		// End:0x187
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szRedShortDescription, ""))
-		{
-			m_aGameTypeInfo[i].m_szRedShortDescription = Localize(m_aGameTypeInfo[i].m_szToString, "RedShortDesc", m_aGameTypeInfo[i].m_szRedShortDescription);
-		}
-		__NFUN_163__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return;
-}
-
-simulated function SetGameTypeDisplayBombTimer(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x51 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x47
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			m_aGameTypeInfo[i].m_bDisplayBombTimer = true;
-			// [Explicit Break]
-			goto J0x51;
-		}
-		__NFUN_163__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	J0x51:
-
-	return;
-}
-
-simulated function bool IsGameTypeDisplayBombTimer(string szGameType)
-{
-	local int i;
-
-	i = 0;
-	J0x07:
-
-	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
-	{
-		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
-		{
-			return m_aGameTypeInfo[i].m_bDisplayBombTimer;
-		}
-		__NFUN_163__(i);
-		// [Loop Continue]
-		goto J0x07;
-	}
-	return false;
-	return;
-}
-
-// R6CODE+
-simulated event PreBeginPlay()
-{
-	local R6ModMgr pModMgr;
-	local R6Mod pCurrentMod;
-
-	// End:0x0B
-	if(m_bGameTypesInitialized)
-	{
-		return;
-	}
-	m_bGameTypesInitialized = true;
-	pModMgr = Class'Engine.Actor'.static.__NFUN_1524__();
-	pModMgr.AddGameTypes(self);
-	return;
-}
-
-//------------------------------------------------------------------
-// ResetOriginalData
-//	
-//------------------------------------------------------------------
-simulated function ResetOriginalData()
-{
-	local R6DecalManager aMgr;
-
-	// End:0x10
-	if(m_bResetSystemLog)
-	{
-		LogResetSystem(false);
-	}
-	super.ResetOriginalData();
-	aMgr = m_DecalManager;
-	m_DecalManager = none;
-	// End:0x3F
-	if(__NFUN_119__(aMgr, none))
-	{
-		aMgr.__NFUN_279__();
-	}
-	m_bCanStartStartingSound = false;
-	// End:0x69
-	if(__NFUN_129__(Level.bKNoInit))
-	{
-		m_DecalManager = __NFUN_278__(Class'Engine.R6DecalManager');
-	}
-	// End:0x83
-	if(__NFUN_119__(m_terroristMgr, none))
-	{
-		m_terroristMgr.ResetOriginalData();
-	}
-	m_bInGamePlanningActive = false;
-	return;
-}
-
-// Export ULevelInfo::execGetLocalURL(FFrame&, void* const)
-// R6CODE-
-//
-// Return the URL of this level on the local machine.
-//
- native simulated function string GetLocalURL();
-
-// Export ULevelInfo::execPBNotifyServerTravel(FFrame&, void* const)
+    var() bool bZone00;
+    var() bool bZone01;
+    var() bool bZone02;
+    var() bool bZone03;
+    var() bool bZone04;
+    var() bool bZone05;
+    var() bool bZone06;
+    var() bool bZone07;
+    var() bool bZone08;
+    var() bool bZone09;
+    var() bool bZone10;
+    var() bool bZone11;
+    var() bool bZone12;
+    var() bool bZone13;
+    var() bool bZone14;
+    var() bool bZone15;
+    var() bool bZone16;
+    var() bool bZone17;
+    var() bool bZone18;
+    var() bool bZone19;
+    var() bool bZone20;
+    var() bool bZone21;
+    var() bool bZone22;
+    var() bool bZone23;
+    var() bool bZone24;
+    var() bool bZone25;
+    var() bool bZone26;
+    var() bool bZone27;
+    var() bool bZone28;
+    var() bool bZone29;
+    var() bool bZone30;
+    var() bool bZone31;
+    var() bool bZone32;
+    var() bool bZone33;
+    var() bool bZone34;
+    var() bool bZone35;
+    var() bool bZone36;
+    var() bool bZone37;
+    var() bool bZone38;
+    var() bool bZone39;
+    var() bool bZone40;
+    var() bool bZone41;
+    var() bool bZone42;
+    var() bool bZone43;
+    var() bool bZone44;
+    var() bool bZone45;
+    var() bool bZone46;
+    var() bool bZone47;
+    var() bool bZone48;
+    var() bool bZone49;
+    var() bool bZone50;
+    var() bool bZone51;
+    var() bool bZone52;
+    var() bool bZone53;
+    var() bool bZone54;
+    var() bool bZone55;
+    var() bool bZone56;
+    var() bool bZone57;
+    var() bool bZone58;
+    var() bool bZone59;
+    var() bool bZone60;
+    var() bool bZone61;
+    var() bool bZone62;
+    var() bool bZone63;
+};
+
+// --- Variables ---
+// var ? color; // REMOVED IN 1.60
+// var ? iIconIndex; // REMOVED IN 1.60
+// var ? iPosX; // REMOVED IN 1.60
+// var ? iPosY; // REMOVED IN 1.60
+// var ? m_bCanSetNbOfTerroristToSpawn; // REMOVED IN 1.60
+// var ? m_bDisplayBombTimer; // REMOVED IN 1.60
+// var ? m_bPlayWithNonRainbowNPCs; // REMOVED IN 1.60
+// var ? m_bTeamAdversarial; // REMOVED IN 1.60
+// var ? m_bUsePreRecMessages; // REMOVED IN 1.60
+// var ? m_bUseRainbowComm; // REMOVED IN 1.60
+// var ? m_eGameModeInfo; // REMOVED IN 1.60
+// var ? m_szClassName; // REMOVED IN 1.60
+// var ? m_szDisplayAsGameType; // REMOVED IN 1.60
+// var ? m_szEnglishDirName; // REMOVED IN 1.60
+// var ? m_szGameType; // REMOVED IN 1.60
+// var ? m_szGreenShortDescription; // REMOVED IN 1.60
+// var ? m_szGreenTeamObjective; // REMOVED IN 1.60
+// var ? m_szLocalizationFile; // REMOVED IN 1.60
+// var ? m_szNameLocalization; // REMOVED IN 1.60
+// var ? m_szRedShortDescription; // REMOVED IN 1.60
+// var ? m_szRedTeamObjective; // REMOVED IN 1.60
+// var ? m_szSaveDirectoryName; // REMOVED IN 1.60
+// var ? m_szToString; // REMOVED IN 1.60
+// var ? numPoints; // REMOVED IN 1.60
+// var ? position; // REMOVED IN 1.60
+// var ? timeStamp; // REMOVED IN 1.60
+var array<array> m_aGameTypeInfo;
+var GameInfo Game;
+var ENetMode NetMode;
+// ^ NEW IN 1.60
+// Current time.
+// Time in seconds since level began play.
+var float TimeSeconds;
+var const Controller ControllerList;
+//R6Weather
+var Emitter m_WeatherEmitter;
+var R6AbstractTerroristMgr m_terroristMgr;
+var int m_iLimitedSFXCount;
+// Second.
+var transient int Second;
+// Minute.
+var transient int Minute;
+// Hour.
+var transient int Hour;
+// Day of month.
+var transient int Day;
+// Month.
+var transient int Month;
+// If paused, name of person pausing the game.
+var /* replicated */ PlayerReplicationInfo Pauser;
+var PhysicsVolume PhysicsVolumeList;
+var class<StaticMeshActor> RedHelmet;
+// ^ NEW IN 1.60
+var class<StaticMeshActor> GreenHelmet;
+// ^ NEW IN 1.60
+var string RedTeamPawnClass;
+// ^ NEW IN 1.60
+var string GreenTeamPawnClass;
+// ^ NEW IN 1.60
+var string NextURL;
+//R6InGamePLanning
+var bool m_bInGamePlanningActive;
+// Millisecond.
+var transient int Millisecond;
+var bool bKNoInit;
+// ^ NEW IN 1.60
+var localized string LevelEnterText;
+// ^ NEW IN 1.60
+var class<R6WeatherEmitter> m_WeatherEmitterClass;
+// ^ NEW IN 1.60
+var R6DecalManager m_DecalManager;
+// there's only one instance of hostageMgr
+var R6AbstractHostageMgr m_hostageMgr;
+var R6LimitedSFX m_aLimitedSFX[6];
+var /* replicated */ float TimeDilation;
+// ^ NEW IN 1.60
+// Year.
+var transient int Year;
+var localized string Title;
+// ^ NEW IN 1.60
+// Client high-detail mode.
+var bool bHighDetailMode;
+var bool m_bGameTypesInitialized;
+// Engine version.
+var string EngineVersion;
+var const NavigationPoint NavigationPointList;
+var float NextSwitchCountdown;
+// R6SOUND
+var bool m_bPlaySound;
+var bool m_bIsResettingLevel;
+var bool m_bCanStartStartingSound;
+var /* replicated */ class<R6WeatherEmitter> m_RepWeatherEmitterClass;
+var string m_szMissionObjLocalization;
+// ^ NEW IN 1.60
+var Material RedHelmetSkin;
+var StaticMesh RedHelmetMesh;
+var Mesh RedMesh;
+var Material RedHandSkin;
+var Material RedGogglesSkin;
+var Material RedHeadSkin;
+var Material RedTeamSkin;
+var Material GreenHelmetSkin;
+var StaticMesh GreenHelmetMesh;
+var Mesh GreenMesh;
+var Material GreenHandSkin;
+var Material GreenGogglesSkin;
+var Material GreenHeadSkin;
+//Skin names received by the client. If package does not exist, it will be downloaded.
+var Material GreenTeamSkin;
+var bool bNextItems;
+// Min engine version that is net compatible.
+var string MinNetVersion;
+// Machine's name according to the OS.
+var string ComputerName;
+var string Song;
+// ^ NEW IN 1.60
+// Starting gameplay.
+var bool bStartup;
+var string Author;
+// ^ NEW IN 1.60
+var Texture m_tWritableMapTexture;
+// ^ NEW IN 1.60
+var float m_fDistanceHeartBeatVisible;
+//R6HEARTBEAT
+var bool m_bHeartBeatOn;
+// true means running, false means not running
+var bool m_bPBSvRunning;
 //#ifdef R6PUNKBUSTER
 //__WITH_PB__
- native(1319) final simulated function PBNotifyServerTravel();
+//1 means PB server is running, 0 means not activated or deactivate cmd given but still running
+var int iPBEnabled;
+var R6ServerInfo m_ServerSettings;
+var bool m_bSoundFadeFinish;
+var array<array> m_aWritableMapIcons;
+var array<array> m_aWritableMapTimeStamp;
+var array<array> m_aWritableMapStrip;
+var Vector m_vPredPredVector;
+var Vector m_vPredVector;
+var array<array> m_aCurrentStrip;
+var Material m_pProneTrailMaterial;
+// ^ NEW IN 1.60
+// debug: max distance to player for displaying nav point.
+var float m_fDbgNavPointDistance;
+// used to avoid blur in menus
+var bool m_bSkipMotionBlur;
+var int m_iMotionBlurIntensity;
+var Texture m_pScopeAddTexture;
+var Texture m_pScopeMaskTexture;
+var bool m_bAllow3DRendering;
+var bool m_bScopeVisionActive;
+var bool m_bHeatVisionActive;
+var bool m_bNightVisionActive;
+var bool m_bShowOnlyTransparentSM;
+var bool m_bShowDebugLODs;
+//R6NEWRENDERERFEATURES
+var bool m_bShowDebugLights;
+//#ifdef R6DBGVECTORINFO
+var bool m_bShowDebugLine;
+var EHostageNationality m_eHostageVoices;
+// ^ NEW IN 1.60
+var ETerroristNationality m_eTerroristVoices;
+// ^ NEW IN 1.60
+var SoundZoneAudibleZones m_SoundZoneAudibleZones[64];
+// ^ NEW IN 1.60
+var float m_fEndGamePauseTime;
+// ^ NEW IN 1.60
+var string m_csVoicesOneLinersBankName;
+// ^ NEW IN 1.60
+var Sound m_StartingMusic;
+// ^ NEW IN 1.60
+var Sound m_BodyFallSwitchForOtherPawnSnd;
+// ^ NEW IN 1.60
+var Sound m_BodyFallSwitchSnd;
+// ^ NEW IN 1.60
+var Sound m_SurfaceSwitchForOtherPawnSnd;
+// ^ NEW IN 1.60
+var Sound m_SurfaceSwitchSnd;
+// ^ NEW IN 1.60
+var Sound m_sndPlayMissionExtro;
+var Sound m_sndPlayMissionIntro;
+var class<Emitter> m_BreathingEmitterClass;
+// ^ NEW IN 1.60
+var Actor m_WeatherViewTarget;
+var Sound m_sndMissionComplete;
+// ^ NEW IN 1.60
+var array<array> m_aMissionObjectives;
+// ^ NEW IN 1.60
+var float m_fTimeLimit;
+// ^ NEW IN 1.60
+var bool m_bUseDefaultMoralityRules;
+// ^ NEW IN 1.60
+var Region RedMenuRegion;
+var Material RedMenuSkin;
+var Region GreenMenuRegion;
+var Material GreenMenuSkin;
+//#ifdef R6ACTIONSPOT
+var const R6ActionSpot m_ActionSpotList;
+var string DefaultGameType;
+// ^ NEW IN 1.60
+// this bool says whether we want to log bwidth usage
+var bool m_bLogBandWidth;
+var bool bNeverPrecache;
+// ^ NEW IN 1.60
+var float m_fTerroSkillMultiplier;
+var float m_fRainbowSkillMultiplier;
+var string m_szGameTypeShown;
+var Vector R6PlanningMinVector;
+// ^ NEW IN 1.60
+var Vector R6PlanningMaxVector;
+// ^ NEW IN 1.60
+var int R6PlanningMinLevel;
+// ^ NEW IN 1.60
+var int R6PlanningMaxLevel;
+// ^ NEW IN 1.60
+var transient ELevelAction LevelAction;
+// ^ NEW IN 1.60
+var int HubStackLevel;
+var Texture LargeVertex;
+var Texture WhiteSquareTexture;
+var Texture WireframeTexture;
+var Texture DefaultTexture;
+var Texture Screenshot;
+// ^ NEW IN 1.60
+var float Brightness;
+// ^ NEW IN 1.60
+var float PlayerDoppler;
+// ^ NEW IN 1.60
+var Rotator CameraRotationDynamic;
+// ^ NEW IN 1.60
+var Vector CameraLocationSide;
+// ^ NEW IN 1.60
+var Vector CameraLocationFront;
+// ^ NEW IN 1.60
+var Vector CameraLocationTop;
+// ^ NEW IN 1.60
+var Vector CameraLocationDynamic;
+// ^ NEW IN 1.60
+var float m_fInGamePlanningZoomDistance;
+var bool m_bInGamePlanningZoomingOut;
+var bool m_bInGamePlanningZoomingIn;
+// true if physicsvolume list initialized
+var transient const bool bPhysicsVolumesInitialized;
+// True if path network is valid
+var bool bPathsRebuilt;
+// frame rate is well below DesiredFrameRate, so make LOD more aggressive
+var bool bAggressiveLOD;
+// frame rate is below DesiredFrameRate, so drop high detail actors
+var bool bDropDetail;
+// Only update players.
+var bool bPlayersOnly;
+// Whether gameplay has begun.
+var bool bBegunPlay;
+var bool bLonePlayer;
+// ^ NEW IN 1.60
+// A list of selected groups in the group browser (only used in editor)
+var transient string SelectedGroups;
+// List of the group names which were checked when the level was last saved
+var string VisibleGroups;
+var LevelSummary Summary;
+var string LocalizedPkg;
+// ^ NEW IN 1.60
+// Better rag-doll/ground friction model, but more CPU.
+var bool bKStaticFriction;
+// Allows you to make ragdolls use lower friction than normal.
+var float KarmaGravScale;
+// Maximum number of simultaneous rag-dolls.
+var int MaxRagdolls;
+// Ragdoll physics timestep scaling. This is applied on top of KarmaTimeScale.
+var float RagdollTimeScale;
+// Karma - jag
+// Karma physics timestep scaling.
+var float KarmaTimeScale;
+var bool m_bIsClassicMission;
+// ^ NEW IN 1.60
+var int m_iNbOfFBToSpawnBasedOnNbPlayers;
+// ^ NEW IN 1.60
+var int m_iNbOfFreeBackupToSpawn;
+// ^ NEW IN 1.60
+var int m_iCoughTimes;
+// ^ NEW IN 1.60
+var float m_fOxygeneStepDecrease;
+// ^ NEW IN 1.60
+var float m_iCoughSeuil;
+// ^ NEW IN 1.60
+var float m_fOxygeneTopLevel;
+// ^ NEW IN 1.60
+var float m_fClignoteTime;
+// ^ NEW IN 1.60
+var float m_fTempsDetection;
+// ^ NEW IN 1.60
+var /* replicated */ float m_fCompteurFrameDetection;
+// ^ NEW IN 1.60
+var /* replicated */ bool m_bShowFloppy;
+// ^ NEW IN 1.60
+var EPhysicsDetailLevel PhysicsDetailLevel;
+// ^ NEW IN 1.60
+// time at which to start pause
+var float PauseDelay;
+// Day of week.
+var transient int DayOfWeek;
 
-// Export ULevelInfo::execGetAddressURL(FFrame&, void* const)
-//
-// Return the URL of this level, which may possibly
-// exist on a remote machine.
-//
- native simulated function string GetAddressURL();
-
+// --- Functions ---
+//============================================================================
+// Object GetTerroristMgr -
+//============================================================================
+function Object GetTerroristMgr() {}
+// ^ NEW IN 1.60
+// R6CODE+
+simulated event PreBeginPlay() {}
 //
 // Jump the server to a new level.
 //
-event ServerTravel(string URL, bool bItems)
-{
-	// End:0x57
-	if(__NFUN_122__(NextURL, ""))
-	{
-		bNextItems = bItems;
-		NextURL = URL;
-		// End:0x4C
-		if(__NFUN_119__(Game, none))
-		{
-			Game.ProcessServerTravel(URL, bItems);			
-		}
-		else
-		{
-			NextSwitchCountdown = 0.0000000;
-		}
-	}
-	return;
-}
-
+event ServerTravel(bool bItems, string URL) {}
+simulated function SetWeatherActive(bool bWeatherActive) {}
+final native function AddWritableMapPoint(Vector point, Color C) {}
+// ^ NEW IN 1.60
+final native function AddEncodedWritableMapStrip(string S) {}
+// ^ NEW IN 1.60
+final native function AddWritableMapIcon(string Msg) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetHostageMgr: singleton pattern
 //
-// ensure the DefaultPhysicsVolume class is loaded.
+//------------------------------------------------------------------
+simulated function Actor GetHostageMgr() {}
+// ^ NEW IN 1.60
+final native function SetBankSound(ER6SoundState eGameState) {}
+// ^ NEW IN 1.60
+simulated function GameTypeSaveGameInfo(int iIndex, string szSaveDirectoryName, string szEnglishDirName) {}
+//------------------------------------------------------------------
+// ResetOriginalData
 //
-function ThisIsNeverExecuted()
-{
-	local DefaultPhysicsVolume P;
-
-	P = none;
-	return;
-}
-
-function Reset()
-{
-	__NFUN_2622__();
-	super(Actor).Reset();
-	return;
-}
-
-simulated function AddPhysicsVolume(PhysicsVolume NewPhysicsVolume)
-{
-	local PhysicsVolume V;
-
-	V = PhysicsVolumeList;
-	J0x0B:
-
-	// End:0x3E [Loop If]
-	if(__NFUN_119__(V, none))
-	{
-		// End:0x27
-		if(__NFUN_114__(V, NewPhysicsVolume))
-		{
-			return;
-		}
-		V = V.NextPhysicsVolume;
-		// [Loop Continue]
-		goto J0x0B;
-	}
-	NewPhysicsVolume.NextPhysicsVolume = PhysicsVolumeList;
-	PhysicsVolumeList = NewPhysicsVolume;
-	return;
-}
-
-simulated function RemovePhysicsVolume(PhysicsVolume DeletedPhysicsVolume)
-{
-	local PhysicsVolume V, Prev;
-
-	V = PhysicsVolumeList;
-	J0x0B:
-
-	// End:0x88 [Loop If]
-	if(__NFUN_119__(V, none))
-	{
-		// End:0x66
-		if(__NFUN_114__(V, DeletedPhysicsVolume))
-		{
-			// End:0x47
-			if(__NFUN_114__(Prev, none))
-			{
-				PhysicsVolumeList = V.NextPhysicsVolume;				
-			}
-			else
-			{
-				Prev.NextPhysicsVolume = V.NextPhysicsVolume;
-			}
-			return;
-		}
-		Prev = V;
-		V = V.NextPhysicsVolume;
-		// [Loop Continue]
-		goto J0x0B;
-	}
-	return;
-}
-
-// Export ULevelInfo::execNotifyMatchStart(FFrame&, void* const)
-//R6ARMPATCHES
- native(2612) final function NotifyMatchStart();
-
 //------------------------------------------------------------------
-// GetCamSpot
-//	
-//------------------------------------------------------------------
-function Actor GetCamSpot(string szGameType)
-{
-	local Actor StartSpot;
-
-	// End:0x42
-	foreach __NFUN_304__(Class'Engine.Actor', StartSpot)
-	{
-		// End:0x41
-		if(__NFUN_130__(StartSpot.__NFUN_303__('R6CameraSpot'), StartSpot.__NFUN_1513__(szGameType)))
-		{			
-			return StartSpot;
-		}		
-	}	
-	return none;
-	return;
-}
-
-//------------------------------------------------------------------
-// ResetLevel
-//	
-//------------------------------------------------------------------
-simulated function ResetLevel(int iNbOfRestart)
-{
-	local Actor aActor;
-	local Pawn aPawn;
-	local Controller C, pNextController;
-	local PlayerController PC;
-
-	__NFUN_231__(__NFUN_112__(__NFUN_112__("Resetting Level (total=", string(iNbOfRestart)), ")"));
-	m_bIsResettingLevel = true;
-	// End:0x51
-	foreach __NFUN_304__(Class'Engine.Actor', aActor)
-	{
-		aActor.FirstPassReset();		
-	}	
-	// End:0x16A
-	if(__NFUN_155__(int(NetMode), int(NM_Client)))
-	{
-		C = Level.ControllerList;
-		J0x76:
-
-		// End:0x16A [Loop If]
-		if(__NFUN_119__(C, none))
-		{
-			PC = PlayerController(C);
-			// End:0xB0
-			if(__NFUN_119__(PC, none))
-			{
-				PC.ResettingLevel(iNbOfRestart);
-			}
-			// End:0x10E
-			if(__NFUN_119__(C.Pawn, none))
-			{
-				aPawn = C.Pawn;
-				// End:0xF2
-				if(__NFUN_119__(PC, none))
-				{
-					PC.UnPossess();
-				}
-				aPawn.__NFUN_279__();
-				C.Pawn = none;
-			}
-			pNextController = C.nextController;
-			// End:0x140
-			if(__NFUN_119__(PC, none))
-			{
-				C.__NFUN_113__('BaseSpectating');				
-			}
-			else
-			{
-				// End:0x15C
-				if(__NFUN_119__(AIController(C), none))
-				{
-					C.__NFUN_279__();
-				}
-			}
-			C = pNextController;
-			// [Loop Continue]
-			goto J0x76;
-		}
-	}
-	// End:0x1A0
-	if(m_bResetSystemLog)
-	{
-		__NFUN_231__("RESET: ResetOriginalData of all actors...");
-	}
-	// End:0x1FA
-	foreach __NFUN_304__(Class'Engine.Actor', aActor)
-	{
-		// End:0x1EA
-		if(__NFUN_132__(aActor.bTearOff, aActor.m_bDeleteOnReset))
-		{
-			// End:0x1E7
-			if(__NFUN_129__(aActor.__NFUN_279__()))
-			{
-			}
-			// End:0x1F9
-			continue;
-		}
-		aActor.ResetOriginalData();		
-	}	
-	__NFUN_1515__();
-	__NFUN_2622__();
-	// End:0x243
-	foreach __NFUN_304__(Class'Engine.Actor', aActor)
-	{
-		// End:0x242
-		if(__NFUN_130__(__NFUN_114__(PlayerController(aActor), none), __NFUN_114__(GameInfo(aActor), none)))
-		{
-			aActor.SetInitialState();
-		}		
-	}	
-	__NFUN_2712__();
-	// End:0x266
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
-	{
-		StopAllMusic();
-	}
-	__NFUN_2704__();
-	m_bIsResettingLevel = false;
-	return;
-}
-
+simulated function ResetOriginalData() {}
+final native function CallLogThisActor(Actor anActor) {}
+// ^ NEW IN 1.60
+final native function string GetMapNameLocalisation(string _szMapName) {}
+// ^ NEW IN 1.60
 //-----------------------------------------------------------------------------
 // GetMissionObjLocFile
 //   return the string for the MObj or the default one
 //-----------------------------------------------------------------------------
-function string GetMissionObjLocFile(R6MissionObjectiveBase obj)
-{
-	// End:0x31
-	if(__NFUN_130__(__NFUN_119__(obj, none), __NFUN_123__(obj.m_szMissionObjLocalization, "")))
-	{
-		return obj.m_szMissionObjLocalization;
-	}
-	return m_szMissionObjLocalization;
-	return;
-}
-
+function string GetMissionObjLocFile(R6MissionObjectiveBase obj) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetCamSpot
+//
+//------------------------------------------------------------------
+function Actor GetCamSpot(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetGameTypeFromClassName
+//
+//------------------------------------------------------------------
+simulated function string GetGameTypeFromClassName(string szGameClassName) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetRedShortDescription
+//
+//------------------------------------------------------------------
+simulated function string GetRedShortDescription(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetGameTypeClassName
+//
+//------------------------------------------------------------------
+simulated function string GetGameTypeClassName(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetGreenShortDescription
+//
+//------------------------------------------------------------------
+simulated function string GetGreenShortDescription(string szGameType) {}
+// ^ NEW IN 1.60
+simulated function bool FindSaveDirectoryNameFromEnglish(out string SaveDirectory, string EnglishSaveDir) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetRedTeamObjective
+//
+//------------------------------------------------------------------
+simulated function string GetRedTeamObjective(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetGreenTeamObjective
+//
+//------------------------------------------------------------------
+simulated function string GetGreenTeamObjective(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GameTypeLocalizationFile
+//
+//------------------------------------------------------------------
+function string GameTypeLocalizationFile(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetGameNameLocalization
+//
+//------------------------------------------------------------------
+function string GameTypeToString(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GetGameNameLocalization
+//
+//------------------------------------------------------------------
+simulated function string GetGameNameLocalization(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeUseRainbowComm
+//
+//------------------------------------------------------------------
+simulated function bool IsGameTypeUseRainbowComm(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeUseNotPlayableNPC
+//
+//------------------------------------------------------------------
+simulated event bool IsGameTypePlayWithNonRainbowNPCs(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeUsePreRecMessages
+//
+//------------------------------------------------------------------
+simulated function bool IsGameTypeUsePreRecMessages(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeSquad
+//
+//------------------------------------------------------------------
+simulated function bool IsGameTypeSquad(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeCooperative
+//
+//------------------------------------------------------------------
+simulated function bool IsGameTypeCooperative(string szGameType) {}
+// ^ NEW IN 1.60
+simulated function bool IsGameTypeTeamAdversarial(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeAdversarial
+//
+//------------------------------------------------------------------
+simulated function bool IsGameTypeAdversarial(string szGameType) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// GameTypeUseNbOfTerroristToSpawn
+//
+//------------------------------------------------------------------
+simulated event bool GameTypeUseNbOfTerroristToSpawn(string szGameType) {}
+// ^ NEW IN 1.60
+simulated function SetGameTypeDisplayBombTimer(string szGameType) {}
+simulated function bool IsGameTypeDisplayBombTimer(string szGameType) {}
+// ^ NEW IN 1.60
+simulated function AddPhysicsVolume(PhysicsVolume NewPhysicsVolume) {}
+simulated function GetGameTypeSaveDirectories(out string SaveDirectory, out string EnglishSaveDir) {}
+//
+// ensure the DefaultPhysicsVolume class is loaded.
+//
+function ThisIsNeverExecuted() {}
+//------------------------------------------------------------------
+// GetGameTypeFromLocName ; The optional parameter is for similar localization name for single and multi.
+//
+//------------------------------------------------------------------
+simulated function string GetGameTypeFromLocName(string szGameTypeLoc, optional bool _bOnlyMulti) {}
+// ^ NEW IN 1.60
+//------------------------------------------------------------------
+// IsGameTypeMultiplayer
+//
+//------------------------------------------------------------------
+simulated function bool IsGameTypeMultiplayer(string szGameType, optional bool _bNotIncludeGMI_None) {}
+// ^ NEW IN 1.60
+simulated function RemovePhysicsVolume(PhysicsVolume DeletedPhysicsVolume) {}
+//------------------------------------------------------------------
+// ResetLevel
+//
+//------------------------------------------------------------------
+simulated function ResetLevel(int iNbOfRestart) {}
+//------------------------------------------------------------------
+// GameTypeInfoAdd
+//  add the data needed to fill a GameTypeInfo struct
+//------------------------------------------------------------------
+simulated function GameTypeInfoAdd(string szGameType, string szDisplayAsGameType, EGameModeInfo eGameModeInfoType, bool bTeamAdversarial, bool bUsePreRecMessage, bool bSetNbTerro, bool bPlayWithNonRainbowNPCs, bool bUseRainbowComm, string szLocalizationFile, string szClassName, string szNameLocalization, string szGreenTeamObjective, string szRedTeamObjective, string szGreenShortDescription, string szRedShortDescription, string szToString) {}
+//------------------------------------------------------------------
+// SetGameTypeStrings
+//
+//------------------------------------------------------------------
+simulated function SetGameTypeStrings() {}
 // R6Weather
-simulated event PostBeginPlay()
-{
-	// End:0x1B
-	if(__NFUN_155__(int(NetMode), int(NM_Client)))
-	{
-		m_RepWeatherEmitterClass = m_WeatherEmitterClass;
-	}
-	// End:0x58
-	if(__NFUN_130__(__NFUN_132__(__NFUN_154__(int(NetMode), int(NM_Standalone)), __NFUN_154__(int(NetMode), int(NM_ListenServer))), __NFUN_119__(m_WeatherEmitterClass, none)))
-	{
-		m_WeatherEmitter = __NFUN_278__(m_WeatherEmitterClass);
-	}
-	GetTerroristMgr();
-	return;
-}
-
-simulated function SetWeatherActive(bool bWeatherActive)
-{
-	// End:0x64
-	if(__NFUN_130__(bWeatherActive, __NFUN_154__(m_WeatherEmitter.Emitters[0].m_iPaused, 1)))
-	{
-		m_WeatherEmitter.Emitters[0].m_iPaused = 0;
-		m_WeatherEmitter.Emitters[0].AllParticlesDead = false;		
-	}
-	else
-	{
-		// End:0xC7
-		if(__NFUN_130__(__NFUN_129__(bWeatherActive), __NFUN_154__(m_WeatherEmitter.Emitters[0].m_iPaused, 0)))
-		{
-			m_WeatherEmitter.Emitters[0].m_iPaused = 1;
-			m_WeatherEmitter.Emitters[0].AllParticlesDead = false;
-		}
-	}
-	return;
-}
+simulated event PostBeginPlay() {}
+final native function NotifyMatchStart() {}
+// ^ NEW IN 1.60
+function Reset() {}
+//
+// Return the URL of this level, which may possibly
+// exist on a remote machine.
+//
+simulated native function string GetAddressURL() {}
+// ^ NEW IN 1.60
+final simulated native function PBNotifyServerTravel() {}
+// ^ NEW IN 1.60
+// R6CODE-
+//
+// Return the URL of this level on the local machine.
+//
+simulated native function string GetLocalURL() {}
+// ^ NEW IN 1.60
+final native function ResetLevelInNative() {}
+// ^ NEW IN 1.60
+final native function FinalizeLoading() {}
+// ^ NEW IN 1.60
 
 defaultproperties
 {
-	PhysicsDetailLevel=1
-	m_iNbOfFBToSpawnBasedOnNbPlayers=3
-	MaxRagdolls=32
-	R6PlanningMinLevel=65535
-	bKStaticFriction=true
-	bHighDetailMode=true
-	m_bUseDefaultMoralityRules=true
-	m_bAllow3DRendering=true
-	m_bPlaySound=true
-	TimeDilation=1.0000000
-	KarmaTimeScale=0.9000000
-	RagdollTimeScale=1.0000000
-	KarmaGravScale=1.0000000
-	m_fInGamePlanningZoomDistance=5000.0000000
-	Brightness=1.0000000
-	m_fRainbowSkillMultiplier=1.0000000
-	m_fTerroSkillMultiplier=1.0000000
-	m_fEndGamePauseTime=8.0000000
-	m_fDbgNavPointDistance=2000.0000000
-	DefaultTexture=Texture'Engine.DefaultTexture'
-	WireframeTexture=Texture'Engine.WireframeTexture'
-	WhiteSquareTexture=Texture'Engine.WhiteSquareTexture'
-	LargeVertex=Texture'Engine.LargeVertex'
-	Title="Untitled"
-	VisibleGroups="None"
-	GreenTeamPawnClass="R6Characters.R6RainbowMediumBlue"
-	RedTeamPawnClass="R6Characters.R6RainbowMediumEuro"
-	m_szMissionObjLocalization="R6MissionObjectives"
-	bWorldGeometry=true
-	bAlwaysRelevant=true
-	bHiddenEd=true
 }
-
-// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
-// REMOVED IN 1.60: var EPhysicsDetailLevel
-// REMOVED IN 1.60: var ELevelAction
-// REMOVED IN 1.60: var ENetMode
-// REMOVED IN 1.60: function GetCampaignNameFromParam

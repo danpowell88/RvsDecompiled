@@ -1,47 +1,31 @@
-//=============================================================================
-// UWindowTabControlItem - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class UWindowTabControlItem extends UWindowList;
 
-var int RowNumber;
-var int m_iItemID;
-var bool bFlash;
-var bool m_bMouseOverItem;
-var float TabTop;
-var float TabLeft;
+// --- Variables ---
 var float TabWidth;
+var float TabLeft;
+var int RowNumber;
+var float TabTop;
 var float TabHeight;
-var float m_fFixWidth;  // a fix size for the tab, by default 0 (the tab size equal the the text size in this case)
+var string Caption;
+var bool m_bMouseOverItem;
+// a fix size for the tab, by default 0 (the tab size equal the the text size in this case)
+var float m_fFixWidth;
+var string HelpText;
 var UWindowTabControl Owner;
 // border and text have the same color (selected or not)
 var Color m_vSelectedColor;
 var Color m_vNormalColor;
-var string Caption;
-var string HelpText;
+var int m_iItemID;
+var bool bFlash;
 
-function SetCaption(string NewCaption)
+// --- Functions ---
+function RightClickTab() {}
+function SetItemColor(Color _vSelected, Color _vNormal) {}
+function SetFixTabSize(float _fFixTabWidth) {}
+function SetCaption(string NewCaption) {}
+
+defaultproperties
 {
-	Caption = NewCaption;
-	return;
 }
-
-function RightClickTab()
-{
-	return;
-}
-
-function SetFixTabSize(float _fFixTabWidth)
-{
-	m_fFixWidth = _fFixTabWidth;
-	return;
-}
-
-function SetItemColor(Color _vSelected, Color _vNormal)
-{
-	m_vSelectedColor = _vSelected;
-	m_vNormalColor = _vNormal;
-	return;
-}
-

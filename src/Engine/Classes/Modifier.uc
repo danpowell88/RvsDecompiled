@@ -1,29 +1,15 @@
-//=============================================================================
-// Modifier - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class Modifier extends Material
-	abstract
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object,Material);
+    native
+    abstract;
 
-var() editinlineuse Material Material;
+// --- Variables ---
+var Material Material;
 
-function Trigger(Actor Other, Actor EventInstigator)
+// --- Functions ---
+function Trigger(Actor EventInstigator, Actor Other) {}
+
+defaultproperties
 {
-	// End:0x24
-	if(__NFUN_119__(Material, none))
-	{
-		Material.Trigger(Other, EventInstigator);
-	}
-	// End:0x48
-	if(__NFUN_119__(FallbackMaterial, none))
-	{
-		FallbackMaterial.Trigger(Other, EventInstigator);
-	}
-	return;
 }
-

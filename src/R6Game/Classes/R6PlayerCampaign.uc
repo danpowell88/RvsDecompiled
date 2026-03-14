@@ -1,10 +1,4 @@
 //=============================================================================
-// R6PlayerCampaign - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6PlayerCampaign.uc : A player campaing keeps tacks of the evolution of a 
 //							user specific saved campaign, allow reloading and 
 //							resuming of a player campaign
@@ -15,12 +9,16 @@
 //    2002/02/18 * Created by Alexandre Dionne
 //=============================================================================
 class R6PlayerCampaign extends Object
- native;
+    native;
 
-var byte m_bCampaignCompleted;
-var int m_iDifficultyLevel;
+// --- Variables ---
 var int m_iNoMission;
 var R6MissionRoster m_OperativesMissionDetails;
-var string m_FileName;
+var byte m_bCampaignCompleted;
 var string m_CampaignFileName;
+var string m_FileName;
+var int m_iDifficultyLevel;
 
+defaultproperties
+{
+}

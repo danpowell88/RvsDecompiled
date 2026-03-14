@@ -1,27 +1,15 @@
-//=============================================================================
-// R6WindowBitMap - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Window.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class R6WindowBitMap extends UWindowBitmap;
 
+// --- Variables ---
+var Color m_TextureColor;
 var bool m_bUseColor;
 var bool m_bDrawBorder;
-var Color m_TextureColor;
 
-function Paint(Canvas C, float X, float Y)
+// --- Functions ---
+function Paint(Canvas C, float X, float Y) {}
+
+defaultproperties
 {
-	// End:0x33
-	if(m_bUseColor)
-	{
-		C.__NFUN_2626__(m_TextureColor.R, m_TextureColor.G, m_TextureColor.B);
-	}
-	super.Paint(C, X, Y);
-	// End:0x5C
-	if(m_bDrawBorder)
-	{
-		DrawSimpleBorder(C);
-	}
-	return;
 }
-

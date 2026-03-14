@@ -1,24 +1,11 @@
-//=============================================================================
-// UWindowTabControlLeftButton - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\UWindow.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class UWindowTabControlLeftButton extends UWindowButton;
 
-function BeforePaint(Canvas C, float X, float Y)
-{
-	LookAndFeel.Tab_SetupLeftButton(self);
-	return;
-}
+// --- Functions ---
+function LMouseDown(float Y, float X) {}
+function BeforePaint(float Y, float X, Canvas C) {}
 
-function LMouseDown(float X, float Y)
+defaultproperties
 {
-	super(UWindowWindow).LMouseDown(X, Y);
-	// End:0x39
-	if(__NFUN_129__(bDisabled))
-	{
-		__NFUN_166__(UWindowTabControl(ParentWindow).TabArea.TabOffset);
-	}
-	return;
 }
-

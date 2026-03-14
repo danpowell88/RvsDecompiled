@@ -1,10 +1,4 @@
 //=============================================================================
-// R6WindowListInfoPlayerItem - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowListServerInfoItem.uc : Class used to hold the values for 
 //  the entries in the list of players in the ServerInfo tab in the multi player menu.
 //
@@ -15,22 +9,23 @@
 //=============================================================================
 class R6WindowListInfoPlayerItem extends UWindowListBoxItem;
 
-var int iSkills;
-var int iPing;  // Ping time to players computer
-var int iRank;  // Player Rank
-var float fNameXOff;
-var float fSkillsXOff;
-var float fTimeXOff;
-var float fPingXOff;
+// --- Variables ---
 var float fNameWidth;
-var string szPlName;  // Player Name
-var string szTime;  // Total time the player has been playing at this server
+var float fPingXOff;
+var float fTimeXOff;
+var float fSkillsXOff;
+var float fNameXOff;
+// Ping time to players computer
+var int iPing;
+// Total time the player has been playing at this server
+var string szTime;
+//
+var int iSkills;
+// Player Name
+var string szPlName;
+// Player Rank
+var int iRank;
 
 defaultproperties
 {
-	fNameXOff=5.0000000
-	fSkillsXOff=91.0000000
-	fTimeXOff=50.0000000
-	fPingXOff=50.0000000
-	fNameWidth=86.0000000
 }

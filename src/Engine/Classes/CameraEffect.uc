@@ -1,17 +1,16 @@
-//=============================================================================
-// CameraEffect - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class CameraEffect extends Object
-	abstract
-	native
- noexport;
+    native
+    abstract
+    noexport;
 
-var float Alpha;  // Used to transition camera effects. 0 = no effect, 1 = full effect
-var bool FinalEffect;  // Forces the renderer to ignore effects on the stack below this one.
+// --- Variables ---
+// Used to transition camera effects. 0 = no effect, 1 = full effect
+var float Alpha;
+// Forces the renderer to ignore effects on the stack below this one.
+var bool FinalEffect;
 
 defaultproperties
 {
-	Alpha=1.0000000
 }

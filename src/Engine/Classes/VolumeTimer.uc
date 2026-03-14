@@ -1,29 +1,14 @@
-//=============================================================================
-// VolumeTimer - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class VolumeTimer extends Info
-	notplaceable
- hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class VolumeTimer extends Info;
 
+// --- Variables ---
 var PhysicsVolume V;
 
-function PostBeginPlay()
-{
-	super(Actor).PostBeginPlay();
-	__NFUN_280__(1.0000000, true);
-	V = PhysicsVolume(Owner);
-	return;
-}
-
-function Timer()
-{
-	V.TimerPop(self);
-	return;
-}
+// --- Functions ---
+function PostBeginPlay() {}
+function Timer() {}
 
 defaultproperties
 {
-	RemoteRole=0
 }

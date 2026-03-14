@@ -1,26 +1,10 @@
-//=============================================================================
-// CriticalEventPlus - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class CriticalEventPlus extends LocalMessagePlus
- hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class CriticalEventPlus extends LocalMessagePlus;
 
-static function float GetOffset(int Switch, float YL, float ClipY)
-{
-	return __NFUN_171__(__NFUN_172__(default.YPos, 768.0000000), ClipY);
-	return;
-}
+// --- Functions ---
+static function float GetOffset(float ClipY, float YL, int Switch) {}
 
 defaultproperties
 {
-	FontSize=1
-	Lifetime=3
-	bIsSpecial=true
-	bIsUnique=true
-	bFadeMessage=true
-	bBeep=true
-	bCenter=true
-	YPos=196.0000000
-	DrawColor=(R=0,G=128,B=255,A=255)
 }

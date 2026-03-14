@@ -1,28 +1,15 @@
-//=============================================================================
-// ACTION_GotoAction - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_GotoAction extends ScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_GotoAction extends ScriptedAction;
 
-var(Action) int ActionNumber;
+// --- Variables ---
+var int ActionNumber;
 
-function ProceedToNextAction(ScriptedController C)
-{
-	C.ActionNum = __NFUN_250__(0, ActionNumber);
-	return;
-}
-
-function string GetActionString()
-{
-	return __NFUN_168__(ActionString, string(ActionNumber));
-	return;
-}
+// --- Functions ---
+function ProceedToNextAction(ScriptedController C) {}
+function string GetActionString() {}
+// ^ NEW IN 1.60
 
 defaultproperties
 {
-	ActionString="go to action"
 }

@@ -1,17 +1,11 @@
-//=============================================================================
-// TexCoordSource - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class TexCoordSource extends TexModifier
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object,Material);
+    native;
 
-var() int SourceChannel;
+// --- Variables ---
+var int SourceChannel;
 
 defaultproperties
 {
-	TexCoordSource=0
 }

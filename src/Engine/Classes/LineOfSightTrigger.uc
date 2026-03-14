@@ -1,10 +1,4 @@
 //=============================================================================
-// LineOfSightTrigger - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // LineOfSightTrigger
 // triggers its event when player looks at it from close enough
 // ONLY WORKS IN SINGLE PLAYER (or for the local client on a listen server)
@@ -12,52 +6,28 @@
 // but that would have more performance cost
 //=============================================================================
 class LineOfSightTrigger extends Triggers
-	native
- placeable;
+    native;
 
-var() int MaxViewAngle;  // how directly a player must be looking at SeenActor center (in degrees)
-var() bool bEnabled;
+// --- Variables ---
+var name SeenActorTag;
+// ^ NEW IN 1.60
+var bool bEnabled;
+// ^ NEW IN 1.60
 var bool bTriggered;
-var() float MaxViewDist;  // maximum distance player can be from this trigger to trigger it
-var float OldTickTime;
-var float RequiredViewDir;  // how directly player must be looking at SeenActor - 1.0 = straight on, 0.75 = barely on screen
 var Actor SeenActor;
-var() name SeenActorTag;  // tag of actor which triggers this trigger when seen
+var int MaxViewAngle;
+// ^ NEW IN 1.60
+// how directly player must be looking at SeenActor - 1.0 = straight on, 0.75 = barely on screen
+var float RequiredViewDir;
+var float MaxViewDist;
+// ^ NEW IN 1.60
+var float OldTickTime;
 
-function PostBeginPlay()
-{
-	super(Actor).PostBeginPlay();
-	RequiredViewDir = __NFUN_188__(__NFUN_172__(__NFUN_171__(float(MaxViewAngle), 3.1415930), float(180)));
-	// End:0x5C
-	if(__NFUN_130__(__NFUN_255__(SeenActorTag, 'None'), __NFUN_255__(SeenActorTag, 'None')))
-	{
-		// End:0x5B
-		foreach __NFUN_304__(Class'Engine.Actor', SeenActor, SeenActorTag)
-		{
-			// End:0x5B
-			break;			
-		}		
-	}
-	return;
-}
-
-event PlayerSeesMe(PlayerController P)
-{
-	TriggerEvent(Event, self, P.Pawn);
-	bTriggered = true;
-	return;
-}
-
-function Trigger(Actor Other, Pawn EventInstigator)
-{
-	bEnabled = true;
-	return;
-}
+// --- Functions ---
+event PlayerSeesMe(PlayerController P) {}
+function PostBeginPlay() {}
+function Trigger(Actor Other, Pawn EventInstigator) {}
 
 defaultproperties
 {
-	MaxViewAngle=15
-	bEnabled=true
-	MaxViewDist=3000.0000000
-	bCollideActors=false
 }

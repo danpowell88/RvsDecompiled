@@ -1,94 +1,22 @@
 //=============================================================================
-// JumpDest - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // JumpDest.
 // specifies positions that can be reached with greater than normal jump
 // forced paths will check for greater than normal jump capability
 // NOTE these have NO relation to JumpPads
 //=============================================================================
 class JumpDest extends NavigationPoint
-	native
-	notplaceable
- hidecategories(Lighting,LightColor,Karma,Force);
+    native;
 
-var int NumUpstreamPaths;
-var ReachSpec UpstreamPaths[8];
+// --- Variables ---
 var Vector NeededJump[8];
+var ReachSpec UpstreamPaths[8];
+var int NumUpstreamPaths;
 
-function int GetPathIndex(ReachSpec Path)
-{
-	local int i;
-
-	// End:0x0D
-	if(__NFUN_114__(Path, none))
-	{
-		return 0;
-	}
-	i = 0;
-	J0x14:
-
-	// End:0x45 [Loop If]
-	if(__NFUN_150__(i, 4))
-	{
-		// End:0x3B
-		if(__NFUN_114__(UpstreamPaths[i], Path))
-		{
-			return i;
-		}
-		__NFUN_165__(i);
-		// [Loop Continue]
-		goto J0x14;
-	}
-	return 0;
-	return;
-}
-
-event int SpecialCost(Pawn Other, ReachSpec Path)
-{
-	local int Num;
-
-	Num = GetPathIndex(Path);
-	// End:0x77
-	if(__NFUN_179__(__NFUN_186__(__NFUN_172__(Other.JumpZ, Other.PhysicsVolume.Gravity.Z)), __NFUN_186__(__NFUN_172__(NeededJump[Num].Z, Other.PhysicsVolume.default.Gravity.Z))))
-	{
-		return 100;
-	}
-	return 10000000;
-	return;
-}
-
-event bool SuggestMovePreparation(Pawn Other)
-{
-	local int Num;
-
-	// End:0x16
-	if(__NFUN_114__(Other.Controller, none))
-	{
-		return false;
-	}
-	Num = GetPathIndex(Other.Controller.CurrentPath);
-	// End:0x9E
-	if(__NFUN_176__(__NFUN_186__(__NFUN_172__(Other.JumpZ, Other.PhysicsVolume.Gravity.Z)), __NFUN_186__(__NFUN_172__(NeededJump[Num].Z, Other.PhysicsVolume.default.Gravity.Z))))
-	{
-		return false;
-	}
-	Other.Controller.MoveTarget = self;
-	Other.Controller.Destination = Location;
-	Other.bNoJumpAdjust = true;
-	Other.Velocity = NeededJump[Num];
-	Other.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
-	Other.__NFUN_3970__(2);
-	Other.Controller.SetFall();
-	Other.DestinationOffset = CollisionRadius;
-	return false;
-	return;
-}
+// --- Functions ---
+event int SpecialCost(Pawn Other, ReachSpec Path) {}
+function int GetPathIndex(ReachSpec Path) {}
+event bool SuggestMovePreparation(Pawn Other) {}
 
 defaultproperties
 {
-	bSpecialForced=true
 }

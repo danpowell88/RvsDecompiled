@@ -1,28 +1,34 @@
-//=============================================================================
-// TexRotator - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class TexRotator extends TexModifier
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object,Material);
+    native;
 
+// --- Enums ---
 enum ETexRotationType
 {
-	TR_FixedRotation,               // 0
-	TR_ConstantlyRotating,          // 1
-	TR_OscillatingRotation          // 2
+	TR_FixedRotation,
+	TR_ConstantlyRotating,
+	TR_OscillatingRotation,
 };
 
-var() TexRotator.ETexRotationType TexRotationType;
-var deprecated bool ConstantRotation;
-var() float UOffset;
-var() float VOffset;
+// --- Variables ---
 var Matrix M;
-var() Rotator Rotation;
-var() Rotator OscillationRate;
-var() Rotator OscillationAmplitude;
-var() Rotator OscillationPhase;
+var ETexRotationType TexRotationType;
+// ^ NEW IN 1.60
+var Rotator Rotation;
+// ^ NEW IN 1.60
+var bool ConstantRotation;
+var float UOffset;
+// ^ NEW IN 1.60
+var float VOffset;
+// ^ NEW IN 1.60
+var Rotator OscillationRate;
+// ^ NEW IN 1.60
+var Rotator OscillationAmplitude;
+// ^ NEW IN 1.60
+var Rotator OscillationPhase;
+// ^ NEW IN 1.60
 
+defaultproperties
+{
+}

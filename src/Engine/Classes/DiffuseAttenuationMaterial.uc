@@ -1,13 +1,12 @@
-//=============================================================================
-// DiffuseAttenuationMaterial - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class DiffuseAttenuationMaterial extends RenderedMaterial
-	native
-	collapsecategories
- hidecategories(Object);
+    native;
 
+// --- Variables ---
 var Material m_pMaterial;
 var Material m_pMaterialGradient;
 
+defaultproperties
+{
+}

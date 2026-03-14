@@ -1,22 +1,10 @@
-//=============================================================================
-// ACTION_DestroyPawn - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-class ACTION_DestroyPawn extends ScriptedAction
-	editinlinenew
-	collapsecategories
- hidecategories(Object);
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+class ACTION_DestroyPawn extends ScriptedAction;
 
-function bool InitActionFor(ScriptedController C)
-{
-	C.DestroyPawn();
-	return true;
-	return;
-}
+// --- Functions ---
+function bool InitActionFor(ScriptedController C) {}
 
 defaultproperties
 {
-	bValidForTrigger=false
-	ActionString="destroy pawn"
 }

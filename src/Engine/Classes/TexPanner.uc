@@ -1,19 +1,15 @@
-//=============================================================================
-// TexPanner - extracted from retail RavenShield 1.60
-// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
-// Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
+// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
+// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
 class TexPanner extends TexModifier
-	native
-	editinlinenew
-	collapsecategories
- hidecategories(Object,Material);
+    native;
 
-var() float PanRate;
-var() Rotator PanDirection;
+// --- Variables ---
+var Rotator PanDirection;
+// ^ NEW IN 1.60
+var float PanRate;
+// ^ NEW IN 1.60
 var Matrix M;
 
 defaultproperties
 {
-	PanRate=0.1000000
 }
