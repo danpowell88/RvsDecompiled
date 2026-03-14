@@ -20,6 +20,11 @@ extern INT GHashLinkCellCount;
 extern INT GHashExtraCount;
 extern CORE_API UBOOL GHideHiddenInEditor;
 
+// Global render-resource cache-ID counter (Ghidra: DAT_1060b564).
+// Incremented each time a render resource is constructed; OR'd with a tag byte
+// to form a unique QWORD cache ID for FBspSection, FStaticLightMapTexture, etc.
+INT DAT_1060b564 = 0;
+
 // --- FAnimMeshVertexStream ---
 IMPL_MATCH("Engine.dll", 0x1032b170)
 FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
@@ -300,12 +305,21 @@ FLightMap::FLightMap(FLightMap const &Other)
 	new ((BYTE*)this + 0x98) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98));
 }
 
-IMPL_DIVERGE("retail ULevel* ctor address unresolved")
-FLightMap::FLightMap(ULevel *,int,int)
+IMPL_MATCH("Engine.dll", 0x10410c60)
+FLightMap::FLightMap(ULevel *Level,int USize,int VSize)
 {
-	// Initialize TArray members so dtor is safe regardless of which ctor was called
+	// Ghidra 0x110c60 (159b): constructs FMatrix at +0x28, 3 FVectors at +0x68, +0x74, +0x80,
+	// 2 FArrays at +0x8C, +0x98; stores USize at +0x0C, Level at +0x04, VSize at +0x10; zeros +0x24.
+	new ((BYTE*)this + 0x28) FMatrix();
+	new ((BYTE*)this + 0x68) FVector(0.f,0.f,0.f);
+	new ((BYTE*)this + 0x74) FVector(0.f,0.f,0.f);
+	new ((BYTE*)this + 0x80) FVector(0.f,0.f,0.f);
 	new ((BYTE*)this + 0x8C) TArray<FLightMapSample52>();
 	new ((BYTE*)this + 0x98) TArray<FLOAT>();
+	*(INT*)((BYTE*)this + 0x0C) = USize;
+	*(ULevel**)((BYTE*)this + 0x04) = Level;
+	*(INT*)((BYTE*)this + 0x10) = VSize;
+	*(INT*)((BYTE*)this + 0x24) = 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x1033c6a0)
@@ -319,18 +333,18 @@ FLightMap::FLightMap()
 	new ((BYTE*)this + 0x98) TArray<FLOAT>();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x1033c8a0)
 FLightMap::~FLightMap()
 {
-	// Ghidra 0x3c6a0 area: destroy TArrays in reverse order
+	// Ghidra 0x3c8a0 (97b): SEH frame; destroys TArray<FLOAT> at +0x98, TArray<FLightMapSample52> at +0x8C.
 	((TArray<FLOAT>*)((BYTE*)this + 0x98))->~TArray();
 	((TArray<FLightMapSample52>*)((BYTE*)this + 0x8C))->~TArray();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x1033ca10)
 FLightMap& FLightMap::operator=(const FLightMap& Other)
 {
-	// Ghidra 0x3ca10: skip vtable +0; +4..+8B = 34 DWORDs (contiguous); +0x8C=TArray<FLightMapSample52>; +0x98=TArray<FLOAT>
+	// Ghidra 0x3ca10 (194b): skip vtable at +0; +4..+8B = 34 DWORDs (contiguous); +0x8C=TArray<FLightMapSample52>; +0x98=TArray<FLOAT>
 	appMemcpy((BYTE*)this + 4, (const BYTE*)&Other + 4, 0x88);
 	*(TArray<FLightMapSample52>*)((BYTE*)this + 0x8C) = *(const TArray<FLightMapSample52>*)((const BYTE*)&Other + 0x8C);
 	*(TArray<FLOAT>*)((BYTE*)this + 0x98) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x98);
@@ -410,46 +424,48 @@ int FLightMap::GetWidth()
 
 
 // --- FLightMapTexture ---
-IMPL_DIVERGE("Ghidra 0x10320e50 (117b): FLightMapTexture copy ctor; copies DWORD@+4, TArray<FLOAT>@+8, FStaticLightMapTexture@+14, 3 DWORDs@+60")
+IMPL_MATCH("Engine.dll", 0x10320e50)
 FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 {
-	// Ghidra 0x20e50: vtable set by compiler; copy DWORD at +4; copy TArray<FLOAT> at +8;
-	// copy FStaticLightMapTexture sub-object at +0x14
+	// Ghidra 0x20e50 (117b): vtable set by compiler; copy DWORD at +4; copy TArray<FLOAT> at +8;
+	// copy FStaticLightMapTexture sub-object at +0x14; copy 3 DWORDs at +0x60
 	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
 	new ((BYTE*)this + 0x08) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x08));
 	new ((BYTE*)this + 0x14) FStaticLightMapTexture(*(const FStaticLightMapTexture*)((const BYTE*)&Other + 0x14));
 	appMemcpy((BYTE*)this + 0x60, (const BYTE*)&Other + 0x60, 0x0C); // 3 DWORDs
 }
 
-IMPL_DIVERGE("VA unconfirmed; ULevel* ctor inits TArray<FLOAT>@+8 and FStaticLightMapTexture@+14, stores Level@+4")
+IMPL_DIVERGE("0x10410bd0 confirmed; DAT_1060b564 CacheId not yet propagated in FLightMapTexture ULevel* ctor")
 FLightMapTexture::FLightMapTexture(ULevel* Level)
 {
-	// Ghidra 0x110bd0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4
+	// Ghidra 0x110bd0 (132b): init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4
+	// DIVERGENCE: retail also reads/increments DAT_1060b564 for a QWORD cache ID at +0x60; we zero it here.
 	new ((BYTE*)this + 0x08) TArray<FLOAT>();
 	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
 	*(ULevel**)((BYTE*)this + 0x04) = Level;
 }
 
-IMPL_DIVERGE("VA unconfirmed; default ctor inits TArray<FLOAT>@+8 and FStaticLightMapTexture@+14")
+IMPL_MATCH("Engine.dll", 0x103279b0)
 FLightMapTexture::FLightMapTexture()
 {
-	// Ghidra 0x279b0: init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14
+	// Ghidra 0x279b0 (78b): init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14
 	new ((BYTE*)this + 0x08) TArray<FLOAT>();
 	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10320df0)
 FLightMapTexture::~FLightMapTexture()
 {
-	// Ghidra 0x20df0: destroy FStaticLightMapTexture at +0x14, then TArray<FLOAT> at +8
+	// Ghidra 0x20df0 (87b): destroy FStaticLightMapTexture at +0x14, then TArray<FLOAT> at +8
 	((FStaticLightMapTexture*)((BYTE*)this + 0x14))->~FStaticLightMapTexture();
 	((TArray<FLOAT>*)((BYTE*)this + 0x08))->~TArray();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x10320ed0 confirmed; calls FUN_1031f660 (unresolved TArray<FLOAT> assign helper)")
 FLightMapTexture& FLightMapTexture::operator=(const FLightMapTexture& Other)
 {
-	// Ghidra 0x20ed0: skip vtable +0; +4=DWORD; +8=TArray<FLOAT>; +0x14=FStaticLightMapTexture subobj; +0x60,+0x64,+0x68=3 DWORDs
+	// Ghidra 0x20ed0 (63b): skip vtable at +0; +4=DWORD; +8=TArray<FLOAT> via FUN_1031f660; +0x14=FStaticLightMapTexture; +0x60..+0x68=3 DWORDs
+	// DIVERGENCE: FUN_1031f660 at param+8 is an unresolved TArray copy helper; we use TArray::operator= directly.
 	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
 	*(TArray<FLOAT>*)((BYTE*)this + 0x08) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x08);
 	*(FStaticLightMapTexture*)((BYTE*)this + 0x14) = *(const FStaticLightMapTexture*)((const BYTE*)&Other + 0x14);
@@ -550,19 +566,18 @@ FLineBatcher::FLineBatcher(FRenderInterface *,int,int)
 	appMemzero((BYTE*)this + 0x10, 0x14); // zero state DWORDs
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10418050)
 FLineBatcher::~FLineBatcher()
 {
-	// Ghidra 0x418050: reset vtable, call Flush(false), destroy TArray<FLineVertex> at +4
-	// Flush() is a stub; we just destroy the TArray
+	// Ghidra 0x118050 (82b): SEH frame; destroys TArray<FLineVertex> at +4
 	((TArray<FLineVertex>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x10327360 confirmed; calls FUN_1031e1c0 (unresolved TArray<FLineVertex> assign helper)")
 FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 {
-	// Ghidra 0x27360: skip vtable at +0, TArray<FLineVertex> at +4 (FUN_1031e1c0=16-byte),
-	// then 5 DWORDs at +0x10..+0x20
+	// Ghidra 0x27360 (57b): skip vtable; TArray<FLineVertex> at +4 via FUN_1031e1c0; 5 DWORDs at +0x10..+0x20
+	// DIVERGENCE: FUN_1031e1c0 is unresolved; using TArray::operator= directly.
 	*(TArray<FLineVertex>*)((BYTE*)this + 0x04) = *(const TArray<FLineVertex>*)((const BYTE*)&Other + 0x04);
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x14); // 5 DWORDs
 	return *this;
@@ -875,9 +890,10 @@ FRawIndexBuffer::FRawIndexBuffer()
 	new ((BYTE*)this + 0x04) TArray<_WORD>();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x103038c0)
 FRawIndexBuffer::~FRawIndexBuffer()
 {
+	// Ghidra 0x38c0 (9b): destroys TArray<unsigned short> at +4
 	((TArray<_WORD>*)((BYTE*)this + 0x04))->~TArray();
 }
 
@@ -946,9 +962,11 @@ FSkinVertexStream::FSkinVertexStream()
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>();
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_DIVERGE("0x1032b7c0 confirmed; calls FUN_10323ab0 (unresolved TArray<FStreamVert32> dtor helper)")
 FSkinVertexStream::~FSkinVertexStream()
 {
+	// Ghidra 0x2b7c0 (8b): calls FUN_10323ab0() which destroys TArray<FStreamVert32> at +0x20
+	// DIVERGENCE: FUN_10323ab0 is unresolved; using ~TArray() directly.
 	((TArray<FStreamVert32>*)((BYTE*)this + 0x20))->~TArray();
 }
 
@@ -1044,17 +1062,20 @@ FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Oth
 	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 0x18); // 6 DWORDs (+0x34..+0x4B)
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10320CF0 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10327960)
 FStaticLightMapTexture::FStaticLightMapTexture()
 {
-// cache ID at +0x40 uses a global render-resource counter (DAT_1060b564, not reconstructed);
-	// revision at +0x48 = 0.
+	// Ghidra 0x27960 (79b): _eh_vector_constructor_iterator_ inits 2 TLazyArray<unsigned_char>
+	// at this+4 (stride 0x18, 2 objects). Then uses DAT_1060b564 for QWORD CacheId at +0x40; zeros revision at +0x48.
 	appMemzero((BYTE*)this + 0x08, 0x08); // TLazyArray[0] header DWORDs
 	new ((BYTE*)this + 0x10) TArray<BYTE>();
 	appMemzero((BYTE*)this + 0x20, 0x08); // TLazyArray[1] header DWORDs
 	new ((BYTE*)this + 0x28) TArray<BYTE>();
-	appMemzero((BYTE*)this + 0x34, 0x18); // extra fields (includes CacheId, Revision = 0)
-	// DIVERGENCE: CacheId left 0; retail uses a global per-resource counter (DAT_1060b564).
+	appMemzero((BYTE*)this + 0x34, 0x0C); // fields +0x34..+0x3F
+	// CacheId at +0x40 = DAT_1060b564 * 0x100 + 0xE0 (render resource tag 0xE0 = FStaticLightMapTexture)
+	*(QWORD*)((BYTE*)this + 0x40) = (QWORD)(DWORD)DAT_1060b564 * 0x100 + 0xE0;
+	DAT_1060b564++;
+	*(DWORD*)((BYTE*)this + 0x48) = 0; // revision = 0
 }
 
 IMPL_MATCH("Engine.dll", 0x10320cd0)
@@ -1269,11 +1290,10 @@ FStaticTexture::FStaticTexture(UTexture* Texture)
 	*(INT*)&Pad[12]       = 1;
 }
 
-IMPL_DIVERGE("VA unconfirmed; implementation logically correct")
+IMPL_MATCH("Engine.dll", 0x10318ee0)
 FStaticTexture& FStaticTexture::operator=(const FStaticTexture& Other)
 {
-	// Ghidra 0x18ee0: skip vtable at +0, copy 4 DWORDs at +4..+10.
-	// Shares address with FStaticCubemap.
+	// Ghidra 0x18ee0 (33b): skip vtable at +0, copy 4 DWORDs at +4..+10. Shares address with FStaticCubemap::operator=.
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 	return *this;
 }

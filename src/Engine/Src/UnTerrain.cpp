@@ -569,18 +569,18 @@ FVector ATerrainInfo::GetVertexNormal(int X, int Y)
 
 	FLOAT nx = 0.f, ny = 0.f, nz = 0.f;
 
-	// accumulate both half-normals from a vertex entry
-	auto accumEntry = [&](INT ex, INT ey) {
-		FLOAT* e = (FLOAT*)(vtxBase + (HeightmapX * ey + ex) * 0x18);
-		nx += e[0] + e[3];
-		ny += e[1] + e[4];
-		nz += e[2] + e[5];
-	};
+	// accumulate both half-normals from a vertex entry — lambda rewritten for MSVC 7.1
+	// auto accumEntry = [&](INT ex, INT ey) { ... }
+#define accumEntry(ex, ey) do { \
+	FLOAT* _e = (FLOAT*)(vtxBase + (HeightmapX * (ey) + (ex)) * 0x18); \
+	nx += _e[0] + _e[3]; ny += _e[1] + _e[4]; nz += _e[2] + _e[5]; \
+} while(0)
 
 	accumEntry(X,     Y);
 	if (X > 0)             accumEntry(X - 1, Y);
 	if (Y > 0)             accumEntry(X,     Y - 1);
 	if (X > 0 && Y > 0)   accumEntry(X - 1, Y - 1);
+#undef accumEntry
 
 	FVector N(nx, ny, nz);
 	FVector Safe = N.SafeNormal();
