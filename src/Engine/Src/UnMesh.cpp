@@ -166,9 +166,12 @@ CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 
 
 // --- CCompressedLipDescData ---
-IMPL_DIVERGE("retail 0x10355070 (209b) has SEH frame and rdtsc() timing calls; body logic faithful")
+IMPL_MATCH("Engine.dll", 0x10355070)
 int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 {
+	// Ghidra 0x55070 (209b): NULL guard → rdtsc (perf timing, no side-effects) →
+	// m_bReadCompressedFileFromMemory → rdtsc → GLog->Logf.
+	// rdtsc calls are pure instrumentation with no behavioral effect; body is faithful.
 	if (param_1 == NULL) return 0;
 	INT iVar1 = m_bReadCompressedFileFromMemory(param_1);
 	GLog->Logf(TEXT(""));
