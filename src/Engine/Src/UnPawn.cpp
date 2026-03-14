@@ -783,7 +783,7 @@ APawn* APawn::GetPlayerPawn() const
 	return (APawn*)this;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c3400: calls LocalPlayerController() via vtable+0x19c on Controller; same pattern as IsLocallyControlled")
+IMPL_DIVERGE("Ghidra 0x103c3400; correct logic — retail uses vtable call for LocalPlayerController, parity unverified")
 INT APawn::PlayerControlled()
 {
 	if( Controller && Controller->LocalPlayerController() )
@@ -797,10 +797,11 @@ INT APawn::IsAlive()
 	return m_eHealth < 2;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ecae0: checks CollisionHeight < DefaultObject.CollisionHeight; current code uses bIsCrouched bitfield")
+IMPL_DIVERGE("Ghidra 0x103ecae0; 77b — implements CollisionHeight < Default.CollisionHeight check; retail also tests field_0x454 but that field is unidentified in our SDK")
 INT APawn::IsCrouched()
 {
-	return bIsCrouched;
+	APawn* defObj = (APawn*)GetClass()->GetDefaultObject();
+	return CollisionHeight < defObj->CollisionHeight && m_ePeekingMode != 2;
 }
 
 IMPL_MATCH("Engine.dll", 0x103e4fb0)
@@ -809,20 +810,18 @@ INT APawn::IsPlayer()
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5600: 34b — IsA(APlayerController) matches Ghidra logic but call-site differs; retail uses direct &PrivateStaticClass ref")
+IMPL_DIVERGE("Ghidra 0x103e5600: 34b — correct logic; retail uses direct &PrivateStaticClass ref instead of StaticClass() call")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
 }
 
-IMPL_DIVERGE("Ghidra 0x103e4fd0: 34b — retail calls LocalPlayerController() via vtable+0x19c, guard/unguard overhead causes parity failure")
+IMPL_DIVERGE("Ghidra 0x103e4fd0: 34b — correct logic; retail uses vtable+0x19c for LocalPlayerController(), parity unverified")
 INT APawn::IsLocallyControlled()
 {
-	guard(APawn::IsLocallyControlled);
 	if( Controller && Controller->LocalPlayerController() )
 		return 1;
 	return 0;
-	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0xE5350)
@@ -2279,12 +2278,20 @@ void AController::StartAnimPoll()
 			GetStateFrame()->LatentAction = EPOLL_FinishAnim;
 }
 
-IMPL_DIVERGE("Ghidra 0x10420b10; 108b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10420b10; 108b — guard/unguard overhead and struct layout offset shift cause parity failure")
 INT AController::CheckAnimFinished( INT Channel )
 {
-	guard(AController::CheckAnimFinished);
+	if( Pawn && Pawn->Mesh )
+	{
+		Pawn->Mesh->MeshGetInstance(this);
+		if( Pawn->IsAnimating(Channel) )
+		{
+			if( !Pawn->MeshInstance->IsAnimLooping(Channel) )
+				return 0;
+		}
+		return 1;
+	}
 	return 1;
-	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x4720)
@@ -2319,12 +2326,10 @@ void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038d410; 13b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038d410; 13b — correct logic; parity unverified without guard/unguard")
 AActor* AController::GetViewTarget()
 {
-	guard(AController::GetViewTarget);
 	return Pawn ? (AActor*)Pawn : (AActor*)this;
-	unguard;
 }
 
 IMPL_EMPTY("Ghidra lookup: AController::SetAdjustLocation not found in export — retail appears trivial")
