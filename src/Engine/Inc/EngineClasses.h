@@ -1,4 +1,4 @@
-﻿/*===========================================================================
+/*===========================================================================
 	EngineClasses.h: Ravenshield Engine class declarations.
 	Reconstructed for decompilation — provides DECLARE_CLASS macros that
 	IMPLEMENT_CLASS requires, plus the AUTOGENERATE_NAME / FUNCTION pattern.
@@ -4963,7 +4963,6 @@ public:
 	virtual int GetGSCreateUbiServer();
 	virtual void InitializeGameService(UConsole *);
 };
-ENGINE_API extern UR6AbstractGameManager* GR6GameManager;
 
 class ENGINE_API UR6MissionDescription : public UObject
 {
@@ -5015,9 +5014,8 @@ public:
 	void eventRestartServer();
 };
 ENGINE_API extern UR6ServerInfo* GServerOptions;
-ENGINE_API extern UR6ServerInfo* GServerOptions;
 
-class ENGINE_API UR6GameOptions: public UObject
+class ENGINE_API UR6GameOptions : public UObject
 {
 public:
 	DECLARE_CLASS(UR6GameOptions,UObject,0,Engine)
