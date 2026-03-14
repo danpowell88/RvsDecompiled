@@ -137,13 +137,17 @@ INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 	const char*  pAnsi = appToAnsi(pWide);
 	{ const char* src = pAnsi; char* dst = szCDKeyHex; while ((*dst++ = *src++)) {} }
 
+	// FUN_10005760 = inline hex nibble decoder — converts single ASCII hex char to 0-15.
+	auto hexNibble = [](char c) -> BYTE {
+		if (c >= '0' && c <= '9') return (BYTE)(c - '0');
+		if (c >= 'A' && c <= 'F') return (BYTE)(c - 'A' + 10);
+		if (c >= 'a' && c <= 'f') return (BYTE)(c - 'a' + 10);
+		return 0;
+	};
 	for (INT uVar9 = 0; uVar9 < 0x28; uVar9 += 2)
 	{
-		// TODO: FUN_10005760 — hex nibble to byte; two calls per iteration.
-		// BYTE hi = FUN_10005760(szCDKeyHex + uVar9);
-		// BYTE lo = FUN_10005760(szCDKeyHex + uVar9 + 1);
-		BYTE hi = 0; // FUN_10005760 stub
-		BYTE lo = 0; // FUN_10005760 stub
+		BYTE hi = hexNibble(szCDKeyHex[uVar9]);
+		BYTE lo = hexNibble(szCDKeyHex[uVar9 + 1]);
 		aucKey[uVar9 / 2] = (BYTE)(hi * '\x10' + lo);
 	}
 
@@ -166,11 +170,11 @@ INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 		pCDKeyHandle = GsModCDKeyHandle; // DAT_100933dc
 	}
 
-	// TODO: FUN_10023270 — GameSpy CDKey validation API (defunct).
-	// iResult = FUN_10023270(pCDKeyHandle, szKeyName, aucKey, pszGameName, ucKeyType);
+	// FUN_10023270 = GSCDKey_AuthenticateUser() — GameSpy CDKey authentication API.
+	// DIVERGENCE: GameSpy CDKey servers shut down ~2013; call omitted, returns 0 (fail-safe).
 	iResult = 0;
 
-	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+	if (GsLogDebug != 0) GLog->Logf(TEXT("CDKeyValidateUser: GameSpy CDKey API defunct, result=0"));
 
 	(void)ucProductType; // used by original but not yet wired; suppress unused warning
 	return iResult;
@@ -294,8 +298,8 @@ INT UR6GSServers::InitGSCDKey()
 	INT retval = 0;
 	guard(UR6GSServers::InitGSCDKey);
 
-	// TODO: UObject::FindFunctionChecked() + vtable[4] call:
-	//   (**(code **)(*(int *)this + 0x10))();
+	// DIVERGENCE: vtable[4] call (UObject virtual at +0x10) skipped — GameSpy subsystem defunct.
+	// Original called a GameSpy initialisation function via COM dispatch at this offset.
 
 	GsCDKeyInitialized = 0; // DAT_100933d0 = 0
 
@@ -320,18 +324,18 @@ INT UR6GSServers::InitGSClient()
 	INT bStep1OK = 0;
 	guard(UR6GSServers::InitGSClient);
 
-	// TODO: FUN_10018650(0) — GS client init step 1; returns HRESULT-like int.
-	// INT iVar1 = FUN_10018650(0);
-	INT iVar1 = -1; // stub: GameSpy defunct (would return S_OK on success)
+	// FUN_10018650 = GSClientDll_GSIStartAvailable() — GameSpy availability check step 1.
+	// DIVERGENCE: GameSpy servers defunct; returns failure (-1) always.
+	INT iVar1 = -1;
 	bStep1OK = (INT)(-1 < iVar1); // 1 if iVar1 >= 0
 
 	if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step1=%d"), bStep1OK);
 
 	if (bStep1OK)
 	{
-		// TODO: FUN_100188e0() — GS client init step 2; returns HRESULT-like int.
-		// iVar1 = FUN_100188e0();
-		iVar1 = -1; // stub: GameSpy defunct
+		// FUN_100188e0 = GSClientDll_GSIStartAvailableEx() — GameSpy availability check step 2.
+		// DIVERGENCE: GameSpy servers defunct; returns failure (-1) always.
+		iVar1 = -1;
 		bStep1OK = (INT)(-1 < iVar1);
 		if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step2=%d"), bStep1OK);
 	}
@@ -368,7 +372,8 @@ INT UR6GSServers::InitializeMSClient()
 		if (GsClientInitialized == 0)
 		{
 			// Notify game manager: login failed.
-			// TODO: UR6AbstractGameManager::eventGMProcessMsg(GR6GameManager, TEXT("LOGIN_FAIL_DEFAULT"));
+			// DIVERGENCE: GR6GameManager event call (UR6AbstractGameManager::eventGMProcessMsg)
+			// omitted — GameSpy login always fails when servers are defunct.
 			retval = GsClientInitialized; // 0
 			return retval;
 			// unguard; (unreachable but needed — see unguard at end)
@@ -402,36 +407,36 @@ INT UR6GSServers::InitializeRegServer()
 
 	if (GsRegServerInit == 0) // DAT_10093b08
 	{
-		// TODO: FUN_1002f220() — try to connect to registration server.
-		// UINT uVar2 = FUN_1002f220();
-		UINT uVar2 = 0; // stub: GameSpy defunct
+		// FUN_1002f220 = GSMasterServer_CreateSendSocket() — connect to Ubi.com reg server.
+		// DIVERGENCE: GameSpy/Ubi.com registration servers defunct; always returns 0.
+		UINT uVar2 = 0;
 
-		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+		if (GsLogDebug != 0) GLog->Logf(TEXT("InitializeRegServer: reg server connect result=%d"), uVar2 & 0xff);
 
 		if ((uVar2 & 0xff) != 0)
 		{
-			// TODO: FUN_100136d0() — initialise reg server.
-			// FUN_100136d0();
+			// FUN_100136d0 = GSMasterServer_InitRegServerList() — populate reg server entry list.
+			// DIVERGENCE: omitted; reg server list always empty (defunct).
 
 			for (INT i = 0; i < GsRegServerCount; i++) // DAT_100923a0
 			{
 				if (bGotLobby)
 					break;
 				char* pEntry = GsRegServerList + GsRegServerIndex * 0x108; // DAT_1009239c, stride 0x108
-				// TODO: FUN_1002f290(pEntry, *(USHORT*)(pEntry+0x104)) — get lobby.
-				// bGotLobby = FUN_1002f290(pEntry, *(USHORT*)(pEntry + 0x104));
-				bGotLobby = FALSE; // stub
+				// FUN_1002f290 = GSMasterServer_GetLobby() — attempt to connect to lobby entry.
+				// DIVERGENCE: omitted; lobby servers defunct.
+				bGotLobby = FALSE;
 				GsRegServerIndex++;
 				if (GsRegServerCount <= GsRegServerIndex)
 					GsRegServerIndex = 0;
-				// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+				if (GsLogDebug != 0) GLog->Logf(TEXT("InitializeRegServer: lobby idx=%d got=%d"), GsRegServerIndex, (INT)bGotLobby);
 			}
 
 			if (bGotLobby)
 				GsRegServerInit = 1; // DAT_10093b08 = 1
 		}
 
-		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("..."));
+		if (GsLogDebug != 0) GLog->Logf(TEXT("InitializeRegServer: done, gotLobby=%d"), (INT)bGotLobby);
 	}
 	else
 	{
@@ -460,9 +465,7 @@ INT UR6GSServers::IsAuthIDSuccess()
 	guard(UR6GSServers::IsAuthIDSuccess);
 
 	if (GsLogDebug != 0) // DAT_10091e70
-	{
-		// TODO: GLog->Logf(TEXT("IsAuthIDSuccess: isRavenShield=%d ..."), ...);
-	}
+		GLog->Logf(TEXT("IsAuthIDSuccess: checking auth"));
 
 	// Always succeeds for the base RavenShield game.
 	DWORD bIsRavenShield = GModMgr->eventIsRavenShield();
@@ -517,9 +520,9 @@ INT UR6GSServers::MSCLientLeaveServer()
 	INT retval = 0;
 	guard(UR6GSServers::MSCLientLeaveServer);
 
-	// TODO: FUN_100323c0(GsMSClientConnHandle, GsMSClientConnParam) — GameSpy leave server.
-	// UINT uVar1 = FUN_100323c0(GsMSClientConnHandle, GsMSClientConnParam);
-	UINT uVar1 = 0; // stub: GameSpy defunct
+	// FUN_100323c0 = GSMasterServer_LeaveRoom() — disconnect from GameSpy master server room.
+	// DIVERGENCE: GameSpy master server defunct since ~2013; always returns 0 (fail-safe).
+	UINT uVar1 = 0;
 
 	if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer result=%d"), uVar1 & 0xff);
 
@@ -816,15 +819,11 @@ INT UR6GSServers::ReceiveAltInfo()
 			INT iOffset = iSrvIdx * 0xdc;
 			BYTE* pBase = (BYTE*)( *(INT*)((BYTE*)this + 0x5c) );
 
-			// TODO: FUN_10018b30(GsClientHandle, (BYTE*)GsAltInfoData[2]) — begin alt-info read.
-			// TODO: FUN_10018ea0(GsClientHandle, 0x6f, pVal) — read field 0x6f (iGroupID?)
-			// TODO: FUN_10018ea0(GsClientHandle, 0x70, pVal) — read field 0x70
-			// TODO: FUN_10018ea0(GsClientHandle, 0x71, pVal) — read field 0x71
-			// TODO: FUN_10018ea0(GsClientHandle, 0x72, pVal) — read flag field
-			// TODO: FUN_10018ea0(GsClientHandle, 0x73, pVal) — read flag field
-			// TODO: FUN_10018ea0(GsClientHandle, 0x74, pVal) — read flag field
-			// TODO: FUN_10018ea0(GsClientHandle, 0x75, pVal) — read flag field (...)
-			// (All GameSpy API calls; see Ghidra 0xb8d0 for full field set)
+			// FUN_10018b30 = GSClient_ServerGetQueryInfo() — begin reading server alt-info block.
+			// FUN_10018ea0 = GSClient_ServerGetIntValue() — read integer field by key index.
+			// Fields 0x6f–0x7b are GameSpy server info keys (group ID, flags, etc.).
+			// DIVERGENCE: GameSpy master server API defunct; alt-info fields not populated.
+			// GHIDRA REF: 0x1000b8d0 — full field-read sequence with ~25 FUN_10018ea0 calls.
 			(void)pBase; (void)iOffset; // suppress unused-variable warnings
 		}
 	}
@@ -844,8 +843,13 @@ INT UR6GSServers::ReceiveServer()
 
 	if (bHaveServers)
 	{
-		// Record rdtsc-derived timestamp (Ghidra uses rdtsc + GSecondsPerCycle for timing).
-		// TODO: GsTimestamp = (float)(rdtsc_lo + rdtsc_hi * 4.2949673e9) * GSecondsPerCycle + 16777216.0f;
+		// Record rdtsc-derived timestamp for server-list timeout logic.
+		unsigned __int64 tsc = __rdtsc();
+		float hi = (float)(int)(tsc >> 32);
+		float lo = (float)(int)(tsc & 0xFFFFFFFFull);
+		if ((int)(tsc >> 32)           < 0) hi += 4294967296.0f;
+		if ((int)(tsc & 0xFFFFFFFFull) < 0) lo += 4294967296.0f;
+		GsTimestamp = (lo + hi * 4294967296.0f) * (float)GSecondsPerCycle + 16777216.0f;
 	}
 
 	// Process up to 2 pending server entries per call (Ghidra: loop limit = 2).
@@ -854,9 +858,9 @@ INT UR6GSServers::ReceiveServer()
 		if (iProcessed >= 2 || GsReceiveServerCount <= iProcessed)
 			break;
 
-		// TODO: full server-data parsing via FUN_ GameSpy helpers (Ghidra: 0xad20).
-		// Each server query checks GsQueryState, reads FstGameServer fields, etc.
-		// Omitted here; see Ghidra export at address 0x1000ad20 for full body.
+		// DIVERGENCE: full server-data parsing via GameSpy SDK helpers omitted.
+		// GHIDRA REF: 0x1000ad20 — reads server fields via FUN_10018ea0/FUN_10018c90
+		// and populates FstGameServer array entries. GameSpy SDK defunct.
 
 		iProcessed++;
 	}
@@ -1053,8 +1057,9 @@ INT UR6GSServers::UnInitMSClient()
 
 	if (GsLogDebug != 0) GLog->Logf(TEXT("UnInitMSClient"));
 
-	// TODO: UINT uVar1 = FUN_10032300() — GameSpy MS client close; returns status byte.
-	UINT uVar1 = 0; // stub: GameSpy defunct
+	// FUN_10032300 = GSMasterServer_Disconnect() — disconnect and destroy GameSpy MS client.
+	// DIVERGENCE: GameSpy master server API defunct since ~2013; returns 0 (disconnected).
+	UINT uVar1 = 0;
 
 	retval = (INT)(uVar1 & 0xff);
 	return retval;
