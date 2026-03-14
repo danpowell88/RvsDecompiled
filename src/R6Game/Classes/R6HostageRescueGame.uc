@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HostageRescueGame.uc : (add small description)
+//  R6HostageRescueGame.uc : Co-op game mode focused on hostage rescue; initialises the rescue
+//                           objectives for the mission.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

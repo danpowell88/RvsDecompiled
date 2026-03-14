@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6HNightWatch01.uc : (add small description)
+//  R6HNightWatch01.uc : Hostage pawn variant: first night-watchman/security-guard skin used in missions.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

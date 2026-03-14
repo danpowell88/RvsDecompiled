@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TeamDeathMatchGame.uc : (add small description)
+//  R6TeamDeathMatchGame.uc : Standard adversarial team deathmatch; two teams compete for the
+//                            highest combined kill count before the round ends.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6SquadDeathmatch.uc : (add small description)
+//  R6SquadDeathmatch.uc : Adversarial squad deathmatch where each player commands AI squad members;
+//                         assigns players to alternating teams and ends on a score limit.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RainbowPilot.uc : (add small description)
+//  R6RainbowPilot.uc : Rainbow pawn variant representing the pilot role in Escort Pilot mode;
+//                      overrides face texture and supports night-vision attachment.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

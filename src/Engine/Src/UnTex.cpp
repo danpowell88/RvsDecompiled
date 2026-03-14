@@ -190,12 +190,12 @@ int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 	return 0;
 	unguard;
 }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1046a630 is 334 bytes, not fully reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1046a630 is 334 bytes, DXT format conversion pipeline not fully reconstructed")
 ETextureFormat UTexture::ConvertDXT(int,int,int,void * *)
 {
 	return TEXF_P8;
 }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1046a630 is 334 bytes, not fully reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1046a7b0 is 282 bytes, DXT format conversion pipeline not fully reconstructed")
 ETextureFormat UTexture::ConvertDXT()
 {
 	return TEXF_P8;
@@ -881,13 +881,17 @@ void UPalette::FixPalette()
 
 
 // --- UProxyBitmapMaterial ---
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10303f00 is 101 bytes, not fully reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10303f00: sets TextureInterface then queries Format/USize/VSize/UBits/VBits via FBaseTexture vtable; vtable layout not yet mapped")
 void UProxyBitmapMaterial::SetTextureInterface(FBaseTexture * Interface)
 {
+	// DIVERGENCE: retail also populates Format (this+0x58), UBits (0x59), VBits (0x5a),
+	// USize (0x60,0x68), VSize (0x64,0x6c), UBits_log2 (0x5b), VBits_log2 (0x5c)
+	// by calling virtual methods on Interface via raw vtable offsets +0x1c,+0x20,+0x2c,+0x30,+0x34.
+	// These vtable slots are not yet mapped to named FBaseTexture methods.
 	TextureInterface = Interface;
 }
 
-IMPL_DIVERGE("UProxyBitmapMaterial::Get not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("UProxyBitmapMaterial::Get not found in Engine.dll Ghidra export — cannot confirm VA")
 UBitmapMaterial * UProxyBitmapMaterial::Get(double,UViewport *)
 {
 	return this;
@@ -935,15 +939,17 @@ FBaseTexture * UShadowBitmapMaterial::GetRenderInterface()
 
 
 // --- UTexCoordMaterial ---
-IMPL_DIVERGE("UTexCoordMaterial::MaterialUSize not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1030a480)
 INT UTexCoordMaterial::MaterialUSize()
 {
+	// Ghidra 0xa480: if Material != NULL, tail-call Material->MaterialUSize() via vtable+0x70; else return 0.
 	return Material ? Material->MaterialUSize() : 0;
 }
 
-IMPL_DIVERGE("UTexCoordMaterial::MaterialVSize not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x1030a4a0)
 INT UTexCoordMaterial::MaterialVSize()
 {
+	// Ghidra 0xa4a0: if Material != NULL, tail-call Material->MaterialVSize() via vtable+0x74; else return 0.
 	return Material ? Material->MaterialVSize() : 0;
 }
 
@@ -978,19 +984,19 @@ FMatrix * UTexEnvMap::GetMatrix(float)
 
 
 // --- UTexMatrix ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x1030AD20 not yet fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1030ad20)
 FMatrix * UTexMatrix::GetMatrix(float)
 {
+	// Ghidra 0xad20: returns (FMatrix*)(this + 100) = &Matrix.
 	return &Matrix;
 }
 
 
 // --- UTexModifier ---
-IMPL_DIVERGE("UTexModifier::SetValidated not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x103c8480)
 void UTexModifier::SetValidated(int x)
 {
-	// Delegate to Material via virtual call if present.
-	// Retail: 8B 41 58 85 C0 74 07 8B C8 8B 01 FF 60 6C C2 04 00
+	// Ghidra 0xc8480: if Material != NULL, tail-call Material->SetValidated(x) via vtable+0x6c.
 	if (Material)
 		Material->SetValidated(x);
 }
@@ -1040,11 +1046,10 @@ FMatrix * UTexModifier::GetMatrix(float)
 	unguard;
 }
 
-IMPL_DIVERGE("UTexModifier::GetValidated not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x103c7e10)
 int UTexModifier::GetValidated()
 {
-	// Retail: if Material -> tail-call Material->GetValidated(); else return 1
-	// 8B 41 58 85 C0 74 07 8B C8 8B 01 FF 60 68 B8 01 00 00 00 C3
+	// Ghidra 0xc7e10: if Material != NULL, tail-call Material->GetValidated() via vtable+0x68; else return 1.
 	if (Material)
 		return Material->GetValidated();
 	return 1;

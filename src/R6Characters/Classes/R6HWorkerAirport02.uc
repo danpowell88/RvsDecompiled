@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HWorkerAirport02.uc : (add small description)
+//  R6HWorkerAirport02.uc : Hostage pawn variant: second airport worker skin; shares animations
+//                          with R6HWorkerAirport01.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

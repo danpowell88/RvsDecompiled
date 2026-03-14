@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TGospic.uc : (add small description)
+//  R6TGospic.uc : Terrorist pawn representing the named campaign villain Gospic.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6PlanningGrenade.uc : (add small description)
+//  R6PlanningGrenade.uc : Planning screen icon representing a grenade-throw action at an ActionPoint;
+//                         displays different textures per grenade type.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

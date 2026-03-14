@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RMediumCamoHelmet.uc : (add small description)
+//  R6RMediumCamoHelmet.uc : Rainbow operative helmet: medium camouflage pattern variant of the
+//                           standard medium helmet.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

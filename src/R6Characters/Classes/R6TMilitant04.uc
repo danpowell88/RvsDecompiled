@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TMilitant04.uc : (add small description)
+//  R6TMilitant04.uc : Terrorist pawn variant: fourth militant skin built on the militant02 base.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

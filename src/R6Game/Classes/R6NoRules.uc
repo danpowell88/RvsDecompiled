@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6NoRules.uc : (add small description)
+//  R6NoRules.uc : A permissive multiplayer game mode with no formal rules; players may join
+//                 mid-match without team assignment constraints.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

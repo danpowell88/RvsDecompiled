@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TeamBomb.uc : (add small description)
+//  R6TeamBomb.uc : Adversarial team mode where one side plants a bomb and the other must defuse it;
+//                  manages bomb arm/disarm state and related objectives.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

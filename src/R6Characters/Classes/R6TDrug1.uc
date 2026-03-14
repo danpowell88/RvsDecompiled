@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TDrug1.uc : (add small description)
+//  R6TDrug1.uc : Terrorist pawn variant: first drug-cartel thug skin.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

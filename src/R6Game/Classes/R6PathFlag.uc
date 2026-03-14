@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6PathFlag.uc : (add small description)
+//  R6PathFlag.uc : Visual icon placed between planning ActionPoints to represent the movement mode
+//                  (speed/type) along a path segment in the planning screen.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6SquadTeamDeathmatch.uc : (add small description)
+//  R6SquadTeamDeathmatch.uc : Team deathmatch with AI squad members; auto-balances the number of AI
+//                             spawned per team based on current human player counts.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================

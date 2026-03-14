@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6TParamilitary02.uc : (add small description)
+//  R6TParamilitary02.uc : Terrorist pawn variant: second paramilitary soldier skin.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

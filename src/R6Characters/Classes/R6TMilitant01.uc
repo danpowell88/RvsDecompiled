@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TMilitant01.uc : (add small description)
+//  R6TMilitant01.uc : Terrorist pawn variant: first militant/guerrilla skin; serves as base for
+//                     several derived terrorist types.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

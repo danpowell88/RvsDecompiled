@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RainbowPawn.uc : (add small description)
+//  R6RainbowPawn.uc : Abstract base pawn for all Rainbow operative characters; loads the operative
+//                     animation set and handles face texture and gender setup.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,5 @@
 //=============================================================================
-//  R6HWorkerShip01.uc : (add small description)
+//  R6HWorkerShip01.uc : Hostage pawn variant: first ship/dock worker skin for maritime missions.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

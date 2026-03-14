@@ -744,31 +744,31 @@ APawn* APawn::GetPlayerPawn() const
 	return (APawn*)this;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c3400: 5-byte JMP thunk redirecting to IsPlayer")
 INT APawn::PlayerControlled()
 {
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e55b0: checks byte at this+0x3a2 < 2; current uses Health > 0")
 INT APawn::IsAlive()
 {
 	return Health > 0;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103ecae0: checks CollisionHeight < DefaultObject.CollisionHeight; current code uses bIsCrouched bitfield")
 INT APawn::IsCrouched()
 {
 	return bIsCrouched;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103e4fb0)
 INT APawn::IsPlayer()
 {
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103e5600)
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
@@ -830,19 +830,16 @@ INT APawn::IsNeutral( APawn* Other )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103e5000)
 FLOAT APawn::GetMaxSpeed()
 {
 	guard(APawn::GetMaxSpeed);
-	if( Physics == PHYS_Walking )
-		return GroundSpeed;
-	if( Physics == PHYS_Swimming )
-		return WaterSpeed;
+	FLOAT result = GroundSpeed;
 	if( Physics == PHYS_Flying )
 		return AirSpeed;
-	if( Physics == PHYS_Ladder )
-		return LadderSpeed;
-	return GroundSpeed;
+	if( Physics == PHYS_Swimming )
+		result = WaterSpeed;
+	return result;
 	unguard;
 }
 
@@ -887,7 +884,7 @@ INT APawn::CheckOwnerUpdated()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x103e5260)
 void APawn::SetPrePivot( FVector NewPrePivot )
 {
 	guard(APawn::SetPrePivot);
@@ -1921,10 +1918,38 @@ void APawn::clearPaths()
 	}
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103f07e0 is 717 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x103f07e0)
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);
+	FCheckResult Hit(1.f);
+	if( checkFloor(FVector(0,0,1),  Hit) ) return 1;
+	if( checkFloor(FVector(0,1,0),  Hit) ) return 1;
+	if( checkFloor(FVector(0,-1,0), Hit) ) return 1;
+	if( checkFloor(FVector(1,0,0),  Hit) ) return 1;
+	if( checkFloor(FVector(-1,0,0), Hit) ) return 1;
+	if( checkFloor(FVector(0,0,-1), Hit) ) return 1;
+
+	eventFalling();
+
+	if( Physics == PHYS_Spider )
+		setPhysics( PHYS_Falling, NULL, FVector(0,0,1) );
+
+	if( Physics == PHYS_Falling )
+	{
+		FLOAT SavedVelZ = Velocity.Z;
+		DWORD flags = *(DWORD*)((BYTE*)this + 0xac);
+		if( !(flags & 8) && RemainingTime < DeltaTime )
+		{
+			// Velocity from displacement — Ghidra shows FVector division but divisor is unclear; best approximation.
+			FVector Delta = Location - OldLocation;
+			Velocity.X = Delta.X;
+			Velocity.Y = Delta.Y;
+		}
+		Velocity.Z = SavedVelZ;
+		if( RemainingTime > 0.005f )
+			physFalling( RemainingTime, Iterations );
+	}
 	return 0;
 	unguard;
 }
@@ -2327,10 +2352,18 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1038e270 is 308 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1038e270: omits rdtsc profiling counters (GScriptCycles, function timer array)")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);
+	if( !Pawn )
+		return NULL;
+	// Ghidra clears bit 7 of AController+0x3a8 and zeros AController+0x3e8 before pathfinding.
+	*(DWORD*)((BYTE*)this + 0x3a8) &= ~0x80u;
+	*(DWORD*)((BYTE*)this + 0x3e8) = 0;
+	FLOAT pathWeight = Pawn->findPathToward( Goal, Dest, NULL, bSinglePath, 0.f );
+	if( pathWeight > 0.f )
+		return SetPath(1);
 	return NULL;
 	unguard;
 }
