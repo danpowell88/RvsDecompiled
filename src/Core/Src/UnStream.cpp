@@ -376,7 +376,7 @@ void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 	unguard;
 }
 
-IMPL_DIVERGE("synthesized operator= for non-exported class; FFileStream::operator= absent from Core.dll Ghidra export")
+IMPL_EMPTY("compiler-synthesized trivial copy; not a named export in Core.dll")
 FFileStream& FFileStream::operator=( const FFileStream& Other )
 {
 	return *this;
