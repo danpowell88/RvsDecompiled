@@ -29,6 +29,8 @@ date: YYYY-MM-DDTHH:MM
 ---
 ```
 
+Note blog post dates must be unique, split by minutes if required for multiple
+
 ## ⚠️ Blog Post Numbering — CRITICAL (recurring issue)
 
 Multiple agents running in parallel **will collide on post numbers** unless each one checks

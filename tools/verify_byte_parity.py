@@ -51,41 +51,46 @@ except ImportError:
 SCRIPT_DIR  = Path(__file__).resolve().parent
 REPO_ROOT   = SCRIPT_DIR.parent
 RETAIL_DIR  = REPO_ROOT / "retail" / "system"
-BUILD_BIN   = REPO_ROOT / "build" / "bin"
 GHIDRA_DIR  = REPO_ROOT / "ghidra" / "exports"
+
+def _find_build_bin() -> Path:
+    """Return the best available build/bin directory.
+
+    Prefer build-71/bin (MSVC 7.1 — closest to retail) over build/bin (VS2019).
+    Can be overridden with --build-dir on the command line.
+    """
+    for candidate in ("build-71", "build"):
+        p = REPO_ROOT / candidate / "bin"
+        if p.exists():
+            return p
+    return REPO_ROOT / "build" / "bin"
+
+BUILD_BIN = _find_build_bin()
 
 # Map DLL stem → locations.  All retail DLL names are lower-cased on lookup.
 DLL_MAP = {
     "engine":       {"retail": "Engine.dll",       "built": "Engine.dll",
-                     "map":    "build/bin/Engine.map",
                      "ghidra": "Engine/_global.cpp",
                      "base":   0x10300000},
     "core":         {"retail": "Core.dll",          "built": "Core.dll",
-                     "map":    "build/bin/Core.map",
                      "ghidra": "Core/_global.cpp",
                      "base":   0x10100000},
     "r6engine":     {"retail": "R6Engine.dll",      "built": "R6Engine.dll",
-                     "map":    "build/bin/R6Engine.map",
                      "ghidra": "R6Engine/_global.cpp",
                      "base":   0x10000000},
     "r6game":       {"retail": "R6Game.dll",        "built": "R6Game.dll",
-                     "map":    "build/bin/R6Game.map",
                      "ghidra": "R6Game/_global.cpp",
                      "base":   0x10000000},
     "r6abstract":   {"retail": "R6Abstract.dll",    "built": "R6Abstract.dll",
-                     "map":    "build/bin/R6Abstract.map",
                      "ghidra": "R6Abstract/_global.cpp",
                      "base":   0x10000000},
     "fire":         {"retail": "Fire.dll",          "built": "Fire.dll",
-                     "map":    "build/bin/Fire.map",
                      "ghidra": "Fire/_global.cpp",
                      "base":   0x10500000},
     "ipdrv":        {"retail": "IpDrv.dll",         "built": "IpDrv.dll",
-                     "map":    "build/bin/IpDrv.map",
                      "ghidra": "IpDrv/_global.cpp",
                      "base":   0x10700000},
     "r6weapons":    {"retail": "R6Weapons.dll",     "built": "R6Weapons.dll",
-                     "map":    "build/bin/R6Weapons.map",
                      "ghidra": "R6Weapons/_global.cpp",
                      "base":   0x10000000},
 }
@@ -262,7 +267,9 @@ def get_map(dll_stem: str) -> dict:
     if dll_stem not in _MAP_CACHE:
         info = DLL_MAP.get(dll_stem.lower())
         if info:
-            path = REPO_ROOT / info["map"]
+            # Map file lives next to the built DLL
+            map_name = info["built"].replace(".dll", ".map")
+            path = BUILD_BIN / map_name
             _MAP_CACHE[dll_stem] = parse_map_file(path)
         else:
             _MAP_CACHE[dll_stem] = {}
@@ -440,7 +447,19 @@ def main():
                         help="Skip size verification (only compare masked bytes)")
     parser.add_argument("--show-pass", action="store_true",
                         help="Print PASS lines too (default: only FAIL)")
+    parser.add_argument("--build-dir", metavar="DIR",
+                        help="Path to bin directory containing built DLLs "
+                             "(default: auto-detect build-71/bin or build/bin)")
     args = parser.parse_args()
+
+    # Override BUILD_BIN if requested
+    global BUILD_BIN
+    if args.build_dir:
+        BUILD_BIN = Path(args.build_dir).resolve()
+    # Rebuild DLL_MAP "map" paths relative to BUILD_BIN
+    for stem, entry in DLL_MAP.items():
+        entry["map"] = str(BUILD_BIN / (entry["built"].replace(".dll", ".map")))
+
 
     src_root = Path(args.src_dir)
 
@@ -468,7 +487,7 @@ def main():
 
         retail_path = RETAIL_DIR / info["retail"]
         built_path  = BUILD_BIN  / info["built"]
-        map_path    = REPO_ROOT  / info["map"]
+        map_path    = BUILD_BIN  / info["built"].replace(".dll", ".map")
 
         if not retail_path.exists():
             print(f"\n[{stem}.dll] — retail DLL not found at {retail_path}, skipping")

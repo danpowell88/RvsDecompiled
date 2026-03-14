@@ -244,15 +244,14 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038e490; 244 bytes; calls FindPath(zero vector, Goal, bSinglePath); bSinglePath default is 1 not 0")
+IMPL_DIVERGE("Ghidra 0x1038e490; 244 bytes; omits rdtsc profiling; default bSinglePath=1 per Ghidra")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
 	P_GET_OBJECT(AActor,Goal);
-	P_GET_UBOOL_OPTX(bSinglePath,0);
+	P_GET_UBOOL_OPTX(bSinglePath,1);
 	P_FINISH;
-	// Pathfinding stub — returns NULL to indicate no path found.
-	*(AActor**)Result = NULL;
+	*(AActor**)Result = FindPath(FVector(0,0,0), Goal, bSinglePath);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
@@ -269,44 +268,46 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_DIVERGE("Ghidra 0x1038e3e0; 172 bytes; calls FindPath(Point, NULL, bSinglePath); stub returns NULL")
+IMPL_DIVERGE("Ghidra 0x1038e3e0; 172 bytes; omits rdtsc profiling; bSinglePath hardcoded 1 in retail")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
 	P_GET_VECTOR(Point);
 	P_FINISH;
-	*(AActor**)Result = NULL;
+	*(AActor**)Result = FindPath(Point, NULL, 1);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_DIVERGE("Ghidra 0x1038e030; 273 bytes; calls Pawn->actorReachable(anActor, 0, 0); stub returns 0")
+IMPL_DIVERGE("Ghidra 0x1038e030; 273 bytes; omits rdtsc profiling; falls through to error-log if anActor/Pawn null")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
 	P_GET_OBJECT(AActor,anActor);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = (anActor && Pawn) ? Pawn->actorReachable(anActor, 0, 0) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e150; 286 bytes; calls Pawn->pointReachable(aPoint, 0); stub returns 0")
+IMPL_DIVERGE("Ghidra 0x1038e150; 286 bytes; omits rdtsc profiling; logs error if Pawn null")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
 	P_GET_VECTOR(aPoint);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = Pawn ? Pawn->pointReachable(aPoint, 0) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e6c0; 131 bytes; calls Pawn->clearPaths() if Pawn; stub is empty")
+IMPL_DIVERGE("Ghidra 0x1038e6c0; 131 bytes; omits rdtsc profiling counters around clearPaths call")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
 	P_FINISH;
+	if( Pawn )
+		Pawn->clearPaths();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
@@ -330,12 +331,13 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_DIVERGE("Ghidra 0x1038df50; 209 bytes; calls Pawn->PickWallAdjust(HitNormal) and stores result; stub returns 0")
+IMPL_DIVERGE("Ghidra 0x1038df50; 209 bytes; omits rdtsc profiling; result unset if Pawn null in retail")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
+	P_GET_VECTOR(HitNormal);
 	P_FINISH;
-	*(DWORD*)Result = 0;
+	*(DWORD*)Result = Pawn ? Pawn->PickWallAdjust(HitNormal) : 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 526, execPickWallAdjust );
