@@ -767,10 +767,11 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 IMPL_DIVERGE("calls FUN_10321a80/FUN_104378f0/FUN_10415600/FUN_10321870 (unresolved bone/LOD TArray serializers); retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
-	// Retail: calls ULodMesh::Serialize, then serializes bone ref pose (+0x1B8),
+	// Retail: calls ULodMesh::Serialize (which calls UMesh::Serialize) then serializes bone ref pose (+0x1B8),
 	// bone array (+0x19C), default anim ref (+0x1DC), vertex inflations, LOD arrays etc.
+	// NOTE: USkeletalMesh inherits from UMesh (not ULodMesh) so we call UMesh::Serialize directly.
 	// DIVERGENCE: bone/LOD TArray serializers unresolved; base-class data is preserved correctly.
-	ULodMesh::Serialize(Ar);
+	UMesh::Serialize(Ar);
 }
 
 IMPL_DIVERGE("Karma ragdoll line check pending MeSDK decompilation; retail 0x104354f0 (729b)")
