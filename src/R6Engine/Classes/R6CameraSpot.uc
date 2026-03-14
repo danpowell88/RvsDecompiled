@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6CameraSpot.uc : (add small description)
+//  R6CameraSpot.uc : Editor-placed actor that marks a named camera position in a level.
+//  Used by the in-game planning/cinematic system to set up fixed camera viewpoints.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

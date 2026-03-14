@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZoneCircle.uc : (add small description)
+//  R6DZoneCircle.uc : Circular deployment zone; spawns/inserts pawns within a radius.
+//  m_fRadius defines the circle's size in world units.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6TerroristMgr.uc : (add small description)
+//  R6TerroristMgr.uc : Manages hostage-terrorist interactions for AI behaviour.
+//  Tracks up to MAX_Hostage (16) hostages and drives terrorist reactions to hostage state changes.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:  Terrorist AI manager for interaction with hostage

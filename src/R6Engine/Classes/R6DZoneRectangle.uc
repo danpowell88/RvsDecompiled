@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZoneRectangle.uc : (add small description)
+//  R6DZoneRectangle.uc : Axis-aligned rectangular deployment zone for inserting/spawning pawns.
+//  Dimensions are set by m_fX and m_fY (width and depth of the rectangle).
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6GameReplicationInfo.uc : (add small description)
+//  R6GameReplicationInfo.uc : Replicates R6-specific per-game state to all clients.
+//  Extends GameReplicationInfo with map name, team details, and mission parameters.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6NightVision.uc : (add small description)
+//  R6NightVision.uc : Night-vision goggle variant for the pilot character model.
+//  Extends R6NightVision with a pilot-specific mesh (R6RPilotNightVision).
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
