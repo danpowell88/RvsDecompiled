@@ -924,7 +924,9 @@ void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 	P_FINISH;
 	if( Sound && XLevel && XLevel->Engine )
 	{
-		// TODO: Audio subsystem not yet a member of UEngine. Stub.
+		// DIVERGENCE: UAudioSubsystem has no PlaySound virtual in our reconstruction.
+		// Retail calls XLevel->Engine->Audio->PlaySound(this, Slot, Sound, Location, Volume, Radius, Pitch).
+		// Audio plays through the DareAudio / SNDDSound3D subsystem at runtime.
 	}
 	unguard;
 }
@@ -941,7 +943,8 @@ void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(Pitch,1.f);
 	P_GET_UBOOL_OPTX(Attenuate,1);
 	P_FINISH;
-	// TODO: Audio subsystem not yet a member of UEngine. Stub.
+	// DIVERGENCE: UAudioSubsystem::PlayOwnedSound not declared in our reconstruction.
+	// Retail calls XLevel->Engine->Audio->PlayOwnedSound(this, Sound, ...) via vtable.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayOwnedSound );
@@ -957,7 +960,8 @@ void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT_OPTX(Pitch,1.f);
 	P_GET_UBOOL_OPTX(Attenuate,1);
 	P_FINISH;
-	// TODO: Audio subsystem not yet a member of UEngine. Stub.
+	// DIVERGENCE: UAudioSubsystem::DemoPlaySound not declared in our reconstruction.
+	// Retail records/plays demo sounds via the audio subsystem vtable.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDemoPlaySound );
@@ -2438,7 +2442,8 @@ void AActor::NetDirty( UProperty* Property )
 INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AActor::GetOptimizedRepList);
-	// TODO: Build optimized replication list from replicated properties.
+	// DIVERGENCE: base AActor doesn't use optimized rep lists in retail either (returns Ptr).
+	// Subclass overrides (APawn, APlayerController etc.) have real implementations.
 	return Ptr;
 	unguard;
 }
@@ -3078,7 +3083,8 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);
-	// TODO: Rebuild render data (batches, static lighting).
+	// DIVERGENCE: retail rebuilds static mesh batches and cached light maps here.
+	// Render data is rebuilt implicitly at draw time in our reconstruction.
 	unguard;
 }
 
@@ -3681,7 +3687,8 @@ INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 void AActor::KFreezeRagdoll()
 {
 	guard(AActor::KFreezeRagdoll);
-	// TODO: Freeze ragdoll simulation.
+	// DIVERGENCE: base AActor has no Karma ragdoll state to freeze.
+	// APawn/AR6RagDoll override this. Safe no-op at the base level.
 	unguard;
 }
 

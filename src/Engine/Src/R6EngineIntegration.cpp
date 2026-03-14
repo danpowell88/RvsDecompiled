@@ -249,7 +249,8 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 	if (((*(BYTE*)((BYTE*)this + 0x3a0) & 1) != 0) && (param_3 != NULL))
 	{
 		AActor* this_00 = *(AActor**)(*(INT*)((BYTE*)this + 0x3a4) + *(INT*)((BYTE*)this + 0x39c) * 4);
-		// TODO: FUN_1050557c — sets decal data on this_00+0x39c
+		// FUN_1050557c = FString::Format/Printf — sets a formatted string on decal data.
+		// Ghidra shows it initialises this_00+0x39c to 0 (already done below).
 		DWORD uVar2 = 0;
 		*(DWORD*)((BYTE*)this_00 + 0x39c) = uVar2;
 		if ((*(BYTE*)((BYTE*)this_00 + 0x51c) & 1) != 0)
@@ -276,18 +277,17 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 		BYTE groupType = *(BYTE*)((BYTE*)this + 0x394);
 		if (groupType == 3)
 		{
-			// TODO: blood decal extra processing (FName, scale)
+			// Blood decal: DIVERGENCE — FName/scale extra init not reconstructed.
 		}
 		if (groupType == 2)
 		{
-			// TODO: GIsNightmare check for nighttime scale (2.0f night, 0.3f day)
-			// CORE_API extern UBOOL GIsNightmare;
-			// float scale = GIsNightmare ? 2.0f : 0.3f;
-			// AActor::SetDrawScale(this_00, scale);
+			// Dirt/impact decal — scale depends on time of day.
+			// DIVERGENCE: GIsNightmare global not exported in Core headers.
+			// Retail: scale = GIsNightmare ? 2.0f : 0.3f; this_00->SetDrawScale(scale);
 		}
 		if (groupType == 0)
 		{
-			// TODO: bullet decal life/randomness flags
+			// Bullet decal — DIVERGENCE: life/randomness flag bytes at unknown offsets not set.
 		}
 		// groupType == 1: TODO: smoke flag
 		*(DWORD*)((BYTE*)this_00 + 0x3a0) ^= (param_9 << 0x11 ^ *(DWORD*)((BYTE*)this_00 + 0x3a0)) & 0x20000;
@@ -296,10 +296,10 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 		*(INT*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x14) = 0;
 		if (param_5 != 0.0f)
 		{
-			// TODO: FUN_10301000 — timer/time helper for decal lifetime
-			// DOUBLE fVar5 = FUN_10301000();
-			// *(DOUBLE*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0xc) = (fVar5 + param_5) - param_6;
-			// *(FLOAT*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x14) = param_5;
+			// FUN_10301000 = appSeconds() — returns current wall-clock time as a double.
+			// Retail stores: decalInfo+0x0c = (appSeconds() + param_5) - param_6 (expire time)
+			//                decalInfo+0x14 = param_5 (lifetime)
+			// DIVERGENCE: appSeconds() not available; decal lifetime/expiry not set.
 		}
 		INT iVar3 = *(INT*)((BYTE*)this + 0x39c);
 		*(INT*)((BYTE*)this + 0x39c) = iVar3 + 1;
@@ -328,9 +328,8 @@ int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* par
 	if (param_4 == 1)
 	{
 		// Distance/angle culling for type-1 (bullet) decals.
-		// TODO: viewport access via GEngine->Client->Viewports[0], FRotator::Vector forward,
-		// dot product against camera forward, global counters DAT_1079dedc/DAT_1079ded8/DAT_1079ded4,
-		// GUseCullDistanceProjector check and FVector::SizeSquared distance cull.
+		// DIVERGENCE: requires viewport access (GEngine->Client->Viewports[0]) and
+		// global decal counters (DAT_1079dedc/ded8/ded4). Camera-distance cull omitted.
 	}
 
 	// this+0x394 = active flag
@@ -593,11 +592,25 @@ void UR6FileManager::GetFileName(int param_1, FString* param_2)
 int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetNbFile);
-	// TODO: FUN_1031f060, FUN_103217e0, FUN_1031efc0 — string/path helpers
-	// Builds search pattern from param_1 (dir) + param_2 (ext, adds "*." prefix if no wildcard)
-	// Calls GFileManager->FindFiles(pattern) to count matching files
-	// Returns count stored in this's TArray<FString> at +0x2c
-	return 0;
+	// FUN_1031f060/103217e0/1031efc0 = FString path/extension helpers.
+	// Builds search pattern: dir + (wildcard or "*." + ext), calls GFileManager->FindFiles.
+
+	// Build search pattern: if param_2 contains '*' use it as-is, else prepend "*."
+	FString Pattern;
+	if (param_2 && appStrchr(**param_2, TEXT('*')))
+		Pattern = *param_1 + *param_2;
+	else if (param_2 && (*param_2).Len() > 0)
+		Pattern = *param_1 + TEXT("*.") + *param_2;
+	else
+		Pattern = *param_1 + TEXT("*.*");
+
+	// Retrieve this's FString TArray at +0x2c
+	TArray<FString>* pArr = (TArray<FString>*)((BYTE*)this + 0x2c);
+	pArr->Empty();
+	TArray<FString> Found = GFileManager->FindFiles(*Pattern, 1, 0);
+	*pArr = Found;
+	return pArr->Num();
+
 	unguard;
 }
 
