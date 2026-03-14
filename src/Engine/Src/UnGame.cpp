@@ -262,7 +262,7 @@ int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10316cb0)
+IMPL_MATCH("Engine.dll", 0x10316cb0)
 void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 {
 	guard(UGameEngine::LoadRandomMenuBackgroundImage);
@@ -296,7 +296,7 @@ void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewp
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10385b30)
+IMPL_MATCH("Engine.dll", 0x10385b30)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);

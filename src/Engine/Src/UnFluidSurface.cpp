@@ -31,7 +31,7 @@ static void RemoveOscillatorFromList(void* oscPtr)
 }
 
 // --- AFluidSurfaceInfo ---
-IMPL_GHIDRA("Engine.dll", 0x99f30)
+IMPL_MATCH("Engine.dll", 0x99f30)
 void AFluidSurfaceInfo::UpdateOscillatorList()
 {
 	// Retail: 0x99f30, 208b.Scan the level actor list at Level+0x30 for
@@ -82,7 +82,7 @@ void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TL
 	// Vertex buffer management and D3D draw call pattern not reconstructed.
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1065c0)
+IMPL_MATCH("Engine.dll", 0x1065c0)
 void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	// Retail: 0x1065c0, 127b.Draw base editor info then overlay the sprite icon.
@@ -96,7 +96,7 @@ void AFluidSurfaceInfo::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1cad0)
+IMPL_MATCH("Engine.dll", 0x1cad0)
 void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 {
 	// Retail: 0x1cad0, 72b.Set or clear a single bit in the clamped-bitmap for (X, Y).
@@ -108,7 +108,7 @@ void AFluidSurfaceInfo::SetClampedBitmap(int X, int Y, int Value)
 	else       *word &= ~mask;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x98a50)
+IMPL_MATCH("Engine.dll", 0x98a50)
 void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 {
 	// Retail: 0x98a50, 648b.Fill the triangle index buffer for the fluid mesh.
@@ -180,7 +180,7 @@ void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 	// convolution involve complex per-row pointer arithmetic not reconstructed.
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1ca90)
+IMPL_MATCH("Engine.dll", 0x1ca90)
 int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)
 {
 	// Ghidra 0x1ca90:bit-array lookup — (xSize * Y + X) into the clamp bitmap at this+0x404.
@@ -188,7 +188,7 @@ int AFluidSurfaceInfo::GetClampedBitmap(int X, int Y)
 	return (INT)((*(DWORD*)(*(INT*)((BYTE*)this + 0x404) + (idx >> 5) * 4) & (1u << ((BYTE)idx & 0x1f))) != 0);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x990d0)
+IMPL_MATCH("Engine.dll", 0x990d0)
 void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 {
 	// Retail: 0x990d0, 199b.Map a world-space position to the nearest grid indices.
@@ -222,7 +222,7 @@ FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 
 
 // --- AFluidSurfaceOscillator ---
-IMPL_GHIDRA("Engine.dll", 0x9af90)
+IMPL_MATCH("Engine.dll", 0x9af90)
 void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 {
 	// Retail: 0x9af90, 293b. Advance the oscillator's phase and call AFluidSurfaceInfo::Pling.
@@ -258,7 +258,7 @@ void AFluidSurfaceOscillator::UpdateOscillation(float DeltaTime)
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x9b0f0)
+IMPL_MATCH("Engine.dll", 0x9b0f0)
 void AFluidSurfaceOscillator::PostEditChange()
 {
 	// Retail: 0x9b0f0, 215b.Re-register with the target fluid surface on property change.
@@ -291,7 +291,7 @@ void AFluidSurfaceOscillator::PostEditChange()
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x9b200)
+IMPL_MATCH("Engine.dll", 0x9b200)
 void AFluidSurfaceOscillator::Destroy()
 {
 	// Retail: 0x9b200, 92b.Remove from the target surface's list then chain to base.
@@ -305,14 +305,14 @@ void AFluidSurfaceOscillator::Destroy()
 
 
 // --- UFluidSurfacePrimitive ---
-IMPL_GHIDRA("Engine.dll", 0x98820)
+IMPL_MATCH("Engine.dll", 0x98820)
 void UFluidSurfacePrimitive::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x98820: delegates directly to UPrimitive::Serialize.
 	UPrimitive::Serialize(Ar);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x98d90)
+IMPL_MATCH("Engine.dll", 0x98d90)
 int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVector Start, FVector End, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
 	// Ghidra 0x98d90:fluid surface line-check against AABB or flat plane.
@@ -370,7 +370,7 @@ int UFluidSurfacePrimitive::LineCheck(FCheckResult &Result, AActor *Actor, FVect
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x98560)
+IMPL_MATCH("Engine.dll", 0x98560)
 int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector Point, FVector Extent, DWORD ExtraNodeFlags)
 {
 	// Ghidra 0x98560: point-vs-AABB overlap test using fluid surface bounding box.

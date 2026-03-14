@@ -2346,7 +2346,7 @@ INT AActor::IsPendingKill()
 	return bDeleteMe;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x5C00)
+IMPL_MATCH("Engine.dll", 0x5C00)
 INT AActor::IsPendingDelete()
 {
 	// Retail (32b RVA=0x5C00): checks bDeleteMe (bit7 @0xA0) first (JS path),
@@ -2476,7 +2476,7 @@ APawn* AActor::GetPlayerPawn() const
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x78DE0)
+IMPL_MATCH("Engine.dll", 0x78DE0)
 UPrimitive* AActor::GetPrimitive()
 {
 	// Retail (47b, RVA 0x78DE0): check 3 direct primitive fields, then a
@@ -2625,7 +2625,7 @@ void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* S
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x70920)
+IMPL_MATCH("Engine.dll", 0x70920)
 void AActor::NetDirty( UProperty* Property )
 {
 	// Retail (27b, RVA 0x70920): only mark bNetDirty if Property is non-null
@@ -2645,7 +2645,7 @@ INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, 
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x77DE0)
+IMPL_MATCH("Engine.dll", 0x77DE0)
 FLOAT AActor::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(AActor::GetNetPriority);
@@ -2690,7 +2690,7 @@ void AActor::PostNetReceiveLocation()
     // STUB: too complex (>150 lines in Ghidra)
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 INT AActor::PlayerControlled()
 {
 	guard(AActor::PlayerControlled);
@@ -2717,7 +2717,7 @@ INT AActor::IsBlockedBy( const AActor* Other ) const
 	unguardSlow;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x78b40)
+IMPL_MATCH("Engine.dll", 0x78b40)
 UBOOL AActor::IsOverlapping( AActor* Other, FCheckResult* Hit )
 {
 	guard(AActor::IsOverlapping);
@@ -2749,7 +2749,7 @@ INT AActor::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14770)
+IMPL_MATCH("Engine.dll", 0x14770)
 void AActor::UpdateColBox( FVector& NewLocation, INT bTest, INT bForce, INT bIgnoreEncroach )
 {
 	guard(AActor::UpdateColBox);
@@ -2826,7 +2826,7 @@ FMatrix AActor::WorldToLocal() const
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xc4870)
+IMPL_MATCH("Engine.dll", 0xc4870)
 INT AActor::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AActor::Tick);
@@ -3018,7 +3018,7 @@ void AActor::NotifyAnimEnd( INT Channel )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10370bd0)
+IMPL_MATCH("Engine.dll", 0x10370bd0)
 void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 {
 	guard(AActor::UpdateAnimation);
@@ -3032,7 +3032,7 @@ void AActor::UpdateAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x120930)
+IMPL_MATCH("Engine.dll", 0x120930)
 void AActor::StartAnimPoll()
 {
 	// Retail RVA 0x120930.
@@ -3052,7 +3052,7 @@ void AActor::StartAnimPoll()
 }
 
 
-IMPL_GHIDRA("Engine.dll", 0x10420AB0)
+IMPL_MATCH("Engine.dll", 0x10420AB0)
 INT AActor::CheckAnimFinished( INT Channel )
 {
 	guard(AActor::CheckAnimFinished);
@@ -3070,7 +3070,7 @@ INT AActor::CheckAnimFinished( INT Channel )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x70B90)
+IMPL_MATCH("Engine.dll", 0x70B90)
 INT AActor::IsAnimating( INT Channel ) const
 {
 	// Retail RVA 0x70B90.
@@ -3097,7 +3097,7 @@ void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenT
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10370A80)
+IMPL_MATCH("Engine.dll", 0x10370A80)
 void AActor::PlayReplicatedAnim()
 {
 	guard(AActor::PlayReplicatedAnim);
@@ -3124,7 +3124,7 @@ void AActor::PlayReplicatedAnim()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10377B40)
+IMPL_MATCH("Engine.dll", 0x10377B40)
 void AActor::ReplicateAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenTime, FLOAT Frame, FLOAT LastFrame, INT bLooping )
 {
 	guard(AActor::ReplicateAnim);
@@ -3176,7 +3176,7 @@ void AActor::ReplicateAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT T
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x103798D0)
+IMPL_MATCH("Engine.dll", 0x103798D0)
 void AActor::AnimBlendParams( INT Channel, FLOAT BlendAlpha, FLOAT InTime, FLOAT OutTime, FName BoneName )
 {
 	guard(AActor::AnimBlendParams);
@@ -3257,7 +3257,7 @@ void AActor::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10379020)
+IMPL_MATCH("Engine.dll", 0x10379020)
 INT AActor::AttachToBone( AActor* Attachment, FName BoneName )
 {
 	guard(AActor::AttachToBone);
@@ -3281,7 +3281,7 @@ INT AActor::AttachToBone( AActor* Attachment, FName BoneName )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10379160)
+IMPL_MATCH("Engine.dll", 0x10379160)
 INT AActor::DetachFromBone( AActor* Attachment )
 {
 	guard(AActor::DetachFromBone);
@@ -3719,7 +3719,7 @@ void AActor::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xef2f0)
+IMPL_MATCH("Engine.dll", 0xef2f0)
 void AActor::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(AActor::stepUp);
@@ -3843,7 +3843,7 @@ void AActor::TwoWallAdjust( FVector& DesiredDir, FVector& Delta, FVector& HitNor
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xecf00)
+IMPL_MATCH("Engine.dll", 0xecf00)
 void AActor::FindBase()
 {
 	guard(AActor::FindBase);
@@ -3857,7 +3857,7 @@ void AActor::FindBase()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x79e30)
+IMPL_MATCH("Engine.dll", 0x79e30)
 void AActor::PutOnGround()
 {
 	guard(AActor::PutOnGround);
@@ -3943,7 +3943,7 @@ void AActor::postKarmaStep_skeletal()
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_GHIDRA("Engine.dll", 0x5e90)
+IMPL_MATCH("Engine.dll", 0x5e90)
 INT AActor::KMP2DynKarmaInterface( INT Mode, FVector Position, FRotator Rotation, AActor* Other )
 {
 	guard(AActor::KMP2DynKarmaInterface);
@@ -3977,7 +3977,7 @@ void AActor::KFreezeRagdoll()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnHeartBeat);
@@ -3986,7 +3986,7 @@ INT AActor::IsRelevantToPawnHeartBeat( APawn* P )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnHeatVision);
@@ -3995,7 +3995,7 @@ INT AActor::IsRelevantToPawnHeatVision( APawn* P )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 INT AActor::IsRelevantToPawnRadar( APawn* P )
 {
 	guard(AActor::IsRelevantToPawnRadar);
@@ -4074,7 +4074,7 @@ INT AActor::TestCanSeeMe( APlayerController* Viewer )
     unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x70c30)
+IMPL_MATCH("Engine.dll", 0x70c30)
 void AActor::UpdateRelativeRotation()
 {
 	guard(AActor::UpdateRelativeRotation);
@@ -4250,7 +4250,7 @@ INT AActor::NativeNonUbiMatchMakingHost()
     unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x123920)
+IMPL_MATCH("Engine.dll", 0x123920)
 INT AActor::NativeStartedByGSClient()
 {
 	guard(AActor::NativeStartedByGSClient);
@@ -4303,7 +4303,7 @@ IMPL_APPROX("delegates to AActor::PostLoad")
 void ABrush::PostLoad() { Super::PostLoad(); }
 IMPL_APPROX("delegates to AActor::PostEditChange")
 void ABrush::PostEditChange() { Super::PostEditChange(); }
-IMPL_GHIDRA("Engine.dll", 0x7B40)
+IMPL_MATCH("Engine.dll", 0x7B40)
 FCoords ABrush::ToLocal() const
 {
 	// Retail (112b, RVA 0x7B40):
@@ -4319,7 +4319,7 @@ FCoords ABrush::ToLocal() const
 		/ *(FRotator*)&Location
 		/ *(FVector*)&Rotation;
 }
-IMPL_GHIDRA("Engine.dll", 0x7BC0)
+IMPL_MATCH("Engine.dll", 0x7BC0)
 FCoords ABrush::ToWorld() const
 {
 	// Retail (112b, RVA 0x7BC0):
@@ -4334,7 +4334,7 @@ FCoords ABrush::ToWorld() const
 		* *(FRotator*)&Location
 		* sv;
 }
-IMPL_GHIDRA("Engine.dll", 0x78E20)
+IMPL_MATCH("Engine.dll", 0x78E20)
 UPrimitive* ABrush::GetPrimitive()
 {
 	// Retail (27b, RVA 0x78E20): check Brush/UModel primitive field, then
@@ -4368,7 +4368,7 @@ IMPL_TODO("Stub; always returns 0.0f")
 FLOAT ABrush::BuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
 IMPL_TODO("Stub; always returns 0.0f")
 FLOAT ABrush::OldBuildCoords(FModelCoords* Coords, FModelCoords* UnCoords) { return 0.0f; }
-IMPL_GHIDRA("Engine.dll", 0x77D0)
+IMPL_MATCH("Engine.dll", 0x77D0)
 FCoords ABrush::OldToLocal() const
 {
 	// Retail (168b, RVA 0x77D0):
@@ -4388,7 +4388,7 @@ FCoords ABrush::OldToLocal() const
 		/ s3c4
 		/ *(FVector*)&Rotation;
 }
-IMPL_GHIDRA("Engine.dll", 0x7880)
+IMPL_MATCH("Engine.dll", 0x7880)
 FCoords ABrush::OldToWorld() const
 {
 	// Retail (168b, RVA 0x7880):

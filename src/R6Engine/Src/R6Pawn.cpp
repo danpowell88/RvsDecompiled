@@ -724,7 +724,7 @@ INT AR6Pawn::IsRelevantToPawnHeatVision(APawn *)
 	return 0;
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x1001bc10)
+IMPL_MATCH("R6Engine.dll", 0x1001bc10)
 INT AR6Pawn::IsUsingHeartBeatSensor()
 {
 	if (m_bIsPlayer && EngineWeapon)
@@ -1788,7 +1788,7 @@ void AR6Pawn::WeaponFollow(INT param_1, FLOAT param_2)
 	unguard;
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x10042934)
+IMPL_MATCH("R6Engine.dll", 0x10042934)
 INT AR6Pawn::WeaponIsAGadget()
 {
 	if (EngineWeapon != NULL)
@@ -1859,7 +1859,7 @@ void AR6Pawn::WeaponLock(INT param_1, FLOAT param_2, FLOAT param_3)
 	unguard;
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x10042934)
+IMPL_MATCH("R6Engine.dll", 0x10042934)
 INT AR6Pawn::WeaponShouldFollowHead()
 {
 	// Physics == 12 is PHYS_KarmaRagDoll
@@ -2393,7 +2393,7 @@ void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 	// Left as no-op pending resolution of FUN_10042934.
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x10042934)
+IMPL_MATCH("R6Engine.dll", 0x10042934)
 void AR6Pawn::execPawnCanBeHurtFrom(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vLocation);

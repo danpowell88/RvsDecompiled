@@ -76,7 +76,7 @@
 #include "FConfigCacheIni.h"
 #include "FCodec.h"
 
-// Function source attribution macros (IMPL_GHIDRA, IMPL_APPROX, etc.)
+// Function source attribution macros (IMPL_MATCH, IMPL_APPROX, etc.)
 // Zero compile-time overhead — all macros expand to nothing.
 #include "ImplSource.h"
 

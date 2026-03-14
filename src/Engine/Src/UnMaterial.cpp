@@ -75,7 +75,7 @@ UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x3970)
+IMPL_MATCH("Engine.dll", 0x3970)
 INT UMaterial::GetValidated()
 {
 	guard(UMaterial::GetValidated);
@@ -84,7 +84,7 @@ INT UMaterial::GetValidated()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x3980)
+IMPL_MATCH("Engine.dll", 0x3980)
 void UMaterial::SetValidated( UBOOL InValidated )
 {
 	guard(UMaterial::SetValidated);
@@ -93,7 +93,7 @@ void UMaterial::SetValidated( UBOOL InValidated )
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 UBOOL UMaterial::IsTransparent()
 {
 	guard(UMaterial::IsTransparent);
@@ -102,7 +102,7 @@ UBOOL UMaterial::IsTransparent()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 INT UMaterial::MaterialUSize()
 {
 	guard(UMaterial::MaterialUSize);
@@ -111,7 +111,7 @@ INT UMaterial::MaterialUSize()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 INT UMaterial::MaterialVSize()
 {
 	guard(UMaterial::MaterialVSize);
@@ -133,7 +133,7 @@ BYTE UMaterial::RequiredUVStreams()
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xc78d0)
+IMPL_MATCH("Engine.dll", 0xc78d0)
 UMaterial* UMaterial::CheckFallback()
 {
 	guard(UMaterial::CheckFallback);
@@ -313,7 +313,7 @@ BYTE UShader::RequiredUVStreams()
 	return result;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xc7b50)
+IMPL_MATCH("Engine.dll", 0xc7b50)
 UMaterial* UShader::CheckFallback()
 {
 	guard(UShader::CheckFallback);
@@ -445,7 +445,7 @@ INT UCombiner::MaterialVSize()
 	return vsize2 > vsize1 ? vsize2 : vsize1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 UBOOL UCombiner::IsTransparent()
 {
 	guard(UCombiner::IsTransparent);
@@ -461,7 +461,7 @@ UBOOL UCombiner::RequiresSorting()
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xBD70)
+IMPL_MATCH("Engine.dll", 0xBD70)
 BYTE UCombiner::RequiredUVStreams()
 {
 	// Retail (80b RVA=0xBD70): OR together Material1 and Material2 stream requirements.

@@ -87,7 +87,7 @@ void AR6IORotatingDoor::PreNetReceive()
 	unguard;
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x1d550)
+IMPL_MATCH("R6Engine.dll", 0x1d550)
 void AR6IORotatingDoor::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6IORotatingDoor::RenderEditorInfo);

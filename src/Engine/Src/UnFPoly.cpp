@@ -94,7 +94,7 @@ int FPoly::CalcNormal(int bSilent) {
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z — Ghidra at 0x9E760.
 // Tests if a line segment intersects this polygon. Optionally returns the hit point.
-IMPL_GHIDRA("Engine.dll", 0x9E760)
+IMPL_MATCH("Engine.dll", 0x9E760)
 int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection) {
 	FLOAT d1 = (Start - Vertex[0]) | Normal;
 	FLOAT d2 = (End   - Vertex[0]) | Normal;
@@ -134,7 +134,7 @@ int FPoly::Faces(FPoly const & Other) const {
 
 // ?Finalize@FPoly@@QAEHH@Z — Ghidra at 0x9e190.
 // Cleans up polygon: removes duplicate verts, validates, computes normal & texture vectors.
-IMPL_GHIDRA("Engine.dll", 0x9e190)
+IMPL_MATCH("Engine.dll", 0x9e190)
 int FPoly::Finalize(int bSilent) {
 	Fix();
 	if( NumVertices < 3 )
@@ -223,7 +223,7 @@ int FPoly::OnPlane(FVector Point) {
 // ?OnPoly@FPoly@@QAEHVFVector@@@Z
 // ?OnPoly@FPoly@@QAEHVFVector@@@Z — Ghidra at 0x9DD10.
 // Returns 1 if Point lies inside the polygon, 0 otherwise.
-IMPL_GHIDRA("Engine.dll", 0x9DD10)
+IMPL_MATCH("Engine.dll", 0x9DD10)
 int FPoly::OnPoly(FVector Point) {
 	for( INT i=0; i<NumVertices; i++ )
 	{
@@ -458,7 +458,7 @@ int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
 }
 
 // ??9FPoly@@QAEHV0@@Z — Ghidra at 0x8bce0.
-IMPL_GHIDRA("Engine.dll", 0x8bce0)
+IMPL_MATCH("Engine.dll", 0x8bce0)
 int FPoly::operator!=(FPoly Other) {
 	if( NumVertices != Other.NumVertices )
 		return 1;
@@ -469,7 +469,7 @@ int FPoly::operator!=(FPoly Other) {
 }
 
 // ??8FPoly@@QAEHV0@@Z — Ghidra at 0xb4b10.
-IMPL_GHIDRA("Engine.dll", 0xb4b10)
+IMPL_MATCH("Engine.dll", 0xb4b10)
 int FPoly::operator==(FPoly Other) {
 	if( NumVertices != Other.NumVertices )
 		return 0;
@@ -528,7 +528,7 @@ void FPoly::Reverse() {
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z — Ghidra at 0x9C640.
 // Splits a polygon in two halves along the vertex midpoint.
-IMPL_GHIDRA("Engine.dll", 0x9C640)
+IMPL_MATCH("Engine.dll", 0x9C640)
 void FPoly::SplitInHalf(FPoly * OtherHalf) {
 	INT Half = NumVertices / 2;
 	if( NumVertices < 4 || NumVertices > 16 )
@@ -556,7 +556,7 @@ void FPoly::SplitInHalf(FPoly * OtherHalf) {
 // ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z
 // ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z — Ghidra at 0x9C8F0.
 // Transforms all polygon data by the given coordinate system.
-IMPL_GHIDRA("Engine.dll", 0x9C8F0)
+IMPL_MATCH("Engine.dll", 0x9C8F0)
 void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, FVector const & PostAdd, float Orientation) {
 	// Transform texture mapping vectors by the contravariant (vector) transform.
 	TextureU = TextureU.TransformVectorBy( Coords.VectorXform );

@@ -312,7 +312,7 @@ void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
 Sound registration.
 -----------------------------------------------------------------------------*/
 
-IMPL_GHIDRA("DareAudio.dll", 0x1ff0)
+IMPL_MATCH("DareAudio.dll", 0x1ff0)
 void UDareAudioSubsystem::RegisterSound(USound* Sound)
 {
 	guard(UDareAudioSubsystem::RegisterSound);

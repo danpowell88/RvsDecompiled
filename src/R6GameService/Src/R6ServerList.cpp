@@ -30,14 +30,14 @@ void UR6ServerList::FillSvrContainer()
 	unguard;
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x125e0)
+IMPL_MATCH("R6GameService.dll", 0x125e0)
 INT UR6ServerList::GetGroupID()
 {
 	// 0x125e0  54  ?GetGroupID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.
 	return GsGroupID;
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x125d0)
+IMPL_MATCH("R6GameService.dll", 0x125d0)
 INT UR6ServerList::GetLobbyID()
 {
 	// 0x125d0  55  ?GetLobbyID@UR6ServerList@@UAEHXZ — size 6 bytes, no SEH frame.

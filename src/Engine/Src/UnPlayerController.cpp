@@ -25,7 +25,7 @@ void APlayerController::SpecialDestroy()
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0xc3c80)
+IMPL_MATCH("Engine.dll", 0xc3c80)
 int APlayerController::Tick(float DeltaSeconds, ELevelTick TickType)
 {
 	guard(APlayerController::Tick);
@@ -158,7 +158,7 @@ SKIP_INPUT:
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x91550)
+IMPL_MATCH("Engine.dll", 0x91550)
 void APlayerController::R6PBKickPlayer(FString KickMsg)
 {
 	guard(APlayerController::R6PBKickPlayer);
@@ -169,7 +169,7 @@ void APlayerController::R6PBKickPlayer(FString KickMsg)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x7a5c0)
+IMPL_MATCH("Engine.dll", 0x7a5c0)
 void APlayerController::SetPlayer(UPlayer* InPlayer)
 {
 	// Ghidra 0x7a5c0: bi-directional controller<->player link, init input if viewport.
@@ -200,7 +200,7 @@ int APlayerController::LocalPlayerController()
 	return Player && Player->IsA(UViewport::StaticClass());
 }
 
-IMPL_GHIDRA("Engine.dll", 0x7de60)
+IMPL_MATCH("Engine.dll", 0x7de60)
 void APlayerController::PostNetReceive()
 {
 	guard(APlayerController::PostNetReceive);
@@ -215,7 +215,7 @@ void APlayerController::PostNetReceive()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x785d0)
+IMPL_MATCH("Engine.dll", 0x785d0)
 void APlayerController::PreNetReceive()
 {
 	guard(APlayerController::PreNetReceive);
@@ -226,7 +226,7 @@ void APlayerController::PreNetReceive()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x127760)
+IMPL_MATCH("Engine.dll", 0x127760)
 void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags)
 {
 	guard(APlayerController::CheckHearSound);

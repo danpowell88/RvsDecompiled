@@ -385,7 +385,7 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10301560)
+IMPL_MATCH("Engine.dll", 0x10301560)
 int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UBeamEmitter::RenderParticles);

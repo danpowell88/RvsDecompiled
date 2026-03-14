@@ -49,7 +49,7 @@ void ULevelBase::Serialize( FArchive& Ar )
 	Ar << Actors;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xbf0d0)
+IMPL_MATCH("Engine.dll", 0xbf0d0)
 void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds )
 {
 	guard(ULevelBase::NotifyProgress);
@@ -476,7 +476,7 @@ INT ULevel::Listen( FString& Error )
 	return 0;
 	unguard;
 }
-IMPL_GHIDRA("Engine.dll", 0xBF270)
+IMPL_MATCH("Engine.dll", 0xBF270)
 INT ULevel::IsServer()
 {
 	// Retail (34b, RVA 0xBF270): return 1 (server) unless NetDriver or DemoRecDriver
@@ -1301,7 +1301,7 @@ INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 	if (!driver) return 1; // safety: not present in retail, but avoids NULL deref
 	return (*(DWORD*)((BYTE*)driver + 0x3C) == 0) ? 1 : 0;
 }
-IMPL_GHIDRA("Engine.dll", 0xbf500)
+IMPL_MATCH("Engine.dll", 0xbf500)
 void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced )
 {
 	guard(ULevel::NotifyReceivedFile);
@@ -1324,7 +1324,7 @@ INT ULevel::GetActorIndex( AActor* Actor )
 }
 IMPL_APPROX("Inline accessor; returns Actors(0) as ALevelInfo")
 ALevelInfo* ULevel::GetLevelInfo() { return (Actors.Num()>0 && Actors(0)) ? (ALevelInfo*)Actors(0) : NULL; }
-IMPL_GHIDRA("Engine.dll", 0x1C0E0)
+IMPL_MATCH("Engine.dll", 0x1C0E0)
 AZoneInfo* ULevel::GetZoneActor( INT iZone )
 {
 	// Retail (27b, RVA 0x1C0E0): Accesses Zones array data at [this+0x90].
@@ -1685,7 +1685,7 @@ FString ALevelInfo::GetDisplayAs(FString s) { return s; }
 // the volumes in Actor->Touching (fast path).
 // The list is lazily rebuilt when the dirty flag at this+0x94C bit 0 is clear.
 // Priority field in APhysicsVolume is at raw offset 0x40C; next-pointer at 0x438.
-IMPL_GHIDRA("Engine.dll", 0x0BBA00)
+IMPL_MATCH("Engine.dll", 0x0BBA00)
 APhysicsVolume* ALevelInfo::GetPhysicsVolume(FVector V, AActor* Actor, INT bUseTouchingVolumes)
 {
 	APhysicsVolume* Best = GetDefaultPhysicsVolume();

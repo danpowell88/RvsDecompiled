@@ -17,7 +17,7 @@
 CORE_API Native GNatives[EX_Max];
 NativeLookup GNativeLookupFuncs[32];
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 BYTE CORE_API GRegisterNative( INT iNative, const Native& Func )
 {
 	GNatives[iNative] = Func;
@@ -27,7 +27,7 @@ BYTE CORE_API GRegisterNative( INT iNative, const Native& Func )
 static INT GRunawayCount = 0;
 static INT GRunawayLimit = 10000000;
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 CORE_API void GInitRunaway()
 {
 	GRunawayCount = 0;
@@ -39,7 +39,7 @@ CORE_API void GInitRunaway()
 -----------------------------------------------------------------------------*/
 
 // 0x00 — EX_LocalVariable.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLocalVariable( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLocalVariable);
@@ -54,7 +54,7 @@ void UObject::execLocalVariable( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_LocalVariable, execLocalVariable );
 
 // 0x01 — EX_InstanceVariable.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execInstanceVariable( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInstanceVariable);
@@ -67,7 +67,7 @@ void UObject::execInstanceVariable( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_InstanceVariable, execInstanceVariable );
 
 // 0x02 — EX_DefaultVariable.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDefaultVariable( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDefaultVariable);
@@ -80,7 +80,7 @@ void UObject::execDefaultVariable( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_DefaultVariable, execDefaultVariable );
 
 // 0x04 — EX_Return.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execReturn( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execReturn);
@@ -90,7 +90,7 @@ void UObject::execReturn( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Return, execReturn );
 
 // 0x05 — EX_Switch.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSwitch( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSwitch);
@@ -110,7 +110,7 @@ void UObject::execSwitch( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Switch, execSwitch );
 
 // 0x06 — EX_Jump.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execJump( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execJump);
@@ -122,7 +122,7 @@ void UObject::execJump( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Jump, execJump );
 
 // 0x07 — EX_JumpIfNot.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execJumpIfNot( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execJumpIfNot);
@@ -137,7 +137,7 @@ void UObject::execJumpIfNot( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_JumpIfNot, execJumpIfNot );
 
 // 0x08 — EX_Stop.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStop( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStop);
@@ -147,7 +147,7 @@ void UObject::execStop( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Stop, execStop );
 
 // 0x09 — EX_Assert.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAssert( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAssert);
@@ -161,7 +161,7 @@ void UObject::execAssert( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Assert, execAssert );
 
 // 0x0A — EX_Case.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execCase( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCase);
@@ -195,7 +195,7 @@ void UObject::execCase( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Case, execCase );
 
 // 0x0B — EX_Nothing.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNothing( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNothing);
@@ -205,7 +205,7 @@ void UObject::execNothing( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Nothing, execNothing );
 
 // 0x0D — EX_GotoLabel.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGotoLabel( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGotoLabel);
@@ -217,7 +217,7 @@ void UObject::execGotoLabel( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_GotoLabel, execGotoLabel );
 
 // 0x0E — EX_EatString.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEatString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEatString);
@@ -228,7 +228,7 @@ void UObject::execEatString( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_EatString, execEatString );
 
 // 0x0F — EX_Let.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLet);
@@ -245,7 +245,7 @@ void UObject::execLet( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Let, execLet );
 
 // 0x10 — EX_DynArrayElement.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDynArrayElement( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDynArrayElement);
@@ -273,7 +273,7 @@ void UObject::execDynArrayElement( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_DynArrayElement, execDynArrayElement );
 
 // 0x11 — EX_New.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNew( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNew);
@@ -296,7 +296,7 @@ void UObject::execNew( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_New, execNew );
 
 // 0x12 — EX_ClassContext.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execClassContext( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClassContext);
@@ -323,7 +323,7 @@ void UObject::execClassContext( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_ClassContext, execClassContext );
 
 // 0x13 — EX_MetaCast.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMetaCast( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMetaCast);
@@ -335,7 +335,7 @@ void UObject::execMetaCast( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_MetaCast, execMetaCast );
 
 // 0x14 — EX_LetBool.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLetBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLetBool);
@@ -357,7 +357,7 @@ void UObject::execLetBool( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_LetBool, execLetBool );
 
 // 0x16 — EX_EndFunctionParms.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEndFunctionParms( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEndFunctionParms);
@@ -367,7 +367,7 @@ void UObject::execEndFunctionParms( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_EndFunctionParms, execEndFunctionParms );
 
 // 0x17 — EX_Self.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSelf( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSelf);
@@ -377,7 +377,7 @@ void UObject::execSelf( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Self, execSelf );
 
 // 0x19 — EX_Context.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execContext( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execContext);
@@ -407,7 +407,7 @@ void UObject::execContext( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Context, execContext );
 
 // 0x1A — EX_ArrayElement.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execArrayElement( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execArrayElement);
@@ -425,7 +425,7 @@ void UObject::execArrayElement( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_ArrayElement, execArrayElement );
 
 // 0x1B — EX_VirtualFunction.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVirtualFunction( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVirtualFunction);
@@ -437,7 +437,7 @@ void UObject::execVirtualFunction( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_VirtualFunction, execVirtualFunction );
 
 // 0x1C — EX_FinalFunction.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFinalFunction( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFinalFunction);
@@ -448,7 +448,7 @@ void UObject::execFinalFunction( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_FinalFunction, execFinalFunction );
 
 // 0x1D — EX_IntConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntConst);
@@ -458,7 +458,7 @@ void UObject::execIntConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_IntConst, execIntConst );
 
 // 0x1E — EX_FloatConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFloatConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFloatConst);
@@ -468,7 +468,7 @@ void UObject::execFloatConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_FloatConst, execFloatConst );
 
 // 0x1F — EX_StringConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringConst);
@@ -481,7 +481,7 @@ void UObject::execStringConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_StringConst, execStringConst );
 
 // 0x20 — EX_ObjectConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execObjectConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execObjectConst);
@@ -491,7 +491,7 @@ void UObject::execObjectConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_ObjectConst, execObjectConst );
 
 // 0x21 — EX_NameConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNameConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNameConst);
@@ -501,7 +501,7 @@ void UObject::execNameConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_NameConst, execNameConst );
 
 // 0x22 — EX_RotationConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRotationConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRotationConst);
@@ -512,7 +512,7 @@ void UObject::execRotationConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_RotationConst, execRotationConst );
 
 // 0x23 — EX_VectorConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVectorConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVectorConst);
@@ -523,7 +523,7 @@ void UObject::execVectorConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_VectorConst, execVectorConst );
 
 // 0x24 — EX_ByteConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execByteConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execByteConst);
@@ -533,7 +533,7 @@ void UObject::execByteConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_ByteConst, execByteConst );
 
 // 0x25 — EX_IntZero.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntZero( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntZero);
@@ -543,7 +543,7 @@ void UObject::execIntZero( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_IntZero, execIntZero );
 
 // 0x26 — EX_IntOne.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntOne( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntOne);
@@ -553,7 +553,7 @@ void UObject::execIntOne( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_IntOne, execIntOne );
 
 // 0x27 — EX_True.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execTrue( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execTrue);
@@ -563,7 +563,7 @@ void UObject::execTrue( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_True, execTrue );
 
 // 0x28 — EX_False.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFalse( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFalse);
@@ -573,7 +573,7 @@ void UObject::execFalse( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_False, execFalse );
 
 // 0x29 — EX_NativeParm.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNativeParm( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNativeParm);
@@ -585,7 +585,7 @@ void UObject::execNativeParm( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_NativeParm, execNativeParm );
 
 // 0x2A — EX_NoObject.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNoObject( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNoObject);
@@ -595,7 +595,7 @@ void UObject::execNoObject( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_NoObject, execNoObject );
 
 // 0x2C — EX_IntConstByte.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntConstByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntConstByte);
@@ -605,7 +605,7 @@ void UObject::execIntConstByte( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_IntConstByte, execIntConstByte );
 
 // 0x2D — EX_BoolVariable.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execBoolVariable( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execBoolVariable);
@@ -624,7 +624,7 @@ void UObject::execBoolVariable( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_BoolVariable, execBoolVariable );
 
 // 0x2E — EX_DynamicCast.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDynamicCast( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDynamicCast);
@@ -636,7 +636,7 @@ void UObject::execDynamicCast( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_DynamicCast, execDynamicCast );
 
 // 0x2F — EX_Iterator.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIterator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIterator);
@@ -660,7 +660,7 @@ void UObject::execIterator( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Iterator, execIterator );
 
 // 0x32 — EX_StructCmpEq.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStructCmpEq( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStructCmpEq);
@@ -677,7 +677,7 @@ void UObject::execStructCmpEq( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_StructCmpEq, execStructCmpEq );
 
 // 0x33 — EX_StructCmpNe.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStructCmpNe( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStructCmpNe);
@@ -694,7 +694,7 @@ void UObject::execStructCmpNe( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_StructCmpNe, execStructCmpNe );
 
 // 0x34 — EX_UnicodeStringConst.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execUnicodeStringConst( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execUnicodeStringConst);
@@ -707,7 +707,7 @@ void UObject::execUnicodeStringConst( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_UnicodeStringConst, execUnicodeStringConst );
 
 // 0x36 — EX_StructMember.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStructMember( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStructMember);
@@ -748,7 +748,7 @@ void UObject::execStructMember( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_StructMember, execStructMember );
 
 // 0x38 — EX_GlobalFunction.
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGlobalFunction( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGlobalFunction);
@@ -763,7 +763,7 @@ IMPLEMENT_FUNCTION( UObject, EX_GlobalFunction, execGlobalFunction );
 	Native conversion tokens (EX_MinConversion–EX_MaxConversion).
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRotatorToVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRotatorToVector);
@@ -773,7 +773,7 @@ void UObject::execRotatorToVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToVector, execRotatorToVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execByteToInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execByteToInt);
@@ -783,7 +783,7 @@ void UObject::execByteToInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_ByteToInt, execByteToInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execByteToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execByteToBool);
@@ -793,7 +793,7 @@ void UObject::execByteToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_ByteToBool, execByteToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execByteToFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execByteToFloat);
@@ -803,7 +803,7 @@ void UObject::execByteToFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_ByteToFloat, execByteToFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntToByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntToByte);
@@ -813,7 +813,7 @@ void UObject::execIntToByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_IntToByte, execIntToByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntToBool);
@@ -823,7 +823,7 @@ void UObject::execIntToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_IntToBool, execIntToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntToFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntToFloat);
@@ -833,7 +833,7 @@ void UObject::execIntToFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_IntToFloat, execIntToFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execBoolToByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execBoolToByte);
@@ -843,7 +843,7 @@ void UObject::execBoolToByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_BoolToByte, execBoolToByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execBoolToInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execBoolToInt);
@@ -853,7 +853,7 @@ void UObject::execBoolToInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_BoolToInt, execBoolToInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execBoolToFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execBoolToFloat);
@@ -863,7 +863,7 @@ void UObject::execBoolToFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_BoolToFloat, execBoolToFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFloatToByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFloatToByte);
@@ -873,7 +873,7 @@ void UObject::execFloatToByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_FloatToByte, execFloatToByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFloatToInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFloatToInt);
@@ -883,7 +883,7 @@ void UObject::execFloatToInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_FloatToInt, execFloatToInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFloatToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFloatToBool);
@@ -893,7 +893,7 @@ void UObject::execFloatToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_FloatToBool, execFloatToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execObjectToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execObjectToBool);
@@ -903,7 +903,7 @@ void UObject::execObjectToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_ObjectToBool, execObjectToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNameToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNameToBool);
@@ -913,7 +913,7 @@ void UObject::execNameToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_NameToBool, execNameToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToByte);
@@ -923,7 +923,7 @@ void UObject::execStringToByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_StringToByte, execStringToByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToInt);
@@ -933,7 +933,7 @@ void UObject::execStringToInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_StringToInt, execStringToInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToBool);
@@ -943,7 +943,7 @@ void UObject::execStringToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_StringToBool, execStringToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToFloat);
@@ -953,7 +953,7 @@ void UObject::execStringToFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_StringToFloat, execStringToFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToVector);
@@ -965,7 +965,7 @@ void UObject::execStringToVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_StringToVector, execStringToVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToRotator);
@@ -977,7 +977,7 @@ void UObject::execStringToRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_StringToRotator, execStringToRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVectorToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVectorToBool);
@@ -987,7 +987,7 @@ void UObject::execVectorToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_VectorToBool, execVectorToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVectorToRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVectorToRotator);
@@ -997,7 +997,7 @@ void UObject::execVectorToRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_VectorToRotator, execVectorToRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRotatorToBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRotatorToBool);
@@ -1007,7 +1007,7 @@ void UObject::execRotatorToBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToBool, execRotatorToBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execByteToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execByteToString);
@@ -1017,7 +1017,7 @@ void UObject::execByteToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_ByteToString, execByteToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIntToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIntToString);
@@ -1027,7 +1027,7 @@ void UObject::execIntToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_IntToString, execIntToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execBoolToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execBoolToString);
@@ -1037,7 +1037,7 @@ void UObject::execBoolToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_BoolToString, execBoolToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFloatToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFloatToString);
@@ -1047,7 +1047,7 @@ void UObject::execFloatToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_FloatToString, execFloatToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execObjectToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execObjectToString);
@@ -1057,7 +1057,7 @@ void UObject::execObjectToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_ObjectToString, execObjectToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNameToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNameToString);
@@ -1067,7 +1067,7 @@ void UObject::execNameToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_NameToString, execNameToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVectorToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVectorToString);
@@ -1077,7 +1077,7 @@ void UObject::execVectorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_VectorToString, execVectorToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRotatorToString);
@@ -1087,7 +1087,7 @@ void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToString, execRotatorToString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToName);
@@ -1134,7 +1134,7 @@ HIGH_NATIVE(15);
 	Undefined native handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execUndefined( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execUndefined);
@@ -1146,7 +1146,7 @@ void UObject::execUndefined( FFrame& Stack, RESULT_DECL )
 	Delegate support.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLetDelegate( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLetDelegate);
@@ -1167,7 +1167,7 @@ void UObject::execLetDelegate( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 196+68, execLetDelegate );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDelegateFunction( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDelegateFunction);
@@ -1181,7 +1181,7 @@ void UObject::execDelegateFunction( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0x2B, execDelegateFunction );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDelegateProperty( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDelegateProperty);
@@ -1205,7 +1205,7 @@ IMPLEMENT_FUNCTION( UObject, 0x15, execDelegateProperty );
 	Debug info.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDebugInfo( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDebugInfo);
@@ -1222,7 +1222,7 @@ IMPLEMENT_FUNCTION( UObject, 0x37, execDebugInfo );
 	NOTE: These indices need verification against the Ravenshield binary.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAdd_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAdd_IntInt);
@@ -1233,7 +1233,7 @@ void UObject::execAdd_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 146, execAdd_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_IntInt);
@@ -1244,7 +1244,7 @@ void UObject::execSubtract_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 147, execSubtract_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_IntInt);
@@ -1255,7 +1255,7 @@ void UObject::execMultiply_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 144, execMultiply_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivide_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivide_IntInt);
@@ -1266,7 +1266,7 @@ void UObject::execDivide_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 145, execDivide_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_PreInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_PreInt);
@@ -1276,7 +1276,7 @@ void UObject::execSubtract_PreInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 143, execSubtract_PreInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execComplement_PreInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execComplement_PreInt);
@@ -1286,7 +1286,7 @@ void UObject::execComplement_PreInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 141, execComplement_PreInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAnd_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAnd_IntInt);
@@ -1297,7 +1297,7 @@ void UObject::execAnd_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 156, execAnd_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execOr_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execOr_IntInt);
@@ -1308,7 +1308,7 @@ void UObject::execOr_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 158, execOr_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execXor_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execXor_IntInt);
@@ -1319,7 +1319,7 @@ void UObject::execXor_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 157, execXor_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLessLess_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLessLess_IntInt);
@@ -1330,7 +1330,7 @@ void UObject::execLessLess_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 148, execLessLess_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreaterGreater_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreaterGreater_IntInt);
@@ -1341,7 +1341,7 @@ void UObject::execGreaterGreater_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 149, execGreaterGreater_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreaterGreaterGreater_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreaterGreaterGreater_IntInt);
@@ -1352,7 +1352,7 @@ void UObject::execGreaterGreaterGreater_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 196, execGreaterGreaterGreater_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLess_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLess_IntInt);
@@ -1363,7 +1363,7 @@ void UObject::execLess_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 150, execLess_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreater_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreater_IntInt);
@@ -1374,7 +1374,7 @@ void UObject::execGreater_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 151, execGreater_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLessEqual_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLessEqual_IntInt);
@@ -1385,7 +1385,7 @@ void UObject::execLessEqual_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 152, execLessEqual_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreaterEqual_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreaterEqual_IntInt);
@@ -1396,7 +1396,7 @@ void UObject::execGreaterEqual_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 153, execGreaterEqual_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_IntInt);
@@ -1407,7 +1407,7 @@ void UObject::execEqualEqual_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 154, execEqualEqual_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_IntInt);
@@ -1418,7 +1418,7 @@ void UObject::execNotEqual_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 155, execNotEqual_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddEqual_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddEqual_IntInt);
@@ -1429,7 +1429,7 @@ void UObject::execAddEqual_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 161, execAddEqual_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractEqual_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractEqual_IntInt);
@@ -1440,7 +1440,7 @@ void UObject::execSubtractEqual_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 162, execSubtractEqual_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyEqual_IntFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyEqual_IntFloat);
@@ -1451,7 +1451,7 @@ void UObject::execMultiplyEqual_IntFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 159, execMultiplyEqual_IntFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivideEqual_IntFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivideEqual_IntFloat);
@@ -1462,7 +1462,7 @@ void UObject::execDivideEqual_IntFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 160, execDivideEqual_IntFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddAdd_PreInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddAdd_PreInt);
@@ -1472,7 +1472,7 @@ void UObject::execAddAdd_PreInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 163, execAddAdd_PreInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractSubtract_PreInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractSubtract_PreInt);
@@ -1482,7 +1482,7 @@ void UObject::execSubtractSubtract_PreInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 164, execSubtractSubtract_PreInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddAdd_Int( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddAdd_Int);
@@ -1492,7 +1492,7 @@ void UObject::execAddAdd_Int( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 165, execAddAdd_Int );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractSubtract_Int( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractSubtract_Int);
@@ -1506,7 +1506,7 @@ IMPLEMENT_FUNCTION( UObject, 166, execSubtractSubtract_Int );
 	Native byte operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddEqual_ByteByte);
@@ -1517,7 +1517,7 @@ void UObject::execAddEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 135, execAddEqual_ByteByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractEqual_ByteByte);
@@ -1528,7 +1528,7 @@ void UObject::execSubtractEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 136, execSubtractEqual_ByteByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyEqual_ByteByte);
@@ -1539,7 +1539,7 @@ void UObject::execMultiplyEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 133, execMultiplyEqual_ByteByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivideEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivideEqual_ByteByte);
@@ -1550,7 +1550,7 @@ void UObject::execDivideEqual_ByteByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 134, execDivideEqual_ByteByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddAdd_PreByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddAdd_PreByte);
@@ -1560,7 +1560,7 @@ void UObject::execAddAdd_PreByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 137, execAddAdd_PreByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractSubtract_PreByte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractSubtract_PreByte);
@@ -1570,7 +1570,7 @@ void UObject::execSubtractSubtract_PreByte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 138, execSubtractSubtract_PreByte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddAdd_Byte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddAdd_Byte);
@@ -1580,7 +1580,7 @@ void UObject::execAddAdd_Byte( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 139, execAddAdd_Byte );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractSubtract_Byte( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractSubtract_Byte);
@@ -1594,7 +1594,7 @@ IMPLEMENT_FUNCTION( UObject, 140, execSubtractSubtract_Byte );
 	Native float operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAdd_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAdd_FloatFloat);
@@ -1605,7 +1605,7 @@ void UObject::execAdd_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 174, execAdd_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_FloatFloat);
@@ -1616,7 +1616,7 @@ void UObject::execSubtract_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 175, execSubtract_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_FloatFloat);
@@ -1627,7 +1627,7 @@ void UObject::execMultiply_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 171, execMultiply_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivide_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivide_FloatFloat);
@@ -1638,7 +1638,7 @@ void UObject::execDivide_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 172, execDivide_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execPercent_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPercent_FloatFloat);
@@ -1649,7 +1649,7 @@ void UObject::execPercent_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 173, execPercent_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyMultiply_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyMultiply_FloatFloat);
@@ -1660,7 +1660,7 @@ void UObject::execMultiplyMultiply_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 170, execMultiplyMultiply_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_PreFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_PreFloat);
@@ -1671,7 +1671,7 @@ void UObject::execSubtract_PreFloat( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 169, execSubtract_PreFloat );
 
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyEqual_FloatFloat);
@@ -1682,7 +1682,7 @@ void UObject::execMultiplyEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 182, execMultiplyEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivideEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivideEqual_FloatFloat);
@@ -1693,7 +1693,7 @@ void UObject::execDivideEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 183, execDivideEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddEqual_FloatFloat);
@@ -1704,7 +1704,7 @@ void UObject::execAddEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 184, execAddEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractEqual_FloatFloat);
@@ -1715,7 +1715,7 @@ void UObject::execSubtractEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 185, execSubtractEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLess_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLess_FloatFloat);
@@ -1726,7 +1726,7 @@ void UObject::execLess_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 176, execLess_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreater_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreater_FloatFloat);
@@ -1737,7 +1737,7 @@ void UObject::execGreater_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 177, execGreater_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLessEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLessEqual_FloatFloat);
@@ -1748,7 +1748,7 @@ void UObject::execLessEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 178, execLessEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreaterEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreaterEqual_FloatFloat);
@@ -1759,7 +1759,7 @@ void UObject::execGreaterEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 179, execGreaterEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_FloatFloat);
@@ -1770,7 +1770,7 @@ void UObject::execEqualEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 180, execEqualEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_FloatFloat);
@@ -1781,7 +1781,7 @@ void UObject::execNotEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 181, execNotEqual_FloatFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execComplementEqual_FloatFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execComplementEqual_FloatFloat);
@@ -1796,7 +1796,7 @@ IMPLEMENT_FUNCTION( UObject, 210, execComplementEqual_FloatFloat );
 	Native bool operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNot_PreBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNot_PreBool);
@@ -1806,7 +1806,7 @@ void UObject::execNot_PreBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 129, execNot_PreBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_BoolBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_BoolBool);
@@ -1817,7 +1817,7 @@ void UObject::execEqualEqual_BoolBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 242, execEqualEqual_BoolBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_BoolBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_BoolBool);
@@ -1828,7 +1828,7 @@ void UObject::execNotEqual_BoolBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 243, execNotEqual_BoolBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAndAnd_BoolBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAndAnd_BoolBool);
@@ -1848,7 +1848,7 @@ void UObject::execAndAnd_BoolBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 130, execAndAnd_BoolBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execOrOr_BoolBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execOrOr_BoolBool);
@@ -1868,7 +1868,7 @@ void UObject::execOrOr_BoolBool( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 132, execOrOr_BoolBool );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execXorXor_BoolBool( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execXorXor_BoolBool);
@@ -1883,7 +1883,7 @@ IMPLEMENT_FUNCTION( UObject, 131, execXorXor_BoolBool );
 	Native name operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_NameName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_NameName);
@@ -1894,7 +1894,7 @@ void UObject::execEqualEqual_NameName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 254, execEqualEqual_NameName );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_NameName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_NameName);
@@ -1909,7 +1909,7 @@ IMPLEMENT_FUNCTION( UObject, 255, execNotEqual_NameName );
 	Native object operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_ObjectObject( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_ObjectObject);
@@ -1920,7 +1920,7 @@ void UObject::execEqualEqual_ObjectObject( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 114, execEqualEqual_ObjectObject );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_ObjectObject( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_ObjectObject);
@@ -1935,7 +1935,7 @@ IMPLEMENT_FUNCTION( UObject, 119, execNotEqual_ObjectObject );
 	Native string operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execConcat_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execConcat_StringString);
@@ -1946,7 +1946,7 @@ void UObject::execConcat_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 112, execConcat_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAt_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAt_StringString);
@@ -1957,7 +1957,7 @@ void UObject::execAt_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 168, execAt_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLess_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLess_StringString);
@@ -1968,7 +1968,7 @@ void UObject::execLess_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 115, execLess_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreater_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreater_StringString);
@@ -1979,7 +1979,7 @@ void UObject::execGreater_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 116, execGreater_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLessEqual_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLessEqual_StringString);
@@ -1990,7 +1990,7 @@ void UObject::execLessEqual_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 120, execLessEqual_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreaterEqual_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreaterEqual_StringString);
@@ -2001,7 +2001,7 @@ void UObject::execGreaterEqual_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 121, execGreaterEqual_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_StringString);
@@ -2012,7 +2012,7 @@ void UObject::execEqualEqual_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 122, execEqualEqual_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_StringString);
@@ -2023,7 +2023,7 @@ void UObject::execNotEqual_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 123, execNotEqual_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execComplementEqual_StringString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execComplementEqual_StringString);
@@ -2034,7 +2034,7 @@ void UObject::execComplementEqual_StringString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 124, execComplementEqual_StringString );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLen);
@@ -2044,7 +2044,7 @@ void UObject::execLen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 125, execLen );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execInStr( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInStr);
@@ -2055,7 +2055,7 @@ void UObject::execInStr( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 126, execInStr );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMid( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMid);
@@ -2067,7 +2067,7 @@ void UObject::execMid( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 127, execMid );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLeft( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLeft);
@@ -2078,7 +2078,7 @@ void UObject::execLeft( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 128, execLeft );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRight( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRight);
@@ -2089,7 +2089,7 @@ void UObject::execRight( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 234, execRight );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execCaps( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCaps);
@@ -2099,7 +2099,7 @@ void UObject::execCaps( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 235, execCaps );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execChr( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execChr);
@@ -2112,7 +2112,7 @@ void UObject::execChr( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 236, execChr );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAsc( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAsc);
@@ -2122,7 +2122,7 @@ void UObject::execAsc( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 237, execAsc );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLocs( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLocs);
@@ -2135,7 +2135,7 @@ void UObject::execLocs( FFrame& Stack, RESULT_DECL )
 	Native math functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAbs( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAbs);
@@ -2145,7 +2145,7 @@ void UObject::execAbs( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 186, execAbs );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSin( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSin);
@@ -2155,7 +2155,7 @@ void UObject::execSin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 187, execSin );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execCos( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCos);
@@ -2165,7 +2165,7 @@ void UObject::execCos( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 188, execCos );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execTan( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execTan);
@@ -2175,7 +2175,7 @@ void UObject::execTan( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 189, execTan );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAtan( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAtan);
@@ -2185,7 +2185,7 @@ void UObject::execAtan( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 190, execAtan );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAcos( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAcos);
@@ -2195,7 +2195,7 @@ void UObject::execAcos( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execAcos );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAsin( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAsin);
@@ -2205,7 +2205,7 @@ void UObject::execAsin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execAsin );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execExp( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execExp);
@@ -2215,7 +2215,7 @@ void UObject::execExp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 191, execExp );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLoge( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLoge);
@@ -2225,7 +2225,7 @@ void UObject::execLoge( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 192, execLoge );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSqrt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSqrt);
@@ -2235,7 +2235,7 @@ void UObject::execSqrt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 193, execSqrt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSquare( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSquare);
@@ -2245,7 +2245,7 @@ void UObject::execSquare( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 194, execSquare );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFRand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFRand);
@@ -2254,7 +2254,7 @@ void UObject::execFRand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 195, execFRand );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRand);
@@ -2264,7 +2264,7 @@ void UObject::execRand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 167, execRand );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMin( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMin);
@@ -2275,7 +2275,7 @@ void UObject::execMin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 249, execMin );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMax( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMax);
@@ -2286,7 +2286,7 @@ void UObject::execMax( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 250, execMax );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execClamp( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClamp);
@@ -2298,7 +2298,7 @@ void UObject::execClamp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 251, execClamp );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFClamp( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFClamp);
@@ -2310,7 +2310,7 @@ void UObject::execFClamp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 246, execFClamp );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFMin( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFMin);
@@ -2321,7 +2321,7 @@ void UObject::execFMin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 244, execFMin );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFMax( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFMax);
@@ -2332,7 +2332,7 @@ void UObject::execFMax( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 245, execFMax );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLerp( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLerp);
@@ -2344,7 +2344,7 @@ void UObject::execLerp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 247, execLerp );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSmerp( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSmerp);
@@ -2357,7 +2357,7 @@ void UObject::execSmerp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 248, execSmerp );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execCeil( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCeil);
@@ -2366,7 +2366,7 @@ void UObject::execCeil( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRound( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRound);
@@ -2379,7 +2379,7 @@ void UObject::execRound( FFrame& Stack, RESULT_DECL )
 	Native vector operators & functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAdd_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAdd_VectorVector);
@@ -2390,7 +2390,7 @@ void UObject::execAdd_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 215, execAdd_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_VectorVector);
@@ -2401,7 +2401,7 @@ void UObject::execSubtract_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 216, execSubtract_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_PreVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_PreVector);
@@ -2412,7 +2412,7 @@ void UObject::execSubtract_PreVector( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 211, execSubtract_PreVector );
 
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_VectorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_VectorFloat);
@@ -2423,7 +2423,7 @@ void UObject::execMultiply_VectorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 212, execMultiply_VectorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_FloatVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_FloatVector);
@@ -2434,7 +2434,7 @@ void UObject::execMultiply_FloatVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 213, execMultiply_FloatVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_VectorVector);
@@ -2445,7 +2445,7 @@ void UObject::execMultiply_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 296, execMultiply_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivide_VectorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivide_VectorFloat);
@@ -2456,7 +2456,7 @@ void UObject::execDivide_VectorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 214, execDivide_VectorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDot_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDot_VectorVector);
@@ -2467,7 +2467,7 @@ void UObject::execDot_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 219, execDot_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execCross_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCross_VectorVector);
@@ -2478,7 +2478,7 @@ void UObject::execCross_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 220, execCross_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_VectorVector);
@@ -2489,7 +2489,7 @@ void UObject::execEqualEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 217, execEqualEqual_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_VectorVector);
@@ -2500,7 +2500,7 @@ void UObject::execNotEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 218, execNotEqual_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyEqual_VectorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyEqual_VectorFloat);
@@ -2511,7 +2511,7 @@ void UObject::execMultiplyEqual_VectorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 221, execMultiplyEqual_VectorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyEqual_VectorVector);
@@ -2523,7 +2523,7 @@ void UObject::execMultiplyEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 297, execMultiplyEqual_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivideEqual_VectorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivideEqual_VectorFloat);
@@ -2535,7 +2535,7 @@ void UObject::execDivideEqual_VectorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 222, execDivideEqual_VectorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddEqual_VectorVector);
@@ -2546,7 +2546,7 @@ void UObject::execAddEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 223, execAddEqual_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractEqual_VectorVector);
@@ -2557,7 +2557,7 @@ void UObject::execSubtractEqual_VectorVector( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 224, execSubtractEqual_VectorVector );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVSize( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVSize);
@@ -2576,7 +2576,7 @@ void UObject::execVSizeSquared( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNormal( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNormal);
@@ -2586,7 +2586,7 @@ void UObject::execNormal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 226, execNormal );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNormalize( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNormalize);
@@ -2597,7 +2597,7 @@ void UObject::execNormalize( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, 0, execNormalize );
 IMPLEMENT_FUNCTION( UObject, 252, execVRand );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMirrorVectorByNormal( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMirrorVectorByNormal);
@@ -2609,7 +2609,7 @@ void UObject::execMirrorVectorByNormal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 300, execMirrorVectorByNormal );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execInvert( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInvert);
@@ -2631,7 +2631,7 @@ IMPLEMENT_FUNCTION( UObject, 227, execInvert );
 	Rotator / axes functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGetAxes( FFrame& Stack, RESULT_DECL )
 {P_GET_VECTOR_REF(X);
 	P_GET_VECTOR_REF(Y);
@@ -2655,7 +2655,7 @@ void UObject::execGetAxes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 229, execGetAxes );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGetUnAxes( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetUnAxes);
@@ -2671,7 +2671,7 @@ void UObject::execGetUnAxes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 230, execGetUnAxes );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execOrthoRotation( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execOrthoRotation);
@@ -2684,7 +2684,7 @@ void UObject::execOrthoRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 253, execOrthoRotation );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLessLess_VectorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLessLess_VectorRotator);
@@ -2695,7 +2695,7 @@ void UObject::execLessLess_VectorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 275, execLessLess_VectorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGreaterGreater_VectorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGreaterGreater_VectorRotator);
@@ -2710,7 +2710,7 @@ IMPLEMENT_FUNCTION( UObject, 276, execGreaterGreater_VectorRotator );
 	Rotator operators.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAdd_RotatorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAdd_RotatorRotator);
@@ -2721,7 +2721,7 @@ void UObject::execAdd_RotatorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 316, execAdd_RotatorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtract_RotatorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtract_RotatorRotator);
@@ -2732,7 +2732,7 @@ void UObject::execSubtract_RotatorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 317, execSubtract_RotatorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_RotatorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_RotatorFloat);
@@ -2743,7 +2743,7 @@ void UObject::execMultiply_RotatorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 287, execMultiply_RotatorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiply_FloatRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiply_FloatRotator);
@@ -2754,7 +2754,7 @@ void UObject::execMultiply_FloatRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 288, execMultiply_FloatRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivide_RotatorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivide_RotatorFloat);
@@ -2765,7 +2765,7 @@ void UObject::execDivide_RotatorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 289, execDivide_RotatorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEqualEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEqualEqual_RotatorRotator);
@@ -2776,7 +2776,7 @@ void UObject::execEqualEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 142, execEqualEqual_RotatorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execNotEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNotEqual_RotatorRotator);
@@ -2787,7 +2787,7 @@ void UObject::execNotEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 203, execNotEqual_RotatorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execMultiplyEqual_RotatorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execMultiplyEqual_RotatorFloat);
@@ -2798,7 +2798,7 @@ void UObject::execMultiplyEqual_RotatorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 290, execMultiplyEqual_RotatorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDivideEqual_RotatorFloat( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDivideEqual_RotatorFloat);
@@ -2810,7 +2810,7 @@ void UObject::execDivideEqual_RotatorFloat( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 291, execDivideEqual_RotatorFloat );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execAddEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execAddEqual_RotatorRotator);
@@ -2821,7 +2821,7 @@ void UObject::execAddEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 318, execAddEqual_RotatorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSubtractEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSubtractEqual_RotatorRotator);
@@ -2832,7 +2832,7 @@ void UObject::execSubtractEqual_RotatorRotator( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 319, execSubtractEqual_RotatorRotator );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execClockwiseFrom_IntInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClockwiseFrom_IntInt);
@@ -2843,7 +2843,7 @@ void UObject::execClockwiseFrom_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 246+100, execClockwiseFrom_IntInt );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execInitRotRand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInitRotRand);
@@ -2859,7 +2859,7 @@ void UObject::execInitRotRand( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execRotRand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRotRand);
@@ -3002,7 +3002,7 @@ void UObject::execInterpCurveGetOutputRange( FFrame& Stack, RESULT_DECL )
 	Dynamic array operations.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDynArrayLength( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDynArrayLength);
@@ -3021,7 +3021,7 @@ void UObject::execDynArrayLength( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0x35, execDynArrayLength );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDynArrayInsert( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDynArrayInsert);
@@ -3040,7 +3040,7 @@ void UObject::execDynArrayInsert( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execDynArrayInsert );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDynArrayRemove( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDynArrayRemove);
@@ -3064,7 +3064,7 @@ IMPLEMENT_FUNCTION( UObject, 0, execDynArrayRemove );
 	Object functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIsA( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIsA);
@@ -3078,7 +3078,7 @@ void UObject::execIsA( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 197+106, execIsA );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execClassIsChildOf( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execClassIsChildOf);
@@ -3089,7 +3089,7 @@ void UObject::execClassIsChildOf( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 258, execClassIsChildOf );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDynamicLoadObject( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDynamicLoadObject);
@@ -3101,7 +3101,7 @@ void UObject::execDynamicLoadObject( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execDynamicLoadObject );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execFindObject( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFindObject);
@@ -3298,7 +3298,7 @@ void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 	State/enable/disable functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGotoState( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGotoState);
@@ -3309,7 +3309,7 @@ void UObject::execGotoState( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 113, execGotoState );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execEnable( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execEnable);
@@ -3322,7 +3322,7 @@ void UObject::execEnable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 117, execEnable );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execDisable( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execDisable);
@@ -3335,7 +3335,7 @@ void UObject::execDisable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 118, execDisable );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execIsInState( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIsInState);
@@ -3345,7 +3345,7 @@ void UObject::execIsInState( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 281, execIsInState );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGetStateName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetStateName);
@@ -3358,7 +3358,7 @@ IMPLEMENT_FUNCTION( UObject, 284, execGetStateName );
 	Logging functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLog( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLog);
@@ -3370,7 +3370,7 @@ void UObject::execLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 231, execLog );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execWarn( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execWarn);
@@ -3381,7 +3381,7 @@ void UObject::execWarn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 232, execWarn );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execLocalize( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLocalize);
@@ -3398,7 +3398,7 @@ IMPLEMENT_FUNCTION( UObject, 0, execLocalize );
 	Property get/set functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGetPropertyText( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPropertyText);
@@ -3418,7 +3418,7 @@ void UObject::execGetPropertyText( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 462, execGetPropertyText );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSetPropertyText( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPropertyText);
@@ -3437,7 +3437,7 @@ IMPLEMENT_FUNCTION( UObject, 0, execSetPropertyText );
 	Config functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execSaveConfig( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSaveConfig);
@@ -3446,7 +3446,7 @@ void UObject::execSaveConfig( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 536, execSaveConfig );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execStaticSaveConfig( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStaticSaveConfig);
@@ -3457,7 +3457,7 @@ void UObject::execStaticSaveConfig( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 537, execStaticSaveConfig );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execResetConfig( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execResetConfig);
@@ -3466,7 +3466,7 @@ void UObject::execResetConfig( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execResetConfig );
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execGetEnum( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetEnum);
@@ -3680,7 +3680,7 @@ void UObject::execGetBaseDir( FFrame& Stack, RESULT_DECL )
 	Primitive cast handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execPrimitiveCast( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrimitiveCast);
@@ -4202,7 +4202,7 @@ IMPLEMENT_FUNCTION( UObject, 1855, execSetRegistryKey );
 	UObject::execVRand — script exec stub for VRand().
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnScript.cpp")
 void UObject::execVRand( FFrame& Stack, void* const Result )
 {
 	P_FINISH;

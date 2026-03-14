@@ -109,7 +109,7 @@ void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x2b030)
+IMPL_MATCH("Engine.dll", 0x2b030)
 CBoneDescData::CBoneDescData(CBoneDescData const & Other)
 {
 	// Ghidra 0x2b030, 93B. Copy 2 DWORDs, deep-copy TArray<FString>, copy FString, copy DWORD.
@@ -120,7 +120,7 @@ CBoneDescData::CBoneDescData(CBoneDescData const & Other)
 	*(DWORD*)((BYTE*)this + 0x20) = *(const DWORD*)((const BYTE*)&Other + 0x20);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x55b30)
+IMPL_MATCH("Engine.dll", 0x55b30)
 CBoneDescData::CBoneDescData()
 {
 	// Ghidra 0x55b30, 93B. Init TArray<FString> at +0x08, FString at +0x14, zero the rest.
@@ -140,7 +140,7 @@ CBoneDescData::~CBoneDescData()
 	((FString*)((BYTE*)this + 0x14))->~FString();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x2b0a0)
+IMPL_MATCH("Engine.dll", 0x2b0a0)
 CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 {
 	// Ghidra 0x2b0a0: +0,+4=DWORD; +8=TArray<FString> (FUN_10321830); +0x14=FString; +0x20=DWORD
@@ -202,7 +202,7 @@ int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14390)
+IMPL_MATCH("Engine.dll", 0x14390)
 CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDescData& Other)
 {
 	// Ghidra 0x14390: 9 DWORDs, no vtable. Shares address with FDXTCompressionOptions.
@@ -341,7 +341,7 @@ void UMeshAnimation::PostLoad()
 	UObject::PostLoad();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x20f50)
+IMPL_MATCH("Engine.dll", 0x20f50)
 void UMeshAnimation::ClearAnimNotifys()
 {
 	// Ghidra 0x20f50: iterate Sequences TArray at +0x48 (stride 0x2C per FMeshAnimSeq).
@@ -536,7 +536,7 @@ FSphere UVertMesh::GetRenderBoundingSphere(AActor const * Owner)
 
 
 // --- USkeletalMesh ---
-IMPL_GHIDRA("Engine.dll", 0x12f410)
+IMPL_MATCH("Engine.dll", 0x12f410)
 void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 {
 	// Retail: 0x12f410. Extracts raw TCHAR* from FString and initialises
@@ -605,7 +605,7 @@ int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x140640)
+IMPL_MATCH("Engine.dll", 0x140640)
 int USkeletalMesh::LODFootprint(int param_1, int param_2)
 {
 	// Retail: 0x140640. Returns memory footprint in bytes for the given LOD model.
@@ -655,7 +655,7 @@ void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x135bb0)
+IMPL_MATCH("Engine.dll", 0x135bb0)
 void USkeletalMesh::ClearAttachAliases()
 {
 	// Retail: 0x135bb0. Empties the three attach alias arrays.
@@ -666,7 +666,7 @@ void USkeletalMesh::ClearAttachAliases()
 	((TArray<INT>*)((BYTE*)this + 0x2E8))->Empty();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x140780)
+IMPL_MATCH("Engine.dll", 0x140780)
 void USkeletalMesh::FlipFaces()
 {
 	guard(USkeletalMesh::FlipFaces);
@@ -727,7 +727,7 @@ void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float para
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12F6C0)
+IMPL_MATCH("Engine.dll", 0x12F6C0)
 int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 {
 	// Retail (18b, RVA 0x12F6C0): returns 0 only for ragdoll actors (Physics byte at Actor+0x2C == 0x0E = PHYS_KarmaRagDoll).
@@ -770,7 +770,7 @@ int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector par
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x140350)
+IMPL_MATCH("Engine.dll", 0x140350)
 int USkeletalMesh::MemFootprint(int param_1)
 {
 	// Retail: 0x140350. Sum memory of all mesh data arrays.
@@ -822,14 +822,14 @@ int USkeletalMesh::MemFootprint(int param_1)
 	return total + (a3 + 3) * 0x30 + a0 * 0x30 + a1 * 4 + a2 * 4;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1042f5d0)
+IMPL_MATCH("Engine.dll", 0x1042f5d0)
 void USkeletalMesh::Destroy()
 {
 	// Retail: 0x1042f5d0. Just calls UObject::Destroy (no custom cleanup beyond base class).
 	UObject::Destroy();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12f6e0)
+IMPL_MATCH("Engine.dll", 0x12f6e0)
 FBox USkeletalMesh::GetCollisionBoundingBox(const AActor* Owner) const
 {
 	// Retail: 0x12f6e0. Delegates to UPrimitive::GetCollisionBoundingBox.

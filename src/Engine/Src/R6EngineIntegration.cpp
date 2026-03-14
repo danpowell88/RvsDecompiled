@@ -366,7 +366,7 @@ int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* par
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x177820)
+IMPL_MATCH("Engine.dll", 0x177820)
 AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 {
 	// Retail: 0x177820, 66 bytes. Returns the decal group for the given type.
@@ -413,7 +413,7 @@ int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2,
 
 
 // --- AR6EngineWeapon ---
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 int AR6EngineWeapon::GetHeartBeatStatus()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -502,7 +502,7 @@ void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 int UR6AbstractGameManager::StartLogInProcedure()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -558,7 +558,7 @@ void UR6AbstractGameManager::GameServiceTick(UConsole *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 int UR6AbstractGameManager::GetGSCreateUbiServer()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -588,7 +588,7 @@ void UR6AbstractPlanningInfo::AddPoint(AActor *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns NULL.

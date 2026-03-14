@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- ASceneManager ---
-IMPL_GHIDRA("Engine.dll", 0x11f6d0)
+IMPL_MATCH("Engine.dll", 0x11f6d0)
 void ASceneManager::UpdateViewerFromPct(float Pct)
 {
 	// Retail: 0x11f6d0, ordinal 4956. Clamps Pct to [0.0001, 100.0].
@@ -50,7 +50,7 @@ void ASceneManager::UpdateViewerFromPct(float Pct)
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11db90)
+IMPL_MATCH("Engine.dll", 0x11db90)
 int ASceneManager::VerifyIntPoints()
 {
 	// Retail: 0x11db90, ordinal 4965. Returns 0 if playing (bit 2 of state byte at this+0x398 set).
@@ -69,7 +69,7 @@ int ASceneManager::VerifyIntPoints()
 	return 1;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11dcb0)
+IMPL_MATCH("Engine.dll", 0x11dcb0)
 void ASceneManager::RefreshSubActions(float Pct)
 {
 	// Retail: 0x11dcb0, ordinal 4269. For each action in Actions TArray (this+0x3A8),
@@ -100,7 +100,7 @@ void ASceneManager::RefreshSubActions(float Pct)
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11f2d0)
+IMPL_MATCH("Engine.dll", 0x11f2d0)
 void ASceneManager::SceneEnded()
 {
 	// Retail: 0x11f2d0, ordinal 4353. Clears playing/hasPC flags (bits 1+2) of state at this+0x3C0,
@@ -126,7 +126,7 @@ void ASceneManager::SceneEnded()
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11fcd0)
+IMPL_MATCH("Engine.dll", 0x11fcd0)
 void ASceneManager::SceneStarted()
 {
 	// Retail: 0x11fcd0, ordinal 4354. Calls InitializeActions, sets bit 1 (flag 2) of
@@ -158,7 +158,7 @@ void ASceneManager::SceneStarted()
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11f970)
+IMPL_MATCH("Engine.dll", 0x11f970)
 void ASceneManager::PreparePath()
 {
 	// Retail: 0x11f970, ordinal 3984. Empties global PathSamples (this+0x3E4).
@@ -202,7 +202,7 @@ void ASceneManager::PreparePath()
 	//     SetSceneStartTime(this);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11e1e0)
+IMPL_MATCH("Engine.dll", 0x11e1e0)
 void ASceneManager::ChangeOrientation(FOrientation orient)
 {
 	// Retail: 0x11e1e0, ordinal 2349. Copies the passed FOrientation (13 DWORDs = 52 bytes)
@@ -224,7 +224,7 @@ void ASceneManager::DeletePathSamples()
 	((TArray<FVector>*)((BYTE*)this + 0x3E4))->Empty();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11dbe0)
+IMPL_MATCH("Engine.dll", 0x11dbe0)
 UMatAction * ASceneManager::GetActionFromPct(float Pct)
 {
 	// Retail: 0x11dbe0, ordinal 2878. Walks Actions TArray at this+0x3A8 (TArray<UMatAction*>)
@@ -241,7 +241,7 @@ UMatAction * ASceneManager::GetActionFromPct(float Pct)
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11ddd0)
+IMPL_MATCH("Engine.dll", 0x11ddd0)
 float ASceneManager::GetActionPctFromScenePct(float Pct)
 {
 	// Retail: 0x11ddd0, ordinal 2881. Uses cached current action at this+0x3D8;
@@ -366,7 +366,7 @@ void UMatAction::PostLoad()
 		*(UObject**)((BYTE*)this + 0x40) = NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11e880)
+IMPL_MATCH("Engine.dll", 0x11e880)
 void UMatAction::Initialize()
 {
 	// Retail: 0x11e880, 74b. Fire the UScript Initialize event then forward to all sub-actions.
@@ -386,7 +386,7 @@ void UMatAction::Initialize()
 
 
 // --- UMatSubAction ---
-IMPL_GHIDRA("Engine.dll", 0x11d920)
+IMPL_MATCH("Engine.dll", 0x11d920)
 int UMatSubAction::Update(float Pct, ASceneManager*)
 {
 	// Retail: 0x11d920, 64b. State machine at this+0x2C (BYTE):
@@ -443,7 +443,7 @@ FString UMatSubAction::GetStatusDesc()
 	return FString();
 }
 
-IMPL_GHIDRA("Engine.dll", 0xce50)
+IMPL_MATCH("Engine.dll", 0xce50)
 void UMatSubAction::Initialize()
 {
 	// Retail: 0xce50, 33b. Fire the UScript Initialize event for this sub-action.
@@ -467,7 +467,7 @@ int UMatSubAction::IsRunning()
 
 
 // --- USubActionCameraEffect ---
-IMPL_GHIDRA("Engine.dll", 0x86800)
+IMPL_MATCH("Engine.dll", 0x86800)
 int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x86800, ordinal 4914. Calls parent Update; if not running returns 0.
@@ -541,7 +541,7 @@ FString USubActionCameraShake::GetStatString()
 
 
 // --- USubActionFOV ---
-IMPL_GHIDRA("Engine.dll", 0x11f0e0)
+IMPL_MATCH("Engine.dll", 0x11f0e0)
 int USubActionFOV::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11f0e0, 245b. If running and active actor is an APlayerController,
@@ -580,7 +580,7 @@ FString USubActionFOV::GetStatString()
 
 
 // --- USubActionFade ---
-IMPL_GHIDRA("Engine.dll", 0x11f1e0)
+IMPL_MATCH("Engine.dll", 0x11f1e0)
 int USubActionFade::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11f1e0, 232b. Gets PlayerController from SceneMgr+0x3DC;
@@ -624,7 +624,7 @@ FString USubActionFade::GetStatString()
 
 
 // --- USubActionGameSpeed ---
-IMPL_GHIDRA("Engine.dll", 0x11e640)
+IMPL_MATCH("Engine.dll", 0x11e640)
 int USubActionGameSpeed::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11e640, 189b. Calls parent update; if running and manager available,
@@ -660,7 +660,7 @@ FString USubActionGameSpeed::GetStatString()
 
 
 // --- USubActionOrientation ---
-IMPL_GHIDRA("Engine.dll", 0x11e480)
+IMPL_MATCH("Engine.dll", 0x11e480)
 int USubActionOrientation::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11e480, 4919. Calls parent; if running, gets scene manager via vtable+0x6C and
@@ -682,7 +682,7 @@ int USubActionOrientation::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11d7e0)
+IMPL_MATCH("Engine.dll", 0x11d7e0)
 void USubActionOrientation::PostLoad()
 {
 	// Retail: 0x11d7e0, 89b. Clear stale (pending-kill) UObject reference at +0x5c.
@@ -700,7 +700,7 @@ FString USubActionOrientation::GetStatString()
 	return FString();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11db10)
+IMPL_MATCH("Engine.dll", 0x11db10)
 int USubActionOrientation::IsRunning()
 {
 	// Retail: 0x11db10, 20b. Returns 1 if not in editor AND state (this+0x2C) is 1 or 2 (running or ending).
@@ -714,7 +714,7 @@ int USubActionOrientation::IsRunning()
 
 
 // --- USubActionSceneSpeed ---
-IMPL_GHIDRA("Engine.dll", 0x11e700)
+IMPL_MATCH("Engine.dll", 0x11e700)
 int USubActionSceneSpeed::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11e700, 173b. Same pattern as USubActionGameSpeed::Update but targets
@@ -747,7 +747,7 @@ FString USubActionSceneSpeed::GetStatString()
 
 
 // --- USubActionTrigger ---
-IMPL_GHIDRA("Engine.dll", 0x11f090)
+IMPL_MATCH("Engine.dll", 0x11f090)
 int USubActionTrigger::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11f090, ordinal 4921 (74b). Calls base Update; if not running returns 0.
@@ -829,7 +829,7 @@ void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRend
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11fbd0)
+IMPL_MATCH("Engine.dll", 0x11fbd0)
 void AInterpolationPoint::PostEditChange()
 {
 	guard(AInterpolationPoint::PostEditChange);
@@ -842,7 +842,7 @@ void AInterpolationPoint::PostEditChange()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x11fc50)
+IMPL_MATCH("Engine.dll", 0x11fc50)
 void AInterpolationPoint::PostEditMove()
 {
 	guard(AInterpolationPoint::PostEditMove);

@@ -200,7 +200,7 @@ ETextureFormat UTexture::ConvertDXT()
 {
 	return TEXF_P8;
 }
-IMPL_GHIDRA("Engine.dll", 0x16a400)
+IMPL_MATCH("Engine.dll", 0x16a400)
 void UTexture::CreateColorRange()
 {
 	guard(UTexture::CreateColorRange);
@@ -252,7 +252,7 @@ int UTexture::Decompress(ETextureFormat)
 	return 0;
 	unguard;
 }
-IMPL_GHIDRA("Engine.dll", 0x1691d0)
+IMPL_MATCH("Engine.dll", 0x1691d0)
 int UTexture::DefaultLOD()
 {
 	guard(UTexture::DefaultLOD);
@@ -345,7 +345,7 @@ FColor UTexture::GetTexel(float,float,float,float)
 {
 	return FColor(0,0,0,0);
 }
-IMPL_GHIDRA("Engine.dll", 0x1692a0)
+IMPL_MATCH("Engine.dll", 0x1692a0)
 void UTexture::Tick(float DeltaSeconds)
 {
 	guard(UTexture::Tick);
@@ -395,7 +395,7 @@ void UTexture::ArithOp(UTexture *,ETextureArithOp)
 {
 	// DIVERGENCE: retail (~150+ B) does per-pixel blending. Skipped — too complex.
 }
-IMPL_GHIDRA("Engine.dll", 0x16a570)
+IMPL_MATCH("Engine.dll", 0x16a570)
 void UTexture::Clear(DWORD ClearFlags)
 {
 	// Ghidra 0x16a570, 58B with SEH. If bit 1 of ClearFlags is set, zero each mip's DataArray.
@@ -409,7 +409,7 @@ void UTexture::Clear(DWORD ClearFlags)
 		}
 	}
 }
-IMPL_GHIDRA("Engine.dll", 0x169470)
+IMPL_MATCH("Engine.dll", 0x169470)
 void UTexture::Clear(FColor InColor)
 {
 	// Ghidra 0x169470, 108B. TEXF_RGBA8 (5) only: fill all pixels with InColor.
@@ -438,7 +438,7 @@ void UTexture::ConstantTimeTick()
 	void* nxt = *(void**)((BYTE*)cur + 0xA4);
 	*(void**)((BYTE*)this + 0xA8) = nxt ? nxt : this; // advance or wrap to self
 }
-IMPL_GHIDRA("Engine.dll", 0x4490)
+IMPL_MATCH("Engine.dll", 0x4490)
 UBitmapMaterial * UTexture::Get(double Time, UViewport *)
 {
 	// Retail: 0x4490, 18b. Advance the texture animation via vtable[0xB4/4] (time-tick),
@@ -454,7 +454,7 @@ FBaseTexture * UTexture::GetRenderInterface()
 {
 	return *(FBaseTexture**)((BYTE*)this + 0xAC);
 }
-IMPL_GHIDRA("Engine.dll", 0x16b920)
+IMPL_MATCH("Engine.dll", 0x16b920)
 void UTexture::Init(int InUSize, int InVSize)
 {
 	guard(UTexture::Init);
@@ -494,13 +494,13 @@ void UTexture::Init(int InUSize, int InVSize)
 
 
 // --- FDXTCompressionOptions ---
-IMPL_GHIDRA("Engine.dll", 0x203248)
+IMPL_MATCH("Engine.dll", 0x203248)
 FDXTCompressionOptions::FDXTCompressionOptions()
 {
 	// Ghidra 0x203248: shares entry with FMipmapBase::FMipmapBase() and others — body is empty.
 }
 
-IMPL_GHIDRA("Engine.dll", 0x14390)
+IMPL_MATCH("Engine.dll", 0x14390)
 FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionOptions& Other)
 {
 	// Ghidra 0x14390: 9 DWORDs, no vtable. Shares address with CCompressedLipDescData.
@@ -510,7 +510,7 @@ FDXTCompressionOptions& FDXTCompressionOptions::operator=(const FDXTCompressionO
 
 
 // --- FMipmap ---
-IMPL_GHIDRA("Engine.dll", 0x27730)
+IMPL_MATCH("Engine.dll", 0x27730)
 FMipmap::FMipmap(FMipmap const & Other)
 {
 	// Ghidra 0x27730, 90B. Copy FMipmapBase (+0x00..+0x0F), deep-copy DataArray,
@@ -523,7 +523,7 @@ FMipmap::FMipmap(FMipmap const & Other)
 	*(DWORD*)((BYTE*)this + 0x18) = *(const DWORD*)((const BYTE*)&Other + 0x18); // SavedPos
 }
 
-IMPL_GHIDRA("Engine.dll", 0x20a10)
+IMPL_MATCH("Engine.dll", 0x20a10)
 FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 {
 	// Ghidra 0x20a10, 89B. Computes W=1<<UBits, H=1<<VBits, allocates W*H bytes.
@@ -546,7 +546,7 @@ FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 	*(INT*)  ((BYTE*)this + 0x24) = Count;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x20a70)
+IMPL_MATCH("Engine.dll", 0x20a70)
 FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 {
 	// Ghidra 0x20a70, 88B. Like (BYTE,BYTE) but uses explicit byte count instead of W*H.
@@ -566,7 +566,7 @@ FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 	*(INT*)  ((BYTE*)this + 0x24) = InCount;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x209e0)
+IMPL_MATCH("Engine.dll", 0x209e0)
 FMipmap::FMipmap()
 {
 	// Ghidra 0x209e0: calls FArray::FArray(this+0x1c,0,1), zeros SavedAr/Pos, sets vtable.
@@ -574,7 +574,7 @@ FMipmap::FMipmap()
 	appMemzero((BYTE*)this, 0x28);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x20ad0)
+IMPL_MATCH("Engine.dll", 0x20ad0)
 FMipmap::~FMipmap()
 {
 	// Ghidra 0x20ad0: calls TLazyArray<BYTE>::~TLazyArray(this+0x10).
@@ -589,7 +589,7 @@ FMipmap::~FMipmap()
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x27790)
+IMPL_MATCH("Engine.dll", 0x27790)
 FMipmap& FMipmap::operator=(const FMipmap& Other)
 {
 	// Ghidra 0x27790: FMipmapBase 4 DWORDs at +0..+0C, skip FLazyLoader vtable at +10,
@@ -601,7 +601,7 @@ FMipmap& FMipmap::operator=(const FMipmap& Other)
 	return *this;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x18e10)
+IMPL_MATCH("Engine.dll", 0x18e10)
 void FMipmap::Clear()
 {
 	// Ghidra 0x18e10, ~40B. Zeroes all bytes in DataArray (at +0x1C).
@@ -613,7 +613,7 @@ void FMipmap::Clear()
 
 
 // --- FMipmapBase ---
-IMPL_GHIDRA("Engine.dll", 0x4260)
+IMPL_MATCH("Engine.dll", 0x4260)
 FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 {
 	// Ghidra 0x4260, 49B.
@@ -624,7 +624,7 @@ FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 	*(INT*)  ((BYTE*)this + 0x08) = 1 << (InVBits & 0x1F);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x203248)
+IMPL_MATCH("Engine.dll", 0x203248)
 FMipmapBase::FMipmapBase()
 {
 	// Ghidra 0x203248: merged entry — body is empty (zero-initialisation from callsite).
@@ -675,7 +675,7 @@ FColor UConstantMaterial::GetColor(float)
 
 
 // --- UCubemap ---
-IMPL_GHIDRA("Engine.dll", 0x168e20)
+IMPL_MATCH("Engine.dll", 0x168e20)
 void UCubemap::Destroy()
 {
 	guard(UCubemap::Destroy);
@@ -714,7 +714,7 @@ FColor UFadeColor::GetColor(float)
 
 
 // --- UMaterialSwitch ---
-IMPL_GHIDRA("Engine.dll", 0xc8920)
+IMPL_MATCH("Engine.dll", 0xc8920)
 void UMaterialSwitch::PostEditChange()
 {
 	guard(UMaterialSwitch::PostEditChange);
@@ -772,7 +772,7 @@ UPalette * UPalette::ReplaceWithExisting()
 }
 
 
-IMPL_GHIDRA("Engine.dll", 0x169890)
+IMPL_MATCH("Engine.dll", 0x169890)
 BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 {
 	guard(UPalette::BestMatch);
@@ -815,7 +815,7 @@ BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x169770)
+IMPL_MATCH("Engine.dll", 0x169770)
 void UPalette::FixPalette()
 {
 	guard(UPalette::FixPalette);
@@ -890,7 +890,7 @@ FBaseTexture * UProxyBitmapMaterial::GetRenderInterface()
 
 
 // --- UShadowBitmapMaterial ---
-IMPL_GHIDRA("Engine.dll", 0x12e3f0)
+IMPL_MATCH("Engine.dll", 0x12e3f0)
 void UShadowBitmapMaterial::Destroy()
 {
 	// Retail: 0x12e3f0, 125 bytes. Free two render buffers at +0x9C and +0xA0 then
@@ -1015,7 +1015,7 @@ int UTexModifier::MaterialVSize()
 	return Material->MaterialVSize();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 FMatrix * UTexModifier::GetMatrix(float)
 {
 	guard(UTexModifier::GetMatrix);
@@ -1036,7 +1036,7 @@ int UTexModifier::GetValidated()
 
 
 // --- UTexOscillator ---
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 FMatrix * UTexOscillator::GetMatrix(float)
 {
 	guard(UTexOscillator::GetMatrix);
@@ -1047,7 +1047,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 
 
 // --- UTexPanner ---
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 FMatrix * UTexPanner::GetMatrix(float)
 {
 	guard(UTexPanner::GetMatrix);
@@ -1072,7 +1072,7 @@ void UTexRotator::PostLoad()
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 FMatrix * UTexRotator::GetMatrix(float)
 {
 	guard(UTexRotator::GetMatrix);
@@ -1083,7 +1083,7 @@ FMatrix * UTexRotator::GetMatrix(float)
 
 
 // --- UTexScaler ---
-IMPL_GHIDRA("Engine.dll", 0x4720)
+IMPL_MATCH("Engine.dll", 0x4720)
 FMatrix * UTexScaler::GetMatrix(float)
 {
 	guard(UTexScaler::GetMatrix);

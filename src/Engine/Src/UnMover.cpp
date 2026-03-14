@@ -88,7 +88,7 @@ int AMover::ShouldTrace(AActor*,DWORD TraceFlags)
 	return TraceFlags & 2;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1651d0)
+IMPL_MATCH("Engine.dll", 0x1651d0)
 void AMover::AddMyMarker(AActor *)
 {
 	guard(AMover::AddMyMarker);
@@ -104,7 +104,7 @@ INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Pt
 
 
 // --- AMover ---
-IMPL_GHIDRA("Engine.dll", 0xd5520)
+IMPL_MATCH("Engine.dll", 0xd5520)
 void AMover::SetWorldRaytraceKey()
 {
 	guard(AMover::SetWorldRaytraceKey);
@@ -144,7 +144,7 @@ void AMover::SetWorldRaytraceKey()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd4f30)
+IMPL_MATCH("Engine.dll", 0xd4f30)
 void AMover::Spawned()
 {
 	// Ghidra 0xd4f30: copy BasePos/BaseRot from this+0x234..0x24B to KeyPos0/KeyRot0 at +0x670..0x6A8.
@@ -152,7 +152,7 @@ void AMover::Spawned()
 	appMemcpy((BYTE*)this + 0x6A0, (BYTE*)this + 0x240, 12); // BaseRot -> KeyRot0
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd5680)
+IMPL_MATCH("Engine.dll", 0xd5680)
 void AMover::SetBrushRaytraceKey()
 {
 	guard(AMover::SetBrushRaytraceKey);
@@ -192,7 +192,7 @@ void AMover::SetBrushRaytraceKey()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd52a0)
+IMPL_MATCH("Engine.dll", 0xd52a0)
 void AMover::PostEditChange()
 {
 	guard(AMover::PostEditChange);
@@ -238,7 +238,7 @@ void AMover::PostEditChange()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd5090)
+IMPL_MATCH("Engine.dll", 0xd5090)
 void AMover::PostEditMove()
 {
 	guard(AMover::PostEditMove);
@@ -292,7 +292,7 @@ void AMover::PostEditMove()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd4f70)
+IMPL_MATCH("Engine.dll", 0xd4f70)
 void AMover::PostLoad()
 {
 	// Ghidra 0xd4f70: AActor::PostLoad, init position sentinel (-12345.678f = 0xC640E400)
@@ -317,7 +317,7 @@ void AMover::PostNetReceive()
 	AActor::PostNetReceive();
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd57d0)
+IMPL_MATCH("Engine.dll", 0xd57d0)
 void AMover::PostRaytrace()
 {
 	guard(AMover::PostRaytrace);
@@ -398,7 +398,7 @@ void ADoor::PostaddReachSpecs(APawn *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd60c0)
+IMPL_MATCH("Engine.dll", 0xd60c0)
 void ADoor::PostPath()
 {
 	guard(ADoor::PostPath);
@@ -414,7 +414,7 @@ void ADoor::PostPath()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd6000)
+IMPL_MATCH("Engine.dll", 0xd6000)
 void ADoor::PrePath()
 {
 	guard(ADoor::PrePath);
@@ -431,14 +431,14 @@ void ADoor::PrePath()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd5af0)
+IMPL_MATCH("Engine.dll", 0xd5af0)
 AActor * ADoor::AssociatedLevelGeometry()
 {
 	// Ghidra 0xd5af0, 7B: return pointer at offset 0x3ec
 	return *(AActor**)((BYTE*)this + 0x3ec);
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd6d10)
+IMPL_MATCH("Engine.dll", 0xd6d10)
 void ADoor::FindBase()
 {
 	guard(ADoor::FindBase);
@@ -455,7 +455,7 @@ void ADoor::FindBase()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd5b20)
+IMPL_MATCH("Engine.dll", 0xd5b20)
 int ADoor::HasAssociatedLevelGeometry(AActor * Other)
 {
 	// Ghidra 0xd5b20, 45B: walk linked list at 0x3ec, next ptr at 0x3e0
@@ -470,7 +470,7 @@ int ADoor::HasAssociatedLevelGeometry(AActor * Other)
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd8030)
+IMPL_MATCH("Engine.dll", 0xd8030)
 void ADoor::InitForPathFinding()
 {
 	guard(ADoor::InitForPathFinding);
@@ -521,7 +521,7 @@ void ADoor::InitForPathFinding()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd5d60)
+IMPL_MATCH("Engine.dll", 0xd5d60)
 int ADoor::IsIdentifiedAs(FName Name)
 {
 	guard(ADoor::IsIdentifiedAs);

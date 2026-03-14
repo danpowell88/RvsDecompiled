@@ -71,7 +71,7 @@ void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x86330)
+IMPL_MATCH("Engine.dll", 0x86330)
 void UMotionBlur::Destroy()
 {
 	// Retail: 0x86330, ordinal 2491. Calls parent Destroy, then frees the two
@@ -112,7 +112,7 @@ void UViewport::LockOnActor(AActor *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x83d70)
+IMPL_MATCH("Engine.dll", 0x83d70)
 int UViewport::MultiShot()
 {
 	// Ghidra 0x83d70: no SEH frame
@@ -230,7 +230,7 @@ void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor *
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12AF0)
+IMPL_MATCH("Engine.dll", 0x12AF0)
 int UViewport::IsDepthComplexity()
 {
 	// Retail (25b, RVA 0x12AF0): RendMap == 0x08 → depth complexity view
@@ -239,7 +239,7 @@ int UViewport::IsDepthComplexity()
 	return (*(DWORD*)((BYTE*)st + 0x504) == 0x08) ? 1 : 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12B90)
+IMPL_MATCH("Engine.dll", 0x12B90)
 int UViewport::IsEditing()
 {
 	// Retail (74b, RVA 0x12B90): RendMap 0x0D/0x0E/0x0F or 1-8 -> editing view
@@ -251,7 +251,7 @@ int UViewport::IsEditing()
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12B60)
+IMPL_MATCH("Engine.dll", 0x12B60)
 int UViewport::IsLit()
 {
 	// Retail (54b, RVA 0x12B60): RendMap 5,7,8,0x1E -> lit; RendMap 0x10 with [state+0x4FC] non-null
@@ -263,7 +263,7 @@ int UViewport::IsLit()
 	return 0;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x12A70)
+IMPL_MATCH("Engine.dll", 0x12A70)
 int UViewport::IsTopView()
 {
 	// Retail (25b, RVA 0x12A70): RendMap == 0x0D → top-down ortho view
@@ -383,7 +383,7 @@ FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 // Decoded from Ghidra Engine @ 0xcf6f0. Complex with ZoneMask (FUN_103cc610),
 // sub-struct pairs (FUN_103cba20), version-gated multi-branch INT serialization.
 // All internal functions fully decoded from _unnamed.cpp.
-IMPL_GHIDRA("Engine.dll", 0xcf6f0)
+IMPL_MATCH("Engine.dll", 0xcf6f0)
 FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 	BYTE* P = (BYTE*)&V;
 
@@ -513,7 +513,7 @@ FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 // UObject* at +0x20, and version-gated INT override.
 // Layout: [0x00] vtable  [0x04] TArray<FBspVertex>  [0x18] INT  [0x1C] INT
 //         [0x20] UObject*  [0x24] INT  [0x28] INT (ver-gated default -1)
-IMPL_GHIDRA("Engine.dll", 0x27ad0)
+IMPL_MATCH("Engine.dll", 0x27ad0)
 FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 	Ar << *(TArray<FBspVertex>*)&V.Pad[4];       // TArray<FBspVertex> at obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);      // INT at obj+0x18
@@ -532,7 +532,7 @@ FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSurf@@@Z
 // Decoded from Ghidra Engine @ 0xcbf50. Uses vtable+0x18 (UObject*), FCompactIndex,
 // ByteOrderSerialize, and Serialize. No FUN_xxx dependencies.
-IMPL_GHIDRA("Engine.dll", 0xcbf50)
+IMPL_MATCH("Engine.dll", 0xcbf50)
 FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 	Ar << V.Texture;
 	Ar.ByteOrderSerialize((BYTE*)&V.PolyFlags, 4);
@@ -583,7 +583,7 @@ FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFBspVertexStream@@@Z
 // FUN_10322590 = TArray<FBspVertex>::Serialize (elem_size 0x28)
 // Layout (after vtable): Pad[0] TArray<FBspVertex>  Pad[0x14] Revision
-IMPL_GHIDRA("Engine.dll", 0x10322590)
+IMPL_MATCH("Engine.dll", 0x10322590)
 FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
 	Ar << *(TArray<FBspVertex>*)V.Pad;            // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -594,17 +594,17 @@ FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
 // Ghidra @ 0x3c730: 7x FCompactIndex at Pad[8..0x20]; 9x DWORD at Pad[0x68..0x88];
 // FUN_10301470 (FName?), FUN_1033a9a0, version checks 0x6a/0x6b/0x6d/0x6e.
 // Needs FTexture base size to correctly interpret Pad offsets.
-IMPL_GHIDRA("Engine.dll", 0x10301470)
+IMPL_MATCH("Engine.dll", 0x10301470)
 FArchive & operator<<(FArchive & Ar, FLightMap & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMapTexture@@@Z
 // Ghidra @ 0x27a00: vtable[6] on Pad[4..8], FUN_103218c0, BOS at Pad[0x60]+8, Pad[0x68]+4;
 // if Ver()>0x73: recurse into FStaticLightMapTexture at Pad[0x14].
-IMPL_GHIDRA("Engine.dll", 0x27a00)
+IMPL_MATCH("Engine.dll", 0x27a00)
 FArchive & operator<<(FArchive & Ar, FLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFPoly@@@Z
-IMPL_GHIDRA("Engine.dll", 0x27a00)
+IMPL_MATCH("Engine.dll", 0x27a00)
 FArchive & operator<<(FArchive & Ar, FPoly & V) {
 	// NumVertices first (compact index)
 	Ar << *(FCompactIndex*)&V.NumVertices;
@@ -651,7 +651,7 @@ FArchive & operator<<(FArchive & Ar, FPoly & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFRaw32BitIndexBuffer@@@Z
 // FUN_1037fbd0 = TArray<DWORD>::Serialize (elem_size 4, ByteOrderSerialize per element)
 // Layout (after vtable): Pad[0] TArray<DWORD>  Pad[0x14] Revision
-IMPL_GHIDRA("Engine.dll", 0x1037fbd0)
+IMPL_MATCH("Engine.dll", 0x1037fbd0)
 FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
 	Ar << *(TArray<DWORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -662,7 +662,7 @@ FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
 // FUN_104170d0 = Custom TArray<FColor>::Serialize with BGRA byte order.
 // Original serializes per-element bytes in order: [2]=B, [1]=G, [0]=R, [3]=A.
 // Layout (after vtable): Pad[0] TArray<FColor>  Pad[0x14] Revision
-IMPL_GHIDRA("Engine.dll", 0x104170d0)
+IMPL_MATCH("Engine.dll", 0x104170d0)
 FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
 	TArray<FColor>& Colors = *(TArray<FColor>*)V.Pad;
 	Colors.CountBytes(Ar);
@@ -696,7 +696,7 @@ FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z
 // FUN_1031e600 = TArray<_WORD>::Serialize (elem_size 2, ByteOrderSerialize per element)
 // Layout (after vtable): Pad[0] TArray<_WORD>  Pad[0x14] Revision
-IMPL_GHIDRA("Engine.dll", 0x1031e600)
+IMPL_MATCH("Engine.dll", 0x1031e600)
 FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
 	Ar << *(TArray<_WORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -708,7 +708,7 @@ FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
 // (only when !IsPersistent), then 3 INTs, then TArray<0x20-elem> via FUN_10323030.
 // Layout (after vtable): Pad[0] UObject*  Pad[4] UObject*  Pad[0x10] INT
 //   Pad[0x14] INT  Pad[0x18] INT  Pad[0x1C] TArray<0x20-elem>
-IMPL_GHIDRA("Engine.dll", 0x10323030)
+IMPL_MATCH("Engine.dll", 0x10323030)
 FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 	if (!Ar.IsPersistent()) {
 		Ar << *(UObject**)&V.Pad[0x00];   // UObject* at Pad[0] = obj+0x04
@@ -745,17 +745,17 @@ FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticLightMapTexture@@@Z
 // Ghidra @ 0x20c60: FUN_1031d450 on Pad[4..0x1c]; vtable[0] at Pad[0x34]+1;
 // BOS at Pad[0x38]+4, Pad[0x3c]+4, Pad[0x48]+4. Needs FTexture base size.
-IMPL_GHIDRA("Engine.dll", 0x20c60)
+IMPL_MATCH("Engine.dll", 0x20c60)
 FArchive & operator<<(FArchive & Ar, FStaticLightMapTexture & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshBatcherVertex@@@Z
-IMPL_GHIDRA("Engine.dll", 0x20c60)
+IMPL_MATCH("Engine.dll", 0x20c60)
 FArchive & operator<<(FArchive & Ar, FStaticMeshBatcherVertex & p1) { return Ar; } // empty in original
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshLightInfo@@@Z
 // Decoded from Ghidra Engine @ 0x21750. UObject* at +0, TArray<BYTE> at +4
 // (FUN_1031cce0 = bulk byte array), INT at +0x10.
-IMPL_GHIDRA("Engine.dll", 0x21750)
+IMPL_MATCH("Engine.dll", 0x21750)
 FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
 	Ar << V.LightObject;
 	Ar << V.LightData;
@@ -764,7 +764,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshLightInfo & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshMaterial@@@Z
-IMPL_GHIDRA("Engine.dll", 0x21750)
+IMPL_MATCH("Engine.dll", 0x21750)
 FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 	Ar << *(UObject**)&V.Material;
 	Ar << *(FCompactIndex*)&V.Flags1;
@@ -775,13 +775,13 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshMaterial & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshSection@@@Z
 // Ghidra @ 0x50f10: complex version-branched (pre-0x5c / 0x5c-0x70 / 0x70+) with SEH;
 // creates temp FStaticMeshVertexStream + FRawIndexBuffer locals. Needs deep decode.
-IMPL_GHIDRA("Engine.dll", 0x50f10)
+IMPL_MATCH("Engine.dll", 0x50f10)
 FArchive & operator<<(FArchive & Ar, FStaticMeshSection & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshUVStream@@@Z
 // FUN_10324510 = TArray<FStaticMeshUV>::Serialize (elem_size 8, two floats per elem)
 // Layout (after vtable): Pad[0] TArray<FStaticMeshUV>  Pad[0x0C] INT  Pad[0x18] Revision
-IMPL_GHIDRA("Engine.dll", 0x10324510)
+IMPL_MATCH("Engine.dll", 0x10324510)
 FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
 	Ar << *(TArray<FStaticMeshUV>*)V.Pad;         // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x0C], 4);      // INT at Pad[0x0C] = obj+0x10
@@ -792,7 +792,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshVertexStream@@@Z
 // FUN_103243e0 = TArray<FStaticMeshVertex>::Serialize (elem_size 0x18)
 // Layout (after vtable): Pad[0] TArray<FStaticMeshVertex>  Pad[0x14] Revision
-IMPL_GHIDRA("Engine.dll", 0x103243e0)
+IMPL_MATCH("Engine.dll", 0x103243e0)
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
 	Ar << *(TArray<FStaticMeshVertex>*)V.Pad;     // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
@@ -802,7 +802,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
 // ??6@YAAAVFArchive@@AAV0@AAVFTags@@@Z
 // Decoded from Ghidra Engine @ 0xcc180. Inlines FUN_103cbaa0 (12×4-byte flat serialize)
 // then serializes FString at offset 0x30.
-IMPL_GHIDRA("Engine.dll", 0xcc180)
+IMPL_MATCH("Engine.dll", 0xcc180)
 FArchive & operator<<(FArchive & Ar, FTags & V) {
 	for (INT i = 0; i < 12; i++)
 		Ar.ByteOrderSerialize(V._Data + i * 4, 4);
@@ -812,7 +812,7 @@ FArchive & operator<<(FArchive & Ar, FTags & V) {
 
 // ??6@YAAAVFArchive@@AAV0@AAVFTerrainVertexStream@@@Z
 // FUN_10323cd0 = TArray<FTerrainVertex>::Serialize (elem_size 0x24)
-IMPL_GHIDRA("Engine.dll", 0x10323cd0)
+IMPL_MATCH("Engine.dll", 0x10323cd0)
 FArchive & operator<<(FArchive & Ar, FTerrainVertexStream & V) {
 	Ar << V.Vertices;
 	Ar.ByteOrderSerialize((BYTE*)&V.Revision, 4);
@@ -820,7 +820,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertexStream & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFURL@@@Z
-IMPL_GHIDRA("Engine.dll", 0x10323cd0)
+IMPL_MATCH("Engine.dll", 0x10323cd0)
 FArchive & operator<<(FArchive& Ar, FURL& U) {
 	Ar << U.Protocol << U.Host << U.Map << U.Portal << U.Op;
 	Ar << U.Port << U.Valid;
@@ -859,17 +859,17 @@ FArchive & operator<<(FArchive & Ar, FPosNormTexData & V) {
 // ??6@YAAAVFArchive@@AAV0@AAUFProjectorRelativeRenderInfo@@@Z
 // Ghidra @ 0x48c0: reads p1.m_RenderInfoPtr.Ptr as FProjectorRenderInfo*;
 // calls FUN_10304820 version check, then vtable[6] for two fields at +0x18 and +0x1c.
-IMPL_GHIDRA("Engine.dll", 0x10304820)
+IMPL_MATCH("Engine.dll", 0x10304820)
 FArchive & operator<<(FArchive & Ar, FProjectorRelativeRenderInfo & p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@PAUFProjectorRenderInfo@@@Z
 // Ghidra @ 0x4890: calls FUN_10304820 version check; if 0 returns Ar;
 // otherwise vtable[6] on p1+0x18 and p1+0x1c. FProjectorRenderInfo is forward-decl only.
-IMPL_GHIDRA("Engine.dll", 0x10304820)
+IMPL_MATCH("Engine.dll", 0x10304820)
 FArchive & operator<<(FArchive & Ar, FProjectorRenderInfo * p1) { return Ar; }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFSkinVertex@@@Z
-IMPL_GHIDRA("Engine.dll", 0x10304820)
+IMPL_MATCH("Engine.dll", 0x10304820)
 FArchive & operator<<(FArchive & Ar, FSkinVertex & V) {
 	// 16 floats: offsets 0x00-0x3C
 	for (INT i = 0; i < 16; i++)
@@ -1482,7 +1482,7 @@ FCollisionHash::FCollisionHash(FCollisionHash const & /*p0*/) {
 // Retail: ordinal 211 (0x6f440).  Size: ~700 bytes.
 // Sets up vftable, zeros pool/FArray, initialises permutation tables once via
 // Fisher-Yates shuffle (seeded by appRand), then NULLs all 0x4000 bucket heads.
-IMPL_GHIDRA("Engine.dll", 0x6f440)
+IMPL_MATCH("Engine.dll", 0x6f440)
 FCollisionHash::FCollisionHash() {
 	FreeList = NULL;
 	// AllocatedPools is default-constructed (TArray ctor zeroes it)
@@ -1639,7 +1639,7 @@ IMPL_APPROX("Inferred from UObject outer cast pattern")
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
 IMPL_TODO("Needs Ghidra analysis")
 void UViewport::InitInput() {}
-IMPL_GHIDRA("Engine.dll", 0x12A60)
+IMPL_MATCH("Engine.dll", 0x12A60)
 INT UViewport::IsOrtho()
 {
 	// Retail (34b, RVA 0x12A60): load state ptr at +0x34, check RendMap at +0x504
@@ -1649,7 +1649,7 @@ INT UViewport::IsOrtho()
 	INT rm = *(INT*)((BYTE*)st + 0x504);
 	return (rm == 0x0D || rm == 0x0E || rm == 0x0F) ? 1 : 0;
 }
-IMPL_GHIDRA("Engine.dll", 0x12A00)
+IMPL_MATCH("Engine.dll", 0x12A00)
 INT UViewport::IsPerspective()
 {
 	// Retail (74b, RVA 0x12A00): same state ptr; RendMap 1-7 or 0x1E → perspective.
@@ -1662,7 +1662,7 @@ INT UViewport::IsPerspective()
 	if (rm == 0x10) return *(void**)((BYTE*)st + 0x4FC) != NULL ? 1 : 0;
 	return 0;
 }
-IMPL_GHIDRA("Engine.dll", 0x12A90)
+IMPL_MATCH("Engine.dll", 0x12A90)
 INT UViewport::IsRealtime()
 {
 	// Retail (26b, RVA 0x12A90): state ptr at +0x34; flags at +0x4F8 bits 11,14.
@@ -1674,7 +1674,7 @@ IMPL_TODO("Needs Ghidra analysis")
 INT UViewport::IsWire() { return 0; }
 IMPL_TODO("Needs Ghidra analysis")
 void UViewport::ScreenShot() {}
-IMPL_GHIDRA("Engine.dll", 0x129D0)
+IMPL_MATCH("Engine.dll", 0x129D0)
 BYTE* UViewport::_Screen( INT X, INT Y )
 {
 	// Retail (31b, RVA 0x129D0): return FrameBuffer + (Pitch * Y + X) * BytesPerPixel

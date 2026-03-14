@@ -18,7 +18,7 @@
 	larger values in up to 5 bytes.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnArc.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnArc.cpp")
 CORE_API FArchive& operator<<( FArchive& Ar, FCompactIndex& I )
 {
 	if( Ar.IsLoading() )
@@ -106,7 +106,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FCompactIndex& I )
 	FTime — double-precision time value.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnArc.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnArc.cpp")
 CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 {
 	return Ar.ByteOrderSerialize( &F, sizeof(F) );

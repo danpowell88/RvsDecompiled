@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- APhysicsVolume ---
-IMPL_GHIDRA("Engine.dll", 0xb77a0)
+IMPL_MATCH("Engine.dll", 0xb77a0)
 void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 {
 	guard(APhysicsVolume::SetZone);
@@ -72,7 +72,7 @@ void AVolume::SetVolumes()
 {
 }
 
-IMPL_GHIDRA("Engine.dll", 0x71530)
+IMPL_MATCH("Engine.dll", 0x71530)
 int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AVolume::ShouldTrace);
@@ -204,7 +204,7 @@ void AWarpZoneMarker::addReachSpecs(APawn*,int)
 	unguardSlow;
 }
 
-IMPL_GHIDRA("Engine.dll", 0xd5f00)
+IMPL_MATCH("Engine.dll", 0xd5f00)
 int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 {
 	guard(AWarpZoneMarker::IsIdentifiedAs);
@@ -229,14 +229,14 @@ void AZoneInfo::PostEditChange()
 
 
 // --- FZoneProperties ---
-IMPL_GHIDRA("Engine.dll", 0x2ac0)
+IMPL_MATCH("Engine.dll", 0x2ac0)
 FZoneProperties::FZoneProperties(const FZoneProperties& Other)
 {
 	// Ghidra 0x2ac0: shares address with operator=; 18 DWORDs flat copy (no vtable)
 	appMemcpy(this, &Other, 0x48);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x18b40)
+IMPL_MATCH("Engine.dll", 0x18b40)
 FZoneProperties::FZoneProperties()
 {
 	// Ghidra 0x18b40: 53 bytes. Zeroes offsets 0x08-0x44 (16 DWORDs).
@@ -244,7 +244,7 @@ FZoneProperties::FZoneProperties()
 	appMemzero((BYTE*)this + 8, 0x40);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x2ac0)
+IMPL_MATCH("Engine.dll", 0x2ac0)
 FZoneProperties& FZoneProperties::operator=(const FZoneProperties& Other)
 {
 	// Ghidra 0x2ac0: 18 DWORDs from +0x00 (no vtable; also used as copy ctor body)

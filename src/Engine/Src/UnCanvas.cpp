@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FCanvasUtil ---
-IMPL_GHIDRA("Engine.dll", 0x18c10)
+IMPL_MATCH("Engine.dll", 0x18c10)
 FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 {
 	// Ghidra 0x18c10: vtable set by compiler; same copy regions as operator= (0x18cb0):
@@ -38,7 +38,7 @@ FCanvasUtil::~FCanvasUtil()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x18cb0)
+IMPL_MATCH("Engine.dll", 0x18cb0)
 FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 {
 	// Ghidra 0x18cb0: vtable at +0 skipped. Copy +4..+53, skip +54..+93 (transient state),
@@ -49,7 +49,7 @@ FCanvasUtil& FCanvasUtil::operator=(const FCanvasUtil& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_GHIDRA("Engine.dll", 0x115b90)
+IMPL_MATCH("Engine.dll", 0x115b90)
 void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 {
 	guard(FCanvasUtil::BeginPrimitive);
@@ -145,7 +145,7 @@ void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TC
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x8b500)
+IMPL_MATCH("Engine.dll", 0x8b500)
 void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 {
 	// Ghidra 0x8b500, 128B. Format varargs then call WrappedPrint with STY_Normal.
@@ -155,7 +155,7 @@ void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 	WrappedPrint(STY_Normal, XL, YL, Font, bCenter, Buffer);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x8b450)
+IMPL_MATCH("Engine.dll", 0x8b450)
 void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...)
 {
 	// Ghidra 0x8b450, 122B. Format varargs then call WrappedPrint with STY_None to measure.
@@ -255,7 +255,7 @@ void UCanvas::SetStretch(float stretchX, float stretchY)
 	m_fStretchX = stretchX;
 	m_fStretchY = stretchY;
 }
-IMPL_GHIDRA("Engine.dll", 0x88f10)
+IMPL_MATCH("Engine.dll", 0x88f10)
 void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL)
 {
 	// Ghidra 0x88f10, ~200B. Clip tile to current canvas bounds, then call DrawTile.
@@ -310,7 +310,7 @@ int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane 
 	typedef int (__thiscall* DrawStrFn)(UCanvas*, UFont*, int, int, const TCHAR*, FPlane, int, int, int);
 	return ((DrawStrFn)0x1038ac40)(this, Font, XL, YL, Text, Color, CR, RenderStyle, DrawExtraLine);
 }
-IMPL_GHIDRA("Engine.dll", 0x1038ac40)
+IMPL_MATCH("Engine.dll", 0x1038ac40)
 void UCanvas::WrappedDrawString(ERenderStyle InStyle, INT& XL, INT& YL, UFont* Font, INT bCenter, const TCHAR* Text)
 {
 	// Ghidra 0x8cac0, 11B. Simply forwards to WrappedPrint.

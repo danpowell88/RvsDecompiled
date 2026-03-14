@@ -53,7 +53,7 @@ void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 	unguard;
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x1000db10)
+IMPL_MATCH("R6Engine.dll", 0x1000db10)
 INT AR6AIController::CanHear(FVector SoundLoc, FLOAT Volume, AActor* SoundActor, enum ENoiseType NoiseType, enum EPawnType PawnType)
 {
 	guard(AR6AIController::CanHear);

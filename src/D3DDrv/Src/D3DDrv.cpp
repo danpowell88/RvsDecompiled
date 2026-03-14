@@ -248,7 +248,7 @@ void UD3DRenderDevice::StaticConstructor()
 	Handles render device console commands: GetRes (list available resolutions),
 	and passes unrecognised commands to the parent class.
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009320)
+IMPL_MATCH("D3DDrv.dll", 0x10009320)
 INT UD3DRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	guard(UD3DRenderDevice::Exec);
@@ -282,7 +282,7 @@ INT UD3DRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	Called after the device is created. Registers statistics, creates
 	shader programs, initialises the resource cache.
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000cb30)
+IMPL_MATCH("D3DDrv.dll", 0x1000cb30)
 INT UD3DRenderDevice::Init()
 {
 	guard(UD3DRenderDevice::Init);
@@ -330,7 +330,7 @@ INT UD3DRenderDevice::Init()
 	Creates the D3D8 object, enumerates adapters, creates the device with
 	the specified resolution, sets up back buffer and depth stencil.
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000de90)
+IMPL_MATCH("D3DDrv.dll", 0x1000de90)
 INT UD3DRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, INT Fullscreen)
 {
 	guard(UD3DRenderDevice::SetRes);
@@ -466,7 +466,7 @@ INT UD3DRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, INT Fullsc
 
 	Retail address: 0x100090f0 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x100090f0)
+IMPL_MATCH("D3DDrv.dll", 0x100090f0)
 void UD3DRenderDevice::Exit(UViewport* Viewport)
 {
 	guard(UD3DRenderDevice::Exit);
@@ -549,7 +549,7 @@ void UD3DRenderDevice::Exit(UViewport* Viewport)
 
 	Retail address: 0x1000f410 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000f410)
+IMPL_MATCH("D3DDrv.dll", 0x1000f410)
 void UD3DRenderDevice::Flush(UViewport* Viewport)
 {
 	guard(UD3DRenderDevice::Flush);
@@ -585,7 +585,7 @@ void UD3DRenderDevice::Flush(UViewport* Viewport)
 
 	Retail address: 0x10009060 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009060)
+IMPL_MATCH("D3DDrv.dll", 0x10009060)
 void UD3DRenderDevice::FlushResource(QWORD CacheID)
 {
 	guard(UD3DRenderDevice::FlushResource);
@@ -644,7 +644,7 @@ void UD3DRenderDevice::UpdateGamma(UViewport* Viewport)
 
 	Retail address: 0x10009250 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009250)
+IMPL_MATCH("D3DDrv.dll", 0x10009250)
 void UD3DRenderDevice::RestoreGamma()
 {
 	guard(UD3DRenderDevice::RestoreGamma);
@@ -663,7 +663,7 @@ void UD3DRenderDevice::RestoreGamma()
 	Returns the FD3DRenderInterface for this frame. The engine uses the
 	returned interface to issue draw calls. Returns NULL to signal skip.
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000aed0)
+IMPL_MATCH("D3DDrv.dll", 0x1000aed0)
 FRenderInterface* UD3DRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
 	guard(UD3DRenderDevice::Lock);
@@ -725,7 +725,7 @@ FRenderInterface* UD3DRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 	Retail address: 0x1000b2c0 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000b2c0)
+IMPL_MATCH("D3DDrv.dll", 0x1000b2c0)
 void UD3DRenderDevice::Unlock(FRenderInterface* RI)
 {
 	guard(UD3DRenderDevice::Unlock);
@@ -744,7 +744,7 @@ void UD3DRenderDevice::Unlock(FRenderInterface* RI)
 
 	Retail address: 0x1000b4c0 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000b4c0)
+IMPL_MATCH("D3DDrv.dll", 0x1000b4c0)
 void UD3DRenderDevice::Present(UViewport* Viewport)
 {
 	guard(UD3DRenderDevice::Present);
@@ -775,7 +775,7 @@ void UD3DRenderDevice::Present(UViewport* Viewport)
 
 	Retail address: 0x1000b600 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000b600)
+IMPL_MATCH("D3DDrv.dll", 0x1000b600)
 void UD3DRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels)
 {
 	guard(UD3DRenderDevice::ReadPixels);
@@ -854,7 +854,7 @@ void UD3DRenderDevice::SetEmulationMode(EHardwareEmulationMode Mode)
 
 	Retail address: 0x1000c9f0 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000c9f0)
+IMPL_MATCH("D3DDrv.dll", 0x1000c9f0)
 FRenderCaps* UD3DRenderDevice::GetRenderCaps()
 {
 	guard(UD3DRenderDevice::GetRenderCaps);
@@ -1069,7 +1069,7 @@ void UD3DRenderDevice::StopVideo(UCanvas* Canvas)
 	visualisation (collision, AI paths, etc.). The Texture, Scale, and Offset
 	params are for optional texture-mapped line styles.
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x1000c8a0)
+IMPL_MATCH("D3DDrv.dll", 0x1000c8a0)
 void UD3DRenderDevice::Draw3DLine(FVector Start, FVector End, FColor Color, UTexture* Texture, FLOAT ScaleX, FLOAT ScaleY, FLOAT OffsetX, FLOAT OffsetY)
 {
 	guard(UD3DRenderDevice::Draw3DLine);
@@ -1152,7 +1152,7 @@ void UD3DRenderDevice::HandleFullScreenEffects(INT Param1, INT Param2)
 
 	Retail address: 0x10009500 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009500)
+IMPL_MATCH("D3DDrv.dll", 0x10009500)
 void UD3DRenderDevice::GetAvailableResolutions(TArray<FResolutionInfo>& Resolutions)
 {
 	guard(UD3DRenderDevice::GetAvailableResolutions);
@@ -1247,7 +1247,7 @@ void UD3DRenderDevice::GetAvailableResolutions(TArray<FResolutionInfo>& Resoluti
 
 	Retail address: 0x10009620 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009620)
+IMPL_MATCH("D3DDrv.dll", 0x10009620)
 DWORD UD3DRenderDevice::GetAvailableVideoMemory()
 {
 	guard(UD3DRenderDevice::GetAvailableVideoMemory);
@@ -1265,7 +1265,7 @@ DWORD UD3DRenderDevice::GetAvailableVideoMemory()
 
 	Retail address: 0x10009650 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009650)
+IMPL_MATCH("D3DDrv.dll", 0x10009650)
 INT UD3DRenderDevice::SupportsTextureFormat(ETextureFormat Format)
 {
 	guard(UD3DRenderDevice::SupportsTextureFormat);
@@ -1307,7 +1307,7 @@ INT UD3DRenderDevice::SupportsTextureFormat(ETextureFormat Format)
 
 	Retail address: 0x10008fc0 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10008fc0)
+IMPL_MATCH("D3DDrv.dll", 0x10008fc0)
 FD3DResource* UD3DRenderDevice::GetCachedResource(QWORD CacheID)
 {
 	guard(UD3DRenderDevice::GetCachedResource);
@@ -1342,7 +1342,7 @@ FD3DResource* UD3DRenderDevice::GetCachedResource(QWORD CacheID)
 
 	Retail address: 0x10009720 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009720)
+IMPL_MATCH("D3DDrv.dll", 0x10009720)
 FD3DPixelShader* UD3DRenderDevice::GetPixelShader(EPixelShader Shader)
 {
 	guard(UD3DRenderDevice::GetPixelShader);
@@ -1360,7 +1360,7 @@ FD3DPixelShader* UD3DRenderDevice::GetPixelShader(EPixelShader Shader)
 
 	Retail address: 0x10009790 (Ghidra)
 =============================================================================*/
-IMPL_GHIDRA("D3DDrv.dll", 0x10009790)
+IMPL_MATCH("D3DDrv.dll", 0x10009790)
 FD3DVertexShader* UD3DRenderDevice::GetVertexShader(EVertexShader Shader, FShaderDeclaration& Decl)
 {
 	guard(UD3DRenderDevice::GetVertexShader);

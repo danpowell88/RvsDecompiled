@@ -45,7 +45,7 @@ void USound::PostLoad()
 	// NOTE: Divergence — FUN_1037ef65() cleanup helper skipped (not identified).
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1037ef65)
+IMPL_MATCH("Engine.dll", 0x1037ef65)
 void USound::PS2Convert()
 {
 	guard(USound::PS2Convert);

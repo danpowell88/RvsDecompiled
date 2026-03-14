@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- ULevelSummary ---
-IMPL_GHIDRA("Engine.dll", 0xfd00)
+IMPL_MATCH("Engine.dll", 0xfd00)
 void ULevelSummary::PostLoad()
 {
 	// Ghidra 0xfd00: UObject::PostLoad, then localize the Level title from package.

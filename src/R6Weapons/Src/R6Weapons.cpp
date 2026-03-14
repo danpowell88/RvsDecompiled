@@ -44,7 +44,7 @@ void AR6Weapons::ProcessState(FLOAT DeltaTime)
 	Super::ProcessState(DeltaTime);
 }
 
-IMPL_GHIDRA("R6Weapons.dll", 0x3c30)
+IMPL_MATCH("R6Weapons.dll", 0x3c30)
 INT AR6Weapons::IsBlockedBy(AActor const* Other) const
 {
 	// Ghidra 0x3c30: if Other has bTrailerSameRotation (bit 17 of flags DWORD at +0xa8), don't block.

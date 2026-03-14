@@ -43,7 +43,7 @@ MdtBaseConstraint * AKConstraint::getKConstraint() const
 return *(MdtBaseConstraint**)((BYTE*)this + 0x418);
 }
 
-IMPL_GHIDRA("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x114310)
 _McdModel * AKConstraint::getKModel() const
 {
 guard(AKConstraint::getKModel);
@@ -101,7 +101,7 @@ guard(AKConstraint::PostEditMove);
 unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x59dc0)
+IMPL_MATCH("Engine.dll", 0x59dc0)
 void AKConstraint::CheckForErrors()
 {
 // Ghidra 0x59dc0: call super, then warn if neither constraint actor is set.
@@ -110,7 +110,7 @@ if (*(INT*)((BYTE*)this + 0x3C0) == 0 && *(INT*)((BYTE*)this + 0x3C4) == 0)
 GWarn->Logf(TEXT("KConstraint which does not point to any Actors."));
 }
 
-IMPL_GHIDRA("Engine.dll", 0x5A410)
+IMPL_MATCH("Engine.dll", 0x5A410)
 int AKConstraint::CheckOwnerUpdated()
 {
 // Retail 0x5A410: same replication-queue logic as AActor, but checks Owner,
@@ -161,7 +161,7 @@ unguard;
 
 
 // --- FKAggregateGeom ---
-IMPL_GHIDRA("Engine.dll", 0x3cc00)
+IMPL_MATCH("Engine.dll", 0x3cc00)
 FKAggregateGeom::FKAggregateGeom(FKAggregateGeom const &Other)
 {
 // Ghidra 0x3cc00: no vtable; 4 TArrays at +0, +0xC, +0x18, +0x24
@@ -191,7 +191,7 @@ FKAggregateGeom::~FKAggregateGeom()
 ((TArray<FKSphereElem>*)((BYTE*)this + 0x00))->~TArray();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x3cc80)
+IMPL_MATCH("Engine.dll", 0x3cc80)
 FKAggregateGeom& FKAggregateGeom::operator=(const FKAggregateGeom& Other)
 {
 // Ghidra 0x3cc80: 4 TArrays at +0,+0xC,+0x18,+0x24
@@ -264,7 +264,7 @@ return *this;
 
 
 // --- FKConvexElem ---
-IMPL_GHIDRA("Engine.dll", 0x27ce0)
+IMPL_MATCH("Engine.dll", 0x27ce0)
 FKConvexElem::FKConvexElem(FKConvexElem const &Other)
 {
 // Ghidra 0x27ce0: no vtable; 16 DWORDs at +0..+3F; TArray<FVector> at +40 (stride 12); TArray<INT> at +4C (stride 4)
@@ -289,7 +289,7 @@ FKConvexElem::~FKConvexElem()
 ((TArray<FVector>*)((BYTE*)this + 0x40))->~TArray();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x27d50)
+IMPL_MATCH("Engine.dll", 0x27d50)
 FKConvexElem& FKConvexElem::operator=(const FKConvexElem& Other)
 {
 // Ghidra 0x27d50: 16 DWORDs (64 bytes) at +0..+3F (no vtable),

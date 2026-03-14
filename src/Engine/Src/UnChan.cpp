@@ -56,7 +56,7 @@ FString UFileChannel::Describe()
 return FString();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x184100)
+IMPL_MATCH("Engine.dll", 0x184100)
 void UFileChannel::Destroy()
 {
 // Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
@@ -91,7 +91,7 @@ UChannel::Destroy();
 }
 }
 
-IMPL_GHIDRA("Engine.dll", 0x180f30)
+IMPL_MATCH("Engine.dll", 0x180f30)
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
 // Retail: 0x180f30. Just delegates to UChannel::Init.
@@ -158,7 +158,7 @@ void UActorChannel::SetClosingFlag()
 UChannel::SetClosingFlag();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x1813e0)
+IMPL_MATCH("Engine.dll", 0x1813e0)
 void UActorChannel::Close()
 {
 // Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
@@ -276,7 +276,7 @@ FString UControlChannel::Describe()
 return FString();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x182070)
+IMPL_MATCH("Engine.dll", 0x182070)
 void UControlChannel::Destroy()
 {
 // Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.

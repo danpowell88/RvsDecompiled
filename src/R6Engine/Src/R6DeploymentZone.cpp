@@ -444,7 +444,7 @@ void AR6DeploymentZone::execIsPointInZone(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = IsPointInZone(vPoint);
 }
 
-IMPL_GHIDRA("R6Engine.dll", 0x18a60)
+IMPL_MATCH("R6Engine.dll", 0x18a60)
 void AR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);

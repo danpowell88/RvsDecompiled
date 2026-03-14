@@ -260,7 +260,7 @@ FString UR6GSServers::GetAuthID(INT)
 	return TEXT("");
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x10f00)
+IMPL_MATCH("R6GameService.dll", 0x10f00)
 BYTE UR6GSServers::GetGSGameState()
 {
 	// 0x10f00  52  ?GetGSGameState@UR6GSServers@@UAEEXZ — size 6 bytes, no SEH frame.
@@ -273,28 +273,28 @@ FString UR6GSServers::GetGlobalIdFromPlayerIDList(FString)
 	return TEXT("");
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x6870)
+IMPL_MATCH("R6GameService.dll", 0x6870)
 INT UR6GSServers::GetLoggedInUbiDotCom()
 {
 	// 0x6870  56  ?GetLoggedInUbiDotCom@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
 	return GsLoggedInUbi;
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x12610)
+IMPL_MATCH("R6GameService.dll", 0x12610)
 BYTE UR6GSServers::GetLoginRegServer()
 {
 	// 0x12610  57  ?GetLoginRegServer@UR6GSServers@@UAEEXZ — size 6 bytes, no SEH frame.
 	return GsLoginRegServer;
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x11fc0)
+IMPL_MATCH("R6GameService.dll", 0x11fc0)
 INT UR6GSServers::GetRegServerInitialized()
 {
 	// 0x11fc0  59  ?GetRegServerInitialized@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
 	return GsRegServerInit;
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x123a0)
+IMPL_MATCH("R6GameService.dll", 0x123a0)
 INT UR6GSServers::GetServerRegistered()
 {
 	// 0x123a0  60  ?GetServerRegistered@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.
@@ -514,14 +514,14 @@ INT UR6GSServers::IsAuthIDSuccess()
 	unguard;
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x6860)
+IMPL_MATCH("R6GameService.dll", 0x6860)
 INT UR6GSServers::IsMSClientIsInRequest()
 {
 	// 0x6860  77  ?IsMSClientIsInRequest@UR6GSServers@@UAEHXZ — size 14 bytes, no SEH frame.
 	return (INT)(GsMSClientInRequest != 0);
 }
 
-IMPL_GHIDRA("R6GameService.dll", 0x7520)
+IMPL_MATCH("R6GameService.dll", 0x7520)
 INT UR6GSServers::IsServerJoined()
 {
 	// 0x7520  78  ?IsServerJoined@UR6GSServers@@UAEHXZ — size 6 bytes, no SEH frame.

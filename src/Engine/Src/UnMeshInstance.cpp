@@ -1826,7 +1826,7 @@ void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10438ce0)
+IMPL_MATCH("Engine.dll", 0x10438ce0)
 int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
 	// Retail: 0x131D50, ~700b. Faithfully decompiled from Ghidra.
@@ -2060,7 +2060,7 @@ int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOA
 	}
 }
 
-IMPL_GHIDRA("Engine.dll", 0x133960)
+IMPL_MATCH("Engine.dll", 0x133960)
 int USkeletalMeshInstance::ActiveVertStreamSize()
 {
 	// Disasm: 0x133960, 48b.
@@ -2323,7 +2323,7 @@ void USkeletalMeshInstance::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_GHIDRA("Engine.dll", 0x132A50)
+IMPL_MATCH("Engine.dll", 0x132A50)
 UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 {
 	// Disasm: 0x132A50, 112b.
@@ -2490,7 +2490,7 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 	return NULL;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10439f40)
+IMPL_MATCH("Engine.dll", 0x10439f40)
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(USkeletalMeshInstance::GetFrame);
@@ -2864,7 +2864,7 @@ void UVertMeshInstance::SetAnimFrame(int, float Frame)
 	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x10321a80)
+IMPL_MATCH("Engine.dll", 0x10321a80)
 void UVertMeshInstance::SetScale(FVector Scale)
 {
 	guard(UVertMeshInstance::SetScale);

@@ -11,7 +11,7 @@
 	FOutputDevice base class implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
 void FOutputDevice::Log( const TCHAR* S )
 {
 	guard(FOutputDevice::Log);
@@ -19,7 +19,7 @@ void FOutputDevice::Log( const TCHAR* S )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
 void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 {
 	guard(FOutputDevice::Log);
@@ -27,7 +27,7 @@ void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
 void FOutputDevice::Log( const FString& S )
 {
 	guard(FOutputDevice::Log);
@@ -35,7 +35,7 @@ void FOutputDevice::Log( const FString& S )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
 void FOutputDevice::Log( enum EName Type, const FString& S )
 {
 	guard(FOutputDevice::Log);
@@ -43,7 +43,7 @@ void FOutputDevice::Log( enum EName Type, const FString& S )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
 void FOutputDevice::Logf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -51,7 +51,7 @@ void FOutputDevice::Logf( const TCHAR* Fmt, ... )
 	Serialize( TempStr, NAME_Log );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
 void FOutputDevice::Logf( enum EName Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -107,7 +107,7 @@ IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FNullOutError::FNullOutError( const FNullOutError& ) {}
 IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
 FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
-IMPL_GHIDRA("Core.dll", 0x1290)
+IMPL_MATCH("Core.dll", 0x1290)
 void FNullOutError::Serialize( const TCHAR* V, EName Event )
 {
 	guard(FNullOutError::Serialize);

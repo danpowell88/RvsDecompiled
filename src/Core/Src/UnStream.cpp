@@ -386,7 +386,7 @@ FFileStream& FFileStream::operator=( const FFileStream& Other )
 	FString constructors and methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( BYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -397,7 +397,7 @@ FString::FString( BYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( SBYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -408,7 +408,7 @@ FString::FString( SBYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( _WORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -419,7 +419,7 @@ FString::FString( _WORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( SWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -430,7 +430,7 @@ FString::FString( SWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( INT Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -441,7 +441,7 @@ FString::FString( INT Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( DWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -452,7 +452,7 @@ FString::FString( DWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 : TArray<TCHAR>()
 {
@@ -463,7 +463,7 @@ FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 : TArray<TCHAR>()
 {
@@ -474,14 +474,14 @@ FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::Chr( TCHAR Ch )
 {
 	TCHAR Buf[2] = { Ch, 0 };
 	return FString( Buf );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::Printf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -489,14 +489,14 @@ FString FString::Printf( const TCHAR* Fmt, ... )
 	return FString( TempStr );
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::FormatAsNumber( INT InNumber )
 {
 	FString Number( InNumber, 0 );
 	return Number;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::LeftPad( INT ChCount )
 {
 	guard(FString::LeftPad);
@@ -513,7 +513,7 @@ FString FString::LeftPad( INT ChCount )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::RightPad( INT ChCount )
 {
 	guard(FString::RightPad);
@@ -528,7 +528,7 @@ FString FString::RightPad( INT ChCount )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::Reverse()
 {
 	guard(FString::Reverse);
@@ -539,7 +539,7 @@ FString FString::Reverse()
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 {
 	guard(FString::ParseIntoArray);
@@ -565,7 +565,7 @@ INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 	FArchive << FString operator.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 {
 	if( Ar.IsLoading() )
@@ -613,7 +613,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 	Explicit template instantiations for .def export.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 {
@@ -622,7 +622,7 @@ TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 	return *this;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+=( const TArray<TCHAR>& Other )
 {

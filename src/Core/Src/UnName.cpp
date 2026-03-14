@@ -20,7 +20,7 @@ UBOOL                FName::Initialized = 0;
 	FNameEntry serialization.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 CORE_API FNameEntry* AllocateNameEntry( const TCHAR* Name, DWORD Index, DWORD Flags, FNameEntry* HashNext )
 {
 	guard(AllocateNameEntry);
@@ -34,7 +34,7 @@ CORE_API FNameEntry* AllocateNameEntry( const TCHAR* Name, DWORD Index, DWORD Fl
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 CORE_API FArchive& operator<<( FArchive& Ar, FNameEntry& E )
 {
 	guard(FNameEntry<<);
@@ -79,7 +79,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FNameEntry& E )
 //
 // Hash function for name strings.
 //
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 static DWORD GetNameHash( const TCHAR* Name )
 {
 	DWORD Hash = 0;
@@ -98,7 +98,7 @@ static DWORD GetNameHash( const TCHAR* Name )
 //
 // Find or add a name by string.
 //
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 FName::FName( const TCHAR* Name, EFindName FindType )
 {
 	guard(FName::FName);
@@ -151,7 +151,7 @@ FName::FName( const TCHAR* Name, EFindName FindType )
 	FName subsystem init/exit.
 -----------------------------------------------------------------------------*/
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 void FName::StaticInit()
 {
 	guard(FName::StaticInit);
@@ -174,7 +174,7 @@ void FName::StaticInit()
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 void FName::StaticExit()
 {
 	guard(FName::StaticExit);
@@ -196,7 +196,7 @@ void FName::StaticExit()
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 void FName::DeleteEntry( int i )
 {
 	guard(FName::DeleteEntry);
@@ -219,7 +219,7 @@ void FName::DeleteEntry( int i )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 void FName::DisplayHash( FOutputDevice& Ar )
 {
 	guard(FName::DisplayHash);
@@ -239,7 +239,7 @@ void FName::DisplayHash( FOutputDevice& Ar )
 	unguard;
 }
 
-IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
+IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnName.cpp")
 void FName::Hardcode( FNameEntry* AutoName )
 {
 	guard(FName::Hardcode);
