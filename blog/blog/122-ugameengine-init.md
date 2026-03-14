@@ -1,11 +1,11 @@
 ---
 slug: ugameengine-init
-title: "100. Booting the Game: Implementing UGameEngine::Init()"
+title: "122. Booting the Game: Implementing UGameEngine::Init()"
 authors: [dan]
 tags: [engine, decompilation, ghidra, initialization, milestones]
 ---
 
-Post 100. 🎉 A milestone in numbers, and fitting that it lands on one of the most important functions in the entire engine: `UGameEngine::Init()`. This is the function that wakes the game up from nothing. No viewport, no sound, no map — just an empty object in memory. By the time `Init()` returns, the engine has a renderer, an input system, a running level, and a player console. Let's walk through how that happens.
+Post 122. This is one of the most important functions in the entire engine: `UGameEngine::Init()`. This is the function that wakes the game up from nothing. No viewport, no sound, no map — just an empty object in memory. By the time `Init()` returns, the engine has a renderer, an input system, a running level, and a player console. Let's walk through how that happens.
 
 <!-- truncate -->
 
@@ -182,4 +182,4 @@ A decompilation isn't always a perfect translation. Here are the documented dive
 
 Before this PR, `UGameEngine::Init()` was a single empty line. The engine couldn't boot at all. Now it has a real implementation that correctly sequences all the subsystems. The stubs for `Browse()` and `LoadMap()` still return failure (they're next on the list), so the game doesn't actually load a map yet — but the scaffolding is there, and the code path is live.
 
-Post 100 feels right for this one. On to 101.
+Post 122 moves the engine significantly forward. On to `Browse()` and `LoadMap()`.
