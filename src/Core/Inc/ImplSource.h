@@ -9,8 +9,8 @@
     Ghidra analysis of the retail binary (IMPL_MATCH), or it wasn't (IMPL_APPROX).
     Everything else is a variant of those two, or a documented special case.
 
-    BUILD RULE: IMPL_TODO is forbidden — build fails (IMPL_STRICT mode is ON).
-    IMPL_APPROX is allowed and means "not yet Ghidra-confirmed; best estimate".
+    BUILD RULE: IMPL_TODO and IMPL_APPROX are BOTH forbidden — build fails (IMPL_STRICT mode is ON).
+    IMPL_MATCH, IMPL_EMPTY, and IMPL_DIVERGE are the only valid macros.
 
     See AGENTS.md for authoring guidance.
 =============================================================================*/
@@ -35,19 +35,9 @@
 #define IMPL_MATCH(dll, addr)
 
 // ---------------------------------------------------------------------------
-// IMPL_APPROX(reason)
-//   Body is a best-effort approximation — NOT directly decompiled from Ghidra,
-//   OR decompiled but with a documented deviation from retail.
-//   'reason' describes the approximation or what analysis is still needed.
-//
-//   Common cases:
-//     - Function not yet analysed in Ghidra
-//     - Body inferred from calling conventions / struct layout
-//     - Reconstruction that matches intent but not byte-for-byte
-//
-//   Example:
-//     IMPL_APPROX("Needs Ghidra analysis of Engine.dll 0x1009a0c0")
-//     void UAudioSubsystem::RegisterMusic(UMusic* Music) { guard(...); unguard; }
+// IMPL_APPROX(reason) — BANNED. BUILD FAILS when present (IMPL_STRICT mode).
+//   Never use this in committed code. It is only here so the verifier can
+//   detect and reject it. Use IMPL_MATCH, IMPL_EMPTY, or IMPL_DIVERGE instead.
 // ---------------------------------------------------------------------------
 #define IMPL_APPROX(reason)
 
@@ -92,9 +82,9 @@
 #define IMPL_DIVERGE(reason)
 
 // ---------------------------------------------------------------------------
-// IMPL_TODO(reason) — BUILD FAILS when present (IMPL_STRICT mode).
+// IMPL_TODO(reason) — BANNED. BUILD FAILS when present (IMPL_STRICT mode).
 //   Never use this in committed code. It is only here so the verifier can
-//   detect and reject it. Use IMPL_APPROX instead.
+//   detect and reject it. Use IMPL_MATCH, IMPL_EMPTY, or IMPL_DIVERGE.
 // ---------------------------------------------------------------------------
 #define IMPL_TODO(reason)
 
