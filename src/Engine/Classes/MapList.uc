@@ -1,22 +1,28 @@
 //=============================================================================
+// MapList - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // MapList.
 //
 // contains a list of maps to cycle through
 //
 //=============================================================================
 class MapList extends Info
+    abstract
     native
-    abstract;
+    config
+    notplaceable
+    hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-// --- Constants ---
-const K_NextDefaultMap =  -2;
+const K_NextDefaultMap = -2;
 
-// --- Variables ---
-var config string Maps[32];
+var(Maps) config string Maps[32];
 
-// --- Functions ---
-function string GetNextMap(int iNextMapNum) {}
-
-defaultproperties
+function string GetNextMap(int iNextMapNum)
 {
+	return;
 }
+

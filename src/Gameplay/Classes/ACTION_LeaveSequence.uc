@@ -1,12 +1,20 @@
-// Scripted action that terminates the current scripted sequence, returning the pawn's
-// control to the normal AI (or a pending controller).
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_LeaveSequence extends ScriptedAction;
+//=============================================================================
+// ACTION_LeaveSequence - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_LeaveSequence extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Functions ---
-function ScriptedSequence GetScript(ScriptedSequence S) {}
+function ScriptedSequence GetScript(ScriptedSequence S)
+{
+	return none;
+	return;
+}
 
 defaultproperties
 {
+	ActionString="leave sequence"
 }

@@ -1,42 +1,79 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// Shader - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class Shader extends RenderedMaterial
-    native;
+    native
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Enums ---
 enum EOutputBlending
 {
-    // enum values not recoverable from binary — see 1.56 source
+	OB_Normal,                      // 0
+	OB_Masked,                      // 1
+	OB_Modulate,                    // 2
+	OB_Translucent,                 // 3
+	OB_Invisible,                   // 4
+	OB_Brighten,                    // 5
+	OB_Darken                       // 6
 };
 
-// --- Variables ---
-var Material SelfIlluminationMask;
-// ^ NEW IN 1.60
-var Material SelfIllumination;
-// ^ NEW IN 1.60
-var Material SpecularityMask;
-// ^ NEW IN 1.60
-var Material Specular;
-// ^ NEW IN 1.60
-var Material Opacity;
-// ^ NEW IN 1.60
-var Material Diffuse;
-// ^ NEW IN 1.60
-var Material Detail;
-// ^ NEW IN 1.60
-var EOutputBlending OutputBlending;
-// ^ NEW IN 1.60
-var bool TwoSided;
-// ^ NEW IN 1.60
-var bool Wireframe;
-// ^ NEW IN 1.60
+// NEW IN 1.60
+var() Shader.EOutputBlending OutputBlending;
+var() bool TwoSided;
+var() bool Wireframe;
 var bool ModulateStaticLighting2X;
-var bool PerformLightingOnSpecularPass;
-// ^ NEW IN 1.60
+var() bool PerformLightingOnSpecularPass;
+var() editinlineuse Material Diffuse;
+var() editinlineuse Material Opacity;
+var() editinlineuse Material Specular;
+var() editinlineuse Material SpecularityMask;
+var() editinlineuse Material SelfIllumination;
+var() editinlineuse Material SelfIlluminationMask;
+var() editinlineuse Material Detail;
 
-// --- Functions ---
-function Trigger(Actor EventInstigator, Actor Other) {}
-
-defaultproperties
+function Trigger(Actor Other, Actor EventInstigator)
 {
+	// End:0x24
+	if(__NFUN_119__(Diffuse, none))
+	{
+		Diffuse.Trigger(Other, EventInstigator);
+	}
+	// End:0x48
+	if(__NFUN_119__(Opacity, none))
+	{
+		Opacity.Trigger(Other, EventInstigator);
+	}
+	// End:0x6C
+	if(__NFUN_119__(Specular, none))
+	{
+		Specular.Trigger(Other, EventInstigator);
+	}
+	// End:0x90
+	if(__NFUN_119__(SpecularityMask, none))
+	{
+		SpecularityMask.Trigger(Other, EventInstigator);
+	}
+	// End:0xB4
+	if(__NFUN_119__(SelfIllumination, none))
+	{
+		SelfIllumination.Trigger(Other, EventInstigator);
+	}
+	// End:0xD8
+	if(__NFUN_119__(SelfIlluminationMask, none))
+	{
+		SelfIlluminationMask.Trigger(Other, EventInstigator);
+	}
+	// End:0xFC
+	if(__NFUN_119__(FallbackMaterial, none))
+	{
+		FallbackMaterial.Trigger(Other, EventInstigator);
+	}
+	return;
 }
+
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var EOutputBlending

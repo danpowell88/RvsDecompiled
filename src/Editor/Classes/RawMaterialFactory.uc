@@ -1,13 +1,25 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Editor.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// RawMaterialFactory - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class RawMaterialFactory extends MaterialFactory;
 
-// --- Variables ---
-var class<Material> MaterialClass;
+var() Class<Material> MaterialClass;
 
-// --- Functions ---
-function Material CreateMaterial(string InName, Object InOuter, string InGroup, string InPackage) {}
+function Material CreateMaterial(Object InOuter, string InPackage, string InGroup, string InName)
+{
+	// End:0x0D
+	if(__NFUN_114__(MaterialClass, none))
+	{
+		return none;
+	}
+	return new (InOuter, InName, __NFUN_146__(4, 524288)) MaterialClass;
+	return;
+}
 
 defaultproperties
 {
+	MaterialClass=Class'Engine.Shader'
+	Description="Raw Material"
 }

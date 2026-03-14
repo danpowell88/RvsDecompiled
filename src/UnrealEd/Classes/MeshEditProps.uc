@@ -1,46 +1,43 @@
 //=============================================================================
+// MeshEditProps - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Object to facilitate properties editing
 //=============================================================================
+//  Animation / Mesh editor object to expose/shuttle only selected editable 
+//  parameters from UMeshAnim/ UMesh objects back and forth in the editor.
+//
 class MeshEditProps extends Object
-    native;
+    native
+    hidecategories(Object);
 
-// --- Structs ---
 struct LODLevel
 {
-    var float DistanceFactor;
-    var float ReductionFactor;
-    var float Hysteresis;
-    var int MaxInfluences;
-    var bool SwitchRedigest;
+	var() float DistanceFactor;
+	var() float ReductionFactor;
+	var() float Hysteresis;
+	var() int MaxInfluences;
+	var() bool SwitchRedigest;
 };
 
-// --- Variables ---
 var const int WBrowserAnimationPtr;
-var Vector Scale;
-// ^ NEW IN 1.60
-var Vector Translation;
-// ^ NEW IN 1.60
-var Rotator Rotation;
-// ^ NEW IN 1.60
-var Vector MinVisBound;
-// ^ NEW IN 1.60
-var Vector MaxVisBound;
-// ^ NEW IN 1.60
-var Vector VisSphereCenter;
-// ^ NEW IN 1.60
-var float VisSphereRadius;
-// ^ NEW IN 1.60
-var int LODStyle;
-// ^ NEW IN 1.60
-var MeshAnimation DefaultAnimation;
-// ^ NEW IN 1.60
-var array<array> Material;
-// ^ NEW IN 1.60
-var float LOD_Strength;
-// ^ NEW IN 1.60
-var array<array> LODLevels;
-// ^ NEW IN 1.60
+var(Redigest) int LODStyle;  // Make drop-down box w. styles...
+var(Mesh) float VisSphereRadius;
+var(LOD) float LOD_Strength;
+var(Animation) MeshAnimation DefaultAnimation;
+var(Skin) array<Material> Material;
+var(LOD) array<LODLevel> LODLevels;
+var(Mesh) Vector Scale;
+var(Mesh) Vector Translation;
+var(Mesh) Rotator Rotation;
+var(Mesh) Vector MinVisBound;
+var(Mesh) Vector MaxVisBound;
+var(Mesh) Vector VisSphereCenter;
 
 defaultproperties
 {
+	Scale=(X=1.0000000,Y=1.0000000,Z=1.0000000)
 }

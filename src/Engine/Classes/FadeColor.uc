@@ -1,22 +1,23 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// FadeColor - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class FadeColor extends ConstantMaterial
-    native;
+    native
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Enums ---
 enum EColorFadeType
 {
-	FC_Linear,
-	FC_Sinusoidal,
+	FC_Linear,                      // 0
+	FC_Sinusoidal                   // 1
 };
 
-// --- Variables ---
-var Color Color1;
-var Color Color2;
-var float FadePeriod;
-var float FadePhase;
-var EColorFadeType ColorFadeType;
+var() FadeColor.EColorFadeType ColorFadeType;
+var() float FadePeriod;
+var() float FadePhase;
+var() Color Color1;
+var() Color Color2;
 
-defaultproperties
-{
-}

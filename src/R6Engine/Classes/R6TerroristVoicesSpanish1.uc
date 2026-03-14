@@ -1,10 +1,29 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// R6TerroristVoicesSpanish1 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6TerroristVoicesSpanish1 extends R6TerroristVoices;
 
-// --- Functions ---
-function Init(Actor aActor) {}
+function Init(Actor aActor)
+{
+	super(R6Voices).Init(aActor);
+	aActor.AddSoundBankName("Voices_Terro_Spanish01");
+	return;
+}
 
 defaultproperties
 {
+	m_sndWounded=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroWounded'
+	m_sndTaunt=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroTaunt'
+	m_sndSurrender=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroSurrender'
+	m_sndSeesTearGas=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroSeesTearGas'
+	m_sndRunAway=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroRunAway'
+	m_sndGrenade=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroGrenade'
+	m_sndCoughsGas=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroCoughsGas'
+	m_sndBackup=Sound'Voices_Terro_Spanish01.01_SpAcc_TerroBackup'
+	m_sndSeesRainbow_LowAlert=Sound'Voices_Terro_Spanish01.01_SpAcc_SeesRainbow_LowAlert'
+	m_sndSeesRainbow_HighAlert=Sound'Voices_Terro_Spanish01.01_SpAcc_SeesRainbow_HighAler'
+	m_sndSeesFreeHostage=Sound'Voices_Terro_Spanish01.01_SpAcc_SeesFreeHostage'
+	m_sndHearsNoize=Sound'Voices_Terro_Spanish01.01_SpAcc_HearsNoize'
 }

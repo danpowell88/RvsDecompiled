@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6NightVision.uc : Night-vision goggle variant for the pilot character model.
-//  Extends R6NightVision with a pilot-specific mesh (R6RPilotNightVision).
+// R6PilotNightVision - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6NightVision.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -8,8 +13,9 @@
 //=============================================================================
 class R6PilotNightVision extends R6NightVision;
 
-#exec NEW StaticMesh File="models\R6RPilotNightVision.ASE" Name="R6RPilotNightVision"
-
 defaultproperties
 {
+	DrawScale=1.2000000
+	StaticMesh=StaticMesh'R6Engine.R6RPilotNightVision'
+	Skins=/* Array type was not detected. */
 }

@@ -1,28 +1,26 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// AnimNotify_Effect - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class AnimNotify_Effect extends AnimNotify
-    native;
+    native
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var class<Actor> EffectClass;
-// ^ NEW IN 1.60
-var name Bone;
-// ^ NEW IN 1.60
-var Vector OffsetLocation;
-// ^ NEW IN 1.60
-var Rotator OffsetRotation;
-// ^ NEW IN 1.60
-var bool Attach;
-// ^ NEW IN 1.60
-var name Tag;
-// ^ NEW IN 1.60
-var float DrawScale;
-// ^ NEW IN 1.60
-var Vector DrawScale3D;
-// ^ NEW IN 1.60
-// Valid only in the editor.
-var transient Actor LastSpawnedEffect;
+var() bool Attach;
+var() float DrawScale;
+var() name Bone;
+var() name Tag;
+var() Class<Actor> EffectClass;
+var() Vector OffsetLocation;
+var() Rotator OffsetRotation;
+var() Vector DrawScale3D;
+var private transient Actor LastSpawnedEffect;  // Valid only in the editor.
 
 defaultproperties
 {
+	DrawScale=1.0000000
+	DrawScale3D=(X=1.0000000,Y=1.0000000,Z=1.0000000)
 }

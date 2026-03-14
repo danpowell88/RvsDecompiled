@@ -1,15 +1,23 @@
-// Latent scripted action that pauses the sequence until the specified animation channel
-// finishes playing.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_WaitForAnimEnd extends LatentScriptedAction;
+//=============================================================================
+// ACTION_WaitForAnimEnd - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_WaitForAnimEnd extends LatentScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var int Channel;
+var(Action) int Channel;
 
-// --- Functions ---
-function bool CompleteOnAnim(int Num) {}
+function bool CompleteOnAnim(int Num)
+{
+	return __NFUN_154__(Channel, Num);
+	return;
+}
 
 defaultproperties
 {
+	bValidForTrigger=false
+	ActionString="Wait for animend"
 }

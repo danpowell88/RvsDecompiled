@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6WindowListButtonItem.uc : List-box row item that embeds an R6WindowButton widget.
-//  Allows a list control to present a clickable button inside each row entry.
+// R6WindowListButtonItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6WindowListButtonItem.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -8,13 +13,25 @@
 //=============================================================================
 class R6WindowListButtonItem extends UWindowListBoxItem;
 
-// --- Variables ---
 var R6WindowButton m_Button;
 
-// --- Functions ---
-function SetFront() {}
-function SetBack() {}
-
-defaultproperties
+function SetFront()
 {
+	// End:0x1A
+	if(__NFUN_119__(m_Button, none))
+	{
+		m_Button.BringToFront();
+	}
+	return;
 }
+
+function SetBack()
+{
+	// End:0x1A
+	if(__NFUN_119__(m_Button, none))
+	{
+		m_Button.SendToBack();
+	}
+	return;
+}
+

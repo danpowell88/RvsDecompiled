@@ -1,12 +1,35 @@
+//=============================================================================
+// R6Pistol - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R6Pistol.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-class R6Pistol extends R6Weapons;
-
-#exec OBJ LOAD FILE="..\Textures\Color.utx" PACKAGE=Color
-#exec NEW StaticMesh FILE="models\RedPistol.ASE" NAME="RedPistolStaticMesh" Yaw=32678
+class R6Pistol extends R6Weapons
+    abstract;
 
 defaultproperties
 {
+	m_fRateOfFire=0.1666667
+	m_eGripType=8
+	m_InventoryGroup=2
+	m_FPMuzzleFlashTexture=Texture'R6SFX_T.Muzzleflash.1stMuzzle_B'
+	m_ShellSingleFireSnd=Sound'CommonPistols.Play_Pistol_SingleShells'
+	m_ShellEndFullAutoSnd=Sound'CommonPistols.Play_Pistol_EndShell'
+	m_PawnWaitAnimLow="StandHandGunLow_nt"
+	m_PawnWaitAnimHigh="StandHandGunHigh_nt"
+	m_PawnWaitAnimProne="ProneHandGun_nt"
+	m_PawnFiringAnim="StandFireHandGun"
+	m_PawnFiringAnimProne="ProneFireHandGun"
+	m_PawnReloadAnim="StandReloadHandGun"
+	m_PawnReloadAnimTactical="StandReloadHandGun"
+	m_PawnReloadAnimProne="ProneReloadHandGun"
+	m_PawnReloadAnimProneTactical="ProneReloadHandGun"
+	m_AttachPoint="TagRightHand"
+	m_HoldAttachPoint="TagHolster"
+	m_szMagazineClass="R63rdWeapons.R63rdMAGPistol"
+	StaticMesh=StaticMesh'R6Weapons.RedPistolStaticMesh'
 }

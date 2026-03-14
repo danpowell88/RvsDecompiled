@@ -1,14 +1,19 @@
-// Scripted action that shows or hides the instigating pawn.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_SetHidden extends ScriptedAction;
+//=============================================================================
+// ACTION_SetHidden - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_SetHidden extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var bool bHidden;
+var(Action) bool bHidden;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-
-defaultproperties
+function bool InitActionFor(ScriptedController C)
 {
+	C.GetInstigator().bHidden = bHidden;
+	return false;
+	return;
 }
+

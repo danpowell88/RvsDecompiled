@@ -1,4 +1,10 @@
 //=============================================================================
+// R6TerroristAI - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6TerroristAI.uc : This is the AI Controller class for all terrorists
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -10,668 +16,4657 @@
 class R6TerroristAI extends R6AIController
     native;
 
-// --- Constants ---
-const C_MaxDistanceForActionSpot =  2000;
-const C_DefaultSearchTime =  30;
-const C_HostageReactionSearchTime =  15;
-const C_HostageSearchTime =  15;
-const C_WaitingForEnemyTime =  15;
-const C_NumberOfNodeRemembered =  10;
+const C_MaxDistanceForActionSpot = 2000;
+const C_DefaultSearchTime = 30;
+const C_HostageReactionSearchTime = 15;
+const C_HostageSearchTime = 15;
+const C_WaitingForEnemyTime = 15;
+const C_NumberOfNodeRemembered = 10;
 
-// --- Enums ---
-enum EEngageReaction
-{
-    EREACT_Random,
-    EREACT_AimedFire,
-    EREACT_SprayFire,
-    EREACT_RunAway,
-    EREACT_Surrender
-};
-enum EReactionStatus        
-{
-    REACTION_HearAndSeeAll,     // Lower status include all higher status (this one include all)
-    REACTION_SeeHostage,        // Dropped investigate sound
-    REACTION_HearBullet,        // Dropped hostage reaction
-    REACTION_SeeRainbow,        // Dropped bullet sound
-    REACTION_Grenade,           // Dropped rainbow
-    REACTION_HearAndSeeNothing  // Dropped all
-};
-enum EEventState
-{
-    EVSTATE_DefaultState, // Use default state
-    EVSTATE_RunAway,      // In state RunAway
-    EVSTATE_Attack,       // In state Attack
-    EVSTATE_FindHostage,  // In state FindHostage
-    EVSTATE_AttackHostage // In state AttackHostage
-};
-enum EFollowMode
-{
-    FMODE_Hostage,      // Escorting an hostage
-    FMODE_Path          // Following a leader on a path
-};
 enum EAttackMode
 {
-    ATTACK_NotEngaged,
-    ATTACK_AimedFire,
-    ATTACK_SprayFire,
-    ATTACK_SprayFireNoStop,     // Don't stop when enemy is not visible
-    ATTACK_SprayFireMove        // When on SprayFireNoStop and received EnemyNotVisible.  Fire while walking
+	ATTACK_NotEngaged,              // 0
+	ATTACK_AimedFire,               // 1
+	ATTACK_SprayFire,               // 2
+	ATTACK_SprayFireNoStop,         // 3
+	ATTACK_SprayFireMove            // 4
 };
 
-// --- Variables ---
-// var ? m_CurrentNode; // REMOVED IN 1.60
-// var ? m_PawnToFollow; // REMOVED IN 1.60
-var R6Terrorist m_pawn;
-// Current cover spot of the terrorist
-var R6ActionSpot m_pActionSpot;
-var Vector m_vMovingDestination;
-// Used in any place where I need a temporary random number
-var int m_iRandomNumber;
-                                                //   increase with each bullet detected
-// Where the terrorist think a threat is coming from
-var Vector m_vThreatLocation;
-var string m_sDebugString;
-var R6DZonePathNode m_currentNode; // Current patrol path node the terrorist is heading toward
-// ^ NEW IN 1.60
-// In wich attack mode the terrorist is currently
-var EAttackMode m_eAttackMode;
-// Hostage interaction
-var R6Hostage m_Hostage;
-var R6TerroristVoices m_VoicesManager;
-// MovingTo variable
-var Actor m_aMovingToDestination;
-var EReactionStatus m_eReactionStatus;
-var R6InteractiveObject m_TriggeredIO;
-// Used in patrol when waiting at a noode
-var float m_fWaitingTime;
-var EEventState m_eStateForEvent;
-// Time that the terrorist stay in engaged by sound
-var float m_fSearchTime;
-var R6TerroristMgr m_Manager;
-var R6Pawn m_pawnToFollow;        // Target pawn this terrorist is currently following or pursuing
-// ^ NEW IN 1.60
-var bool m_bWaiting;
-var R6DZonePath m_path;
-// Chance that the terrorist detect from where come the bullet,
-var int m_iChanceToDetectShooter;
+enum EReactionStatus
+{
+	REACTION_HearAndSeeAll,         // 0
+	REACTION_SeeHostage,            // 1
+	REACTION_HearBullet,            // 2
+	REACTION_SeeRainbow,            // 3
+	REACTION_Grenade,               // 4
+	REACTION_HearAndSeeNothing      // 5
+};
+
+enum EEventState
+{
+	EVSTATE_DefaultState,           // 0
+	EVSTATE_RunAway,                // 1
+	EVSTATE_Attack,                 // 2
+	EVSTATE_FindHostage,            // 3
+	EVSTATE_AttackHostage           // 4
+};
+
+enum EFollowMode
+{
+	FMODE_Hostage,                  // 0
+	FMODE_Path                      // 1
+};
+
+enum EEngageReaction
+{
+	EREACT_Random,                  // 0
+	EREACT_AimedFire,               // 1
+	EREACT_SprayFire,               // 2
+	EREACT_RunAway,                 // 3
+	EREACT_Surrender                // 4
+};
+
 // Variables used for threat reaction (SeePlayer and HearNoise)
-var EEngageReaction m_eEngageReaction;
-var R6HostageAI m_HostageAI;
-var bool m_bHearInvestigate;
-var bool m_bHearThreat;
+var R6TerroristAI.EEngageReaction m_eEngageReaction;
+var R6TerroristAI.EReactionStatus m_eReactionStatus;
+var R6TerroristAI.EEventState m_eStateForEvent;
+var R6TerroristAI.EAttackMode m_eAttackMode;  // In wich attack mode the terrorist is currently
+var R6TerroristAI.EFollowMode m_eFollowMode;
+var byte m_wBadMoveCount;
 var int m_iCurrentGroupID;
-var Rotator m_rStandRotation;
-var bool m_bCanFailMovingTo;
-var R6Pawn m_LastBumped;
-var R6DeploymentZone m_ZoneToEscort;
-// hunted pawn
-var R6Pawn m_huntedPawn;
-// Variable that can be used inside a state but not used between state
-var int m_iStateVariable;
-var bool m_bHeardGrenade;
+// Variable internally used for AI
+var int m_iTerroristInGroup;  // Number of terrorist in group, for reaction check
+var int m_iRainbowInCombat;  // Number of Rainbow in combat, for reaction check
+var int m_iChanceToDetectShooter;  // Chance that the terrorist detect from where come the bullet,
+var int m_iRandomNumber;  // Used in any place where I need a temporary random number
+var int m_iStateVariable;  // Variable that can be used inside a state but not used between state
+var int m_iFollowYaw;
+var bool m_bHearInvestigate;
 var bool m_bSeeHostage;
+var bool m_bHearThreat;
 var bool m_bSeeRainbow;
 var bool m_bHearGrenade;
-var float m_fFollowDist;
-// hostage reaction direction
-var Vector m_vHostageReactionDirection;
-// Used in patrol when waiting at a noode
-var float m_fFacingTime;
-// Number of Rainbow in combat, for reaction check
-var int m_iRainbowInCombat;
-var byte m_wBadMoveCount;
+var bool m_bPreciseMove;  // Set to true for the pawn to walk as close as possible to destination
+var bool m_bCanFailMovingTo;
 var bool m_bFireShort;
-var name m_PatrolCurrentLabel;
-// Variable used for PlayVoices
-var bool m_bAlreadyHeardSound;
-// For interrupted IO
-var bool m_bCalledForBackup;
-var Vector m_vSpawningPosition;
-var int m_iFollowYaw;
-var float m_fPawnDistance;
-var Rotator m_rSpawningRotation;
-var float m_fLastBumpedTime;
-var name m_labelAfterMovingTo;
-var name m_stateAfterMovingTo;
-var EFollowMode m_eFollowMode;
-// Last ten node used by the terrorist
-var NavigationPoint m_aLastNode[10];
-// Variable internally used for AI
-// Number of terrorist in group, for reaction check
-var int m_iTerroristInGroup;
-var R6TerroristAI m_TerroristLeader;
-// Set to true for the pawn to walk as close as possible to destination
-var bool m_bPreciseMove;
-var array<array> m_listAvailableBackup;
 // Patrol path variable
 var bool m_bInPathMode;
+var bool m_bWaiting;
+// Variable used for PlayVoices
+var bool m_bAlreadyHeardSound;
+var bool m_bHeardGrenade;
+// For interrupted IO
+var bool m_bCalledForBackup;
+var float m_fWaitingTime;  // Used in patrol when waiting at a noode
+var float m_fFacingTime;  // Used in patrol when waiting at a noode
+var float m_fSearchTime;  // Time that the terrorist stay in engaged by sound
+var float m_fPawnDistance;
+var float m_fFollowDist;
+var float m_fLastBumpedTime;
+var R6TerroristAI m_TerroristLeader;
+var R6Terrorist m_pawn;
+var R6TerroristMgr m_Manager;
+var R6TerroristVoices m_VoicesManager;
+var R6ActionSpot m_pActionSpot;  // Current cover spot of the terrorist
+// NEW IN 1.60
+var NavigationPoint m_aLastNode[10];
+var R6Pawn m_huntedPawn;  // hunted pawn
+// Hostage interaction
+var R6Hostage m_Hostage;
+var R6HostageAI m_HostageAI;
+var R6DeploymentZone m_ZoneToEscort;
+// Follow pawn variable
+var R6Pawn m_pawnToFollow;
+// MovingTo variable
+var Actor m_aMovingToDestination;
+var R6Pawn m_LastBumped;
+var R6DZonePath m_path;
+var R6DZonePathNode m_currentNode;
+var R6InteractiveObject m_TriggeredIO;
+var name m_stateAfterMovingTo;
+var name m_labelAfterMovingTo;
+var name m_PatrolCurrentLabel;
+var array<R6TerroristAI> m_listAvailableBackup;
+                                                //   increase with each bullet detected
+var Vector m_vThreatLocation;  // Where the terrorist think a threat is coming from
+var Vector m_vHostageReactionDirection;  // hostage reaction direction
+var Vector m_vMovingDestination;
+var Rotator m_rStandRotation;
+var Vector m_vSpawningPosition;
+var Rotator m_rSpawningRotation;
+var string m_sDebugString;
 
-// --- Functions ---
-// function ? SetView(...); // REMOVED IN 1.60
+// Export UR6TerroristAI::execGetNextRandomNode(FFrame&, void* const)
+native(1820) final function NavigationPoint GetNextRandomNode();
+
+// Export UR6TerroristAI::execCallBackupForAttack(FFrame&, void* const)
+native(1821) final function CallBackupForAttack(Vector vDestination, R6Pawn.eMovementPace ePace);
+
+// Export UR6TerroristAI::execCallBackupForInvestigation(FFrame&, void* const)
+native(1823) final function CallBackupForInvestigation(Vector vDestination, R6Pawn.eMovementPace ePace);
+
+// Export UR6TerroristAI::execMakeBackupList(FFrame&, void* const)
+native(1822) final function bool MakeBackupList();
+
+// Export UR6TerroristAI::execFindBetterShotLocation(FFrame&, void* const)
+native(1824) final function Vector FindBetterShotLocation(Pawn PTarget);
+
+// Export UR6TerroristAI::execHaveAClearShot(FFrame&, void* const)
+native(1827) final function bool HaveAClearShot(Vector vStart, Pawn PTarget);
+
+// Export UR6TerroristAI::execCallVisibleTerrorist(FFrame&, void* const)
+native(1828) final function bool CallVisibleTerrorist();
+
+// Export UR6TerroristAI::execIsAttackSpotStillValid(FFrame&, void* const)
+native(1829) final function bool IsAttackSpotStillValid();
+
+event PostBeginPlay()
+{
+	super(Controller).PostBeginPlay();
+	m_VoicesManager = R6TerroristVoices(R6AbstractGameInfo(Level.Game).GetTerroristVoicesMgr(Level.m_eTerroristVoices));
+	return;
+}
+
 //============================================================================
-// SeePlayer -
+// LogTerroState - 
 //============================================================================
-event SeePlayer(Pawn seen) {}
-    // Ignore GotoPointToAttack in state RunAway
-event GotoPointToAttack(Actor PTarget, Vector vDestination) {}
+function LogTerroState()
+{
+	local R6PlayerController C;
+
+	// End:0x4A
+	foreach __NFUN_304__(Class'R6Engine.R6PlayerController', C)
+	{
+		// End:0x49
+		if(__NFUN_119__(C.CheatManager, none))
+		{
+			R6CheatManager(C.CheatManager).LogTerro(m_pawn);
+			// End:0x4A
+			break;
+		}		
+	}	
+	return;
+}
+
 //============================================================================
-// AIAffectedByGrenade -
+// bool CanClimbLadders - 
 //============================================================================
-function AIAffectedByGrenade(EGrenadeType eType, Actor aGrenade) {}
+function bool CanClimbLadders(R6Ladder Ladder)
+{
+	local int i;
+	local bool bResult;
+
+	// End:0xAE
+	if(__NFUN_130__(m_pawn.m_bAutoClimbLadders, __NFUN_132__(__NFUN_114__(MoveTarget, Ladder), __NFUN_114__(Pawn.Anchor, Ladder))))
+	{
+		J0x3D:
+
+		// End:0xAE [Loop If]
+		if(__NFUN_130__(__NFUN_150__(i, 16), __NFUN_119__(RouteCache[i], none)))
+		{
+			// End:0x82
+			if(__NFUN_114__(RouteCache[i], Ladder.m_pOtherFloor))
+			{
+				bResult = true;
+			}
+			// End:0xA4
+			if(__NFUN_130__(bResult, __NFUN_114__(RouteCache[i], Ladder)))
+			{
+				return false;
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x3D;
+		}
+	}
+	return bResult;
+	return;
+}
+
 //============================================================================
-//  ####   ###   ####  #   #  #####    #####  #####   ###   ####   ####  ##  #
-//  ##  # ##  #   ##   ##  #   ##      ##     ##     ##  #  #   # ##     ##  #
-//  ####  ##  #   ##   # # #   ##      #####  ####   #####  ####  ##     #####
-//  ##    ##  #   ##   #  ##   ##         ##  ##     ##  #  ## #  ##     ##  #
-//  ##     ###   ####  #   #   ##      #####  #####  ##  #  ##  #  ####  ##  #
+// BOOL CanSafelyChangeState - 
+//          Return true if a pawn can safely change state by event.
+//          - Not in ladder
+//          - Not in root motion
+//          - Not with an uninterruptable interactive object
 //============================================================================
-event GotoPointAndSearch(optional float fSearchTime, Vector vDestination, eMovementPace ePace, optional EDefCon eNewDefCon, bool bCallBackup) {}
+function bool CanSafelyChangeState()
+{
+	return __NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(Pawn.IsAlive(), __NFUN_129__(m_bCantInterruptIO)), __NFUN_155__(int(Pawn.Physics), int(12))), __NFUN_155__(int(Pawn.Physics), int(11))), __NFUN_129__(m_pawn.m_bIsKneeling));
+	return;
+}
+
 //============================================================================
-// HearNoise -
+// R6DamageAttitudeTo - 
 //============================================================================
-event HearNoise(Actor NoiseMaker, ENoiseType eType, float Loudness, optional ESoundType ESoundType) {}
-function FollowLeader(Vector VOffset, R6Terrorist Leader) {}
+function R6DamageAttitudeTo(Pawn instigatedBy, Actor.eKillResult eKillFromTable, Actor.eStunResult eStunFromTable, Vector vBulletMomentum)
+{
+	// End:0x37
+	if(IsAnEnemy(R6Pawn(instigatedBy)))
+	{
+		// End:0x37
+		if(__NFUN_152__(int(m_eReactionStatus), int(3)))
+		{
+			GotoStateEngageByThreat(instigatedBy.Location);
+		}
+	}
+	// End:0x63
+	if(__NFUN_119__(m_pawn.EngineWeapon, none))
+	{
+		m_pawn.EngineWeapon.SetAccuracyOnHit();
+	}
+	return;
+}
+
 //============================================================================
-// HostageSurrender - Called from an hostage AI when that AI surrender
+// PlaySoundDamage - 
 //============================================================================
-function HostageSurrender(R6HostageAI hostageAI) {}
+function PlaySoundDamage(Pawn instigatedBy)
+{
+	m_VoicesManager.PlayTerroristVoices(m_pawn, 0);
+	switch(m_pawn.m_eHealth)
+	{
+		// End:0x2B
+		case 2:
+		// End:0x64
+		case 3:
+			// End:0x61
+			if(__NFUN_119__(instigatedBy.Controller, none))
+			{
+				instigatedBy.Controller.PlaySoundInflictedDamage(m_pawn);
+			}
+			// End:0x67
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
+}
+
 //============================================================================
-//  #####   ##  #   ####    ####    #####   #   #   ####    #####   ####
-//  ##      ##  #   #   #   #   #   ##      ##  #   ## ##   ##      #   #
-//  #####   ##  #   ####    ####    ####    # # #   ##  #   ####    ####
-//     ##   ##  #   ## #    ## #    ##      #  ##   ## ##   ##      ## #
-//  #####   #####   ##  #   ##  #   #####   #   #   ####    #####   ##  #
+// SetReactionStatus - 
 //============================================================================
-function SecureTerrorist(R6Pawn pOther) {}
-function EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTerro, int iNbRainbow) {}
-// ^ NEW IN 1.60
+function SetReactionStatus(R6TerroristAI.EReactionStatus eNewStatus, R6TerroristAI.EEventState eState)
+{
+	m_bHearInvestigate = false;
+	m_bSeeHostage = false;
+	m_bHearThreat = false;
+	m_bSeeRainbow = false;
+	m_bHearGrenade = false;
+	// End:0x42
+	if(__NFUN_150__(int(eNewStatus), int(5)))
+	{
+		__NFUN_117__('HearNoise');		
+	}
+	else
+	{
+		__NFUN_118__('HearNoise');
+	}
+	// End:0x63
+	if(__NFUN_150__(int(eNewStatus), int(4)))
+	{
+		__NFUN_117__('SeePlayer');		
+	}
+	else
+	{
+		__NFUN_118__('SeePlayer');
+	}
+	switch(eNewStatus)
+	{
+		// End:0x7E
+		case 0:
+			m_bHearInvestigate = true;
+		// End:0x8B
+		case 1:
+			m_bSeeHostage = true;
+		// End:0x98
+		case 2:
+			m_bHearThreat = true;
+		// End:0xA5
+		case 3:
+			m_bSeeRainbow = true;
+		// End:0xB2
+		case 4:
+			m_bHearGrenade = true;
+		// End:0xBA
+		case 5:
+			// End:0xBD
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	m_eReactionStatus = eNewStatus;
+	m_eStateForEvent = eState;
+	// End:0xED
+	if(__NFUN_155__(int(m_eStateForEvent), int(0)))
+	{
+		__NFUN_117__('EnemyNotVisible');		
+	}
+	else
+	{
+		__NFUN_118__('EnemyNotVisible');
+	}
+	return;
+}
+
 //============================================================================
-//  ##### #   #   ####   ###    ####  #####    #####  ####   ####  ##  # #####
-//  ##    ##  #  ##     ##  #  ##     ##       ##      ##   ##     ##  #  ##
-//  ####  # # #  ## ##  #####  ## ##  ####     #####   ##   ## ##  #####  ##
-//  ##    #  ##  ##  #  ##  #  ##  #  ##          ##   ##   ##  #  ##  #  ##
-//  ##### #   #   ####  ##  #   ####  #####    #####  ####   ####  ##  #  ##
+// ChangeDefcon - 
 //============================================================================
-function EngageBySight(Pawn aPawn) {}
+function ChangeDefCon(R6Terrorist.EDefCon eNewDefCon)
+{
+	switch(eNewDefCon)
+	{
+		// End:0x28
+		case 1:
+			m_pawn.RotationRate.Yaw = 70000;
+			// End:0xAF
+			break;
+		// End:0x49
+		case 2:
+			m_pawn.RotationRate.Yaw = 60000;
+			// End:0xAF
+			break;
+		// End:0x6A
+		case 3:
+			m_pawn.RotationRate.Yaw = 50000;
+			// End:0xAF
+			break;
+		// End:0x8B
+		case 4:
+			m_pawn.RotationRate.Yaw = 40000;
+			// End:0xAF
+			break;
+		// End:0xAC
+		case 5:
+			m_pawn.RotationRate.Yaw = 30000;
+			// End:0xAF
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	m_pawn.m_eDefCon = eNewDefCon;
+	// End:0xE7
+	if(__NFUN_152__(int(eNewDefCon), int(2)))
+	{
+		m_pawn.m_bWantsHighStance = true;		
+	}
+	else
+	{
+		m_pawn.m_bWantsHighStance = false;
+	}
+	m_pawn.PlayMoving();
+	return;
+}
+
 //============================================================================
-// IsAnHostage -
+// SetActionSpot - 
 //============================================================================
-function bool IsAnHostage(R6Pawn Other) {}
-// ^ NEW IN 1.60
+function SetActionSpot(R6ActionSpot pNewSpot)
+{
+	// End:0x1B
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		m_pActionSpot.m_pCurrentUser = none;
+	}
+	m_pActionSpot = pNewSpot;
+	// End:0x45
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		m_pActionSpot.m_pCurrentUser = m_pawn;
+	}
+	return;
+}
+
 //============================================================================
-// AssignNearHostage -
+// SetEnemy - 
 //============================================================================
-function AssignNearHostage() {}
+function SetEnemy(Pawn newEnemy)
+{
+	Enemy = newEnemy;
+	LastSeenTime = Level.TimeSeconds;
+	// End:0x3E
+	if(__NFUN_119__(Enemy, none))
+	{
+		LastSeenPos = Enemy.Location;
+	}
+	return;
+}
+
 //============================================================================
-// R6DamageAttitudeTo -
+// INT GetKillingHostageChance - 
 //============================================================================
-delegate R6DamageAttitudeTo(Pawn instigatedBy, eKillResult eKillFromTable, eStunResult eStunFromTable, Vector vBulletMomentum) {}
+function int GetKillingHostageChance()
+{
+	local int iChance;
+
+	// End:0x14
+	if(UseRandomHostage())
+	{
+		iChance = 40;		
+	}
+	else
+	{
+		iChance = m_pawn.m_DZone.m_HostageShootChance;
+	}
+	// End:0x4E
+	if(__NFUN_154__(m_pawn.m_iDiffLevel, 1))
+	{
+		__NFUN_162__(iChance, 20);
+	}
+	// End:0x6C
+	if(__NFUN_154__(m_pawn.m_iDiffLevel, 3))
+	{
+		__NFUN_161__(iChance, 20);
+	}
+	return iChance;
+	return;
+}
+
 //============================================================================
-// PlaySoundDamage -
+// SeePlayer - 
 //============================================================================
-function PlaySoundDamage(Pawn instigatedBy) {}
+event SeePlayer(Pawn seen)
+{
+	local R6Pawn r6seen;
+	local R6Hostage hostage;
+	local R6HostageAI hostageAI;
+
+	r6seen = R6Pawn(seen);
+	// End:0x1D
+	if(__NFUN_114__(r6seen, none))
+	{
+		return;
+	}
+	// End:0x5D
+	if(__NFUN_130__(m_bSeeHostage, IsAnHostage(r6seen)))
+	{
+		hostage = R6Hostage(r6seen);
+		// End:0x5D
+		if(__NFUN_242__(hostage.m_bClassicMissionCivilian, true))
+		{
+			return;
+		}
+	}
+	// End:0xA2
+	if(__NFUN_154__(int(m_eStateForEvent), int(4)))
+	{
+		// End:0xA0
+		if(__NFUN_130__(r6seen.IsAlive(), IsAnHostage(r6seen)))
+		{
+			SetEnemy(r6seen);
+			GotoStateAimedFire();
+		}
+		return;
+	}
+	// End:0xF6
+	if(__NFUN_130__(__NFUN_129__(m_pawn.m_bHearNothing), __NFUN_129__(r6seen.IsAlive())))
+	{
+		// End:0xD7
+		if(CheckForInteraction())
+		{
+			return;
+		}
+		// End:0xF6
+		if(__NFUN_129__(m_bAlreadyHeardSound))
+		{
+			GotoSeeADead(r6seen.Location);
+		}
+	}
+	// End:0x12A
+	if(__NFUN_130__(m_bSeeRainbow, IsAnEnemy(r6seen)))
+	{
+		ReconThreatCheck(seen, 0);
+		EngageBySight(r6seen);		
+	}
+	else
+	{
+		// End:0x27D
+		if(__NFUN_130__(m_bSeeHostage, IsAnHostage(r6seen)))
+		{
+			hostage = R6Hostage(r6seen);
+			// End:0x16A
+			if(UseRandomHostage())
+			{
+				m_Hostage = hostage;				
+			}
+			else
+			{
+				// End:0x1DA
+				if(__NFUN_129__(IsAssigned(hostage)))
+				{
+					// End:0x1B6
+					if(IsMyHostage(hostage))
+					{
+						m_Manager.AssignHostageTo(hostage, self);
+						m_VoicesManager.PlayTerroristVoices(m_pawn, 9);						
+					}
+					else
+					{
+						m_VoicesManager.PlayTerroristVoices(m_pawn, 12);
+						GotoStateFindHostage(hostage);
+					}					
+				}
+				else
+				{
+					hostageAI = R6HostageAI(hostage.Controller);
+					// End:0x27D
+					if(__NFUN_130__(__NFUN_218__(hostageAI.m_vReactionDirection, vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_217__(m_vHostageReactionDirection, vect(0.0000000, 0.0000000, 0.0000000))))
+					{
+						m_vHostageReactionDirection = hostageAI.m_vReactionDirection;
+						hostageAI.m_vReactionDirection = vect(0.0000000, 0.0000000, 0.0000000);
+						GotoPointAndSearch(m_vHostageReactionDirection, 4, false, 15.0000000, m_pawn.m_eDefCon);
+					}
+				}
+			}
+		}
+	}
+	return;
+}
+
 //============================================================================
-// ChangeDefcon -
+// ReconThreatCheck - 
 //============================================================================
-function ChangeDefCon(EDefCon eNewDefCon) {}
+function ReconThreatCheck(Actor aThreat, Actor.ENoiseType eType)
+{
+	local R6Pawn aPawn;
+
+	aPawn = R6Pawn(aThreat);
+	// End:0x6E
+	if(__NFUN_154__(int(eType), int(0)))
+	{
+		// End:0x6B
+		if(__NFUN_130__(__NFUN_119__(aPawn, none), m_pawn.IsEnemy(aPawn)))
+		{
+			R6AbstractGameInfo(Level.Game).PawnSeen(aPawn, m_pawn);
+		}		
+	}
+	else
+	{
+		// End:0xE6
+		if(__NFUN_132__(__NFUN_154__(int(eType), int(2)), __NFUN_130__(m_pawn.IsEnemy(aThreat.Instigator), aThreat.__NFUN_303__('R6Weapon'))))
+		{
+			R6AbstractGameInfo(Level.Game).PawnHeard(aThreat.Instigator, m_pawn);
+		}
+	}
+	return;
+}
+
 //============================================================================
-// LogTerroState -
+// BOOL UseRandomHostage - 
 //============================================================================
-function LogTerroState() {}
+function bool UseRandomHostage()
+{
+	return Level.GameTypeUseNbOfTerroristToSpawn(Level.Game.m_szGameTypeFlag);
+	return;
+}
+
 //============================================================================
-// SetGunDirection -
+// AssignNearHostage - 
 //============================================================================
-function SetGunDirection(Actor aTarget) {}
+function AssignNearHostage()
+{
+	local R6Hostage hostage;
+
+	// End:0x2F
+	foreach __NFUN_312__(Class'R6Engine.R6Hostage', hostage, 500.0000000, Pawn.Location)
+	{
+		m_Hostage = hostage;		
+	}	
+	return;
+}
+
 //============================================================================
-// IsAnEnemy -
+// HearNoise - 
 //============================================================================
-function bool IsAnEnemy(R6Pawn Other) {}
-// ^ NEW IN 1.60
+event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
+{
+	local R6Hostage hostage;
+	local R6Pawn pPawn;
+
+	// End:0x4A
+	if(__NFUN_132__(m_pawn.m_bHearNothing, __NFUN_130__(m_pawn.m_bDontHearPlayer, R6Pawn(NoiseMaker.Instigator).m_bIsPlayer)))
+	{
+		return;
+	}
+	ReconThreatCheck(NoiseMaker, eType);
+	// End:0xF3
+	if(__NFUN_130__(m_bHearInvestigate, __NFUN_154__(int(eType), int(1))))
+	{
+		hostage = R6Hostage(NoiseMaker.Instigator);
+		// End:0xA9
+		if(__NFUN_119__(hostage, none))
+		{
+			// End:0xA9
+			if(IsAssigned(hostage))
+			{
+				return;
+			}
+		}
+		// End:0xD2
+		if(__NFUN_129__(m_bAlreadyHeardSound))
+		{
+			m_bAlreadyHeardSound = true;
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 13);
+		}
+		GotoPointAndSearch(NoiseMaker.Location, 4, true, 30.0000000, 2);		
+	}
+	else
+	{
+		// End:0x178
+		if(__NFUN_130__(m_bHearThreat, __NFUN_154__(int(eType), int(2))))
+		{
+			// End:0x123
+			if(__NFUN_150__(m_iChanceToDetectShooter, 80))
+			{
+				__NFUN_161__(m_iChanceToDetectShooter, 20);
+			}
+			// End:0x14B
+			if(__NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), m_iChanceToDetectShooter))
+			{
+				EngageBySight(NoiseMaker.Instigator);				
+			}
+			else
+			{
+				// End:0x175
+				if(__NFUN_129__(__NFUN_281__('EngageByThreat')))
+				{
+					GotoStateEngageByThreat(NoiseMaker.Instigator.Location);
+				}
+			}			
+		}
+		else
+		{
+			// End:0x268
+			if(__NFUN_130__(m_bHearGrenade, __NFUN_154__(int(eType), int(3))))
+			{
+				// End:0x265
+				if(__NFUN_132__(__NFUN_150__(__NFUN_1851__(Rotator(__NFUN_216__(NoiseMaker.Location, Pawn.Location)).Yaw, Pawn.Rotation.Yaw), 16000), __NFUN_150__(__NFUN_1851__(Rotator(__NFUN_216__(NoiseMaker.Instigator.Location, Pawn.Location)).Yaw, Pawn.Rotation.Yaw), 16000)))
+				{
+					// End:0x251
+					if(__NFUN_129__(m_bHeardGrenade))
+					{
+						m_VoicesManager.PlayTerroristVoices(m_pawn, 5);
+						m_bHeardGrenade = true;
+					}
+					ReactToGrenade(NoiseMaker.Location);
+				}				
+			}
+			else
+			{
+				// End:0x2F5
+				if(__NFUN_130__(m_bHearInvestigate, __NFUN_154__(int(eType), int(4))))
+				{
+					pPawn = R6Pawn(NoiseMaker.Instigator);
+					// End:0x2ED
+					if(__NFUN_130__(__NFUN_119__(pPawn, none), __NFUN_129__(pPawn.m_bTerroSawMeDead)))
+					{
+						pPawn.m_bTerroSawMeDead = true;
+						GotoPointAndSearch(NoiseMaker.Location, 4, true, 30.0000000);						
+					}
+					else
+					{
+						ChangeDefCon(2);
+					}
+				}
+			}
+		}
+	}
+	return;
+}
+
 //============================================================================
-// BOOL IsMyHostage -
+// EnemyNotVisible - 
 //============================================================================
-function bool IsMyHostage(R6Hostage hostage) {}
-// ^ NEW IN 1.60
-function bool CheckForInteraction() {}
-// ^ NEW IN 1.60
+event EnemyNotVisible()
+{
+	local Vector vDir, vTest;
+
+	switch(m_eStateForEvent)
+	{
+		// End:0x0F
+		case 0:
+			// End:0x1EA
+			break;
+		// End:0x47
+		case 1:
+			// End:0x44
+			if(__NFUN_130__(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastSeenTime), float(2)), CanSafelyChangeState()))
+			{
+				__NFUN_113__('WaitForEnemy');
+			}
+			// End:0x1EA
+			break;
+		// End:0x66
+		case 3:
+			FocalPoint = LastSeenPos;
+			__NFUN_113__('FindHostage', 'Pursues');
+			// End:0x1EA
+			break;
+		// End:0x1E0
+		case 2:
+			// End:0x7D
+			if(__NFUN_154__(int(m_eAttackMode), int(4)))
+			{
+				return;
+			}
+			FocalPoint = LastSeenPos;
+			Focus = none;
+			// End:0x1AA
+			if(__NFUN_130__(__NFUN_154__(int(m_eAttackMode), int(3)), m_pawn.m_bAllowLeave))
+			{
+				m_vMovingDestination = LastSeenPos;
+				// End:0x1A8
+				if(__NFUN_177__(__NFUN_225__(__NFUN_216__(Pawn.Location, m_vMovingDestination)), __NFUN_171__(Pawn.CollisionRadius, float(2))))
+				{
+					// End:0x108
+					if(__NFUN_521__(m_vMovingDestination))
+					{
+						__NFUN_113__('Attack', 'SprayFireMove');						
+					}
+					else
+					{
+						vDir = __NFUN_226__(__NFUN_216__(m_vMovingDestination, m_pawn.Location));
+						vTest = __NFUN_212__(__NFUN_220__(vDir, vect(0.0000000, 0.0000000, 1.0000000)), float(200));
+						// End:0x178
+						if(__NFUN_521__(__NFUN_215__(m_vMovingDestination, vTest)))
+						{
+							m_vMovingDestination = __NFUN_215__(m_vMovingDestination, vTest);
+							__NFUN_113__('Attack', 'SprayFireMove');							
+						}
+						else
+						{
+							// End:0x1A8
+							if(__NFUN_521__(__NFUN_216__(m_vMovingDestination, vTest)))
+							{
+								m_vMovingDestination = __NFUN_216__(m_vMovingDestination, vTest);
+								__NFUN_113__('Attack', 'SprayFireMove');
+							}
+						}
+					}
+				}
+				return;
+			}
+			// End:0x1D2
+			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+			{
+				__NFUN_113__('Sniping', 'LostTrackOfEnemy');				
+			}
+			else
+			{
+				GotoStateLostSight(LastSeenPos);
+			}
+			// End:0x1EA
+			break;
+		// End:0xFFFF
+		default:
+			__NFUN_118__('EnemyNotVisible');
+			break;
+	}
+	return;
+}
+
 //============================================================================
-// GotoStateFindHostage -
+// state BumpBackUp - set the pawn engagement status at beginning of state
 //============================================================================
-function GotoStateFindHostage(R6Hostage hostage) {}
+function GotoBumpBackUpState(name returnState)
+{
+	// End:0x23
+	if(__NFUN_130__(__NFUN_129__(m_pawn.m_bIsKneeling), __NFUN_129__(CanSafelyChangeState())))
+	{
+		return;
+	}
+	super.GotoBumpBackUpState(returnState);
+	return;
+}
+
 //============================================================================
-// SetReactionStatus -
+// SetGunDirection - 
 //============================================================================
-function SetReactionStatus(EReactionStatus eNewStatus, EEventState eState) {}
+function SetGunDirection(Actor aTarget)
+{
+	local Rotator rDirection;
+	local Vector vDirection;
+	local Coords cTarget;
+	local Vector vTarget;
+
+	// End:0xB4
+	if(__NFUN_119__(aTarget, none))
+	{
+		// End:0x28
+		if(__NFUN_114__(aTarget, Enemy))
+		{
+			vTarget = LastSeenPos;			
+		}
+		else
+		{
+			cTarget = aTarget.GetBoneCoords('R6 Spine');
+			vTarget = cTarget.Origin;
+		}
+		vDirection = __NFUN_216__(vTarget, m_pawn.GetFiringStartPoint());
+		rDirection = Rotator(vDirection);
+		m_pawn.m_wWantedAimingPitch = byte(__NFUN_145__(rDirection.Pitch, 256));
+		m_pawn.m_rFiringRotation = rDirection;		
+	}
+	else
+	{
+		m_pawn.m_wWantedAimingPitch = 0;
+		m_pawn.m_rFiringRotation = m_pawn.Rotation;
+	}
+	return;
+}
+
 //============================================================================
-// ReconThreatCheck -
+// IsAnEnemy - 
 //============================================================================
-function ReconThreatCheck(Actor aThreat, ENoiseType eType) {}
+function bool IsAnEnemy(R6Pawn Other)
+{
+	// End:0x28
+	if(__NFUN_130__(m_pawn.m_bDontSeePlayer, Other.m_bIsPlayer))
+	{
+		return false;
+	}
+	// End:0x55
+	if(__NFUN_130__(m_pawn.IsEnemy(Other), Other.IsAlive()))
+	{
+		return true;
+	}
+	return false;
+	return;
+}
+
 //============================================================================
-// GotoStateMoveToDestination -
+// IsAnHostage - 
 //============================================================================
-function GotoStateMovingTo(optional Vector vDestination, optional name labelAfter, optional name stateAfter, optional Actor aMoveTarget, eMovementPace ePace, string sDebugString, bool bCanFail, optional bool bDontCheckLeave, optional bool bPreciseMove) {}
+function bool IsAnHostage(R6Pawn Other)
+{
+	// End:0x2D
+	if(__NFUN_130__(m_pawn.IsNeutral(Other), Other.IsAlive()))
+	{
+		return true;
+	}
+	return false;
+	return;
+}
+
 //============================================================================
-// AIPlayCallBackup -
-//   - Return true if we must wait for the end of the animation
+// BOOL IsAssigned - 
 //============================================================================
-function bool AIPlayCallBackup(Actor pEnemy) {}
-// ^ NEW IN 1.60
+function bool IsAssigned(R6Hostage hostage)
+{
+	return m_Manager.IsHostageAssigned(hostage);
+	return;
+}
+
 //============================================================================
-// EnemyNotVisible -
+// BOOL IsMyHostage - 
 //============================================================================
-event EnemyNotVisible() {}
+function bool IsMyHostage(R6Hostage hostage)
+{
+	local bool bResult;
+	local R6DZonePoint zonePoint;
+	local Actor HitActor;
+	local Vector vHitLocation, vHitNormal;
+
+	zonePoint = R6DZonePoint(m_pawn.m_DZone);
+	// End:0x7B
+	if(__NFUN_119__(zonePoint, none))
+	{
+		HitActor = m_pawn.__NFUN_1806__(vHitLocation, vHitNormal, hostage.Location, zonePoint.Location, __NFUN_158__(1, 2));
+		// End:0x78
+		if(__NFUN_114__(HitActor, hostage))
+		{
+			bResult = true;
+		}		
+	}
+	else
+	{
+		bResult = __NFUN_130__(m_pawn.m_DZone.__NFUN_1832__(m_pawn.Location), m_pawn.m_DZone.__NFUN_1832__(hostage.Location));
+	}
+	return bResult;
+	return;
+}
+
 //============================================================================
-// INT GetKillingHostageChance -
+// StartFiring - 
 //============================================================================
-function int GetKillingHostageChance() {}
-// ^ NEW IN 1.60
+function StartFiring()
+{
+	// End:0x80
+	if(__NFUN_130__(__NFUN_129__(Pawn.m_bDroppedWeapon), __NFUN_119__(Pawn.EngineWeapon, none)))
+	{
+		// End:0x49
+		if(__NFUN_129__(Pawn.EngineWeapon.HasAmmo()))
+		{
+			return;
+		}
+		// End:0x5F
+		if(__NFUN_119__(Enemy, none))
+		{
+			Target = Enemy;
+		}
+		bFire = 1;
+		Pawn.EngineWeapon.__NFUN_113__('NormalFire');
+	}
+	m_pawn.PlayWeaponAnimation();
+	return;
+}
+
 //============================================================================
-// bool CanClimbLadders -
+// StopFiring - 
 //============================================================================
-function bool CanClimbLadders(R6Ladder Ladder) {}
-// ^ NEW IN 1.60
-function Rotator ChooseRandomDirection(int iLookBackChance) {}
-// ^ NEW IN 1.60
-function bool IsGoingBack() {}
-// ^ NEW IN 1.60
+function StopFiring()
+{
+	bFire = 0;
+	m_pawn.PlayWeaponAnimation();
+	return;
+}
+
 //============================================================================
-// ReactToGrenade -
+// ReloadWeapon - 
 //============================================================================
-function ReactToGrenade(Vector vGrenadeLocation) {}
-function float GetFacingTime() {}
-// ^ NEW IN 1.60
-// Random decision function
-function float GetWaitingTime() {}
-// ^ NEW IN 1.60
+function AIReloadWeapon()
+{
+	Pawn.EngineWeapon.__NFUN_113__('None');
+	m_pawn.m_wWantedAimingPitch = 0;
+	// End:0x67
+	if(__NFUN_154__(int(Pawn.EngineWeapon.m_eWeaponType), int(5)))
+	{
+		Pawn.EngineWeapon.FullCurrentClip();		
+	}
+	else
+	{
+		m_pawn.m_ePlayerIsUsingHands = 0;
+		m_pawn.ServerSwitchReloadingWeapon(true);
+		m_pawn.ReloadWeapon();
+	}
+	m_pawn.PlayWeaponAnimation();
+	return;
+}
+
 //============================================================================
-// BOOL SetLowestSnipingStance -
+// FLOAT GetMaxCoverDistance - Max distance that the pawn is willing to go
+//                             to find a cover
+//============================================================================
+function float GetMaxCoverDistance()
+{
+	switch(m_pawn.m_ePersonality)
+	{
+		// End:0x1E
+		case 0:
+			return 2000.0000000;
+			// End:0x67
+			break;
+		// End:0x2C
+		case 1:
+			return 1600.0000000;
+			// End:0x67
+			break;
+		// End:0x3A
+		case 2:
+			return 1200.0000000;
+			// End:0x67
+			break;
+		// End:0x48
+		case 3:
+			return 800.0000000;
+			// End:0x67
+			break;
+		// End:0x56
+		case 4:
+			return 400.0000000;
+			// End:0x67
+			break;
+		// End:0x64
+		case 5:
+			return 0.0000000;
+			// End:0x67
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return 0.0000000;
+	return;
+}
+
+//============================================================================
+// BOOL SetLowestSnipingStance - 
 //    - If aTarget != none, return true if we see the pawn from a position
 //    - I have assumed that from or animation the offset on Z from the ground
 //      for the start firing point is prone 15, crouch 70 and standing 135
 //============================================================================
-function bool SetLowestSnipingStance(optional Actor aTarget) {}
-// ^ NEW IN 1.60
-function WaitAtNode(float fWaitingTime, float fFacingTime, Rotator rOrientation) {}
-// Callback
-function GotoNode(Vector VPosition) {}
+function bool SetLowestSnipingStance(optional Actor aTarget)
+{
+	local Vector vStart, vTarget;
+
+	vStart = m_pawn.Location;
+	vStart.Z = __NFUN_174__(__NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight), float(15));
+	// End:0x6A
+	if(__NFUN_119__(aTarget, none))
+	{
+		vTarget = aTarget.Location;		
+	}
+	else
+	{
+		vTarget = __NFUN_215__(vStart, __NFUN_212__(Vector(m_pawn.Rotation), float(500)));
+	}
+	// End:0xC4
+	if(__NFUN_548__(vStart, vTarget))
+	{
+		m_pawn.m_bWantsToProne = true;
+		m_pawn.bWantsToCrouch = false;
+		return true;
+	}
+	vStart.Z = __NFUN_174__(__NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight), float(70));
+	// End:0x11A
+	if(__NFUN_119__(aTarget, none))
+	{
+		vTarget = aTarget.Location;		
+	}
+	else
+	{
+		vTarget = __NFUN_215__(vStart, __NFUN_212__(Vector(m_pawn.Rotation), float(500)));
+	}
+	// End:0x174
+	if(__NFUN_548__(vStart, vTarget))
+	{
+		m_pawn.m_bWantsToProne = false;
+		m_pawn.bWantsToCrouch = true;
+		return true;
+	}
+	// End:0x1FD
+	if(__NFUN_119__(aTarget, none))
+	{
+		vStart.Z = __NFUN_174__(__NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight), float(135));
+		vTarget = aTarget.Location;
+		// End:0x1FB
+		if(__NFUN_548__(vStart, vTarget))
+		{
+			m_pawn.m_bWantsToProne = false;
+			m_pawn.bWantsToCrouch = false;
+			return true;
+		}
+		return false;
+	}
+	m_pawn.m_bWantsToProne = false;
+	m_pawn.bWantsToCrouch = false;
+	return true;
+	return;
+}
+
 //============================================================================
-//  #####   ###   ##     ##      ###   #   #
-//  ##     ##  #  ##     ##     ##  #  #   #
-//  ####   ##  #  ##     ##     ##  #  # # #
-//  ##     ##  #  ##     ##     ##  #  #####
-//  ##      ###   #####  #####   ###    # #
+// ReactToGrenade - 
+//============================================================================
+function ReactToGrenade(Vector vGrenadeLocation)
+{
+	local Vector vDestination;
+	local float fDistance, fTemp;
+	local int i;
+	local NavigationPoint aDest;
+
+	ChangeDefCon(1);
+	// End:0x2D
+	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_pawn.Location, vGrenadeLocation)), float(600)))
+	{
+		return;
+	}
+	fDistance = RandRange(400.0000000, 1000.0000000);
+	i = 0;
+	J0x4A:
+
+	// End:0x6D [Loop If]
+	if(__NFUN_150__(i, 10))
+	{
+		m_aLastNode[i] = none;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x4A;
+	}
+	aDest = __NFUN_1820__();
+	i = 0;
+	J0x7D:
+
+	// End:0xBF [Loop If]
+	if(__NFUN_130__(__NFUN_176__(__NFUN_225__(__NFUN_216__(aDest.Location, vGrenadeLocation)), fDistance), __NFUN_150__(i, 10)))
+	{
+		__NFUN_165__(i);
+		aDest = __NFUN_1820__();
+		// [Loop Continue]
+		goto J0x7D;
+	}
+	SetReactionStatus(4, 0);
+	m_aMovingToDestination = aDest;
+	// End:0xED
+	if(__NFUN_129__(__NFUN_281__('TransientStateCode')))
+	{
+		__NFUN_113__('TransientStateCode', 'RunFromGrenade');
+	}
+	return;
+}
+
+function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
+{
+	switch(eType)
+	{
+		// End:0x25
+		case 2:
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 7);
+			// End:0x46
+			break;
+		// End:0x43
+		case 1:
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 6);
+			// End:0x46
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
+}
+
+//============================================================================
+// AIAffectedByGrenade - 
+//============================================================================
+function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
+{
+	ChangeDefCon(2);
+	m_pawn.m_vGrenadeLocation = aGrenade.Location;
+	// End:0x77
+	if(__NFUN_154__(int(eType), int(2)))
+	{
+		// End:0x74
+		if(CanSafelyChangeState())
+		{
+			m_pawn.bWantsToCrouch = false;
+			m_pawn.SetNextPendingAction(1);
+			ReactToGrenade(m_pawn.m_vGrenadeLocation);
+		}		
+	}
+	else
+	{
+		// End:0xD3
+		if(__NFUN_132__(__NFUN_154__(int(eType), int(3)), __NFUN_154__(int(eType), int(4))))
+		{
+			// End:0xB3
+			if(__NFUN_130__(__NFUN_129__(m_bCantInterruptIO), __NFUN_129__(CanSafelyChangeState())))
+			{
+				return;
+			}
+			m_pawn.SetNextPendingAction(3);
+			__NFUN_113__('TransientStateCode', 'RecoverFromFlash');			
+		}
+		else
+		{
+			// End:0xF0
+			if(CanSafelyChangeState())
+			{
+				ReactToGrenade(m_pawn.m_vGrenadeLocation);
+			}
+		}
+	}
+	return;
+}
+
+//============================================================================
+//  #####  #####  #####    ###    ####   #####   ###   ####    
+//  ##     ##     ##      ##  #   ## ##  ##     ##  #  ## ##   
+//  #####  ####   ####    #####   ##  #  ####   #####  ##  #   
+//     ##  ##     ##      ##  #   ## ##  ##     ##  #  ## ##   
+//  #####  #####  #####   ##  #   ####   #####  ##  #  ####    
+//============================================================================
+function GotoSeeADead(Vector vDeadLocation)
+{
+	m_vThreatLocation = vDeadLocation;
+	__NFUN_113__('SeeADead');
+	return;
+}
+
+//============================================================================
+//  ####   ###   ####  #   #  #####    #####  #####   ###   ####   ####  ##  #   
+//  ##  # ##  #   ##   ##  #   ##      ##     ##     ##  #  #   # ##     ##  #   
+//  ####  ##  #   ##   # # #   ##      #####  ####   #####  ####  ##     #####   
+//  ##    ##  #   ##   #  ##   ##         ##  ##     ##  #  ## #  ##     ##  #   
+//  ##     ###   ####  #   #   ##      #####  #####  ##  #  ##  #  ####  ##  #   
+//============================================================================
+event GotoPointAndSearch(Vector vDestination, R6Pawn.eMovementPace ePace, bool bCallBackup, optional float fSearchTime, optional R6Terrorist.EDefCon eNewDefCon)
+{
+	// End:0x0D
+	if(__NFUN_129__(CanSafelyChangeState()))
+	{
+		return;
+	}
+	// End:0x29
+	if(bCallBackup)
+	{
+		// End:0x29
+		if(__NFUN_1822__())
+		{
+			__NFUN_1823__(vDestination, ePace);
+		}
+	}
+	// End:0x47
+	if(__NFUN_155__(int(eNewDefCon), int(0)))
+	{
+		ChangeDefCon(eNewDefCon);		
+	}
+	else
+	{
+		ChangeDefCon(1);
+	}
+	// End:0x67
+	if(__NFUN_180__(fSearchTime, float(0)))
+	{
+		fSearchTime = 30.0000000;
+	}
+	GotoStateEngageBySound(vDestination, ePace, fSearchTime);
+	return;
+}
+
+//============================================================================
+// GotoPointAndAttack - 
+//============================================================================
+event GotoPointToAttack(Vector vDestination, Actor PTarget)
+{
+	// End:0x0D
+	if(__NFUN_129__(CanSafelyChangeState()))
+	{
+		return;
+	}
+	// End:0x47
+	if(__NFUN_119__(m_InteractionObject, none))
+	{
+		m_bCalledForBackup = true;
+		m_vThreatLocation = vDestination;
+		Target = PTarget;
+		m_InteractionObject.StopInteractionWithEndingActions();
+		return;
+	}
+	// End:0x52
+	if(CheckForInteraction())
+	{
+		return;
+	}
+	m_pawn.m_bPawnSpecificAnimInProgress = false;
+	ChangeDefCon(1);
+	m_vThreatLocation = vDestination;
+	Target = PTarget;
+	SetActionSpot(none);
+	m_StateAfterInteraction = 'MovingToAttack';
+	__NFUN_113__('MovingToAttack');
+	return;
+}
+
+//============================================================================
+// GotoStateLostSight - 
+//============================================================================
+function GotoStateLostSight(Vector vLastSeen)
+{
+	m_vThreatLocation = vLastSeen;
+	__NFUN_113__('LostSight');
+	return;
+}
+
+//============================================================================
+//  ##### #   #   ####   ###    ####  #####    #####  ####   ####  ##  # #####   
+//  ##    ##  #  ##     ##  #  ##     ##       ##      ##   ##     ##  #  ##     
+//  ####  # # #  ## ##  #####  ## ##  ####     #####   ##   ## ##  #####  ##     
+//  ##    #  ##  ##  #  ##  #  ##  #  ##          ##   ##   ##  #  ##  #  ##     
+//  ##### #   #   ####  ##  #   ####  #####    #####  ####   ####  ##  #  ##     
+//============================================================================
+function EngageBySight(Pawn aPawn)
+{
+	SetEnemy(aPawn);
+	Target = aPawn;
+	__NFUN_113__('PrecombatAction');
+	return;
+}
+
+function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTerro, int iNbRainbow)
+{
+	local bool bOutnumbered;
+
+	// End:0x16
+	if(__NFUN_155__(int(m_eEngageReaction), int(0)))
+	{
+		return m_eEngageReaction;
+	}
+	// End:0x41
+	if(__NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(Pawn.EngineWeapon, none)))
+	{
+		return 4;
+	}
+	// End:0x5D
+	if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+	{
+		return 1;
+	}
+	m_iRandomNumber = __NFUN_146__(__NFUN_167__(100), 1);
+	switch(m_pawn.m_ePersonality)
+	{
+		// End:0x8B
+		case 0:
+			__NFUN_162__(m_iRandomNumber, 40);
+			// End:0xC9
+			break;
+		// End:0x9C
+		case 1:
+			__NFUN_162__(m_iRandomNumber, 20);
+			// End:0xC9
+			break;
+		// End:0xA4
+		case 2:
+			// End:0xC9
+			break;
+		// End:0xB5
+		case 3:
+			__NFUN_161__(m_iRandomNumber, 20);
+			// End:0xC9
+			break;
+		// End:0xC6
+		case 4:
+			__NFUN_161__(m_iRandomNumber, 40);
+			// End:0xC9
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	// End:0xE7
+	if(__NFUN_150__(__NFUN_144__(__NFUN_146__(m_iTerroristInGroup, 1), 2), m_iRainbowInCombat))
+	{
+		bOutnumbered = true;
+	}
+	// End:0x158
+	if(bOutnumbered)
+	{
+		// End:0xFF
+		if(__NFUN_153__(m_iRandomNumber, 81))
+		{
+			return 1;
+		}
+		// End:0x10E
+		if(__NFUN_153__(m_iRandomNumber, 41))
+		{
+			return 2;
+		}
+		// End:0x120
+		if(__NFUN_153__(m_iRandomNumber, 11))
+		{
+			return 3;			
+		}
+		else
+		{
+			// End:0x152
+			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, pEnemy.Location)), float(1000)))
+			{
+				return 4;				
+			}
+			else
+			{
+				return 3;
+			}
+		}		
+	}
+	else
+	{
+		// End:0x167
+		if(__NFUN_153__(m_iRandomNumber, 61))
+		{
+			return 1;
+		}
+		// End:0x179
+		if(__NFUN_153__(m_iRandomNumber, 11))
+		{
+			return 2;			
+		}
+		else
+		{
+			return 3;
+		}
+	}
+	return 4;
+	return;
+}
+
+function bool CheckForInteraction()
+{
+	local Actor aGoal;
+
+	// End:0x82
+	if(__NFUN_119__(m_TriggeredIO, none))
+	{
+		m_bCantInterruptIO = true;
+		SetReactionStatus(5, 0);
+		// End:0x48
+		if(__NFUN_119__(m_TriggeredIO.m_Anchor, none))
+		{
+			aGoal = m_TriggeredIO.m_Anchor;			
+		}
+		else
+		{
+			aGoal = m_TriggeredIO;
+		}
+		GotoStateMovingTo("InteractionObject", 5, false, aGoal,, 'PrecombatAction', 'InteractiveObject', true);
+		return true;
+	}
+	// End:0xAC
+	if(__NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(m_pawn.EngineWeapon, none)))
+	{
+		return false;
+	}
+	// End:0xE0
+	if(__NFUN_129__(UseRandomHostage()))
+	{
+		m_Hostage = m_pawn.m_DZone.__NFUN_1838__(m_pawn.Location);
+	}
+	// End:0x11D
+	if(__NFUN_130__(__NFUN_119__(m_Hostage, none), __NFUN_129__(m_Hostage.m_bExtracted)))
+	{
+		// End:0x11D
+		if(__NFUN_150__(__NFUN_167__(100), GetKillingHostageChance()))
+		{
+			GotoStateAttackHostage(m_Hostage);
+			return true;
+		}
+	}
+	return false;
+	return;
+}
+
+//============================================================================
+// PlayAttackVoices - 
+//============================================================================
+function PlayAttackVoices()
+{
+	local int iAngle;
+
+	// End:0x7B
+	if(__NFUN_151__(__NFUN_1851__(Enemy.Rotation.Yaw, m_pawn.Rotation.Yaw), 13000))
+	{
+		// End:0x65
+		if(__NFUN_153__(int(m_pawn.m_eDefCon), int(3)))
+		{
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 10);			
+		}
+		else
+		{
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 11);
+		}
+	}
+	return;
+}
+
+//------------------------------------------------------------------
+// PawnDied: called when the pawn is declared dead 
+//------------------------------------------------------------------
+function PawnDied()
+{
+	// End:0x33
+	if(__NFUN_130__(__NFUN_119__(m_path, none), __NFUN_129__(Level.m_bIsResettingLevel)))
+	{
+		m_path.InformTerroTeam(5, self);
+	}
+	super.PawnDied();
+	return;
+}
+
+//============================================================================
+// AIPlayCallBackup - 
+//   - Return true if we must wait for the end of the animation
+//============================================================================
+function bool AIPlayCallBackup(Actor pEnemy)
+{
+	local int iShootingChance, iAnimID;
+
+	// End:0x37
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, pEnemy.Location)), float(400)))
+	{
+		iShootingChance = 100;		
+	}
+	else
+	{
+		switch(m_pawn.m_iDiffLevel)
+		{
+			// End:0x56
+			case 1:
+				iShootingChance = 50;
+				// End:0x79
+				break;
+			// End:0x66
+			case 2:
+				iShootingChance = 70;
+				// End:0x79
+				break;
+			// End:0x76
+			case 3:
+				iShootingChance = 90;
+				// End:0x79
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	// End:0x91
+	if(__NFUN_150__(__NFUN_167__(100), iShootingChance))
+	{
+		iAnimID = 0;		
+	}
+	else
+	{
+		iAnimID = 1;
+	}
+	m_pawn.SetNextPendingAction(34, iAnimID);
+	m_VoicesManager.PlayTerroristVoices(m_pawn, 8);
+	// End:0xD1
+	if(__NFUN_154__(iAnimID, 0))
+	{
+		return false;
+	}
+	return true;
+	return;
+}
+
+//============================================================================
+// DispatchOrder - 
+//============================================================================
+function DispatchOrder(int iOrder, R6Pawn pSource)
+{
+	switch(iOrder)
+	{
+		// End:0x25
+		case int(m_pawn.1):
+			SecureTerrorist(pSource);
+			// End:0x2C
+			break;
+		// End:0xFFFF
+		default:
+			assert(false);
+			break;
+	}
+	return;
+}
+
+//============================================================================
+//   ####   ####    #####   #   #    ###    ####    #####   
+//  ##      #   #   ##      ##  #   ##  #   ## ##   ##      
+//  ## ##   ####    ####    # # #   #####   ##  #   ####    
+//  ##  #   ## #    ##      #  ##   ##  #   ## ##   ##      
+//   ####   ##  #   #####   #   #   ##  #   ####    #####   
+//============================================================================
+function GotoStateThrowingGrenade(name nNextState, name nNextLabel)
+{
+	NextState = nNextState;
+	NextLabel = nNextLabel;
+	__NFUN_113__('ThrowingGrenade');
+	return;
+}
+
+//============================================================================
+//  #   #    ###      #####   ##  #   ####    #####    ###    #####   
+//  ##  #   ##  #      ##     ##  #   #   #   ##      ##  #    ##     
+//  # # #   ##  #      ##     #####   ####    ####    #####    ##     
+//  #  ##   ##  #      ##     ##  #   ## #    ##      ##  #    ##     
+//  #   #    ###       ##     ##  #   ##  #   #####   ##  #    ##     
+//============================================================================
+function GotoStateNoThreat()
+{
+	// End:0x1C
+	if(m_pawn.IsAlive())
+	{
+		__NFUN_113__('NoThreat');		
+	}
+	else
+	{
+		__NFUN_113__('Dead');
+	}
+	return;
+}
+
+//============================================================================
+// GotoStateMoveToDestination - 
+//============================================================================
+function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool bCanFail, optional Actor aMoveTarget, optional Vector vDestination, optional name stateAfter, optional name labelAfter, optional bool bDontCheckLeave, optional bool bPreciseMove)
+{
+	local Vector vHitNormal;
+
+	// End:0x75
+	if(__NFUN_130__(__NFUN_114__(aMoveTarget, none), __NFUN_217__(vDestination, vect(0.0000000, 0.0000000, 0.0000000))))
+	{
+		logX("Call to GotoStateMovingTo with no aMoveTarget or vDestination");
+		__NFUN_113__(stateAfter, labelAfter);
+	}
+	CheckPaceForInjury(ePace);
+	m_aMovingToDestination = aMoveTarget;
+	// End:0xAD
+	if(__NFUN_119__(m_aMovingToDestination, none))
+	{
+		m_vMovingDestination = m_aMovingToDestination.Location;		
+	}
+	else
+	{
+		// End:0xEC
+		if(__NFUN_119__(__NFUN_277__(m_vMovingDestination, vHitNormal, __NFUN_216__(vDestination, vect(0.0000000, 0.0000000, 200.0000000)), vDestination), none))
+		{
+			__NFUN_184__(m_vMovingDestination.Z, float(80));			
+		}
+		else
+		{
+			m_vMovingDestination = vDestination;
+		}
+	}
+	m_bCanFailMovingTo = bCanFail;
+	m_pawn.m_eMovementPace = ePace;
+	m_stateAfterMovingTo = stateAfter;
+	m_labelAfterMovingTo = labelAfter;
+	m_bPreciseMove = bPreciseMove;
+	// End:0x207
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bDontCheckLeave), __NFUN_129__(m_pawn.m_bAllowLeave)), __NFUN_129__(m_pawn.m_DZone.__NFUN_1832__(m_vMovingDestination))))
+	{
+		// End:0x1B9
+		if(__NFUN_114__(R6DZoneRandomPoints(m_pawn.m_DZone), none))
+		{
+			m_vMovingDestination = m_pawn.m_DZone.__NFUN_1833__(m_vMovingDestination);			
+		}
+		else
+		{
+			// End:0x1E7
+			if(R6DZoneRandomPoints(m_pawn.m_DZone).m_bUseAllowLeave)
+			{
+				m_vMovingDestination = m_vSpawningPosition;				
+			}
+			else
+			{
+				m_vMovingDestination = m_pawn.m_DZone.__NFUN_1833__(m_vMovingDestination);
+			}
+		}
+	}
+	__NFUN_113__('MovingTo');
+	m_sDebugString = sDebugString;
+	return;
+}
+
+//============================================================================
+//  #####   ##  #   ####    #####    ###    #####   
+//   ##     ##  #   #   #   ##      ##  #    ##     
+//   ##     #####   ####    ####    #####    ##     
+//   ##     ##  #   ## #    ##      ##  #    ##     
+//   ##     ##  #   ##  #   #####   ##  #    ##     
+//============================================================================
+event GotoStateEngageByThreat(Vector vThreathLocation)
+{
+	// End:0x0D
+	if(__NFUN_129__(CanSafelyChangeState()))
+	{
+		return;
+	}
+	m_vThreatLocation = vThreathLocation;
+	m_fSearchTime = __NFUN_174__(Level.TimeSeconds, float(20));
+	__NFUN_113__('EngageByThreat');
+	return;
+}
+
+//============================================================================
+//  #####    ###    ##  #   #   #   ####    
+//  ##      ##  #   ##  #   ##  #   ## ##   
+//  #####   ##  #   ##  #   # # #   ##  #   
+//     ##   ##  #   ##  #   #  ##   ## ##   
+//  #####    ###    #####   #   #   ####    
+//============================================================================
+function GotoStateEngageBySound(Vector vInvestigateDestination, R6Pawn.eMovementPace ePace, float fSearchTime)
+{
+	m_vThreatLocation = vInvestigateDestination;
+	m_pawn.m_eMovementPace = ePace;
+	m_fSearchTime = __NFUN_174__(Level.TimeSeconds, fSearchTime);
+	__NFUN_113__('EngageBySound');
+	return;
+}
+
+//============================================================================
+//  #####   ##  #   ####    ####    #####   #   #   ####    #####   ####    
+//  ##      ##  #   #   #   #   #   ##      ##  #   ## ##   ##      #   #   
+//  #####   ##  #   ####    ####    ####    # # #   ##  #   ####    ####    
+//     ##   ##  #   ## #    ## #    ##      #  ##   ## ##   ##      ## #    
+//  #####   #####   ##  #   ##  #   #####   #   #   ####    #####   ##  #   
+//============================================================================
+function SecureTerrorist(R6Pawn pOther)
+{
+	ChangeOrientationTo(Rotator(__NFUN_216__(Pawn.Location, pOther.Location)));
+	SetEnemy(pOther);
+	__NFUN_113__('Surrender', 'Secure');
+	return;
+}
+
+//============================================================================
+//   ###    #####   #####    ###     ####   ##  #   
+//  ##  #    ##      ##     ##  #   ##      ## #    
+//  #####    ##      ##     #####   ##      ###     
+//  ##  #    ##      ##     ##  #   ##      ## #    
+//  ##  #    ##      ##     ##  #    ####   ##  #   
+//============================================================================
+function GotoStateAimedFire()
+{
+	m_eAttackMode = 1;
+	m_pawn.m_bSprayFire = false;
+	__NFUN_113__('Attack');
+	return;
+}
+
+function GotoStateSprayFire()
+{
+	m_pawn.m_bSprayFire = true;
+	// End:0x38
+	if(__NFUN_130__(__NFUN_154__(int(m_eAttackMode), int(0)), __NFUN_154__(__NFUN_167__(2), 0)))
+	{
+		m_eAttackMode = 3;		
+	}
+	else
+	{
+		m_eAttackMode = 2;
+	}
+	__NFUN_113__('Attack');
+	return;
+}
+
+function GotoStateAttackHostage(R6Pawn hostage)
+{
+	SetEnemy(hostage);
+	m_eAttackMode = 1;
+	m_pawn.m_bSprayFire = false;
+	__NFUN_113__('AttackHostage');
+	return;
+}
+
+//============================================================================
+// HostageSurrender - Called from an hostage AI when that AI surrender
+//============================================================================
+function HostageSurrender(R6HostageAI hostageAI)
+{
+	local Vector vDestination;
+
+	// End:0x0B
+	if(UseRandomHostage())
+	{
+		return;
+	}
+	m_HostageAI = hostageAI;
+	m_Hostage = hostageAI.m_pawn;
+	m_Manager.AssignHostageTo(m_Hostage, self);
+	m_ZoneToEscort = m_Manager.__NFUN_1826__(m_pawn);
+	// End:0x75
+	if(__NFUN_114__(m_ZoneToEscort, none))
+	{
+		m_ZoneToEscort = m_pawn.m_DZone;
+	}
+	vDestination = m_ZoneToEscort.__NFUN_1831__();
+	m_HostageAI.SetStateEscorted(m_pawn, vDestination, true);
+	GotoStateFollowPawn(R6Pawn(m_HostageAI.Pawn), 0, 100.0000000);
+	return;
+}
+
+function EscortIsOver(R6HostageAI hostageAI, bool bSuccess)
+{
+	// End:0x2B
+	if(bSuccess)
+	{
+		m_Manager.AssignHostageToZone(m_Hostage, m_ZoneToEscort);
+		GotoStateNoThreat();		
+	}
+	else
+	{
+		m_Manager.RemoveHostageAssignment(m_Hostage);
+		GotoStateEngageBySound(m_Hostage.Location, 5, 10.0000000);
+	}
+	return;
+}
+
+//============================================================================
+// GotoStateFindHostage - 
+//============================================================================
+function GotoStateFindHostage(R6Hostage hostage)
+{
+	m_Hostage = hostage;
+	m_HostageAI = R6HostageAI(hostage.Controller);
+	m_Manager.AssignHostageTo(hostage, self);
+	__NFUN_113__('FindHostage');
+	return;
+}
+
+//============================================================================
+//  #####   ###   ##     ##      ###   #   #   
+//  ##     ##  #  ##     ##     ##  #  #   #   
+//  ####   ##  #  ##     ##     ##  #  # # #   
+//  ##     ##  #  ##     ##     ##  #  #####   
+//  ##      ###   #####  #####   ###    # #    
 //
 // if iYaw == 0, always approach the following pawn in straight line
 //        in front : 32768
 //        left : 16384 + 49151 : right
 //            behind : 0
 //============================================================================
-function GotoStateFollowPawn(R6Pawn followedpawn, EFollowMode eMode, float fDist, optional int iYaw) {}
-//============================================================================
-// EscortIsOver - Called from the hostage AI when the escort is over
-//============================================================================
-function EscortIsOver(bool bSuccess, R6HostageAI hostageAI) {}
-function GotoStateAttackHostage(R6Pawn hostage) {}
-//============================================================================
-//  #####    ###    ##  #   #   #   ####
-//  ##      ##  #   ##  #   ##  #   ## ##
-//  #####   ##  #   ##  #   # # #   ##  #
-//     ##   ##  #   ##  #   #  ##   ## ##
-//  #####    ###    #####   #   #   ####
-//============================================================================
-function GotoStateEngageBySound(Vector vInvestigateDestination, eMovementPace ePace, float fSearchTime) {}
-//============================================================================
-//  #####   ##  #   ####    #####    ###    #####
-//   ##     ##  #   #   #   ##      ##  #    ##
-//   ##     #####   ####    ####    #####    ##
-//   ##     ##  #   ## #    ##      ##  #    ##
-//   ##     ##  #   ##  #   #####   ##  #    ##
-//============================================================================
-event GotoStateEngageByThreat(Vector vThreathLocation) {}
-//============================================================================
-//   ####   ####    #####   #   #    ###    ####    #####
-//  ##      #   #   ##      ##  #   ##  #   ## ##   ##
-//  ## ##   ####    ####    # # #   #####   ##  #   ####
-//  ##  #   ## #    ##      #  ##   ##  #   ## ##   ##
-//   ####   ##  #   #####   #   #   ##  #   ####    #####
-//============================================================================
-function GotoStateThrowingGrenade(name nNextState, name nNextLabel) {}
-//============================================================================
-// DispatchOrder -
-//============================================================================
-function DispatchOrder(int iOrder, R6Pawn pSource) {}
-//============================================================================
-// GotoStateLostSight -
-//============================================================================
-function GotoStateLostSight(Vector vLastSeen) {}
-//============================================================================
-//  #####  #####  #####    ###    ####   #####   ###   ####
-//  ##     ##     ##      ##  #   ## ##  ##     ##  #  ## ##
-//  #####  ####   ####    #####   ##  #  ####   #####  ##  #
-//     ##  ##     ##      ##  #   ## ##  ##     ##  #  ## ##
-//  #####  #####  #####   ##  #   ####   #####  ##  #  ####
-//============================================================================
-function GotoSeeADead(Vector vDeadLocation) {}
-function PlaySoundAffectedByGrenade(EGrenadeType eType) {}
-//============================================================================
-// BOOL IsAssigned -
-//============================================================================
-function bool IsAssigned(R6Hostage hostage) {}
-// ^ NEW IN 1.60
-//============================================================================
-// state BumpBackUp - set the pawn engagement status at beginning of state
-//============================================================================
-function GotoBumpBackUpState(name returnState) {}
-//============================================================================
-// SetEnemy -
-//============================================================================
-function SetEnemy(Pawn newEnemy) {}
-//============================================================================
-// SetActionSpot -
-//============================================================================
-function SetActionSpot(R6ActionSpot pNewSpot) {}
-final native function bool HaveAClearShot(Vector vStart, Pawn PTarget) {}
-// ^ NEW IN 1.60
-final native function Vector FindBetterShotLocation(Pawn PTarget) {}
-// ^ NEW IN 1.60
-final native function CallBackupForInvestigation(Vector vDestination, eMovementPace ePace) {}
-// ^ NEW IN 1.60
-final native function CallBackupForAttack(Vector vDestination, eMovementPace ePace) {}
-// ^ NEW IN 1.60
-final native function NavigationPoint GetNextRandomNode() {}
-// ^ NEW IN 1.60
-final native function bool MakeBackupList() {}
-// ^ NEW IN 1.60
-final native function bool CallVisibleTerrorist() {}
-// ^ NEW IN 1.60
-final native function bool IsAttackSpotStillValid() {}
-// ^ NEW IN 1.60
-event PostBeginPlay() {}
-//============================================================================
-// BOOL CanSafelyChangeState -
-//          Return true if a pawn can safely change state by event.
-//          - Not in ladder
-//          - Not in root motion
-//          - Not with an uninterruptable interactive object
-//============================================================================
-function bool CanSafelyChangeState() {}
-// ^ NEW IN 1.60
-//============================================================================
-// BOOL UseRandomHostage -
-//============================================================================
-function bool UseRandomHostage() {}
-// ^ NEW IN 1.60
-//============================================================================
-// StartFiring -
-//============================================================================
-function StartFiring() {}
-//============================================================================
-// StopFiring -
-//============================================================================
-function StopFiring() {}
-//============================================================================
-// ReloadWeapon -
-//============================================================================
-function AIReloadWeapon() {}
-//============================================================================
-// FLOAT GetMaxCoverDistance - Max distance that the pawn is willing to go
-//                             to find a cover
-//============================================================================
-function float GetMaxCoverDistance() {}
-// ^ NEW IN 1.60
-//============================================================================
-// PlayAttackVoices -
-//============================================================================
-function PlayAttackVoices() {}
-//------------------------------------------------------------------
-// PawnDied: called when the pawn is declared dead
-//------------------------------------------------------------------
-function PawnDied() {}
-//============================================================================
-//  #   #    ###      #####   ##  #   ####    #####    ###    #####
-//  ##  #   ##  #      ##     ##  #   #   #   ##      ##  #    ##
-//  # # #   ##  #      ##     #####   ####    ####    #####    ##
-//  #  ##   ##  #      ##     ##  #   ## #    ##      ##  #    ##
-//  #   #    ###       ##     ##  #   ##  #   #####   ##  #    ##
-//============================================================================
-function GotoStateNoThreat() {}
-//============================================================================
-//   ###    #####   #####    ###     ####   ##  #
-//  ##  #    ##      ##     ##  #   ##      ## #
-//  #####    ##      ##     #####   ##      ###
-//  ##  #    ##      ##     ##  #   ##      ## #
-//  ##  #    ##      ##     ##  #    ####   ##  #
-//============================================================================
-function GotoStateAimedFire() {}
-function GotoStateSprayFire() {}
+function GotoStateFollowPawn(R6Pawn followedpawn, R6TerroristAI.EFollowMode eMode, float fDist, optional int iYaw)
+{
+	m_pawnToFollow = followedpawn;
+	m_eFollowMode = eMode;
+	m_fFollowDist = fDist;
+	m_iFollowYaw = iYaw;
+	__NFUN_113__('FollowPawn');
+	return;
+}
+
+// Random decision function
+function float GetWaitingTime()
+{
+	local float fTemp;
+
+	switch(m_pawn.m_eDefCon)
+	{
+		// End:0x23
+		case 1:
+			fTemp = 1.0000000;
+			// End:0x72
+			break;
+		// End:0x36
+		case 2:
+			fTemp = 2.0000000;
+			// End:0x72
+			break;
+		// End:0x49
+		case 3:
+			fTemp = 3.0000000;
+			// End:0x72
+			break;
+		// End:0x5C
+		case 4:
+			fTemp = 4.0000000;
+			// End:0x72
+			break;
+		// End:0x6F
+		case 5:
+			fTemp = 5.0000000;
+			// End:0x72
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return RandRange(fTemp, __NFUN_174__(fTemp, fTemp));
+	return;
+}
+
+function float GetFacingTime()
+{
+	local int fTemp;
+
+	switch(m_pawn.m_eDefCon)
+	{
+		// End:0x1F
+		case 1:
+			fTemp = 1;
+			// End:0x62
+			break;
+		// End:0x2F
+		case 2:
+			fTemp = 2;
+			// End:0x62
+			break;
+		// End:0x3F
+		case 3:
+			fTemp = 3;
+			// End:0x62
+			break;
+		// End:0x4F
+		case 4:
+			fTemp = 4;
+			// End:0x62
+			break;
+		// End:0x5F
+		case 5:
+			fTemp = 5;
+			// End:0x62
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return RandRange(float(fTemp), float(__NFUN_146__(fTemp, fTemp)));
+	return;
+}
+
+function bool IsGoingBack()
+{
+	local int ITemp;
+
+	switch(m_pawn.m_eDefCon)
+	{
+		// End:0x20
+		case 1:
+			ITemp = 30;
+			// End:0x62
+			break;
+		// End:0x30
+		case 2:
+			ITemp = 25;
+			// End:0x62
+			break;
+		// End:0x40
+		case 3:
+			ITemp = 20;
+			// End:0x62
+			break;
+		// End:0x50
+		case 4:
+			ITemp = 10;
+			// End:0x62
+			break;
+		// End:0x5F
+		case 5:
+			ITemp = 0;
+			// End:0x62
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return __NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), ITemp);
+	return;
+}
+
+function Rotator ChooseRandomDirection(int iLookBackChance)
+{
+	local int ITemp;
+
+	switch(m_pawn.m_eDefCon)
+	{
+		// End:0x20
+		case 1:
+			ITemp = 25;
+			// End:0x63
+			break;
+		// End:0x30
+		case 2:
+			ITemp = 20;
+			// End:0x63
+			break;
+		// End:0x40
+		case 3:
+			ITemp = 15;
+			// End:0x63
+			break;
+		// End:0x50
+		case 4:
+			ITemp = 10;
+			// End:0x63
+			break;
+		// End:0x60
+		case 5:
+			ITemp = 5;
+			// End:0x63
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return super.ChooseRandomDirection(ITemp);
+	return;
+}
+
 // Sent messages
-function ReachedTheNode() {}
-function FinishedWaiting() {}
+function ReachedTheNode()
+{
+	m_bWaiting = true;
+	m_path.InformTerroTeam(1, self);
+	return;
+}
+
+function FinishedWaiting()
+{
+	m_bWaiting = true;
+	m_path.InformTerroTeam(2, self);
+	return;
+}
+
+// Callback
+function GotoNode(Vector VPosition)
+{
+	m_bWaiting = false;
+	GotoStateMovingTo("GotoNode", 4, true,, VPosition, 'PatrolPath', 'ReachedNode', true);
+	return;
+}
+
+function FollowLeader(R6Terrorist Leader, Vector VOffset)
+{
+	m_bWaiting = false;
+	GotoStateFollowPawn(Leader, 1, __NFUN_225__(VOffset), Rotator(VOffset).Yaw);
+	return;
+}
+
+function WaitAtNode(float fWaitingTime, float fFacingTime, Rotator rOrientation)
+{
+	m_bWaiting = false;
+	m_fWaitingTime = fWaitingTime;
+	m_fFacingTime = fFacingTime;
+	m_rStandRotation = rOrientation;
+	__NFUN_113__('PatrolPath', 'WaitingAtNode');
+	return;
+}
+
 //===================================================================================================
-//   ####              #                                       #      ##
-//    ##              ##                                      ##
-//    ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####
-//    ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##
-//    ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####
-//    ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##
-//   ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####
+//   ####              #                                       #      ##                            
+//    ##              ##                                      ##                                    
+//    ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
+//    ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
+//    ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
+//    ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
+//   ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
 //===================================================================================================
-function bool CanInteractWithObjects(R6InteractiveObject o) {}
-// ^ NEW IN 1.60
-function PerformAction_StopInteraction() {}
-
-state Attack
+function bool CanInteractWithObjects(R6InteractiveObject o)
 {
-    function FindNextEnemy() {}
-    function BeginState() {}
-    function EndState() {}
-    function bool NeedToReload() {}
-// ^ NEW IN 1.60
-    event bool NotifyBump(Actor Other) {}
-// ^ NEW IN 1.60
+	// End:0x76
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_InteractionObject, none), __NFUN_119__(m_pawn, none)), m_pawn.IsAlive()), __NFUN_154__(int(m_eReactionStatus), int(0))), __NFUN_153__(int(m_pawn.m_eDefCon), int(3))), __NFUN_155__(int(m_pawn.m_eStrategy), int(3))))
+	{
+		return true;
+	}
+	return false;
+	return;
 }
 
-state FindHostage
+function PerformAction_StopInteraction()
 {
-    event bool NotifyBump(Actor Other) {}
-// ^ NEW IN 1.60
-    function BeginState() {}
-    function EndState() {}
+	// End:0x3D
+	if(__NFUN_132__(__NFUN_132__(m_bCalledForBackup, __NFUN_119__(m_InteractionObject.m_SeePlayerPawn, none)), __NFUN_119__(m_InteractionObject.m_HearNoiseNoiseMaker, none)))
+	{
+		ChangeDefCon(2);
+	}
+	super.PerformAction_StopInteraction();
+	// End:0x78
+	if(__NFUN_130__(m_bCalledForBackup, __NFUN_129__(m_bCantInterruptIO)))
+	{
+		m_bCalledForBackup = false;
+		m_InteractionObject = none;
+		GotoPointToAttack(m_vThreatLocation, Target);
+	}
+	return;
 }
 
-state WaitForEnemy
-{
-//============================================================================
-// SeePlayer -
-//============================================================================
-    function SeePlayer(Pawn seen) {}
-    function BeginState() {}
-    function EndState() {}
-    function Timer() {}
-}
+state test
+{Begin:
 
-state FollowPawn
-{
-    function Vector GetFollowDestination() {}
-// ^ NEW IN 1.60
-    function BeginState() {}
-    function EndState() {}
-}
+	SetReactionStatus(5, 0);
+	m_rStandRotation = m_pawn.Rotation;
+	goto 'RandomRotation';
+RandomRotation:
 
-state HuntRainbow
-{
-    function R6Pawn GetClosestEnemy() {}
-// ^ NEW IN 1.60
-    function BeginState() {}
+
+	m_rStandRotation.Yaw = __NFUN_144__(__NFUN_167__(32767), 4);
+	logX(__NFUN_112__("Yaw: ", string(m_rStandRotation.Yaw)));
+	ChangeOrientationTo(m_rStandRotation);
+	__NFUN_256__(2.0000000);
+	goto 'RandomRotation';
+Sequence:
+
+
+	__NFUN_256__(2.0000000);
+	goto 'Sequence';
+	stop;			
 }
 
 state BumpBackUp
 {
-    function bool GetReacheablePoint(out Vector vTarget, bool bNoFail) {}
-// ^ NEW IN 1.60
-    function BeginState() {}
-    function EndState() {}
-}
+	function BeginState()
+	{
+		SetReactionStatus(m_eReactionStatus, m_eStateForEvent);
+		super.BeginState();
+		return;
+	}
 
-state ThrowingGrenade
-{
-    function CheckDistance() {}
-    function BeginState() {}
-    function EndState() {}
-    event bool NotifyBump(Actor Other) {}
-// ^ NEW IN 1.60
-}
+	function EndState()
+	{
+		Focus = none;
+		super.EndState();
+		return;
+	}
 
-state Sniping
-{
-//============================================================================
-// SeePlayer -
-//============================================================================
-    event SeePlayer(Pawn seen) {}
-//============================================================================
-// HearNoise -
-//============================================================================
-    event HearNoise(Actor NoiseMaker, ENoiseType eType, float Loudness, optional ESoundType ESoundType) {}
-    function BeginState() {}
-}
+	function bool GetReacheablePoint(out Vector vTarget, bool bNoFail)
+	{
+		local Actor HitActor;
+		local Vector vHitLocation, vHitNormal, vExtent;
 
-state MovingTo
-{
-    event bool NotifyBump(Actor Other) {}
-// ^ NEW IN 1.60
-    function bool GetReacheablePoint(out Vector vTarget) {}
-// ^ NEW IN 1.60
-    function BeginState() {}
-    function EndState() {}
-    event Timer() {}
-}
-
-state test
-{
+		// End:0x44
+		if(MoveRight())
+		{
+			vTarget = __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_316__(Rotator(m_vBumpedByVelocity), rot(0, 16384, 0)))));			
+		}
+		else
+		{
+			vTarget = __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_317__(Rotator(m_vBumpedByVelocity), rot(0, 16384, 0)))));
+		}
+		vExtent.X = Pawn.CollisionRadius;
+		vExtent.Y = vExtent.Y;
+		vExtent.Z = Pawn.CollisionHeight;
+		HitActor = __NFUN_1806__(vHitLocation, vHitNormal, vTarget, Pawn.Location, __NFUN_158__(1, 2), vExtent);
+		// End:0x11D
+		if(__NFUN_119__(HitActor, none))
+		{
+			vTarget = __NFUN_215__(vHitLocation, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(Rotator(m_vBumpedByVelocity))));
+		}
+		return true;
+		return;
+	}
+	stop;
 }
 
 state ApproachLadder
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(m_eReactionStatus, m_eStateForEvent);
+		super.BeginState();
+		return;
+	}
+
+	function EndState()
+	{
+		Focus = none;
+		super.EndState();
+		return;
+	}
+	stop;
 }
 
 state WaitToClimbLadder
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(m_eReactionStatus, m_eStateForEvent);
+		super.BeginState();
+		return;
+	}
+
+	function EndState()
+	{
+		Focus = none;
+		super.EndState();
+		return;
+	}
+	stop;
 }
 
 state TransientStateCode
 {
-    function BeginState() {}
+	function BeginState()
+	{
+		SetReactionStatus(m_eReactionStatus, 0);
+		return;
+	}
+RunFromGrenade:
+
+	StopMoving();
+	switch(m_pawn.m_iDiffLevel)
+	{
+		// End:0x25
+		case 1:
+			__NFUN_256__(1.0000000);
+			// End:0x40
+			break;
+		// End:0x35
+		case 2:
+			__NFUN_256__(0.5000000);
+			// End:0x40
+			break;
+		// End:0x3D
+		case 3:
+			// End:0x40
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	GotoStateMovingTo("RunFromGrenade", 5, true, m_aMovingToDestination,, 'TransientStateCode', 'AfterRunFromGrenade', true);
+AfterRunFromGrenade:
+
+
+	m_bHeardGrenade = false;
+	// End:0x85
+	if(__NFUN_114__(Enemy, none))
+	{
+		__NFUN_256__(3.0000000);
+	}
+	goto 'ResumeAction';
+RecoverFromFlash:
+
+
+	__NFUN_118__('HearNoise');
+	__NFUN_118__('SeePlayer');
+	StopMoving();
+	__NFUN_256__(5.0000000);
+	// End:0xB6
+	if(m_bCantInterruptIO)
+	{
+		CheckForInteraction();
+	}
+ResumeAction:
+
+
+	// End:0xCB
+	if(__NFUN_119__(Enemy, none))
+	{
+		__NFUN_113__('Attack');		
+	}
+	else
+	{
+		GotoStateNoThreat();
+	}
+	stop;		
 }
 
 state SeeADead
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_wWantedHeadYaw = 0;
+		return;
+	}
+Begin:
+
+	ChangeDefCon(2);
+	SetActionSpot(__NFUN_1817__(none, m_vThreatLocation, 2000.0000000));
+	// End:0x53
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		GotoStateMovingTo("SeeADead:FireSpot", 5, true, m_pActionSpot,, 'SeeADead', 'AtSpot');
+	}
+AtSpot:
+
+
+	StopMoving();
+	// End:0x7B
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		ChangeOrientationTo(m_pActionSpot.Rotation);		
+	}
+	else
+	{
+		Focus = none;
+		FocalPoint = m_vThreatLocation;
+	}
+	// End:0xC4
+	if(__NFUN_132__(__NFUN_114__(m_pActionSpot, none), __NFUN_154__(int(m_pActionSpot.m_eFire), int(2))))
+	{
+		Pawn.bWantsToCrouch = true;
+	}
+	m_fSearchTime = __NFUN_174__(Level.TimeSeconds, float(30));
+Wait:
+
+
+	// End:0x108
+	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	{
+		GotoStateEngageBySound(m_vThreatLocation, 4, 30.0000000);
+	}
+	__NFUN_256__(RandRange(1.0000000, 3.0000000));
+	m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, 10000.0000000), float(256)));
+	__NFUN_256__(RandRange(0.5000000, 1.5000000));
+	m_pawn.m_wWantedHeadYaw = 0;
+	goto 'Wait';
+	stop;				
 }
 
 state MovingToAttack
 {
-    function BeginState() {}
+	function BeginState()
+	{
+		SetReactionStatus(3, 0);
+		return;
+	}
+Begin:
+
+	// End:0x23
+	if(__NFUN_114__(m_pActionSpot, none))
+	{
+		SetActionSpot(__NFUN_1817__(Target, m_vThreatLocation, 2000.0000000));
+	}
+	// End:0x78
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		m_pActionSpot.m_pCurrentUser = m_pawn;
+		GotoStateMovingTo("MovingToAttackActionSpot", 5, true, m_pActionSpot,, 'MovingToAttack', 'AtActionSpot');		
+	}
+	else
+	{
+		GotoStateMovingTo("MovingToAttackThreat", 5, true,, m_vThreatLocation, 'MovingToAttack', 'AtPosition');
+	}
+	J0xA7:
+
+	__NFUN_2201__(m_pActionSpot.Location, Rotator(__NFUN_216__(Target.Location, m_pActionSpot.Location)));
+	// End:0x105
+	if(__NFUN_154__(int(m_pActionSpot.m_eFire), int(2)))
+	{
+		m_pawn.bWantsToCrouch = true;		
+	}
+	else
+	{
+		m_pawn.bWantsToCrouch = false;
+	}
+	goto 'Wait';
+AtPosition:
+
+
+	FocalPoint = Target.Location;
+Wait:
+
+
+	__NFUN_256__(30.0000000);
+	__NFUN_256__(RandRange(1.0000000, 3.0000000));
+	GotoStateEngageBySound(m_vThreatLocation, 4, 30.0000000);
+	stop;		
 }
 
 state LostSight
 {
-    function BeginState() {}
+	function BeginState()
+	{
+		SetReactionStatus(3, 0);
+		return;
+	}
+Begin:
+
+	// End:0x62
+	if(__NFUN_119__(Enemy, none))
+	{
+		m_vTargetPosition = __NFUN_1824__(Enemy);
+		R6PreMoveTo(m_vTargetPosition, Enemy.Location, 5);
+		__NFUN_500__(m_vTargetPosition, Enemy);
+		Focus = none;
+		FocalPoint = Enemy.Location;
+		goto 'AtBetterLocation';
+	}
+Grenade:
+
+
+	// End:0x9F
+	if(m_pawn.m_bHaveAGrenade)
+	{
+		// End:0x9F
+		if(m_pawn.m_DZone.m_bUseGrenade)
+		{
+			GotoStateThrowingGrenade('LostSight', 'EndThrowingGrenade');
+		}
+	}
+EndThrowingGrenade:
+
+
+	SetActionSpot(__NFUN_1817__(none, m_vThreatLocation, 2000.0000000));
+	// End:0x100
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		m_pActionSpot.m_pCurrentUser = m_pawn;
+		GotoStateMovingTo("LostSightActionSpot", 5, true, m_pActionSpot,, 'LostSight', 'AtActionSpot');
+	}
+	m_pawn.bWantsToCrouch = true;
+	FocalPoint = m_vThreatLocation;
+	goto 'Waiting';
+AtActionSpot:
+
+
+	__NFUN_2201__(m_pActionSpot.Location, Rotator(__NFUN_216__(m_pActionSpot.Location, m_vThreatLocation)));
+	// End:0x192
+	if(__NFUN_132__(__NFUN_154__(int(m_pActionSpot.m_eFire), int(2)), __NFUN_154__(int(m_pActionSpot.m_eCover), int(2))))
+	{
+		m_pawn.bWantsToCrouch = true;		
+	}
+	else
+	{
+		m_pawn.bWantsToCrouch = false;
+	}
+	J0x1A3:
+
+	__NFUN_256__(RandRange(0.0000000, 3.0000000));
+	// End:0x22D
+	if(__NFUN_176__(float(Pawn.EngineWeapon.NumberOfBulletsLeftInClip()), __NFUN_171__(0.5000000, float(Pawn.EngineWeapon.GetClipCapacity()))))
+	{
+		SetReactionStatus(5, 0);
+		AIReloadWeapon();
+		J0x206:
+
+		// End:0x223 [Loop If]
+		if(m_pawn.m_bReloadingWeapon)
+		{
+			__NFUN_256__(0.1000000);
+			// [Loop Continue]
+			goto J0x206;
+		}
+		SetReactionStatus(0, 0);
+	}
+	GotoStateEngageBySound(m_vThreatLocation, 5, 30.0000000);
+	stop;				
 }
 
 state PrecombatAction
 {
-    function BeginState() {}
+	function BeginState()
+	{
+		SetReactionStatus(5, 0);
+		return;
+	}
+Begin:
+
+	m_pawn.m_bSkipTick = false;
+	ChangeDefCon(1);
+	CheckForInteraction();
+	goto 'AfterInteraction';
+InteractiveObject:
+
+
+	StopMoving();
+	J0x2B:
+
+	// End:0x83 [Loop If]
+	if(__NFUN_119__(m_TriggeredIO.m_InteractionOwner, none))
+	{
+		// End:0x78
+		if(__NFUN_129__(m_TriggeredIO.m_InteractionOwner.Pawn.IsAlive()))
+		{
+			m_TriggeredIO.m_InteractionOwner = none;			
+		}
+		else
+		{
+			__NFUN_256__(0.5000000);
+		}
+		// [Loop Continue]
+		goto J0x2B;
+	}
+	m_TriggeredIO.PerformAction(m_pawn);
+	m_TriggeredIO = none;
+	__NFUN_256__(1.0000000);
+	// End:0xB7
+	if(__NFUN_114__(Enemy, none))
+	{
+		GotoStateNoThreat();
+	}
+AfterInteraction:
+
+
+	// End:0xE4
+	if(__NFUN_132__(m_pawn.m_bIsKneeling, m_pawn.m_bIsUnderArrest))
+	{
+		__NFUN_113__('Surrender');
+	}
+	StopMoving();
+	LastSeenTime = Level.TimeSeconds;
+	LastSeenPos = Enemy.Location;
+	// End:0x16B
+	if(__NFUN_130__(__NFUN_129__(Pawn.m_bDroppedWeapon), __NFUN_119__(Pawn.EngineWeapon, none)))
+	{
+		// End:0x16B
+		if(__NFUN_155__(int(m_eAttackMode), int(0)))
+		{
+			// End:0x164
+			if(__NFUN_154__(int(m_eAttackMode), int(4)))
+			{
+				m_eAttackMode = 3;
+			}
+			__NFUN_113__('Attack');
+		}
+	}
+	// End:0x1BE
+	if(__NFUN_1822__())
+	{
+		// End:0x1AB
+		if(AIPlayCallBackup(Enemy))
+		{
+			__NFUN_256__(1.0000000);
+			__NFUN_1821__(Enemy.Location, 5);
+			__NFUN_261__(m_pawn.16);			
+		}
+		else
+		{
+			__NFUN_1821__(Enemy.Location, 5);
+		}
+	}
+	J0x1BE:
+
+	// End:0x21E
+	if(m_pawn.m_bHaveAGrenade)
+	{
+		// End:0x21E
+		if(m_pawn.m_DZone.m_bUseGrenade)
+		{
+			// End:0x21E
+			if(__NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), m_pawn.m_DZone.m_iChanceToUseGrenadeAtFirstReaction))
+			{
+				GotoStateThrowingGrenade('PrecombatAction', 'Reaction');
+			}
+		}
+	}
+Reaction:
+
+
+	// End:0x265
+	if(__NFUN_119__(R6RainbowAI(Enemy.Controller), none))
+	{
+		m_iRainbowInCombat = R6RainbowAI(Enemy.Controller).m_TeamManager.m_iMemberCount;		
+	}
+	else
+	{
+		// End:0x2A9
+		if(__NFUN_119__(R6PlayerController(Enemy.Controller), none))
+		{
+			m_iRainbowInCombat = R6PlayerController(Enemy.Controller).m_TeamManager.m_iMemberCount;
+		}
+	}
+	switch(GetEngageReaction(Enemy, m_iTerroristInGroup, m_iRainbowInCombat))
+	{
+		// End:0x2D4
+		case 1:
+			PlayAttackVoices();
+			GotoStateAimedFire();
+			// End:0x335
+			break;
+		// End:0x2E8
+		case 2:
+			PlayAttackVoices();
+			GotoStateSprayFire();
+			// End:0x335
+			break;
+		// End:0x30D
+		case 3:
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 4);
+			__NFUN_113__('RunAway');
+			// End:0x335
+			break;
+		// End:0x332
+		case 4:
+			m_VoicesManager.PlayTerroristVoices(m_pawn, 2);
+			__NFUN_113__('Surrender');
+			// End:0x335
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	stop;		
 }
 
-state Configuration
+auto state Configuration
+{Begin:
+
+	m_pawn = R6Terrorist(Pawn);
+	m_pawn.m_controller = self;
+	m_Manager = R6TerroristMgr(Level.GetTerroristMgr());
+	J0x3A:
+
+	// End:0x59 [Loop If]
+	if(__NFUN_129__(m_pawn.m_bInitFinished))
+	{
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x3A;
+	}
+	m_vSpawningPosition = m_pawn.Location;
+	m_rSpawningRotation = m_pawn.Rotation;
+	m_eEngageReaction = m_pawn.m_DZone.m_eEngageReaction;
+	ChangeDefCon(m_pawn.m_eDefCon);
+	// End:0x116
+	if(__NFUN_154__(int(m_pawn.m_eStrategy), int(0)))
+	{
+		m_path = R6DZonePath(m_pawn.m_DZone);
+		assert(__NFUN_119__(m_path, none));
+		// End:0x116
+		if(__NFUN_150__(m_path.m_aNode.Length, 2))
+		{
+			m_pawn.m_eStrategy = 2;
+		}
+	}
+	// End:0x125
+	if(UseRandomHostage())
+	{
+		AssignNearHostage();
+	}
+	m_TriggeredIO = m_pawn.m_DZone.m_InteractiveObject;
+	GotoStateNoThreat();
+	stop;			
+}
+
+state ThrowingGrenade
 {
+	function BeginState()
+	{
+		SetReactionStatus(5, 0);
+		Focus = Enemy;
+		return;
+	}
+
+	function EndState()
+	{
+		Focus = none;
+		FocalPoint = Enemy.Location;
+		return;
+	}
+
+	function CheckDistance()
+	{
+		local Vector vDir;
+		local float fDist;
+
+		vDir = __NFUN_216__(Enemy.Location, m_pawn.Location);
+		fDist = __NFUN_225__(vDir);
+		// End:0xA4
+		if(__NFUN_177__(fDist, float(1500)))
+		{
+			vDir = __NFUN_226__(vDir);
+			vDir = __NFUN_215__(m_pawn.Location, __NFUN_212__(vDir, __NFUN_175__(fDist, float(1400))));
+			GotoStateMovingTo("ThrowingGrenade", 5, true,, vDir, 'ThrowingGrenade', 'Throw');
+		}
+		return;
+	}
+
+	event bool NotifyBump(Actor Other)
+	{
+		return true;
+		return;
+	}
+Begin:
+
+	CheckDistance();
+Throw:
+
+
+	// End:0x38
+	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(Enemy.Location, m_pawn.Location)), float(1500)))
+	{
+		goto 'Exit';
+	}
+	Target = Enemy;
+	StopMoving();
+	// End:0x74
+	if(m_pawn.bIsCrouched)
+	{
+		m_pawn.bWantsToCrouch = false;
+		__NFUN_256__(0.1000000);
+	}
+	__NFUN_508__();
+	m_pawn.SetToGrenade();
+	m_pawn.PlayWeaponAnimation();
+	m_pawn.SetNextPendingAction(30);
+	__NFUN_261__(m_pawn.16);
+	m_pawn.SetToNormalWeapon();
+	m_pawn.PlayWeaponAnimation();
+	__NFUN_256__(2.0000000);
+Exit:
+
+
+	__NFUN_113__(NextState, NextLabel);
+	stop;	
 }
 
 state NoThreat
 {
-    function BeginState() {}
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		return;
+	}
+Begin:
+
+	// End:0x2D
+	if(__NFUN_132__(m_pawn.m_bIsKneeling, m_pawn.m_bIsUnderArrest))
+	{
+		__NFUN_113__('Surrender');
+	}
+	Pawn.SetMovementPhysics();
+	m_eAttackMode = 0;
+	m_pawn.m_bSprayFire = false;
+	StopMoving();
+	// End:0x99
+	if(__NFUN_155__(int(m_pawn.m_ePersonality), int(5)))
+	{
+		m_pawn.bWantsToCrouch = false;
+		m_pawn.m_bIsSniping = false;		
+	}
+	else
+	{
+		m_pawn.m_bIsSniping = true;
+		m_pawn.m_bCanProne = true;
+		m_pawn.m_bAllowLeave = false;
+	}
+	m_pawn.m_bSkipTick = true;
+	m_pawn.m_bIsKneeling = false;
+	m_pawn.m_bIsUnderArrest = false;
+	m_bAlreadyHeardSound = false;
+	m_TerroristLeader = none;
+	m_iCurrentGroupID = 0;
+	m_HostageAI = none;
+	SetEnemy(none);
+	m_iChanceToDetectShooter = 0;
+	SetActionSpot(none);
+	// End:0x143
+	if(__NFUN_129__(UseRandomHostage()))
+	{
+		m_Hostage = none;
+	}
+	// End:0x164
+	if(__NFUN_152__(int(m_pawn.m_eDefCon), int(2)))
+	{
+		ChangeDefCon(2);
+	}
+	m_iRandomNumber = 0;
+	J0x16B:
+
+	// End:0x18E [Loop If]
+	if(__NFUN_150__(m_iRandomNumber, 10))
+	{
+		m_aLastNode[m_iRandomNumber] = none;
+		__NFUN_165__(m_iRandomNumber);
+		// [Loop Continue]
+		goto J0x16B;
+	}
+	J0x18E:
+
+	// End:0x1B6 [Loop If]
+	if(__NFUN_129__(Level.Game.m_bGameStarted))
+	{
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x18E;
+	}
+	// End:0x201
+	if(__NFUN_132__(__NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(Pawn.EngineWeapon, none)), Pawn.EngineWeapon.GunIsFull()))
+	{
+		goto 'ChooseState';
+	}
+Reload:
+
+
+	SetReactionStatus(5, 0);
+	J0x20B:
+
+	// End:0x256 [Loop If]
+	if(__NFUN_129__(Pawn.EngineWeapon.GunIsFull()))
+	{
+		__NFUN_256__(0.1000000);
+		AIReloadWeapon();
+		J0x236:
+
+		// End:0x253 [Loop If]
+		if(m_pawn.m_bReloadingWeapon)
+		{
+			__NFUN_256__(0.1000000);
+			// [Loop Continue]
+			goto J0x236;
+		}
+		// [Loop Continue]
+		goto J0x20B;
+	}
+	SetReactionStatus(0, 0);
+ChooseState:
+
+
+	switch(m_pawn.m_eStrategy)
+	{
+		// End:0x27F
+		case 0:
+			__NFUN_113__('PatrolPath');
+			// End:0x2BB
+			break;
+		// End:0x28E
+		case 1:
+			__NFUN_113__('PatrolArea');
+			// End:0x2BB
+			break;
+		// End:0x29D
+		case 2:
+			__NFUN_113__('GuardPoint');
+			// End:0x2BB
+			break;
+		// End:0x2AC
+		case 3:
+			__NFUN_113__('HuntRainbow');
+			// End:0x2BB
+			break;
+		// End:0x2B8
+		case 4:
+			__NFUN_113__('test');
+		// End:0xFFFF
+		default:
+			break;
+	}
+	stop;				
+}
+
+state MovingTo
+{
+	function BeginState()
+	{
+		SetReactionStatus(m_eReactionStatus, m_eStateForEvent);
+		// End:0x49
+		if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)))
+		{
+			m_pawn.m_ePlayerIsUsingHands = 3;
+			m_pawn.PlayWeaponAnimation();
+		}
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x39
+		if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)))
+		{
+			m_pawn.m_ePlayerIsUsingHands = 0;
+			m_pawn.PlayWeaponAnimation();
+		}
+		__NFUN_280__(0.0000000, false);
+		m_pawn.m_wWantedHeadYaw = 0;
+		return;
+	}
+
+	event bool NotifyBump(Actor Other)
+	{
+		local R6Pawn aPawn;
+
+		aPawn = R6Pawn(Other);
+		// End:0x15C
+		if(__NFUN_119__(aPawn, none))
+		{
+			// End:0x43
+			if(__NFUN_154__(int(aPawn.m_ePawnType), int(1)))
+			{
+				__NFUN_113__('MovingTo', 'Exit');				
+			}
+			else
+			{
+				// End:0x15C
+				if(__NFUN_154__(int(aPawn.m_ePawnType), int(2)))
+				{
+					// End:0x8D
+					if(__NFUN_119__(aPawn, m_LastBumped))
+					{
+						m_LastBumped = aPawn;
+						m_fLastBumpedTime = Level.TimeSeconds;						
+					}
+					else
+					{
+						// End:0x15C
+						if(__NFUN_177__(Level.TimeSeconds, __NFUN_174__(__NFUN_174__(m_fLastBumpedTime, 0.3000000), RandRange(0.1000000, 0.3000000))))
+						{
+							// End:0xF8
+							if(__NFUN_130__(m_bCanFailMovingTo, __NFUN_217__(m_LastBumped.Velocity, vect(0.0000000, 0.0000000, 0.0000000))))
+							{
+								__NFUN_113__('MovingTo', 'Exit');								
+							}
+							else
+							{
+								// End:0x14E
+								if(__NFUN_130__(m_bCantInterruptIO, __NFUN_119__(R6TerroristAI(aPawn.Controller), none)))
+								{
+									R6TerroristAI(aPawn.Controller).GotoBumpBackUpState(aPawn.Controller.__NFUN_284__());
+								}
+								__NFUN_113__('MovingTo', 'WaitLastBumped');
+							}
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+		return;
+	}
+
+	function bool GetReacheablePoint(out Vector vTarget)
+	{
+		local Vector vDirection;
+		local float fTemp;
+
+		vDirection = __NFUN_216__(Pawn.Location, m_LastBumped.Location);
+		vDirection.Z = 0.0000000;
+		vDirection = __NFUN_212__(__NFUN_212__(__NFUN_226__(vDirection), Pawn.CollisionRadius), float(4));
+		vTarget = __NFUN_215__(Pawn.Location, vDirection);
+		// End:0x7F
+		if(__NFUN_521__(vTarget))
+		{
+			return true;
+		}
+		fTemp = __NFUN_169__(vDirection.X);
+		vDirection.X = vDirection.Y;
+		vDirection.Y = fTemp;
+		vTarget = __NFUN_215__(Pawn.Location, vDirection);
+		// End:0xDE
+		if(__NFUN_521__(vTarget))
+		{
+			return true;
+		}
+		vDirection.X = __NFUN_169__(vDirection.X);
+		vDirection.Y = __NFUN_169__(vDirection.Y);
+		vTarget = __NFUN_215__(Pawn.Location, vDirection);
+		// End:0x134
+		if(__NFUN_521__(vTarget))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	event Timer()
+	{
+		__NFUN_165__(m_iStateVariable);
+		switch(m_iStateVariable)
+		{
+			// End:0x1A
+			case 4:
+				m_iStateVariable = 0;
+			// End:0x1E
+			case 0:
+			// End:0x4B
+			case 2:
+				m_pawn.m_wWantedHeadYaw = 0;
+				__NFUN_280__(RandRange(1.0000000, 2.0000000), false);
+				// End:0xD9
+				break;
+			// End:0x90
+			case 1:
+				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(3500.0000000, 10000.0000000), float(256)));
+				__NFUN_280__(RandRange(0.5000000, 1.5000000), false);
+				// End:0xD9
+				break;
+			// End:0xD6
+			case 3:
+				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -3500.0000000), float(256)));
+				__NFUN_280__(RandRange(0.5000000, 1.5000000), false);
+				// End:0xD9
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+		return;
+	}
+Begin:
+
+	m_iRandomNumber = 0;
+	m_wBadMoveCount = 0;
+	// End:0x36
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, Pawn.Location)), 10.0000000))
+	{
+		goto 'Exit';
+	}
+	// End:0x7F
+	if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)))
+	{
+		// End:0x63
+		if(__NFUN_154__(__NFUN_167__(2), 0))
+		{
+			m_iStateVariable = 0;			
+		}
+		else
+		{
+			m_iStateVariable = 2;
+		}
+		__NFUN_280__(RandRange(1.0000000, 2.0000000), false);
+	}
+	// End:0xAA
+	if(m_pawn.bWantsToCrouch)
+	{
+		m_pawn.bWantsToCrouch = false;
+		__NFUN_256__(0.1000000);
+	}
+	m_iRandomNumber = 0;
+PathFinding:
+
+
+	// End:0xDC
+	if(__NFUN_132__(__NFUN_130__(__NFUN_119__(m_aMovingToDestination, none), __NFUN_520__(m_aMovingToDestination)), __NFUN_521__(m_vMovingDestination)))
+	{
+		goto 'EndPath';
+	}
+	// End:0xF8
+	if(__NFUN_119__(m_aMovingToDestination, none))
+	{
+		MoveTarget = __NFUN_517__(m_aMovingToDestination);		
+	}
+	else
+	{
+		MoveTarget = __NFUN_518__(m_vMovingDestination, true);
+	}
+	// End:0x120
+	if(__NFUN_114__(MoveTarget, none))
+	{
+		__NFUN_256__(0.5000000);
+		goto 'Exit';
+	}
+	// End:0x164
+	if(__NFUN_130__(__NFUN_154__(m_iRandomNumber, 0), __NFUN_151__(int(m_pawn.m_eDefCon), int(2))))
+	{
+		m_iRandomNumber = 1;
+		FocalPoint = MoveTarget.Location;
+		__NFUN_508__();
+	}
+	R6PreMoveTo(MoveTarget.Location, MoveTarget.Location, m_pawn.m_eMovementPace);
+	__NFUN_502__(MoveTarget);
+	// End:0x1D5
+	if(__NFUN_154__(int(m_eMoveToResult), int(2)))
+	{
+		__NFUN_139__(m_wBadMoveCount);
+		// End:0x1D2
+		if(__NFUN_130__(m_bCanFailMovingTo, __NFUN_151__(int(m_wBadMoveCount), 2)))
+		{
+			goto 'Exit';
+		}		
+	}
+	else
+	{
+		m_wBadMoveCount = 0;
+	}
+	goto 'PathFinding';
+EndPath:
+
+
+	// End:0x21E
+	if(__NFUN_130__(__NFUN_154__(m_iRandomNumber, 0), __NFUN_151__(int(m_pawn.m_eDefCon), int(2))))
+	{
+		m_iRandomNumber = 1;
+		FocalPoint = m_vMovingDestination;
+		__NFUN_508__();
+	}
+	R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, m_pawn.m_eMovementPace);
+	// End:0x252
+	if(__NFUN_119__(m_aMovingToDestination, none))
+	{
+		__NFUN_502__(m_aMovingToDestination);		
+	}
+	else
+	{
+		__NFUN_500__(m_vMovingDestination);
+	}
+	J0x25A:
+
+	// End:0x2F1
+	if(__NFUN_129__(m_bCanFailMovingTo))
+	{
+		// End:0x2BA
+		if(__NFUN_119__(m_aMovingToDestination, none))
+		{
+			// End:0x2B7
+			if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, Pawn.Location)), __NFUN_174__(__NFUN_174__(Pawn.CollisionRadius, m_aMovingToDestination.CollisionRadius), 10.0000000)))
+			{
+				goto 'Begin';
+			}			
+		}
+		else
+		{
+			// End:0x2F1
+			if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, Pawn.Location)), __NFUN_171__(Pawn.CollisionRadius, 2.0000000)))
+			{
+				goto 'Begin';
+			}
+		}
+	}
+	StopMoving();
+	__NFUN_113__(m_stateAfterMovingTo, m_labelAfterMovingTo);
+WaitLastBumped:
+
+
+	// End:0x34A
+	if(GetReacheablePoint(m_vTargetPosition))
+	{
+		m_sDebugString = "Bumped away";
+		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, m_pawn.m_eMovementPace);
+		__NFUN_500__(m_vTargetPosition);
+	}
+	StopMoving();
+	// End:0x36F
+	if(__NFUN_119__(MoveTarget, none))
+	{
+		FocalPoint = MoveTarget.Location;
+	}
+	m_sDebugString = "WaitLastBumped";
+	// End:0x3A1
+	if(m_bCanFailMovingTo)
+	{
+		__NFUN_256__(RandRange(0.0000000, 2.0000000));
+	}
+	m_LastBumped = none;
+	m_sDebugString = "";
+	goto 'Begin';
+	stop;	
 }
 
 state EngageByThreat
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(3, 0);
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.bRotateToDesired = true;
+		m_pawn.bPhysicsAnimUpdate = true;
+		m_pawn.m_wWantedHeadYaw = 0;
+		return;
+	}
+Begin:
+
+	__NFUN_256__(RandRange(0.1000000, 0.2000000));
+	ChangeDefCon(1);
+	SetActionSpot(__NFUN_1811__(m_vThreatLocation, 2000.0000000));
+	// End:0x67
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		GotoStateMovingTo("ThreatActionSpot", 5, true, m_pActionSpot,, 'EngageByThreat', 'ReachedCover');		
+	}
+	else
+	{
+		// End:0x8C
+		if(__NFUN_129__(m_pawn.m_bPreventCrouching))
+		{
+			Pawn.bWantsToCrouch = true;
+		}
+		Focus = none;
+		FocalPoint = m_vThreatLocation;
+		StopMoving();
+		SetReactionStatus(2, 0);
+		goto 'Wait';
+	}
+	J0xB4:
+
+	// End:0x10E
+	if(__NFUN_155__(int(m_pActionSpot.m_eCover), int(0)))
+	{
+		// End:0xFA
+		if(__NFUN_154__(int(m_pActionSpot.m_eCover), int(1)))
+		{
+			m_r6pawn.bWantsToCrouch = false;			
+		}
+		else
+		{
+			m_r6pawn.bWantsToCrouch = true;
+		}		
+	}
+	else
+	{
+		// End:0x13B
+		if(__NFUN_154__(int(m_pActionSpot.m_eFire), int(1)))
+		{
+			m_r6pawn.bWantsToCrouch = false;			
+		}
+		else
+		{
+			m_r6pawn.bWantsToCrouch = true;
+		}
+	}
+	__NFUN_2201__(m_pActionSpot.Location, m_pActionSpot.Rotation);
+	Focus = none;
+	FocalPoint = m_vThreatLocation;
+	StopMoving();
+	SetReactionStatus(2, 0);
+Wait:
+
+
+	// End:0x1AB
+	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	{
+		GotoStateNoThreat();
+	}
+	// End:0x1F2
+	if(__NFUN_154__(__NFUN_167__(3), 0))
+	{
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, 10000.0000000), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+	}
+	m_pawn.m_wWantedHeadYaw = 0;
+	__NFUN_256__(RandRange(1.0000000, 5.0000000));
+	goto 'Wait';
+	stop;			
 }
 
 state EngageBySound
 {
-    function BeginState() {}
-    function EndState() {}
-    function Vector ChooseARandomPoint() {}
-// ^ NEW IN 1.60
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		m_pawn.m_bAvoidFacingWalls = true;
+		return;
+	}
+
+	function EndState()
+	{
+		m_vHostageReactionDirection = vect(0.0000000, 0.0000000, 0.0000000);
+		m_pawn.m_wWantedHeadYaw = 0;
+		m_pawn.m_bAvoidFacingWalls = false;
+		return;
+	}
+
+	function Vector ChooseARandomPoint()
+	{
+		SetActionSpot(__NFUN_1818__(m_iCurrentGroupID, 2000.0000000));
+		// End:0x2B
+		if(__NFUN_114__(m_pActionSpot, none))
+		{
+			return __NFUN_1820__().Location;
+		}
+		m_pActionSpot.m_iLastInvestigateID = m_iCurrentGroupID;
+		return m_pActionSpot.Location;
+		return;
+	}
+Begin:
+
+	StopMoving();
+	Focus = none;
+	FocalPoint = m_vThreatLocation;
+	__NFUN_508__();
+	__NFUN_256__(RandRange(0.2500000, 0.5000000));
+	m_pawn.TurnAwayFromNearbyWalls();
+	__NFUN_256__(RandRange(0.2500000, 1.0000000));
+	// End:0x6E
+	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	{
+		goto 'Exit';
+	}
+	// End:0x88
+	if(__NFUN_129__(m_pawn.m_bAllowLeave))
+	{
+		goto 'GoCloserAndLook';
+	}
+	SetActionSpot(__NFUN_1818__(m_iCurrentGroupID, 2000.0000000, true, m_vThreatLocation));
+	// End:0xF9
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		m_pActionSpot.m_iLastInvestigateID = m_iCurrentGroupID;
+		GotoStateMovingTo("SoundActionSpot", m_pawn.m_eMovementPace, true, m_pActionSpot,, 'EngageBySound', 'AtDestination');		
+	}
+	else
+	{
+		GotoStateMovingTo("SoundThreatLocation", m_pawn.m_eMovementPace, true,, m_vThreatLocation, 'EngageBySound', 'AtDestination');
+	}
+	J0x133:
+
+	m_pawn.m_eMovementPace = 4;
+	goto 'AtRandomPoint';
+WaitHere:
+
+
+	// End:0x168
+	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	{
+		goto 'Exit';
+	}
+	// End:0x193
+	if(__NFUN_154__(__NFUN_167__(4), 0))
+	{
+		ChangeOrientationTo(ChooseRandomDirection(50));
+		__NFUN_256__(RandRange(2.0000000, 4.0000000));
+	}
+	// End:0x1EB
+	if(__NFUN_154__(__NFUN_167__(2), 0))
+	{
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, 10000.0000000), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = 0;
+	}
+	__NFUN_256__(RandRange(1.0000000, 4.0000000));
+	goto 'WaitHere';
+ChooseDestination:
+
+
+	// End:0x222
+	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	{
+		goto 'Exit';
+	}
+	Destination = ChooseARandomPoint();
+	GotoStateMovingTo("EBSRndPoint", m_pawn.m_eMovementPace, true,, Destination, 'EngageBySound', 'AtRandomPoint');
+AtRandomPoint:
+
+
+	// End:0x27F
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		ChangeOrientationTo(m_pActionSpot.Rotation);
+	}
+	// End:0x306
+	if(__NFUN_154__(__NFUN_167__(2), 0))
+	{
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 2.5000000));		
+	}
+	else
+	{
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+	}
+	m_pawn.m_wWantedHeadYaw = 0;
+	goto 'ChooseDestination';
+GoCloserAndLook:
+
+
+	GotoStateMovingTo("EBSThreatLoc", m_pawn.m_eMovementPace, true,, m_vThreatLocation, 'EngageBySound', 'AtClosest');
+AtClosest:
+
+
+	FocalPoint = m_vThreatLocation;
+	__NFUN_508__();
+	__NFUN_256__(RandRange(3.0000000, 5.0000000));
+Exit:
+
+
+	GotoStateNoThreat();
+	stop;		
 }
 
 state Surrender
 {
-    function BeginState() {}
+	function BeginState()
+	{
+		SetReactionStatus(5, 0);
+		return;
+	}
+
+	function EscortIsOver(R6HostageAI hostageAI, bool bSuccess)
+	{
+		m_Manager.RemoveHostageAssignment(m_Hostage);
+		return;
+	}
+
 //============================================================================
-//  ####   ###   ####  #   #  #####    #####  #####   ###   ####   ####  ##  #
-//  ##  # ##  #   ##   ##  #   ##      ##     ##     ##  #  #   # ##     ##  #
-//  ####  ##  #   ##   # # #   ##      #####  ####   #####  ####  ##     #####
-//  ##    ##  #   ##   #  ##   ##         ##  ##     ##  #  ## #  ##     ##  #
-//  ##     ###   ####  #   #   ##      #####  #####  ##  #  ##  #  ####  ##  #
+// AIAffectedByGrenade - 
 //============================================================================
-    event GotoPointAndSearch(Vector vDestination, eMovementPace ePace, bool bCallBackup, optional float fSearchTime, optional EDefCon eNewDefCon) {}
-//============================================================================
-// EscortIsOver - Called from the hostage AI when the escort is over
-//============================================================================
-    function EscortIsOver(R6HostageAI hostageAI, bool bSuccess) {}
-//============================================================================
-// AIAffectedByGrenade -
-//============================================================================
-    function AIAffectedByGrenade(Actor aGrenade, EGrenadeType eType) {}
+	function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
+	{
+		return;
+	}
+Begin:
+
+	StopMoving();
+	__NFUN_508__();
+	// End:0x30
+	if(__NFUN_132__(m_pawn.m_bIsUnderArrest, m_pawn.m_bIsKneeling))
+	{
+		stop;
+	}
+	m_pawn.m_bPreventWeaponAnimation = true;
+	m_pawn.SetNextPendingAction(31);
+	__NFUN_256__(0.3330000);
+	m_pawn.SetNextPendingAction(9);
+	__NFUN_261__(m_pawn.16);
+	m_pawn.SetNextPendingAction(32);
+	J0x8A:
+
+	// End:0xA9 [Loop If]
+	if(__NFUN_129__(m_pawn.m_bIsKneeling))
+	{
+		__NFUN_256__(1.0000000);
+		// [Loop Continue]
+		goto J0x8A;
+	}
+	R6AbstractGameInfo(Level.Game).RemoveTerroFromList(m_pawn);
+	R6AbstractGameInfo(Level.Game).PawnSecure(m_pawn);
+	stop;
+Secure:
+
+
+	__NFUN_508__();
+	m_pawn.m_bIsUnderArrest = true;
+	R6AbstractGameInfo(Level.Game).PawnSecure(m_pawn);
+	m_pawn.__NFUN_262__(false, false, false);
+	m_pawn.SetNextPendingAction(33);
+	stop;			
 }
 
 state RunAway
 {
-    function BeginState() {}
-    // Ignore GotoPointToAttack in state RunAway
-    event GotoPointToAttack(Vector vDestination, Actor PTarget) {}
+	function BeginState()
+	{
+		SetReactionStatus(5, 1);
+		return;
+	}
+
+//============================================================================
+// GotoPointAndAttack - 
+//============================================================================
+	event GotoPointToAttack(Vector vDestination, Actor PTarget)
+	{
+		return;
+	}
+Begin:
+
+	// End:0x2B
+	if(Pawn.bIsCrouched)
+	{
+		m_pawn.bWantsToCrouch = false;
+		__NFUN_256__(0.1000000);
+	}
+ChooseDestination:
+
+
+	// End:0x46
+	if(__NFUN_132__(__NFUN_129__(__NFUN_1810__()), __NFUN_114__(RouteGoal, none)))
+	{
+		GotoStateSprayFire();
+	}
+	GotoStateMovingTo("AttackReloadCover", 5, true, RouteGoal,, 'RunAway', 'ChooseDestination');
+	goto 'ChooseDestination';
+	stop;			
 }
 
-state AttackHostage
+state WaitForEnemy
 {
+	function BeginState()
+	{
+		SetReactionStatus(3, 0);
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		Focus = none;
+		FocalPoint = Enemy.Location;
+		return;
+	}
+
+//============================================================================
+// SeePlayer - 
+//============================================================================
+	function SeePlayer(Pawn seen)
+	{
+		// End:0x37
+		if(IsAnEnemy(R6Pawn(seen)))
+		{
+			SetEnemy(seen);
+			// End:0x31
+			if(__NFUN_154__(__NFUN_167__(2), 0))
+			{
+				GotoStateSprayFire();				
+			}
+			else
+			{
+				GotoStateAimedFire();
+			}
+		}
+		return;
+	}
+
+	function Timer()
+	{
+		GotoStateNoThreat();
+		return;
+	}
+Begin:
+
+	Focus = Enemy;
+	FocalPoint = LastSeenPos;
+	StopMoving();
+	// End:0x41
+	if(__NFUN_129__(m_pawn.m_bPreventCrouching))
+	{
+		Pawn.bWantsToCrouch = true;
+	}
+	__NFUN_280__(10.0000000, false);
+	m_pawn.m_bAvoidFacingWalls = true;
+Wait:
+
+
+	stop;				
+}
+
+state Attack
+{
+	function BeginState()
+	{
+		SetReactionStatus(4, 2);
+		// End:0x91
+		if(__NFUN_130__(Pawn.IsAlive(), __NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(Pawn.EngineWeapon, none))))
+		{
+			m_pawn.ServerForceKillResult(4);
+			m_pawn.R6TakeDamage(1000, 1000, m_pawn, m_pawn.Location, vect(0.0000000, 0.0000000, 0.0000000), 0);
+		}
+		// End:0xA9
+		if(__NFUN_154__(int(m_eAttackMode), int(0)))
+		{
+			GotoStateNoThreat();
+			return;
+		}
+		m_pawn.m_bEngaged = true;
+		m_pawn.PlayWaiting();
+		Focus = Enemy;
+		m_sDebugString = "";
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bEngaged = false;
+		m_pawn.m_wWantedAimingPitch = 0;
+		StopFiring();
+		Focus = none;
+		// End:0x4E
+		if(__NFUN_119__(Enemy, none))
+		{
+			FocalPoint = Enemy.Location;
+		}
+		m_sDebugString = "";
+		return;
+	}
+
+	function bool NeedToReload()
+	{
+		// End:0x20
+		if(__NFUN_154__(Pawn.EngineWeapon.NumberOfBulletsLeftInClip(), 0))
+		{
+			return true;
+		}
+		// End:0x7F
+		if(__NFUN_130__(__NFUN_154__(int(Pawn.EngineWeapon.m_eWeaponType), int(5)), __NFUN_150__(Pawn.EngineWeapon.NumberOfBulletsLeftInClip(), __NFUN_147__(Pawn.EngineWeapon.GetClipCapacity(), 50))))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function FindNextEnemy()
+	{
+		local R6Pawn aPawn;
+
+		// End:0x1F
+		if(__NFUN_119__(Enemy, none))
+		{
+			FocalPoint = Enemy.Location;
+		}
+		SetEnemy(none);
+		// End:0x8E
+		foreach __NFUN_312__(Class'R6Engine.R6Pawn', aPawn, 5000.0000000, m_pawn.Location)
+		{
+			// End:0x8D
+			if(__NFUN_130__(m_pawn.IsEnemy(aPawn), aPawn.IsAlive()))
+			{
+				SetEnemy(aPawn);
+				Focus = Enemy;				
+				return;
+			}			
+		}		
+		// End:0xC4
+		if(__NFUN_154__(int(m_eAttackMode), int(3)))
+		{
+			// End:0xC1
+			if(__NFUN_521__(LastSeenPos))
+			{
+				m_vMovingDestination = LastSeenPos;
+				__NFUN_113__('Attack', 'SprayFireMove');
+			}			
+		}
+		else
+		{
+			GotoStateLostSight(LastSeenPos);
+		}
+		return;
+	}
+
+	event bool NotifyBump(Actor Other)
+	{
+		return true;
+		return;
+	}
+Begin:
+
+	// End:0x2D
+	if(__NFUN_155__(int(m_pawn.m_eEffectiveGrenade), int(0)))
+	{
+		ReactToGrenade(m_pawn.m_vGrenadeLocation);
+	}
+	m_sDebugString = "Begin";
+	StopMoving();
+	m_bFireShort = false;
+	// End:0x90
+	if(__NFUN_119__(m_pActionSpot, none))
+	{
+		m_iRandomNumber = __NFUN_167__(100);
+		// End:0x74
+		if(__NFUN_150__(m_iRandomNumber, 60))
+		{
+			m_bFireShort = true;			
+		}
+		else
+		{
+			// End:0x8A
+			if(__NFUN_150__(m_iRandomNumber, 80))
+			{
+				SetActionSpot(none);				
+			}
+			else
+			{
+				goto 'MoveToFireSpot';
+			}
+		}
+	}
+	// End:0xDF
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_129__(Pawn.bIsCrouched)), __NFUN_154__(__NFUN_167__(3), 0)))
+	{
+		Pawn.bWantsToCrouch = true;
+		__NFUN_256__(0.1000000);
+	}
+	Target = Enemy;
+	m_sDebugString = "FinishRotation2";
+	__NFUN_508__();
+ReactionTime:
+
+
+	switch(m_pawn.m_iDiffLevel)
+	{
+		// End:0x123
+		case 1:
+			__NFUN_256__(1.0000000);
+			// End:0x13E
+			break;
+		// End:0x133
+		case 2:
+			__NFUN_256__(0.5000000);
+			// End:0x13E
+			break;
+		// End:0x13B
+		case 3:
+			// End:0x13E
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	__NFUN_1828__();
+Fire:
+
+
+	// End:0x169
+	if(__NFUN_132__(__NFUN_155__(int(m_eAttackMode), int(3)), __NFUN_533__(Enemy)))
+	{
+		Focus = Enemy;
+	}
+	m_sDebugString = "Fire";
+	// End:0x184
+	if(NeedToReload())
+	{
+		goto 'Reload';
+	}
+	// End:0x1DC
+	if(__NFUN_154__(int(m_eAttackMode), int(4)))
+	{
+		SetGunDirection(none);
+		// End:0x1D9
+		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, Destination)), __NFUN_171__(Pawn.CollisionRadius, float(2))))
+		{
+			StopMoving();
+			m_eAttackMode = 3;
+		}		
+	}
+	else
+	{
+		// End:0x22A
+		if(__NFUN_132__(__NFUN_114__(Enemy, none), __NFUN_129__(R6Pawn(Enemy).IsAlive())))
+		{
+			// End:0x224
+			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+			{
+				GotoStateNoThreat();				
+			}
+			else
+			{
+				FindNextEnemy();
+			}
+		}
+		m_sDebugString = "CheckLineOfSight";
+		// End:0x2F0
+		if(__NFUN_130__(__NFUN_119__(Enemy, none), __NFUN_129__(__NFUN_1827__(m_pawn.GetFiringStartPoint(), Enemy))))
+		{
+			// End:0x2A0
+			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+			{
+				SetLowestSnipingStance(Enemy);
+				__NFUN_256__(0.2000000);
+				goto 'Fire';				
+			}
+			else
+			{
+				m_vTargetPosition = __NFUN_1824__(Enemy);
+				R6PreMoveTo(m_vTargetPosition, Enemy.Location, 5);
+				__NFUN_500__(m_vTargetPosition, Enemy);
+				FocalPoint = Enemy.Location;
+				goto 'Fire';
+			}
+		}
+		SetGunDirection(Enemy);
+		J0x2FB:
+
+		// End:0x36C [Loop If]
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Enemy, none), Enemy.IsAlive()), __NFUN_155__(int(m_pawn.m_wWantedAimingPitch), __NFUN_145__(__NFUN_156__(m_pawn.m_iCurrentAimingPitch, 65535), 256))))
+		{
+			m_sDebugString = "SettingPitch";
+			__NFUN_256__(0.0500000);
+			// [Loop Continue]
+			goto J0x2FB;
+		}
+	}
+	// End:0x3AA
+	if(__NFUN_154__(int(m_eAttackMode), int(1)))
+	{
+		J0x37C:
+
+		// End:0x3AA [Loop If]
+		if(__NFUN_129__(IsReadyToFire(Enemy)))
+		{
+			m_sDebugString = "ReadyToFire";
+			__NFUN_256__(0.2000000);
+			// [Loop Continue]
+			goto J0x37C;
+		}
+	}
+	// End:0x407
+	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(4))), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(2))))
+	{
+		__NFUN_256__(0.5000000);
+		goto 'ReactionTime';
+	}
+	m_sDebugString = "FinishRotation";
+	__NFUN_508__();
+	// End:0x493
+	if(__NFUN_154__(int(m_eAttackMode), int(1)))
+	{
+		StartFiring();
+		m_sDebugString = "AimedFiring";
+		// End:0x482
+		if(__NFUN_154__(int(Pawn.EngineWeapon.GetRateOfFire()), int(2)))
+		{
+			__NFUN_256__(RandRange(0.4000000, 1.0000000));			
+		}
+		else
+		{
+			__NFUN_256__(0.2000000);
+		}
+		StopFiring();		
+	}
+	else
+	{
+		// End:0x51A
+		if(__NFUN_154__(int(Pawn.EngineWeapon.GetRateOfFire()), int(2)))
+		{
+			StartFiring();
+			m_sDebugString = "FiringAuto";
+			__NFUN_256__(RandRange(0.2000000, 1.5000000));
+			StopFiring();
+			SetGunDirection(Target);
+			m_sDebugString = "StopFiring";
+			__NFUN_256__(RandRange(0.0000000, 0.5000000));			
+		}
+		else
+		{
+			m_iRandomNumber = __NFUN_146__(__NFUN_167__(4), 2);
+			J0x528:
+
+			// End:0x57B [Loop If]
+			if(__NFUN_151__(m_iRandomNumber, 0))
+			{
+				StartFiring();
+				m_sDebugString = "FiringSingle";
+				__NFUN_256__(RandRange(0.1000000, 0.2000000));
+				StopFiring();
+				SetGunDirection(Target);
+				__NFUN_166__(m_iRandomNumber);
+				// [Loop Continue]
+				goto J0x528;
+			}
+			m_sDebugString = "StopFiring2";
+			__NFUN_256__(RandRange(0.0000000, 0.5000000));
+		}
+	}
+	// End:0x5B8
+	if(m_bFireShort)
+	{
+		m_bFireShort = false;
+		goto 'MoveToFireSpot';
+	}
+	goto 'ReactionTime';
+Reload:
+
+
+	m_sDebugString = "Reload";
+	SetReactionStatus(5, 0);
+	// End:0x5EE
+	if(__NFUN_151__(int(m_eAttackMode), int(2)))
+	{
+		m_eAttackMode = 2;
+	}
+	// End:0x6FD
+	if(__NFUN_130__(__NFUN_155__(int(m_pawn.m_ePersonality), int(5)), __NFUN_119__(Enemy, none)))
+	{
+		SetActionSpot(__NFUN_1811__(Enemy.Location, GetMaxCoverDistance()));
+		// End:0x6B6
+		if(__NFUN_119__(m_pActionSpot, none))
+		{
+			GotoStateMovingTo("AttackReloadCover", 5, true, m_pActionSpot,, 'Attack', 'AtCover');
+AtCover:
+
+
+			SetReactionStatus(5, 0);
+			__NFUN_2201__(m_pActionSpot.Location, m_pActionSpot.Rotation);
+			Focus = Enemy;
+			m_sDebugString = "FinishRotation3";
+			__NFUN_508__();
+		}
+		// End:0x6FD
+		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_129__(Pawn.bIsCrouched)), __NFUN_154__(__NFUN_167__(2), 0)))
+		{
+			Pawn.bWantsToCrouch = true;
+		}
+	}
+	Target = none;
+	StopMoving();
+	AIReloadWeapon();
+	J0x710:
+
+	// End:0x73E [Loop If]
+	if(m_pawn.m_bReloadingWeapon)
+	{
+		m_sDebugString = "Reloading";
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x710;
+	}
+	Target = Enemy;
+	SetGunDirection(Target);
+	m_sDebugString = "EndReloading";
+	__NFUN_256__(0.4000000);
+	SetReactionStatus(4, 2);
+	goto 'Fire';
+SprayFireMove:
+
+
+	m_sDebugString = "SprayFireMove";
+	SetReactionStatus(3, 2);
+	m_eAttackMode = 4;
+	// End:0x829
+	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, m_pawn.Location)), 100.0000000))
+	{
+		R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, 4);
+		Pawn.__NFUN_3970__(1);
+		Destination = m_vMovingDestination;
+		Pawn.Acceleration = __NFUN_212__(__NFUN_226__(__NFUN_216__(Destination, Pawn.Location)), m_pawn.m_fWalkingSpeed);
+	}
+	goto 'Fire';
+MoveToFireSpot:
+
+
+	// End:0x865
+	if(__NFUN_1829__())
+	{
+		GotoStateMovingTo("AttackFireSpot", 5, true, m_pActionSpot, m_vThreatLocation, 'Attack', 'AtFireSpot');		
+	}
+	else
+	{
+		goto 'Fire';
+	}
+	J0x86B:
+
+	__NFUN_2201__(m_pActionSpot.Location, Rotator(__NFUN_216__(m_pActionSpot.Location, Enemy.Location)));
+	Focus = Enemy;
+	// End:0x8D1
+	if(__NFUN_154__(int(m_pActionSpot.m_eFire), int(2)))
+	{
+		m_pawn.bWantsToCrouch = true;
+	}
+	goto 'Fire';
+	stop;				
+}
+
+state AttackHostage extends Attack
+{Begin:
+
+	// End:0x2F
+	if(__NFUN_132__(__NFUN_114__(R6Hostage(Enemy), none), R6Hostage(Enemy).m_bExtracted))
+	{
+		FindNextEnemy();
+	}
+	// End:0x5B
+	if(__NFUN_132__(__NFUN_129__(R6Pawn(Enemy).IsAlive()), __NFUN_533__(Enemy)))
+	{
+		GotoStateAimedFire();
+	}
+	SetReactionStatus(3, 4);
+	GotoStateMovingTo("Chase hostage", 5, true, Enemy,, 'AttackHostage', 'Begin');
+	stop;		
 }
 
 state GuardPoint
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_wWantedHeadYaw = 0;
+		return;
+	}
+Begin:
+
+	GotoStateMovingTo("GuardPoint", 4, true,, m_vSpawningPosition, 'GuardPoint', 'StartWaiting',, true);
+StartWaiting:
+
+
+	StopMoving();
+	ChangeOrientationTo(m_rSpawningRotation);
+	__NFUN_508__();
+	// End:0x5B
+	if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+	{
+		__NFUN_113__('Sniping');
+	}
+	// End:0x9E
+	if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_154__(int(m_pawn.m_eStartingStance), int(2))))
+	{
+		Pawn.bWantsToCrouch = true;		
+	}
+	else
+	{
+		Pawn.bWantsToCrouch = false;
+	}
+	J0xAF:
+
+	// End:0x188
+	if(__NFUN_154__(__NFUN_167__(3), 0))
+	{
+		m_iRandomNumber = __NFUN_167__(2);
+		// End:0xD9
+		if(__NFUN_154__(m_iRandomNumber, 0))
+		{
+			m_iRandomNumber = -1;
+		}
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(float(__NFUN_144__(m_iRandomNumber, 5000)), float(__NFUN_144__(m_iRandomNumber, 10000))), float(256)));
+		__NFUN_256__(RandRange(1.0000000, 1.5000000));
+		__NFUN_159__(m_iRandomNumber, float(-1));
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(float(__NFUN_144__(m_iRandomNumber, 5000)), float(__NFUN_144__(m_iRandomNumber, 10000))), float(256)));
+		__NFUN_256__(RandRange(1.2500000, 1.7500000));		
+	}
+	else
+	{
+		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+		// End:0x1DF
+		if(__NFUN_154__(__NFUN_167__(2), 0))
+		{
+			m_pawn.m_wWantedHeadYaw = byte(__NFUN_143__(int(m_pawn.m_wWantedHeadYaw)));
+		}
+		__NFUN_256__(RandRange(1.0000000, 1.5000000));
+	}
+	m_pawn.m_wWantedHeadYaw = 0;
+	__NFUN_256__(RandRange(2.0000000, 6.0000000));
+	goto 'Waiting';
+	stop;			
+}
+
+state Sniping
+{
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		return;
+	}
+
+//============================================================================
+// SeePlayer - 
+//============================================================================
+	event SeePlayer(Pawn seen)
+	{
+		local R6Pawn r6seen;
+
+		r6seen = R6Pawn(seen);
+		// End:0x1D
+		if(__NFUN_114__(r6seen, none))
+		{
+			return;
+		}
+		// End:0xEE
+		if(__NFUN_130__(m_bSeeRainbow, IsAnEnemy(r6seen)))
+		{
+			ReconThreatCheck(r6seen, 0);
+			// End:0xB1
+			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(seen.Location, m_pawn.Location)), float(500)))
+			{
+				m_pawn.m_bWantsToProne = false;
+				// End:0xB1
+				if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_155__(__NFUN_167__(4), 0)))
+				{
+					m_pawn.bWantsToCrouch = true;
+				}
+			}
+			SetEnemy(r6seen);
+			Target = Enemy;
+			// End:0xE0
+			if(__NFUN_1822__())
+			{
+				__NFUN_1821__(Enemy.Location, 5);
+			}
+			ChangeDefCon(1);
+			GotoStateAimedFire();
+		}
+		return;
+	}
+
+//============================================================================
+// HearNoise - 
+//============================================================================
+	event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
+	{
+		// End:0x36
+		if(__NFUN_130__(m_pawn.m_bDontHearPlayer, R6Pawn(NoiseMaker.Instigator).m_bIsPlayer))
+		{
+			return;
+		}
+		ReconThreatCheck(NoiseMaker, eType);
+		// End:0x68
+		if(m_pawn.IsNeutral(NoiseMaker.Instigator))
+		{
+			return;
+		}
+		// End:0x1CD
+		if(__NFUN_132__(__NFUN_130__(m_bHearInvestigate, __NFUN_154__(int(eType), int(1))), __NFUN_130__(m_bHearThreat, __NFUN_154__(int(eType), int(2)))))
+		{
+			GotoPointAndSearch(NoiseMaker.Location, 4, true, 30.0000000, 2);
+			// End:0x13C
+			if(__NFUN_130__(m_bHearThreat, __NFUN_154__(int(eType), int(2))))
+			{
+				// End:0xEE
+				if(__NFUN_150__(m_iChanceToDetectShooter, 80))
+				{
+					__NFUN_161__(m_iChanceToDetectShooter, 20);
+				}
+				// End:0x139
+				if(m_pawn.IsEnemy(NoiseMaker.Instigator))
+				{
+					// End:0x139
+					if(__NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), m_iChanceToDetectShooter))
+					{
+						SetEnemy(NoiseMaker.Instigator);
+						GotoStateAimedFire();
+					}
+				}				
+			}
+			else
+			{
+				// End:0x1CA
+				if(__NFUN_176__(__NFUN_225__(__NFUN_216__(NoiseMaker.Location, m_pawn.Location)), float(500)))
+				{
+					m_pawn.m_bWantsToProne = false;
+					// End:0x1AA
+					if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_155__(__NFUN_167__(4), 0)))
+					{
+						m_pawn.bWantsToCrouch = true;
+					}
+					FocalPoint = NoiseMaker.Location;
+					__NFUN_113__('Sniping', 'CheckBehind');
+				}
+			}			
+		}
+		else
+		{
+			// End:0x225
+			if(__NFUN_130__(m_bHearGrenade, __NFUN_154__(int(eType), int(3))))
+			{
+				// End:0x211
+				if(__NFUN_129__(m_bHeardGrenade))
+				{
+					m_VoicesManager.PlayTerroristVoices(m_pawn, 5);
+					m_bHeardGrenade = true;
+				}
+				ReactToGrenade(NoiseMaker.Location);
+			}
+		}
+		return;
+	}
+Begin:
+
+	// End:0x22
+	if(__NFUN_114__(R6DZonePoint(m_pawn.m_DZone), none))
+	{
+		SetLowestSnipingStance();		
+	}
+	else
+	{
+		switch(R6DZonePoint(m_pawn.m_DZone).m_eStance)
+		{
+			// End:0x6A
+			case 1:
+				m_pawn.m_bWantsToProne = false;
+				m_pawn.bWantsToCrouch = false;
+				// End:0xC1
+				break;
+			// End:0x94
+			case 2:
+				m_pawn.m_bWantsToProne = false;
+				m_pawn.bWantsToCrouch = true;
+				// End:0xC1
+				break;
+			// End:0xBE
+			case 3:
+				m_pawn.m_bWantsToProne = true;
+				m_pawn.bWantsToCrouch = false;
+				// End:0xC1
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	stop;
+LostTrackOfEnemy:
+
+
+	__NFUN_256__(RandRange(3.0000000, 7.0000000));
+	ChangeOrientationTo(m_pawn.m_DZone.Rotation);
+	__NFUN_508__();
+	GotoStateNoThreat();
+CheckBehind:
+
+
+	__NFUN_508__();
+	__NFUN_256__(RandRange(1.0000000, 3.0000000));
+	ChangeOrientationTo(__NFUN_316__(m_pawn.Rotation, rot(0, 10000, 0)));
+	__NFUN_256__(RandRange(1.0000000, 2.0000000));
+	ChangeOrientationTo(__NFUN_316__(m_pawn.Rotation, rot(0, -20000, 0)));
+	__NFUN_256__(RandRange(1.0000000, 2.0000000));
+	ChangeOrientationTo(m_pawn.m_DZone.Rotation);
+	__NFUN_508__();
+	GotoStateNoThreat();
+	stop;		
+}
+
+state FindHostage
+{
+	function BeginState()
+	{
+		SetReactionStatus(2, 3);
+		return;
+	}
+
+	function EndState()
+	{
+		Focus = none;
+		FocalPoint = Enemy.Location;
+		return;
+	}
+
+	event bool NotifyBump(Actor Other)
+	{
+		// End:0x1B
+		if(__NFUN_114__(Other, Enemy))
+		{
+			__NFUN_113__('FindHostage', 'Begin');
+		}
+		return global.NotifyBump(Other);
+		return;
+	}
+Begin:
+
+	StopMoving();
+	SetEnemy(m_Hostage);
+	LastSeenTime = Level.TimeSeconds;
+	LastSeenPos = Enemy.Location;
+	Focus = m_Hostage;
+AskToSurrender:
+
+
+	m_HostageAI.Order_Surrender(m_pawn);
+	Pawn.__NFUN_259__('StandYellAlarm');
+	__NFUN_261__();
+	m_iRandomNumber = __NFUN_167__(100);
+	// End:0x93
+	if(__NFUN_150__(m_iRandomNumber, 50))
+	{
+		__NFUN_256__(2.0000000);
+		goto 'AskToSurrender';		
+	}
+	else
+	{
+		// End:0xA8
+		if(__NFUN_150__(m_iRandomNumber, 90))
+		{
+			goto 'Pursues';			
+		}
+		else
+		{
+			goto 'AimedFire';
+		}
+	}
+	J0xAE:
+
+	// End:0x13F
+	if(__NFUN_130__(__NFUN_533__(m_Hostage), m_Hostage.IsAlive()))
+	{
+		// End:0xE6
+		if(__NFUN_520__(Enemy))
+		{
+			MoveTarget = Enemy;			
+		}
+		else
+		{
+			MoveTarget = __NFUN_517__(Enemy);
+		}
+		// End:0x10A
+		if(__NFUN_114__(MoveTarget, none))
+		{
+			__NFUN_256__(1.0000000);			
+		}
+		else
+		{
+			R6PreMoveTo(MoveTarget.Location, MoveTarget.Location, 5);
+			__NFUN_502__(MoveTarget);
+		}
+		goto 'Pursues';		
+	}
+	else
+	{
+		// End:0x158
+		if(__NFUN_521__(LastSeenPos))
+		{
+			Destination = LastSeenPos;			
+		}
+		else
+		{
+			MoveTarget = __NFUN_518__(LastSeenPos);
+			Destination = MoveTarget.Location;
+		}
+		R6PreMoveTo(Destination, Destination, 5);
+		__NFUN_500__(Destination);
+		GotoStateEngageBySound(LastSeenPos, 5, 15.0000000);
+	}
+	J0x1A6:
+
+	GotoStateAimedFire();
+	stop;			
+}
+
+state FollowPawn
+{
+	function BeginState()
+	{
+		SetReactionStatus(m_eReactionStatus, m_eStateForEvent);
+		return;
+	}
+
+	function EndState()
+	{
+		Focus = none;
+		return;
+	}
+
+	function Vector GetFollowDestination()
+	{
+		local float fDist;
+		local Vector vDir, vTargetPos;
+		local Rotator rOrientation;
+
+		// End:0x4B
+		if(__NFUN_154__(m_iFollowYaw, 0))
+		{
+			vTargetPos = __NFUN_215__(m_pawnToFollow.Location, __NFUN_212__(__NFUN_226__(__NFUN_216__(Pawn.Location, m_pawnToFollow.Location)), m_fFollowDist));			
+		}
+		else
+		{
+			rOrientation.Yaw = __NFUN_146__(m_pawnToFollow.Rotation.Yaw, m_iFollowYaw);
+			vTargetPos = __NFUN_216__(m_pawnToFollow.Location, __NFUN_212__(Vector(rOrientation), m_fFollowDist));
+		}
+		__NFUN_1800__(vTargetPos);
+		return vTargetPos;
+		return;
+	}
+Moving:
+
+	// End:0x1A
+	if(__NFUN_129__(m_pawnToFollow.IsAlive()))
+	{
+		GotoStateNoThreat();
+	}
+	m_fPawnDistance = DistanceTo(m_pawnToFollow);
+	// End:0x9C
+	if(__NFUN_176__(m_fPawnDistance, __NFUN_174__(m_fFollowDist, Pawn.CollisionRadius)))
+	{
+		StopMoving();
+		// End:0x8E
+		if(__NFUN_130__(__NFUN_154__(int(m_eFollowMode), int(1)), R6Terrorist(m_pawnToFollow).m_controller.m_bWaiting))
+		{
+			__NFUN_113__('PatrolPath', 'ReachedNode');
+		}
+		__NFUN_256__(0.2000000);
+		goto 'Moving';
+	}
+	m_vMovingDestination = GetFollowDestination();
+	m_pawn.m_eMovementPace = 4;
+	// End:0xF3
+	if(__NFUN_129__(__NFUN_521__(m_vMovingDestination)))
+	{
+		MoveTarget = __NFUN_518__(m_vMovingDestination);
+		// End:0xF3
+		if(__NFUN_119__(MoveTarget, none))
+		{
+			m_vMovingDestination = MoveTarget.Location;
+		}
+	}
+	// End:0x113
+	if(__NFUN_177__(m_fPawnDistance, 500.0000000))
+	{
+		m_pawn.m_eMovementPace = 5;
+	}
+	R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, m_pawn.m_eMovementPace);
+	__NFUN_500__(m_vMovingDestination);
+	goto 'Moving';
+	stop;				
 }
 
 state PatrolArea
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		m_pawn.m_bAvoidFacingWalls = true;
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_wWantedHeadYaw = 0;
+		m_pawn.m_bAvoidFacingWalls = false;
+		return;
+	}
+Begin:
+
+	m_pawn.m_eMovementPace = 4;
+ChooseDestination:
+
+
+	m_vTargetPosition = m_pawn.m_DZone.__NFUN_1831__();
+	GotoStateMovingTo("PatrolArea", 4, true,, m_vTargetPosition, 'PatrolArea', 'AtDestination');
+AtDestination:
+
+
+	// End:0x16D
+	if(__NFUN_155__(__NFUN_167__(3), 0))
+	{
+		// End:0xE2
+		if(__NFUN_154__(__NFUN_167__(2), 0))
+		{
+			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+			__NFUN_256__(RandRange(1.0000000, 2.5000000));
+			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
+			__NFUN_256__(RandRange(1.0000000, 2.5000000));			
+		}
+		else
+		{
+			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
+			__NFUN_256__(RandRange(1.0000000, 2.5000000));
+			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+			__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		}
+		m_pawn.m_wWantedHeadYaw = 0;
+	}
+	__NFUN_256__(RandRange(1.0000000, 2.0000000));
+	goto 'ChooseDestination';
+	stop;	
 }
 
 state PatrolPath
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_wWantedHeadYaw = 0;
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_pawn.__NFUN_1805__(m_pawn.16);
+		return;
+	}
+Begin:
+
+	// End:0x15
+	if(__NFUN_255__(m_PatrolCurrentLabel, 'None'))
+	{
+		goto m_PatrolCurrentLabel;
+	}
+	FinishedWaiting();
+	stop;
+ReachedNode:
+
+
+	m_PatrolCurrentLabel = 'ReachedNode';
+	ReachedTheNode();
+	stop;
+WaitingAtNode:
+
+
+	m_PatrolCurrentLabel = 'WaitingAtNode';
+	StopMoving();
+	ChangeOrientationTo(m_rStandRotation);
+	__NFUN_508__();
+	// End:0x8D
+	if(m_currentNode.bDirectional)
+	{
+		m_pawn.m_wWantedAimingPitch = byte(__NFUN_145__(m_currentNode.Rotation.Pitch, 256));		
+	}
+	else
+	{
+		m_pawn.m_bAvoidFacingWalls = true;
+	}
+	// End:0x13B
+	if(__NFUN_255__(m_currentNode.m_AnimToPlay, 'None'))
+	{
+		// End:0x13B
+		if(__NFUN_150__(__NFUN_167__(100), m_currentNode.m_AnimChance))
+		{
+			// End:0xFF
+			if(__NFUN_119__(m_currentNode.m_SoundToPlay, none))
+			{
+				m_pawn.__NFUN_2730__(m_currentNode.m_SoundToPlay, 6, 15);
+			}
+			m_pawn.m_szSpecialAnimName = m_currentNode.m_AnimToPlay;
+			m_pawn.SetNextPendingAction(35);
+			__NFUN_261__(m_pawn.16);
+		}
+	}
+	// End:0x194
+	if(__NFUN_130__(__NFUN_177__(m_fWaitingTime, float(0)), __NFUN_152__(int(m_pawn.m_eDefCon), int(2))))
+	{
+		// End:0x194
+		if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_154__(__NFUN_167__(2), 0)))
+		{
+			m_pawn.bWantsToCrouch = true;
+		}
+	}
+	// End:0x1E2
+	if(__NFUN_176__(m_fFacingTime, m_fWaitingTime))
+	{
+		__NFUN_256__(m_fFacingTime);
+		m_pawn.m_wWantedAimingPitch = 0;
+		ChangeOrientationTo(ChooseRandomDirection(-1));
+		__NFUN_256__(__NFUN_175__(m_fWaitingTime, m_fFacingTime));
+		__NFUN_508__();		
+	}
+	else
+	{
+		// End:0x311
+		if(__NFUN_130__(__NFUN_129__(m_currentNode.bDirectional), __NFUN_155__(__NFUN_167__(3), 0)))
+		{
+			// End:0x27F
+			if(__NFUN_154__(__NFUN_167__(2), 0))
+			{
+				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));
+				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
+				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));				
+			}
+			else
+			{
+				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
+				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));
+				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));
+			}
+			m_pawn.m_wWantedHeadYaw = 0;
+			__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));			
+		}
+		else
+		{
+			__NFUN_256__(m_fWaitingTime);
+		}
+		m_pawn.m_wWantedAimingPitch = 0;
+	}
+	FinishedWaiting();
+	m_pawn.m_bAvoidFacingWalls = false;
+	m_pawn.bWantsToCrouch = false;
+	stop;	
+}
+
+state HuntRainbow
+{
+	function BeginState()
+	{
+		SetReactionStatus(0, 0);
+		return;
+	}
+
+	function R6Pawn GetClosestEnemy()
+	{
+		local R6Pawn aEnemy, aClosestEnemy;
+		local float fDist, fBestDist;
+
+		// End:0x96
+		foreach __NFUN_313__(Class'R6Engine.R6Pawn', aEnemy)
+		{
+			// End:0x95
+			if(__NFUN_130__(m_pawn.IsEnemy(aEnemy), aEnemy.IsAlive()))
+			{
+				fDist = __NFUN_225__(__NFUN_216__(aEnemy.Location, Pawn.Location));
+				// End:0x95
+				if(__NFUN_132__(__NFUN_176__(fDist, fBestDist), __NFUN_180__(fBestDist, float(0))))
+				{
+					fBestDist = fDist;
+					aClosestEnemy = aEnemy;
+				}
+			}			
+		}		
+		return aClosestEnemy;
+		return;
+	}
+FindNewEnemy:
+
+	// End:0x28
+	if(__NFUN_130__(__NFUN_119__(m_huntedPawn, none), __NFUN_129__(m_huntedPawn.IsAlive())))
+	{
+		m_huntedPawn = none;
+	}
+	// End:0x42
+	if(__NFUN_114__(m_huntedPawn, none))
+	{
+		SetEnemy(GetClosestEnemy());		
+	}
+	else
+	{
+		SetEnemy(m_huntedPawn);
+	}
+	J0x4D:
+
+	// End:0xB6
+	if(__NFUN_130__(__NFUN_119__(R6Pawn(Enemy), none), R6Pawn(Enemy).IsAlive()))
+	{
+		MoveTarget = __NFUN_517__(Enemy);
+		// End:0xB6
+		if(__NFUN_119__(MoveTarget, none))
+		{
+			GotoStateMovingTo("HuntRainbow", 4, true, MoveTarget,, 'HuntRainbow', 'nextNode', true);
+		}
+	}
+	__NFUN_256__(1.0000000);
+	goto 'FindNewEnemy';
+	stop;			
 }
 
 state PA_PlayAnim
 {
-    function EndState() {}
+	function EndState()
+	{
+		m_pawn.SetNextPendingAction(37);
+		super(PA_Interaction).EndState();
+		return;
+	}
+Begin:
+
+	m_pawn.m_szSpecialAnimName = m_AnimName;
+	m_pawn.SetNextPendingAction(35);
+	__NFUN_261__(m_pawn.16);
+	AnimBlendToAlpha(m_pawn.16, 0.0000000, 0.5000000);
+	m_pawn.m_ePlayerIsUsingHands = 0;
+	m_pawn.PlayWeaponAnimation();
+	m_pawn.m_bPawnSpecificAnimInProgress = false;
+	m_InteractionObject.FinishAction();
+	stop;	
 }
 
 state PA_LoopAnim
 {
-    function BeginState() {}
-    function EndState() {}
+	function BeginState()
+	{
+		m_fSearchTime = __NFUN_174__(Level.TimeSeconds, m_fLoopAnimTime);
+		super(Object).BeginState();
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.SetNextPendingAction(37);
+		super(PA_Interaction).EndState();
+		return;
+	}
+Begin:
+
+	m_pawn.m_szSpecialAnimName = m_AnimName;
+	m_pawn.SetNextPendingAction(36);
+	// End:0x3F
+	if(__NFUN_181__(m_fLoopAnimTime, 0.0000000))
+	{
+		__NFUN_256__(m_fLoopAnimTime);		
+	}
+	else
+	{
+		stop;
+	}
+	m_InteractionObject.FinishAction();
+	stop;				
 }
 
 defaultproperties
 {
+	bIsPlayer=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_aLastNodeC_NumberOfNodeRemembered
+// REMOVED IN 1.60: function SetView
+// REMOVED IN 1.60: function GetEngageReaction

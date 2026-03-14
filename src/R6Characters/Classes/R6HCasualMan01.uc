@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6HCasualMan01.uc : Hostage pawn variant: first casual male civilian skin used in missions.
+// R6HCasualMan01 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6HCasualMan01.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -7,8 +13,9 @@
 //=============================================================================
 class R6HCasualMan01 extends R6HostagePawn;
 
-#exec OBJ LOAD FILE=..\Animations\R6Hostage_UKX.ukx PACKAGE=R6Hostage_UKX
-
 defaultproperties
 {
+	Mesh=SkeletalMesh'R6Hostage_UKX.CasualManMesh'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel197'
+	Skins=/* Array type was not detected. */
 }

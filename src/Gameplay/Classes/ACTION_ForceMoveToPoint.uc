@@ -1,18 +1,37 @@
-// Scripted action that force-moves the pawn directly to a tagged destination without
-// pathfinding, temporarily overriding its physics mode.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_ForceMoveToPoint extends ScriptedAction;
+//=============================================================================
+// ACTION_ForceMoveToPoint - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_ForceMoveToPoint extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var Actor Dest;
-var name DestinationTag;
-// ^ NEW IN 1.60
 var byte originalPhys;
+var Actor Dest;
+var(Action) name DestinationTag;  // tag of destination - if none, then use the ScriptedSequence
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-
-defaultproperties
+function bool InitActionFor(ScriptedController C)
 {
+	Dest = C.SequenceScript.GetMoveTarget();
+	// End:0x61
+	if(__NFUN_130__(__NFUN_255__(DestinationTag, 'None'), __NFUN_255__(DestinationTag, 'None')))
+	{
+		// End:0x60
+		foreach C.__NFUN_304__(Class'Engine.Actor', Dest, DestinationTag)
+		{
+			// End:0x60
+			break;			
+		}		
+	}
+	originalPhys = C.Pawn.Physics;
+	C.Pawn.__NFUN_262__(false, false, false);
+	C.Pawn.bCollideWorld = false;
+	C.Pawn.__NFUN_267__(Dest.Location);
+	C.Pawn.__NFUN_299__(Dest.Rotation);
+	C.Pawn.__NFUN_3970__(0);
+	return false;
+	return;
 }
+

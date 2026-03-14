@@ -1,21 +1,62 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// R6CommonRainbowVoices - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6CommonRainbowVoices extends R6Voices;
 
-// --- Variables ---
-var Sound m_sndSuffocation;      // Voice line played when the pawn is suffocating (smoke/gas)
-// ^ NEW IN 1.60
-var Sound m_sndCoughOxygene;     // Coughing voice line triggered when oxygen is low
-// ^ NEW IN 1.60
-var Sound m_sndEntersGas;
-var Sound m_sndGoesDown;
-var Sound m_sndTakeWound;
 var Sound m_sndTerroristDown;
+var Sound m_sndTakeWound;
+var Sound m_sndGoesDown;
 var Sound m_sndEntersSmoke;
+var Sound m_sndEntersGas;
+// NEW IN 1.60
+var Sound m_sndCoughOxygene;
+// NEW IN 1.60
+var Sound m_sndSuffocation;
 
-// --- Functions ---
-function PlayCommonRainbowVoices(R6Pawn aPawn, ECommonRainbowVoices eRainbowVoices) {}
-
-defaultproperties
+function PlayCommonRainbowVoices(R6Pawn aPawn, Pawn.ECommonRainbowVoices eRainbowVoices)
 {
+	switch(eRainbowVoices)
+	{
+		// End:0x26
+		case 0:
+			aPawn.__NFUN_2730__(m_sndTerroristDown, 8, 10, 1);
+			// End:0xCC
+			break;
+		// End:0x45
+		case 1:
+			aPawn.__NFUN_2730__(m_sndTakeWound, 6, 5, 2);
+			// End:0xCC
+			break;
+		// End:0x64
+		case 2:
+			aPawn.__NFUN_2730__(m_sndGoesDown, 6, 5, 2);
+			// End:0xCC
+			break;
+		// End:0x6C
+		case 3:
+			// End:0xCC
+			break;
+		// End:0x8B
+		case 4:
+			aPawn.__NFUN_2730__(m_sndEntersGas, 6, 5, 2);
+			// End:0xCC
+			break;
+		// End:0xAA
+		case 5:
+			aPawn.__NFUN_2730__(m_sndCoughOxygene, 6, 5, 2);
+			// End:0xCC
+			break;
+		// End:0xC9
+		case 6:
+			aPawn.__NFUN_2730__(m_sndSuffocation, 6, 5, 2);
+			// End:0xCC
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
+

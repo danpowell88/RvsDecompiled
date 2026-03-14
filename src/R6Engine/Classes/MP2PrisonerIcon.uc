@@ -1,14 +1,16 @@
-// MP2PrisonerIcon - HUD/map icon representing a prisoner in Mission Pack 2 CTE mode.
-// Extends R6ReferenceIcons to show which team the prisoner belongs to and whether
-// the prisoner's location is known to the opposing team.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class MP2PrisonerIcon extends R6ReferenceIcons;
+//=============================================================================
+// MP2PrisonerIcon - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// No matching SDK 1.56 source found
+//=============================================================================
+class MP2PrisonerIcon extends R6ReferenceIcons
+    placeable;
 
-// --- Variables ---
-var int m_iPrisonerTeam;
-var bool m_bKnownForOtherTeam;
+var(LimitSeats) int m_iPrisonerTeam;
+var(LimitSeats) bool m_bKnownForOtherTeam;
 
 defaultproperties
 {
+	m_bKnownForOtherTeam=true
+	bStatic=true
 }

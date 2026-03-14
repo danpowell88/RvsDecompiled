@@ -1,7 +1,8 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class Decal extends Actor;
+//=============================================================================
+// Decal - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class Decal extends Actor
+    notplaceable;
 
-defaultproperties
-{
-}

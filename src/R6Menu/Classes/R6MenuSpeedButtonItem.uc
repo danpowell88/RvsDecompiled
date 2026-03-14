@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6MenuSpeedButtonItem.uc : List button item representing a movement speed setting; stores the EMovementSpeed enum value.
+// R6MenuSpeedButtonItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6MenuSpeedButtonItem.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -7,9 +13,5 @@
 //=============================================================================
 class R6MenuSpeedButtonItem extends R6WindowListButtonItem;
 
-// --- Variables ---
-var EMovementSpeed m_eSpeed;
+var Object.EMovementSpeed m_eSpeed;
 
-defaultproperties
-{
-}

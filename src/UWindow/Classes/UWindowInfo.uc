@@ -1,4 +1,10 @@
 //=============================================================================
+// UWindowInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  UWindowInfo.uc : Additionnal official informations for mission pack, publicity, etc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -8,10 +14,11 @@
 class UWindowInfo extends Object
     config(R6Info);
 
-// --- Variables ---
 // mod/mission pack publicity
-var config array<array> m_AModsInfo;
+var config array<string> m_AModsInfo;
 
 defaultproperties
 {
+	m_AModsInfo[0]="RavenShield"
+	m_AModsInfo[1]="AthenaSword"
 }

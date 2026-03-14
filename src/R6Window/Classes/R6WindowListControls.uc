@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowListControls - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListControls.uc : Create the controls page in options. Scrollbar page with 3 types of the same items
 //							  Title, selected item and line item
 //							  see default properties for some settings
@@ -9,26 +15,202 @@
 //=============================================================================
 class R6WindowListControls extends R6WindowTextListBox;
 
-// --- Variables ---
-// var ? m_fXOffset; // REMOVED IN 1.60
+var float m_fXOffSet;
+var UWindowListBoxItem m_pPreviousItem;
+var Texture m_BorderTexture;
 // for the draw line
 var Region m_BorderTextureRegion;
-var UWindowListBoxItem m_pPreviousItem;
-var float m_fXOffSet;
-// ^ NEW IN 1.60
-var Texture m_BorderTexture;
 
-// --- Functions ---
-function MouseMove(float X, float Y) {}
+function Paint(Canvas C, float fMouseX, float fMouseY)
+{
+	local R6WindowLookAndFeel LAF;
+	local UWindowList CurItem;
+	local float Y, fdrawWidth, fListHeight, fItemHeight;
+	local int i;
+
+	LAF = R6WindowLookAndFeel(LookAndFeel);
+	CurItem = Items.Next;
+	// End:0x40
+	if(__NFUN_119__(CurItem, none))
+	{
+		fItemHeight = GetSizeOfAnItem(CurItem);
+	}
+	fListHeight = GetSizeOfList();
+	// End:0xD1
+	if(__NFUN_119__(m_VertSB, none))
+	{
+		m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(fListHeight, fItemHeight))));
+		J0x8C:
+
+		// End:0xD1 [Loop If]
+		if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), m_VertSB.pos)))
+		{
+			__NFUN_165__(i);
+			CurItem = CurItem.Next;
+			// [Loop Continue]
+			goto J0x8C;
+		}
+	}
+	// End:0xFE
+	if(__NFUN_132__(__NFUN_114__(m_VertSB, none), m_VertSB.isHidden()))
+	{
+		fdrawWidth = WinWidth;		
+	}
+	else
+	{
+		fdrawWidth = __NFUN_175__(WinWidth, m_VertSB.WinWidth);
+	}
+	m_iTotItemsDisplayed = 0;
+	Y = float(LAF.m_SBHBorder.H);
+	J0x13B:
+
+	// End:0x209 [Loop If]
+	if(__NFUN_130__(__NFUN_178__(__NFUN_174__(Y, fItemHeight), fListHeight), __NFUN_119__(CurItem, none)))
+	{
+		// End:0x1F2
+		if(CurItem.ShowThisItem())
+		{
+			// End:0x1AE
+			if(UWindowListBoxItem(CurItem).m_bImALine)
+			{
+				DrawItem(C, CurItem, m_fXOffSet, Y, fdrawWidth, fItemHeight);				
+			}
+			else
+			{
+				DrawItem(C, CurItem, m_fXOffSet, Y, __NFUN_175__(fdrawWidth, m_fXOffSet), fItemHeight);
+			}
+			Y = __NFUN_174__(Y, fItemHeight);
+			__NFUN_165__(m_iTotItemsDisplayed);
+		}
+		CurItem = CurItem.Next;
+		// [Loop Continue]
+		goto J0x13B;
+	}
+	return;
+}
+
+function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
+{
+	local float fXPos, fW, fH, fTextY;
+	local int temp;
+	local Texture t;
+	local UWindowListBoxItem pListBoxItem;
+
+	pListBoxItem = UWindowListBoxItem(Item);
+	C.__NFUN_2626__(UWindowListBoxItem(Item).m_vItemColor.R, UWindowListBoxItem(Item).m_vItemColor.G, UWindowListBoxItem(Item).m_vItemColor.B);
+	// End:0x133
+	if(pListBoxItem.m_bImALine)
+	{
+		C.Style = 5;
+		// End:0xC2
+		if(__NFUN_130__(__NFUN_177__(__NFUN_173__(H, float(2)), float(0)), __NFUN_178__(float(m_BorderTextureRegion.H), 1.0000000)))
+		{
+			H = __NFUN_174__(H, float(1));
+		}
+		DrawStretchedTextureSegment(C, 1.0000000, __NFUN_174__(Y, __NFUN_171__(H, 0.5000000)), __NFUN_175__(W, float(1)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);		
+	}
+	else
+	{
+		// End:0x3BE
+		if(__NFUN_123__(pListBoxItem.HelpText, ""))
+		{
+			C.Style = 5;
+			C.Font = Root.Fonts[11];
+			C.SpaceX = m_fFontSpacing;
+			TextSize(C, UWindowListBoxItem(Item).HelpText, fW, fH);
+			fTextY = __NFUN_171__(__NFUN_175__(m_fItemHeight, fH), 0.5000000);
+			fTextY = float(int(__NFUN_174__(TextY, 0.5000000)));
+			// End:0x389
+			if(__NFUN_123__(pListBoxItem.m_szActionKey, ""))
+			{
+				t = Texture'UWindow.WhiteTexture';
+				C.DrawColor = Root.Colors.Black;
+				C.Style = 5;
+				C.__NFUN_2626__(C.DrawColor.R, C.DrawColor.G, C.DrawColor.B, 50);
+				DrawStretchedTexture(C, pListBoxItem.m_fXFakeEditBox, __NFUN_174__(Y, fTextY), pListBoxItem.m_fWFakeEditBox, H, t);
+				C.__NFUN_2626__(pListBoxItem.m_vItemColor.R, pListBoxItem.m_vItemColor.G, pListBoxItem.m_vItemColor.B);
+				TextSize(C, pListBoxItem.m_szFakeEditBoxValue, fW, fH);
+				fXPos = __NFUN_174__(pListBoxItem.m_fXFakeEditBox, __NFUN_172__(__NFUN_175__(pListBoxItem.m_fWFakeEditBox, fW), float(2)));
+				ClipTextWidth(C, fXPos, __NFUN_174__(Y, fTextY), pListBoxItem.m_szFakeEditBoxValue, W);
+			}
+			ClipTextWidth(C, __NFUN_174__(X, float(2)), __NFUN_174__(Y, fTextY), pListBoxItem.HelpText, W);
+		}
+	}
+	return;
+}
+
+function MouseMove(float X, float Y)
+{
+	super(R6WindowListBox).MouseMove(X, Y);
+	ManageOverEffect(X, Y);
+	return;
+}
+
+function MouseLeave()
+{
+	super(R6WindowListBox).MouseLeave();
+	ManageOverEffect(0.0000000, 0.0000000);
+	return;
+}
+
+function ManageOverEffect(float X, float Y)
+{
+	local UWindowListBoxItem OverItem;
+
+	OverItem = GetItemAt(X, Y);
+	// End:0x56
+	if(__NFUN_119__(m_pPreviousItem, none))
+	{
+		m_pPreviousItem.m_vItemColor = Root.Colors.White;
+		m_pPreviousItem = none;
+		ToolTip("");
+	}
+	// End:0xBA
+	if(__NFUN_119__(OverItem, none))
+	{
+		// End:0xBA
+		if(__NFUN_129__(OverItem.m_bNotAffectByNotify))
+		{
+			OverItem.m_vItemColor = Root.Colors.BlueLight;
+			ToolTip(OverItem.m_szToolTip);
+			m_pPreviousItem = OverItem;
+		}
+	}
+	return;
+}
+
 //=====================================================================
 // SetSelectedItem: derivate from R6WindowListBox
 //=====================================================================
-function SetSelectedItem(UWindowListBoxItem NewSelected) {}
-function DrawItem(Canvas C, float H, UWindowList Item, float Y, float W, float X) {}
-function Paint(Canvas C, float fMouseX, float fMouseY) {}
-function ManageOverEffect(float X, float Y) {}
-function MouseLeave() {}
+function SetSelectedItem(UWindowListBoxItem NewSelected)
+{
+	// End:0x61
+	if(__NFUN_119__(NewSelected, none))
+	{
+		// End:0x27
+		if(__NFUN_119__(m_SelectedItem, none))
+		{
+			m_SelectedItem.bSelected = false;
+		}
+		m_SelectedItem = NewSelected;
+		// End:0x4E
+		if(__NFUN_119__(m_SelectedItem, none))
+		{
+			m_SelectedItem.bSelected = true;
+		}
+		// End:0x61
+		if(__NFUN_119__(m_pPreviousItem, none))
+		{
+			Notify(2);
+		}
+	}
+	return;
+}
 
 defaultproperties
 {
+	m_BorderTexture=Texture'UWindow.WhiteTexture'
+	m_BorderTextureRegion=(Zone=StructProperty'R6Window.R6WindowSimpleFramedWindow.m_topLeftCornerR',iLeaf=290,ZoneNumber=0)
+	m_fItemHeight=20.0000000
+	m_fSpaceBetItem=0.0000000
 }

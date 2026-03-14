@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6WindowArea.uc : Generic selectable panel used as a dialog client area.
-//  Extends UWindowDialogClientWindow and tracks its own selection state.
+// R6WindowArea - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6WindowArea.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -8,9 +13,5 @@
 //=============================================================================
 class R6WindowArea extends UWindowDialogClientWindow;
 
-// --- Variables ---
 var bool m_bSelected;
 
-defaultproperties
-{
-}

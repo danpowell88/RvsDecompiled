@@ -1,17 +1,18 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// R6Voices - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6Voices extends Object;
 
-// --- Structs ---
 struct STSound
 {
-    var Sound Play;
-    var Sound Stop;
+	var Sound Play;
+	var Sound Stop;
 };
 
-// --- Functions ---
-function Init(Actor aActor) {}
-
-defaultproperties
+function Init(Actor aActor)
 {
+	return;
 }
+

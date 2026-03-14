@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6WindowListAreaItem.uc : List-box row item that embeds an R6WindowArea panel widget.
-//  Extends UWindowListBoxItem and holds a reference to the hosted area sub-window.
+// R6WindowListAreaItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6WindowListAreaItem.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -8,13 +13,25 @@
 //=============================================================================
 class R6WindowListAreaItem extends UWindowListBoxItem;
 
-// --- Variables ---
 var R6WindowArea m_Area;
 
-// --- Functions ---
-function SetFront() {}
-function SetBack() {}
-
-defaultproperties
+function SetFront()
 {
+	// End:0x1A
+	if(__NFUN_119__(m_Area, none))
+	{
+		m_Area.BringToFront();
+	}
+	return;
 }
+
+function SetBack()
+{
+	// End:0x1A
+	if(__NFUN_119__(m_Area, none))
+	{
+		m_Area.SendToBack();
+	}
+	return;
+}
+

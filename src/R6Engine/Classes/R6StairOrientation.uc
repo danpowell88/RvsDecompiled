@@ -1,17 +1,35 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\R6Engine.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// R6StairOrientation - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+/*=============================================================================
+// R6StairOrientation - automatically placed in StairVolume
+============================================================================= */
 class R6StairOrientation extends Actor
     native
     notplaceable;
 
-#exec OBJ LOAD FILE=..\Textures\R6Planning.utx PACKAGE=R6Planning
+var() R6StairVolume m_pStairVolume;
 
-// --- Variables ---
-var R6StairVolume m_pStairVolume;
-
-// --- Functions ---
-simulated function PostBeginPlay() {}
+simulated function PostBeginPlay()
+{
+	super.PostBeginPlay();
+	// End:0x57
+	if(__NFUN_114__(m_pStairVolume, none))
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_112__("WARNING: ", string(Name)), " is not linked to a stair volume. Remove it."));
+	}
+	return;
+}
 
 defaultproperties
 {
+	m_eDisplayFlag=0
+	bStatic=true
+	bHidden=true
+	m_bSkipHitDetection=true
+	m_bSpriteShowFlatInPlanning=true
+	Texture=Texture'R6Planning.Icons.PlanIcon_Stairs'
 }

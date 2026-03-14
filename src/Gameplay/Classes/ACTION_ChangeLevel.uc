@@ -1,17 +1,38 @@
-// Scripted action that performs a server-side level transition to the given URL.
-// Used in mission scripts to chain levels together or trigger mission-end sequences.
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_ChangeLevel extends ScriptedAction;
+//=============================================================================
+// ACTION_ChangeLevel - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_ChangeLevel extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var string URL;
-var bool bShowLoadingMessage;
+var(Action) bool bShowLoadingMessage;
+var(Action) string URL;
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
-function string GetActionString() {}
+function bool InitActionFor(ScriptedController C)
+{
+	// End:0x2A
+	if(bShowLoadingMessage)
+	{
+		C.Level.ServerTravel(URL, false);		
+	}
+	else
+	{
+		C.Level.ServerTravel(__NFUN_112__(URL, "?quiet"), false);
+	}
+	return true;
+	return;
+}
+
+function string GetActionString()
+{
+	return ActionString;
+	return;
+}
 
 defaultproperties
 {
+	ActionString="Change level"
 }

@@ -1,21 +1,22 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Editor.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
+//=============================================================================
+// MaterialFactory - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class MaterialFactory extends Object
-    native
-    abstract;
+    abstract
+    native;
 
-// --- Constants ---
-const RF_Standalone =  0x00080000;
-const RF_Public =  0x0000004;
+const RF_Public = 0x0000004;
+const RF_Standalone = 0x00080000;
 
-// --- Variables ---
 var string Description;
 
-// --- Functions ---
-event Material CreateMaterial(string InName, string InGroup, string InPackage, Object InOuter) {}
-// ^ NEW IN 1.60
-native function ConsoleCommand(string Cmd) {}
-
-defaultproperties
+event Material CreateMaterial(Object InOuter, string InPackage, string InGroup, string InName)
 {
+	return;
 }
+
+// Export UMaterialFactory::execConsoleCommand(FFrame&, void* const)
+native function ConsoleCommand(string Cmd);
+

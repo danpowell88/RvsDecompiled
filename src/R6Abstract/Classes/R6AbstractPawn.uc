@@ -1,4 +1,10 @@
 //=============================================================================
+// R6AbstractPawn - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6AbstractPawn.uc : This is the abstract class for the r6pawn class.  We
 //                      use an abstract class without any declared function.  
 //                      This is useful to avoid circular references
@@ -8,31 +14,63 @@
 //    July 18th, 2001 * Created by Eric Begin
 //=============================================================================
 class R6AbstractPawn extends Pawn
-    native
-    abstract;
+    abstract
+    native;
 
-// --- Enums ---
 enum ESkills
 {
-    SKILL_Assault,
-    SKILL_Demolitions,
-    SKILL_Electronics,
-    SKILL_Sniper,
-    SKILL_Stealth,
-    SKILL_SelfControl,
-    SKILL_Leadership,
-    SKILL_Observation
+	SKILL_Assault,                  // 0
+	SKILL_Demolitions,              // 1
+	SKILL_Electronics,              // 2
+	SKILL_Sniper,                   // 3
+	SKILL_Stealth,                  // 4
+	SKILL_SelfControl,              // 5
+	SKILL_Leadership,               // 6
+	SKILL_Observation               // 7
 };
 
-// --- Variables ---
-var bool bShowLog;
+var(Debug) bool bShowLog;
 
-// --- Functions ---
-function ClientGetWeapon(R6EngineWeapon NewWeapon) {}
-function GetWeapon(R6AbstractWeapon NewWeapon) {}
-event float GetSkill(ESkills eSkillName) {}
-// ^ NEW IN 1.60
-
-defaultproperties
+replication
 {
+	// Pos:0x000
+	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		ClientGetWeapon;
 }
+
+event float GetSkill(R6AbstractPawn.ESkills eSkillName)
+{
+	return;
+}
+
+function GetWeapon(R6AbstractWeapon NewWeapon)
+{
+	// End:0x24
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__("ak: GetWeapon ", string(NewWeapon)));
+	}
+	return;
+}
+
+function ClientGetWeapon(R6EngineWeapon NewWeapon)
+{
+	// End:0x36
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	{
+		return;
+	}
+	// End:0x62
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__("IN: ClientGetWeapon() ", string(NewWeapon)));
+	}
+	GetWeapon(R6AbstractWeapon(NewWeapon));
+	// End:0x9F
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__("OUT: ClientGetWeapon() ", string(NewWeapon)));
+	}
+	return;
+}
+

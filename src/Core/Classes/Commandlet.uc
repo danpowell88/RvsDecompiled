@@ -1,4 +1,10 @@
 //=============================================================================
+// Commandlet - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 /// UnrealScript Commandlet (command-line applet) class.
 ///
 /// Commandlets are executed from the ucc.exe command line utility, using the
@@ -35,12 +41,11 @@
 /// loaded, and no actors exist.
 //=============================================================================
 class Commandlet extends Object
-    native
     abstract
     transient
+    native
     noexport;
 
-// --- Variables ---
 /// Command name to show for "ucc help".
 var localized string HelpCmd;
 /// Command description to show for "ucc help".
@@ -54,11 +59,11 @@ var localized string HelpParm[16];
 var localized string HelpDesc[16];
 /// Whether to redirect log output to console stdout.
 var bool LogToStdout;
-var bool IsServer;
-// ^ NEW IN 1.60
-var bool IsClient;
-// ^ NEW IN 1.60
 /// Whether to load objects required in server, client, and editor context.
+var bool IsServer;
+// NEW IN 1.60
+var bool IsClient;
+// NEW IN 1.60
 var bool IsEditor;
 /// Whether to load objects immediately, or only on demand.
 var bool LazyLoad;
@@ -67,10 +72,20 @@ var bool ShowErrorCount;
 /// Whether to show Unreal banner on startup.
 var bool ShowBanner;
 
-// --- Functions ---
+// Export UCommandlet::execMain(FFrame&, void* const)
 /// Entry point.
-native event int Main(string Parms) {}
+    native event int Main(string Parms);
 
 defaultproperties
 {
+	LogToStdout=true
+	IsServer=true
+	IsClient=true
+	IsEditor=true
+	LazyLoad=true
+	ShowBanner=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var t
+// REMOVED IN 1.60: var r

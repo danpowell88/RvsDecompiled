@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuVideo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuVideo.uc : Draw a simple window (opportunity to create a empty box) and play a video inside it
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,28 +13,79 @@
 //=============================================================================
 class R6MenuVideo extends UWindowWindow;
 
-// --- Variables ---
-// var ? bShowlog; // REMOVED IN 1.60
-// the video is playing
-var bool m_bPlayVideo;
-// the name of the video to play
-var string m_szVideoFilename;
-// the video is is already playing
-var bool m_bAlreadyStart;
+var int m_iCentered;  // the video is center at 1, 0 none
+var int m_iXStartPos;  // the start pos in x
+var int m_iYStartPos;  // the start pos in y
+var bool m_bAlreadyStart;  // the video is is already playing
+var bool m_bPlayVideo;  // the video is playing
 var bool bShowLog;
-// ^ NEW IN 1.60
-// the start pos in y
-var int m_iYStartPos;
-// the start pos in x
-var int m_iXStartPos;
-// the video is center at 1, 0 none
-var int m_iCentered;
+var string m_szVideoFilename;  // the name of the video to play
 
-// --- Functions ---
-function StopVideo() {}
-function Paint(Canvas C, float X, float Y) {}
-function PlayVideo(int _iXStartPos, int _iYStartPos, string _szVideoFileName) {}
-
-defaultproperties
+function PlayVideo(int _iXStartPos, int _iYStartPos, string _szVideoFileName)
 {
+	m_szVideoFilename = _szVideoFileName;
+	// End:0x35
+	if(__NFUN_123__(m_szVideoFilename, ""))
+	{
+		m_bPlayVideo = true;
+		m_iXStartPos = _iXStartPos;
+		m_iYStartPos = _iYStartPos;
+	}
+	// End:0x81
+	if(bShowLog)
+	{
+		__NFUN_231__("PlayVideo");
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("m_szVideoFilename", m_szVideoFilename), "m_bPlayVideo"), string(m_bPlayVideo)));
+	}
+	return;
 }
+
+function StopVideo()
+{
+	local Canvas C;
+
+	// End:0x30
+	if(bShowLog)
+	{
+		__NFUN_231__("StopVideo");
+		__NFUN_231__(__NFUN_168__("m_bPlayVideo", string(m_bPlayVideo)));
+	}
+	// End:0x67
+	if(m_bPlayVideo)
+	{
+		C = Class'Engine.Actor'.static.__NFUN_2618__();
+		m_bPlayVideo = false;
+		m_bAlreadyStart = false;
+		C.__NFUN_2604__();
+	}
+	// End:0xA7
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__("m_bPlayVideo", string(m_bPlayVideo)));
+		__NFUN_231__(__NFUN_168__("m_bAlreadyStart", string(m_bAlreadyStart)));
+	}
+	return;
+}
+
+function Paint(Canvas C, float X, float Y)
+{
+	// End:0x87
+	if(m_bPlayVideo)
+	{
+		// End:0x87
+		if(__NFUN_129__(m_bAlreadyStart))
+		{
+			// End:0x52
+			if(bShowLog)
+			{
+				__NFUN_231__("Paint m_bPlayVideo = true m_bAlreadyStart = false");
+			}
+			C.__NFUN_2601__(m_szVideoFilename, 0);
+			m_bAlreadyStart = true;
+			C.__NFUN_2603__(m_iXStartPos, m_iYStartPos, m_iCentered);
+		}
+	}
+	DrawSimpleBorder(C);
+	return;
+}
+

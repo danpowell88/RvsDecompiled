@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6WindowListRadio.uc : Single-selection list control with tracked selected item.
-//  Extends UWindowListControl; supports configurable row height and double-click forwarding.
+// R6WindowListRadio - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6WindowListRadio.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -8,28 +13,217 @@
 //=============================================================================
 class R6WindowListRadio extends UWindowListControl;
 
-// --- Variables ---
-var UWindowListBoxItem m_SelectedItem;
 var float m_fItemHeight;
-// list to send items to on double-click
-var R6WindowListRadio m_DoubleClickList;
+var UWindowListBoxItem m_SelectedItem;
+var R6WindowListRadio m_DoubleClickList;  // list to send items to on double-click
 var string m_szDefaultHelpText;
 
-// --- Functions ---
-function SetSelectedItem(UWindowListBoxItem NewSelected) {}
-function Paint(Canvas C, float fMouseX, float fMouseY) {}
-function UWindowListBoxItem GetItemAt(float fMouseY, float fMouseX) {}
-// ^ NEW IN 1.60
-function DoubleClickItem(UWindowListBoxItem i) {}
-function DoubleClick(float Y, float X) {}
-function LMouseDown(float Y, float X) {}
-function SetSelected(float Y, float X) {}
-function SetHelpText(string t) {}
-function MakeSelectedVisible() {}
-function ReceiveDoubleClickItem(UWindowListBoxItem i, R6WindowListRadio L) {}
-function BeforePaint(float fMouseY, float fMouseX, Canvas C) {}
-function Sort() {}
+function BeforePaint(Canvas C, float fMouseX, float fMouseY)
+{
+	local UWindowListBoxItem OverItem;
+	local string szNewHelpText;
+
+	szNewHelpText = m_szDefaultHelpText;
+	// End:0x66
+	if(__NFUN_119__(m_SelectedItem, none))
+	{
+		OverItem = GetItemAt(fMouseX, fMouseY);
+		// End:0x66
+		if(__NFUN_130__(__NFUN_114__(OverItem, m_SelectedItem), __NFUN_123__(OverItem.HelpText, "")))
+		{
+			szNewHelpText = OverItem.HelpText;
+		}
+	}
+	// End:0x88
+	if(__NFUN_123__(szNewHelpText, HelpText))
+	{
+		HelpText = szNewHelpText;
+		Notify(13);
+	}
+	return;
+}
+
+function SetHelpText(string t)
+{
+	super(UWindowDialogControl).SetHelpText(t);
+	m_szDefaultHelpText = t;
+	return;
+}
+
+function Sort()
+{
+	Items.Sort();
+	return;
+}
+
+function Paint(Canvas C, float fMouseX, float fMouseY)
+{
+	local float Y;
+	local UWindowList CurItem;
+	local int i;
+
+	CurItem = Items.Next;
+	Y = 0.0000000;
+	J0x1F:
+
+	// End:0x9A [Loop If]
+	if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+	{
+		// End:0x83
+		if(CurItem.ShowThisItem())
+		{
+			DrawItem(C, CurItem, 0.0000000, Y, WinWidth, m_fItemHeight);
+			Y = __NFUN_174__(Y, m_fItemHeight);
+		}
+		CurItem = CurItem.Next;
+		// [Loop Continue]
+		goto J0x1F;
+	}
+	return;
+}
+
+function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
+{
+	local float Y;
+	local UWindowList CurItem;
+	local int i;
+
+	// End:0x20
+	if(__NFUN_132__(__NFUN_176__(fMouseX, float(0)), __NFUN_177__(fMouseX, WinWidth)))
+	{
+		return none;
+	}
+	CurItem = Items.Next;
+	Y = 0.0000000;
+	J0x3F:
+
+	// End:0xC8 [Loop If]
+	if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+	{
+		// End:0xB1
+		if(CurItem.ShowThisItem())
+		{
+			// End:0x9F
+			if(__NFUN_130__(__NFUN_179__(fMouseY, Y), __NFUN_178__(fMouseY, __NFUN_174__(Y, m_fItemHeight))))
+			{
+				return UWindowListBoxItem(CurItem);
+			}
+			Y = __NFUN_174__(Y, m_fItemHeight);
+		}
+		CurItem = CurItem.Next;
+		// [Loop Continue]
+		goto J0x3F;
+	}
+	return none;
+	return;
+}
+
+function MakeSelectedVisible()
+{
+	local UWindowList CurItem;
+	local int i;
+
+	// End:0x0D
+	if(__NFUN_114__(m_SelectedItem, none))
+	{
+		return;
+	}
+	CurItem = Items.Next;
+	J0x21:
+
+	// End:0x6E [Loop If]
+	if(__NFUN_119__(CurItem, none))
+	{
+		// End:0x3E
+		if(__NFUN_114__(CurItem, m_SelectedItem))
+		{
+			// [Explicit Break]
+			goto J0x6E;
+		}
+		// End:0x57
+		if(CurItem.ShowThisItem())
+		{
+			__NFUN_165__(i);
+		}
+		CurItem = CurItem.Next;
+		// [Loop Continue]
+		goto J0x21;
+	}
+	J0x6E:
+
+	return;
+}
+
+function SetSelectedItem(UWindowListBoxItem NewSelected)
+{
+	// End:0x67
+	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(m_SelectedItem, NewSelected)))
+	{
+		// End:0x38
+		if(__NFUN_119__(m_SelectedItem, none))
+		{
+			m_SelectedItem.bSelected = false;
+		}
+		m_SelectedItem = NewSelected;
+		// End:0x5F
+		if(__NFUN_119__(m_SelectedItem, none))
+		{
+			m_SelectedItem.bSelected = true;
+		}
+		Notify(2);
+	}
+	return;
+}
+
+function SetSelected(float X, float Y)
+{
+	local UWindowListBoxItem NewSelected;
+
+	NewSelected = GetItemAt(X, Y);
+	SetSelectedItem(NewSelected);
+	return;
+}
+
+function LMouseDown(float X, float Y)
+{
+	super(UWindowWindow).LMouseDown(X, Y);
+	SetSelected(X, Y);
+	return;
+}
+
+function DoubleClick(float X, float Y)
+{
+	super(UWindowWindow).DoubleClick(X, Y);
+	// End:0x35
+	if(__NFUN_114__(GetItemAt(X, Y), m_SelectedItem))
+	{
+		DoubleClickItem(m_SelectedItem);
+	}
+	return;
+}
+
+function ReceiveDoubleClickItem(R6WindowListRadio L, UWindowListBoxItem i)
+{
+	i.Remove();
+	Items.AppendItem(i);
+	SetSelectedItem(i);
+	L.m_SelectedItem = none;
+	L.Notify(1);
+	Notify(1);
+	return;
+}
+
+function DoubleClickItem(UWindowListBoxItem i)
+{
+	// End:0x2D
+	if(__NFUN_130__(__NFUN_119__(m_DoubleClickList, none), __NFUN_119__(i, none)))
+	{
+		m_DoubleClickList.ReceiveDoubleClickItem(self, i);
+	}
+	return;
+}
 
 defaultproperties
 {
+	m_fItemHeight=10.0000000
 }

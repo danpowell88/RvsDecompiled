@@ -1,17 +1,29 @@
-// Scripted action that randomly skips the next action based on a probability value
-// (0.0 = never skip, 1.0 = always skip).
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_IfRandomPct extends ScriptedAction;
+//=============================================================================
+// ACTION_IfRandomPct - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_IfRandomPct extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Variables ---
-var float Probability;
+var(Action) float Probability;
 
-// --- Functions ---
-function ProceedToNextAction(ScriptedController C) {}
-function bool StartsSection() {}
-// ^ NEW IN 1.60
-
-defaultproperties
+function ProceedToNextAction(ScriptedController C)
 {
+	__NFUN_161__(C.ActionNum, 1);
+	// End:0x28
+	if(__NFUN_177__(__NFUN_195__(), Probability))
+	{
+		ProceedToSectionEnd(C);
+	}
+	return;
 }
+
+function bool StartsSection()
+{
+	return true;
+	return;
+}
+

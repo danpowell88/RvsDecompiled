@@ -1,5 +1,11 @@
 //=============================================================================
-//  R6TBusiness02.uc : Terrorist pawn variant: second business-attire enemy skin.
+// R6TBusiness02 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6TBusiness02.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -9,4 +15,8 @@ class R6TBusiness02 extends R6TerroristPawn;
 
 defaultproperties
 {
+	m_eTerroType=2
+	Mesh=SkeletalMesh'R6Terrorist_UKX.Business02Mesh'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel250'
+	Skins=/* Array type was not detected. */
 }

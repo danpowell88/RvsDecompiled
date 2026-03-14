@@ -1,4 +1,10 @@
 //=============================================================================
+// R6ActionPointAbstract - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6ActionPointAbstract.uc : 
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,19 +12,20 @@
 //    2002/07/04 * Created by Jean-Francois Dube
 //=============================================================================
 class R6ActionPointAbstract extends Actor
+    abstract
     native
-    abstract;
+    notplaceable;
 
-// --- Variables ---
-// previous point in the current planning
-var R6ActionPointAbstract prevActionPoint;
-// list of navigation point to reach the next Action Point
-var array<array> m_PathToNextPoint;
+var R6ActionPointAbstract prevActionPoint;  // previous point in the current planning
+var array<Actor> m_PathToNextPoint;  // list of navigation point to reach the next Action Point
 
-// --- Functions ---
-function ResetPathNode() {}
-function ResetActionIcon() {}
-
-defaultproperties
+function ResetPathNode()
 {
+	return;
 }
+
+function ResetActionIcon()
+{
+	return;
+}
+

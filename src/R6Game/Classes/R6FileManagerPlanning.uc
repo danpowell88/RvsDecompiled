@@ -1,4 +1,10 @@
 //=============================================================================
+// R6FileManagerPlanning - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6FileManagerPlanning.uc : Actor to list file, load and save a file
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,14 +15,14 @@
 class R6FileManagerPlanning extends R6FileManager
     native;
 
-// --- Variables ---
 var int m_iCurrentTeam;
 
-// --- Functions ---
-final native function bool SavePlanning(R6StartGameInfo sgi, string szFileName, string szGameType, string szEnglishGT, string szLocalizedMapName, string szMapName) {}
-final native function bool LoadPlanning(string szMapName, string szLocalizedMapName, string szEnglishGT, string szGameType, string szFileName, R6StartGameInfo sgi, out optional string LoadErrorMsgMapName, out optional string LoadErrorMsgGameType) {}
-final native function int GetNumberOfFiles(string MapName, string szGameType) {}
+// Export UR6FileManagerPlanning::execLoadPlanning(FFrame&, void* const)
+native(1416) final function bool LoadPlanning(string szMapName, string szLocalizedMapName, string szEnglishGT, string szGameType, string szFileName, R6StartGameInfo sgi, optional out string LoadErrorMsgMapName, optional out string LoadErrorMsgGameType);
 
-defaultproperties
-{
-}
+// Export UR6FileManagerPlanning::execSavePlanning(FFrame&, void* const)
+native(1417) final function bool SavePlanning(string szMapName, string szLocalizedMapName, string szEnglishGT, string szGameType, string szFileName, R6StartGameInfo sgi);
+
+// Export UR6FileManagerPlanning::execGetNumberOfFiles(FFrame&, void* const)
+native(1418) final function int GetNumberOfFiles(string MapName, string szGameType);
+

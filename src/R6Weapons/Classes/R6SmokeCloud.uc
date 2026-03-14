@@ -1,32 +1,74 @@
 //=============================================================================
-//  R6SmokeCloud.uc : Native actor simulating an expanding smoke cloud in the world.
-//  Spawned by smoke grenades; blocks visibility checks and triggers AI reactions.
+// R6SmokeCloud - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6SmokeCloud.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/03/06 * Created by Guillaume Borgia
 //=============================================================================
 class R6SmokeCloud extends Actor
-    native;
+    native
+    notplaceable;
 
-// --- Variables ---
-var R6Grenade m_grenade;
-// Time needed to reach maximum radius
-var float m_fExpansionTime;
+var float m_fStartTime;
+var float m_fExpansionTime;  // Time needed to reach maximum radius
 var float m_fFinalRadius;
 var float m_fCurrentRadius;
-var float m_fStartTime;
+var R6Grenade m_grenade;
 
-// --- Functions ---
 //============================================================================
-// SetCloud -
+// SetCloud - 
 //============================================================================
-function SetCloud(R6Grenade aGrenade, float fExpansionTime, float fDuration, float fFinalRadius) {}
+function SetCloud(R6Grenade aGrenade, float fExpansionTime, float fFinalRadius, float fDuration)
+{
+	m_grenade = aGrenade;
+	m_fExpansionTime = fExpansionTime;
+	m_fFinalRadius = fFinalRadius;
+	LifeSpan = fDuration;
+	m_fStartTime = Level.TimeSeconds;
+	Instigator = none;
+	__NFUN_280__(0.2500000, true);
+	return;
+}
+
 //============================================================================
-// Timer -
+// Timer - 
 //============================================================================
-event Timer() {}
+event Timer()
+{
+	local float fElapsedTime;
+
+	fElapsedTime = __NFUN_175__(Level.TimeSeconds, m_fStartTime);
+	// End:0x61
+	if(__NFUN_130__(__NFUN_119__(m_grenade, none), __NFUN_155__(int(m_grenade.Physics), int(0))))
+	{
+		__NFUN_267__(__NFUN_215__(m_grenade.Location, vect(0.0000000, 0.0000000, 125.0000000)));
+	}
+	// End:0x8C
+	if(__NFUN_176__(fElapsedTime, m_fExpansionTime))
+	{
+		m_fCurrentRadius = __NFUN_171__(__NFUN_172__(fElapsedTime, m_fExpansionTime), m_fFinalRadius);		
+	}
+	else
+	{
+		m_fCurrentRadius = m_fFinalRadius;
+		__NFUN_280__(0.0000000, false);
+	}
+	__NFUN_283__(m_fCurrentRadius, CollisionHeight);
+	return;
+}
 
 defaultproperties
 {
+	RemoteRole=0
+	DrawType=0
+	m_bDeleteOnReset=true
+	bCollideActors=true
+	CollisionRadius=10.0000000
+	CollisionHeight=125.0000000
 }

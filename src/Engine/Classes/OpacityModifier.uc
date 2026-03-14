@@ -1,18 +1,18 @@
-//
-// OpacityModifier — material modifier that overrides the opacity channel of a shader.
-// Used with terrain shaders and other material chains to inject a custom opacity
-// texture without modifying the base material asset.
-// Extracted from retail Engine.u.
+//=============================================================================
+// OpacityModifier - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //
 // OpacityModfifer - used to override a shader's opacity channel (eg for shaders on terrain).
 //
 class OpacityModifier extends Modifier
-    native;
+    native
+	noteditinlinenew
+    collapsecategories
+    hidecategories(Object,Material);
 
-// --- Variables ---
-var Material Opacity;
 var bool bOverrideTexModifier;
+var Material Opacity;
 
-defaultproperties
-{
-}

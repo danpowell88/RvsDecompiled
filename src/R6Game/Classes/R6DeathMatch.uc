@@ -1,47 +1,122 @@
 //=============================================================================
-//  R6DeathMatch.uc : Free-for-all adversarial deathmatch mode; rotates players across teams and ends
-//                    the round based on a score or elimination condition.
+// R6DeathMatch - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6DeathMatch.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/11/27 * Created by Aristomenis Kolokathis  Adversarial Mode
 //=============================================================================
-class R6DeathMatch extends R6AdversarialTeamGame;
+class R6DeathMatch extends R6AdversarialTeamGame
+    config
+    hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-// --- Variables ---
 var int m_iNextPlayerTeamID;
 
-// --- Functions ---
-//------------------------------------------------------------------
-// EndGame
-//
-//------------------------------------------------------------------
-function EndGame(PlayerReplicationInfo Winner, string Reason) {}
-//------------------------------------------------------------------
-// SetPawnTeamFriendlies
-//
-//------------------------------------------------------------------
-function SetPawnTeamFriendlies(Pawn aPawn) {}
-//------------------------------------------------------------------
-// ResetPlayerTeam
-//
-//------------------------------------------------------------------
-function ResetPlayerTeam(Controller aPlayer) {}
-//------------------------------------------------------------------
-// GetSpawnPointNum
-//
-//------------------------------------------------------------------
-function int GetSpawnPointNum(string Options) {}
-// ^ NEW IN 1.60
+function int GetRainbowTeamColourIndex(int eTeamName)
+{
+	return 1;
+	return;
+}
+
+function BroadcastTeam(Actor Sender, coerce string Msg, optional name type)
+{
+	return;
+}
+
 //------------------------------------------------------------------
 // InitObjectives
-//
+//	
 //------------------------------------------------------------------
-function InitObjectives() {}
-function BroadcastTeam(optional name type, coerce string Msg, Actor Sender) {}
-function int GetRainbowTeamColourIndex(int eTeamName) {}
-// ^ NEW IN 1.60
+function InitObjectives()
+{
+	m_iNextPlayerTeamID = __NFUN_146__(4, 1);
+	m_missionMgr.m_bOnSuccessAllObjectivesAreCompleted = false;
+	Level.m_bUseDefaultMoralityRules = false;
+	super.InitObjectives();
+	return;
+}
+
+//------------------------------------------------------------------
+// EndGame
+//	
+//------------------------------------------------------------------
+function EndGame(PlayerReplicationInfo Winner, string Reason)
+{
+	local R6GameReplicationInfo gameRepInfo;
+
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
+	// End:0xD3
+	if(__NFUN_130__(m_objDeathmatch.m_bCompleted, __NFUN_242__(m_bCompilingStats, true)))
+	{
+		// End:0x6D
+		if(bShowLog)
+		{
+			__NFUN_231__("** Game : someone won the deathmatch ");
+		}
+		__NFUN_165__(m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.m_iRoundsWon);
+		BroadcastGameMsg("", m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.PlayerName, "HasWonTheRound", none, int(GetGameMsgLifeTime()));		
+	}
+	else
+	{
+		BroadcastGameMsg("", "", "RoundIsADraw", none, int(GetGameMsgLifeTime()));
+		// End:0x116
+		if(bShowLog)
+		{
+			__NFUN_231__("** Game : it's a draw");
+		}
+	}
+	super.EndGame(Winner, Reason);
+	return;
+}
+
+//------------------------------------------------------------------
+// GetSpawnPointNum
+//	
+//------------------------------------------------------------------
+function int GetSpawnPointNum(string Options)
+{
+	return 0;
+	return;
+}
+
+//------------------------------------------------------------------
+// ResetPlayerTeam
+//	
+//------------------------------------------------------------------
+function ResetPlayerTeam(Controller aPlayer)
+{
+	super.ResetPlayerTeam(aPlayer);
+	aPlayer.Pawn.PlayerReplicationInfo.TeamID = m_iNextPlayerTeamID;
+	R6Pawn(aPlayer.Pawn).m_iTeam = m_iNextPlayerTeamID;
+	__NFUN_165__(m_iNextPlayerTeamID);
+	return;
+}
+
+//------------------------------------------------------------------
+// SetPawnTeamFriendlies
+//	
+//------------------------------------------------------------------
+function SetPawnTeamFriendlies(Pawn aPawn)
+{
+	aPawn.m_iFriendlyTeams = GetTeamNumBit(aPawn.m_iTeam);
+	aPawn.m_iEnemyTeams = __NFUN_141__(aPawn.m_iFriendlyTeams);
+	return;
+}
 
 defaultproperties
 {
+	m_iUbiComGameMode=1
+	m_bIsRadarAllowed=false
+	m_bIsWritableMapAllowed=false
+	m_szGameTypeFlag="RGM_DeathmatchMode"
 }

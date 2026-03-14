@@ -1,11 +1,23 @@
-// Scripted action that sets the pawn to walking pace (disables crouch and run).
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class ACTION_Walk extends ScriptedAction;
+//=============================================================================
+// ACTION_Walk - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_Walk extends ScriptedAction
+	editinlinenew
+    collapsecategories
+    hidecategories(Object);
 
-// --- Functions ---
-function bool InitActionFor(ScriptedController C) {}
+function bool InitActionFor(ScriptedController C)
+{
+	C.Pawn.ShouldCrouch(false);
+	C.Pawn.SetWalking(true);
+	return false;
+	return;
+}
 
 defaultproperties
 {
+	bValidForTrigger=false
+	ActionString="walk"
 }

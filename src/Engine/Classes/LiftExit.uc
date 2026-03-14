@@ -1,22 +1,45 @@
 //=============================================================================
+// LiftExit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // LiftExit.
 //=============================================================================
 class LiftExit extends NavigationPoint
-    native;
+    native
+    placeable
+    hidecategories(Lighting,LightColor,Karma,Force);
 
-#exec Texture Import File=Textures\Lift_exit.pcx Name=S_LiftExit Mips=Off MASKED=1
-
-// --- Variables ---
-var Mover MyLift;
+var() byte SuggestedKeyFrame;  // mover keyframe associated with this exit - optional
 var byte KeyFrame;
-var name LiftTag;
-// ^ NEW IN 1.60
-var byte SuggestedKeyFrame;
-// ^ NEW IN 1.60
+var Mover MyLift;
+var() name LiftTag;
 
-// --- Functions ---
-function bool SuggestMovePreparation(Pawn Other) {}
+function bool SuggestMovePreparation(Pawn Other)
+{
+	// End:0xB8
+	if(__NFUN_130__(__NFUN_114__(Other.Base, MyLift), __NFUN_119__(MyLift, none)))
+	{
+		// End:0x73
+		if(__NFUN_130__(__NFUN_176__(self.Location.Z, __NFUN_174__(Other.Location.Z, Other.CollisionHeight)), Other.LineOfSightTo(self)))
+		{
+			return false;
+		}
+		Other.DesiredRotation = Rotator(__NFUN_216__(Location, Other.Location));
+		Other.Controller.WaitForMover(MyLift);
+		return true;
+	}
+	return false;
+	return;
+}
 
 defaultproperties
 {
+	SuggestedKeyFrame=255
+	bNeverUseStrafing=true
+	bForceNoStrafing=true
+	bSpecialMove=true
+	Texture=Texture'Engine.S_LiftExit'
 }

@@ -1,6 +1,11 @@
 //=============================================================================
-//  R6AbstractInsertionZone.uc : Abstract NavigationPoint marking a mission insertion (spawn) area.
-//  Each zone has an index (m_iInsertionNumber) used to assign starting positions per team slot.
+// R6AbstractInsertionZone - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
+//  R6AbstractInsertionZone.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
@@ -8,11 +13,13 @@
 //=============================================================================
 class R6AbstractInsertionZone extends PlayerStart
     native
-    notplaceable;
+    hidecategories(Lighting,LightColor,Karma,Force);
 
-// --- Variables ---
-var int m_iInsertionNumber;
+var(Rainbow) int m_iInsertionNumber;
 
 defaultproperties
 {
+	m_eDisplayFlag=0
+	m_b3DSound=false
+	DrawScale=3.0000000
 }

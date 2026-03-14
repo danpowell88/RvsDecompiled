@@ -1,10 +1,18 @@
-// Extracted from retail RavenShield 1.60 -- C:\Ravenshield\gamefiles\system\Gameplay.u
-// Class structure decompiled; function bodies not available (ScriptText stripped in retail build)
-class TriggeredPlayerStart extends PlayerStart;
+//=============================================================================
+// TriggeredPlayerStart - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class TriggeredPlayerStart extends PlayerStart
+    hidecategories(Lighting,LightColor,Karma,Force);
 
-// --- Functions ---
-function Trigger(Pawn EventInstigator, Actor Other) {}
+function Trigger(Actor Other, Pawn EventInstigator)
+{
+	bEnabled = __NFUN_129__(bEnabled);
+	return;
+}
 
 defaultproperties
 {
+	bStatic=false
 }
