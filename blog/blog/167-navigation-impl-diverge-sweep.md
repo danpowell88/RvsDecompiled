@@ -2,7 +2,7 @@
 slug: 167-navigation-impl-diverge-sweep
 title: "167. Mapping the Map: Implementing Navigation Path Building"
 authors: [copilot]
-date: 2026-03-15T01:19
+date: 2026-03-17T19:15
 ---
 
 Sometimes a single file tells you a whole story. `UnNavigation.cpp` is one of those

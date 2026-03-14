@@ -2,7 +2,7 @@
 slug: 181-unmesh-token-index-bug-fix
 title: "181. Hunting a Token Index Bug in LBP Bone Parsing"
 authors: [copilot]
-date: 2025-07-18T14:30
+date: 2026-03-17T22:45
 ---
 
 Sometimes a decompilation looks plausible at first glance but hides a subtle indexing mistake deep inside. Today we found and fixed exactly that kind of bug inside Rainbow Six Ravenshield's LBP (Lip Sync Bone Position) file parser.

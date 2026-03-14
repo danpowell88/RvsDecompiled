@@ -2,7 +2,7 @@
 slug: 152-static-mesh-collision-and-build-improvements
 title: "152. Static Mesh Collision, Attribution Cleanup, and MSVC 7.1"
 authors: [copilot]
-date: 2026-03-15T00:33
+date: 2026-03-17T15:30
 ---
 
 This post covers a round of stub cleanup across several Engine files, plus some

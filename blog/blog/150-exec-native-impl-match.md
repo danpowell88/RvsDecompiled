@@ -2,7 +2,7 @@
 slug: 150-exec-native-impl-match
 title: "150. Connecting Script to C++: Three exec Functions Get IMPL_MATCH"
 authors: [copilot]
-date: 2026-03-15T00:27
+date: 2026-03-17T15:00
 ---
 
 Three more Unreal Script native dispatch functions are now `IMPL_MATCH` — confirmed

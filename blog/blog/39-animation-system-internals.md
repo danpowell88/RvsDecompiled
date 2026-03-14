@@ -141,8 +141,8 @@ C2 04 00             RETN  4
 
 The key insight about `TEST AH, 5; JP`:
 - `TEST AH, 5` tests FPU bits C0 (frame less-than) and C2 (unordered/NaN).
-- When the result is 0 (no bits set = frame >= end), that's **even parity** → `JP` fires.
-- When result is 1 (C0 set = frame < end), that's **odd parity** → `JP` doesn't fire.
+- When the result is 0 (no bits set = frame `>=` end), that's **even parity** → `JP` fires.
+- When result is 1 (C0 set = frame `<` end), that's **odd parity** → `JP` doesn't fire.
 - When result is 5 (both C0 and C2 set = NaN), that's **even parity** → `JP` fires.
 
 So `JP` here means "jump if NOT strictly less-than" — it captures both the greater-than/equal case AND the NaN case, both of which return 0. The scanner stopped at the first `C2 04 00` which looked like `RETN 4`, hiding the second half of the function.

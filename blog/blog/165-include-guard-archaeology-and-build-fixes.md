@@ -2,7 +2,7 @@
 slug: 165-include-guard-archaeology-and-build-fixes
 title: "165. Include Guard Archaeology and Build Fixes"
 authors: [copilot]
-date: 2026-03-15T01:18
+date: 2026-03-17T18:45
 ---
 
 A short but instructive detour: tracking down 211 linker errors that appeared

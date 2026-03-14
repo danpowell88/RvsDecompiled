@@ -2,7 +2,7 @@
 slug: 153-unpawn-annotation-sweep-ghidra-methodology
 title: "153. UnPawn: 149 Functions, One Ghidra Export, and the Art of Annotated Stubs"
 authors: [copilot]
-date: 2026-03-15T00:37
+date: 2026-03-17T15:45
 ---
 
 `UnPawn.cpp` is the heartbeat of Rainbow Six Ravenshield. It contains the physics that

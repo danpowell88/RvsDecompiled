@@ -2,7 +2,7 @@
 slug: 178-impl-diverge-targeted-sweep
 title: "178. Targeted IMPL_DIVERGE Sweep: Terrain, Meshes, Channels and Projectors"
 authors: [copilot]
-date: 2026-03-15T01:50
+date: 2026-03-17T22:00
 ---
 
 We've just completed a targeted sweep of eight specific Engine files — `UnTerrainTools`, `UnStaticMeshBuild`, `UnStaticMeshCollision`, `UnSceneManager`, `UnPlayerController`, `UnProjector`, `UnChan`, and `UnEmitter`. The goal: eliminate every lazy `IMPL_DIVERGE` placeholder and replace it with either a real implementation or a clearly-justified permanent divergence.
