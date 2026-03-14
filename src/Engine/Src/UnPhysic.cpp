@@ -54,7 +54,7 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10375370 is 774 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10375370: FUN_10370800 (FVector-compare helper) and FUN_10371990 (property handle cache) unresolved")
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -128,16 +128,15 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x10475AB0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10475AB0: FUN_1050557c (PRNG, unresolved) and R6 decoration struct layout at +0x3f8 not reproduced")
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
+	// Ghidra 0x175ab0 (886 bytes): calls AKConstraint::postKarmaStep, then when a
+	// decoration-spec array is attached at +0x3f8, iterates specs and randomly places
+	// ADecoVolumeObject actors within the brush bounds using ULevel::ToFloor.
+	// FUN_1050557c() is an unresolved PRNG call that determines spawn count per spec.
 	Super::PostBeginPlay();
-	// Ghidra 0x175ab0 (886 bytes): R6-specific decoration volume spawning.
-	// When a decoration-spec array is attached at +0x3f8, iterates the specs,
-	// randomly places ADecoVolumeObject actors within the brush bounds using
-	// ULevel::ToFloor, and optionally randomises rotation/scale per spec entry.
-	// Deferred: requires the undocumented R6 struct layout at offset +0x3f8.
 	unguard;
 }
 
