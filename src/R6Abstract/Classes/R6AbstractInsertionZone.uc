@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6AbstractInsertionZone.uc : (add small description)
+//  R6AbstractInsertionZone.uc : Abstract NavigationPoint marking a mission insertion (spawn) area.
+//  Each zone has an index (m_iInsertionNumber) used to assign starting positions per team slot.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

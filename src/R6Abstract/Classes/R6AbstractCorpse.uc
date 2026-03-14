@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6AbstractCorpse.uc : (add small description)
+//  R6AbstractCorpse.uc : Abstract native actor that represents a dead pawn's corpse.
+//  Provides bone-level rendering and impulse application for ragdoll/death animations.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
