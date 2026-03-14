@@ -212,57 +212,112 @@ INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 	unguard;
 }
 
-IMPL_DIVERGE("retail adjusts fov based on crouch/movement state, DrawScale byte,")
+IMPL_MATCH("R6Engine.dll", 0x10021e60)
 DWORD AR6Pawn::CheckSeePawn(AR6Pawn* param_1, FVector& param_2, INT param_3)
 {
 	guard(AR6Pawn::CheckSeePawn);
-	// this+0x4ec = Controller
-	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
 
-	// Distance check
-	FVector delta = param_2 - Location;
-	FLOAT distSq = delta.SizeSquared();
+	// this+0x4fc = sensor/gadget range object; this+0x6c4 flags (0x800 = extended range)
+	INT pSensor = *(INT*)((BYTE*)this + 0x4fc);
 
-	// this+0x4fc = sensor/gadget range object (heartbeat sensor or similar)
-	// this+0x6c4 = flags bitfield (0x800 = extended sensor range flag)
-	INT* pSensor = *(INT**)((BYTE*)this + 0x4fc);
-	DWORD flags = *(DWORD*)((BYTE*)this + 0x6c4);
+	FLOAT distSq = (param_2.X - Location.X) * (param_2.X - Location.X)
+	             + (param_2.Y - Location.Y) * (param_2.Y - Location.Y)
+	             + (param_2.Z - Location.Z) * (param_2.Z - Location.Z);
 
-	if (pSensor != NULL && *(FLOAT*)((BYTE*)pSensor + 0x3a8) >= 10.0f)
+	// Distance gating: tier depends on sensor range and extended-range flag
+	if (pSensor != 0)
 	{
-		if (distSq > 1.12896e+09f) return 0;  // ~33600 units sq
+		if (*(FLOAT*)((BYTE*)pSensor + 0x3a8) >= 10.0f)
+		{
+			if (distSq > 1.12896e+09f) return 0;
+			goto LAB_sight;
+		}
+		if ((*(DWORD*)((BYTE*)this + 0x6c4) & 0x800) && *(FLOAT*)((BYTE*)pSensor + 0x3a8) >= 2.5f)
+		{
+			if (distSq > 5.0176e+08f) return 0;
+			goto LAB_sight;
+		}
 	}
-	else if (pSensor != NULL && (flags & 0x800) && *(FLOAT*)((BYTE*)pSensor + 0x3a8) >= 2.5f)
-	{
-		if (distSq > 5.0176e+08f) return 0;   // ~22400 units sq
-	}
-	else
-	{
-		if (distSq > 1.2544e+08f) return 0;   // ~11200 units sq
-	}
+	if (distSq > 1.2544e+08f) return 0;
 
-	// Direction to target (safe normalize)
-	FVector dir = delta.SafeNormal();
+LAB_sight:
+	// Direction to target (safe-normalized)
+	FVector dir(param_2.X - Location.X, param_2.Y - Location.Y, param_2.Z - Location.Z);
+	dir = dir.SafeNormal();
 
-	// Get view direction from view rotation
+	// View forward vector from GetViewRotation
 	FRotator viewRot = GetViewRotation();
 	FVector forward = viewRot.Vector();
 
-	// this+0x404 = PeripheralVision (dot threshold); subtract from forward dot
-	FLOAT periph = *(FLOAT*)((BYTE*)this + 0x404);
-	FLOAT sightDot = (forward | dir) - periph;
+	// Dot product against peripheral vision threshold; cache in Controller+0x3b8
+	AController* pCtrl = Controller;
+	FLOAT sightDot = (forward | dir) - *(FLOAT*)((BYTE*)this + 0x404);
+	if (pCtrl)
+		*(FLOAT*)((BYTE*)pCtrl + 0x3b8) = sightDot;
 
 	if (sightDot >= 0.0f)
 	{
-		// this+0x6e8 = sight radius scale; this+0x400 = SightRadius
+		// Extended-range secondary check for 0x800 flag: widen horizontal angle
+		if ((*(DWORD*)((BYTE*)this + 0x6c4) & 0x800) != 0)
+		{
+			FVector dir2(dir.X + dir.X, dir.Y, dir.Z);
+			dir2.Normalize();
+			FLOAT sightDot2 = (forward | dir2) - *(FLOAT*)((BYTE*)this + 0x404);
+			if (pCtrl)
+				*(FLOAT*)((BYTE*)pCtrl + 0x3b8) = sightDot2;
+			if (sightDot2 < 0.0f) return 0;
+		}
+
+		// Base FOV scale: SightDistanceFactor * 0.5 + 0.75
 		FLOAT fov = *(FLOAT*)((BYTE*)this + 0x6e8) * 0.5f + 0.75f;
-		// DIVERGENCE: retail adjusts fov based on crouch/movement state, DrawScale byte,
-		// and lighting (see Ghidra); complex unresolved field lookups deferred.
+
+		// Observer stance/velocity: reduce fov if moving and not prone
+		// 0x39e = m_bIsProne, 0x258..0x260 = Velocity, 0x3e0 bit2 = crouched
+		if (*(BYTE*)((BYTE*)this + 0x39e) != 1)
+		{
+			if (*(FLOAT*)((BYTE*)this + 0x258) != 0.0f
+				|| *(FLOAT*)((BYTE*)this + 0x25c) != 0.0f
+				|| *(FLOAT*)((BYTE*)this + 0x260) != 0.0f)
+			{
+				fov *= (*(BYTE*)((BYTE*)this + 0x3e0) & 4) ? 0.8f : 0.6f;
+			}
+		}
+
+		// Target stance/velocity: increase fov if target is moving and not prone
+		if (*(BYTE*)((BYTE*)param_1 + 0x39e) != 1)
+		{
+			if (*(FLOAT*)((BYTE*)param_1 + 0x258) != 0.0f
+				|| *(FLOAT*)((BYTE*)param_1 + 0x25c) != 0.0f
+				|| *(FLOAT*)((BYTE*)param_1 + 0x260) != 0.0f)
+			{
+				fov *= (*(BYTE*)((BYTE*)param_1 + 0x3e0) & 4) ? 1.2f : 1.4f;
+			}
+		}
+
+		// DrawScale multiplier: byte at param_1+0x395 scaled to [0..1] range (1/128)
+		fov *= (FLOAT)*(BYTE*)((BYTE*)param_1 + 0x395) * 0.0078125f;
+
+		// Lighting adjustment: param_1+0x114 = ambient light level [0..1]
+		{
+			FLOAT light = *(FLOAT*)((BYTE*)param_1 + 0x114);
+			if (light >= 0.3f)
+			{
+				if (light < 0.7f)
+					fov *= 0.75f;
+				// else >= 0.7: full fov (no change)
+			}
+			else
+			{
+				fov *= 0.5f;  // dark: harder to spot
+			}
+		}
+
+		// Final range check: distSq <= (fov * SightRadius)^2
 		FLOAT range = fov * *(FLOAT*)((BYTE*)this + 0x400);
 		if (distSq <= range * range)
 		{
-			if (pCtrl == NULL) return 0;
-			return ((AController*)pCtrl)->LineOfSightTo(param_1, 1);
+			if (!pCtrl) return 0;
+			return pCtrl->LineOfSightTo(param_1, 1);
 		}
 	}
 	return 0;
