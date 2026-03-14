@@ -30,7 +30,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- USound ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7EEE0)
 void USound::PostLoad()
 {
 	// Ghidra 0x7eee0: UObject::PostLoad, then if Audio exists call vtable[0x70/4] to
@@ -55,7 +55,7 @@ void USound::PS2Convert()
 	unguard;
 }
 
-IMPL_APPROX("Named-sound constructor — fields not declared in stripped header; base UObject init only")
+IMPL_MATCH("Engine.dll", 0x21190)
 USound::USound(const TCHAR* InName, INT InFlags)
 {
 	guard(USound::USound);
@@ -68,7 +68,7 @@ USound::USound(const TCHAR* InName, INT InFlags)
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7FE10)
 void USound::Serialize(FArchive& Ar)
 {
 	// Retail: 0x1037fe10. Calls UObject::Serialize, then serializes FSoundData at +0x48.
@@ -76,7 +76,7 @@ void USound::Serialize(FArchive& Ar)
 	// raw sound data is loaded directly from the .u package stream.
 	UObject::Serialize(Ar);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7EE40)
 void USound::Destroy()
 {
 	// Retail: 0x1037ee40. Notifies global audio subsystem (at 0x10666b58) to release
@@ -91,7 +91,7 @@ void USound::Destroy()
 	}
 	UObject::Destroy();
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x151F0)
 float USound::GetDuration()
 {
 	// Ghidra: Duration at offset 0x5C, FSoundData at offset 0x2C.
@@ -107,7 +107,7 @@ float USound::GetDuration()
 
 
 // --- UI3DL2Listener ---
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_MATCH("Engine.dll", 0x7F530)
 void UI3DL2Listener::PostEditChange()
 {
 	// Retail: 30b. Call UObject::PostEditChange via import, then mark dirty flag at this+0x64.
@@ -117,7 +117,7 @@ void UI3DL2Listener::PostEditChange()
 
 
 // --- USoundGen ---
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_MATCH("Engine.dll", 0x80100)
 void USoundGen::Serialize(FArchive &Ar)
 {
 	guard(USoundGen::Serialize);
@@ -148,15 +148,15 @@ void USoundGen::Serialize(FArchive &Ar)
 // ============================================================================
 
 // ??0FWaveModInfo@@QAE@XZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x15260)
 FWaveModInfo::FWaveModInfo() : SampleLoopsNum(0), NoiseGate(0) {}
 
 // ??4FWaveModInfo@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x15280)
 FWaveModInfo & FWaveModInfo::operator=(FWaveModInfo const & Other) { appMemcpy(this, &Other, 64); return *this; }
 
 // ?ReadWaveInfo@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7F560)
 INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 	guard(FWaveModInfo::ReadWaveInfo);
 
@@ -206,7 +206,7 @@ INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 }
 
 // ?UpdateWaveData@FWaveModInfo@@QAEHAAV?$TArray@E@@@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7F7F0)
 INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
 {
 	if (NewDataSize < SampleDataSize) {
@@ -232,11 +232,11 @@ INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
 }
 
 // ?Pad16Bit@FWaveModInfo@@QAEKK@Z
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x15270)
 DWORD FWaveModInfo::Pad16Bit(DWORD InVal) { return (InVal + 1) & ~1; }
 
 // ?HalveData@FWaveModInfo@@QAEXXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7F2C0)
 void FWaveModInfo::HalveData()
 {
 	if (*pBitsPerSample == 16)
@@ -280,7 +280,7 @@ void FWaveModInfo::HalveData()
 }
 
 // ?HalveReduce16to8@FWaveModInfo@@QAEXXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7F000)
 void FWaveModInfo::HalveReduce16to8()
 {
 	DWORD DataSize = SampleDataSize;
@@ -305,7 +305,7 @@ void FWaveModInfo::HalveReduce16to8()
 }
 
 // ?NoiseGateFilter@FWaveModInfo@@QAEXXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7FA00)
 void FWaveModInfo::NoiseGateFilter()
 {
 	BYTE* Data = SampleDataStart;
@@ -337,7 +337,7 @@ void FWaveModInfo::NoiseGateFilter()
 }
 
 // ?Reduce16to8@FWaveModInfo@@QAEXXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7F190)
 void FWaveModInfo::Reduce16to8()
 {
 	DWORD DataSize = SampleDataSize;
@@ -361,11 +361,11 @@ void FWaveModInfo::Reduce16to8()
 // ============================================================================
 // FSoundData
 // ============================================================================
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x21030)
 FSoundData::FSoundData(USound*) { appMemzero(this, sizeof(*this)); }
-IMPL_APPROX("Reconstructed from context")
+IMPL_EMPTY("Ghidra VA 0x10321070 (RVA 0x21070) confirms retail body is trivial (5 bytes)")
 FSoundData::~FSoundData() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x801C0)
 void FSoundData::Load() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x7FCD0)
 FLOAT FSoundData::GetPeriod() { return 0.0f; }

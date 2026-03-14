@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UBinaryFileDownload ---
-IMPL_APPROX("StaticConstructor — sets config key string to 'Enabled' at +0x38; matches Ghidra 0x189160")
+IMPL_MATCH("Engine.dll", 0x189160)
 void UBinaryFileDownload::StaticConstructor()
 {
 	// Retail: 0x189160, 71b. Sets the config key FString at +0x38 to "Enabled".
@@ -28,7 +28,7 @@ void UBinaryFileDownload::Tick()
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_APPROX("TrySkipFile — Ghidra 0x114310: shared zero-return vtable stub")
+IMPL_DIVERGE("TrySkipFile — Ghidra 0x114310: shared zero-return vtable stub — not in Engine.dll Ghidra index")
 int UBinaryFileDownload::TrySkipFile()
 {
 	guard(UBinaryFileDownload::TrySkipFile);
@@ -38,7 +38,7 @@ int UBinaryFileDownload::TrySkipFile()
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x189270)
 void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 {
 	// Retail: 0x189270. Lazy-opens a write-file at path this+0x4C, then appends Data bytes.
@@ -63,14 +63,14 @@ void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 {
 	// Retail: 0x14770 (shared empty stub)
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1891E0)
 void UBinaryFileDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x1891e0. UChannelDownload::Serialize + serialize connection ptr at this+0x458.
 	UChannelDownload::Serialize(Ar);
 	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x189A30)
 void UBinaryFileDownload::Destroy()
 {
 	// Retail: 0x189a30. Clear connection back-pointer at conn+0x68, call UChannelDownload::Destroy.
@@ -81,7 +81,7 @@ void UBinaryFileDownload::Destroy()
 	*(INT*)((BYTE*)this + 0x458) = 0;
 	UChannelDownload::Destroy();
 }
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x189330)
 void UBinaryFileDownload::DownloadDone()
 {
 	// Retail: 0x189330. Closes the file write handle and notifies connection.
@@ -106,14 +106,14 @@ void UBinaryFileDownload::DownloadError(const TCHAR*)
 
 
 // --- UChannelDownload ---
-IMPL_APPROX("StaticConstructor — sets config key FString at +0x38 to 'Enabled'; Ghidra 0x188ea0")
+IMPL_MATCH("Engine.dll", 0x188EA0)
 void UChannelDownload::StaticConstructor()
 {
 	// Retail: 0x188ea0, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188FB0)
 int UChannelDownload::TrySkipFile()
 {
 	guard(UChannelDownload::TrySkipFile);
@@ -136,7 +136,7 @@ int UChannelDownload::TrySkipFile()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1898C0)
 void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex, const TCHAR* Data, int DataSize)
 {
 	// Retail: 0x1898c0, 310b.
@@ -168,7 +168,7 @@ void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex,
 	ch->SendBunch(&bunch, 0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188F20)
 void UChannelDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x188f20, 84b.
@@ -176,7 +176,7 @@ void UChannelDownload::Serialize(FArchive& Ar)
 	Ar << *(UObject**)((BYTE*)this + 0x458);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x1890D0)
 void UChannelDownload::Destroy()
 {
 	// Retail: 0x1890d0, 84b. Clear the channel's back-pointer, then chain to base Destroy.
@@ -189,7 +189,7 @@ void UChannelDownload::Destroy()
 
 
 // --- UDownload ---
-IMPL_APPROX("StaticConstructor — initialises config key FString to '' and clears +0x44; Ghidra 0x1889d0")
+IMPL_MATCH("Engine.dll", 0x1889D0)
 void UDownload::StaticConstructor()
 {
 	// Retail: 0x1889d0, 80b. Initialise config key FString at +0x38 to "" and zero +0x44.
@@ -203,7 +203,7 @@ void UDownload::Tick()
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188AF0)
 int UDownload::TrySkipFile()
 {
 	// Retail (28b, RVA 0x188AF0): need the connection object at +0x48 to exist,
@@ -216,7 +216,7 @@ int UDownload::TrySkipFile()
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188B10)
 void UDownload::ReceiveData(BYTE* Data, int Size)
 {
 	// Retail: 0x188b10, 544b. Lazy-open a temp file on the first call, then append data.
@@ -245,7 +245,7 @@ void UDownload::ReceiveData(BYTE* Data, int Size)
 	}
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x189460)
 void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR* /*Data*/, int /*DataSize*/)
 {
 	// Retail: 32b. Stores connection/channel, computes channel base offset.
@@ -255,7 +255,7 @@ void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR
 	*(INT*)((BYTE*)this + 0x34) = Channel * 0x44 + *(INT*)(ChannelTable + 0x2C);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188A60)
 void UDownload::Serialize(FArchive& Ar)
 {
 	// Retail: 0x188a60, 82b.
@@ -263,7 +263,7 @@ void UDownload::Serialize(FArchive& Ar)
 	Ar << *(UObject**)((BYTE*)this + 0x2c);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188DF0)
 void UDownload::Destroy()
 {
 	// Retail: 0x188df0, 124b. Close and delete the temp file, clear connection back-pointer.
@@ -283,7 +283,7 @@ void UDownload::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_MATCH("Engine.dll", 0x18AE80)
 void UDownload::DownloadDone()
 {
 	// Retail: 0x18ae80, 1347b. Finalises the download: closes the temp file, moves it
@@ -358,7 +358,7 @@ void UDownload::DownloadDone()
 	*(INT*)((BYTE*)this + 0x2c) = 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x188D70)
 void UDownload::DownloadError(const TCHAR* Error)
 {
 	// Retail: 0x188d70, 79b. Copy error string into the error buffer at +0x24c.

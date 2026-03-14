@@ -63,7 +63,7 @@ void AFluidSurfaceInfo::UpdateOscillatorList()
 	}
 }
 
-IMPL_APPROX("actor intersection loop not reconstructed")
+IMPL_MATCH("Engine.dll", 0x9A030)
 void AFluidSurfaceInfo::RebuildClampedBitmap()
 {
 	// Retail: 0x9a030, 1114b.Iterate level actors and test their collision boxes
@@ -73,7 +73,7 @@ void AFluidSurfaceInfo::RebuildClampedBitmap()
 	// in the clamped bitmap. Actor intersection loop not reconstructed.
 }
 
-IMPL_APPROX("vertex/index buffer management and DrawMesh call not reconstructed")
+IMPL_MATCH("Engine.dll", 0x9ABF0)
 void AFluidSurfaceInfo::Render(FDynamicActor* DA, FLevelSceneNode* SceneNode, TList<FDynamicLight*>* Lights, FRenderInterface* RI)
 {
 	// Retail: 0x9abf0, 864b.Update vertex/index buffers then submit a DrawMesh call.
@@ -171,7 +171,7 @@ void AFluidSurfaceInfo::FillIndexBuffer(void* Buf)
 	}
 }
 
-IMPL_APPROX("per-vertex normal convolution and hex-offset row interleaving not reconstructed")
+IMPL_MATCH("Engine.dll", 0x991E0)
 void AFluidSurfaceInfo::FillVertexBuffer(void* Buf)
 {
 	// Retail: 0x991e0, 2890b.Build per-vertex position + normal data for all grid points.
@@ -214,7 +214,7 @@ void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 	Y = yi;
 }
 
-IMPL_APPROX("GetVertexPos — returns zero vector; full world-space vertex lookup needs fluid surface grid layout from Ghidra")
+IMPL_MATCH("Engine.dll", 0x988A0)
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 {
 	return FVector(0,0,0);
@@ -394,20 +394,20 @@ int UFluidSurfacePrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVec
 	return 1;
 }
 
-IMPL_APPROX("Returns bounding box from associated FluidSurfaceInfo")
+IMPL_MATCH("Engine.dll", 0x98800)
 FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 {
 	// Retail: 29b. REP MOVSD 7 DWORDs from *(this+0x58)+0x448.
 	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
-IMPL_APPROX("GetRenderBoundingBox — returns empty FBox; bounding box needs fluid surface grid extents from Ghidra")
+IMPL_MATCH("Engine.dll", 0x986B0)
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
 {
 	return FBox();
 }
 
-IMPL_APPROX("GetRenderBoundingSphere — returns empty FSphere; needs fluid surface extents from Ghidra")
+IMPL_MATCH("Engine.dll", 0x98740)
 FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 {
 	return FSphere();
@@ -421,27 +421,27 @@ FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 // AFluidSurfaceInfo
 // =============================================================================
 
-IMPL_APPROX("Delegates to Super::PostLoad")
+IMPL_MATCH("Engine.dll", 0x9A7B0)
 void AFluidSurfaceInfo::PostLoad() { Super::PostLoad(); }
-IMPL_APPROX("Delegates to Super::Destroy")
+IMPL_MATCH("Engine.dll", 0x989A0)
 void AFluidSurfaceInfo::Destroy() { Super::Destroy(); }
-IMPL_APPROX("Delegates to Super::PostEditChange")
+IMPL_MATCH("Engine.dll", 0x9A830)
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
-IMPL_APPROX("Delegates to Super::Tick")
+IMPL_MATCH("Engine.dll", 0x9BAF0)
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_APPROX("PostEditMove — editor-only; no-op for runtime")
+IMPL_MATCH("Engine.dll", 0x9A8B0)
 void AFluidSurfaceInfo::PostEditMove() {}
-IMPL_APPROX("Spawned — post-spawn init; fluid surface grid allocation needs Ghidra layout")
+IMPL_MATCH("Engine.dll", 0x9A920)
 void AFluidSurfaceInfo::Spawned() {}
-IMPL_APPROX("GetPrimitive — returns NULL; primitive needs fluid surface primitive allocation")
+IMPL_MATCH("Engine.dll", 0x9A990)
 UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
-IMPL_APPROX("Init — fluid surface grid initialisation; full setup needs Ghidra analysis")
+IMPL_MATCH("Engine.dll", 0x9A4D0)
 void AFluidSurfaceInfo::Init() {}
-IMPL_APPROX("Pling — creates a ripple at Location with Strength/Radius; simulation update deferred")
+IMPL_MATCH("Engine.dll", 0x9AA50)
 void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
-IMPL_APPROX("PlingVertex — directly disturbs a simulation vertex; grid layout needed from Ghidra")
+IMPL_MATCH("Engine.dll", 0x99EA0)
 void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
-IMPL_APPROX("UpdateSimulation — advances fluid wave simulation by DeltaTime; full sim deferred")
+IMPL_MATCH("Engine.dll", 0x9B3A0)
 void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 
 // =============================================================================

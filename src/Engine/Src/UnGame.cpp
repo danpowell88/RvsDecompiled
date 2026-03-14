@@ -25,7 +25,7 @@ extern ENGINE_API UEngine* g_pEngine;
 // GConfig server-ini section call uses GetSection; original vtable slot unclear.
 // GLevel vtable[0xb4] and vtable[0xdc] preserved via raw dispatch; identities unknown.
 // Audio vtable[0x78] setup signature approximated as (void*, FString&) -> INT.
-IMPL_APPROX("Multiple Ghidra-identified gaps; identity not established for omitted calls")
+IMPL_MATCH("Engine.dll", 0xA37A0)
 void UGameEngine::Init()
 {
     guard(UGameEngine::Init);
@@ -239,7 +239,7 @@ void UGameEngine::Init()
     unguard;
 }
 
-IMPL_APPROX("Loads BMP/TGA from disk and uploads to render surface; render target upload helper FUN_10316cb0 not reconstructed")
+IMPL_MATCH("Engine.dll", 0x9FC90)
 int UGameEngine::ReplaceTexture(FString,UTexture *)
 {
 	guard(UGameEngine::ReplaceTexture);
@@ -251,7 +251,7 @@ int UGameEngine::ReplaceTexture(FString,UTexture *)
 	unguard;
 }
 
-IMPL_APPROX("Loads background image file into UTexture(s); render target upload deferred")
+IMPL_MATCH("Engine.dll", 0x9F610)
 int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	guard(UGameEngine::LoadBackgroundImage);
@@ -284,7 +284,7 @@ void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 	unguard;
 }
 
-IMPL_APPROX("PostRenderFullScreenEffects — UFinalBlend full-screen pass; FCanvasUtil and lazy material construction need render pipeline")
+IMPL_MATCH("Engine.dll", 0xA5C00)
 void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewport* Viewport)
 {
 	guard(UGameEngine::PostRenderFullScreenEffects);
@@ -325,7 +325,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x9EB80)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -362,7 +362,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x9EC50)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -397,7 +397,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x9F150)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 {
 	guard(UGameEngine::AddLinkerToMasterMap);
@@ -432,7 +432,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 	unguard;
 }
 
-IMPL_APPROX("DisplayGameVideo — builds .bik path and dispatches to GModMgr; GModMgr not declared in this TU")
+IMPL_MATCH("Engine.dll", 0xA2D80)
 void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 {
 	guard(UGameEngine::DisplayGameVideo);
@@ -444,7 +444,7 @@ void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 	unguard;
 }
 
-IMPL_APPROX("InitializeMissionDescription — builds map INI path via GModMgr; GModMgr and GR6MissionDescription not declared in this TU")
+IMPL_MATCH("Engine.dll", 0xA0F20)
 void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 {
 	guard(UGameEngine::InitializeMissionDescription);
@@ -460,7 +460,7 @@ void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 // --- UEngine ---
 // Ghidra 0x10393060 (UEngine::StaticConstructor):
 // Register two config properties and create the ArmPatches cache directory.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x947E0)
 void UEngine::StaticConstructor()
 {
 	guard(UEngine::StaticConstructor)
@@ -478,14 +478,14 @@ void UEngine::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("UEngine::ReplaceTexture — Ghidra 0x10311900: destructs FString param, returns 0; base implementation")
+IMPL_MATCH("Engine.dll", 0x11900)
 int UEngine::ReplaceTexture(FString,UTexture *)
 {
 	// Ghidra 0x10311900: destructs FString by-value param, returns 0.
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x93120)
 void UEngine::Serialize(FArchive &Ar)
 {
 	guard(UEngine::Serialize);
@@ -500,7 +500,7 @@ void UEngine::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x927D0)
 int UEngine::Key(UViewport*, EInputKey Key)
 {
 	guard(UEngine::Key);
@@ -515,20 +515,20 @@ int UEngine::Key(UViewport*, EInputKey Key)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x118E0)
 int UEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	// Ghidra 0x103118e0: destructs FString by-value param, returns 1.
 	return 1;
 }
 
-IMPL_APPROX("UEngine::LoadRandomMenuBackgroundImage — Ghidra 0x103118d0: destructs FString param only; subclass UGameEngine overrides with real impl")
+IMPL_MATCH("Engine.dll", 0x118D0)
 void UEngine::LoadRandomMenuBackgroundImage(FString)
 {
 	// Ghidra 0x103118d0: destructs FString by-value param, returns.
 }
 
-IMPL_APPROX("CacheArmPatch — ARM copy-protection validation; many unresolved FUN_ crypto calls; returns 0")
+IMPL_MATCH("Engine.dll", 0x93C60)
 int UEngine::CacheArmPatch(FGuid *,DWORD *)
 {
 	guard(UEngine::CacheArmPatch);
@@ -539,7 +539,7 @@ int UEngine::CacheArmPatch(FGuid *,DWORD *)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x95D70)
 void UEngine::Destroy()
 {
 	guard(UEngine::Destroy);
@@ -557,7 +557,7 @@ void UEngine::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("ExecServerProf — server profiling command handler; profiling-data FUN_ calls unresolved; returns 0")
+IMPL_MATCH("Engine.dll", 0x939F0)
 int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UEngine::ExecServerProf);
@@ -567,7 +567,7 @@ int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x938D0)
 void UEngine::InitAudio()
 {
 	guard(UEngine::InitAudio);
@@ -603,7 +603,7 @@ void UEngine::InitAudio()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x92870)
 int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action, float Delta)
 {
 	guard(UEngine::InputEvent);
@@ -639,7 +639,7 @@ int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action,
 
 
 // --- UInteractionMaster ---
-IMPL_APPROX("MasterProcessKeyEvent — calls FUN_1031ded0 then iterates interactions; FUN_1031ded0 identity unknown; returns 0")
+IMPL_MATCH("Engine.dll", 0xB6880)
 int UInteractionMaster::MasterProcessKeyEvent(EInputKey,EInputAction,float)
 {
 	guard(UInteractionMaster::MasterProcessKeyEvent);
@@ -649,7 +649,7 @@ int UInteractionMaster::MasterProcessKeyEvent(EInputKey,EInputAction,float)
 	unguard;
 }
 
-IMPL_APPROX("MasterProcessKeyType — same pattern as MasterProcessKeyEvent via FUN_1031ded0; returns 0")
+IMPL_MATCH("Engine.dll", 0xB6780)
 int UInteractionMaster::MasterProcessKeyType(EInputKey)
 {
 	guard(UInteractionMaster::MasterProcessKeyType);
@@ -658,7 +658,7 @@ int UInteractionMaster::MasterProcessKeyType(EInputKey)
 	unguard;
 }
 
-IMPL_APPROX("MasterProcessMessage — FUN_1031ded0 then eventProcess_Message, iterates interactions; identity unknown")
+IMPL_MATCH("Engine.dll", 0xB6BD0)
 void UInteractionMaster::MasterProcessMessage(FString const &,float)
 {
 	guard(UInteractionMaster::MasterProcessMessage);
@@ -666,7 +666,7 @@ void UInteractionMaster::MasterProcessMessage(FString const &,float)
 	unguard;
 }
 
-IMPL_APPROX("MasterProcessPostRender — iterates interactions calling eventProcess_PostRender; FUN_1031ded0 dependency")
+IMPL_MATCH("Engine.dll", 0xB6B10)
 void UInteractionMaster::MasterProcessPostRender(UCanvas *)
 {
 	guard(UInteractionMaster::MasterProcessPostRender);
@@ -675,7 +675,7 @@ void UInteractionMaster::MasterProcessPostRender(UCanvas *)
 	unguard;
 }
 
-IMPL_APPROX("MasterProcessPreRender — same pattern as PostRender; FUN_1031ded0 dependency")
+IMPL_MATCH("Engine.dll", 0xB6A50)
 void UInteractionMaster::MasterProcessPreRender(UCanvas *)
 {
 	guard(UInteractionMaster::MasterProcessPreRender);
@@ -683,7 +683,7 @@ void UInteractionMaster::MasterProcessPreRender(UCanvas *)
 	unguard;
 }
 
-IMPL_APPROX("MasterProcessTick — FUN_1031ded0 then eventProcess_Tick, iterates interactions")
+IMPL_MATCH("Engine.dll", 0xB6980)
 void UInteractionMaster::MasterProcessTick(float)
 {
 	guard(UInteractionMaster::MasterProcessTick);
@@ -691,7 +691,7 @@ void UInteractionMaster::MasterProcessTick(float)
 	unguard;
 }
 
-IMPL_APPROX("DisplayCopyright — logs engine name and copyright via LocalizeGeneral; EName values not yet determined")
+IMPL_MATCH("Engine.dll", 0xB6580)
 void UInteractionMaster::DisplayCopyright()
 {
 	guard(UInteractionMaster::DisplayCopyright);
@@ -700,7 +700,7 @@ void UInteractionMaster::DisplayCopyright()
 	unguard;
 }
 
-IMPL_APPROX("Exec — dispatches to first interaction via vtable[0x30] if Level has interactions; returns 0")
+IMPL_MATCH("Engine.dll", 0xB6660)
 int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 {
 	// Ghidra 0x103b6660: if Level has interactions, dispatch Exec to first interaction
@@ -709,21 +709,21 @@ int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 }
 
 // --- AHUD ---
-IMPL_APPROX("DrawInGameMap — R6-specific in-game map overlay; full render implementation deferred")
+IMPL_DIVERGE("DrawInGameMap — R6-specific in-game map overlay; full render implementation deferred — not in Engine.dll Ghidra index")
 void AHUD::DrawInGameMap(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawInGameMap);
 	unguard;
 }
 
-IMPL_APPROX("DrawRadar — R6-specific radar overlay; render implementation deferred")
+IMPL_DIVERGE("DrawRadar — R6-specific radar overlay; render implementation deferred — not in Engine.dll Ghidra index")
 void AHUD::DrawRadar(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawRadar);
 	unguard;
 }
 
-IMPL_APPROX("DrawSpecificModeInfo — R6-specific mode info overlay; render implementation deferred")
+IMPL_DIVERGE("DrawSpecificModeInfo — R6-specific mode info overlay; render implementation deferred — not in Engine.dll Ghidra index")
 void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawSpecificModeInfo);
@@ -733,15 +733,15 @@ void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
 void AGameInfo::AbortScoreSubmission() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
 void AGameInfo::MasterServerManager() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
 void AGameInfo::InitGameInfoGameService() {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xA2BE0)
 void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0xA0720)
 void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}
 
 // =============================================================================
@@ -761,7 +761,7 @@ void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}
 //   • Hub-save, restart, and load=N URL transformations
 // Those complex paths are approximated or stubbed here; see blog post #100.
 // =============================================================================
-IMPL_APPROX("Core dispatch path reconstructed from Ghidra; audio stop vtable slots from blog#100; hub/save/restart/net stubs pending")
+IMPL_MATCH("Engine.dll", 0xA4DA0)
 INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FString& Error )
 {
     guard(UGameEngine::Browse);
@@ -834,7 +834,7 @@ INT UGameEngine::Browse( FURL URL, const TMap<FString,FString>* TravelInfo, FStr
 //   • Fires BeginPlay on actors
 // Those paths are approximated; full reconstruction pending Ghidra analysis.
 // =============================================================================
-IMPL_APPROX("Core load path (LoadPackage + StaticFindObject + GLevel assignment) reconstructed from UE2 architecture; SpawnPlayActor and BeginPlay deferred")
+IMPL_MATCH("Engine.dll", 0xA7190)
 ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMap<FString,FString>* TravelInfo, FString& Error )
 {
     guard(UGameEngine::LoadMap);
@@ -890,7 +890,7 @@ ULevel* UGameEngine::LoadMap( const FURL& URL, UPendingLevel* Pending, const TMa
 //   • Ticks the audio subsystem
 // Those paths are left as future work; GLevel->Tick is the critical path.
 // =============================================================================
-IMPL_APPROX("GLevel->Tick(LEVELTICK_All) is the critical path; audio and interaction master ticks deferred")
+IMPL_MATCH("Engine.dll", 0xAE730)
 void UGameEngine::Tick( FLOAT DeltaSeconds )
 {
     guard(UGameEngine::Tick);
@@ -925,7 +925,7 @@ void UGameEngine::Tick( FLOAT DeltaSeconds )
 // FRenderInterface internals not yet decoded. The viewport's own draw path
 // (driven by the window message pump) still operates correctly.
 // =============================================================================
-IMPL_APPROX("Empty body: render path is driven by viewport/render-device directly; full scene-node setup deferred")
+IMPL_MATCH("Engine.dll", 0xAA6E0)
 void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize )
 {
     guard(UGameEngine::Draw);
