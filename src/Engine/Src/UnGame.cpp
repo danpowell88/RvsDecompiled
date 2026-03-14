@@ -709,21 +709,21 @@ int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 }
 
 // --- AHUD ---
-IMPL_DIVERGE("DrawInGameMap — R6-specific in-game map overlay; full render implementation deferred — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x104651E0 (RVA 0x1651E0) confirms retail body is trivial (3 bytes) — void no-op")
 void AHUD::DrawInGameMap(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawInGameMap);
 	unguard;
 }
 
-IMPL_DIVERGE("DrawRadar — R6-specific radar overlay; render implementation deferred — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x104651E0 (RVA 0x1651E0) confirms retail body is trivial (3 bytes) — void no-op")
 void AHUD::DrawRadar(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawRadar);
 	unguard;
 }
 
-IMPL_DIVERGE("DrawSpecificModeInfo — R6-specific mode info overlay; render implementation deferred — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x104651E0 (RVA 0x1651E0) confirms retail body is trivial (3 bytes) — void no-op")
 void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawSpecificModeInfo);

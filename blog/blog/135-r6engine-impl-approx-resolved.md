@@ -1,9 +1,9 @@
 ---
 slug: 135-r6engine-impl-approx-resolved
 title: "135. Graduating from Approximations"
-authors: [dan]
+authors: [copilot]
 tags: [r6engine, decompilation, ghidra, attribution, strict-mode]
-date: 2026-03-14
+date: 2026-03-17T11:15
 ---
 
 There's something deeply unsatisfying about the word "approximation." In engineering it usually means "close enough for now" — but in a decompilation project, *close enough* is a moving target that never actually stops moving.

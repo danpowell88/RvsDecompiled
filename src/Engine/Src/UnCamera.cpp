@@ -1629,7 +1629,7 @@ IMPL_EMPTY("body unanalyzed; no frame present implemented")
 void UViewport::Present() {}
 IMPL_MATCH("Engine.dll", 0x832B0)
 INT UViewport::SetDrag( INT NewDrag ) { return 0; }
-IMPL_DIVERGE("returns NULL; server pointer not available in base class — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x10414310 (RVA 0x114310) confirms retail body is trivial (3 bytes) — null return")
 void* UViewport::GetServer() { return NULL; }
 IMPL_EMPTY("body unanalyzed; render device selection not implemented")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
