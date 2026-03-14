@@ -80,3 +80,33 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
    - `IMPL_TODO("reason")` — **BANNED, causes build failure**
 
    **The only valid macros are IMPL_MATCH, IMPL_EMPTY, and IMPL_DIVERGE.**
+
+## Build Commands
+
+**To build and check for errors (agents MUST use this):**
+```powershell
+cd C:\Users\danpo\Desktop\rvs\build-71
+$VS2019_X86 = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x86"
+$env:PATH = "C:\Users\danpo\Desktop\rvs\tools\toolchain\msvc71\bin;$VS2019_X86;$env:PATH"
+$env:LIB = "C:\Users\danpo\Desktop\rvs\tools\toolchain\msvc71\lib;C:\Users\danpo\Desktop\rvs\tools\toolchain\winsdk\Lib;C:\Users\danpo\Desktop\rvs\tools\toolchain\dxsdk\Lib"
+& "$VS2019_X86\nmake.exe" /s 2>&1 | Where-Object { $_ -match "error " }
+```
+
+The VS2019_X86 path must be in PATH for `cvtres.exe` to be found by the MSVC 7.1 linker (needed for RavenShield.exe .rc file linking).
+
+All DLL targets build in 3-5 minutes. A clean build (no errors) will show just the target names.
+
+## Ghidra Reference Files
+
+Function decompilations are in `ghidra/exports/`:
+- `ghidra/exports/Engine/` — Engine.dll decompilations (base 0x10300000)
+- `ghidra/exports/Core/` — Core.dll decompilations (base 0x10100000)
+- `ghidra/exports/R6Engine/` — R6Engine.dll decompilations
+- etc.
+
+For each DLL there is a `_global.cpp` with all exported functions. Search by address:
+```powershell
+$content = Get-Content "ghidra\exports\Engine\_global.cpp" -Raw
+$idx = $content.IndexOf("// Address: 103b4130")
+if ($idx -ge 0) { $content.Substring($idx, [Math]::Min(2000, $content.Length - $idx)) }
+```
