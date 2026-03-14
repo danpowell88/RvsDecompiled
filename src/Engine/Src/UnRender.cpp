@@ -354,23 +354,37 @@ void UCanvas::execSetVirtualSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetVirtualSize );
 
-IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x1038a700 is 218 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x1038a700)
 void UCanvas::execUseVirtualSize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execUseVirtualSize);
 	P_GET_UBOOL(bUse);
+	P_GET_FLOAT(fX);
+	P_GET_FLOAT(fY);
 	P_FINISH;
-	UseVirtualSize(bUse, m_fVirtualResX, m_fVirtualResY);
+	UseVirtualSize(bUse, fX, fY);
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execUseVirtualSize );
 
-IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10389690 is 179 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10389690)
 void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execSetMotionBlurIntensity);
-	P_GET_FLOAT(Intensity);
+	P_GET_INT(Intensity);
 	P_FINISH;
+	if( Intensity >= 256 ) Intensity = 255;
+	else if( Intensity < 0 ) Intensity = 0;
+	if( Viewport )
+	{
+		INT* v = *(INT**)((BYTE*)Viewport + 0x34);
+		if( v )
+		{
+			INT* target = *(INT**)((BYTE*)v + 0x144);
+			if( target )
+				*(INT*)((BYTE*)target + 0x444) = Intensity;
+		}
+	}
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetMotionBlurIntensity );
@@ -389,6 +403,7 @@ void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoOpen);
 	P_GET_STR(Filename);
+	P_GET_INT(Flags);
 	P_FINISH;
 	// DIVERGENCE: Retail calls into the Bink or proprietary video subsystem via a
 	// vtable-dispatched VideoOpen API (Ghidra signature differs from UC declaration).
@@ -403,6 +418,8 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoPlay);
 	P_GET_INT(Handle);
+	P_GET_INT(p2);
+	P_GET_INT(p3);
 	P_FINISH;
 	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
 	unguardexec;
@@ -413,9 +430,9 @@ IMPL_DIVERGE("body incomplete — Ghidra 0x10389EE0 not yet fully reconstructed"
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);
-	P_GET_INT(Handle);
 	P_FINISH;
-	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
+	// DIVERGENCE: Retail calls _BinkSetVolume_12 then dispatches vtable[0xac] on
+	// Viewport->RenDev — Bink headers unavailable. No-op.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoStop );
@@ -424,9 +441,9 @@ IMPL_DIVERGE("body incomplete — Ghidra 0x10389CC0 not yet fully reconstructed"
 void UCanvas::execVideoClose( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoClose);
-	P_GET_INT(Handle);
 	P_FINISH;
-	// DIVERGENCE: video subsystem API call — see execVideoOpen. No-op.
+	// DIVERGENCE: Retail dispatches vtable[0xa0] on Viewport->RenDev — RenDev
+	// vtable binding unavailable here. No-op.
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );

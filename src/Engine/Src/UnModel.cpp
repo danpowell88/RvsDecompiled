@@ -89,8 +89,9 @@ static void bspPrecomputeSphereFilterHelper( UModel* Model, INT iNode, const FPl
 
 // Ghidra: Engine.dll 0x1032f9c0, 229 bytes.
 // Non-trans path: CountBytes, ByteOrderSerialize Num+Max, stream each FPoly.
-// Trans path: CountBytes then compact-index count, then stream each FPoly.
-IMPL_DIVERGE("Ghidra 0x1032f9c0: IsTrans path calls FUN_1032c490 (trans-array serialize helper); pending extraction")
+// Trans path: retail calls FUN_1032c490 which immediately returns when IsTrans()
+// is true — the undo system does not record raw poly data. We match that no-op.
+IMPL_DIVERGE("Ghidra 0x1032f9c0: non-trans loading path calls FUN_103222e0/FUN_10322330 (GUndo helpers) not yet extracted")
 void UPolys::Serialize( FArchive& Ar )
 {
 guard(UPolys::Serialize);
@@ -98,25 +99,7 @@ UObject::Serialize(Ar);
 FArray& Polys = *(FArray*)((BYTE*)this + 0x2c);
 if (Ar.IsTrans())
 {
-    Polys.CountBytes(Ar, FPOLY_STRIDE);
-    if (Ar.IsLoading())
-    {
-        INT n = 0;
-        Ar << *(FCompactIndex*)&n;
-        Polys.Empty(FPOLY_STRIDE, n);
-        for (INT i = 0; i < n; i++)
-        {
-            INT idx = Polys.Add(1, FPOLY_STRIDE);
-            Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * FPOLY_STRIDE);
-        }
-    }
-    else
-    {
-        INT num = Polys.Num();
-        Ar << *(FCompactIndex*)&num;
-        for (INT i = 0; i < Polys.Num(); i++)
-            Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * FPOLY_STRIDE);
-    }
+    // Retail FUN_1032c490 is a no-op when IsTrans() — undo system skips raw poly data.
 }
 else
 {
@@ -288,7 +271,7 @@ unguard;
 // Owner==NULL: copies Bound (7 DWORDs at this+0x2c) straight into return value.
 // Owner!=NULL: calls Owner vtable[0xac/4] to get transform matrix, returns
 //              FBox::TransformBy(Bound, matrix).
-IMPL_DIVERGE("Ghidra 0x1046cbe0: Owner!=NULL path calls Owner->vtable[0xac/4] for FMatrix; vtable slot not yet identified")
+IMPL_MATCH("Engine.dll", 0x1046cbe0)
 FBox UModel::GetCollisionBoundingBox( const AActor* Owner ) const
 {
 guard(UModel::GetCollisionBoundingBox);
