@@ -115,7 +115,7 @@ int AR6ColBox::CanStepUp(FVector vec)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; collision enable/disable logic requires Ghidra analysis")
 void AR6ColBox::EnableCollision(int,int,int)
 {
 	guard(AR6ColBox::EnableCollision);

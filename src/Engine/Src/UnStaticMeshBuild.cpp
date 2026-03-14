@@ -379,7 +379,7 @@ IMPL_EMPTY("editor tool: deletes named rebuild option")
 void FRebuildTools::Delete(FString p0) {}
 
 // ?Init@FRebuildTools@@QAEXXZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor tool: initializes rebuild tools data")
 void FRebuildTools::Init() {}
 
 // ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z

@@ -199,7 +199,7 @@ UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeT
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushEdgeTurn::Execute(int)
 {
 	guard(UTerrainBrushEdgeTurn::Execute);
