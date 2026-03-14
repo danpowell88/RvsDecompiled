@@ -185,13 +185,13 @@ void ULevel::Destroy()
 // GNewCollisionHash is defined in UnCamera.cpp
 ENGINE_API FCollisionHashBase* GNewCollisionHash();
 
-IMPL_DIVERGE("DoTransArrays param ignored; retail passes 0 to UModel::Modify at Ghidra 0x103bf1e0")
+IMPL_MATCH("Engine.dll", 0x103bf1e0)
 void ULevel::Modify( INT DoTransArrays )
 {
 	guard(ULevel::Modify);
 	UObject::Modify();
-	UModel* m = *(UModel**)((BYTE*)this + 0x90);
-	if (m) m->Modify(DoTransArrays);
+	// Retail always passes 0 to UModel::Modify regardless of DoTransArrays.
+	(*(UModel**)((BYTE*)this + 0x90))->Modify(0);
 	unguard;
 }
 
@@ -429,12 +429,12 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	unguard;
 }
 
-IMPL_DIVERGE("null check added; retail calls ShrinkModel unconditionally at Ghidra 0x103bf160")
+IMPL_MATCH("Engine.dll", 0x103bf160)
 void ULevel::ShrinkLevel()
 {
 	guard(ULevel::ShrinkLevel);
-	UModel* m = *(UModel**)((BYTE*)this + 0x90);
-	if (m) m->ShrinkModel();
+	// Retail calls ShrinkModel unconditionally on this+0x90 (the level's world model).
+	(*(UModel**)((BYTE*)this + 0x90))->ShrinkModel();
 	unguard;
 }
 
@@ -1272,12 +1272,38 @@ void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 }
 IMPL_DIVERGE("stub returns 1; retail IsAudibleAt at Ghidra 0x103bf9b0")
 INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* SourceActor, ESoundOcclusion Occlusion ) { return 1; }
-IMPL_DIVERGE("formula incorrect; retail uses appPow(0.85, audibility_table_val^2) at Ghidra 0x103bf600")
-FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner ) { return 25.f * ((INT)SoundRadius + 1); }
+IMPL_MATCH("Engine.dll", 0x103bf600)
+FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner )
+{
+	guard(ULevel::CalculateRadiusMultiplier);
+	// Ghidra 0xbf600: reads a byte from an inline audibility table at this+0x110,
+	// indexed as [SoundRadius * 256 + SoundRadiusInner], squares it, then applies
+	// appPow(0.85, squared).  This gives a falloff multiplier in the range (0,1].
+	BYTE val = *(BYTE*)((BYTE*)this + (DWORD)SoundRadius * 0x100 + (DWORD)SoundRadiusInner + 0x110);
+	return (FLOAT)appPow( 0.85, (DOUBLE)(val * val) );
+	unguard;
+}
 
 // FNetworkNotify interface.
-IMPL_DIVERGE("stub; retail checks NetDriver and game class at Ghidra 0x103c07c0")
-EAcceptConnection ULevel::NotifyAcceptingConnection() { return ACCEPTC_Reject; }
+IMPL_DIVERGE("this-pointer offset differs; retail at Ghidra 0x103c07c0")
+EAcceptConnection ULevel::NotifyAcceptingConnection()
+{
+	guard(ULevel::NotifyAcceptingConnection);
+	// Ghidra 0xc07c0: checks via FNetworkNotify subobject pointer.
+	// In our C++ context 'this' is the full ULevel pointer; use named fields.
+	if ( !NetDriver )
+		appFailAssert("NetDriver", ".\\UnLevel.cpp", 0x326);
+	// If we already have a server connection we're a client — reject.
+	if ( *(INT*)((BYTE*)NetDriver + 0x3c) != 0 )
+		return ACCEPTC_Reject;
+	// Check whether the game has started by testing a string field in LevelInfo at +0x8ec.
+	// In retail: compare against an empty literal to determine if GameClass is set.
+	ALevelInfo* li = GetLevelInfo();
+	if ( li && *(INT*)((BYTE*)li + 0x8ec) != 0 ) // string Data ptr non-null → not empty
+		return ACCEPTC_Ignore;
+	return ACCEPTC_Accept;
+	unguard;
+}
 IMPL_DIVERGE("connection description logging omitted; retail at Ghidra 0x103bf2a0")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
@@ -1290,8 +1316,40 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 	// and logs to DevNet. Ghidra 0xbf2a0. Omitted — no-op here.
 	unguard;
 }
-IMPL_DIVERGE("stub; retail checks channel type at Ghidra 0x103bf3b0")
-INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
+IMPL_DIVERGE("this-pointer offset differs; retail at Ghidra 0x103bf3b0")
+INT ULevel::NotifyAcceptingChannel( UChannel* Channel )
+{
+	guard(ULevel::NotifyAcceptingChannel);
+	if ( !Channel )
+		appFailAssert("Channel", ".\\UnLevel.cpp", 0x357);
+	if ( *(INT*)((BYTE*)Channel + 0x2c) == 0 )
+		appFailAssert("Channel->Connection", ".\\UnLevel.cpp", 0x358);
+	if ( *(INT*)(*(INT*)((BYTE*)Channel + 0x2c) + 0x7c) == 0 )
+		appFailAssert("Channel->Connection->Driver", ".\\UnLevel.cpp", 0x359);
+
+	// ServerConnection field of the driver: if non-NULL we are a client.
+	void* serverConn = *(void**)(*(INT*)((BYTE*)Channel + 0x2c) + 0x7c + 0x3c);
+
+	INT chType = *(INT*)((BYTE*)Channel + 0x48);  // ChType
+
+	if ( serverConn )
+	{
+		// Client side: accept control (1) and actor (2) channels; reject file channels.
+		if ( chType == 2 || chType == 3 )
+			return 1;
+		debugf( NAME_DevNet, TEXT("NotifyAcceptingChannel: unexpected channel type %i"), chType );
+		return 0;
+	}
+	else
+	{
+		// Server side: accept outgoing (non-incoming) control channels and all file channels.
+		INT bIncoming = *(INT*)((BYTE*)Channel + 0x38);
+		if ( !bIncoming && chType == 1 )
+			return 1;
+		return (chType == 3) ? 1 : 0;
+	}
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103116c0)
 ULevel* ULevel::NotifyGetLevel() { return this; }
 IMPL_DIVERGE("stub; retail dispatches network protocol commands at Ghidra 0x103c1d30")
@@ -1303,15 +1361,14 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 	// Unresolved — accepting connections will not progress through the handshake.
 	unguard;
 }
-IMPL_DIVERGE("null check added; retail at Ghidra 0x103bf590")
+IMPL_DIVERGE("this-pointer offset differs: retail receives FNetworkNotify subobject at Ghidra 0x103bf590")
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 {
-	// Retail (18b, RVA 0xBF590): returns 1 if [this+0x14]->field@+0x3C is NULL, else 0.
-	// Connection and GUID params are NOT referenced in retail assembly.
-	// [this+0x14] is likely the embedded NetDriver/network object pointer.
-	void* driver = *(void**)((BYTE*)this + 0x14);
-	if (!driver) return 1; // safety: not present in retail, but avoids NULL deref
-	return (*(DWORD*)((BYTE*)driver + 0x3C) == 0) ? 1 : 0;
+	// Ghidra 0xbf590 (18 bytes): return (Driver->ServerConnection == NULL).
+	// 'this' in Ghidra is the FNetworkNotify subobject (ULevel+0x2c), so it accesses
+	// this+0x14 = NetDriver.  In our code this is the full ULevel pointer, so we use
+	// the named field directly — same memory, different base, hence IMPL_DIVERGE.
+	return (*(INT*)((BYTE*)NetDriver + 0x3c) == 0) ? 1 : 0;
 }
 IMPL_MATCH("Engine.dll", 0x103bf500)
 void ULevel::NotifyReceivedFile( UNetConnection* Connection, INT PackageIndex, const TCHAR* Error, INT Forced )
@@ -1326,12 +1383,14 @@ IMPL_DIVERGE("null returns instead of asserting; retail at Ghidra 0x1031bf30")
 ABrush* ULevel::Brush() { return (Actors.Num()>=2 && Actors(1)) ? (ABrush*)Actors(1) : NULL; }
 IMPL_DIVERGE("stub; retail EditorDestroyActor has navigation point handling at Ghidra 0x103b8100")
 INT ULevel::EditorDestroyActor( AActor* Actor ) { return DestroyActor( Actor ); }
-IMPL_DIVERGE("error logging omitted; retail logs to GError on failure at Ghidra 0x1031bfb0")
+IMPL_DIVERGE("returns INDEX_NONE instead of asserting via GError; retail at Ghidra 0x1031bfb0")
 INT ULevel::GetActorIndex( AActor* Actor )
 {
 	for( INT i=0; i<Actors.Num(); i++ )
 		if( Actors(i) == Actor )
 			return i;
+	// Retail (0x1bfb0): calls UObject::GetFullName then GError->Logf on failure.
+	GError->Logf( TEXT("GetActorIndex: %s not found"), Actor ? Actor->GetName() : TEXT("NULL") );
 	return INDEX_NONE;
 }
 IMPL_DIVERGE("null returns instead of asserting; retail at Ghidra 0x1031c080")
@@ -1406,25 +1465,26 @@ void ULevel::UpdateTerrainArrays()
 =============================================================================*/
 
 // GetAddressURL() - returns the server's address URL string.
-IMPL_DIVERGE("retail always appends port; retail at Ghidra 0x10425bf0")
+IMPL_MATCH("Engine.dll", 0x10425bf0)
 void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetAddressURL);
 	P_FINISH;
-	*(FString*)Result = XLevel->URL.Host;
-	if( XLevel->URL.Port != 7777 )
-		*(FString*)Result += FString::Printf( TEXT(":%i"), XLevel->URL.Port );
+	// Retail always formats "host:port" unconditionally (no default-port check).
+	*(FString*)Result = FString::Printf( TEXT("%s:%i"), *XLevel->URL.Host, XLevel->URL.Port );
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetAddressURL );
 
 // GetLocalURL() - returns the current map URL.
-IMPL_DIVERGE("stub; retail execGetLocalURL at Ghidra 0x10425b60")
+IMPL_DIVERGE("retail calls FURL::String (full URL); current returns just the map string at Ghidra 0x10425b60")
 void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetLocalURL);
 	P_FINISH;
-	*(FString*)Result = XLevel->URL.Map;
+	// Ghidra 0x125b60: calls FURL::String(XLevel->URL, local_buf) which returns the
+	// full URL string (e.g. "MapName?opt1=val1").  URL.String() is equivalent.
+	*(FString*)Result = XLevel->URL.String();
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );

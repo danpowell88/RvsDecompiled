@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6ActionPoint.uc : (add small description)
+//  R6ActionPoint.uc : A planning waypoint placed in the pre-mission planning screen; holds team, speed,
+//                     movement mode, and action settings for each step of a team's plan.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

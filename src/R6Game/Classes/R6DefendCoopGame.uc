@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DefendCoopGame.uc : (add small description)
+//  R6DefendCoopGame.uc : Co-operative variant of the defend game mode; extends R6DefendGame for
+//                        online co-op sessions.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================

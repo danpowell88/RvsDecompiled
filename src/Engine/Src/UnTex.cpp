@@ -317,10 +317,25 @@ DWORD UTexture::GetColorsIndex()
 	UObject* Pal = *(UObject**)((BYTE*)this + 0x70);
 	return Pal->GetIndex();
 }
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10304310 is 318 bytes, not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x10304310)
 FString UTexture::GetFormatDesc()
 {
-	return FString();
+	// Ghidra 0x4310: switch on Format byte (this+0x58), return format name string.
+	switch( Format )
+	{
+		case 0:  return TEXT("P8");
+		case 1:  return TEXT("RGBA7");
+		case 2:  return TEXT("RGB16");
+		case 3:  return TEXT("DXT1");
+		case 4:  return TEXT("RGB8");
+		case 5:  return TEXT("RGBA8");
+		case 7:  return TEXT("DXT3");
+		case 8:  return TEXT("DXT5");
+		case 9:  return TEXT("L8");
+		case 10: return TEXT("G16");
+		case 11: return TEXT("RRRGGGBBB");
+		default: return TEXT("?");
+	}
 }
 IMPL_MATCH("Engine.dll", 0x10304500)
 double UTexture::GetLastUpdateTime()
@@ -631,9 +646,10 @@ FMipmapBase::FMipmapBase()
 	appMemzero((BYTE*)this, sizeof(_Data));
 }
 
-IMPL_DIVERGE("FMipmapBase::operator= not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10304570)
 FMipmapBase& FMipmapBase::operator=(const FMipmapBase& Other)
 {
+	// Ghidra 0x4570: copies 4 DWORDs (16 bytes = sizeof FMipmapBase).
 	appMemcpy( this, &Other, sizeof(FMipmapBase) );
 	return *this;
 }

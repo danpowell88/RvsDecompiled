@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6CoOpMode.uc : (add small description)
+//  R6CoOpMode.uc : Base co-operative multiplayer game mode; tracks whether Rainbow or terrorist pawns
+//                  remain alive and handles game-start and end-game logic.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

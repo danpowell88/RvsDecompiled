@@ -38,12 +38,12 @@ IMPLEMENT_CLASS(UObject);
 	FScriptDelegate.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_MATCH("Core.dll", 0x10103f10)
 FScriptDelegate::FScriptDelegate()
 {
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10101ca0)
 FScriptDelegate& FScriptDelegate::operator=( const FScriptDelegate& Other )
 {
 	Object       = Other.Object;
@@ -621,7 +621,7 @@ UBOOL UObject::IsValid()
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_MATCH("Core.dll", 0x10102ab0)
 INT UObject::IsA( UClass* SomeBase ) const
 {
 	guardSlow(UObject::IsA);
@@ -643,7 +643,7 @@ INT UObject::IsIn( UObject* SomeOuter ) const
 	unguardSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::IsInState( FName StateName )
 {
 	guard(UObject::IsInState);
@@ -663,7 +663,7 @@ INT UObject::IsProbing( FName ProbeName )
 	UObject accessors.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_MATCH("Core.dll", 0x10101590)
 UClass* UObject::GetClass() const
 {
 	return Class;
@@ -687,13 +687,13 @@ DWORD UObject::GetIndex() const
 	return Index;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_MATCH("Core.dll", 0x10101540)
 UObject* UObject::GetOuter() const
 {
 	return Outer;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_MATCH("Core.dll", 0x10101520)
 ULinkerLoad* UObject::GetLinker()
 {
 	return _Linker;
@@ -1353,7 +1353,7 @@ INT UObject::GetObjectHash( FName ObjName, INT Outer )
 	return (ObjName.GetIndex() ^ Outer) & (ARRAY_COUNT(GObjHash)-1);
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 TArray<UObject*> UObject::GetLoaderList()
 {
 	return GObjLoaded;
@@ -1689,7 +1689,7 @@ UState* UObject::FindState( FName StateName )
 	Property search helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindBoolProperty( FString PropertyName, INT* Value )
 {
 	guard(UObject::FindBoolProperty);
@@ -1697,7 +1697,7 @@ INT UObject::FindBoolProperty( FString PropertyName, INT* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindIntProperty( FString PropertyName, INT* Value )
 {
 	guard(UObject::FindIntProperty);
@@ -1705,7 +1705,7 @@ INT UObject::FindIntProperty( FString PropertyName, INT* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindFloatProperty( FString PropertyName, FLOAT* Value )
 {
 	guard(UObject::FindFloatProperty);
@@ -1713,7 +1713,7 @@ INT UObject::FindFloatProperty( FString PropertyName, FLOAT* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindFNameProperty( FString PropertyName, FName* Value )
 {
 	guard(UObject::FindFNameProperty);
@@ -1721,7 +1721,7 @@ INT UObject::FindFNameProperty( FString PropertyName, FName* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindObjectProperty( FString PropertyName, UObject** Value )
 {
 	guard(UObject::FindObjectProperty);
@@ -1729,7 +1729,7 @@ INT UObject::FindObjectProperty( FString PropertyName, UObject** Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindArrayProperty( FString PropertyName, FArray** Value, INT* ElementSize )
 {
 	guard(UObject::FindArrayProperty);
@@ -1737,7 +1737,7 @@ INT UObject::FindArrayProperty( FString PropertyName, FArray** Value, INT* Eleme
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 INT UObject::FindStructProperty( FString PropertyName, UStruct** Value )
 {
 	guard(UObject::FindStructProperty);
@@ -1904,14 +1904,14 @@ void UObject::ConditionalShutdownAfterError()
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 void UObject::CheckDanglingOuter( UObject* Obj )
 {
 	guard(UObject::CheckDanglingOuter);
 	unguard;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
 void UObject::CheckDanglingRefs( UObject* Obj )
 {
 	guard(UObject::CheckDanglingRefs);
@@ -1995,7 +1995,7 @@ FEdLoadError::~FEdLoadError()
 {
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1010e3f0)
 FEdLoadError& FEdLoadError::operator=( FEdLoadError Other )
 {
 	Type = Other.Type;
@@ -2003,7 +2003,7 @@ FEdLoadError& FEdLoadError::operator=( FEdLoadError Other )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1010a720)
 INT FEdLoadError::operator==( const FEdLoadError& Other ) const
 {
 	return Type == Other.Type && Desc == Other.Desc;
@@ -2013,13 +2013,13 @@ INT FEdLoadError::operator==( const FEdLoadError& Other ) const
 	Editor load error helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014ba80)
 CORE_API void EdClearLoadErrors()
 {
 	GEdLoadErrors.Empty();
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1014b260)
 CORE_API void VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -2027,7 +2027,7 @@ CORE_API void VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... )
 	new(GEdLoadErrors) FEdLoadError( Type, TempStr );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1011baa0)
 CORE_API BYTE GRegisterCast( INT CastCode, const Native& Func )
 {
 	// On first call, initialise all cast slots to execUndefined.
@@ -2053,7 +2053,7 @@ CORE_API BYTE GRegisterCast( INT CastCode, const Native& Func )
 	ParseObject.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1012fa20)
 CORE_API INT ParseObject( const TCHAR* Stream, const TCHAR* Match, UClass* Class, UObject*& DestRes, UObject* InParent )
 {
 	guard(ParseObject);
@@ -2081,7 +2081,7 @@ CORE_API INT ParseObject( const TCHAR* Stream, const TCHAR* Match, UClass* Class
 	Must be out-of-line so the linker can export the symbol via .def.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x10101d20)
 void UObject::operator delete( void* Object, size_t Size )
 {
 	guard(UObject::operator delete);
@@ -2192,10 +2192,15 @@ void UObject::SafeLoadError( DWORD LoadFlags, const TCHAR* Error, const TCHAR* F
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_MATCH("Core.dll", 0x1013a630)
 UObject& UObject::operator=( const UObject& Other )
 {
+	guard(UObject::operator=);
+	check(&Other);
+	if( Class != Other.Class )
+		GError->Logf( TEXT("Attempt to assign %s from %s"), GetFullName(), Other.GetFullName() );
 	return *this;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
@@ -2223,7 +2228,7 @@ UCommandlet::UCommandlet( const UCommandlet& Other )
 	unguard;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("body incomplete — FUN_10101000 (memcpy helper) not resolved; Core.dll VA 0x1010c140")
 UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
 {
 	return *this;

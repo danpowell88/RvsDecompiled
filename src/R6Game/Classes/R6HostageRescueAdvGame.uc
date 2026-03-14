@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6HostageRescueAdvGame.uc : (add small description)
+//  R6HostageRescueAdvGame.uc : Adversarial hostage-rescue mode; Rainbow rescues hostages while the opposing
+//                              team tries to prevent it, with per-team acceptable loss tracking.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

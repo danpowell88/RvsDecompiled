@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DeathMatch.uc : (add small description)
+//  R6DeathMatch.uc : Free-for-all adversarial deathmatch mode; rotates players across teams and ends
+//                    the round based on a score or elimination condition.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
