@@ -17,7 +17,7 @@ FMemStack::FTaggedMemory* FMemStack::UnusedChunks = NULL;
 	FMemStack implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_MATCH("Core.dll", 0x1012DA00)
 void FMemStack::Init( INT InDefaultChunkSize )
 {
 	guard(FMemStack::Init);
@@ -30,7 +30,7 @@ void FMemStack::Init( INT InDefaultChunkSize )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_MATCH("Core.dll", 0x1012DAB0)
 void FMemStack::Exit()
 {
 	guard(FMemStack::Exit);
@@ -54,7 +54,7 @@ void FMemStack::Exit()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_MATCH("Core.dll", 0x1012DA20)
 void FMemStack::Tick()
 {
 	guard(FMemStack::Tick);
@@ -70,7 +70,7 @@ void FMemStack::Tick()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_MATCH("Core.dll", 0x1012DB40)
 INT FMemStack::GetByteCount()
 {
 	guard(FMemStack::GetByteCount);
@@ -83,7 +83,7 @@ INT FMemStack::GetByteCount()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_MATCH("Core.dll", 0x1012DBC0)
 BYTE* FMemStack::AllocateNewChunk( INT MinSize )
 {
 	guard(FMemStack::AllocateNewChunk);
@@ -116,7 +116,7 @@ BYTE* FMemStack::AllocateNewChunk( INT MinSize )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_MATCH("Core.dll", 0x1012DB70)
 void FMemStack::FreeChunks( FTaggedMemory* NewTopChunk )
 {
 	guard(FMemStack::FreeChunks);
@@ -140,7 +140,7 @@ void FMemStack::FreeChunks( FTaggedMemory* NewTopChunk )
 	these provide the actual compiled implementations.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void* FMallocWindows::Malloc( DWORD Size, const TCHAR* Tag )
 {
 	guard(FMallocWindows::Malloc);
@@ -235,7 +235,7 @@ void* FMallocWindows::Malloc( DWORD Size, const TCHAR* Tag )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void* FMallocWindows::Realloc( void* Ptr, DWORD NewSize, const TCHAR* Tag )
 {
 	guard(FMallocWindows::Realloc);
@@ -290,7 +290,7 @@ void* FMallocWindows::Realloc( void* Ptr, DWORD NewSize, const TCHAR* Tag )
 	unguardf(( TEXT("%08X %i %s"), (INT)Ptr, NewSize, Tag ));
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void FMallocWindows::Free( void* Ptr )
 {
 	guard(FMallocWindows::Free);
@@ -345,7 +345,7 @@ void FMallocWindows::Free( void* Ptr )
 	FMallocAnsi method bodies.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMem.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void* FMallocAnsi::Realloc( void* Ptr, DWORD NewSize, const TCHAR* Tag )
 {
 	guard(FMallocAnsi::Realloc);

@@ -18,7 +18,7 @@ void AMP2IOKarma::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("FCoords rotation and ZDR impulse — FCoords::operator/ + ZDR spring list")
 INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A)
 {
 	guard(AMP2IOKarma::KMP2DynKarmaInterface);
@@ -87,7 +87,7 @@ INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A
 	unguard;
 }
 
-IMPL_APPROX("Karma physics pending MeSDK decompilation from Engine.dll")
+IMPL_DIVERGE("editor constraint visualization — iterates karma constraint list")
 void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AMP2IOKarma::RenderEditorInfo);
@@ -103,7 +103,7 @@ void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface*
 	unguard;
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10008f10)
 void AMP2IOKarma::eventReinitSimulation(INT A)
 {
 	struct { INT A; } Parms;
@@ -111,7 +111,7 @@ void AMP2IOKarma::eventReinitSimulation(INT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ReinitSimulation), &Parms);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10008e90)
 void AMP2IOKarma::eventStartSimulation(INT A)
 {
 	struct { INT A; } Parms;
@@ -119,7 +119,7 @@ void AMP2IOKarma::eventStartSimulation(INT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StartSimulation), &Parms);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10008ed0)
 void AMP2IOKarma::eventStopSimulation(INT A)
 {
 	struct { INT A; } Parms;
@@ -127,7 +127,7 @@ void AMP2IOKarma::eventStopSimulation(INT A)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_StopSimulation), &Parms);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x1000df20)
 void AMP2IOKarma::eventZDRSetDamageState(INT A, FLOAT B, FVector C)
 {
 	struct { 
@@ -141,7 +141,7 @@ void AMP2IOKarma::eventZDRSetDamageState(INT A, FLOAT B, FVector C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ZDRSetDamageState), &Parms);
 }
 
-IMPL_APPROX("Exec thunk for MP2IOKarmaAllNativeFct; native body empty — all logic is in UnrealScript")
+IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
 void AMP2IOKarma::execMP2IOKarmaAllNativeFct(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

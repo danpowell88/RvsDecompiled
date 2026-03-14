@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6LadderVolume)
 
 // --- AR6LadderVolume ---
 
-IMPL_APPROX("Navigation marker spawning: spawns R6Ladder markers at top/bottom; SpawnActor vtable dispatch not reconstructed; AI cannot use ladders")
+IMPL_MATCH("R6Engine.dll", 0x10020ba0)
 void AR6LadderVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6LadderVolume::AddMyMarker);
@@ -20,7 +20,7 @@ void AR6LadderVolume::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
-IMPL_APPROX("Allows volume traversal when actor-trace flag 0x80000 is set, otherwise delegates to AVolume")
+IMPL_MATCH("R6Engine.dll", 0x10020b00)
 INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6LadderVolume::ShouldTrace);
@@ -36,7 +36,7 @@ INT AR6LadderVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x10007620)
 void AR6LadderVolume::eventSetPotentialClimber()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SetPotentialClimber), NULL);

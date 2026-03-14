@@ -11,7 +11,7 @@
 	FOutputDevice base class implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_MATCH("Core.dll", 0x1012EE70)
 void FOutputDevice::Log( const TCHAR* S )
 {
 	guard(FOutputDevice::Log);
@@ -19,7 +19,7 @@ void FOutputDevice::Log( const TCHAR* S )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_MATCH("Core.dll", 0x1012EEA0)
 void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 {
 	guard(FOutputDevice::Log);
@@ -27,7 +27,7 @@ void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_MATCH("Core.dll", 0x1012EED0)
 void FOutputDevice::Log( const FString& S )
 {
 	guard(FOutputDevice::Log);
@@ -35,7 +35,7 @@ void FOutputDevice::Log( const FString& S )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_MATCH("Core.dll", 0x1012EF20)
 void FOutputDevice::Log( enum EName Type, const FString& S )
 {
 	guard(FOutputDevice::Log);
@@ -43,7 +43,7 @@ void FOutputDevice::Log( enum EName Type, const FString& S )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_MATCH("Core.dll", 0x1012EF70)
 void FOutputDevice::Logf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -51,7 +51,7 @@ void FOutputDevice::Logf( const TCHAR* Fmt, ... )
 	Serialize( TempStr, NAME_Log );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnLog.cpp")
+IMPL_MATCH("Core.dll", 0x1012EFD0)
 void FOutputDevice::Logf( enum EName Type, const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -69,43 +69,43 @@ void FOutputDevice::Logf( enum EName Type, const TCHAR* Fmt, ... )
 	FErrorOutError / FLogOutError / FNullOutError / FThrowOut classes.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108500 size 9 bytes")
 FErrorOutError::FErrorOutError() {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10108510)
 FErrorOutError::FErrorOutError( const FErrorOutError& ) {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FErrorOutError& FErrorOutError::operator=( const FErrorOutError& ) { return *this; }
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void FErrorOutError::Serialize( const TCHAR* V, EName Event )
 {
 	if( GError )
 		GError->Serialize( V, Event );
 }
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void FErrorOutError::HandleError()
 {
 	if( GError )
 		GError->HandleError();
 }
 
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108520 size 9 bytes")
 FLogOutError::FLogOutError() {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10108530)
 FLogOutError::FLogOutError( const FLogOutError& ) {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FLogOutError& FLogOutError::operator=( const FLogOutError& ) { return *this; }
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void FLogOutError::Serialize( const TCHAR* V, EName Event )
 {
 	if( GLog )
 		GLog->Serialize( V, Event );
 }
 
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101012A0 size 9 bytes")
 FNullOutError::FNullOutError() {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101012B0)
 FNullOutError::FNullOutError( const FNullOutError& ) {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
 IMPL_MATCH("Core.dll", 0x1290)
 void FNullOutError::Serialize( const TCHAR* V, EName Event )
@@ -115,13 +115,13 @@ void FNullOutError::Serialize( const TCHAR* V, EName Event )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10101260)
 FThrowOut::FThrowOut() {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108540 size 9 bytes")
 FThrowOut::FThrowOut( const FThrowOut& ) {}
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FThrowOut& FThrowOut::operator=( const FThrowOut& ) { return *this; }
-IMPL_APPROX("Ravenshield-specific output device; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10101220)
 void FThrowOut::Serialize( const TCHAR* V, EName Event )
 {
 	appThrowf( TEXT("%s"), V );
@@ -131,7 +131,7 @@ void FThrowOut::Serialize( const TCHAR* V, EName Event )
 	FFrame::Serialize.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("retail 0x1bd50: logs script frame context to GLog/GError")
+IMPL_MATCH("Core.dll", 0x1011BD50)
 void FFrame::Serialize( const TCHAR* V, EName Event )
 {
 	guard(FFrame::Serialize);

@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6ClimbableObject)
 
 // --- AR6ClimbableObject ---
 
-IMPL_APPROX("Reconstructed with divergence: retail error-log args in data sections; generic message used")
+IMPL_DIVERGE("retail error log args are in data sections; log a generic message")
 void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 {
 	guard(AR6ClimbableObject::AddMyMarker);
@@ -54,7 +54,7 @@ void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed editor validation for missing climb height")
+IMPL_MATCH("R6Engine.dll", 0x100162e0)
 void AR6ClimbableObject::CheckForErrors()
 {
 	guard(AR6ClimbableObject::CheckForErrors);
@@ -63,7 +63,7 @@ void AR6ClimbableObject::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed actor destruction of spawned climbable point markers")
+IMPL_MATCH("R6Engine.dll", 0x10016250)
 void AR6ClimbableObject::PostScriptDestroyed()
 {
 	guard(AR6ClimbableObject::PostScriptDestroyed);
@@ -72,7 +72,7 @@ void AR6ClimbableObject::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed trace flag filter: always visible to level geometry traces")
+IMPL_MATCH("R6Engine.dll", 0x100161b0)
 INT AR6ClimbableObject::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	guard(AR6ClimbableObject::ShouldTrace);

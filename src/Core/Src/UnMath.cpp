@@ -12,7 +12,7 @@
 	FGlobalMath constructor — builds trig and sqrt lookup tables.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012BFA0)
 FGlobalMath::FGlobalMath()
 :	WorldMin		(-32700.f,-32700.f,-32700.f)
 ,	WorldMax		(32700.f,32700.f,32700.f)
@@ -37,19 +37,19 @@ FGlobalMath::FGlobalMath()
 	FVector out-of-line methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10103410)
 FLOAT FVector::Size() const
 {
 	return appSqrt( X*X + Y*Y + Z*Z );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10103460)
 FLOAT FVector::Size2D() const
 {
 	return appSqrt( X*X + Y*Y );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101034F0)
 UBOOL FVector::Normalize()
 {
 	FLOAT SquareSum = X*X + Y*Y + Z*Z;
@@ -62,14 +62,14 @@ UBOOL FVector::Normalize()
 	return 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10103630)
 FVector FVector::UnsafeNormal() const
 {
 	FLOAT Scale = 1.f / appSqrt(X*X + Y*Y + Z*Z);
 	return FVector( X*Scale, Y*Scale, Z*Scale );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C970)
 FVector FVector::SafeNormal() const
 {
 	FLOAT SquareSum = X*X + Y*Y + Z*Z;
@@ -81,7 +81,7 @@ FVector FVector::SafeNormal() const
 	return FVector( 0.f, 0.f, 0.f );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C1F0)
 FRotator FVector::Rotation()
 {
 	FRotator R;
@@ -98,7 +98,7 @@ FRotator FVector::Rotation()
 	return R;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012D010)
 void FVector::FindBestAxisVectors( FVector& Axis1, FVector& Axis2 )
 {
 	FLOAT NX = Abs(X);
@@ -113,7 +113,7 @@ void FVector::FindBestAxisVectors( FVector& Axis1, FVector& Axis2 )
 	Axis2 = Axis1 ^ *this;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FLOAT FDist( const FVector& V1, const FVector& V2 )
 {
 	return appSqrt( Square(V2.X-V1.X) + Square(V2.Y-V1.Y) + Square(V2.Z-V1.Z) );
@@ -123,7 +123,7 @@ FLOAT FDist( const FVector& V1, const FVector& V2 )
 	FBox.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10104E00)
 FBox::FBox( const FVector* Points, INT Count )
 :	Min(0,0,0), Max(0,0,0), IsValid(0)
 {
@@ -135,7 +135,7 @@ FBox::FBox( const FVector* Points, INT Count )
 	FSphere.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10103E30)
 FSphere::FSphere( const FVector* Pts, INT Count )
 :	FPlane(0,0,0,0)
 {
@@ -157,7 +157,7 @@ FSphere::FSphere( const FVector* Pts, INT Count )
 	FCoords functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C270)
 FCoords FCoords::Inverse() const
 {
 	FLOAT RDet = 1.f / (XAxis | (YAxis ^ ZAxis));
@@ -185,7 +185,7 @@ FCoords FCoords::Inverse() const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C550)
 FCoords FCoords::PivotInverse() const
 {
 	return FCoords
@@ -197,7 +197,7 @@ FCoords FCoords::PivotInverse() const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C450)
 FCoords FCoords::ApplyPivot(const FCoords& CoordsB) const
 {
 	// Equivalent to IsometricInverse * CoordsB.
@@ -209,7 +209,7 @@ FCoords FCoords::ApplyPivot(const FCoords& CoordsB) const
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C710)
 FRotator FCoords::OrthoRotation() const
 {
 	FRotator R;
@@ -231,7 +231,7 @@ FRotator FCoords::OrthoRotation() const
 	FMatrix.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FMatrix CombineTransforms( const FMatrix& M, const FMatrix& N )
 {
 	FMatrix Result;
@@ -258,7 +258,7 @@ FMatrix CombineTransforms( const FMatrix& M, const FMatrix& N )
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FQuat FMatrix::FMatrixToFQuat()
 {
 	FQuat Q;
@@ -298,7 +298,7 @@ FQuat FMatrix::FMatrixToFQuat()
 	FQuat out-of-line methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10106710)
 UBOOL FQuat::Normalize()
 {
 	FLOAT SquareSum = X*X + Y*Y + Z*Z + W*W;
@@ -321,7 +321,7 @@ UBOOL FQuat::Normalize()
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10106850)
 FQuat FQuat::AngAxisToFQuat()
 {
 	FLOAT scale = X*X + Y*Y + Z*Z;
@@ -345,7 +345,7 @@ FQuat FQuat::AngAxisToFQuat()
 	return Q;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FMatrix FQuat::FQuatToFMatrix()
 {
 	FMatrix M;
@@ -384,31 +384,31 @@ FMatrix FQuat::FQuatToFMatrix()
 	Math utility stubs.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API DOUBLE appAsin( DOUBLE Value )
 {
 	return asin( Value );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API FLOAT appFractional( FLOAT Value )
 {
 	return Value - floorf( Value );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API FLOAT appSRand()
 {
 	return (FLOAT)appRand() / (FLOAT)RAND_MAX * 2.0f - 1.0f;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appSRandInit( INT Seed )
 {
 	appRandInit( Seed );
 }
 
-IMPL_APPROX("platform-specific Win32 wrapper; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API INT appIsDebuggerPresent()
 {
 	return ::IsDebuggerPresent();
@@ -436,7 +436,7 @@ CORE_API INT appIsDebuggerPresent()
 #define MD5_HH(a,b,c,d,x,s,t) { (a)+=MD5_H(b,c,d)+(x)+(DWORD)(t); (a)=MD5_ROL(a,s)+(b); }
 #define MD5_II(a,b,c,d,x,s,t) { (a)+=MD5_I(b,c,d)+(x)+(DWORD)(t); (a)=MD5_ROL(a,s)+(b); }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appMD5Init( FMD5Context* Context )
 {
 	Context->count[0] = Context->count[1] = 0;
@@ -449,7 +449,7 @@ CORE_API void appMD5Init( FMD5Context* Context )
 
 // Core compression: processes exactly one 64-byte block.
 // State is the current A,B,C,D; Block is the raw 64 input bytes.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appMD5Transform( DWORD* State, BYTE* Block )
 {
 	DWORD a=State[0], b=State[1], c=State[2], d=State[3];
@@ -501,7 +501,7 @@ CORE_API void appMD5Transform( DWORD* State, BYTE* Block )
 }
 
 // Accumulate up to InputLen bytes, processing 64-byte blocks as they fill.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appMD5Update( FMD5Context* Context, BYTE* Input, INT InputLen )
 {
 	// Compute byte offset into the current partial buffer.
@@ -531,7 +531,7 @@ CORE_API void appMD5Update( FMD5Context* Context, BYTE* Input, INT InputLen )
 }
 
 // Finalize: pad, append bit-count, encode digest into 16-byte Digest.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appMD5Final( BYTE* Digest, FMD5Context* Context )
 {
 	BYTE Bits[8];
@@ -550,7 +550,7 @@ CORE_API void appMD5Final( BYTE* Digest, FMD5Context* Context )
 	appMemzero( Context, sizeof(*Context) ); // security-wipe
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appMD5Encode( BYTE* Output, DWORD* Input, INT Len )
 {
 	for( INT i=0, j=0; j<Len; i++, j+=4 )
@@ -562,7 +562,7 @@ CORE_API void appMD5Encode( BYTE* Output, DWORD* Input, INT Len )
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 {
 	for( INT i=0, j=0; j<Len; i++, j+=4 )
@@ -573,7 +573,7 @@ CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 	Misc geometry / utility functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, const FVector& End, const FVector& Extent, FVector& HitLocation, FVector& HitNormal, FLOAT& HitTime )
 {
 	// Expand the AABB by the sweep half-extents (Minkowski sum).
@@ -641,7 +641,7 @@ CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, 
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
 {
 	Value = FVector(0,0,0);
@@ -657,7 +657,7 @@ CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API INT GetFROTATOR( const TCHAR* Stream, FRotator& Value, INT bScaled )
 {
 	Value = FRotator(0,0,0);
@@ -685,12 +685,12 @@ const FVector FVector::FVector0(0,0,0);
 	Note: FMatrix uses M(i,j) method accessor, not M[i][j] array.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FMatrix::~FMatrix()
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107250)
 FMatrix FMatrix::Inverse()
 {
 	FMatrix Result;
@@ -752,7 +752,7 @@ FMatrix FMatrix::Inverse()
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107100)
 FMatrix FMatrix::Transpose()
 {
 	FMatrix Result;
@@ -762,7 +762,7 @@ FMatrix FMatrix::Transpose()
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107580)
 FMatrix FMatrix::TransposeAdjoint() const
 {
 	// Cofactor matrix of the upper-left 3x3 submatrix, stored transposed.
@@ -792,7 +792,7 @@ FMatrix FMatrix::TransposeAdjoint() const
 	return TA;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107190)
 FLOAT FMatrix::Determinant() const
 {
 	return M(0,0) * (
@@ -814,7 +814,7 @@ FLOAT FMatrix::Determinant() const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107670)
 FCoords FMatrix::Coords()
 {
 	FCoords Result;
@@ -825,7 +825,7 @@ FCoords FMatrix::Coords()
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FMatrix FMatrix::operator*( FMatrix Other ) const
 {
 	FMatrix Result;
@@ -839,32 +839,32 @@ FMatrix FMatrix::operator*( FMatrix Other ) const
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 void FMatrix::operator*=( FMatrix Other )
 {
 	*this = *this * Other;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FMatrix::operator==( FMatrix& Other ) const
 {
 	return appMemcmp( this, &Other, sizeof(FMatrix) ) == 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FMatrix::operator!=( FMatrix& Other ) const
 {
 	return appMemcmp( this, &Other, sizeof(FMatrix) ) != 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10106990)
 void FMatrix::SetIdentity()
 {
 	appMemzero( this, sizeof(*this) );
 	M(0,0) = M(1,1) = M(2,2) = M(3,3) = 1.0f;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101070C0)
 FPlane FMatrix::TransformNormal( const FVector& V ) const
 {
 	return FPlane(
@@ -875,7 +875,7 @@ FPlane FMatrix::TransformNormal( const FVector& V ) const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012C840)
 FMatrix FCoords::Matrix() const
 {
 	FMatrix Result;
@@ -890,34 +890,34 @@ FMatrix FCoords::Matrix() const
 	FPlane methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator+( const FPlane& V ) const { return FPlane( X+V.X, Y+V.Y, Z+V.Z, W+V.W ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator-( const FPlane& V ) const { return FPlane( X-V.X, Y-V.Y, Z-V.Z, W-V.W ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator*( const FPlane& V )        { return FPlane( X*V.X, Y*V.Y, Z*V.Z, W*V.W ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator*( FLOAT Scale ) const      { return FPlane( X*Scale, Y*Scale, Z*Scale, W*Scale ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator/( FLOAT Scale ) const      { FLOAT RScale = 1.0f/Scale; return FPlane( X*RScale, Y*RScale, Z*RScale, W*RScale ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator+=(const FPlane& V)         { X+=V.X; Y+=V.Y; Z+=V.Z; W+=V.W; return *this; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator-=(const FPlane& V)         { X-=V.X; Y-=V.Y; Z-=V.Z; W-=V.W; return *this; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator*=( const FPlane& V )       { X*=V.X; Y*=V.Y; Z*=V.Z; W*=V.W; return *this; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator*=( FLOAT Scale )           { X*=Scale; Y*=Scale; Z*=Scale; W*=Scale; return *this; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPlane FPlane::operator/=( FLOAT Scale )           { FLOAT RScale = 1.0f/Scale; X*=RScale; Y*=RScale; Z*=RScale; W*=RScale; return *this; }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107800)
 FPlane FPlane::TransformBy( const FCoords& Coords ) const
 {
 	return FPlane( *this | Coords.XAxis, *this | Coords.YAxis, *this | Coords.ZAxis, W - (*this | Coords.Origin) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1010A6E0)
 FPlane FPlane::TransformBy( const FMatrix& M ) const
 {
 	return FPlane(
@@ -928,7 +928,7 @@ FPlane FPlane::TransformBy( const FMatrix& M ) const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101079B0)
 FPlane FPlane::TransformByUsingAdjointT( const FMatrix& M, const FMatrix& TA ) const
 {
 	return FPlane(
@@ -939,7 +939,7 @@ FPlane FPlane::TransformByUsingAdjointT( const FMatrix& M, const FMatrix& TA ) c
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107760)
 FPlane FPlane::TransformPlaneByOrtho( const FMatrix& M ) const
 {
 	return TransformBy( M );
@@ -949,13 +949,13 @@ FPlane FPlane::TransformPlaneByOrtho( const FMatrix& M ) const
 	FVector methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10103020)
 FVector::FVector( FLOAT InVal )
 : X(InVal), Y(InVal), Z(InVal)
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10109180)
 FVector FVector::GetNonParallel()
 {
 	if( Abs(X) < 0.9f )
@@ -964,7 +964,7 @@ FVector FVector::GetNonParallel()
 		return FVector(0,1,0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10103560)
 FVector FVector::GetNormalized()
 {
 	FLOAT Sz = Size();
@@ -973,7 +973,7 @@ FVector FVector::GetNormalized()
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10105540)
 FVector FVector::RotateAngleAxis( INT Angle, const FVector& Axis ) const
 {
 	FLOAT S = GMath.SinTab(Angle);
@@ -995,7 +995,7 @@ FVector FVector::RotateAngleAxis( INT Angle, const FVector& Axis ) const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101053B0)
 FVector FVector::TransformVectorByTranspose( const FCoords& Coords ) const
 {
 	return FVector(
@@ -1005,25 +1005,25 @@ FVector FVector::TransformVectorByTranspose( const FCoords& Coords ) const
 	);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101090A0)
 FLOAT FVector::GetAbsMax() const
 {
 	return ::Max( ::Max( Abs(X), Abs(Y) ), Abs(Z) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10109070)
 FLOAT FVector::GetMax() const
 {
 	return ::Max( ::Max( X, Y ), Z );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10109310)
 INT FVector::IsUniform()
 {
 	return (X == Y) && (Y == Z);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FLOAT& FVector::operator[]( INT i )
 {
 	check(i>=0 && i<3);
@@ -1034,7 +1034,7 @@ FLOAT& FVector::operator[]( INT i )
 	FBox methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101050B0)
 bool FBox::Intersect( const FBox& Other ) const
 {
 	if( Min.X > Other.Max.X || Other.Min.X > Max.X )
@@ -1046,7 +1046,7 @@ bool FBox::Intersect( const FBox& Other ) const
 	return true;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1010A440)
 FBox FBox::TransformBy( const FMatrix& M ) const
 {
 	FBox Result(0);
@@ -1060,33 +1060,33 @@ FBox FBox::TransformBy( const FMatrix& M ) const
 	return Result;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10104F60)
 FVector FBox::GetCenter() const
 {
 	return FVector( (Min.X+Max.X)*0.5f, (Min.Y+Max.Y)*0.5f, (Min.Z+Max.Z)*0.5f );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10104FC0)
 FVector FBox::GetExtent() const
 {
 	return FVector( (Max.X-Min.X)*0.5f, (Max.Y-Min.Y)*0.5f, (Max.Z-Min.Z)*0.5f );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10105010)
 void FBox::GetCenterAndExtents( FVector& Center, FVector& Extents )
 {
 	Center  = GetCenter();
 	Extents = GetExtent();
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10104E50)
 void FBox::Init()
 {
 	Min = Max = FVector(0,0,0);
 	IsValid = 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FVector& FBox::operator[]( INT i )
 {
 	check( i>=0 && i<2 );
@@ -1098,19 +1098,19 @@ FVector& FBox::operator[]( INT i )
 	FRotator methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10104060)
 FRotator::FRotator( FLOAT InVal )
 : Pitch((INT)InVal), Yaw((INT)InVal), Roll((INT)InVal)
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10104490)
 FRotator FRotator::Clamp()
 {
 	return FRotator( Pitch&65535, Yaw&65535, Roll&65535 );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10109460)
 FRotator FRotator::ClampPos()
 {
 	FRotator R = Clamp();
@@ -1124,7 +1124,7 @@ FRotator FRotator::ClampPos()
 	FSphere methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10107AD0)
 FSphere FSphere::TransformBy( const FMatrix& M ) const
 {
 	FVector Center(X, Y, Z);
@@ -1141,18 +1141,18 @@ FSphere FSphere::TransformBy( const FMatrix& M ) const
 	FPosition class.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101044D0)
 FPosition::FPosition()
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x101044D0)
 FPosition::FPosition( FVector InLocation, FCoords InCoords )
 : Location(InLocation), Coords(InCoords)
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FPosition& FPosition::operator=( const FPosition& Other )
 {
 	Location = Other.Location;
@@ -1164,13 +1164,13 @@ FPosition& FPosition::operator=( const FPosition& Other )
 	FCylinder class.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FCylinder::FCylinder()
 : Radius(0), Height(0)
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FCylinder& FCylinder::operator=( const FCylinder& Other )
 {
 	Radius = Other.Radius;
@@ -1178,7 +1178,7 @@ FCylinder& FCylinder::operator=( const FCylinder& Other )
 	return *this;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012D850)
 INT FCylinder::LineCheck( const FVector& Start, const FVector& End, FVector& HitNormal ) const
 {
 	// DIVERGENCE: The binary FCylinder has additional fields (Center FVector,
@@ -1212,7 +1212,7 @@ INT FCylinder::LineCheck( const FVector& Start, const FVector& End, FVector& Hit
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x1012D320)
 INT FCylinder::LineIntersection( const FVector& Start, const FVector& End, FLOAT* const HitTime ) const
 {
 	// DIVERGENCE: Same as LineCheck above — binary has Center/Axis/HalfHeight fields.
@@ -1252,21 +1252,21 @@ INT FCylinder::LineIntersection( const FVector& Start, const FVector& End, FLOAT
 	FEdge class.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10109360)
 FEdge::FEdge()
 {
 	Vertex[0] = FVector(0,0,0);
 	Vertex[1] = FVector(0,0,0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_MATCH("Core.dll", 0x10109360)
 FEdge::FEdge( FVector InVertex0, FVector InVertex1 )
 {
 	Vertex[0] = InVertex0;
 	Vertex[1] = InVertex1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FEdge& FEdge::operator=( const FEdge& Other )
 {
 	Vertex[0] = Other.Vertex[0];
@@ -1274,7 +1274,7 @@ FEdge& FEdge::operator=( const FEdge& Other )
 	return *this;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 INT FEdge::operator==( const FEdge& Other ) const
 {
 	return (Vertex[0] == Other.Vertex[0] && Vertex[1] == Other.Vertex[1]) ||

@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6DZonePathNode)
 
 // --- AR6DZonePathNode ---
 
-IMPL_APPROX("Reconstructed orphan-check: validates node belongs to its path and puts on ground")
+IMPL_MATCH("R6Engine.dll", 0x1001a350)
 void AR6DZonePathNode::CheckForErrors()
 {
 	guard(AR6DZonePathNode::CheckForErrors);
@@ -31,7 +31,7 @@ Done:
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed node self-removal from parent path on destruction")
+IMPL_MATCH("R6Engine.dll", 0x1001a2d0)
 void AR6DZonePathNode::PostScriptDestroyed()
 {
 	guard(AR6DZonePathNode::PostScriptDestroyed);
@@ -40,7 +40,7 @@ void AR6DZonePathNode::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed editor rendering delegation to parent path")
+IMPL_MATCH("R6Engine.dll", 0x1001a240)
 void AR6DZonePathNode::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DZonePathNode::RenderEditorInfo);

@@ -15,14 +15,14 @@ public:
     INT LineIntersection(const FVector& Start, const FVector& End, FLOAT* const HitTime) const;
 };
 // --- ULodMeshInstance ---
-IMPL_APPROX("returns NULL — shared null-stub, no SEH frame")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x103c6ff0, "simplified to UObject::Serialize; render bounds regenerated on load")
 void ULodMeshInstance::Serialize(FArchive& Ar)
 {
 	// Retail: 0x103c6ff0. Calls UPrimitive::Serialize (chain: UObject::Serialize + render bounds).
@@ -30,31 +30,31 @@ void ULodMeshInstance::Serialize(FArchive& Ar)
 	UObject::Serialize(Ar);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void ULodMeshInstance::SetActor(AActor * a)
 {
 	Actor = a;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void ULodMeshInstance::SetMesh(UMesh * m)
 {
 	Mesh = m;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void ULodMeshInstance::SetStatus(int s)
 {
 	Status = s;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 AActor * ULodMeshInstance::GetActor()
 {
 	return Actor;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x14730 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x14730)
 void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(ULodMeshInstance::GetFrame);
@@ -62,20 +62,20 @@ void ULodMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,D
 	unguard;
 }
 
-IMPL_APPROX("returns NULL — shared null-stub, no SEH frame")
+IMPL_GHIDRA("Engine.dll", 0x6c990)
 UMaterial * ULodMeshInstance::GetMaterial(int,AActor *)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UMesh * ULodMeshInstance::GetMesh()
 {
 	return Mesh;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x14770 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x14770)
 void ULodMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(ULodMeshInstance::GetMeshVerts);
@@ -83,7 +83,7 @@ void ULodMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 INT ULodMeshInstance::GetStatus()
 {
 	return Status;
@@ -91,7 +91,7 @@ INT ULodMeshInstance::GetStatus()
 
 
 // --- UMeshInstance ---
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::StopAnimating(int)
 {
 	guard(UMeshInstance::StopAnimating);
@@ -100,7 +100,7 @@ int UMeshInstance::StopAnimating(int)
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::UpdateAnimation(float)
 {
 	guard(UMeshInstance::UpdateAnimation);
@@ -109,7 +109,7 @@ int UMeshInstance::UpdateAnimation(float)
 	unguard;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x14770 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x14770)
 void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UMeshInstance::Render);
@@ -117,31 +117,31 @@ void UMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight
 	unguard;
 }
 
-IMPL_EMPTY("retail body is also empty — virtual base no-op")
+IMPL_INTENTIONALLY_EMPTY("virtual base no-op; subclasses override")
 void UMeshInstance::SetActor(AActor *)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_EMPTY("retail body is also empty — virtual base no-op")
+IMPL_INTENTIONALLY_EMPTY("virtual base no-op; subclasses override")
 void UMeshInstance::SetAnimFrame(int,float)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_EMPTY("retail body is also empty — virtual base no-op")
+IMPL_INTENTIONALLY_EMPTY("virtual base no-op; subclasses override")
 void UMeshInstance::SetMesh(UMesh *)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_EMPTY("retail body is also empty — virtual base no-op")
+IMPL_INTENTIONALLY_EMPTY("virtual base no-op; subclasses override")
 void UMeshInstance::SetScale(FVector)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x1651d0 no-op")
+IMPL_GHIDRA("Engine.dll", 0x1651d0)
 void UMeshInstance::SetStatus(int)
 {
 	guard(UMeshInstance::SetStatus);
@@ -149,7 +149,7 @@ void UMeshInstance::SetStatus(int)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x14650)
 int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector Start,FVector Extent,DWORD ExtraNodeFlags,DWORD TraceFlags)
 {
 	guard(UMeshInstance::LineCheck);
@@ -161,7 +161,7 @@ int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x14580 null-stub")
+IMPL_GHIDRA("Engine.dll", 0x14580)
 int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 {
 	guard(UMeshInstance::PlayAnim);
@@ -170,7 +170,7 @@ int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x145f0)
 int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVector Extent,DWORD TraceFlags)
 {
 	guard(UMeshInstance::PointCheck);
@@ -182,7 +182,7 @@ int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVec
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x33a0 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x33a0)
 int UMeshInstance::AnimForcePose(FName,float,float,int)
 {
 	guard(UMeshInstance::AnimForcePose);
@@ -191,26 +191,26 @@ int UMeshInstance::AnimForcePose(FName,float,float,int)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x14590)
 float UMeshInstance::AnimGetFrameCount(void *)
 {
 	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName UMeshInstance::AnimGetGroup(void *)
 {
 	return FName(NAME_None);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName UMeshInstance::AnimGetName(void *)
 {
 	return FName(NAME_None);
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::AnimGetNotifyCount(void *)
 {
 	guard(UMeshInstance::AnimGetNotifyCount);
@@ -219,35 +219,35 @@ int UMeshInstance::AnimGetNotifyCount(void *)
 	unguard;
 }
 
-IMPL_APPROX("returns NULL — retail 0x6c990 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x6c990)
 UAnimNotify * UMeshInstance::AnimGetNotifyObject(void *,int)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 const TCHAR* UMeshInstance::AnimGetNotifyText(void *,int)
 {
 	// Ghidra: returns L""
 	return TEXT("");
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x145b0)
 float UMeshInstance::AnimGetNotifyTime(void *,int)
 {
 	// Retail 0x145b0: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float UMeshInstance::AnimGetRate(void *)
 {
 	// Ghidra: default rate is 15.0
 	return 15.0f;
 }
 
-IMPL_APPROX("returns 0 — retail 0x6c990 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x6c990)
 int UMeshInstance::AnimIsInGroup(void *,FName)
 {
 	guard(UMeshInstance::AnimIsInGroup);
@@ -256,7 +256,7 @@ int UMeshInstance::AnimIsInGroup(void *,FName)
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::AnimStopLooping(int)
 {
 	guard(UMeshInstance::AnimStopLooping);
@@ -265,13 +265,13 @@ int UMeshInstance::AnimStopLooping(int)
 	unguard;
 }
 
-IMPL_EMPTY("retail body is also empty — virtual base no-op")
+IMPL_INTENTIONALLY_EMPTY("virtual base no-op; subclasses override")
 void UMeshInstance::ClearChannel(int)
 {
 	// Retail (3b): base no-op, subclasses override.
 }
 
-IMPL_APPROX("returns 0 — retail 0x6c990 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x6c990)
 int UMeshInstance::FreezeAnimAt(float,int)
 {
 	guard(UMeshInstance::FreezeAnimAt);
@@ -280,34 +280,34 @@ int UMeshInstance::FreezeAnimAt(float,int)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x14590)
 float UMeshInstance::GetActiveAnimFrame(int)
 {
 	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x14590)
 float UMeshInstance::GetActiveAnimRate(int)
 {
 	// Retail 0x14590: shared null-stub, no SEH frame.
 	return 0.0f;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName UMeshInstance::GetActiveAnimSequence(int)
 {
 	return FName(NAME_None);
 }
 
-IMPL_APPROX("returns NULL — retail 0x114310 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 AActor * UMeshInstance::GetActor()
 {
 	// Retail 0x114310: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("returns 0 — retail 0x114310 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 int UMeshInstance::GetAnimCount()
 {
 	guard(UMeshInstance::GetAnimCount);
@@ -316,28 +316,28 @@ int UMeshInstance::GetAnimCount()
 	unguard;
 }
 
-IMPL_APPROX("returns NULL — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 void * UMeshInstance::GetAnimIndexed(int)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("returns NULL — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 void * UMeshInstance::GetAnimNamed(FName)
 {
 	// Retail 0x4720: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FBox UMeshInstance::GetCollisionBoundingBox(const AActor* Owner)
 {
 	// Retail: 32b. Get mesh via vtable[35] (GetMesh), call GetCollisionBoundingBox on mesh.
 	return GetMesh()->GetCollisionBoundingBox(Owner);
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x14730 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x14730)
 void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UMeshInstance::GetFrame);
@@ -345,35 +345,35 @@ void UMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWOR
 	unguard;
 }
 
-IMPL_APPROX("returns NULL — retail 0x6c990 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x6c990)
 UMaterial * UMeshInstance::GetMaterial(int,AActor *)
 {
 	// Retail 0x6c990: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("returns NULL — retail 0x114310 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 UMesh * UMeshInstance::GetMesh()
 {
 	// Retail 0x114310: shared null-stub, no SEH frame.
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FBox UMeshInstance::GetRenderBoundingBox(const AActor* Owner)
 {
 	// Retail: 32b. Get mesh via vtable[35] (GetMesh), call GetRenderBoundingBox on mesh.
 	return GetMesh()->GetRenderBoundingBox(Owner);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FSphere UMeshInstance::GetRenderBoundingSphere(const AActor* Owner)
 {
 	// Retail: 32b. Get mesh via vtable[35] (GetMesh), call GetRenderBoundingSphere on mesh.
 	return GetMesh()->GetRenderBoundingSphere(Owner);
 }
 
-IMPL_APPROX("returns 0 — retail 0x114310 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x114310)
 int UMeshInstance::GetStatus()
 {
 	guard(UMeshInstance::GetStatus);
@@ -382,7 +382,7 @@ int UMeshInstance::GetStatus()
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimating(int)
 {
 	guard(UMeshInstance::IsAnimating);
@@ -391,7 +391,7 @@ int UMeshInstance::IsAnimating(int)
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimLooping(int)
 {
 	guard(UMeshInstance::IsAnimLooping);
@@ -400,7 +400,7 @@ int UMeshInstance::IsAnimLooping(int)
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimPastLastFrame(int)
 {
 	guard(UMeshInstance::IsAnimPastLastFrame);
@@ -409,7 +409,7 @@ int UMeshInstance::IsAnimPastLastFrame(int)
 	unguard;
 }
 
-IMPL_APPROX("returns 0 — retail 0x4720 shared null-stub")
+IMPL_GHIDRA("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimTweening(int)
 {
 	guard(UMeshInstance::IsAnimTweening);
@@ -421,7 +421,7 @@ int UMeshInstance::IsAnimTweening(int)
 
 
 // --- USkeletalMeshInstance ---
-IMPL_APPROX("returns 0 — retail 0x12FF20 complex head-bone line check")
+IMPL_GHIDRA("Engine.dll", 0x12FF20)
 int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start, FVector const& End, FVector const& DirNorm, float const& Extent)
 {
 	// Retail: 0x12FF20, 96b. Casts a line from Start toward End with the given half-extent
@@ -434,7 +434,7 @@ int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start,
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x134EF0)
 void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float DeltaTime)
 {
 	// Retail: 0x134EF0, 160b.
@@ -462,7 +462,7 @@ void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float Del
 	}
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x130F40)
 int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 {
 	// Retail: 0x130F40, 92b. Bounds-check channel [0..255]. If TArray at this+0x10C
@@ -476,7 +476,7 @@ int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x134A90)
 void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 {
 	// Disasm: 0x134A90, 240b.
@@ -492,7 +492,7 @@ void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 	*(INT*)(elem + 0x40) = (Rate > 0.0f) ? 1 : 0;
 }
 
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x134FC0, "we use vtable[0x12C/4] (RefreshAnimObjects / FindAnimObject) as an")
 void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 {
 	// Disasm: 0x134FC0, 304b.
@@ -557,7 +557,7 @@ void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 	*(INT*)(elem + 0x34) = (IsLooping(this, SeqObj) != 0) ? 1 : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 {
 	// Retail: 145b SEH. Clamps Alpha to [0.0, 1.0] and stores at element+0x50 in TArray at this+0x10C.
@@ -571,7 +571,7 @@ void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 	*(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50) = clamped;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1326B0)
 int USkeletalMeshInstance::SetBlendParams(INT Channel, FLOAT Alpha, FLOAT UScale, FLOAT VScale, FName BoneRef, INT bBlend)
 {
 	// Retail: 0x1326B0. Validates channel, then stores blend params into channel slot.
@@ -598,7 +598,7 @@ int USkeletalMeshInstance::SetBlendParams(INT Channel, FLOAT Alpha, FLOAT UScale
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x131A90)
 int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
 {
 	// Retail: 0x131A90, 32b. Returns 0 if bone override array (this+0x130) is at
@@ -609,7 +609,7 @@ int USkeletalMeshInstance::SetBoneDirection(FName,FRotator,FVector,float)
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1317A0)
 int USkeletalMeshInstance::SetBoneLocation(FName BoneName, FVector Location, FLOAT Scale)
 {
 	// Retail: 0x1317A0. Faithfully decompiled from Ghidra.
@@ -652,7 +652,7 @@ int USkeletalMeshInstance::SetBoneLocation(FName BoneName, FVector Location, FLO
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x131BA0)
 int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector Loc, FLOAT Scale)
 {
 	// Retail: 0x131BA0. Faithfully decompiled from Ghidra.
@@ -696,7 +696,7 @@ int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x131890)
 int USkeletalMeshInstance::SetBoneRotation(FName BoneName, FRotator NewRot, INT bNotifyOwner, FLOAT BlendTarget, FLOAT BlendSpeed)
 {
 	// Retail: 0x131890. Faithfully decompiled from Ghidra.
@@ -779,7 +779,7 @@ int USkeletalMeshInstance::SetBoneRotation(FName BoneName, FRotator NewRot, INT 
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x131620)
 int USkeletalMeshInstance::SetBoneScale(INT BoneChannel, FLOAT Scale, FName BoneName)
 {
 	// Retail: 0x131620. Faithfully decompiled from Ghidra.
@@ -825,7 +825,7 @@ int USkeletalMeshInstance::SetBoneScale(INT BoneChannel, FLOAT Scale, FName Bone
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::SetSkelAnim(UMeshAnimation* Anim, USkeletalMesh* Mesh)
 {
 	// Disasm: if Anim==NULL return 0
@@ -861,7 +861,7 @@ int USkeletalMeshInstance::SetSkelAnim(UMeshAnimation* Anim, USkeletalMesh* Mesh
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 {
 	// Disasm: store Mode at this+0x1C4, set lock flag at this+0x228=1, clear this+0x188=0
@@ -885,7 +885,7 @@ int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x130D40)
 int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 {
 	// Disasm: 0x130D40, 256b.
@@ -931,7 +931,7 @@ int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 	return -1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1351B0)
 void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT DeltaTime)
 {
 	// Retail: 0x1351B0, ~130b.
@@ -948,7 +948,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x1361a0 builds bone pivot list")
+IMPL_TODO("Needs Ghidra analysis")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -957,7 +957,7 @@ void USkeletalMeshInstance::BuildPivotsList()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x13D860)
 void USkeletalMeshInstance::ClearSkelAnims()
 {
 	// Disasm: 0x13D860, 128b.
@@ -974,7 +974,7 @@ void USkeletalMeshInstance::ClearSkelAnims()
 	AnimArr->Empty(0x18);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x134980)
 void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 {
 	// Retail: 0x134980, ~200b.
@@ -1000,7 +1000,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x10436390 draws debug cylinders")
+IMPL_TODO("Needs Ghidra analysis")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1009,7 +1009,7 @@ void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1338B0)
 int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 {
 	// Retail: 0x1338B0, ~130b.
@@ -1022,7 +1022,7 @@ int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x134B80)
 void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
 {
 	// Retail: 0x134B80, 96b. Stores Rate at channel element+0x0C in TArray at this+0x10C
@@ -1036,7 +1036,7 @@ void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
 	*(FLOAT*)(elem + 0x0C) = Rate;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::GetAnimChannelCount()
 {
 	// Retail: 12b. Adjusts this to TArray at this+0x10C, then jumps to TArray::Num via IAT.
@@ -1044,7 +1044,7 @@ int USkeletalMeshInstance::GetAnimChannelCount()
 	return *(INT*)((BYTE*)this + 0x110); // this+0x10C is TArray start; +0x04 = ArrayNum
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::GetAnimFrame(INT Channel)
 {
 	// Retail: 93b SEH. Same TArray at this+0x10C (stride 0x74), frame float at element+0x10.
@@ -1055,7 +1055,7 @@ float USkeletalMeshInstance::GetAnimFrame(INT Channel)
 	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x10);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x135B20)
 float USkeletalMeshInstance::GetAnimRateOnChannel(INT Channel)
 {
 	// Disasm: 0x135B20, 96b.
@@ -1082,7 +1082,7 @@ float USkeletalMeshInstance::GetAnimRateOnChannel(INT Channel)
 	return GetActiveRate(this, SeqObj);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName USkeletalMeshInstance::GetAnimSequence(INT Channel)
 {
 	// Retail: 98b SEH. Reads FName.Index from channel element+0x08 in TArray at this+0x10C.
@@ -1095,7 +1095,7 @@ FName USkeletalMeshInstance::GetAnimSequence(INT Channel)
 	return *(FName*)(data + Channel * 0x74 + 0x08);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::GetBlendAlpha(INT Channel)
 {
 	// Retail: 93b SEH. Same TArray at this+0x10C (stride 0x74), blend alpha float at element+0x50.
@@ -1106,13 +1106,13 @@ float USkeletalMeshInstance::GetBlendAlpha(INT Channel)
 	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 {
 	return FCoords();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x133990, "radius data deferred until binary extraction is complete")
 int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
 	guard(USkeletalMeshInstance::GetBoneCylinder);
@@ -1168,7 +1168,7 @@ int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x133680)
 FName USkeletalMeshInstance::GetBoneName(FName BoneName)
 {
 	// Disasm: 0x133680, 128b.
@@ -1197,7 +1197,7 @@ FName USkeletalMeshInstance::GetBoneName(FName BoneName)
 	return FName(NAME_None);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x133520)
 FRotator USkeletalMeshInstance::GetBoneRotation(DWORD boneIndex, INT Space)
 {
 	// Retail: 0x133520, 320b. Same skeleton update guard as GetBoneCoords.
@@ -1253,7 +1253,7 @@ FRotator USkeletalMeshInstance::GetBoneRotation(DWORD boneIndex, INT Space)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x133610)
 FRotator USkeletalMeshInstance::GetBoneRotation(FName BoneName, INT Space)
 {
 	// Retail: 0x133610, 64b. Call MatchRefBone to get index then forward to GetBoneRotation(DWORD,int).
@@ -1263,7 +1263,7 @@ FRotator USkeletalMeshInstance::GetBoneRotation(FName BoneName, INT Space)
 	return GetBoneRotation((DWORD)boneIndex, Space);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x12F8F0)
 FVector USkeletalMeshInstance::GetRootLocation()
 {
 	// Disasm: 0x12F8F0, 96b.
@@ -1279,7 +1279,7 @@ FVector USkeletalMeshInstance::GetRootLocation()
 	return *(FVector*)((BYTE*)this + 0x1C8);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x133790)
 FVector USkeletalMeshInstance::GetRootLocationDelta()
 {
 	// Disasm: 0x133790, 288b.
@@ -1310,7 +1310,7 @@ FVector USkeletalMeshInstance::GetRootLocationDelta()
 	return FVector(dX, dY, dZ);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x12F950)
 FRotator USkeletalMeshInstance::GetRootRotation()
 {
 	// Disasm: 0x12F950, 96b. Same pattern as GetRootLocation but reads this+0x1D4.
@@ -1322,7 +1322,7 @@ FRotator USkeletalMeshInstance::GetRootRotation()
 	return *(FRotator*)((BYTE*)this + 0x1D4);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x12F9B0)
 FRotator USkeletalMeshInstance::GetRootRotationDelta()
 {
 	// Disasm: 0x12F9B0, 224b.
@@ -1348,7 +1348,7 @@ FRotator USkeletalMeshInstance::GetRootRotationDelta()
 	return FRotator(0, Current.Yaw - Prev.Yaw, 0);
 }
 
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_GHIDRA("Engine.dll", 0x135BF0)
 FCoords USkeletalMeshInstance::GetTagCoords(FName TagName)
 {
 	// Retail: 0x135BF0, 120b.
@@ -1373,7 +1373,7 @@ FCoords USkeletalMeshInstance::GetTagCoords(FName TagName)
 	return FCoords();
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x133700)
 FCoords USkeletalMeshInstance::GetTagPosition(FName TagName)
 {
 	// Retail: 0x133700, ~140b.
@@ -1404,7 +1404,7 @@ FCoords USkeletalMeshInstance::GetTagPosition(FName TagName)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x135800)
 int USkeletalMeshInstance::StopAnimating(int bClearAll)
 {
 	// Retail: 0x135800. Clear animation play state for all channels.
@@ -1437,7 +1437,7 @@ int USkeletalMeshInstance::StopAnimating(int bClearAll)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x132d10)
 int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 {
 	guard(USkeletalMeshInstance::UpdateAnimation);
@@ -1666,7 +1666,7 @@ int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x174f70 full skeletal mesh rendering pipeline")
+IMPL_TODO("Needs Ghidra analysis")
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(USkeletalMeshInstance::Render);
@@ -1675,7 +1675,7 @@ void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x10438750, "simplified to calling base class; per-field data regenerated at runtime")
 void USkeletalMeshInstance::Serialize(FArchive& Ar)
 {
 	// Retail: 0x10438750. Calls ULodMeshInstance::Serialize, then serializes animation-
@@ -1692,7 +1692,7 @@ void USkeletalMeshInstance::Serialize(FArchive& Ar)
 	}
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 {
 	// Retail: 96b SEH. Bounds-checks Channel against TArray count at this+0x10C,
@@ -1705,7 +1705,7 @@ void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 	*(FLOAT*)(data + Channel * 0x74 + 0x10) = Frame;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x135AA0)
 void USkeletalMeshInstance::SetMesh(UMesh* NewMesh)
 {
 	// Disasm: 0x135AA0, ~60b.
@@ -1727,7 +1727,7 @@ void USkeletalMeshInstance::SetMesh(UMesh* NewMesh)
 	}
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x130E40)
 void USkeletalMeshInstance::SetScale(FVector Scale)
 {
 	// Disasm: 0x130E40, 96b.
@@ -1743,7 +1743,7 @@ void USkeletalMeshInstance::SetScale(FVector Scale)
 	if (*DrawScale < 0.0f) *DrawScale = -*DrawScale;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x133b50)
 int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD TraceFlags)
 {
 	guard(USkeletalMeshInstance::LineCheck);
@@ -1815,7 +1815,7 @@ int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector E
 	unguard;
 }
 
-IMPL_APPROX("guard-wrapped no-op; FUN_10438ce0 identity unresolved")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x13da50, "FUN_10438ce0 is a complex GPU-skinning transform; identity unresolved")
 void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
 	guard(USkeletalMeshInstance::MeshSkinVertsCallback);
@@ -1826,7 +1826,7 @@ void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10438ce0)
+IMPL_GHIDRA("Engine.dll", 0x131D50)
 int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
 	// Retail: 0x131D50, ~700b. Faithfully decompiled from Ghidra.
@@ -2060,7 +2060,7 @@ int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOA
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x133960)
+IMPL_GHIDRA("Engine.dll", 0x133960)
 int USkeletalMeshInstance::ActiveVertStreamSize()
 {
 	// Disasm: 0x133960, 48b.
@@ -2075,7 +2075,7 @@ int USkeletalMeshInstance::ActiveVertStreamSize()
 	return *(INT*)(LODData + LODIdx * 0x11C + 0x18);
 }
 
-IMPL_APPROX("calls hardcoded FUN_10435900 for bone channel linkup rebuild")
+IMPL_GHIDRA("Engine.dll", 0x135A30)
 void USkeletalMeshInstance::ActualizeAnimLinkups()
 {
 	// Retail: 0x135A30. Iterates AnimObjects TArray at this+0xAC (stride 0x18).
@@ -2099,7 +2099,7 @@ void USkeletalMeshInstance::ActualizeAnimLinkups()
 	}
 }
 
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x132ac0, "untracked register values from AnimForcePose Ghidra output;")
 int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(USkeletalMeshInstance::AnimForcePose);
@@ -2164,7 +2164,7 @@ int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate,
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::AnimGetFrameCount(void* Channel)
 {
 	// Retail: 14b. Returns float of int frame count at Channel+0x14. Checks Channel != NULL.
@@ -2172,7 +2172,7 @@ float USkeletalMeshInstance::AnimGetFrameCount(void* Channel)
 	return (FLOAT)(*(INT*)((BYTE*)Channel + 0x14));
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName USkeletalMeshInstance::AnimGetGroup(void* Channel)
 {
 	// Retail: 34b. Check *(Channel+4) is non-null via IAT guard, then double-deref to get FName.Index.
@@ -2183,7 +2183,7 @@ FName USkeletalMeshInstance::AnimGetGroup(void* Channel)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName USkeletalMeshInstance::AnimGetName(void* Channel)
 {
 	// Retail: 19b. Null-check Channel, then double-deref: FName.Index = *(*(Channel+0)).
@@ -2194,7 +2194,7 @@ FName USkeletalMeshInstance::AnimGetName(void* Channel)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::AnimGetNotifyCount(void* Channel)
 {
 	// Retail: 20b. Null-checks Channel (returns 0 via fallthrough into next func), then
@@ -2203,7 +2203,7 @@ int USkeletalMeshInstance::AnimGetNotifyCount(void* Channel)
 	return *(INT*)((BYTE*)Channel + 0x20);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UAnimNotify * USkeletalMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIndex)
 {
 	// Retail: 25b. Same as VertMesh but with null check on Channel.
@@ -2213,7 +2213,7 @@ UAnimNotify * USkeletalMeshInstance::AnimGetNotifyObject(void* Channel, int noti
 	return *(UAnimNotify**)(notifyArray + notifyIndex * 12 + 8);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 const TCHAR* USkeletalMeshInstance::AnimGetNotifyText(void* Channel, INT notifyIndex)
 {
 	// Retail: 31b. Null-checks Channel (null->returns NULL via fallthrough), then reads FName at
@@ -2224,7 +2224,7 @@ const TCHAR* USkeletalMeshInstance::AnimGetNotifyText(void* Channel, INT notifyI
 	return *name;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
 {
 	// Retail: 24b. Null-check Channel; returns time float at notify_array[notifyIndex*12] (entry+0).
@@ -2233,7 +2233,7 @@ float USkeletalMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
 	return *(FLOAT*)(notifyArray + notifyIndex * 12);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::AnimGetRate(void* Channel)
 {
 	// Retail: 14b. Returns float rate from Channel+0x18, or 0.0f if Channel NULL.
@@ -2241,14 +2241,14 @@ float USkeletalMeshInstance::AnimGetRate(void* Channel)
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_APPROX("returns 0 — retail 37b has unimplemented relative call")
+IMPL_TODO("Needs Ghidra analysis")
 int USkeletalMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 {
 	// Retail: 37b. Has direct call — not fully implemented (complex relative call).
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::AnimStopLooping(INT channel)
 {
 	// Retail: 104b (SEH). TArray at this+0x10C, stride 0x74=116b.
@@ -2263,7 +2263,7 @@ int USkeletalMeshInstance::AnimStopLooping(INT channel)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x132500)
 void USkeletalMeshInstance::ClearChannel(INT Channel)
 {
 	// Retail: 0x132500, 141b. If Channel is within the channel TArray (this+0x10C,
@@ -2282,7 +2282,7 @@ void USkeletalMeshInstance::ClearChannel(INT Channel)
 	*(INT*)(elem + 0x38) = 0;  // loop
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 {
 	// Bounds check channel
@@ -2312,7 +2312,7 @@ UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 	return *(UMeshAnimation**)((BYTE*)MeshPtr + 0x1DC);
 }
 
-IMPL_APPROX("calls hardcoded FUN_10367df0 for bone geometry cleanup")
+IMPL_GHIDRA("Engine.dll", 0x12f640)
 void USkeletalMeshInstance::Destroy()
 {
 	// Retail: 0x12f640. Calls FUN_10367df0(this) to release bone geometry arrays
@@ -2323,7 +2323,7 @@ void USkeletalMeshInstance::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_MATCH("Engine.dll", 0x132A50)
+IMPL_GHIDRA("Engine.dll", 0x132A50)
 UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 {
 	// Disasm: 0x132A50, 112b.
@@ -2354,7 +2354,7 @@ UMeshAnimation* USkeletalMeshInstance::FindAnimObjectForSequence(FName SeqName)
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x131040)
 int USkeletalMeshInstance::FreezeAnimAt(FLOAT Frame, INT Channel)
 {
 	// Disasm: 0x131040, 200b.
@@ -2391,7 +2391,7 @@ int USkeletalMeshInstance::FreezeAnimAt(FLOAT Frame, INT Channel)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::GetActiveAnimFrame(INT Channel)
 {
 	// Retail: 93b (SEH). TArray at this+0x10C, stride 0x74=116b, frame float at element+0x10.
@@ -2402,7 +2402,7 @@ float USkeletalMeshInstance::GetActiveAnimFrame(INT Channel)
 	return *(FLOAT*)(data + Channel * 0x74 + 0x10);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float USkeletalMeshInstance::GetActiveAnimRate(INT Channel)
 {
 	// Retail: 93b (SEH). Same TArray at this+0x10C (stride 0x74=116b), rate float at element+0x0C.
@@ -2413,7 +2413,7 @@ float USkeletalMeshInstance::GetActiveAnimRate(INT Channel)
 	return *(FLOAT*)(data + Channel * 0x74 + 0x0C);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 {
 	// Retail: 98b SEH. Reads FName from channel element+0x08 in TArray at this+0x10C.
@@ -2426,7 +2426,7 @@ FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 	return *(FName*)(data + Channel * 0x74 + 0x08);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x132810)
 int USkeletalMeshInstance::GetAnimCount()
 {
 	// Retail: 0x132810. Iterate anim object slots in TArray at this+0xAC (stride 0x18).
@@ -2446,7 +2446,7 @@ int USkeletalMeshInstance::GetAnimCount()
 	return total;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
 {
 	// Retail: 88b. Calls vtbl[0x130/4=76] with arg 0 to get anim channel array object.
@@ -2462,7 +2462,7 @@ void * USkeletalMeshInstance::GetAnimIndexed(INT Index)
 	return data + Index * 0x2C;
 }
 
-IMPL_APPROX("calls hardcoded FUN_10432640 for anim object refresh")
+IMPL_GHIDRA("Engine.dll", 0x1328D0)
 void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 {
 	// Retail: 0x1328D0. Calls FUN_10432640 (RefreshAnimObjects) to populate AnimObjects
@@ -2490,7 +2490,7 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 	return NULL;
 }
 
-IMPL_MATCH("Engine.dll", 0x10439f40)
+IMPL_TODO("Needs Ghidra analysis")
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(USkeletalMeshInstance::GetFrame);
@@ -2499,7 +2499,7 @@ void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,in
 	unguard;
 }
 
-IMPL_APPROX("Ghidra reference; body approximated")
+IMPL_INFERRED("Reconstructed from context")
 UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 {
 	// Retail: 49b. Identical implementation to UVertMeshInstance::GetMaterial.
@@ -2513,7 +2513,7 @@ UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_APPROX("FUN_10438ce0 identity unresolved; no vertex output produced.")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x13d8e0, "FUN_10438ce0 identity unresolved; no vertex output produced")
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(USkeletalMeshInstance::GetMeshVerts);
@@ -2523,21 +2523,21 @@ void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FBox USkeletalMeshInstance::GetRenderBoundingBox(const AActor*)
 {
 	// Retail: 33b. GetMesh() + copy FBox from mesh+0x2C (cached render bounds).
 	return *(FBox*)((BYTE*)GetMesh() + 0x2C);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FSphere USkeletalMeshInstance::GetRenderBoundingSphere(const AActor*)
 {
 	// Retail: 31b. GetMesh() + copy FSphere from mesh+0x48 via ctor.
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x130FB0)
 int USkeletalMeshInstance::IsAnimating(int Channel)
 {
 	// Retail: 0x130FB0, 133 bytes. Returns 1 if the animation channel has a non-None
@@ -2561,7 +2561,7 @@ int USkeletalMeshInstance::IsAnimating(int Channel)
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::IsAnimLooping(INT Channel)
 {
 	// Retail: 93b (SEH). TArray at this+0x10C, stride 0x74=116b, loop flag (INT) at element+0x30.
@@ -2572,7 +2572,7 @@ int USkeletalMeshInstance::IsAnimLooping(INT Channel)
 	return *(INT*)(data + Channel * 0x74 + 0x30);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 {
 	// Retail: 111b (SEH). Compares current frame (element+0x10) with end frame (element+0x14).
@@ -2585,7 +2585,7 @@ int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 	return (*(FLOAT*)(elem + 0x10) >= *(FLOAT*)(elem + 0x14)) ? 1 : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x131110)
 int USkeletalMeshInstance::IsAnimTweening(int Channel)
 {
 	// Retail: 0x131110, 117 bytes. Returns 1 if channel's current frame < 0 and vtbl
@@ -2605,7 +2605,7 @@ int USkeletalMeshInstance::IsAnimTweening(int Channel)
 
 
 // --- USkeletalMeshInstance ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x12F8B0)
 int USkeletalMeshInstance::WasSkeletonUpdated()
 {
 	// Disasm: 0x12F8B0, 64b.
@@ -2617,7 +2617,7 @@ int USkeletalMeshInstance::WasSkeletonUpdated()
 	return (UpdateStamp >= GTicks - 1) ? 1 : 0;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x141f40 computes bounding box/sphere")
+IMPL_TODO("Needs Ghidra analysis")
 void USkeletalMeshInstance::MeshBuildBounds()
 {
 	guard(USkeletalMeshInstance::MeshBuildBounds);
@@ -2626,7 +2626,7 @@ void USkeletalMeshInstance::MeshBuildBounds()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FMatrix USkeletalMeshInstance::MeshToWorld()
 {
 	return FMatrix();
@@ -2635,7 +2635,7 @@ FMatrix USkeletalMeshInstance::MeshToWorld()
 
 
 // --- UVertMeshInstance ---
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName Name)
 {
 	// Retail: ~90b. Calls vtbl[0x8C/4=35] on this to get the underlying mesh object,
@@ -2659,7 +2659,7 @@ FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName Name)
 	return NULL;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::StopAnimating(INT Channel)
 {
 	// Retail: 15b. Clears the animation sequence name (FName) at this+0xB8 and returns 1.
@@ -2668,7 +2668,7 @@ int UVertMeshInstance::StopAnimating(INT Channel)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x172950)
 int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 {
 	guard(UVertMeshInstance::UpdateAnimation);
@@ -2837,7 +2837,7 @@ int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x174f70 full vertex mesh rendering pipeline")
+IMPL_TODO("Needs Ghidra analysis")
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UVertMeshInstance::Render);
@@ -2846,7 +2846,7 @@ void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicL
 	unguard;
 }
 
-IMPL_APPROX("guard-wrapped no-op; FUN_10321a80 identity unresolved")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x174730, "FUN_10321a80 identity unresolved; anim state not serialized here")
 void UVertMeshInstance::Serialize(FArchive &)
 {
 	guard(UVertMeshInstance::Serialize);
@@ -2857,14 +2857,14 @@ void UVertMeshInstance::Serialize(FArchive &)
 	unguard;
 }
 
-IMPL_APPROX("stores Frame at this+0xC0; retail 13b single-write stub")
+IMPL_INFERRED("Reconstructed from context")
 void UVertMeshInstance::SetAnimFrame(int, float Frame)
 {
 	// Retail: 13b. Stores Frame float value at this+0xC0 (ignores channel index).
 	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
 }
 
-IMPL_MATCH("Engine.dll", 0x10321a80)
+IMPL_GHIDRA("Engine.dll", 0x173500)
 void UVertMeshInstance::SetScale(FVector Scale)
 {
 	guard(UVertMeshInstance::SetScale);
@@ -2888,7 +2888,7 @@ void UVertMeshInstance::SetScale(FVector Scale)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA_APPROX("Engine.dll", 0x172d40, "FUN_103808e0 body unresolved — approximated as safe-divide")
 int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
 	guard(UVertMeshInstance::PlayAnim);
@@ -3093,7 +3093,7 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1724f0)
 int UVertMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(UVertMeshInstance::AnimForcePose);
@@ -3110,14 +3110,14 @@ int UVertMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float UVertMeshInstance::AnimGetFrameCount(void* Channel)
 {
 	// Retail: 10b. Returns float of int frame count at Channel+0x14 (no null check per retail).
 	return (FLOAT)(*(INT*)((BYTE*)Channel + 0x14));
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName UVertMeshInstance::AnimGetGroup(void* Channel)
 {
 	// Retail: 34b. Identical bytecode to USkeletalMeshInstance::AnimGetGroup.
@@ -3128,7 +3128,7 @@ FName UVertMeshInstance::AnimGetGroup(void* Channel)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName UVertMeshInstance::AnimGetName(void* Channel)
 {
 	// Retail: 15b. Copies the FName index (first DWORD) from *Channel to output.
@@ -3138,7 +3138,7 @@ FName UVertMeshInstance::AnimGetName(void* Channel)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::AnimGetNotifyCount(void* Channel)
 {
 	// Retail: 16b. Reads Num field of TArray<FMeshAnimNotify> embedded at Channel+0x1C.
@@ -3146,7 +3146,7 @@ int UVertMeshInstance::AnimGetNotifyCount(void* Channel)
 	return *(INT*)((BYTE*)Channel + 0x20);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UAnimNotify * UVertMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIndex)
 {
 	// Retail: 21b. Returns UAnimNotify* from packed notify array.
@@ -3156,7 +3156,7 @@ UAnimNotify * UVertMeshInstance::AnimGetNotifyObject(void* Channel, int notifyIn
 	return *(UAnimNotify**)(notifyArray + notifyIndex * 12 + 8);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 const TCHAR* UVertMeshInstance::AnimGetNotifyText(void* Channel, INT notifyIndex)
 {
 	// Retail: 27b. Reads FName at notify entry+4, returns FName string via operator*.
@@ -3166,7 +3166,7 @@ const TCHAR* UVertMeshInstance::AnimGetNotifyText(void* Channel, INT notifyIndex
 	return *name;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float UVertMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
 {
 	// Retail: 20b. Returns time float from Channel's notify array (stride 12b, float at entry+0).
@@ -3174,21 +3174,21 @@ float UVertMeshInstance::AnimGetNotifyTime(void* Channel, INT notifyIndex)
 	return *(FLOAT*)(notifyArray + notifyIndex * 12);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float UVertMeshInstance::AnimGetRate(void* Channel)
 {
 	// Retail: 10b. Returns float rate from Channel+0x18 (no null check per retail).
 	return *(FLOAT*)((BYTE*)Channel + 0x18);
 }
 
-IMPL_APPROX("returns 0 — retail 48b has complex sub-call")
+IMPL_TODO("Needs Ghidra analysis")
 int UVertMeshInstance::AnimIsInGroup(void*, FName)
 {
 	// Retail: 48b. Has complex sub-call — stub returns 0.
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::AnimStopLooping(int)
 {
 	// Retail: 22b. Clears loop flag at this+0xE0 and this+0xDC, returns 1.
@@ -3197,7 +3197,7 @@ int UVertMeshInstance::AnimStopLooping(int)
 	return 1;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float UVertMeshInstance::GetActiveAnimFrame(INT Channel)
 {
 	// Retail: 17b. Returns current frame float from this+0xC0 for channel 0 only.
@@ -3206,7 +3206,7 @@ float UVertMeshInstance::GetActiveAnimFrame(INT Channel)
 	return *(FLOAT*)((BYTE*)this + 0xC0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 float UVertMeshInstance::GetActiveAnimRate(INT Channel)
 {
 	// Retail: 17b. Returns animation rate float from this+0xBC for channel 0 only.
@@ -3215,7 +3215,7 @@ float UVertMeshInstance::GetActiveAnimRate(INT Channel)
 	return *(FLOAT*)((BYTE*)this + 0xBC);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FName UVertMeshInstance::GetActiveAnimSequence(int sequenceChannelIndex)
 {
 	// Retail: 23b. Only returns a value for channel index 0 (reads FName.Index from this+0xB8).
@@ -3226,7 +3226,7 @@ FName UVertMeshInstance::GetActiveAnimSequence(int sequenceChannelIndex)
 	return result;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::GetAnimCount()
 {
 	// Retail: 18b. Gets mesh via vtbl[35], returns TArray.Num from TArray at mesh+0x118.
@@ -3236,7 +3236,7 @@ int UVertMeshInstance::GetAnimCount()
 	return *(INT*)(obj + 0x118 + 4);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void * UVertMeshInstance::GetAnimIndexed(INT Index)
 {
 	// Retail: 34b. Gets mesh via vtbl[35], returns TArray.Data[Index] (stride 0x2C=44b).
@@ -3247,7 +3247,7 @@ void * UVertMeshInstance::GetAnimIndexed(INT Index)
 	return data + Index * 0x2C;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void * UVertMeshInstance::GetAnimNamed(FName Name)
 {
 	// Retail: ~144b. Gets mesh via vtbl[35], searches TArray at mesh+0x118 (stride 0x2C=44b,
@@ -3271,7 +3271,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail 0x10473c20 transforms vertex mesh frames")
+IMPL_TODO("Needs Ghidra analysis")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3280,7 +3280,7 @@ void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 {
 	// Retail: 49b. Calls Actor->vtable[40] (GetSkin, vtable offset 0xA0) twice:
@@ -3295,7 +3295,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_APPROX("guard-wrapped no-op; retail extracts transformed vertex positions")
+IMPL_TODO("Needs Ghidra analysis")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
@@ -3304,21 +3304,21 @@ void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FBox UVertMeshInstance::GetRenderBoundingBox(const AActor* Owner)
 {
 	// Retail: 33b. Same pattern as GetRenderBoundingSphere: get mesh, call mesh's method.
 	return GetMesh()->GetRenderBoundingBox(Owner);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FSphere UVertMeshInstance::GetRenderBoundingSphere(const AActor*)
 {
 	// Retail: 84b (SEH). Calls vtbl[35] to get mesh, copies FSphere from mesh+0x48.
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_GHIDRA("Engine.dll", 0x1725d0)
 int UVertMeshInstance::IsAnimating(int Channel)
 {
 	// Retail: 0x1725d0, 74b. Only channel 0 supported on vertex meshes.
@@ -3335,14 +3335,14 @@ int UVertMeshInstance::IsAnimating(int Channel)
 	return (*(FLOAT*)((BYTE*)this + 0xBC) != 0.0f) ? 1 : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::IsAnimLooping(int)
 {
 	// Retail: 9b. Returns loop flag/counter at this+0xE0 (ignores Channel argument).
 	return *(INT*)((BYTE*)this + 0xE0);
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::IsAnimPastLastFrame(int)
 {
 	// Retail: 31b (scanner shows 27b, stops at first RETN). Compares frame position
@@ -3350,7 +3350,7 @@ int UVertMeshInstance::IsAnimPastLastFrame(int)
 	return (*(FLOAT*)((BYTE*)this + 0xC0) < *(FLOAT*)((BYTE*)this + 0xC4)) ? 1 : 0;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 int UVertMeshInstance::IsAnimTweening(int)
 {
 	// Retail: 9b. Returns the tween flag/counter at this+0xE4 (ignores Channel argument).
@@ -3362,7 +3362,7 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 
 // --- UVertMeshInstance ---
-IMPL_APPROX("guard-wrapped no-op; retail 0x174850 computes bounding box/sphere")
+IMPL_TODO("Needs Ghidra analysis")
 void UVertMeshInstance::MeshBuildBounds()
 {
 	guard(UVertMeshInstance::MeshBuildBounds);
@@ -3371,7 +3371,7 @@ void UVertMeshInstance::MeshBuildBounds()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FMatrix UVertMeshInstance::MeshToWorld()
 {
 	return FMatrix();
@@ -3381,9 +3381,9 @@ FMatrix UVertMeshInstance::MeshToWorld()
 
 // --- Moved from EngineStubs.cpp ---
 // ?MeshBuildBounds@UMeshInstance@@UAEXXZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 void UMeshInstance::MeshBuildBounds() {}
 // ?MeshToWorld@UMeshInstance@@UAE?AVFMatrix@@XZ
-IMPL_APPROX("Reconstructed from context")
+IMPL_INFERRED("Reconstructed from context")
 FMatrix UMeshInstance::MeshToWorld() { // Retail: 36b. Copies FMatrix::Identity (from Core.dll IAT) to return buffer.
  return FMatrix::Identity; }

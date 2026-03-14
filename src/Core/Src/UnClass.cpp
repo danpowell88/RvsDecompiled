@@ -12,21 +12,21 @@
 	FDependency.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10115120 size 3 bytes")
 FDependency::FDependency()
 :	Class         ( NULL )
 ,	Deep          ( 0 )
 ,	ScriptTextCRC ( 0 )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101167F0)
 FDependency::FDependency( UClass* InClass, UBOOL InDeep )
 :	Class         ( InClass )
 ,	Deep          ( InDeep )
 ,	ScriptTextCRC ( InClass->GetScriptTextCRC() )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116850)
 UBOOL FDependency::IsUpToDate()
 {
 	guard(FDependency::IsUpToDate);
@@ -36,7 +36,7 @@ UBOOL FDependency::IsUpToDate()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchive& operator<<( FArchive& Ar, FDependency& Dep )
 {
 	return Ar << Dep.Class << Dep.Deep << Dep.ScriptTextCRC;
@@ -46,13 +46,13 @@ FArchive& operator<<( FArchive& Ar, FDependency& Dep )
 	FLabelEntry.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115130)
 FLabelEntry::FLabelEntry( FName InName, INT iInCode )
 :	Name  ( InName )
 ,	iCode ( iInCode )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchive& operator<<( FArchive& Ar, FLabelEntry& Label )
 {
 	return Ar << Label.Name << Label.iCode;
@@ -62,7 +62,7 @@ FArchive& operator<<( FArchive& Ar, FLabelEntry& Label )
 	UField.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101023D0)
 UField::UField( ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UField* InSuperField )
 :	UObject       ( EC_NativeConstructor, InClass, InName, InPackageName, InFlags )
 ,	SuperField    ( InSuperField )
@@ -70,7 +70,7 @@ UField::UField( ENativeConstructor, UClass* InClass, const TCHAR* InName, const 
 ,	HashNext      ( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101023F0)
 UField::UField( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :	UObject       ( EC_StaticConstructor, InName, InPackageName, InFlags )
 ,	SuperField    ( NULL )
@@ -78,14 +78,14 @@ UField::UField( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageN
 ,	HashNext      ( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10114EB0)
 UField::UField( UField* InSuperField )
 :	SuperField    ( InSuperField )
 ,	Next          ( NULL )
 ,	HashNext      ( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115280)
 void UField::Serialize( FArchive& Ar )
 {
 	guard(UField::Serialize);
@@ -94,7 +94,7 @@ void UField::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10114F70)
 void UField::PostLoad()
 {
 	guard(UField::PostLoad);
@@ -102,7 +102,7 @@ void UField::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115090)
 void UField::Register()
 {
 	guard(UField::Register);
@@ -110,7 +110,7 @@ void UField::Register()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115010)
 void UField::AddCppProperty( UProperty* Property )
 {
 	guard(UField::AddCppProperty);
@@ -118,7 +118,7 @@ void UField::AddCppProperty( UProperty* Property )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10115000 size 6 bytes")
 UBOOL UField::MergeBools()
 {
 	return 1;
@@ -130,7 +130,7 @@ void UField::Bind()
 	// Retail Core.dll: ret (truly empty)
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115260)
 UClass* UField::GetOwnerClass()
 {
 	guard(UField::GetOwnerClass);
@@ -140,7 +140,7 @@ UClass* UField::GetOwnerClass()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10114FF0 size 3 bytes")
 INT UField::GetPropertiesSize()
 {
 	return 0;
@@ -152,7 +152,7 @@ IMPLEMENT_CLASS(UField);
 	UStruct.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010C690)
 UStruct::UStruct( ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct )
 :	UField         ( EC_NativeConstructor, UStruct::StaticClass(), InName, InPackageName, InFlags, InSuperStruct )
 ,	ScriptText     ( NULL )
@@ -169,7 +169,7 @@ UStruct::UStruct( ENativeConstructor, INT InSize, const TCHAR* InName, const TCH
 ,	ConstructorLink( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010C6B0)
 UStruct::UStruct( EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :	UField         ( EC_StaticConstructor, InName, InPackageName, InFlags )
 ,	ScriptText     ( NULL )
@@ -186,7 +186,7 @@ UStruct::UStruct( EStaticConstructor, INT InSize, const TCHAR* InName, const TCH
 ,	ConstructorLink( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116240)
 UStruct::UStruct( UStruct* InSuperStruct )
 :	UField         ( InSuperStruct )
 ,	ScriptText     ( NULL )
@@ -203,7 +203,7 @@ UStruct::UStruct( UStruct* InSuperStruct )
 ,	ConstructorLink( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115440)
 void UStruct::Serialize( FArchive& Ar )
 {
 	guard(UStruct::Serialize);
@@ -229,7 +229,7 @@ void UStruct::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115180)
 void UStruct::PostLoad()
 {
 	guard(UStruct::PostLoad);
@@ -237,7 +237,7 @@ void UStruct::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101153C0)
 void UStruct::Destroy()
 {
 	guard(UStruct::Destroy);
@@ -246,7 +246,7 @@ void UStruct::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115340)
 void UStruct::Register()
 {
 	guard(UStruct::Register);
@@ -254,7 +254,7 @@ void UStruct::Register()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115110)
 void UStruct::AddCppProperty( UProperty* Property )
 {
 	guard(UStruct::AddCppProperty);
@@ -263,7 +263,7 @@ void UStruct::AddCppProperty( UProperty* Property )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101181C0)
 void UStruct::Link( FArchive& Ar, UBOOL Props )
 {
 	guard(UStruct::Link);
@@ -289,7 +289,7 @@ void UStruct::Link( FArchive& Ar, UBOOL Props )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116CA0)
 void UStruct::SerializeBin( FArchive& Ar, BYTE* Data )
 {
 	guard(UStruct::SerializeBin);
@@ -300,7 +300,7 @@ void UStruct::SerializeBin( FArchive& Ar, BYTE* Data )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116EE0)
 void UStruct::SerializeTaggedProperties( FArchive& Ar, BYTE* Data, UClass* DefaultsClass )
 {
 	guard(UStruct::SerializeTaggedProperties);
@@ -428,7 +428,7 @@ void UStruct::SerializeTaggedProperties( FArchive& Ar, BYTE* Data, UClass* Defau
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10117870)
 void UStruct::CleanupDestroyed( BYTE* Data )
 {
 	guard(UStruct::CleanupDestroyed);
@@ -440,7 +440,7 @@ void UStruct::CleanupDestroyed( BYTE* Data )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101159E0)
 EExprToken UStruct::SerializeExpr( INT& iCode, FArchive& Ar )
 {
 	guard(UStruct::SerializeExpr);
@@ -451,7 +451,7 @@ EExprToken UStruct::SerializeExpr( INT& iCode, FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010E0D0)
 UBOOL UStruct::StructCompare( const void* A, const void* B )
 {
 	guard(UStruct::StructCompare);
@@ -473,7 +473,7 @@ IMPLEMENT_CLASS(UStruct);
 	UFunction.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010C8A0)
 UFunction::UFunction( UFunction* InSuperFunction )
 :	UStruct         ( InSuperFunction )
 ,	FunctionFlags   ( 0 )
@@ -486,7 +486,7 @@ UFunction::UFunction( UFunction* InSuperFunction )
 ,	Func            ( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116940)
 void UFunction::Serialize( FArchive& Ar )
 {
 	guard(UFunction::Serialize);
@@ -503,7 +503,7 @@ void UFunction::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101151F0)
 void UFunction::PostLoad()
 {
 	guard(UFunction::PostLoad);
@@ -511,7 +511,7 @@ void UFunction::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116AC0)
 void UFunction::Bind()
 {
 	guard(UFunction::Bind);
@@ -524,7 +524,7 @@ void UFunction::Bind()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10118A80)
 void UFunction::Link( FArchive& Ar, UBOOL Props )
 {
 	guard(UFunction::Link);
@@ -546,7 +546,7 @@ void UFunction::Link( FArchive& Ar, UBOOL Props )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10118110)
 UProperty* UFunction::GetReturnProperty()
 {
 	guard(UFunction::GetReturnProperty);
@@ -563,7 +563,7 @@ IMPLEMENT_CLASS(UFunction);
 	UState.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010CA30)
 UState::UState( ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UState* InSuperState )
 :	UStruct    ( EC_NativeConstructor, InSize, InName, InPackageName, InFlags, InSuperState )
 ,	ProbeMask  ( 0 )
@@ -574,7 +574,7 @@ UState::UState( ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR
 	appMemzero( VfHash, sizeof(VfHash) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010CA50)
 UState::UState( EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :	UStruct    ( EC_StaticConstructor, InSize, InName, InPackageName, InFlags )
 ,	ProbeMask  ( 0 )
@@ -585,7 +585,7 @@ UState::UState( EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR
 	appMemzero( VfHash, sizeof(VfHash) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116380)
 UState::UState( UState* InSuperState )
 :	UStruct    ( InSuperState )
 ,	ProbeMask  ( 0 )
@@ -596,7 +596,7 @@ UState::UState( UState* InSuperState )
 	appMemzero( VfHash, sizeof(VfHash) );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10115640)
 void UState::Serialize( FArchive& Ar )
 {
 	guard(UState::Serialize);
@@ -611,7 +611,7 @@ void UState::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101155D0)
 void UState::Destroy()
 {
 	guard(UState::Destroy);
@@ -619,7 +619,7 @@ void UState::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10118760)
 void UState::Link( FArchive& Ar, UBOOL Props )
 {
 	guard(UState::Link);
@@ -643,12 +643,12 @@ IMPLEMENT_CLASS(UState);
 	UEnum.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010CBF0)
 UEnum::UEnum( UEnum* InSuperEnum )
 :	UField( InSuperEnum )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1013A130)
 void UEnum::Serialize( FArchive& Ar )
 {
 	guard(UEnum::Serialize);
@@ -663,7 +663,7 @@ IMPLEMENT_CLASS(UEnum);
 	UClass.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x1010F550)
 UClass::UClass()
 :	ClassFlags        ( 0 )
 ,	ClassUnique       ( 0 )
@@ -673,7 +673,7 @@ UClass::UClass()
 ,	ClassStaticConstructor( NULL )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10117CD0)
 UClass::UClass( UClass* InSuperClass )
 :	UState            ( InSuperClass )
 ,	ClassFlags        ( 0 )
@@ -691,7 +691,7 @@ UClass::UClass( UClass* InSuperClass )
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10117D80)
 UClass::UClass( ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)() )
 :	UState            ( EC_NativeConstructor, InSize, InNameStr, InPackageName, InFlags, InBaseClass )
 ,	ClassFlags        ( InClassFlags | CLASS_Parsed | CLASS_Compiled )
@@ -706,7 +706,7 @@ UClass::UClass( ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* In
 	Defaults.AddZeroed( InSize );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10117D80)
 UClass::UClass( EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)() )
 :	UState            ( EC_StaticConstructor, InSize, InNameStr, InPackageName, InFlags )
 ,	ClassFlags        ( InClassFlags | CLASS_Parsed | CLASS_Compiled )
@@ -720,7 +720,7 @@ UClass::UClass( EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGu
 	Defaults.AddZeroed( InSize );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10117960)
 void UClass::Serialize( FArchive& Ar )
 {
 	guard(UClass::Serialize);
@@ -742,7 +742,7 @@ void UClass::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101158E0)
 void UClass::PostLoad()
 {
 	guard(UClass::PostLoad);
@@ -750,7 +750,7 @@ void UClass::PostLoad()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101166C0)
 void UClass::Destroy()
 {
 	guard(UClass::Destroy);
@@ -763,7 +763,7 @@ void UClass::Destroy()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10116470)
 void UClass::Register()
 {
 	guard(UClass::Register);
@@ -775,7 +775,7 @@ void UClass::Register()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x101156F0)
 void UClass::Bind()
 {
 	guard(UClass::Bind);
@@ -793,7 +793,7 @@ void UClass::Bind()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnClass.cpp")
+IMPL_MATCH("Core.dll", 0x10118860)
 void UClass::Link( FArchive& Ar, UBOOL Props )
 {
 	guard(UClass::Link);

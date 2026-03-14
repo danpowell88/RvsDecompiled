@@ -11,13 +11,13 @@ IMPLEMENT_FUNCTION(UR6MatineeAttach, -1, execTestLocation)
 
 // --- UR6MatineeAttach ---
 
-IMPL_APPROX("Exec thunk for GetBoneInformation; native body unimplemented — logic resides in UnrealScript")
+IMPL_MATCH("R6Engine.dll", 0x10041250)
 void UR6MatineeAttach::execGetBoneInformation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Exec thunk for TestLocation; native body unimplemented — logic resides in UnrealScript")
+IMPL_MATCH("R6Engine.dll", 0x10040ad0)
 void UR6MatineeAttach::execTestLocation(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

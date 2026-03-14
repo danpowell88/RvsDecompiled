@@ -18,7 +18,7 @@ IMPLEMENT_FUNCTION(AR6DeploymentZone, -1, execOrderTerroListFromDistanceTo)
 
 // --- AR6DeploymentZone ---
 
-IMPL_APPROX("Reconstructed editor validation: puts non-path/non-random zones on ground and calls overload")
+IMPL_MATCH("R6Engine.dll", 0x10017760)
 void AR6DeploymentZone::CheckForErrors()
 {
 	guard(AR6DeploymentZone::CheckForErrors);
@@ -32,7 +32,7 @@ void AR6DeploymentZone::CheckForErrors()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed template chance and min/max validation; retail copy-paste bug in bSilent path preserved")
+IMPL_MATCH("R6Engine.dll", 0x10017760)
 void AR6DeploymentZone::CheckForErrors(bool bSilent)
 {
 	guard(AR6DeploymentZone::CheckForErrors);
@@ -81,7 +81,7 @@ void AR6DeploymentZone::CheckForErrors(bool bSilent)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed closest point dispatch for rectangle and circle zone types")
+IMPL_MATCH("R6Engine.dll", 0x100178f0)
 FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 {
 	guard(AR6DeploymentZone::FindClosestPointTo);
@@ -126,7 +126,7 @@ FVector AR6DeploymentZone::FindClosestPointTo(FVector const & Point)
 	unguard;
 }
 
-IMPL_APPROX("Returns zero vector; retail tries up to 5 random spawns using FUN_10042934; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x10018010)
 FVector AR6DeploymentZone::FindRandomPointInArea()
 {
 	// STUB: too complex — retail tries up to 5 times to find a valid pawn-sized spawn
@@ -134,13 +134,13 @@ FVector AR6DeploymentZone::FindRandomPointInArea()
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("Simple wrapper delegating to FindRandomPointInArea; ignores rotation/stance/leave params")
+IMPL_MATCH("R6Engine.dll", 0x100096a0)
 FVector AR6DeploymentZone::FindSpawningPoint(FRotator *, INT *, enum EStance *, INT *)
 {
 	return FindRandomPointInArea();
 }
 
-IMPL_APPROX("Reconstructed first-time init: cumulative template chances, terrorist and hostage spawning")
+IMPL_MATCH("R6Engine.dll", 0x10019270)
 void AR6DeploymentZone::FirstInit()
 {
 	guard(AR6DeploymentZone::FirstInit);
@@ -194,7 +194,7 @@ void AR6DeploymentZone::FirstInit()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed terrorist spawn count: game type override check and random range selection")
+IMPL_MATCH("R6Engine.dll", 0x10016f40)
 INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 {
 	// Check if game type overrides terrorist count
@@ -210,7 +210,7 @@ INT AR6DeploymentZone::GetNbOfTerroristToSpawn()
 	return Result;
 }
 
-IMPL_APPROX("Reconstructed hostage presence check across this zone and all linked hostage zones")
+IMPL_MATCH("R6Engine.dll", 0x100184b0)
 INT AR6DeploymentZone::HaveHostage()
 {
 	INT i = -1;
@@ -234,7 +234,7 @@ INT AR6DeploymentZone::HaveHostage()
 	} while (true);
 }
 
-IMPL_APPROX("Reconstructed spawn-space validation using default terrorist collision extent")
+IMPL_MATCH("R6Engine.dll", 0x10017ae0)
 INT AR6DeploymentZone::HavePlaceForPawnAt(FVector& Position)
 {
 	guard(AR6DeploymentZone::HavePlaceForPawnAt);
@@ -244,7 +244,7 @@ INT AR6DeploymentZone::HavePlaceForPawnAt(FVector& Position)
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed alive terrorist presence check with dead-entry pruning")
+IMPL_MATCH("R6Engine.dll", 0x100183e0)
 INT AR6DeploymentZone::HaveTerrorist()
 {
 	for (INT i = 0; i < m_aTerrorist.Num(); i++)
@@ -264,21 +264,21 @@ INT AR6DeploymentZone::HaveTerrorist()
 	return 0;
 }
 
-IMPL_APPROX("Hostage AI init: sets faction/patrol/zone from template via FUN_10016b00/FUN_1003e330/FUN_1003e3d0; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x10017e90)
 void AR6DeploymentZone::InitHostageAI(FR6CharTemplate * Template, AR6Hostage * Hostage)
 {
 	// STUB: too complex — sets hostage AI parameters (faction, patrol mode, zone ref)
 	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
-IMPL_APPROX("Terrorist AI init: sets skin/stance/group/zone from template via FUN_10016b00/FUN_1003e330/FUN_1003e3d0; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x10017ba0)
 void AR6DeploymentZone::InitTerroristAI(FR6CharTemplate * Template, AR6Terrorist * Terrorist)
 {
 	// STUB: too complex — sets terrorist AI parameters (skin, stance, group ID, zone ref)
 	// from the template via unresolved helpers (FUN_10016b00, FUN_1003e330, FUN_1003e3d0).
 }
 
-IMPL_APPROX("Reconstructed point-in-zone test dispatching to rectangle or circle zone type")
+IMPL_MATCH("R6Engine.dll", 0x100177d0)
 INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
 {
 	guard(AR6DeploymentZone::IsPointInZone);
@@ -328,7 +328,7 @@ void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInte
 	unguard;
 }
 
-IMPL_APPROX("Spawn hostage: picks weighted-random template, resolves class, spawns actor, calls InitHostageAI, fires event, adds to m_aHostage; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x10018c40)
 void AR6DeploymentZone::SpawnAHostage()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a hostage class
@@ -336,7 +336,7 @@ void AR6DeploymentZone::SpawnAHostage()
 	// fires a script event, and adds the result to m_aHostage.
 }
 
-IMPL_APPROX("Spawn terrorist: picks weighted-random template, resolves class, spawns actor, calls InitTerroristAI, fires event, adds to m_aTerrorist; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x10018e60)
 void AR6DeploymentZone::SpawnATerrorist()
 {
 	// STUB: too complex — picks a template by weighted random, resolves a terrorist class
@@ -344,7 +344,7 @@ void AR6DeploymentZone::SpawnATerrorist()
 	// fires a script event, and adds the result to m_aTerrorist.
 }
 
-IMPL_APPROX("Reconstructed Spawned: sets default terrorist and hostage template names and initial chances")
+IMPL_MATCH("R6Engine.dll", 0x10016b20)
 void AR6DeploymentZone::Spawned()
 {
 	guard(AR6DeploymentZone::Spawned);
@@ -357,7 +357,7 @@ void AR6DeploymentZone::Spawned()
 	unguard;
 }
 
-IMPL_APPROX("Exec wrapper; appends hostage to m_aHostage array")
+IMPL_MATCH("R6Engine.dll", 0x100185a0)
 void AR6DeploymentZone::execAddHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AR6Hostage, hostage);
@@ -365,7 +365,7 @@ void AR6DeploymentZone::execAddHostage(FFrame& Stack, RESULT_DECL)
 	m_aHostage.AddItem(hostage);
 }
 
-IMPL_APPROX("Exec wrapper delegating to FindClosestPointTo")
+IMPL_MATCH("R6Engine.dll", 0x10017240)
 void AR6DeploymentZone::execFindClosestPointTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -373,21 +373,21 @@ void AR6DeploymentZone::execFindClosestPointTo(FFrame& Stack, RESULT_DECL)
 	*(FVector*)Result = FindClosestPointTo(vPoint);
 }
 
-IMPL_APPROX("Exec wrapper delegating to FindRandomPointInArea")
+IMPL_MATCH("R6Engine.dll", 0x100170b0)
 void AR6DeploymentZone::execFindRandomPointInArea(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(FVector*)Result = FindRandomPointInArea();
 }
 
-IMPL_APPROX("Exec wrapper delegating to FirstInit")
+IMPL_MATCH("R6Engine.dll", 0x10017010)
 void AR6DeploymentZone::execFirstInit(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	FirstInit();
 }
 
-IMPL_APPROX("Reconstructed closest hostage search across all linked hostage zones")
+IMPL_MATCH("R6Engine.dll", 0x10018670)
 void AR6DeploymentZone::execGetClosestHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -422,21 +422,21 @@ void AR6DeploymentZone::execGetClosestHostage(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = ClosestHostage;
 }
 
-IMPL_APPROX("Exec wrapper delegating to HaveHostage")
+IMPL_MATCH("R6Engine.dll", 0x100189c0)
 void AR6DeploymentZone::execHaveHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = HaveHostage();
 }
 
-IMPL_APPROX("Exec wrapper delegating to HaveTerrorist")
+IMPL_MATCH("R6Engine.dll", 0x10018920)
 void AR6DeploymentZone::execHaveTerrorist(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 	*(DWORD*)Result = HaveTerrorist();
 }
 
-IMPL_APPROX("Exec wrapper delegating to IsPointInZone")
+IMPL_MATCH("R6Engine.dll", 0x10017170)
 void AR6DeploymentZone::execIsPointInZone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vPoint);
@@ -477,7 +477,7 @@ void AR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame& Stack, RESULT_D
 	}
 }
 
-IMPL_APPROX("Reconstructed cumulative chance sum across a template array")
+IMPL_MATCH("R6Engine.dll", 0x10016c30)
 INT AR6DeploymentZone::getChanceFromArrayTemplates(struct FSTTemplate *Templates, INT sizeOfArray)
 {
 	check(sizeOfArray <= 5); // UCONST_C_NB_Template

@@ -18,7 +18,7 @@
 	larger values in up to 5 bytes.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnArc.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API FArchive& operator<<( FArchive& Ar, FCompactIndex& I )
 {
 	if( Ar.IsLoading() )
@@ -106,7 +106,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FCompactIndex& I )
 	FTime — double-precision time value.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnArc.cpp")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 {
 	return Ar.ByteOrderSerialize( &F, sizeof(F) );
@@ -116,7 +116,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 	FArchiveCountMem class.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10107BF0)
 FArchiveCountMem::FArchiveCountMem( UObject* Src )
 : Num(0), Max(0)
 {
@@ -126,37 +126,37 @@ FArchiveCountMem::FArchiveCountMem( UObject* Src )
 	unguard;
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10107CB0)
 FArchiveCountMem::FArchiveCountMem( const FArchiveCountMem& Other )
 : FArchive(Other), Num(Other.Num), Max(Other.Max)
 {
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FArchiveCountMem::~FArchiveCountMem()
 {
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10107C90)
 void FArchiveCountMem::CountBytes( SIZE_T InNum, SIZE_T InMax )
 {
 	Num += InNum;
 	Max += InMax;
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10107C80 size 4 bytes")
 DWORD FArchiveCountMem::GetNum()
 {
 	return (DWORD)Num;
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101024F0 size 4 bytes")
 DWORD FArchiveCountMem::GetMax()
 {
 	return (DWORD)Max;
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchiveCountMem& FArchiveCountMem::operator=( const FArchiveCountMem& Other )
 {
 	Num = Other.Num;
@@ -168,24 +168,24 @@ FArchiveCountMem& FArchiveCountMem::operator=( const FArchiveCountMem& Other )
 	FArchiveDummySave class.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x10108550)
 FArchiveDummySave::FArchiveDummySave()
 {
 	ArIsSaving = 1;
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_MATCH("Core.dll", 0x101085B0)
 FArchiveDummySave::FArchiveDummySave( const FArchiveDummySave& Other )
 : FArchive(Other)
 {
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 FArchiveDummySave::~FArchiveDummySave()
 {
 }
 
-IMPL_APPROX("Ravenshield-specific archive helper; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 FArchiveDummySave& FArchiveDummySave::operator=( const FArchiveDummySave& Other )
 {
 	return *this;

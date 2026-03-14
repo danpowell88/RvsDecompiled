@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6StairOrientation)
 
 // --- AR6StairOrientation ---
 
-IMPL_APPROX("Safely destroys associated stair volume actor on script cleanup")
+IMPL_MATCH("R6Engine.dll", 0x1003b000)
 void AR6StairOrientation::PostScriptDestroyed()
 {
 	guard(AR6StairOrientation::PostScriptDestroyed);
@@ -16,7 +16,7 @@ void AR6StairOrientation::PostScriptDestroyed()
 	unguard;
 }
 
-IMPL_APPROX("Associates this orientation marker with its parent stair volume")
+IMPL_MATCH("R6Engine.dll", 0x1003aff0)
 void AR6StairOrientation::linkWithStair(AR6StairVolume* StairVolume)
 {
 	m_pStairVolume = StairVolume;

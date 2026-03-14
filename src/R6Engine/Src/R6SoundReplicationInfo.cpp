@@ -21,7 +21,7 @@ static FVector GSoundRepInfo_OldLocation;
 
 // --- AR6SoundReplicationInfo ---
 
-IMPL_APPROX("Zone-based team visibility check; returns true if viewer and this actor share zone visibility")
+IMPL_MATCH("R6Engine.dll", 0x1003a5c0)
 INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*, FVector)
 {
 	// Get the viewer's relevant actor (pawn if available, otherwise the controller itself)
@@ -50,7 +50,7 @@ INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*
 	return 1;
 }
 
-IMPL_APPROX("Triggers weapon particle effects and manages looping fire sound state; audio dispatch not reconstructed")
+IMPL_DIVERGE("audio dispatch via vtable call (*(code**)(*AudioSub + 0x84)) not")
 void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYTE CurrentWeapon)
 {
 	guard(AR6SoundReplicationInfo::PlayWeaponSound);
@@ -96,7 +96,7 @@ Done:
 	unguard;
 }
 
-IMPL_APPROX("Decodes replicated pawn state byte into weapon state and stance; sound dispatch not reconstructed")
+IMPL_DIVERGE("retail checks weapon owner via IsA on class hierarchy,")
 void AR6SoundReplicationInfo::PostNetReceive()
 {
 	guard(AR6SoundReplicationInfo::PostNetReceive);
@@ -133,7 +133,7 @@ void AR6SoundReplicationInfo::PostNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("Caches replicated fields before net update for change detection in PostNetReceive")
+IMPL_MATCH("R6Engine.dll", 0x1003a3d0)
 void AR6SoundReplicationInfo::PreNetReceive()
 {
 	guard(AR6SoundReplicationInfo::PreNetReceive);
@@ -147,7 +147,7 @@ void AR6SoundReplicationInfo::PreNetReceive()
 	unguard;
 }
 
-IMPL_APPROX("Sets stop-sound bit on PawnRepInfo and triggers looping fire stop if needed")
+IMPL_MATCH("R6Engine.dll", 0x1003ad90)
 void AR6SoundReplicationInfo::StopWeaponSound()
 {
 	guard(AR6SoundReplicationInfo::StopWeaponSound);
@@ -166,7 +166,7 @@ void AR6SoundReplicationInfo::StopWeaponSound()
 	unguard;
 }
 
-IMPL_APPROX("Syncs location and region from owning pawn; periodically marks location dirty for replication")
+IMPL_MATCH("R6Engine.dll", 0x1003a490)
 void AR6SoundReplicationInfo::TickSpecial(FLOAT DeltaTime)
 {
 	guard(AR6SoundReplicationInfo::TickSpecial);
@@ -197,7 +197,7 @@ void AR6SoundReplicationInfo::TickSpecial(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native PlayWeaponSound")
+IMPL_MATCH("R6Engine.dll", 0x1003ae30)
 void AR6SoundReplicationInfo::execPlayLocalWeaponSound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_BYTE(EWeaponSound);
@@ -205,7 +205,7 @@ void AR6SoundReplicationInfo::execPlayLocalWeaponSound(FFrame& Stack, RESULT_DEC
 	PlayWeaponSound((enum EWeaponSound)EWeaponSound, m_CurrentWeapon);
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native PlayWeaponSound")
+IMPL_MATCH("R6Engine.dll", 0x1003ac50)
 void AR6SoundReplicationInfo::execPlayWeaponSound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_BYTE(EWeaponSound);
@@ -213,7 +213,7 @@ void AR6SoundReplicationInfo::execPlayWeaponSound(FFrame& Stack, RESULT_DECL)
 	PlayWeaponSound((enum EWeaponSound)EWeaponSound, m_CurrentWeapon);
 }
 
-IMPL_APPROX("Standard exec thunk delegating to native StopWeaponSound")
+IMPL_MATCH("R6Engine.dll", 0x1003af00)
 void AR6SoundReplicationInfo::execStopWeaponSound(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

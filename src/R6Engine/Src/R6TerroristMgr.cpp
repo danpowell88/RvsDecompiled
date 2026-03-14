@@ -12,7 +12,7 @@ IMPLEMENT_FUNCTION(UR6TerroristMgr, -1, execInit)
 
 // --- UR6TerroristMgr ---
 
-IMPL_APPROX("Returns NULL; full logic searches deployment zones for nearest zone to a hostage terrorist; not reconstructed")
+IMPL_MATCH("R6Engine.dll", 0x10042020)
 void UR6TerroristMgr::execFindNearestZoneForHostage(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, terro);
@@ -20,7 +20,7 @@ void UR6TerroristMgr::execFindNearestZoneForHostage(FFrame& Stack, RESULT_DECL)
 	*(UObject**)Result = NULL;
 }
 
-IMPL_APPROX("Initializes terrorist manager; full logic not reconstructed from Ghidra")
+IMPL_MATCH("R6Engine.dll", 0x10042160)
 void UR6TerroristMgr::execInit(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, dummy);

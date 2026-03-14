@@ -12,7 +12,7 @@
 	UExporter.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x10110DB0)
 UExporter::UExporter()
 :	SupportedClass( NULL )
 ,	TextIndent     ( 0 )
@@ -33,7 +33,7 @@ void UExporter::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x10111440)
 void UExporter::Serialize( FArchive& Ar )
 {
 	guard(UExporter::Serialize);
@@ -42,7 +42,7 @@ void UExporter::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x101114D0)
 UExporter* UExporter::FindExporter( UObject* Object, const TCHAR* FileType )
 {
 	guard(UExporter::FindExporter);
@@ -67,7 +67,7 @@ UExporter* UExporter::FindExporter( UObject* Object, const TCHAR* FileType )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x10111A20)
 INT UExporter::ExportToFile( UObject* Object, UExporter* InExporter, const TCHAR* Filename, UBOOL NoReplaceIdentical, UBOOL Prompt )
 {
 	guard(UExporter::ExportToFile);
@@ -114,7 +114,7 @@ INT UExporter::ExportToFile( UObject* Object, UExporter* InExporter, const TCHAR
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x101117C0)
 void UExporter::ExportToArchive( UObject* Object, UExporter* InExporter, FArchive& Ar, const TCHAR* FileType )
 {
 	guard(UExporter::ExportToArchive);
@@ -125,7 +125,7 @@ void UExporter::ExportToArchive( UObject* Object, UExporter* InExporter, FArchiv
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x101118F0)
 void UExporter::ExportToOutputDevice( UObject* Object, UExporter* InExporter, FOutputDevice& Out, const TCHAR* FileType, INT Indent )
 {
 	guard(UExporter::ExportToOutputDevice);
@@ -145,7 +145,7 @@ IMPLEMENT_CLASS(UExporter);
 	UFactory.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x10110AB0)
 UFactory::UFactory()
 :	SupportedClass    ( NULL )
 ,	ContextClass      ( NULL )
@@ -176,7 +176,7 @@ void UFactory::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x10112270)
 void UFactory::Serialize( FArchive& Ar )
 {
 	guard(UFactory::Serialize);
@@ -185,7 +185,7 @@ void UFactory::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
+IMPL_MATCH("Core.dll", 0x10112520)
 UObject* UFactory::StaticImportObject( UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* InFactory, const TCHAR* Parms, FFeedbackContext* Warn )
 {
 	guard(UFactory::StaticImportObject);

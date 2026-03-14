@@ -10,7 +10,7 @@
 
 // ReadToken: Read a single token (alphanumeric word or quoted string) from
 // a text buffer. Returns pointer past the token, or NULL on failure.
-IMPL_APPROX("local text parsing helper; reconstructed from context")
+IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
 static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 {
 	if( !Buffer )
@@ -47,7 +47,7 @@ static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 	UProperty base.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x1010CF40)
 UProperty::UProperty()
 :	ArrayDim          ( 1 )
 ,	ElementSize       ( 0 )
@@ -66,7 +66,7 @@ UProperty::UProperty()
 ,	Unknown4          ( 0 )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147FD0)
 UProperty::UProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
 :	ArrayDim          ( 1 )
 ,	ElementSize       ( 0 )
@@ -85,7 +85,7 @@ UProperty::UProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD
 ,	Unknown4          ( 0 )
 {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145810)
 void UProperty::Serialize( FArchive& Ar )
 {
 	guard(UProperty::Serialize);
@@ -100,7 +100,7 @@ void UProperty::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10143930 size 3 bytes")
 void UProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	guard(UProperty::Link);
@@ -111,7 +111,7 @@ void UProperty::Link( FArchive& Ar, UProperty* Prev )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101475A0)
 void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm ) const
 {
 	guard(UProperty::ExportCpp);
@@ -137,7 +137,7 @@ void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm ) con
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101438C0)
 UBOOL UProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const
 {
 	guard(UProperty::NetSerializeItem);
@@ -146,7 +146,7 @@ UBOOL UProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) 
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101458F0)
 UBOOL UProperty::ExportText( INT ArrayElement, TCHAR* ValueStr, BYTE* Data, BYTE* Delta, INT PortFlags ) const
 {
 	guard(UProperty::ExportText);
@@ -155,7 +155,7 @@ UBOOL UProperty::ExportText( INT ArrayElement, TCHAR* ValueStr, BYTE* Data, BYTE
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143890)
 void UProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	guard(UProperty::CopySingleValue);
@@ -163,7 +163,7 @@ void UProperty::CopySingleValue( void* Dest, void* Src ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101438E0)
 void UProperty::CopyCompleteValue( void* Dest, void* Src ) const
 {
 	guard(UProperty::CopyCompleteValue);
@@ -172,14 +172,14 @@ void UProperty::CopyCompleteValue( void* Dest, void* Src ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101438B0 size 3 bytes")
 void UProperty::DestroyValue( void* Dest ) const
 {
 	guard(UProperty::DestroyValue);
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145A00)
 UBOOL UProperty::Port() const
 {
 	return (Category != NAME_None) && !(PropertyFlags & (CPF_Transient|CPF_Native));
@@ -200,46 +200,46 @@ IMPLEMENT_CLASS(UProperty);
 	UByteProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145B40)
 void UByteProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << Enum;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145A40)
 void UByteProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(BYTE);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143980)
 UBOOL UByteProperty::Identical( const void* A, const void* B ) const
 {
 	return *(BYTE*)A == (B ? *(BYTE*)B : 0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145AE0)
 void UByteProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	Ar << *(BYTE*)Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145B00)
 UBOOL UByteProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const
 {
 	Ar << *(BYTE*)Data;
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101439B0)
 void UByteProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("BYTE") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101478A0)
 void UByteProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	if( Enum )
@@ -248,7 +248,7 @@ void UByteProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* 
 		appSprintf( ValueStr, TEXT("%i"), *(BYTE*)PropertyValue );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147980)
 const TCHAR* UByteProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UByteProperty::ImportText);
@@ -278,13 +278,13 @@ const TCHAR* UByteProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Por
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143940)
 void UByteProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(BYTE*)Dest = *(BYTE*)Src;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143950)
 void UByteProperty::CopyCompleteValue( void* Dest, void* Src ) const
 {
 	for( INT i=0; i<ArrayDim; i++ )
@@ -297,38 +297,38 @@ IMPLEMENT_CLASS(UByteProperty);
 	UIntProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145BE0)
 void UIntProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(INT);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143AB0)
 UBOOL UIntProperty::Identical( const void* A, const void* B ) const
 {
 	return *(INT*)A == (B ? *(INT*)B : 0);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145C80)
 void UIntProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	Ar << *(INT*)Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143AF0)
 void UIntProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("INT") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143B90)
 void UIntProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	appSprintf( ValueStr, TEXT("%i"), *(INT*)PropertyValue );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143C30)
 const TCHAR* UIntProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UIntProperty::ImportText);
@@ -339,7 +339,7 @@ const TCHAR* UIntProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Port
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143A50)
 void UIntProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(INT*)Dest = *(INT*)Src;
@@ -351,14 +351,14 @@ IMPLEMENT_CLASS(UIntProperty);
 	UBoolProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146060)
 void UBoolProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << BitMask;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145F70)
 void UBoolProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	guard(UBoolProperty::Link);
@@ -384,13 +384,13 @@ void UBoolProperty::Link( FArchive& Ar, UProperty* Prev )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143F90)
 UBOOL UBoolProperty::Identical( const void* A, const void* B ) const
 {
 	return (!IsA(UBoolProperty::StaticClass())) || ((*(BITFIELD*)A ^ (B ? *(BITFIELD*)B : 0)) & BitMask) == 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143FD0)
 void UBoolProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	BYTE B = (*(BITFIELD*)Value & BitMask) ? 1 : 0;
@@ -401,19 +401,19 @@ void UBoolProperty::SerializeItem( FArchive& Ar, void* Value ) const
 		*(BITFIELD*)Value &= ~BitMask;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143E20)
 void UBoolProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("BITFIELD") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143EC0)
 void UBoolProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	appSprintf( ValueStr, TEXT("%s"), (*(BITFIELD*)PropertyValue & BitMask) ? TEXT("True") : TEXT("False") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146110)
 const TCHAR* UBoolProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UBoolProperty::ImportText);
@@ -429,7 +429,7 @@ const TCHAR* UBoolProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Por
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144080)
 void UBoolProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(BITFIELD*)Dest = (*(BITFIELD*)Dest & ~BitMask) | (*(BITFIELD*)Src & BitMask);
@@ -441,38 +441,38 @@ IMPLEMENT_CLASS(UBoolProperty);
 	UFloatProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101462A0)
 void UFloatProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(FLOAT);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144100)
 UBOOL UFloatProperty::Identical( const void* A, const void* B ) const
 {
 	return *(FLOAT*)A == (B ? *(FLOAT*)B : 0.f);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144130)
 void UFloatProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	Ar << *(FLOAT*)Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144170)
 void UFloatProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("FLOAT") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144210)
 void UFloatProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	appSprintf( ValueStr, TEXT("%f"), *(FLOAT*)PropertyValue );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101442C0)
 const TCHAR* UFloatProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UFloatProperty::ImportText);
@@ -483,7 +483,7 @@ const TCHAR* UFloatProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Po
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101440A0)
 void UFloatProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(FLOAT*)Dest = *(FLOAT*)Src;
@@ -495,39 +495,39 @@ IMPLEMENT_CLASS(UFloatProperty);
 	UObjectProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101464E0)
 void UObjectProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << PropertyClass;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146340)
 void UObjectProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(UObject*);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144480)
 UBOOL UObjectProperty::Identical( const void* A, const void* B ) const
 {
 	return *(UObject**)A == (B ? *(UObject**)B : NULL);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101444C0)
 void UObjectProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	Ar << *(UObject**)Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144500)
 void UObjectProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("class %s*"), PropertyClass->GetNameCPP() );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147B70)
 void UObjectProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	UObject* Obj = *(UObject**)PropertyValue;
@@ -537,7 +537,7 @@ void UObjectProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE
 		appSprintf( ValueStr, TEXT("None") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146580)
 const TCHAR* UObjectProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UObjectProperty::ImportText);
@@ -591,7 +591,7 @@ const TCHAR* UObjectProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT P
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144470)
 void UObjectProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(UObject**)Dest = *(UObject**)Src;
@@ -603,7 +603,7 @@ IMPLEMENT_CLASS(UObjectProperty);
 	UClassProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146790)
 void UClassProperty::Serialize( FArchive& Ar )
 {
 	UObjectProperty::Serialize( Ar );
@@ -616,38 +616,38 @@ IMPLEMENT_CLASS(UClassProperty);
 	UNameProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146850)
 void UNameProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(FName);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101468F0)
 UBOOL UNameProperty::Identical( const void* A, const void* B ) const
 {
 	return *(FName*)A == (B ? *(FName*)B : NAME_None);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144610)
 void UNameProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	Ar << *(FName*)Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144630)
 void UNameProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("FName") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147D00)
 void UNameProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	appSprintf( ValueStr, TEXT("%s"), **(FName*)PropertyValue );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146910)
 const TCHAR* UNameProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UNameProperty::ImportText);
@@ -660,7 +660,7 @@ const TCHAR* UNameProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Por
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101445B0)
 void UNameProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(FName*)Dest = *(FName*)Src;
@@ -672,38 +672,38 @@ IMPLEMENT_CLASS(UNameProperty);
 	UStrProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101469F0)
 void UStrProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(FString);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146AA0)
 UBOOL UStrProperty::Identical( const void* A, const void* B ) const
 {
 	return *(FString*)A == (B ? *(FString*)B : TEXT(""));
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101446D0)
 void UStrProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	Ar << *(FString*)Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101446F0)
 void UStrProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("FString") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146B90)
 void UStrProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	appSprintf( ValueStr, TEXT("\"%s\""), **(FString*)PropertyValue );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146C70)
 const TCHAR* UStrProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UStrProperty::ImportText);
@@ -747,13 +747,13 @@ const TCHAR* UStrProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Port
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147DE0)
 void UStrProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	*(FString*)Dest = *(FString*)Src;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10148090)
 void UStrProperty::DestroyValue( void* Dest ) const
 {
 	for( INT i=0; i<ArrayDim; i++ )
@@ -766,14 +766,14 @@ IMPLEMENT_CLASS(UStrProperty);
 	UFixedArrayProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146F00)
 void UFixedArrayProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << Inner << Count;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146E20)
 void UFixedArrayProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
@@ -781,7 +781,7 @@ void UFixedArrayProperty::Link( FArchive& Ar, UProperty* Prev )
 		ElementSize = Inner->ElementSize * Count;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144790)
 UBOOL UFixedArrayProperty::Identical( const void* A, const void* B ) const
 {
 	// Ghidra 0x44790: iterate all Count elements and compare via Inner->Identical.
@@ -795,36 +795,36 @@ UBOOL UFixedArrayProperty::Identical( const void* A, const void* B ) const
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101447F0)
 void UFixedArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	for( INT i=0; i<Count; i++ )
 		Inner->SerializeItem( Ar, (BYTE*)Value + i*Inner->ElementSize );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144850)
 void UFixedArrayProperty::ExportCppItem( FOutputDevice& Out ) const {}
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144900)
 void UFixedArrayProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	*ValueStr = 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144A00)
 const TCHAR* UFixedArrayProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	return Buffer;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144C10)
 void UFixedArrayProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	for( INT i=0; i<Count; i++ )
 		Inner->CopySingleValue( (BYTE*)Dest + i*Inner->ElementSize, (BYTE*)Src + i*Inner->ElementSize );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144C60)
 void UFixedArrayProperty::DestroyValue( void* Dest ) const
 {
 	for( INT i=0; i<Count; i++ )
@@ -837,21 +837,21 @@ IMPLEMENT_CLASS(UFixedArrayProperty);
 	UArrayProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147150)
 void UArrayProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << Inner;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147080)
 void UArrayProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	ElementSize = sizeof(FArray);
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144CA0)
 UBOOL UArrayProperty::Identical( const void* A, const void* B ) const
 {
 	// Ghidra 0x44ca0: compare element counts first, then compare each element via Inner->Identical.
@@ -886,7 +886,7 @@ UBOOL UArrayProperty::Identical( const void* A, const void* B ) const
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147E40)
 void UArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	guard(UArrayProperty::SerializeItem);
@@ -903,25 +903,25 @@ void UArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144D70)
 void UArrayProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("TArray") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144E30)
 void UArrayProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	*ValueStr = 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144F40)
 const TCHAR* UArrayProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	return Buffer;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UArrayProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	// Deep copy the dynamic array.
@@ -942,7 +942,7 @@ void UArrayProperty::CopySingleValue( void* Dest, void* Src ) const
 	}
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101471F0)
 void UArrayProperty::DestroyValue( void* Dest ) const
 {
 	guard(UArrayProperty::DestroyValue);
@@ -962,36 +962,36 @@ IMPLEMENT_CLASS(UArrayProperty);
 	UMapProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147360)
 void UMapProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << Key << Value;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147280)
 void UMapProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
 	// Map not used in Ravenshield.
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145270 size 8 bytes")
 UBOOL UMapProperty::Identical( const void* A, const void* B ) const
 {
 	// Ghidra 0x45270: maps are always considered identical (unused in Ravenshield).
 	return 1;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145280 size 3 bytes")
 void UMapProperty::SerializeItem( FArchive& Ar, void* Value ) const {}
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101452A0)
 void UMapProperty::ExportCppItem( FOutputDevice& Out ) const {}
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145370 size 3 bytes")
 void UMapProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const { *ValueStr = 0; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145380 size 7 bytes")
 const TCHAR* UMapProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const { return Buffer; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145390 size 3 bytes")
 void UMapProperty::CopySingleValue( void* Dest, void* Src ) const {}
 
 IMPLEMENT_CLASS(UMapProperty);
@@ -1000,14 +1000,14 @@ IMPLEMENT_CLASS(UMapProperty);
 	UStructProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147500)
 void UStructProperty::Serialize( FArchive& Ar )
 {
 	UProperty::Serialize( Ar );
 	Ar << Struct;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147410)
 void UStructProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	UProperty::Link( Ar, Prev );
@@ -1015,7 +1015,7 @@ void UStructProperty::Link( FArchive& Ar, UProperty* Prev )
 		ElementSize = Align( Struct->GetPropertiesSize(), PROPERTY_ALIGNMENT );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101480C0)
 UBOOL UStructProperty::Identical( const void* A, const void* B ) const
 {
 	guard(UStructProperty::Identical);
@@ -1025,7 +1025,7 @@ UBOOL UStructProperty::Identical( const void* A, const void* B ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145460)
 void UStructProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	guard(UStructProperty::SerializeItem);
@@ -1034,19 +1034,19 @@ void UStructProperty::SerializeItem( FArchive& Ar, void* Value ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101454D0)
 void UStructProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	Out.Logf( TEXT("F%s"), Struct ? Struct->GetName() : TEXT("Unknown") );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10148850)
 void UStructProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	*ValueStr = 0;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101489E0)
 const TCHAR* UStructProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UStructProperty::ImportText);
@@ -1080,13 +1080,13 @@ const TCHAR* UStructProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT P
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10148D10)
 void UStructProperty::CopySingleValue( void* Dest, void* Src ) const
 {
 	appMemcpy( Dest, Src, ElementSize );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145580)
 void UStructProperty::DestroyValue( void* Dest ) const
 {
 	guard(UStructProperty::DestroyValue);
@@ -1108,18 +1108,18 @@ IMPLEMENT_CLASS(UStructProperty);
 	UDelegateProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x1010DFF0)
 UDelegateProperty::UDelegateProperty()
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x1010E010)
 UDelegateProperty::UDelegateProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
 :	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
 {
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145DE0)
 void UDelegateProperty::Serialize( FArchive& Ar )
 {
 	guard(UDelegateProperty::Serialize);
@@ -1127,7 +1127,7 @@ void UDelegateProperty::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145E80)
 void UDelegateProperty::CleanupDestroyed( BYTE* Data ) const
 {
 	guard(UDelegateProperty::CleanupDestroyed);
@@ -1141,7 +1141,7 @@ void UDelegateProperty::CleanupDestroyed( BYTE* Data ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145CC0)
 void UDelegateProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	guard(UDelegateProperty::Link);
@@ -1151,7 +1151,7 @@ void UDelegateProperty::Link( FArchive& Ar, UProperty* Prev )
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145D60)
 UBOOL UDelegateProperty::Identical( const void* A, const void* B ) const
 {
 	guard(UDelegateProperty::Identical);
@@ -1161,7 +1161,7 @@ UBOOL UDelegateProperty::Identical( const void* A, const void* B ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143D70)
 void UDelegateProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
 {
 	guard(UDelegateProperty::ExportCppItem);
@@ -1169,7 +1169,7 @@ void UDelegateProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145D90)
 void UDelegateProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const
 {
 	guard(UDelegateProperty::SerializeItem);
@@ -1178,7 +1178,7 @@ void UDelegateProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadByt
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145DB0)
 UBOOL UDelegateProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const
 {
 	guard(UDelegateProperty::NetSerializeItem);
@@ -1187,7 +1187,7 @@ UBOOL UDelegateProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void*
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147AC0)
 void UDelegateProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const
 {
 	guard(UDelegateProperty::ExportTextItem);
@@ -1200,7 +1200,7 @@ void UDelegateProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BY
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10143E10 size 7 bytes")
 const TCHAR* UDelegateProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UDelegateProperty::ImportText);
@@ -1221,7 +1221,7 @@ const TCHAR* UDelegateProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143D00)
 void UDelegateProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const
 {
 	guard(UDelegateProperty::CopySingleValue);
@@ -1230,7 +1230,7 @@ void UDelegateProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperOb
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143D20)
 void UDelegateProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const
 {
 	guard(UDelegateProperty::CopyCompleteValue);
@@ -1245,7 +1245,7 @@ IMPLEMENT_CLASS(UDelegateProperty);
 	UStruct::SerializeBin with MaxReadBytes.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10116CA0)
 void UStruct::SerializeBin( FArchive& Ar, BYTE* Data, INT MaxReadBytes )
 {
 	SerializeBin( Ar, Data );
@@ -1255,7 +1255,7 @@ void UStruct::SerializeBin( FArchive& Ar, BYTE* Data, INT MaxReadBytes )
 	UNameProperty::CopyCompleteValue 2-arg.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101445C0)
 void UNameProperty::CopyCompleteValue( void* Dest, void* Src ) const
 {
 	*(FName*)Dest = *(FName*)Src;
@@ -1265,7 +1265,7 @@ void UNameProperty::CopyCompleteValue( void* Dest, void* Src ) const
 	UClassProperty::ImportText — delegates to UObjectProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147C50)
 const TCHAR* UClassProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	return UObjectProperty::ImportText( Buffer, Data, PortFlags );
@@ -1277,13 +1277,13 @@ const TCHAR* UClassProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT Po
 -----------------------------------------------------------------------------*/
 
 // UProperty base overloads.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101475A0)
 void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm, UBOOL IsStruct ) const
 {
 	ExportCpp( Out, IsLocal, IsParm );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
 	guard(UProperty::SerializeItem);
@@ -1291,19 +1291,19 @@ void UProperty::SerializeItem( FArchive& Ar, void* Value ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const
 {
 	SerializeItem( Ar, Value );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UProperty::SerializeBin( FArchive& Ar, BYTE* Data ) const
 {
 	SerializeItem( Ar, Data );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10143880 size 3 bytes")
 void UProperty::CleanupDestroyed( BYTE* Data ) const
 {
 	guard(UProperty::CleanupDestroyed);
@@ -1311,138 +1311,138 @@ void UProperty::CleanupDestroyed( BYTE* Data ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143890)
 void UProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const
 {
 	CopySingleValue( Dest, Src );
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101438E0)
 void UProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const
 {
 	CopyCompleteValue( Dest, Src );
 }
 
 // UByteProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145AE0)
 void UByteProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101439B0)
 void UByteProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143940)
 void UByteProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143950)
 void UByteProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
 
 // UIntProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145C80)
 void UIntProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143AF0)
 void UIntProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143A50)
 void UIntProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143A60)
 void UIntProperty::CopyCompleteValue( void* Dest, void* Src ) const { *(INT*)Dest = *(INT*)Src; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143A60)
 void UIntProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
 
 // UBoolProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143FD0)
 void UBoolProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10143E20)
 void UBoolProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144080)
 void UBoolProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
 
 // UFloatProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144130)
 void UFloatProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144170)
 void UFloatProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101440A0)
 void UFloatProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101440B0)
 void UFloatProperty::CopyCompleteValue( void* Dest, void* Src ) const { *(FLOAT*)Dest = *(FLOAT*)Src; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101440B0)
 void UFloatProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
 
 // UObjectProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101444C0)
 void UObjectProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144500)
 void UObjectProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144390)
 void UObjectProperty::CleanupDestroyed( BYTE* Data ) const {}
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144470)
 void UObjectProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146400)
 void UObjectProperty::CopyCompleteValue( void* Dest, void* Src ) const { *(UObject**)Dest = *(UObject**)Src; }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146400)
 void UObjectProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { CopyCompleteValue( Dest, Src ); }
 
 // UNameProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144610)
 void UNameProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144630)
 void UNameProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101445B0)
 void UNameProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101445C0)
 void UNameProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { UProperty::CopyCompleteValue( Dest, Src ); }
 
 // UStrProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101446D0)
 void UStrProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101446F0)
 void UStrProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { ExportCppItem( Out ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147DE0)
 void UStrProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146B00)
 void UStrProperty::Serialize( FArchive& Ar ) { UProperty::Serialize( Ar ); }
 
 // UFixedArrayProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101447F0)
 void UFixedArrayProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144850)
 void UFixedArrayProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* FixedArray */") ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146D70)
 void UFixedArrayProperty::CleanupDestroyed( BYTE* Data ) const {}
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144C10)
 void UFixedArrayProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144B20)
 void UFixedArrayProperty::AddCppProperty( UProperty* Property, INT Count ) {}
 
 // UArrayProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10147E40)
 void UArrayProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144D70)
 void UArrayProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Array */") ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10146FB0)
 void UArrayProperty::CleanupDestroyed( BYTE* Data ) const {}
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145190)
 void UArrayProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const { UProperty::CopyCompleteValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UArrayProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101450C0)
 void UArrayProperty::AddCppProperty( UProperty* Property ) { Inner = Property; }
 
 // UMapProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145280 size 3 bytes")
 void UMapProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101452A0)
 void UMapProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Map */") ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145390 size 3 bytes")
 void UMapProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101453A0 size 3 bytes")
 void UMapProperty::DestroyValue( void* Dest ) const {}
 
 // UStructProperty.
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145460)
 void UStructProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101454D0)
 void UStructProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Struct */") ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101453B0)
 void UStructProperty::CleanupDestroyed( BYTE* Data ) const {}
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10148D10)
 void UStructProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
 
 // UDelegateProperty — ExportCppItem already implemented in UnProp.cpp.
@@ -1451,21 +1451,21 @@ void UStructProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObje
 	NetSerializeItem overloads.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144020)
 UBOOL UBoolProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10144150)
 UBOOL UFloatProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10145CA0)
 UBOOL UIntProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x101444E0)
 UBOOL UObjectProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10144D60 size 8 bytes")
 UBOOL UArrayProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10144840 size 8 bytes")
 UBOOL UFixedArrayProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145290 size 8 bytes")
 UBOOL UMapProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_MATCH("Core.dll", 0x10148170)
 UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
 
 /*-----------------------------------------------------------------------------
@@ -1473,7 +1473,7 @@ UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* D
 	Needed because we declared virtual (non-pure) in UProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UProperty::ExportCppItem( FOutputDevice& Out ) const
 {
 	guard(UProperty::ExportCppItem);
@@ -1481,7 +1481,7 @@ void UProperty::ExportCppItem( FOutputDevice& Out ) const
 	unguard;
 }
 
-IMPL_APPROX("sdk/Ut99PubSrc/Core/Src/UnProp.cpp")
+IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
 void UProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
 {
 	guard(UProperty::ExportCppItem);

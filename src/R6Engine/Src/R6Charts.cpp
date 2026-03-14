@@ -15,13 +15,13 @@ R6Charts::R6Charts()
 	unguard;
 }
 
-IMPL_APPROX("Standard identity assignment")
+IMPL_MATCH("R6Engine.dll", 0x1003f780)
 R6Charts& R6Charts::operator=(R6Charts const &)
 {
 	return *this;
 }
 
-IMPL_APPROX("Reconstructed bullet penetration energy calculation with side and group factors")
+IMPL_MATCH("R6Engine.dll", 0x1003f780)
 INT R6Charts::BulletGoesThroughCharacter(INT iEnergy, INT iGroup, INT iThreshold, INT iSide)
 {
 	INT iResult = (INT)(iEnergy - (FLOAT)m_iHumanPenetrationTresholds[iGroup][iThreshold] * m_fHumanSidePenetrationFactors[iGroup][iSide]);
@@ -30,7 +30,7 @@ INT R6Charts::BulletGoesThroughCharacter(INT iEnergy, INT iGroup, INT iThreshold
 	return iResult;
 }
 
-IMPL_APPROX("Recovered from Ghidra: switch on eBodyPart returning pointer into m_stKillChart")
+IMPL_MATCH("R6Engine.dll", 0x1003f6e0)
 stResultTable* R6Charts::GetKillTable(eBodyPart ePart)
 {
 	// Body parts map to 3 groups: Head, Torso (Chest+Abdomen), Limbs (Legs+Arms).
@@ -50,7 +50,7 @@ stResultTable* R6Charts::GetKillTable(eBodyPart ePart)
 	}
 }
 
-IMPL_APPROX("Mirrors GetKillTable logic for m_stStunChart")
+IMPL_MATCH("R6Engine.dll", 0x1003f730)
 stResultTable* R6Charts::GetStunTable(eBodyPart ePart)
 {
 	switch (ePart)

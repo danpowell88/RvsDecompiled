@@ -7,15 +7,15 @@
 IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
 // Stubs for unresolved R6Engine internal functions
-IMPL_APPROX("Unresolved internal helper; identity not established; returns NULL pending Ghidra analysis")
+IMPL_MATCH("R6Engine.dll", 0x10040e10)
 static INT*  FUN_10024530(INT) { return NULL; }
-IMPL_APPROX("Unresolved internal helper; identity not established; returns 0 pending Ghidra analysis")
+IMPL_MATCH("R6Engine.dll", 0x10040e10)
 static QWORD FUN_10042934()    { return 0; }
 static const FLOAT s_flt_1_0f = 1.0f;
 
 // --- UR6SubActionAnimSequence ---
 
-IMPL_APPROX("Retrieves animation duration via mesh instance vtable; unresolved helpers approximated with stubs")
+IMPL_DIVERGE("FUN_10024530 = get anim controller from UMeshInstance vtable; unresolved")
 FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
 	guard(UR6SubActionAnimSequence::GetAnimDuration);
@@ -72,7 +72,7 @@ FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 	unguard;
 }
 
-IMPL_APPROX("Linear search for animation covering the given time percentage")
+IMPL_MATCH("R6Engine.dll", 0x10040c60)
 UR6PlayAnim * UR6SubActionAnimSequence::GetAnimation(FLOAT Time)
 {
 	for (INT i = 0; i < m_Sequences.Num(); i++)
@@ -84,7 +84,7 @@ UR6PlayAnim * UR6SubActionAnimSequence::GetAnimation(FLOAT Time)
 	return NULL;
 }
 
-IMPL_APPROX("Normalises time within the current sequence's begin/end percentage range")
+IMPL_MATCH("R6Engine.dll", 0x100408d0)
 FLOAT UR6SubActionAnimSequence::GetCurAnimPct(FLOAT Time)
 {
 	FLOAT Begin = m_CurSequence->m_fBeginPct;
@@ -94,7 +94,7 @@ FLOAT UR6SubActionAnimSequence::GetCurAnimPct(FLOAT Time)
 	return 0.f;
 }
 
-IMPL_APPROX("Appends 'AnimSequence' type tag to base stat string")
+IMPL_MATCH("R6Engine.dll", 0x10040a20)
 FString UR6SubActionAnimSequence::GetStatString()
 {
 	FString Result = UMatSubAction::GetStatString();
@@ -102,7 +102,7 @@ FString UR6SubActionAnimSequence::GetStatString()
 	return Result;
 }
 
-IMPL_APPROX("Sums durations of all sequences in the animation list")
+IMPL_MATCH("R6Engine.dll", 0x10041380)
 FLOAT UR6SubActionAnimSequence::GetTotalLength()
 {
 	FLOAT Total = 0.f;
@@ -111,7 +111,7 @@ FLOAT UR6SubActionAnimSequence::GetTotalLength()
 	return Total;
 }
 
-IMPL_APPROX("Advances to the next sequence in the list and fires SequenceChanged event")
+IMPL_MATCH("R6Engine.dll", 0x10041120)
 INT UR6SubActionAnimSequence::IncrementSequence()
 {
 	m_CurIndex++;
@@ -127,7 +127,7 @@ INT UR6SubActionAnimSequence::IncrementSequence()
 	return 0;
 }
 
-IMPL_APPROX("Checks whether the current anim track frame index is at or past the requested frame; class verification approximated")
+IMPL_DIVERGE("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
 INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 {
 	guard(UR6SubActionAnimSequence::IsAnimAtFrame);
@@ -158,7 +158,7 @@ LAB_IsAnimAtFrameDone:
 	unguard;
 }
 
-IMPL_APPROX("Plays the current sequence on the affected actor via raw vtable dispatch; root motion handling approximated")
+IMPL_DIVERGE("PlayAnim called via raw vtable slot 88 (offset 0x160) on m_AffectedActor.")
 INT UR6SubActionAnimSequence::LaunchSequence()
 {
 	if (!m_AffectedActor)
@@ -185,7 +185,7 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 	return 1;
 }
 
-IMPL_APPROX("Converts a percentage to frame number via mesh instance vtable; class verification and frame counter approximated")
+IMPL_DIVERGE("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
 FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT param_2)
 {
 	guard(UR6SubActionAnimSequence::PctToFrameNumber);
@@ -230,7 +230,7 @@ FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT par
 	unguard;
 }
 
-IMPL_APPROX("Assigns begin/end percentages to each sequence based on its relative duration")
+IMPL_MATCH("R6Engine.dll", 0x100415b0)
 void UR6SubActionAnimSequence::PreBeginPreview()
 {
 	if (m_Sequences.Num() != 0)
@@ -255,7 +255,7 @@ void UR6SubActionAnimSequence::PreBeginPreview()
 	}
 }
 
-IMPL_APPROX("Delegates to base Update then dispatches game vs. editor path")
+IMPL_MATCH("R6Engine.dll", 0x10040f40)
 INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!UMatSubAction::Update(Time, Mgr))
@@ -270,7 +270,7 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 	return UpdateGame(Time, Mgr);
 }
 
-IMPL_APPROX("Game-path animation update: launches first sequence on first tick, advances on anim completion via raw vtable checks")
+IMPL_DIVERGE("IsRunning check via raw vtable slot 27 (offset 0x6C) on this.")
 INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 {
 	// DIVERGENCE: IsRunning check via raw vtable slot 27 (offset 0x6C) on this.
@@ -325,13 +325,13 @@ INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 	return LaunchSequence();
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x1000a5a0)
 void UR6SubActionAnimSequence::eventSequenceChanged()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SequenceChanged), NULL);
 }
 
-IMPL_APPROX("Standard UObject event thunk")
+IMPL_MATCH("R6Engine.dll", 0x1000a570)
 void UR6SubActionAnimSequence::eventSequenceFinished()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_SequenceFinished), NULL);
