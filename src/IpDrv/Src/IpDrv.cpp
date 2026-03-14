@@ -470,7 +470,8 @@ void AInternetLink::execValidate(FFrame& Stack, RESULT_DECL)
 	P_GET_STR(ProductID);
 	P_GET_STR(CDKey);
 	P_FINISH;
-	// TODO: implement CD key validation (calls FUN_10703730/10703800/10703870/10703b90)
+	// DIVERGENCE: CD key validation called GameSpy CDKey SDK (FUN_10703730/10703800/10703870/10703b90).
+	// GameSpy services have been defunct since 2014; returning empty string (= validation skipped).
 	*(FString*)Result = TEXT("");
 }
 
