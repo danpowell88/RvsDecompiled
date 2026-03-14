@@ -145,13 +145,12 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103FB160 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103FB160: terrain sector iteration and BSP ConvexVolumeMultiCheck loops (1291b) — FUN_103f82f0 (render info init) partially resolved; sector/BSP loops unresolved")
 void AProjector::Attach()
 {
-	// Retail: 0xfb160, 1291b. Build the projection matrix then allocate and populate
-	// a FProjectorRenderInfo, and attach to terrain/BSP as appropriate.
-	// DIVERGENCE: terrain sector iteration and BSP ConvexVolumeMultiCheck loop not
-	// reconstructed — projector attaches without terrain/BSP surface info.
+	// Ghidra 0xfb160 (1291b): CalcMatrix(), editor snapshot, allocate FProjectorRenderInfo,
+	// copy colour tints, then iterate terrain sectors (bit 1 of +0x3A0) and BSP surfaces
+	// (bit 0 of +0x3A0) via FUN_103f82f0. Terrain/BSP loops not reconstructed.
 
 	// Recalculate projection matrix
 	CalcMatrix();
@@ -197,16 +196,17 @@ void AProjector::Attach()
 		}
 	}
 
-	// DIVERGENCE: terrain attachment (bit 1 of this+0x3a0) and
-	// BSP attachment (bit 0 of this+0x3a0) — loops not reconstructed (see above).
+	// DIVERGENCE: terrain attachment (bit 1 of this+0x3A0) and
+	// BSP attachment (bit 0 of this+0x3A0) loops not reconstructed.
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103F8F90 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103F8F90: FCoords rotation decomposition and 8 frustum corner generation (4699b) — matrix/coord helper FUN_ calls unresolved")
 void AProjector::CalcMatrix()
 {
-	// Retail: 0xf8f90, 4699b. Builds projection matrix and 8 frustum corner points
-	// from position, rotation, FOV, and draw-distance properties.
-	// DIVERGENCE: FCoords construction and matrix-multiply helpers not reconstructed.
+	// Ghidra 0xf8f90 (4699b): builds AProjector's projection matrix from Position/Rotation/FOV
+	// and generates the 8 frustum corner points. Requires FCoords rotation helpers and
+	// several FMatrix multiply functions that are not yet decompiled.
+	// DIVERGENCE: all matrix/coord helper calls (FUN_1038e680, FUN_103906b0 etc.) unresolved.
 }
 
 IMPL_MATCH("Engine.dll", 0x103060a0)
