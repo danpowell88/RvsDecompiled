@@ -631,11 +631,23 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 	}
 }
 
-IMPL_DIVERGE("retail 0x10414e50 (772b): complex sin/cos cylinder loop; implementable but not yet done")
+IMPL_MATCH("Engine.dll", 0x10414e50)
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
-	// Ghidra 0x114e50: too complex to fully decompile; left empty.
-	// TODO: implement FLineBatcher::DrawCylinder (Ghidra 0x114e50)
+	// Ghidra 0x114e50 (772b): loop identical to DrawCircle but draws 3 lines per step:
+	// bottom ring (Prev-Z*HH → Curr-Z*HH), top ring (Prev+Z*HH → Curr+Z*HH),
+	// and vertical strut (Prev-Z*HH → Prev+Z*HH). Initial point at angle 0 = Base+X*Radius.
+	const FLOAT StepAngle = 2.0f * PI / (FLOAT)NumSides;
+	FVector Prev = Base + X * (Radius * appCos(0.0f)) + Y * (Radius * appSin(0.0f));
+	for (INT i = 1; i <= NumSides; i++)
+	{
+		const FLOAT Angle = (FLOAT)i * StepAngle;
+		FVector Curr = Base + X * (Radius * appCos(Angle)) + Y * (Radius * appSin(Angle));
+		DrawLine(Prev - Z * HalfHeight, Curr - Z * HalfHeight, Color);
+		DrawLine(Prev + Z * HalfHeight, Curr + Z * HalfHeight, Color);
+		DrawLine(Prev - Z * HalfHeight, Prev + Z * HalfHeight, Color);
+		Prev = Curr;
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10415190)
@@ -678,11 +690,20 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_DIVERGE("retail 0x10414b90 (656b): FMatrix rotation per ring; implementable but not yet done")
+IMPL_DIVERGE("Ghidra 0x10414b90 (656b): uses FUN_10370d70 (unresolved FMatrix ctor from FRotator) — replaced with FCoords/FRotator which produces equivalent axes")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
-	// Ghidra 0x114b90: too complex to fully decompile (FMatrix rotation per ring); left empty.
-	// TODO: implement FLineBatcher::DrawSphere (Ghidra 0x114b90: complex FMatrix rotation per ring)
+	// Retail loops NumSides times using FRotator→FMatrix via FUN_10370d70 to derive circle axes.
+	// We replicate using GMath.UnitCoords / FRotator which gives the same transformed axes.
+	const INT Step = 0x10000 / NumSides;
+	INT Angle = 0;
+	for (INT i = 0; i < NumSides; i++, Angle += Step)
+	{
+		FCoords C1 = GMath.UnitCoords / FRotator(Angle, 0, 0);
+		DrawCircle(Center, C1.XAxis, C1.YAxis, Color, Radius, NumSides);
+		FCoords C2 = GMath.UnitCoords / FRotator(0, Angle, 0);
+		DrawCircle(Center, C2.YAxis, C2.ZAxis, Color, Radius, NumSides);
+	}
 }
 
 IMPL_DIVERGE("retail 0x104172a0 (813b): GCache + UProxyBitmapMaterial proxy + vertex stream submit; multiple unresolved DAT globals")
@@ -1152,12 +1173,13 @@ int FStaticLightMapTexture::GetRevision()
 {
 return *(INT*)(Pad + 68);
 }
-IMPL_DIVERGE("retail 0x1040fd90 (159b): format assert, lazy-load, then FUN_10301050 (unresolved memory copy helper); data copy omitted")
+IMPL_MATCH("Engine.dll", 0x1040fd90)
 void FStaticLightMapTexture::GetTextureData(int MipIndex,void * Dest,int Size,ETextureFormat Format,int bShrink)
 {
 	guard(FStaticLightMapTexture::GetTextureData);
-	// Retail 0x1040fd90: asserts format matches, lazy-loads mip, then calls FUN_10301050(Dest, data, byteCount).
-	// FUN_10301050 is an unresolved memory copy helper; data copy is omitted here.
+	// Ghidra 0x10fd90: assert format matches TLazyArray element format at +0x34,
+	// lazy-load mip data via vtable call at (this + MipIndex*0x18 + 4) if not yet loaded,
+	// then copy raw byte count via FUN_10301050(Dest, data, Num) = appMemcpy.
 	check(Format == (ETextureFormat)*(int*)((BYTE*)this + 0x34));
 	FArray* arr = (FArray*)((BYTE*)this + MipIndex * 0x18 + 0x10);
 	if (arr->Num() == 0)
@@ -1165,7 +1187,7 @@ void FStaticLightMapTexture::GetTextureData(int MipIndex,void * Dest,int Size,ET
 		void** vt = *(void***)((BYTE*)this + MipIndex * 0x18 + 4);
 		((void (__thiscall*)(void*))vt[0])((void*)((BYTE*)this + MipIndex * 0x18 + 4));
 	}
-	// FUN_10301050(Dest, arr->GetData(), arr->Num()) — unresolved; data copy omitted
+	appMemcpy(Dest, *(void**)arr, arr->Num()); // FUN_10301050 = appMemcpy
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10414310)
@@ -1883,14 +1905,15 @@ int FStaticCubemap::GetWidth()
 
 
 // --- FTempLineBatcher ---
-IMPL_DIVERGE("retail 0x104180b0 (454b) uses DAT_1060b564 counter for FLineBatcher cache ID; approximated")
+IMPL_DIVERGE("retail 0x104180b0 (454b): constructs a stack-local FLineBatcher (vtable + FArray only) rather than a full FLineBatcher object; our version uses the full ctor/dtor")
 void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 {
-	// Ghidra 0x1180b0: create a temporary FLineBatcher, draw all stored lines and boxes, flush.
-	// Line starts at this+0, ends at this+0xC, line colors at this+0x18 (DWORD in FLOAT slot).
-	// Boxes at this+0x24, box colors at this+0x30.
-	// DIVERGENCE: FLineBatcher ctor args (cache-key counter DAT_1060b564) not reconstructed;
-	// using FLineBatcher(RI, Flags, 0) and relying on existing ctor stub.
+	// Ghidra 0x1180b0: sets local_30 = &FLineBatcher::_vftable_, initialises a bare FArray
+	// at local_2c, sets the cache ID using DAT_1060b564 (= (QWORD)DAT_1060b564 * 0x100 + 0xe1),
+	// increments DAT_1060b564, then iterates Start/End TArrays at this+0/+0xC and Box TArrays
+	// at this+0x24, calling FLineBatcher::DrawLine/DrawBox on the stack-local batcher.
+	// DIVERGENCE: retail builds a lightweight stack struct (vtable ptr + FArray, no full ctor);
+	// our version uses the full FLineBatcher ctor/dtor path with the same draw calls.
 	FLineBatcher Batcher(RI, Flags, 0);
 	TArray<FVector>* Starts     = (TArray<FVector>*)((BYTE*)this + 0x00);
 	TArray<FVector>* Ends       = (TArray<FVector>*)((BYTE*)this + 0x0C);

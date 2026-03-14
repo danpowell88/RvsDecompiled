@@ -195,8 +195,8 @@ int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 	{
 		FLOAT fVal; appMemcpy(&fVal, puVar6, 4); puVar6 += 4;
 		*(FLOAT*)((BYTE*)arr + iVar4) = fVal;
-		SWORD sVal; appMemcpy(&sVal, puVar6, 4); puVar6 += 4;
-		*(SWORD*)((BYTE*)arr + iVar4 + 4) = sVal;
+		INT sValRaw; appMemcpy(&sValRaw, puVar6, 4); puVar6 += 4; // retail reads 4 bytes; lower 2 used as count
+		*(SWORD*)((BYTE*)arr + iVar4 + 4) = (SWORD)sValRaw;
 		_WORD count2 = *(_WORD*)((BYTE*)arr + iVar4 + 4);
 		if (count2 != 0)
 		{
@@ -283,7 +283,7 @@ UClass * UMesh::MeshGetInstanceClass()
 
 
 // --- UMeshAnimation ---
-IMPL_DIVERGE("FUN_10430990 not called; retail 0x10430b80 (159b) returns true per-item footprint")
+IMPL_DIVERGE("calls FUN_10430990 (unresolved per-sequence memory footprint helper); fixed stride returned instead; retail 0x10430b80 (159b)")
 int UMeshAnimation::SequenceMemFootprint(FName Name)
 {
 	// Retail: 0x130b80, ordinal 4365. Searches Sequences TArray (this+0x48, stride 0x2C)
@@ -310,7 +310,7 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	return 0;
 }
 
-IMPL_DIVERGE("TArray serializer helpers unresolved; retail 0x1043fee0 (135b) serializes all arrays")
+IMPL_DIVERGE("calls FUN_10437c90/FUN_1043fd50/FUN_1043f770 (unresolved TArray serializers at +0x30/+0x3C/+0x48); retail 0x1043fee0 (135b)")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
@@ -322,7 +322,7 @@ void UMeshAnimation::Serialize(FArchive& Ar)
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
 
-IMPL_DIVERGE("FUN_10430990 not called; retail 0x10430ae0 (103b) accumulates per-item footprint")
+IMPL_DIVERGE("calls FUN_10430990 (unresolved per-sequence footprint helper) per Movements entry; accumulation omitted; retail 0x10430ae0 (103b)")
 int UMeshAnimation::MemFootprint()
 {
 	// Retail: 0x130ae0, ordinal 3775. Sums memory footprint across all entries in
@@ -341,7 +341,7 @@ int UMeshAnimation::MemFootprint()
 	return total;
 }
 
-IMPL_DIVERGE("FUN_103ca8f0 not called; retail 0x10430a30 (119b) preloads linked animation packages")
+IMPL_DIVERGE("calls FUN_103ca8f0 (unresolved lazy package preload helper) per Sequences entry; retail 0x10430a30 (119b)")
 void UMeshAnimation::PostLoad()
 {
 	// Ghidra 0x130a30: UObject::PostLoad, then iterate Sequences (this+0x48) once per
@@ -414,7 +414,7 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 	return NULL;
 }
 
-IMPL_DIVERGE("reconstructed from Ghidra 0x1033a490 (139b); SEH frame and allocator omitted")
+IMPL_DIVERGE("calls FUN_1032b9b0 (unresolved digest struct initializer) after GMalloc alloc; replaced with appMalloc; retail 0x1033a490 (139b)")
 void UMeshAnimation::InitForDigestion()
 {
 	guard(UMeshAnimation::InitForDigestion);
@@ -491,7 +491,7 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_DIVERGE("TArray serializers omitted; retail 0x104758b0 (424b) serializes vert mesh arrays")
+IMPL_DIVERGE("calls FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0 (unresolved TArray serializers at +0xF4/+0x10C/+0x118/+0x100); retail 0x104758b0 (424b)")
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
@@ -522,7 +522,7 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("FUN_103ca8f0 not called; retail 0x10472830 (124b) preloads linked anim packages")
+IMPL_DIVERGE("calls FUN_103ca8f0 (unresolved lazy package preload helper) per AnimSets entry; retail 0x10472830 (124b)")
 void UVertMesh::PostLoad()
 {
 	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
@@ -892,7 +892,7 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 	return USkeletalMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("LOD version check and auto-generation skipped; retail 0x1042f4b0 (232b)")
+IMPL_DIVERGE("vtable call on stream at this+0xF4 unresolved; auto-generation via GenerateLodModel (when LOD array empty) also skipped; retail 0x1042f4b0 (232b)")
 void USkeletalMesh::PostLoad()
 {
 	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version at +0x5C < 2,
