@@ -516,42 +516,42 @@ void UR6AbstractGameManager::StartPreJoinProcedure(int)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific game-service teardown; SDK types not available")
 void UR6AbstractGameManager::UnInitialize()
 {
 	guard(UR6AbstractGameManager::UnInitialize);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires UbiSoft GS (UbisoftGameService) SDK; server-creation types not available")
 void UR6AbstractGameManager::SetGSCreateUbiServer(int)
 {
 	guard(UR6AbstractGameManager::SetGSCreateUbiServer);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific listen-server and game-service SDK types not available")
 void UR6AbstractGameManager::LaunchListenSrv(FString,FString)
 {
 	guard(UR6AbstractGameManager::LaunchListenSrv);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific game-service session management; SDK types not available")
 void UR6AbstractGameManager::ClientLeaveServer()
 {
 	guard(UR6AbstractGameManager::ClientLeaveServer);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific UbiSoft connection-error handler SDK types not available")
 void UR6AbstractGameManager::ConnectionInterrupted(int)
 {
 	guard(UR6AbstractGameManager::ConnectionInterrupted);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific UbiSoft game-service polling; SDK types not available")
 void UR6AbstractGameManager::GameServiceTick(UConsole *)
 {
 	guard(UR6AbstractGameManager::GameServiceTick);
@@ -565,7 +565,7 @@ int UR6AbstractGameManager::GetGSCreateUbiServer()
 	return 0;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_DIVERGE("Requires R6-specific UbiSoft game-service SDK initialization; types not available")
 void UR6AbstractGameManager::InitializeGameService(UConsole *)
 {
 	guard(UR6AbstractGameManager::InitializeGameService);
@@ -574,14 +574,14 @@ void UR6AbstractGameManager::InitializeGameService(UConsole *)
 
 
 // --- UR6AbstractPlanningInfo ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; planning info serialization field layout requires Ghidra analysis")
 void UR6AbstractPlanningInfo::TransferFile(FArchive &)
 {
 	guard(UR6AbstractPlanningInfo::TransferFile);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Body unknown; path waypoint addition logic requires Ghidra analysis")
 void UR6AbstractPlanningInfo::AddPoint(AActor *)
 {
 	guard(UR6AbstractPlanningInfo::AddPoint);
@@ -667,9 +667,9 @@ int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 // ============================================================================
 
 // ??0UR6AbstractTerroristMgr@@QAE@XZ
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Default constructor; member initialization layout requires Ghidra analysis")
 UR6AbstractTerroristMgr::UR6AbstractTerroristMgr() {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Default constructor; member initialization layout requires Ghidra analysis")
 AR6AbstractClimbableObj::AR6AbstractClimbableObj() {}
