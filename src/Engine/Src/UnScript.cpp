@@ -26,11 +26,10 @@ void UAnimNotify::PostEditChange()
 }
 
 
-// --- UAnimNotify_DestroyEffect ---
-// GHIDRA REF: 0x136ec0 (~120 bytes)
-// Iterates XLevel->Actors in reverse; for each actor whose Owner == Owner and
-// Tag == DestroyTag: if bExpireParticles, tries to expire via AEmitter vtable;
-// otherwise calls ULevel::DestroyActor(actor, 0).
+// DIVERGENCE: UAnimNotify_DestroyEffect::Notify not yet implemented.
+// GHIDRA REF: 0x136ec0 — iterates XLevel->Actors, destroys/expires particle actors
+// owned by Owner whose Tag matches DestroyTag. Complex actor iteration + conditional
+// ULevel::DestroyActor / UParticleEmitter::expire dispatch not yet reconstructed.
 void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_DestroyEffect::Notify);
@@ -68,26 +67,20 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimNotify_Effect ---
-// GHIDRA REF: 0x136b20 (~875 bytes)
-// Spawns EffectClass at Owner's location/rotation, optionally attached to a
-// bone.  Body involves FCoords rotation construction from bone transform,
-// bone-relative offsets, and SpawnActor — complex enough that reconstruction
-// risks subtle divergence in coordinate-frame math.
-// DIVERGENCE: spawn omitted; the effect simply doesn't play.
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
-	// DIVERGENCE: see comment above.
+	// DIVERGENCE: UAnimNotify_Effect::Notify not yet implemented.
+	// GHIDRA REF: 0x136b20 — 875 bytes. Spawns the Effect actor (this->Effect at +0x40)
+	// at Owner's location/rotation using FCoords rotation math and SpawnActor.
+	// Full reconstruction requires FCoords helpers not yet available.
 	unguard;
 }
 
 
-// --- UAnimNotify_MatSubAction ---
-// GHIDRA REF: 0x136fe0
-// Finds the first live ASceneManager in XLevel->Actors and calls
-// SubAction->Start() on it, adjusting start/end times relative to the scene
-// manager's current play position and total duration.
-// DIVERGENCE: ASceneManager vtable layout not fully reconstructed; omitted.
+// DIVERGENCE: UAnimNotify_MatSubAction::Notify not yet implemented.
+// GHIDRA REF: 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts
+// the SubAction on it, adjusting start/end times from scene manager position.
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
