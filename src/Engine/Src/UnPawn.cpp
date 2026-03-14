@@ -246,7 +246,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e590; 289b -- reconstructed from context, parity unverified")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -269,7 +269,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e030; 273b -- reconstructed from context, parity unverified")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -280,7 +280,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e150; 286b -- reconstructed from context, parity unverified")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -291,7 +291,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e6c0; 131b -- reconstructed from context, parity unverified")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -300,7 +300,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038ce20; 236b -- reconstructed from context, parity unverified")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -309,7 +309,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10390770; 281b -- reconstructed from context, parity unverified")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -319,7 +319,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038df50; 209b -- reconstructed from context, parity unverified")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -329,7 +329,7 @@ void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 526, execPickWallAdjust );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cce0; 77b -- reconstructed from context, parity unverified")
 void AController::execAddController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execAddController);
@@ -344,7 +344,7 @@ void AController::execAddController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 529, execAddController );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cd30; 139b -- reconstructed from context, parity unverified")
 void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execRemoveController);
@@ -374,7 +374,7 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714b -- reconstructed from context, parity unverified")
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
@@ -389,7 +389,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038dc20; 688b -- reconstructed from context, parity unverified")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -403,7 +403,7 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d870; 416b -- reconstructed from context, parity unverified")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
@@ -414,7 +414,7 @@ void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10390890; 162b -- reconstructed from context, parity unverified")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEndClimbLadder);
@@ -425,7 +425,7 @@ void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d090; 114b -- reconstructed from context, parity unverified")
 void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execInLatentExecution);
@@ -436,7 +436,7 @@ void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execInLatentExecution );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cc90; 71b -- reconstructed from context, parity unverified")
 void AController::execStopWaiting( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execStopWaiting);
@@ -448,7 +448,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103900a0; 1734b -- reconstructed from context, parity unverified")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -459,7 +459,7 @@ void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 524, execFindStairRotation );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f400; 228b -- reconstructed from context, parity unverified")
 void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execResetKeyboard);
@@ -468,7 +468,7 @@ void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038eff0; 372b -- reconstructed from context, parity unverified")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -480,7 +480,7 @@ void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038da50; 299b -- reconstructed from context, parity unverified")
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
@@ -495,7 +495,7 @@ void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103919e0; 330b -- reconstructed from context, parity unverified")
 void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetDefaultURL);
@@ -506,7 +506,7 @@ void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetDefaultURL );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f1a0; 263b -- reconstructed from context, parity unverified")
 void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEntryLevel);
@@ -516,7 +516,7 @@ void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetEntryLevel );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f2e0; 226b -- reconstructed from context, parity unverified")
 void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetViewTarget);
@@ -528,7 +528,7 @@ void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10425910; 292b -- reconstructed from context, parity unverified")
 void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientTravel);
@@ -540,7 +540,7 @@ void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientTravel );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10425c90; 259b -- reconstructed from context, parity unverified")
 void APlayerController::execClientHearSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientHearSound);
@@ -554,7 +554,7 @@ void APlayerController::execClientHearSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientHearSound );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra catch-only at 0x1042c22b; function body not exported; returns empty FString")
 void APlayerController::execGetPlayerNetworkAddress( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPlayerNetworkAddress);
@@ -564,7 +564,7 @@ void APlayerController::execGetPlayerNetworkAddress( FFrame& Stack, RESULT_DECL 
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPlayerNetworkAddress );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10420680; 169b -- reconstructed from context, parity unverified")
 void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execCopyToClipboard);
@@ -575,7 +575,7 @@ void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execCopyToClipboard );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10420760; 190b -- reconstructed from context, parity unverified")
 void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPasteFromClipboard);
@@ -585,7 +585,7 @@ void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execPasteFromClipboard );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10420230; 88b -- reconstructed from context, parity unverified")
 void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSpecialDestroy);
@@ -594,7 +594,7 @@ void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cc50; 59b -- reconstructed from context, parity unverified")
 void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPB_CanPlayerSpawn);
@@ -604,7 +604,7 @@ void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1042c250; 562b -- reconstructed from context, parity unverified")
 void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPBConnectStatus);
@@ -614,7 +614,7 @@ void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPBConnectStatus );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10420290; 105b -- reconstructed from context, parity unverified")
 void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execIsPBEnabled);
@@ -624,7 +624,7 @@ void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execIsPBEnabled );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f520; 299b -- reconstructed from context, parity unverified")
 void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetKey);
@@ -635,7 +635,7 @@ void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2706, execGetKey );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f7a0; 288b -- reconstructed from context, parity unverified")
 void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetActionKey);
@@ -646,7 +646,7 @@ void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2707, execGetActionKey );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f680; 231b -- reconstructed from context, parity unverified")
 void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEnumName);
@@ -657,7 +657,7 @@ void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2708, execGetEnumName );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038f900; 168b -- reconstructed from context, parity unverified")
 void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeInputSet);
@@ -667,7 +667,7 @@ void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10391770; 451b -- reconstructed from context, parity unverified")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
@@ -678,7 +678,7 @@ void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2710, execSetKey );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cb30; 102b -- reconstructed from context, parity unverified")
 void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetSoundOptions);
@@ -688,7 +688,7 @@ void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cba0; 172b -- reconstructed from context, parity unverified")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeVolumeTypeLinear);
@@ -701,7 +701,7 @@ IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
 
 /*-- AAIController functions -------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038cf10; 203b -- reconstructed from context, parity unverified")
 void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execWaitToSeeEnemy);
@@ -711,7 +711,7 @@ void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execWaitToSeeEnemy );
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038e7c0; 163b -- reconstructed from context, parity unverified")
 void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execPollWaitToSeeEnemy);
@@ -730,13 +730,13 @@ IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execPollWaitToSeeEnemy );
 	Reconstructed from Ghidra decompilation + UT99 reference.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10301a90; 3b -- reconstructed from context, parity unverified")
 APawn* APawn::GetPawnOrColBoxOwner() const
 {
 	return (APawn*)this;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10301a90; 3b -- reconstructed from context, parity unverified")
 APawn* APawn::GetPlayerPawn() const
 {
 	// Retail: 8B C1 C3 = mov eax,ecx; ret — APawn always returns itself.
@@ -774,7 +774,7 @@ INT APawn::IsHumanControlled()
 	return Controller && Controller->IsA(APlayerController::StaticClass());
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e4fd0; 33b -- reconstructed from context, parity unverified")
 INT APawn::IsLocallyControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
@@ -894,7 +894,7 @@ void APawn::SetPrePivot( FVector NewPrePivot )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103982c0; 206b -- reconstructed from context, parity unverified")
 void APawn::CheckForErrors()
 {
 	guard(APawn::CheckForErrors);
@@ -902,7 +902,7 @@ void APawn::CheckForErrors()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra catch-only at 0x103ecab6; full body not exported; returns Delta as stub")
 FVector APawn::CheckForLedges( AActor* HitActor, FVector Loc, FVector Delta, FVector GravDir, INT& bShouldJump, INT& bCheckedFall, FLOAT DeltaTime )
 {
 	guard(APawn::CheckForLedges);
@@ -910,7 +910,7 @@ FVector APawn::CheckForLedges( AActor* HitActor, FVector Loc, FVector Delta, FVe
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103ea860; 166b -- reconstructed from context, parity unverified")
 void APawn::Destroy()
 {
 	guard(APawn::Destroy);
@@ -920,7 +920,7 @@ void APawn::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra catch at 0x103ec90b is for AActor::FindSlopeRotation; APawn override not found; delegates to AActor")
 FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 {
 	guard(APawn::FindSlopeRotation);
@@ -928,7 +928,7 @@ FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e50c0; 360b -- reconstructed from context, parity unverified")
 FLOAT APawn::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(APawn::GetNetPriority);
@@ -938,7 +938,7 @@ FLOAT APawn::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra: APawn::GetOptimizedRepList body not exported; delegates to AActor base")
 INT* APawn::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(APawn::GetOptimizedRepList);
@@ -947,7 +947,7 @@ INT* APawn::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, I
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e8370; 168b -- reconstructed from context, parity unverified")
 INT APawn::HurtByVolume( AActor* V )
 {
 	guard(APawn::HurtByVolume);
@@ -976,7 +976,7 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 	return AActor::IsBlockedBy(Other);
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c4b30; 2176b -- reconstructed from context, parity unverified")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
@@ -984,7 +984,7 @@ INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVec
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5700; 79b -- reconstructed from context, parity unverified")
 void APawn::NotifyAnimEnd( INT Channel )
 {
 	guard(APawn::NotifyAnimEnd);
@@ -992,7 +992,7 @@ void APawn::NotifyAnimEnd( INT Channel )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103b7420; 63b -- reconstructed from context, parity unverified")
 void APawn::NotifyBump( AActor* Other )
 {
 	guard(APawn::NotifyBump);
@@ -1002,7 +1002,7 @@ void APawn::NotifyBump( AActor* Other )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5280; 155b -- reconstructed from context, parity unverified")
 void APawn::PostBeginPlay()
 {
 	guard(APawn::PostBeginPlay);
@@ -1010,7 +1010,7 @@ void APawn::PostBeginPlay()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1037d840; 501b -- reconstructed from context, parity unverified")
 void APawn::PostNetReceive()
 {
 	guard(APawn::PostNetReceive);
@@ -1018,7 +1018,7 @@ void APawn::PostNetReceive()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10378250; 883b -- reconstructed from context, parity unverified")
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
@@ -1026,7 +1026,7 @@ void APawn::PostNetReceiveLocation()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10377ff0; 210b -- reconstructed from context, parity unverified")
 void APawn::PreNetReceive()
 {
 	guard(APawn::PreNetReceive);
@@ -1050,7 +1050,7 @@ DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103ebe70; 310b -- reconstructed from context, parity unverified")
 INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::Reachable);
@@ -1092,7 +1092,7 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c35b0; 125b -- reconstructed from context, parity unverified")
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
@@ -1105,7 +1105,7 @@ INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra: APawn::RenderEditorSelected body not exported; delegates to AActor base")
 void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
 	guard(APawn::RenderEditorSelected);
@@ -1113,7 +1113,7 @@ void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* 
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1037c590; 140b -- reconstructed from context, parity unverified")
 void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(APawn::SetBase);
@@ -1121,7 +1121,7 @@ void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103bd4a0; 573b -- reconstructed from context, parity unverified")
 void APawn::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(APawn::SetZone);
@@ -1129,7 +1129,7 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5630; 204b -- reconstructed from context, parity unverified")
 INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
 	guard(APawn::ShouldTrace);
@@ -1137,7 +1137,7 @@ INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("AActor::SmoothHitWall at 0x103f15c0 (38b); APawn override not separately exported; delegates to processHitWall")
 void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::SmoothHitWall);
@@ -1145,7 +1145,7 @@ void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c36c0; 145b -- reconstructed from context, parity unverified")
 void APawn::TickSimulated( FLOAT DeltaTime )
 {
 	guard(APawn::TickSimulated);
@@ -1153,7 +1153,7 @@ void APawn::TickSimulated( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c3760; 267b -- reconstructed from context, parity unverified")
 void APawn::TickSpecial( FLOAT DeltaTime )
 {
 	guard(APawn::TickSpecial);
@@ -1213,7 +1213,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103ebfe0; 983b -- reconstructed from context, parity unverified")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -1513,7 +1513,7 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103f1a50; 844b -- reconstructed from context, parity unverified")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);
@@ -1522,7 +1522,7 @@ void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra catch-only at 0x103f2059; APawn::processLanded body not fully exported; fires eventNotifyLanded+eventLanded")
 void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingTime, INT Iterations )
 {
 	guard(APawn::processLanded);
@@ -1532,7 +1532,7 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103eea80; 2043b -- reconstructed from context, parity unverified")
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
@@ -1544,7 +1544,7 @@ void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckRe
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c3410; 74b -- reconstructed from context, parity unverified")
 INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AActor* Viewer)
 {
 	guard(APawn::CacheNetRelevancy);
@@ -1615,7 +1615,7 @@ void APawn::Crouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e9020; 332b -- reconstructed from context, parity unverified")
 ETestMoveResult APawn::FindBestJump(FVector Dest)
 {
 	guard(APawn::FindBestJump);
@@ -1635,7 +1635,7 @@ ETestMoveResult APawn::FindBestJump(FVector Dest)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e8de0; 513b -- reconstructed from context, parity unverified")
 ETestMoveResult APawn::FindJumpUp(FVector Dest)
 {
 	guard(APawn::FindJumpUp);
@@ -1743,7 +1743,7 @@ void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra catch-only at 0x103e69b8; SuggestJumpVelocity body not exported; returns zero vector stub")
 FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJumpZ)
 {
 	guard(APawn::SuggestJumpVelocity);
@@ -1751,7 +1751,7 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103f3e60; 514b -- reconstructed from context, parity unverified")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
@@ -1813,7 +1813,7 @@ INT APawn::ValidAnchor()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e9f00; 184b -- reconstructed from context, parity unverified")
 void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 {
 	guard(APawn::ZeroMovementAlpha);
@@ -1849,7 +1849,7 @@ ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5050; 100b -- reconstructed from context, parity unverified")
 INT APawn::calcMoveFlags()
 {
 	guard(APawn::calcMoveFlags);
@@ -1866,7 +1866,7 @@ INT APawn::calcMoveFlags()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103f06e0; 248b -- reconstructed from context, parity unverified")
 INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 {
 	guard(APawn::checkFloor);
@@ -1883,7 +1883,7 @@ INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1041c130; 56b -- reconstructed from context, parity unverified")
 void APawn::clearPath(ANavigationPoint* Node)
 {
 	guard(APawn::clearPath);
@@ -1950,7 +1950,7 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1041cfa0; 1916b -- reconstructed from context, parity unverified")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -1958,7 +1958,7 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra address unknown; reconstructed from context, parity unverified")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
@@ -1966,7 +1966,7 @@ FVector APawn::findWaterLine(FVector Start, FVector End)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e6e50; 629b -- reconstructed from context, parity unverified")
 ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::flyMove);
@@ -1982,7 +1982,7 @@ INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e88b0; 1264b -- reconstructed from context, parity unverified")
 ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 {
 	guard(APawn::jumpLanding);
@@ -1990,7 +1990,7 @@ ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e87e0; 200b -- reconstructed from context, parity unverified")
 INT APawn::jumpReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::jumpReachable);
@@ -2004,7 +2004,7 @@ INT APawn::jumpReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra catch-only at 0x103ebe4a; ladderReachable body not fully exported; delegates to walkReachable")
 INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::ladderReachable);
@@ -2071,7 +2071,7 @@ void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e5a30; 245b -- reconstructed from context, parity unverified")
 void APawn::setMoveTimer(FLOAT DeltaTime)
 {
 	guard(APawn::setMoveTimer);
@@ -2102,7 +2102,7 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103f3810; 112b -- reconstructed from context, parity unverified")
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::startNewPhysics);
@@ -2130,7 +2130,7 @@ void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT Ve
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e7100; 823b -- reconstructed from context, parity unverified")
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::swimMove);
@@ -2146,7 +2146,7 @@ INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103e69e0; 1084b -- reconstructed from context, parity unverified")
 ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::walkMove);
@@ -2166,7 +2166,7 @@ INT APawn::walkReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	AController — Virtual methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra: AController::GetOptimizedRepList body not exported; delegates to AActor base")
 INT* AController::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AController::GetOptimizedRepList);
@@ -2189,7 +2189,7 @@ INT AController::LocalPlayerController()
 	return 0;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x103c3870; 977b -- reconstructed from context, parity unverified")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
@@ -2226,7 +2226,7 @@ void AController::StartAnimPoll()
 			GetStateFrame()->LatentAction = EPOLL_FinishAnim;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x10420b10; 108b -- reconstructed from context, parity unverified")
 INT AController::CheckAnimFinished( INT Channel )
 {
 	guard(AController::CheckAnimFinished);
@@ -2266,7 +2266,7 @@ void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d410; 13b -- reconstructed from context, parity unverified")
 AActor* AController::GetViewTarget()
 {
 	guard(AController::GetViewTarget);
@@ -2292,7 +2292,7 @@ void AController::ShowSelf()
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d370; 112b -- reconstructed from context, parity unverified")
 DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 {
 	guard(AController::SeePawn);
@@ -2317,7 +2317,7 @@ void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLO
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038d460; 112b -- reconstructed from context, parity unverified")
 DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 {
 	guard(AController::LineOfSightTo);
@@ -2335,7 +2335,7 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038ed20; 173b -- reconstructed from context, parity unverified")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
@@ -2364,7 +2364,7 @@ AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed from context")
+IMPL_DIVERGE("Ghidra 0x1038ee00; 252b -- reconstructed from context, parity unverified")
 AActor* AController::HandleSpecial( AActor* BestPath )
 {
 	guard(AController::HandleSpecial);
