@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	R6EngineIntegration.cpp: R6-specific types hosted in Engine.dll
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -45,7 +45,7 @@ void AR6ActionSpot::CheckForErrors()
 
 
 // --- AR6ColBox ---
-IMPL_MATCH("Engine.dll", 0x1766d0)
+IMPL_MATCH("Engine.dll", 0x104766d0)
 int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 {
 	guard(AR6ColBox::ShouldTrace);
@@ -78,14 +78,14 @@ int AR6ColBox::ShouldTrace(AActor* param_1, DWORD param_2)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x176ae0)
+IMPL_MATCH("Engine.dll", 0x10476ae0)
 void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 {
 	if (!NewBase) { EnableCollision(0, 0, 0); return; }
 	AActor::SetBase(NewBase, FloorNormal, bNotifyActor);
 }
 
-IMPL_MATCH("Engine.dll", 0x176bf0)
+IMPL_MATCH("Engine.dll", 0x10476bf0)
 int AR6ColBox::CanStepUp(FVector vec)
 {
 	guard(AR6ColBox::CanStepUp);
@@ -120,7 +120,7 @@ void AR6ColBox::EnableCollision(int,int,int)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1764b0)
+IMPL_MATCH("Engine.dll", 0x104764b0)
 void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 {
 	guard(AR6ColBox::GetColBoxLocationFromOwner);
@@ -145,7 +145,7 @@ void AR6ColBox::GetDestination(FVector &,FRotator &)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x176b20)
+IMPL_MATCH("Engine.dll", 0x10476b20)
 float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 {
 	guard(AR6ColBox::GetMaxStepUp);
@@ -182,7 +182,7 @@ float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1767c0)
+IMPL_MATCH("Engine.dll", 0x104767c0)
 APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 {
 	guard(AR6ColBox::GetPawnOrColBoxOwner);
@@ -208,7 +208,7 @@ APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1766a0)
+IMPL_MATCH("Engine.dll", 0x104766a0)
 int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 {
 	guard(AR6ColBox::IsBlockedBy);
@@ -364,7 +364,7 @@ int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* par
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x177820)
+IMPL_MATCH("Engine.dll", 0x10477820)
 AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 {
 	// Retail: 0x177820, 66 bytes. Returns the decal group for the given type.
@@ -382,7 +382,7 @@ AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 
 
 // --- AR6DecalsBase ---
-IMPL_MATCH("Engine.dll", 0x1781b0)
+IMPL_MATCH("Engine.dll", 0x104781b0)
 int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2, FVector param_3)
 {
 	guard(AR6DecalsBase::IsNetRelevantFor);
@@ -411,7 +411,7 @@ int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2,
 
 
 // --- AR6EngineWeapon ---
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 int AR6EngineWeapon::GetHeartBeatStatus()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -420,7 +420,7 @@ int AR6EngineWeapon::GetHeartBeatStatus()
 
 
 // --- AR6RainbowStartInfo ---
-IMPL_MATCH("Engine.dll", 0x70940)
+IMPL_MATCH("Engine.dll", 0x10370940)
 void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 {
 	guard(AR6RainbowStartInfo::TransferFile);
@@ -500,7 +500,7 @@ void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 int UR6AbstractGameManager::StartLogInProcedure()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -556,7 +556,7 @@ void UR6AbstractGameManager::GameServiceTick(UConsole *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 int UR6AbstractGameManager::GetGSCreateUbiServer()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns 0.
@@ -586,7 +586,7 @@ void UR6AbstractPlanningInfo::AddPoint(AActor *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x114310)
+IMPL_MATCH("Engine.dll", 0x10414310)
 AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 {
 	// Verified from Ghidra: shared stub at 0x114310 — just returns NULL.
@@ -595,7 +595,7 @@ AActor * UR6AbstractPlanningInfo::GetTeamLeader()
 
 
 // --- UR6FileManager ---
-IMPL_MATCH("Engine.dll", 0x6cdf0)
+IMPL_MATCH("Engine.dll", 0x1036cdf0)
 int UR6FileManager::FindFile(FString* param_1)
 {
 	guard(UR6FileManager::FindFile);
@@ -622,7 +622,7 @@ int UR6FileManager::FindFile(FString* param_1)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x6cff0)
+IMPL_MATCH("Engine.dll", 0x1036cff0)
 void UR6FileManager::GetFileName(int param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetFileName);
@@ -632,7 +632,7 @@ void UR6FileManager::GetFileName(int param_1, FString* param_2)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x6d480)
+IMPL_MATCH("Engine.dll", 0x1036d480)
 int UR6FileManager::GetNbFile(FString* param_1, FString* param_2)
 {
 	guard(UR6FileManager::GetNbFile);
